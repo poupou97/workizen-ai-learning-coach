@@ -13,17 +13,23 @@ library;
 
 /// Tri thức này ở đâu ra.
 enum KnowledgeOrigin {
-  /// Đọc được **trực tiếp** từ nguồn: OCR một trang, mục trong bảng thuật ngữ,
-  /// dòng trong mục lục. Trích dẫn được tới trang.
-  sourceDerived,
+  /// ⭐ Sách **nói thẳng**. "Muốn cộng hai phân số khác mẫu số, ta quy đồng…"
+  /// Trích dẫn được nguyên văn, kèm trang.
+  sourceStated,
 
-  /// **LLM suy luận.** Ví dụ: "quy đồng mẫu số cần BCNN" — hợp lý, thường đúng,
-  /// và **sách có thể không hề nói vậy**. Không bao giờ được trình bày cho phụ
-  /// huynh/học sinh như điều sách viết.
+  /// Sách chỉ **xếp thứ tự**. Mục lục đặt Bài 5 trước Bài 6 — đó là sự thật,
+  /// nhưng sách KHÔNG nói "Bài 6 cần Bài 5".
+  ///
+  /// Tách khỏi [sourceStated] vì đây là chỗ dễ trượt nhất: thứ tự trông y hệt
+  /// quan hệ nhân quả, và một lần gộp là Parent Coach bắt đầu nói "sách bảo con
+  /// cần học lại Bài 5" về điều sách không viết.
+  sourceSequence,
+
+  /// Hệ thống suy ra bằng luật tất định từ dữ liệu nguồn (khoảng trang, offset).
+  systemDerived,
+
+  /// **LLM suy luận.** Hợp lý, thường đúng, và sách có thể không hề nói vậy.
   llmInferred,
-
-  /// Hệ thống tự sinh: id, chỉ mục, thống kê. Không phải khẳng định tri thức.
-  systemGenerated,
 }
 
 /// Nguồn gốc của một mẩu tri thức. **Mọi trường quan trọng đều `required`.**
@@ -68,5 +74,16 @@ class Provenance {
   /// đúng: phụ huynh tin ta vì ta bám sách, nên một suy luận trình bày như trích
   /// dẫn là phá vỡ chính niềm tin đó.
   bool get citableAsTextbookFact =>
-      origin == KnowledgeOrigin.sourceDerived && pageStart != null;
+      (origin == KnowledgeOrigin.sourceStated ||
+          origin == KnowledgeOrigin.sourceSequence) &&
+      pageStart != null;
+
+  /// ⭐ Được phép phát biểu một quan hệ PHỤ THUỘC ("A cần B") như lời của sách.
+  ///
+  /// Chỉ [sourceStated]. Thứ tự trong mục lục **không** là phụ thuộc — dù bằng
+  /// chứng có mạnh đến đâu. Đo được: Toán 5 Bài 6 mở đầu bằng "không chia hết
+  /// cho nhau", tham chiếu rõ ca của lớp 4 — bằng chứng rất mạnh, và vẫn KHÔNG
+  /// phải câu "cần học Bài 57 trước".
+  bool get citableAsDependency =>
+      origin == KnowledgeOrigin.sourceStated && pageStart != null;
 }

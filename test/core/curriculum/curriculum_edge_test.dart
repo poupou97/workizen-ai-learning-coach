@@ -8,7 +8,7 @@ void main() {
     from: 'toan5-bai5', to: 'toan5-bai6', kind: EdgeKind.sourceOrder,
     evidence: 'Mục lục: Bài 5 tr.16 · Bài 6 tr.20',
     provenance: const Provenance(
-      origin: KnowledgeOrigin.sourceDerived, sourceId: 'kntt-toan5-t1',
+      origin: KnowledgeOrigin.sourceSequence, sourceId: 'kntt-toan5-t1',
       extractionMethod: 'toc-parse', confidence: 0.99, pageStart: 4),
   );
 
@@ -22,6 +22,19 @@ void main() {
 
   test('⭐ THỨ TỰ trong mục lục trích dẫn được — sách tự xếp', () {
     expect(order.citable, isTrue);
+    expect(order.provenance.origin, KnowledgeOrigin.sourceSequence);
+  });
+
+  test('⭐⭐ CÙNG dữ liệu mục lục, nhưng gọi là TIÊN QUYẾT thì KHÔNG trích dẫn được',
+      () {
+    final asPrereq = CurriculumEdge(
+      from: order.from, to: order.to, kind: EdgeKind.prerequisite,
+      evidence: order.evidence, provenance: order.provenance);
+    expect(order.citable, isTrue);
+    expect(asPrereq.citable, isFalse,
+        reason: '⭐ y hệt một dòng mục lục. "Sách xếp Bài 5 trước Bài 6" là sự '
+            'thật; "Bài 6 cần Bài 5" là khẳng định MẠNH HƠN mà sách không đưa ra. '
+            'Cùng bằng chứng, hai quyền phát biểu khác nhau.');
   });
 
   test('⭐⭐ TIÊN QUYẾT do suy luận KHÔNG trích dẫn được, dù confidence cao', () {

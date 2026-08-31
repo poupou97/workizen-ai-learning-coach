@@ -49,7 +49,15 @@ class CurriculumEdge {
   ///
   /// Một cạnh `prerequisite` do LLM suy ra **không bao giờ** được — kể cả khi nó
   /// gần như chắc chắn đúng. Độ đúng và quyền trích dẫn là hai câu hỏi khác nhau.
-  bool get citable =>
-      provenance.origin == KnowledgeOrigin.sourceDerived &&
-      provenance.pageStart != null;
+  /// ⭐ Cạnh này được nói ra như lời của sách hay không — **phụ thuộc vào LOẠI
+  /// khẳng định nó đưa ra**, không chỉ vào xuất xứ.
+  ///
+  /// `sourceOrder` + `sourceSequence` ⇒ ✅ "sách xếp Bài 5 trước Bài 6".
+  /// `prerequisite` + `sourceSequence` ⇒ ❌ cùng dữ liệu, khẳng định MẠNH HƠN
+  /// hẳn. Đây chính là chỗ trượt: cùng một dòng mục lục, hai câu nói khác nhau
+  /// về mức độ chắc chắn.
+  bool get citable => switch (kind) {
+        EdgeKind.prerequisite => provenance.citableAsDependency,
+        _ => provenance.citableAsTextbookFact,
+      };
 }

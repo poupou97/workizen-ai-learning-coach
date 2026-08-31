@@ -15,6 +15,7 @@
 /// method rồi tự hỏi có được dùng không. Nó chỉ nhận **tập method đã được lọc**.
 library;
 
+
 /// Vị trí học tập hiện tại — thứ quyết định cái gì được phép dùng.
 ///
 /// Không phải "trình độ" của đứa trẻ. Là **đã đi tới đâu trong sách nào**.
@@ -50,11 +51,19 @@ class TeachingMethod {
     required this.appliesToConcepts,
     required this.requiresConcepts,
     required this.requiresTerminology,
+    this.skillCaseId,
   });
 
   final String id;
   final String name;
   final Set<String> appliesToConcepts;
+
+  /// ⭐ Ca mà phương pháp này xử lý. `null` = áp cho mọi ca của khái niệm.
+  ///
+  /// Đây là lỗ hổng của bản trước: phương pháp chỉ gate theo **lớp**, mà bằng
+  /// chứng cho thấy phải gate theo **ca**. Một phương pháp đúng về toán học
+  /// nhưng sai ca thì không được tới tay Tutor — cũng nghiêm như chưa được dạy.
+  final String? skillCaseId;
 
   /// Khái niệm phải ĐÃ được giới thiệu thì method mới dùng được.
   /// `bcnn-common-denominator` đòi `bcnn` — lớp 5 KNTT chưa có.
@@ -69,6 +78,12 @@ enum MethodRejection {
   conceptNotIntroduced,
   terminologyNotIntroduced,
   notInCurriculumForStage,
+
+  /// ⭐ Đúng về toán học nhưng **không áp cho ca của bài này**.
+  notApplicableToCase,
+
+  /// Không xác định được ca ⇒ **fail closed**, không đoán.
+  caseUnknown,
 }
 
 class MethodEligibility {
@@ -132,6 +147,33 @@ class TutorScope {
   final Set<String> prerequisiteScope;
   final LearningStage stage;
 
+  /// ⭐⭐ AVAILABLE_TO_TUTOR = APPLICABLE_TO_PROBLEM ∩ PEDAGOGICALLY_ALLOWED
+  ///
+  /// [exerciseCase] `null` ⇒ **không xác định được ca** ⇒ trả tập RỖNG. Fail
+  /// closed. Tutor không nhận gì và phải nói "chưa chắc" — thà im còn hơn dạy
+  /// một phương pháp cho sai loại bài.
+  static TutorScope forProblem(
+    String concept,
+    String? exerciseCase,
+    LearningStage stage,
+    List<TeachingMethod> catalogue, {
+    Set<String> prerequisiteScope = const {},
+  }) =>
+      TutorScope(
+        targetConcept: concept,
+        allowedMethods: exerciseCase == null
+            ? const []
+            : [
+                for (final m in catalogue)
+                  if (eligibilityForProblem(m, concept, exerciseCase, stage)
+                      .eligible)
+                    m
+              ],
+        allowedTerminology: stage.terminologyIntroduced,
+        prerequisiteScope: prerequisiteScope,
+        stage: stage,
+      );
+
   static TutorScope forConcept(
     String concept,
     LearningStage stage,
@@ -148,4 +190,26 @@ class TutorScope {
         prerequisiteScope: prerequisiteScope,
         stage: stage,
       );
+}
+
+
+/// ⭐⭐ Giao của hai điều kiện. **Fail closed** ở mọi nhánh không chắc.
+///
+/// Hai câu hỏi độc lập, và thiếu câu nào cũng loại:
+///   ① phương pháp có áp cho CA của bài này không  (đúng về toán học)
+///   ② học sinh đã được dạy nó chưa                (đúng về sư phạm)
+MethodEligibility eligibilityForProblem(
+  TeachingMethod m,
+  String concept,
+  String? exerciseCase,
+  LearningStage stage,
+) {
+  if (exerciseCase == null) {
+    return const MethodEligibility.rejected(MethodRejection.caseUnknown, {});
+  }
+  if (m.skillCaseId != null && m.skillCaseId != exerciseCase) {
+    return MethodEligibility.rejected(
+        MethodRejection.notApplicableToCase, {exerciseCase});
+  }
+  return eligibilityOf(m, concept, stage);
 }

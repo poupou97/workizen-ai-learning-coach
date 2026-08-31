@@ -18,18 +18,18 @@ void main() {
       );
 
   test('⭐ CHỈ tri thức đọc từ nguồn mới được trích dẫn như sách viết', () {
-    expect(p(KnowledgeOrigin.sourceDerived).citableAsTextbookFact, isTrue);
+    expect(p(KnowledgeOrigin.sourceStated).citableAsTextbookFact, isTrue);
 
     expect(p(KnowledgeOrigin.llmInferred).citableAsTextbookFact, isFalse,
         reason: '⭐ prerequisite do LLM suy ra ("quy đồng cần BCNN") nghe rất '
             'hợp lý và SÁCH CÓ THỂ KHÔNG HỀ NÓI VẬY. Trình bày nó như trích dẫn '
             'là phá chính niềm tin khiến phụ huynh chọn ta.');
 
-    expect(p(KnowledgeOrigin.systemGenerated).citableAsTextbookFact, isFalse);
+    expect(p(KnowledgeOrigin.systemDerived).citableAsTextbookFact, isFalse);
   });
 
   test('⭐ không có SỐ TRANG thì không phải trích dẫn được, dù đọc từ nguồn', () {
-    expect(p(KnowledgeOrigin.sourceDerived, page: null).citableAsTextbookFact,
+    expect(p(KnowledgeOrigin.sourceStated, page: null).citableAsTextbookFact,
         isFalse,
         reason: '"sách có nói" mà không chỉ được trang thì phụ huynh không kiểm '
             'chứng được — đó là khẳng định, không phải trích dẫn');
@@ -38,7 +38,7 @@ void main() {
   test('confidence ngoài [0,1] là lỗi lập trình, phải nổ', () {
     expect(
         () => Provenance(
-            origin: KnowledgeOrigin.sourceDerived,
+            origin: KnowledgeOrigin.sourceStated,
             sourceId: 's',
             extractionMethod: 'm',
             confidence: 1.5),
@@ -49,13 +49,19 @@ void main() {
       () {
     for (final o in KnowledgeOrigin.values) {
       final citable = switch (o) {
-        KnowledgeOrigin.sourceDerived => true,
+        KnowledgeOrigin.sourceStated => true,
+        // ⭐ Thứ tự trong mục lục LÀ sự thật trong sách — trích dẫn được như
+        // thứ tự. Nó chỉ không được dùng để phát biểu PHỤ THUỘC.
+        KnowledgeOrigin.sourceSequence => true,
+        KnowledgeOrigin.systemDerived => false,
         KnowledgeOrigin.llmInferred => false,
-        KnowledgeOrigin.systemGenerated => false,
       };
       expect(p(o).citableAsTextbookFact, citable);
+
+      // Chỉ sách NÓI THẲNG mới được phát biểu quan hệ phụ thuộc.
+      expect(p(o).citableAsDependency, o == KnowledgeOrigin.sourceStated);
     }
-    expect(KnowledgeOrigin.values, hasLength(3),
+    expect(KnowledgeOrigin.values, hasLength(4),
         reason: '⭐ thêm một KnowledgeOrigin mà không sửa chốt này ⇒ switch vét '
             'cạn ở trên KHÔNG biên dịch được. Đó là điều mong muốn.');
   });
