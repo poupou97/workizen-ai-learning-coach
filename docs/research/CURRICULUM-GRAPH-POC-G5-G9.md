@@ -140,3 +140,56 @@ trang ≈ 8 phút**. Đó là hai bậc độ lớn, và đủ để dựng khun
 
 Toán 9 (đã giải nén, chưa OCR) · retrieval POC · Camera Tutor POC · embedding ·
 bảng thuật ngữ Toán 9 · tập hai của cả hai lớp.
+
+---
+
+# ⭐⭐ Chuỗi xuyên lớp — đo được, không giả định
+
+*(Trích tối thiểu Toán 4 theo uỷ quyền §POC CONSEQUENCE. Chỉ 2 cuốn SGK, chỉ mục lục +
+bài 57. KHÔNG ingest lớp 4 diện rộng.)*
+
+## Chuỗi thật
+
+| Lớp | Bài | Trang | Vai trò |
+|---|---|---|---|
+| **4** | Bài 57. Quy đồng mẫu số các phân số | 62 | **DẠY** |
+| 5 | Bài 3. Ôn tập phân số | 11–13 | ÔN |
+| 5 | Bài 6. Cộng, trừ hai phân số khác mẫu số | 20–22 | DÙNG |
+
+Toán 4 tập hai, chủ đề PHÂN SỐ: Bài 53 Khái niệm phân số (tr.49) → Bài 55 Tính chất cơ
+bản (tr.56) → Bài 56 Rút gọn (tr.59) → **Bài 57 Quy đồng (tr.62)** → Bài 58 So sánh (tr.64).
+
+## ⭐ Và hai lớp dạy HAI PHƯƠNG PHÁP KHÁC NHAU
+
+**Lớp 4, Bài 57** (tr.62), nguyên văn:
+> *"Ta thấy: Mẫu số của phân số 3/8 **chia hết** cho mẫu số của phân số 1/4 (8 : 4 = 2)…
+> 12 : 4 = 3, mẫu số chung là 12… **giữ nguyên** phân số 5/12."*
+
+**Lớp 5, Bài 6** (tr.20), nguyên văn:
+> *"Hai mẫu số 5 và 2 **không chia hết cho nhau**. Lấy mẫu số chung là **tích** của hai
+> mẫu số (5 × 2 = 10)."*
+
+| | Điều kiện | Mẫu số chung |
+|---|---|---|
+| Lớp 4 | mẫu này **chia hết** cho mẫu kia | lấy mẫu **lớn hơn**, giữ nguyên một phân số |
+| Lớp 5 | **không chia hết** | lấy **tích** hai mẫu |
+
+Một khái niệm, **hai ca bổ sung nhau, chia đôi qua hai lớp**. Và lớp 5 mở đầu bằng đúng
+cụm *"không chia hết cho nhau"* — **sách tự tham chiếu ca của lớp 4**. Đây là bằng chứng
+tiên quyết mạnh gần mức source-stated, tuy vẫn chưa phải câu *"cần học Bài 57 trước"*.
+
+## Hệ quả sản phẩm — lớn hơn dự kiến
+
+⭐ Một học sinh lớp 5 sai `3/4 + 2/5` **có thể không hề hổng quy đồng**. Em ấy có thể nắm
+chắc ca lớp 4 (chia hết) và bối rối vì **luật đổi**. Đó là **misconception**, không phải
+knowledge gap — và can thiệp hoàn toàn khác:
+
+| Chẩn đoán | Can thiệp đúng |
+|---|---|
+| chưa biết quy đồng | dạy lại từ lớp 4 Bài 57 |
+| **biết ca chia hết, chưa biết ca không chia hết** | dạy **phân biệt hai ca**, không dạy lại |
+
+Đây đúng ca §4 của addendum: *hai học sinh cùng trả lời sai cần can thiệp khác nhau*.
+Và nó chỉ lộ ra khi đọc **cả hai lớp** — đọc riêng lớp 5 sẽ kết luận sai.
+
+⇒ `Method` phải gắn **điều kiện áp dụng**, không chỉ gắn lớp.
