@@ -113,6 +113,23 @@ void main() {
             'Thà nói "chưa chắc" còn hơn dạy nhầm dạng bài.');
     expect(d.diagnosis, DiagnosticOutcome.insufficientEvidence);
     expect(d.remediation, RemediationStatus.diagnosticConfidenceLow);
+
+    // ⭐ Hai ca "chưa kết luận được" nói với phụ huynh HAI câu khác nhau, và khác
+    // biệt đó phải được khoá lại.
+    //
+    // Phát hiện khi chạy đột biến: gỡ chốt null trong `decide()` mà test vẫn XANH,
+    // vì `TutorScope.forProblem` cũng có chốt null riêng và nhánh rơi cuối hàm cho
+    // cùng `diagnosis` + `remediation`. Hai lớp chắn độc lập ⇒ gỡ một lớp không lộ.
+    // Thứ THỰC SỰ khác là câu nói: "chưa đọc được đề" ≠ "chưa đủ dữ kiện về con".
+    expect(d.reason, contains('dạng bài'),
+        reason: '⭐ Không đọc được đề là lỗi của ẢNH, không phải của đứa trẻ. Nói '
+            '"chưa đủ dữ kiện" ở đây là đổ lỗi nhầm chỗ cho học sinh.');
+
+    final noEvidence = decide(
+        conceptId: concept, exerciseCase: nonDiv,
+        mastery: ConceptMastery(conceptId: concept, cases: const {}),
+        stage: grade5, catalogue: catalogue);
+    expect(noEvidence.reason, isNot(contains('dạng bài')));
   });
 
   test('⭐ học sinh MỚI tinh ⇒ không bị kết luận là hỏng', () {
