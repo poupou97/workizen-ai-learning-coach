@@ -1,0 +1,25 @@
+# ⛔ NGUỒN SGK — KHÔNG BAO GIỜ COMMIT
+#
+# `nguon-chi-thuc/` là 9,8GB PDF sách giáo khoa. Ba lý do tuyệt đối không đưa
+# vào git, theo thứ tự nghiêm trọng:
+#
+# 1. BẢN QUYỀN. Chưa có bằng chứng nào cho thấy Workizen có quyền phân phối lại
+#    SGK. Đẩy lên GitHub = redistribute. Xem docs/research/TEXTBOOK-LICENSING-QUESTIONS.md
+# 2. Thư mục này nằm TRONG repo cha `~/projects` (remote: workforceos-project).
+#    Trước khi có tệp này, một lệnh `git add -A` ở thư mục cha là đủ để đẩy đi.
+# 3. 9,8GB trong lịch sử git là không gỡ được nếu không rewrite history.
+nguon-chi-thuc/
+
+# Sản phẩm phái sinh từ SGK cũng KHÔNG commit: text trích xuất, ảnh trang, chunk,
+# embedding — chúng vẫn là tác phẩm phái sinh của nguồn có bản quyền.
+poc-out/
+*.pdf
+
+.DS_Store
+
+# Flutter
+build/
+.dart_tool/
+.idea/
+*.iml
+.flutter-plugins*
