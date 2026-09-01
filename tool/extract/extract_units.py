@@ -13,20 +13,30 @@ không giả định. Output ngoài git (ADR-002).
 """
 import json, os, re, sys, unicodedata
 
-BOOK = '05-sgk-toan-5-tap-mot'
+# dùng: python3 extract_units.py <book-id> — mặc định Toán 5 t1 (batch ①)
+BOOK = sys.argv[1] if len(sys.argv) > 1 else '05-sgk-toan-5-tap-mot'
 OCR = f'poc-out/graph/ocr-body/{BOOK}'
 
 def strip(s):
-    s = unicodedata.normalize('NFD', s.lower())
+    # 'đ' (U+0111) KHÔNG phân rã qua NFD — phải thay tay, nếu không mọi từ
+    # khoá chứa 'đ' đều trượt (bug thật: 'quy đồng', 'đổi chỗ' từng unmapped).
+    s = unicodedata.normalize('NFD', s.lower().replace('đ', 'd').replace('Đ', 'd'))
     return ''.join(c for c in s if not unicodedata.combining(c))
 
-SECTION = {'kham pha': 'EXPLORE', 'luyen tap': 'PRACTICE',
-           'tro choi': 'GAME', 'hoat dong': 'ACTIVITY',
-           'cuoc song': 'APPLICATION'}
+# Lexicon THEO MÔN — «Đọc/Viết» là section của sách VĂN nhưng là ĐỘNG TỪ ĐẦU
+# BÀI TOÁN («Viết các số…») — trộn chung sẽ băm nát unit toán (đã dính, đã đo).
+SECTION_TOAN = {'kham pha': 'EXPLORE', 'luyen tap': 'PRACTICE',
+                'tro choi': 'GAME', 'hoat dong': 'ACTIVITY',
+                'cuoc song': 'APPLICATION'}
+SECTION_TV = {**SECTION_TOAN,
+              'doc': 'READING', 'viet': 'WRITING',
+              'noi va nghe': 'SPEAKING', 'luyen tu va cau': 'GRAMMAR'}
+GHI_NHO = 'ghi nho'  # RULE marker của sách Tiếng Việt (0 hit ở toán — đã đo)
 LESSON_HDR = re.compile(r'^Bài\s+(\d+)\b')
 EX_STEM = re.compile(r'^(\d{1,2})\s*[.．]?\s+\S')
 
 def main():
+    section_map = SECTION_TV if 'tieng-viet' in BOOK else SECTION_TOAN
     scan = json.load(open('poc-out/graph/structure-scan.json'))
     book = next(b for b in scan['books'] if b['id'] == BOOK)
     toc = {l['n']: l for l in book['lessonTitles'] if l['n'] is not None}
@@ -72,6 +82,12 @@ def main():
         nonlocal cur
         if cur and len(cur['text'].strip()) >= 8:
             cur['text'] = re.sub(r'\s+', ' ', cur['text']).strip()
+            if cur['role'] == 'RULE_PENDING':
+                # kiểm trên CẢ ĐOẠN (150c đầu) — «ta» có thể nằm dòng sau
+                head = strip(cur['text'][:150])
+                canon = re.search(r'\bta\b', head) or \
+                    (head.startswith('khi ') and ' thi ' in head)
+                cur['role'] = 'RULE' if canon else 'RULE_CANDIDATE'
             units.append(cur)
         cur = None
 
@@ -94,10 +110,23 @@ def main():
             st = strip(t)
             if LESSON_HDR.match(t) and l['y'] < 0.15:
                 flush(); section = None; continue
-            hit = next((v for k, v in SECTION.items() if st.startswith(k)), None)
+            hit = next((v for k, v in section_map.items() if st.startswith(k)), None)
             if hit:
                 flush(); section = hit; continue
+            # khuôn RULE thứ 2 (kiểm trên Toán 4 t1): phát biểu tính chất
+            # «Khi X thì Y.» — p83 «Khi đổi chỗ các số hạng trong một tổng
+            # thì tổng không thay đổi.»
+            if st.startswith('khi ') and ' thi ' in st:
+                start('RULE_PENDING', section, p, t)
+                continue
             if st.startswith('muon'):
+                # v2 (kiểm trên 17 RULE batch ①): quy tắc CHUẨN luôn phát biểu
+                # tổng quát bằng «… ta …»; câu lời giải («Muốn tính diện tích
+                # phần lát gạch xanh thì phải…») không có — 16/17 tách đúng,
+                # 1 CAND chính là FP đã biết.
+                start('RULE_PENDING', section, p, t)
+                continue
+            if st.startswith(GHI_NHO):
                 start('RULE', section, p, t); continue
             if st.startswith('vi du'):
                 start('EXAMPLE', section, p, t); continue
