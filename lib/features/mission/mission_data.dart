@@ -42,18 +42,25 @@ class MissionData {
   final List<String> unobservedCaseNames;
 }
 
+/// Bó domain demo dùng chung giữa màn Hôm nay và flow camera.
+class DemoDomain {
+  const DemoDomain({
+    required this.mastery,
+    required this.stage,
+    required this.catalogue,
+    required this.cases,
+  });
+  final ConceptMastery mastery;
+  final LearningStage stage;
+  final List<TeachingMethod> catalogue;
+  final List<SkillCase> cases;
+}
+
 /// Fixture "Minh, lớp 5, giữa Bài 6" — đúng golden scenario của repo:
 /// vững ca chia-hết (lớp 4), CHƯA GẶP ca không-chia-hết ⇒ caseTransitionGap.
-MissionData buildDemoMission({DateTime? now}) {
+DemoDomain buildDemoDomain({DateTime? now}) {
   final t = now ?? DateTime(2026, 9, 1, 19);
   const p = BktParams.freeResponse;
-  const names = {
-    'denominator-divisible': 'một mẫu số chia hết cho mẫu kia',
-    'denominator-non-divisible': 'hai mẫu số không chia hết cho nhau',
-    'denominator-equal': 'hai mẫu số bằng nhau',
-  };
-
-  // Bằng chứng qua ĐƯỜNG THẬT: log sự kiện → replay (không đặt tay pMastery).
   EvidenceLog log(String caseId, int n, Duration age) {
     var l = EvidenceLog.empty(caseId);
     for (var i = 0; i < n; i++) {
@@ -68,39 +75,56 @@ MissionData buildDemoMission({DateTime? now}) {
     return l;
   }
 
-  final divisible = replayMastery(log('denominator-divisible', 3, const Duration(days: 30)), p);
-  final mastery = ConceptMastery(conceptId: 'quy-dong', cases: {
-    'denominator-divisible': divisible,
-    'denominator-non-divisible': CaseMastery.initial('denominator-non-divisible', p),
-  });
-
-  const stage = LearningStage(
-    grade: 5, bookSeries: 'kntt', lessonId: 'toan5-t1-bai6',
-    conceptsIntroduced: {'phan-so', 'chia-het', 'nhan-so-tu-nhien'},
-    methodsIntroduced: {'common-denom-take-larger', 'common-denom-by-product'},
-    terminologyIntroduced: {'mẫu số chung'},
+  final divisible =
+      replayMastery(log('denominator-divisible', 3, const Duration(days: 30)), p);
+  return DemoDomain(
+    mastery: ConceptMastery(conceptId: 'quy-dong', cases: {
+      'denominator-divisible': divisible,
+      'denominator-non-divisible':
+          CaseMastery.initial('denominator-non-divisible', p),
+    }),
+    stage: const LearningStage(
+      grade: 5, bookSeries: 'kntt', lessonId: 'toan5-t1-bai6',
+      conceptsIntroduced: {'phan-so', 'chia-het', 'nhan-so-tu-nhien'},
+      methodsIntroduced: {'common-denom-take-larger', 'common-denom-by-product'},
+      terminologyIntroduced: {'mẫu số chung'},
+    ),
+    catalogue: const [
+      TeachingMethod(
+          id: 'common-denom-by-product',
+          name: 'Lấy mẫu số chung là tích hai mẫu số',
+          appliesToConcepts: {'quy-dong'},
+          skillCaseId: 'denominator-non-divisible',
+          requiresConcepts: {'phan-so', 'nhan-so-tu-nhien'},
+          requiresTerminology: {'mẫu số chung'}),
+    ],
+    cases: const [
+      SkillCase(id: 'denominator-divisible', conceptId: 'quy-dong',
+          condition: 'một mẫu số chia hết cho mẫu số còn lại', introducedGrade: 4),
+      SkillCase(id: 'denominator-non-divisible', conceptId: 'quy-dong',
+          condition: 'hai mẫu số không chia hết cho nhau', introducedGrade: 5),
+    ],
   );
-  const catalogue = [
-    TeachingMethod(
-        id: 'common-denom-by-product', name: 'Lấy mẫu số chung là tích hai mẫu số',
-        appliesToConcepts: {'quy-dong'}, skillCaseId: 'denominator-non-divisible',
-        requiresConcepts: {'phan-so', 'nhan-so-tu-nhien'},
-        requiresTerminology: {'mẫu số chung'}),
-  ];
-  const cases = [
-    SkillCase(id: 'denominator-divisible', conceptId: 'quy-dong',
-        condition: 'một mẫu số chia hết cho mẫu số còn lại', introducedGrade: 4),
-    SkillCase(id: 'denominator-non-divisible', conceptId: 'quy-dong',
-        condition: 'hai mẫu số không chia hết cho nhau', introducedGrade: 5),
-  ];
+}
+
+MissionData buildDemoMission({DateTime? now}) {
+  final t = now ?? DateTime(2026, 9, 1, 19);
+  const names = {
+    'denominator-divisible': 'một mẫu số chia hết cho mẫu kia',
+    'denominator-non-divisible': 'hai mẫu số không chia hết cho nhau',
+    'denominator-equal': 'hai mẫu số bằng nhau',
+  };
+  final domain = buildDemoDomain(now: t);
+  final mastery = domain.mastery;
+  final divisible = mastery.cases['denominator-divisible']!;
 
   final decision = decide(
     conceptId: 'quy-dong',
     exerciseCase: 'denominator-non-divisible',
     mastery: mastery,
-    stage: stage,
-    catalogue: catalogue,
-    caseCatalogue: cases,
+    stage: domain.stage,
+    catalogue: domain.catalogue,
+    caseCatalogue: domain.cases,
   );
 
   final summary = ConceptSummary.of(mastery,

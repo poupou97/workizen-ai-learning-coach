@@ -12,6 +12,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import '../camera/camera_demo_flow.dart';
 import 'mission_data.dart';
 
 class MissionCenterScreen extends StatelessWidget {
@@ -148,7 +149,7 @@ class MissionCenterScreen extends StatelessWidget {
         ]),
       );
 
-  Widget _bottomActions() => Row(children: [
+  Widget _bottomActions() => Builder(builder: (context) => Row(children: [
         Expanded(
           child: SizedBox(
             height: WalSpacing.minTouch + 8,
@@ -158,7 +159,7 @@ class MissionCenterScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.circular(WalSpacing.radiusButton))),
-              onPressed: () {}, // C1 camera — WAL-52
+              onPressed: () => openCameraDemo(context),
               icon: const Icon(Icons.photo_camera_outlined),
               label: const Text('Chụp bài tập',
                   style: TextStyle(fontSize: WalType.body)),
@@ -180,7 +181,7 @@ class MissionCenterScreen extends StatelessWidget {
                 style: TextStyle(fontSize: WalType.body)),
           ),
         ),
-      ]);
+      ]));
 
   Widget _samChip(String asset, {double size = 36}) => ClipOval(
         child: Image.asset(asset,
