@@ -16,6 +16,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 MAX_IDLE=3                      # 3 vòng không tiến bộ ⇒ dừng
 MAX_CYCLES="${1:-20}"           # trần tuyệt đối, an toàn token
+MAX_WAIT=30                     # chờ lock tối đa 30 lần (~30 phút) rồi bỏ
 LOG="poc-out/wf-supervisor.log"
 mkdir -p poc-out
 
@@ -31,10 +32,19 @@ for ((i = 1; i <= MAX_CYCLES; i++)); do
   ai-wf --once >>"$LOG" 2>&1
   rc=$?
   if [ $rc -eq 17 ]; then
-    say "  (một tiến trình runtime khác đang giữ lock — chờ 60s)"
+    # ⚠️ Vòng bị LOCK không phải vòng làm việc — KHÔNG tính vào trần, nếu
+    # không supervisor sẽ chạm trần mà chưa dispatch nổi lần nào (đã dính).
+    i=$((i - 1))
+    waited=$((waited + 1))
+    if [ $waited -ge $MAX_WAIT ]; then
+      say "🛑 DỪNG: chờ lock $MAX_WAIT lần liên tiếp — agent khác chạy quá lâu."
+      exit 0
+    fi
+    say "  (agent khác đang giữ lock — chờ 60s · lần chờ $waited/$MAX_WAIT)"
     sleep 60
     continue
   fi
+  waited=0
 
   after=$(git rev-parse HEAD)
   after_n=$(git rev-list --count HEAD)
