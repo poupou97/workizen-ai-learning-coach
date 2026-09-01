@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
 import '../camera/camera_demo_flow.dart';
+import '../parent/parent_tonight_screen.dart';
 import 'mission_data.dart';
 
 class MissionCenterScreen extends StatelessWidget {
@@ -179,6 +180,19 @@ class MissionCenterScreen extends StatelessWidget {
             onPressed: () {}, // bản đồ học — sau slice
             child: const Text('Bản đồ ▸',
                 style: TextStyle(fontSize: WalType.body)),
+          ),
+        ),
+        const SizedBox(width: WalSpacing.sm),
+        SizedBox(
+          height: WalSpacing.minTouch,
+          child: TextButton(
+            // ⚠️ INTENT GATE chưa có — vào thẳng. Gate thật (xác nhận người
+            // lớn) đi cùng child-safety architecture; residual ghi ở WAL-53.
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => buildDemoParentTonight())),
+            child: const Text('Bố mẹ ▸',
+                style: TextStyle(
+                    fontSize: WalType.secondary, color: WalColors.inkSoft)),
           ),
         ),
       ]));

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/curriculum/skill_case.dart';
 import 'package:learning_coach/features/mission/mission_center_screen.dart';
+import 'package:learning_coach/main.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
 
 void main() {
@@ -51,5 +52,15 @@ void main() {
         scrollable: find.byType(Scrollable).first);
     expect(find.textContaining('hai mẫu số không chia hết'), findsWidgets);
     expect(find.text('Mình chưa thử dạng này'), findsWidgets);
+  });
+
+  testWidgets('lối vào Bố mẹ dẫn tới màn Tối nay claim-gated', (tester) async {
+    await tester.pumpWidget(const HocCungSamApp());
+    await tester.scrollUntilVisible(find.text('Bố mẹ ▸'), 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Bố mẹ ▸'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Tối nay cùng'), findsOneWidget);
+    expect(find.text('VIỆC CHO TỐI NAY · ~10 PHÚT'), findsOneWidget);
   });
 }
