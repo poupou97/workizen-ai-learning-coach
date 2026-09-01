@@ -28,7 +28,7 @@ Bộ MCP **không tạo được**: chính project và chính space.
 
 ⇒ Cần founder bấm tay **một lần**, ~2 phút. Sau đó agent làm nốt toàn bộ backlog.
 
-## 2. Founder cần làm gì — chính xác, đã dò convention
+## 2. ~~Founder cần làm gì~~ — **[LỊCH SỬ — ĐÃ LÀM XONG 2026-09-01]** giữ làm hồ sơ, KHÔNG còn là việc cần làm
 
 ### 2.1 Jira project
 

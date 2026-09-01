@@ -1,9 +1,14 @@
-# Workizen AI Learning Coach
+# Workizen AI Learning Coach — «Học cùng SAM»
 
 Gia sư thích ứng **có ý thức sư phạm** cho học sinh phổ thông Việt Nam.
 
-> ⚠️ **Trạng thái: DOMAIN KERNEL + RESEARCH.** Chưa có màn hình nào. `lib/features/*` là
-> thư mục rỗng. Đừng đọc sơ đồ kiến trúc rồi tưởng đã có UI — xem bảng độ chín bên dưới.
+**Tên sản phẩm tiếng Việt (Founder chốt 2026-09-01): «Học cùng SAM»** — SAM là định danh
+tutor/mascot (cú tím-vàng). Tên tiếng Anh/quốc tế **chưa chốt** — không tự đổi.
+
+> ⚠️ **Trạng thái: DOMAIN KERNEL V0 + RESEARCH** — *mạch lạc, đã cài đặt, đã
+> falsification-test trong phạm vi các khái niệm giới hạn* (2 khái niệm Toán, 1 bộ sách).
+> KHÔNG gọi là "hoàn chỉnh" cho tới khi validate rộng hơn. Chưa có màn hình nào —
+> `lib/features/*` là thư mục rỗng. Đừng đọc sơ đồ kiến trúc rồi tưởng đã có UI.
 
 ---
 
@@ -98,8 +103,8 @@ lên `LEGAL_APPROVED`. Chi tiết: [`TEXTBOOK-LICENSING-QUESTIONS.md`](docs/rese
 | | |
 |---|---|
 | GitHub | [poupou97/workizen-ai-learning-coach](https://github.com/poupou97/workizen-ai-learning-coach) (PRIVATE) |
-| Jira | `WAL` — ⛔ chưa tạo, xem [`GOVERNANCE-BOOTSTRAP.md`](docs/pm/GOVERNANCE-BOOTSTRAP.md) |
-| Confluence | `WAL` — ⛔ chưa tạo |
+| Jira | [`WAL`](https://workizen.atlassian.net/browse/WAL) — ✅ hoạt động (12 Epic + 49 issue, Kanban 7 cột); là **hàng đợi vận hành** |
+| Confluence | `WAL` — ✅ hoạt động (16 trang 00–15); giải thích cho Founder/product, git vẫn là nguồn sự thật kỹ thuật |
 | Cấu hình agent | [`.workforce.json`](.workforce.json) |
 
 ## Công cụ
@@ -114,7 +119,7 @@ lên `LEGAL_APPROVED`. Chi tiết: [`TEXTBOOK-LICENSING-QUESTIONS.md`](docs/rese
 
 ```bash
 flutter pub get
-flutter test       # 48 test (39 chức năng + 9 falsification)
+flutter test       # số test hiện hành: xem output (109 @ 2026-09-01; con số này TĂNG theo commit)
 flutter analyze
 ```
 
