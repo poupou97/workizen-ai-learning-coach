@@ -36,10 +36,18 @@ WAL giữ khác biệt SCAN→HYPOTHESIS→CONFIRM→DIAGNOSE→TEACH.
 | 14 | VOICE_HINT | OATutor TTS-per-hint; Khanmigo voice | POC: ĐỌC gợi ý thành lời (một nút loa trên hint) — không voice-chat tự do | hint events (không đổi domain) |
 | 15 | MASCOT_PEDAGOGICAL_STATE | Duolingo character-driven (KHÔNG nhận engagement-first); Prodigy (KHÔNG nhận game economy) | 13 state audit MASCOT-STATE-SYSTEM + 2 thiếu; state gắn SỰ KIỆN THẬT của engine, không trang trí | mọi state ↔ domain event (bảng đã có) |
 
-## PRE-CAPTURE (WAL-65, nạp trước từ benchmark)
+## PRE-CAPTURE (WAL-65 — gate ĐÃ THÀNH MÃ, phần khung hình)
 AutoMath/Photomath: khung ngắm + auto-crop + guidance mờ/sáng [SECONDARY]. WAL state machine:
 FIT_ONE_PROBLEM · MOVE_CLOSER · MORE_LIGHT · HOLD_STEADY · TOO_BLURRY — mascot CAMERA_SCAN
 làm gương mặt của khung ngắm; chặn thượng nguồn rẻ hơn vá hạ nguồn (số WAL-63 làm chuẩn đo).
+
+**Đã ship (`precapture_quality.dart`, 5 test):** `assessFrame(GrayFrame)` → OK ·
+TOO_DARK («bật thêm đèn») · TOO_BRIGHT («nghiêng vở cho đỡ bóng») · TOO_BLURRY («giữ máy
+yên một nhịp») — sáng kiểm TRƯỚC nét (ảnh tối thì số đo nét vô nghĩa); phương sai Laplacian
+ngưỡng 1500 hiệu chỉnh trên trang tổng hợp (nét ≈29.000 vs blur ≈430); lời SAM không đổ lỗi
+(test quét). Thiết bị chỉ việc downscale preview → grayscale → gọi hàm.
+**Chưa ship (device):** FIT_ONE_PROBLEM/MOVE_CLOSER/REMOVE_HAND cần phát hiện bố cục thật;
+hiệu chỉnh ngưỡng trên khung hình thật — WAL-84.
 
 ## REJECT ghi sổ
 StudyFetch feature-buffet (MVP một vòng lặp làm thật tốt) · Duolingo Max engagement-first ·
