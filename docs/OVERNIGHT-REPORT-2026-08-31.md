@@ -144,7 +144,10 @@ Toán 9 tập một (mục lục + 2 tr. thuật ngữ). **Không** ingest lớp
 
 ## Founder Decisions Required
 
-**FOUNDER_DECISION_REQUIRED — 1. Tên repo `coarch`**
+**~~FOUNDER_DECISION_REQUIRED~~ — 1. Tên repo `coarch`** · ✅ **ĐÃ CHỐT 2026-09-01**
+> Founder: `coarch` là lỗi gõ. Repo nay là `workizen-ai-learning-coach`, branch `main`,
+> remote `poupou97/workizen-ai-learning-coach` (PRIVATE).
+
 Gần như chắc là lỗi gõ của *coach*. Nay đã có 9 commit và một repo git thật. Đổi bây giờ
 vẫn rẻ; sau khi có CI/remote thì đắt. *Không tự đổi — quyết định định danh.*
 

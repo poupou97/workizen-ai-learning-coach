@@ -76,11 +76,23 @@ Sau mỗi bước: `flutter analyze` + `flutter test` phải xanh. Commit nhỏ.
 
 ## ⚠️ Ba điểm cần Founder quyết trước khi chạy Phase 3
 
-**① Tên repo — `workizen-ai-learning-coarch`**
+> **Cập nhật 2026-09-01 — ① và ② ĐÃ ĐÓNG. ③ vẫn mở.**
+> Văn bản gốc giữ nguyên bên dưới làm hồ sơ. Đừng đọc chúng như câu hỏi còn mở: doctrine
+> hết hạn chặn cứng y hệt một cổng thật, và không test nào bắt được chuyện đó.
+
+**① Tên repo — `workizen-ai-learning-coarch`** · ✅ **ĐÃ CHỐT 2026-09-01**
+> Founder xác nhận `coarch` là lỗi gõ. Tên chuẩn **`workizen-ai-learning-coach`**. Thư mục
+> local đã đổi tên; branch `master` → `main` theo convention repo sản phẩm mới. Định danh
+> package/bundle **không** đổi vì đã đúng dạng sẵn: `learning_coach` ·
+> `ai.workizen.learningcoach`.
+
 Nhiều khả năng là lỗi gõ của *coach*. Đổi tên repo GitHub bây giờ tốn 1 phút; sau khi có
 CI, submodule, tài liệu trỏ vào thì đắt. **Không tự đổi** — đây là quyết định định danh.
 
-**② Thư mục chưa phải một git repo**
+**② Thư mục chưa phải một git repo** · ✅ **KHÔNG CÒN ĐÚNG từ 2026-08-31**
+> Nay là repo git riêng: 10 commit, remote `poupou97/workizen-ai-learning-coach` (PRIVATE),
+> branch `main` — đúng ADR-059 *một repo mỗi sản phẩm*.
+
 `workizen-ai-learning-coarch/` hiện là thư mục **untracked bên trong** repo cha
 `~/projects` (remote `workforceos-project` trên GitHub). Theo ADR-059 *một repo mỗi sản
 phẩm* thì nó phải là repo riêng. Tôi chưa `git init` vì việc này gắn với ① .
@@ -90,5 +102,10 @@ phẩm* thì nó phải là repo riêng. Tôi chưa `git init` vì việc này g
 huấn luyện, hay RAG thương mại. Xem `docs/research/TEXTBOOK-LICENSING-QUESTIONS.md`.
 
 > ✅ Đã xử lý ngay phần rủi ro kỹ thuật: thêm `.gitignore` chặn `nguon-chi-thuc/`,
-> `*.pdf` và `poc-out/`. Trước đó một lệnh `git add -A` ở `~/projects` là đủ để đẩy
-> 9,8GB sách bản quyền lên GitHub. Đã kiểm: git nay thấy **0** đường dẫn SGK.
+> `*.pdf` và `poc-out/`. Đã kiểm: git nay thấy **0** đường dẫn SGK.
+>
+> ⚠️ **Đính chính cơ chế (đo 2026-09-01).** Câu "một lệnh `git add -A` ở `~/projects` là
+> đủ để đẩy 9,8GB lên GitHub" **không đúng** kể từ khi thư mục này thành repo git. Dry-run
+> thật ở repo cha chỉ sinh **một** entry gitlink kèm `warning: adding embedded git
+> repository` — 0 byte corpus, vì git không đệ quy vào repo lồng. Xem
+> `docs/decisions/ADR-002-bao-ve-corpus-nhieu-lop.md` cho ma trận 4 ca đã đo.

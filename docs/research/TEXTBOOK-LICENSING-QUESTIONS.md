@@ -85,9 +85,15 @@ soạn, và Camera Tutor xử lý ngay trên máy — không repo nào chứa SG
 
 `.gitignore` chặn `nguon-chi-thuc/`, `*.pdf`, `poc-out/`. Trước đó thư mục 9,8GB này
 nằm **untracked bên trong repo cha** `~/projects` (remote GitHub `workforceos-project`)
-và `.gitignore` của repo cha không có dòng nào chặn — một lệnh `git add -A` là đủ để
-**đăng tải lại** toàn bộ SGK lên GitHub công khai. Đã kiểm: git nay thấy **0** đường
+và `.gitignore` của repo cha không có dòng nào chặn. Đã kiểm: git nay thấy **0** đường
 dẫn SGK.
+
+⚠️ **Đính chính (đo 2026-09-01).** Bản trước viết "một lệnh `git add -A` là đủ để đăng tải
+lại toàn bộ SGK" — **sai kể từ khi thư mục này thành repo git**. Đo bằng dry-run + sandbox
+4 ca: mỗi lớp chắn một mình đã đủ, phải hỏng đồng thời cả hai mới mất corpus. Chốt thật
+mong manh **không phải** lệnh `git add`, mà là **sự tồn tại của `.git` con và `.gitignore`
+con** — xoá nhầm một trong hai thì không lệnh nào báo. Chi tiết:
+`docs/decisions/ADR-002-bao-ve-corpus-nhieu-lop.md`.
 
 ## 6. Câu hỏi còn để mở (không tự trả lời)
 
