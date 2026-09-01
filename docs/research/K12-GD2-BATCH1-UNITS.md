@@ -1,4 +1,4 @@
-# WAL-74 — GĐ2 batch ①+②+③: ContentUnit atomic từ corpus thật (5 cuốn: 3 Toán + 2 TV)
+# WAL-74 — GĐ2 batch ①→④: ContentUnit + EXERCISE→SkillCase + SCALE GATE tự động
 
 **Ngày:** 2026-09-01 · 0 LLM · `tool/extract/extract_units.py` · output ngoài git (ADR-002)
 
@@ -102,3 +102,53 @@ tự nhiên: lặp-từ → kết-từ → đại-từ.
 **TỔNG CORPUS GĐ2 sau 3 batch: 2.202 unit / 5 cuốn** (42 RULE · 1.706 EXERCISE).
 Residual: 2 RULE TV thiếu số trang in (chân trang OCR miss) — id vẫn truy pdf-page;
 box-detection và mapping case vẫn là batch ④.
+
+
+---
+
+## Batch ④ (cùng ngày) — EXERCISE→SkillCase + gate tự động: **SCALE GATE ĐÃ XANH**
+
+### Phát hiện chặn đường: text đã gom dòng cho **0%** biểu thức parse được
+
+Đo trước khi viết luật: 803 bài tập Toán, regex `a/b ± c/d` khớp **0**. Không phải lỗi
+OCR — sách in phân số **XẾP CHỒNG DỌC**, OCR trả token số rời (tử ở y, mẫu ở y+0,02,
+cùng cột x). ⇒ mapping bài tập KHÔNG THỂ chạy trên text; phải dựng lại từ HÌNH HỌC.
+
+### `rebuild_fractions.py` — dựng phân số tất định từ bbox
+
+Luật: hai token SỐ cùng cột (|dx| ≤ 0,035) cách nhau ≤ 0,03 theo y ⇒ tử/mẫu; hai phân số
+cùng hàng cách ≤ 0,22 với toán tử ở giữa ⇒ biểu thức. Ca ⇒ **đúng luật `fractionCase` của
+kernel** (không viết luật song song). Mọi thứ khác ⇒ không dựng.
+
+**Kết: 34 biểu thức**, mỗi cái mang `status: INFERRED` (dựng từ hình học ≠ nguyên văn).
+
+### Hai FP thật bị bắt và vá (không tắt gate)
+
+1. **Ghép hai bài cạnh nhau**: không siết khoảng cách thì `a)` và `b)` cùng hàng dính thành
+   biểu thức ma («10/15 + 11/8»). Siết 0,22 ⇒ 53→38.
+2. ⭐ **CHƯƠNG TRÌNH LỌC NHẬN DẠNG**: B53 «Khái niệm phân số» tr.50 sinh «2/3 − 3/5» —
+   nhưng sách **chưa dạy phép trừ phân số** ở bài đó ⇒ gần chắc là gạch nối bị đọc thành
+   phép tính. Thêm luật: không nhận phép cộng/trừ phân số TRƯỚC bài đầu tiên dạy nó
+   (B60 lớp 4, đọc từ TOC thật) ⇒ loại 4 ca. Đây là chương trình lọc nhận dạng, không
+   phải nhận dạng lọc chương trình.
+
+### KIỂM CHÉO NGOẠI VI (bằng chứng mạnh nhất của batch)
+
+B60 tr.74-76 = phần «cộng/trừ phân số **CÙNG** mẫu» → **8/8 dựng ra `denominator-equal`**;
+tr.78+ = phần «**KHÁC** mẫu» → chuyển sang divisible/non-divisible. Luật hình học + luật
+case của kernel, kiểm chéo với **cấu trúc bài học của sách** — khớp, không phải tự-nói-tự-nghe.
+
+### `verify_corpus_gates.py` — SCALE GATE thành lệnh chạy được
+
+11 check trên DỮ LIỆU THẬT (suite Dart giữ luật trên fixture vì corpus ở ngoài git):
+G1 provenance (assertion đủ, RULE=EXPLICIT, truy được trang) · G2 chống rò xuyên-sách,
+xuyên-lớp và trong TV5 · G3 mapping (INFERRED, khớp sự thật bài học, không mẫu 0, không
+vượt phạm vi, không sinh phép tính chưa dạy) · G4 trung thực (unmapped giữ nguyên).
+**🟢 11/11 XANH — Founder Delta §7/§13 scale gate ĐÃ MỞ.**
+
+### Coverage nói thẳng
+
+34 biểu thức = **17% bài tập trong chương phân số (197)**, **2% toàn bộ 1.706 bài tập** —
+phần lớn bài tập là đọc/tìm/chọn/viết, không chứa biểu thức nào. Không đoán để nâng số.
+Residual: bài tập dạng cột dọc/có hình, phép nhân-chia phân số, số thập phân — mở rộng
+luật khi cần, mỗi lần kèm kiểm chéo bài học tương ứng.
