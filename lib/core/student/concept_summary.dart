@@ -157,6 +157,20 @@ class SummaryPolicy {
   final double weakestTieEpsilon;
 }
 
+/// Số liệu quan sát của MỘT ca — để mọi câu nói trích dẫn được đúng ca
+/// (doctrine F4: truy vết tới bằng chứng, không trích số liệu gộp).
+class CaseObservation {
+  const CaseObservation({
+    required this.pMastery,
+    required this.evidenceCount,
+    required this.lastEvidenceAt,
+  });
+
+  final double pMastery;
+  final int evidenceCount;
+  final DateTime? lastEvidenceAt;
+}
+
 /// ⭐⭐⭐ Tóm tắt bằng chứng của MỘT khái niệm — thứ Parent Coach đọc.
 class ConceptSummary {
   const ConceptSummary({
@@ -171,6 +185,7 @@ class ConceptSummary {
     required this.supportedPracticeCount,
     required this.lastEvidenceAt,
     required this.claim,
+    this.observedCaseFacts = const {},
   });
 
   final String conceptId;
@@ -213,6 +228,9 @@ class ConceptSummary {
   final DateTime? lastEvidenceAt;
 
   final ConceptClaim claim;
+
+  /// Số liệu từng ca ĐÃ QUAN SÁT — nguồn cho citation của tầng phát ngôn.
+  final Map<String, CaseObservation> observedCaseFacts;
 
   /// ⭐ Suy tóm tắt từ trạng thái các ca + danh mục ca ĐÃ BIẾT của khái niệm.
   ///
@@ -341,6 +359,14 @@ class ConceptSummary {
       supportedPracticeCount: supported,
       lastEvidenceAt: lastAt,
       claim: claim,
+      observedCaseFacts: {
+        for (final id in coverage.observedCases)
+          id: CaseObservation(
+            pMastery: observed[id]!.pMastery,
+            evidenceCount: observed[id]!.evidenceCount,
+            lastEvidenceAt: observed[id]!.lastIndependentEvidenceAt,
+          ),
+      },
     );
   }
 

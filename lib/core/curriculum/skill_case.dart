@@ -52,6 +52,12 @@ enum DiagnosticOutcome {
 
   /// Chưa đủ bằng chứng. **Là câu trả lời hợp lệ**, không phải thất bại.
   insufficientEvidence,
+
+  /// ⭐ F6 — bài ĐA KỸ NĂNG sai, và ≥2 thành phần chưa vững: biết là hỏng,
+  /// CHƯA biết hỏng ở thành phần nào. Trước khi có giá trị này, engine buộc
+  /// phải quy lỗi cho một concept — quy lỗi sai địa chỉ tệ hơn không quy lỗi
+  /// (ADR-003 §F6).
+  attributionUnresolved,
 }
 
 /// Can thiệp tương ứng. Ánh xạ vét cạn — thêm một chẩn đoán mà quên quyết định
@@ -68,6 +74,12 @@ enum LearningAction {
   /// hai mẫu không chia hết cho nhau. Mình thử so hai trường hợp nhé."*
   contrastCases,
 
+  /// ⭐ F6 — cô lập kỹ năng: ra vài bài NGẮN, mỗi bài chạm đúng MỘT thành
+  /// phần, để tìm thành phần hỏng thay vì đoán. Chính là "chẩn đoán theo
+  /// prerequisite graph" của tài liệu nghiên cứu: log₂(k) câu thay vì dạy
+  /// lại cả k thành phần.
+  isolateSkills,
+
   challenge,
   advance,
   revisit,
@@ -82,4 +94,5 @@ LearningAction actionFor(DiagnosticOutcome d) => switch (d) {
       DiagnosticOutcome.executionError => LearningAction.practice,
       DiagnosticOutcome.carelessError => LearningAction.practice,
       DiagnosticOutcome.insufficientEvidence => LearningAction.diagnosePrerequisite,
+      DiagnosticOutcome.attributionUnresolved => LearningAction.isolateSkills,
     };
