@@ -179,6 +179,68 @@ void main() {
     });
   });
 
+  group('ADR-007 — pha loãng claim theo hỗ trợ (từ số đo WAL-87)', () {
+    // ĐỐI CHỨNG: cùng 3 đúng độc lập/ca, KHÔNG hỗ trợ ⇒ mastered như cũ.
+    // Chứng minh cú lật ở test dưới đến từ MỘT biến duy nhất: supportedCount.
+    test('stream thuần độc lập: hành vi KHÔNG đổi (mastered)', () {
+      final s = sum({
+        div: drill(div, answers: [true, true, true]),
+        nonDiv: drill(nonDiv, answers: [true, true, true]),
+      }, {
+        div, nonDiv
+      });
+      expect(s.claim, ConceptClaim.mastered);
+    });
+
+    test('stream nặng hỗ trợ: 3 độc lập + 16 có-hỗ-trợ ⇒ KHÔNG được claim vững',
+        () {
+      final heavy = drill(nonDiv,
+          answers: [
+            for (var i = 0; i < 16; i++) true, // 16 lần đúng-sau-gợi-ý
+            true, true, true, // 3 lần độc lập
+          ],
+          kinds: [
+            for (var i = 0; i < 16; i++) EvidenceKind.postHintSuccess,
+            EvidenceKind.independentAttempt,
+            EvidenceKind.independentAttempt,
+            EvidenceKind.independentAttempt,
+          ]);
+      // cần = 2 + 16 ~/ 4 = 6 bằng chứng độc lập; mới có 3 ⇒ volume 0.5 < 0.6
+      expect(heavy.supportedCount, 16);
+      expect(heavy.evidenceCount, 3);
+      final s = sum({
+        div: drill(div, answers: [true, true, true]),
+        nonDiv: heavy,
+      }, {
+        div, nonDiv
+      });
+      expect(s.claim, isNot(ConceptClaim.mastered),
+          reason: 'mẫu độc lập thưa đang cõng cả kết luận — WAL-87 đo được '
+              'FALSE TRUSTED 7–13%% ở đúng cấu hình stream này');
+      expect(s.claim, ConceptClaim.insufficientEvidence,
+          reason: 'không đủ tin thì không kết luận theo HƯỚNG nào');
+    });
+
+    test('đủ bù: 6 độc lập + 16 hỗ trợ ⇒ lại được claim', () {
+      final earned = drill(nonDiv,
+          answers: [for (var i = 0; i < 22; i++) true],
+          kinds: [
+            for (var i = 0; i < 16; i++) EvidenceKind.postHintSuccess,
+            for (var i = 0; i < 6; i++) EvidenceKind.independentAttempt,
+          ]);
+      expect(earned.evidenceCount, 6);
+      final s = sum({
+        div: drill(div, answers: [true, true, true]),
+        nonDiv: earned,
+      }, {
+        div, nonDiv
+      });
+      expect(s.claim, ConceptClaim.mastered,
+          reason: 'dilution là RÀO CÓ THỂ VƯỢT bằng bằng chứng thật, '
+              'không phải án chung thân cho trẻ cần nhiều gợi ý');
+    });
+  });
+
   group('bất biến ba trục', () {
     test('⭐⭐ MASTERY cao ≠ COVERAGE đủ ≠ CONFIDENCE cao — ba trục ĐỘC LẬP', () {
       // Cùng mastery ước lượng cao, ba tình huống khác nhau ở trục khác:

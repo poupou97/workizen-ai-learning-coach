@@ -35,11 +35,12 @@ bằng chứng độc lập nào ⇒ không bao giờ được claim ⇒ phụ h
 báo. **Nửa FADE (YOUR_TURN) không phải trang trí sư phạm — nó là CẢM BIẾN của
 toàn hệ đo.** Đây là số liệu trực tiếp bảo vệ `SAM_YOUR_TURN` và luật trẻ-thử-trước.
 
-**③ Claim gate hiện tại (pMastery≥0.85 + ≥3 bằng chứng) yếu với học sinh chậm.**
-Ở pLearn 0.05, FALSE TRUSTED của các stream trộn hỗ trợ lên 7–13% số ca claim
-(mẫu độc lập thưa ⇒ hiệu chuẩn kém; mẫu claim nhỏ nên % nhiễu — xem JSON).
-⇒ đầu vào cụ thể cho `ConfidenceFactors` (E3): stream nhiều hỗ trợ cần sàn bằng
-chứng độc lập CAO HƠN stream thuần độc lập. Chưa sửa kernel — cần ADR nhỏ.
+**③ Claim gate V1 của kernel (≥2 độc lập/ca) yếu với học sinh chậm.** Đo với
+gate V1 thật: FALSE TRUSTED lên 10–19% số claim ở wood-±1, **33–40%** ở
+jump-to-full (pLearn 0.05). ⇒ ĐÃ SỬA: **ADR-007** — yêu cầu độc lập tăng theo
+supportedCount (`+1 mỗi 4 lần có-hỗ-trợ`). Đo lại: FT về 0–2% mọi policy hỗ
+trợ; CHI PHÍ nói thẳng: MISSED tăng 5→14% (hệ chờ lâu hơn mới khen — hướng sai
+an toàn). Đối chứng never-help không đổi (0 hỗ trợ ⇒ dilution không chạm).
 
 ## Kết quả — cái gì KHÔNG phân xử được (nói thẳng)
 

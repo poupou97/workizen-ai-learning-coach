@@ -9,6 +9,7 @@
 /// luận đổi theo kịch bản thì phải BÁO ĐÚNG NHƯ VẬY.
 ///
 /// Chạy: dart run tool/sim/fading_sim.dart > poc-out/sim/fading-sim-out.txt
+// ignore_for_file: avoid_print — tool CLI, print là giao diện.
 library;
 
 import 'dart:convert';
@@ -114,7 +115,8 @@ class EpisodeResult {
   int timeToIndependence = -1; // lần thử đầu của chuỗi 3 đúng-độc-lập liên tiếp
   int independentEvents = 0, totalAnswerEvents = 0;
   double posterior = 0;
-  bool claimed = false; // hệ tuyên "vững" (pMastery≥0.85, ≥3 bằng chứng độc lập)
+  bool claimedOld = false; // gate V1: pM≥0.85 + ≥2 độc lập (kernel trước ADR-007)
+  bool claimedNew = false; // gate ADR-007: cần 2 + supported~/4 độc lập
   bool trueKnown = false;
 }
 
@@ -168,7 +170,9 @@ EpisodeResult runEpisode(Policy policy, SimStudent st, {int budget = 20}) {
 
   final m = replayMastery(log, p);
   r.posterior = m.pMastery;
-  r.claimed = m.pMastery >= 0.85 && m.evidenceCount >= 3;
+  r.claimedOld = m.pMastery >= 0.85 && m.evidenceCount >= 2;
+  r.claimedNew = m.pMastery >= 0.85 &&
+      m.evidenceCount >= 2 + m.supportedCount ~/ 4;
   r.trueKnown = st.known;
   return r;
 }
@@ -185,7 +189,7 @@ void main() {
       print('policy         học-đc  tớiĐộcLập  %evidĐộcLập  FALSE-TRUSTED  MISSED');
       for (final pol in policies.entries) {
         var known = 0, indep = 0, indepEv = 0, totEv = 0;
-        var falseTrusted = 0, claimedN = 0, missed = 0, trueN = 0;
+        var ftO = 0, clO = 0, msO = 0, ftN = 0, clN = 0, msN = 0, trueN = 0;
         for (var i = 0; i < n; i++) {
           final st =
               SimStudent(pLearn, sc.value, Random(7919 * i + pol.key.hashCode));
@@ -195,25 +199,27 @@ void main() {
           if (r.timeToIndependence > 0) indep++;
           indepEv += r.independentEvents;
           totEv += r.totalAnswerEvents;
-          if (r.claimed) {
-            claimedN++;
-            if (!r.trueKnown) falseTrusted++; // tuyên vững khi CHƯA biết
-          }
-          if (r.trueKnown && !r.claimed) missed++; // biết mà hệ chưa thấy
+          if (r.claimedOld) { clO++; if (!r.trueKnown) ftO++; }
+          if (r.trueKnown && !r.claimedOld) msO++;
+          if (r.claimedNew) { clN++; if (!r.trueKnown) ftN++; }
+          if (r.trueKnown && !r.claimedNew) msN++;
         }
-        final ftRate = claimedN == 0 ? 0.0 : falseTrusted / claimedN;
-        final missRate = trueN == 0 ? 0.0 : missed / trueN;
+        final ftRate = clO == 0 ? 0.0 : ftO / clO;
+        final missRate = trueN == 0 ? 0.0 : msO / trueN;
+        final ftRateN = clN == 0 ? 0.0 : ftN / clN;
+        final missRateN = trueN == 0 ? 0.0 : msN / trueN;
         print('${pol.key.padRight(14)} '
             '${(known / n * 100).toStringAsFixed(0).padLeft(5)}%  '
             '${(indep / n * 100).toStringAsFixed(0).padLeft(8)}%  '
             '${(indepEv / totEv * 100).toStringAsFixed(0).padLeft(10)}%  '
-            '${(ftRate * 100).toStringAsFixed(1).padLeft(12)}%  '
-            '${(missRate * 100).toStringAsFixed(0).padLeft(5)}%');
+            '${(ftRate * 100).toStringAsFixed(1).padLeft(5)}%→${(ftRateN * 100).toStringAsFixed(1)}%  '
+            '${(missRate * 100).toStringAsFixed(0).padLeft(3)}%→${(missRateN * 100).toStringAsFixed(0)}%');
         out.add({
           'scenario': sc.key, 'pLearn': pLearn, 'policy': pol.key,
           'learnedRate': known / n, 'independenceRate': indep / n,
           'independentEvidenceShare': indepEv / totEv,
-          'falseTrustedRate': ftRate, 'missedRate': missRate,
+          'falseTrustedRateOld': ftRate, 'missedRateOld': missRate,
+          'falseTrustedRateNew': ftRateN, 'missedRateNew': missRateN,
         });
       }
       print('');

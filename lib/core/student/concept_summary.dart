@@ -125,6 +125,7 @@ class SummaryPolicy {
     this.practiceBelow = 0.6,
     this.confidenceFloor = 0.6,
     this.minIndependentPerCase = 2,
+    this.supportDilutionPerCase = 4,
     this.freshWithin = const Duration(days: 30),
     this.staleAfter = const Duration(days: 180),
     this.weakestTieEpsilon = 0.05,
@@ -145,6 +146,15 @@ class SummaryPolicy {
   /// thể là trượt tay theo giả định của chính ta. Claim với phụ huynh phải
   /// sống sót ít nhất một lần trượt được mô hình thừa nhận ⇒ cần ≥ 2.
   final int minIndependentPerCase;
+
+  /// ⭐ ADR-007 (từ số đo WAL-87): stream NẶNG HỖ TRỢ claim trên rất ít mẫu
+  /// độc lập bị hiệu chuẩn kém — FALSE TRUSTED 7–13% số claim ở học sinh chậm
+  /// trong mô phỏng. Cứ mỗi [supportDilutionPerCase] lần trả-lời-có-hỗ-trợ,
+  /// yêu cầu bằng chứng độc lập của ca tăng thêm 1:
+  /// `cần = minIndependentPerCase + supportedCount ~/ supportDilutionPerCase`.
+  /// Stream thuần độc lập (supportedCount = 0) KHÔNG đổi hành vi.
+  /// 4 là GIẢ THUYẾT V1 — khớp lại bằng dữ liệu thật; cơ chế mới là quyết định.
+  final int supportDilutionPerCase;
 
   /// 30/180 ngày — placeholder có lý do (mất mát sau kỳ nghỉ hè đo được ở
   /// văn liệu ~3 tháng); sẽ do F5 thay thế bằng mô hình thời gian thật.
@@ -304,7 +314,11 @@ class ConceptSummary {
     var recency = 1.0;
     var consistency = 1.0;
     for (final c in observed.values) {
-      final v = c.evidenceCount / policy.minIndependentPerCase;
+      // ADR-007: luyện-có-hỗ-trợ nhiều ⇒ cần NHIỀU bằng chứng độc lập hơn
+      // mới đủ tin để claim — các mẫu độc lập thưa đang cõng cả kết luận.
+      final required = policy.minIndependentPerCase +
+          c.supportedCount ~/ policy.supportDilutionPerCase;
+      final v = c.evidenceCount / required;
       if (v < volume) volume = v > 1 ? 1 : v;
       recency = _min(recency, _recencyScore(c.lastIndependentEvidenceAt, now, policy));
       final attempts = c.independentCorrect + c.independentIncorrect;
