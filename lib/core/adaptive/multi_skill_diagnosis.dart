@@ -43,7 +43,11 @@ List<LearningEvent> attributeEvidence({
   return [
     for (final r in map.requirements)
       LearningEvent(
-        eventId: '${map.exerciseId}:${r.conceptId}:${r.skillCaseId}',
+        // ⭐ §G: eventId phải DUY NHẤT qua các lần làm — thiếu thời điểm thì
+        // hai lần làm cùng bài sinh cùng id và hệ lưu trữ khử-trùng-lặp sẽ
+        // nuốt mất lần sau (falsified bởi replay_audit_test trước khi vá).
+        eventId:
+            '${map.exerciseId}@${at.microsecondsSinceEpoch}:${r.conceptId}:${r.skillCaseId}',
         skillCaseId: r.skillCaseId,
         conceptIds: concepts,
         exerciseId: map.exerciseId,
