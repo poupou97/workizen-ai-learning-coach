@@ -1,30 +1,51 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+/// ⭐ WAL-51 — widget test màn HÔM NAY: luật hiển thị do TEST giữ.
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:learning_coach/main.dart';
+import 'package:learning_coach/core/curriculum/skill_case.dart';
+import 'package:learning_coach/features/mission/mission_center_screen.dart';
+import 'package:learning_coach/features/mission/mission_data.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  final data = buildDemoMission(now: DateTime(2026, 9, 1, 19));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  Future<void> pump(WidgetTester t) async {
+    await t.pumpWidget(MaterialApp(home: MissionCenterScreen(data: data)));
+    await t.pump();
+  }
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('⭐ MỘT hành động kế tiếp + reason NGUYÊN VĂN của engine', (t) async {
+    await pump(t);
+    expect(data.decision.diagnosis, DiagnosticOutcome.caseTransitionGap,
+        reason: 'fixture đi đường domain thật — vững ca lớp 4, chưa gặp ca mới');
+    expect(find.text(data.decision.reason), findsOneWidget,
+        reason: 'UI hiển thị reason của engine nguyên văn, không suy diễn thêm');
+    expect(find.text('Bắt đầu'), findsOneWidget);
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('⭐⭐ CẤM %: không ký tự % nào trên toàn màn', (t) async {
+    await pump(t);
+    for (final w in t.widgetList<Text>(find.byType(Text))) {
+      expect(w.data ?? '', isNot(contains('%')),
+          reason: '⭐⭐ không con số nào giả vờ chính xác — luật hiển thị '
+              'Decision 1, do widget test giữ');
+    }
+  });
+
+  testWidgets('ôn tới hạn hiển thị dịu (không chữ đỏ hối thúc)', (t) async {
+    await pump(t);
+    expect(data.reviews, isNotEmpty,
+        reason: 'fixture: bằng chứng 9 ngày trước, khoảng ôn 3 lần = ~28 ngày… '
+            'kiểm bằng ReviewSchedule thật');
+    expect(find.text('Tới lúc gặp lại rồi'), findsWidgets);
+    expect(find.textContaining('quá hạn', findRichText: true), findsNothing);
+  });
+
+  testWidgets('⭐ dạng CHƯA THỬ được nêu TÊN — coverage nhìn thấy được', (t) async {
+    await pump(t);
+    expect(data.unobservedCaseNames, contains('hai mẫu số không chia hết cho nhau'));
+    expect(find.textContaining('hai mẫu số không chia hết'), findsWidgets);
+    expect(find.text('Mình chưa thử dạng này'), findsWidgets);
   });
 }
