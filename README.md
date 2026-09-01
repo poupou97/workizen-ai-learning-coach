@@ -28,11 +28,16 @@ là toàn bộ lý do của kiến trúc `Concept → SkillCase → Method`.
 | `SkillCase` + method applicability | **DOMAIN IMPLEMENTED** |
 | `TutorScope` (fail closed) | **DOMAIN IMPLEMENTED** |
 | Student mastery — BKT theo ca (ADR-001) | **DOMAIN IMPLEMENTED** |
+| Learning Evidence — log thô 7 loại sự kiện, replay được (ADR-004) | **DOMAIN IMPLEMENTED** |
+| `ConceptSummary` — mastery ≠ coverage ≠ confidence (ADR-004) | **DOMAIN IMPLEMENTED** |
 | Adaptive Decision Engine (rule-based) | **DOMAIN IMPLEMENTED** |
+| Q-matrix đa kỹ năng + quy lỗi `attributionUnresolved` (ADR-005) | **DOMAIN IMPLEMENTED** |
+| Lịch ôn tập (tách khỏi ước lượng tri thức, ADR-005) | **DOMAIN IMPLEMENTED** |
+| Parent Coach — tầng phát ngôn claim-gated (ADR-005) | **DOMAIN IMPLEMENTED** — UI chưa có |
 | Trích cấu trúc SGK từ mục lục | **POC VERIFIED** (0 LLM, 0 đ) |
 | OCR trang sách | **POC VERIFIED** trên bản quét · công thức toán 53% |
 | Camera Tutor | **DESIGNED** — chưa đo trên ảnh điện thoại |
-| Exercise → Concept mapping | **RESEARCHED** — chặn ở OCR công thức |
+| Exercise → Concept/ca mapping | **POC VERIFIED** trên quét — precision 5/5, trần recall ~38–50%, nút thắt: ghép biểu thức |
 | Misconception model | **RESEARCHED** — không có nguồn văn bản, phải học lúc chạy |
 | Toàn bộ UI / Student / Parent experience | **NOT STARTED** |
 
