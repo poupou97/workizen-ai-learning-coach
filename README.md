@@ -88,6 +88,15 @@ Nguồn SGK có **điều khoản cấm sao chép/lưu trữ/chuyển thể bằ
 lên `LEGAL_APPROVED`. Chi tiết: [`TEXTBOOK-LICENSING-QUESTIONS.md`](docs/research/TEXTBOOK-LICENSING-QUESTIONS.md)
 · ba lớp bảo vệ corpus đã đo: [`ADR-002`](docs/decisions/ADR-002-bao-ve-corpus-nhieu-lop.md).
 
+## Governance
+
+| | |
+|---|---|
+| GitHub | [poupou97/workizen-ai-learning-coach](https://github.com/poupou97/workizen-ai-learning-coach) (PRIVATE) |
+| Jira | `WAL` — ⛔ chưa tạo, xem [`GOVERNANCE-BOOTSTRAP.md`](docs/pm/GOVERNANCE-BOOTSTRAP.md) |
+| Confluence | `WAL` — ⛔ chưa tạo |
+| Cấu hình agent | [`.workforce.json`](.workforce.json) |
+
 ## Công cụ
 
 | | |
