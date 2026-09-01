@@ -23,8 +23,9 @@ Học sinh đang Bài 6 hỏi «cộng»: không trần → 3 RULE (bài 6, 19, 
 
 ## Bytes tầng unit (đo)
 
-Một cuốn 220 unit: **~103KB SQLite / ~14KB gzip** (thô 44KB) ⇒ ~SGK lõi cấp 1 (toán+TV
-~50 cuốn) cỡ vài MB — khớp ngoại suy 30MB toàn corpus của WAL-83.
+Một cuốn 220 unit: **184.320 B SQLite / 35.948 B gzip** (thô 162.096 B — text unit trung
+bình ~740 B vì gom cả thân đoạn). ⇒ SGK lõi (toán+TV, ~100 cuốn tương đương) cỡ ~4-20MB
+tuỳ định dạng — khớp trần ngoại suy 30MB gzip toàn corpus của WAL-83.
 
 ## Lỗi ghi thật + residual
 
