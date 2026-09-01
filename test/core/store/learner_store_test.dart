@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
+import 'package:learning_coach/core/store/timetable.dart';
 import 'package:learning_coach/core/student/evidence_weighting.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
@@ -226,6 +227,41 @@ void main() {
       );
       expect(tutoringViolationsInExam(learn), isEmpty,
           reason: 'dạy học có hỗ trợ là BÌNH THƯỜNG — chỉ thi mới cấm');
+    });
+  });
+
+  group('WAL-96 thời khoá biểu trong kho', () {
+    test('lưu → đọc lại giữ nguyên; TKB là TUỲ CHỌN nên rỗng là hợp lệ',
+        () async {
+      final store = JsonlLearnerStore();
+      expect(await store.timetable('l1'), isEmpty,
+          reason: 'chưa nhập TKB ⇒ rỗng, không lỗi (F13)');
+      await store.saveTimetable('l1', const [
+        TimetableEntry(
+            learnerId: 'l1', weekday: 2, period: 1, subjectId: 'toan'),
+        TimetableEntry(
+            learnerId: 'l1', weekday: 2, period: 2, subjectId: 'tieng-viet'),
+      ]);
+      final reloaded = JsonlLearnerStore.fromJsonl(store.toJsonl());
+      final tt = await reloaded.timetable('l1');
+      expect(tt.map((e) => e.subjectId), ['toan', 'tieng-viet']);
+      expect(await reloaded.timetable('l2'), isEmpty,
+          reason: 'TKB cũng cô lập theo learnerId');
+    });
+
+    test('đổi TKB giữa kỳ: bản mới thắng, lịch sử vẫn còn trong log', () async {
+      final store = JsonlLearnerStore();
+      await store.saveTimetable('l1', const [
+        TimetableEntry(
+            learnerId: 'l1', weekday: 2, period: 1, subjectId: 'toan')
+      ]);
+      await store.saveTimetable('l1', const [
+        TimetableEntry(
+            learnerId: 'l1', weekday: 2, period: 1, subjectId: 'khoa-hoc')
+      ]);
+      expect((await store.timetable('l1')).single.subjectId, 'khoa-hoc');
+      expect(store.toJsonl().split('\n').where((l) => l.contains('timetable')),
+          hasLength(2), reason: 'append-only: lịch sử đổi lịch không mất');
     });
   });
 }

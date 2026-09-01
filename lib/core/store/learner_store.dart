@@ -19,6 +19,7 @@ import '../student/learning_evidence.dart';
 import '../student/mastery.dart';
 import 'learner_profile.dart';
 import 'learning_session.dart';
+import 'timetable.dart';
 
 /// Cổng lưu trữ. Ứng dụng nói chuyện với interface này, không với tệp.
 abstract class LearnerStore {
@@ -40,6 +41,11 @@ abstract class LearnerStore {
   /// Toàn bộ sự kiện của MỘT ca — nguyên liệu replay (ADR-004).
   Future<EvidenceLog> evidenceFor(
       {required String learnerId, required String skillCaseId});
+
+  /// Thời khoá biểu — TUỲ CHỌN (F13): rỗng là trạng thái hợp lệ, app chạy
+  /// bình thường khi không có.
+  Future<void> saveTimetable(String learnerId, List<TimetableEntry> entries);
+  Future<List<TimetableEntry>> timetable(String learnerId);
 }
 
 /// Bản triển khai trên bộ nhớ + chuỗi JSONL — đủ cho app một máy, và là
@@ -134,6 +140,31 @@ class JsonlLearnerStore implements LearnerStore {
     }
     out.sort((a, b) => a.startedAt.compareTo(b.startedAt));
     return out;
+  }
+
+  @override
+  Future<void> saveTimetable(
+      String learnerId, List<TimetableEntry> entries) async {
+    // Ghi cả tuần thành MỘT bản ghi: bản sau đè bản trước (append-only vẫn
+    // giữ lịch sử đổi TKB, hữu ích khi trường đổi lịch giữa kỳ).
+    _lines.add(jsonEncode({
+      'type': 'timetable',
+      'learnerId': learnerId,
+      'entries': [for (final e in entries) e.toJson()],
+    }));
+  }
+
+  @override
+  Future<List<TimetableEntry>> timetable(String learnerId) async {
+    List<TimetableEntry>? latest;
+    for (final r in _records('timetable')) {
+      if (r['learnerId'] != learnerId) continue;
+      latest = [
+        for (final e in (r['entries'] as List? ?? const []))
+          ?TimetableEntry.fromJson((e as Map).cast<String, Object?>())
+      ];
+    }
+    return latest ?? const [];
   }
 
   @override
