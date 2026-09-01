@@ -12,7 +12,10 @@ import '../../app/theme/wal_tokens.dart';
 import '../../core/adaptive/adaptive_engine.dart';
 import '../../core/curriculum/canonical_problem.dart';
 import '../../core/perception/perception_provenance.dart';
+import '../../core/curriculum/pedagogical_boundary.dart';
 import '../mission/mission_data.dart';
+import '../tutor/tutor_screen.dart';
+import '../tutor/tutor_session.dart';
 import 'confirm_problem_screen.dart';
 
 /// Parse "a/b ± c/d" → cặp mẫu số. Sai dạng ⇒ null (fail closed như mọi nơi).
@@ -91,17 +94,43 @@ class ProblemResultScreen extends StatelessWidget {
                       height: 1.45)),
             ),
             const Spacer(),
+            // Ca xác định được ⇒ vào làm bài (T1). Ca không xác định ⇒ KHÔNG
+            // có nút làm bài với tutor — fail closed, chỉ còn đường quay về.
+            if (exerciseCase != null && pair != null) ...[
+              SizedBox(
+                height: WalSpacing.minTouch + 8,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                      backgroundColor: WalColors.primary500,
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(WalSpacing.radiusButton))),
+                  onPressed: () {
+                    final fp = FractionProblem.parse(problem.expression)!;
+                    final session = TutorSession(
+                      exerciseId: problem.exerciseId,
+                      skillCaseId: exerciseCase,
+                      problem: fp,
+                      scope: TutorScope.forProblem('quy-dong', exerciseCase,
+                          domain.stage, domain.catalogue),
+                    );
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => TutorScreen(
+                            session: session,
+                            expression: problem.expression)));
+                  },
+                  child: const Text('Làm bài này ▸',
+                      style: TextStyle(fontSize: WalType.body)),
+                ),
+              ),
+              const SizedBox(height: WalSpacing.sm),
+            ],
             SizedBox(
-              height: WalSpacing.minTouch + 8,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                    backgroundColor: WalColors.primary500,
-                    shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(WalSpacing.radiusButton))),
+              height: WalSpacing.minTouch,
+              child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: const Text('Về Hôm nay',
-                    style: TextStyle(fontSize: WalType.body)),
+                    style: TextStyle(fontSize: WalType.body, color: WalColors.primaryText)),
               ),
             ),
           ]),
