@@ -1,7 +1,7 @@
 # ADR-008 — AI Curriculum (QĐ 2422) là DOMAIN trong graph hợp nhất + cạnh `aiIntegration`
 
-**Ngày:** 2026-09-01 · **Trạng thái:** PROPOSED (L2 — hướng kiến trúc; chốt ACCEPTED sau
-khi tầng ingestion Dart đầu tiên chạy trên dữ liệu này) · **Nguồn:** WAL-89/90/91/92
+**Ngày:** 2026-09-01 · **Trạng thái:** ACCEPTED (L2 — điều kiện chốt đã đạt cùng ngày: `ai_curriculum.dart`
++ 5 test fixture tổng hợp, 2 đột biến đỏ; dữ liệu thật ở pack ngoài git chờ WAL-43) · **Nguồn:** WAL-89/90/91/92
 
 ## Bối cảnh
 QĐ 2422/QĐ-BGDĐT ban hành khung giáo dục AI lớp 1–12 với hệ mã chính thức tự-định-nghĩa
