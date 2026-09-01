@@ -65,6 +65,19 @@ class LearningActivity {
   final int? sourcePage;
   final String? sourceBook;
 
+  /// Đoạn văn để ĐỌC trước khi trả lời — chỉ dùng cho [ResponseKind.readRespond].
+  /// `null` với loại khác. Reader surface KHOÁ câu hỏi cho tới khi trẻ tự xác
+  /// nhận đã đọc (fail-closed: không có đọc-hiểu nếu chưa đọc). Đoạn văn rỗng ⇒
+  /// surface nói KHÔNG HỖ TRỢ, không bịa đoạn văn.
+  final String? passage;
+
+  /// Câu HỎI tự-soát cho [ResponseKind.compose] — dẫn dắt QUÁ TRÌNH viết
+  /// (dàn ý → nháp → sửa), KHÔNG chứa bài mẫu. ⭐ Cố ý KHÔNG có trường nào giữ
+  /// "bài văn mẫu": REVEAL gate (SAM không viết hộ) đúng theo CẤU TRÚC dữ liệu,
+  /// không phải theo lời dặn — surface không thể lộ sản phẩm hoàn chỉnh vì
+  /// không tồn tại chỗ để chứa nó. Rỗng ⇒ dùng bộ câu hỏi tự-soát mặc định.
+  final List<String> composeChecklist;
+
   bool get gradable => correctOption != null &&
       correctOption! >= 0 &&
       correctOption! < options.length;

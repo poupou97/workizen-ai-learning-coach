@@ -53,3 +53,21 @@ Interaction Surface (Quiz/Problem/Reader/Compose…) ← widget
   corpus chạm Sử/Địa/Lý-Hoá — gate bằng bằng chứng, không bằng dự đoán.
 - Rủi ro ghi nhận: `resolveSurface` có thể phình khi nhiều môn — khi đó tách theo
   subject-family adapter (cùng khuôn với extractor adapter đã falsify ở GĐ2).
+
+## Cập nhật — WAL-98 XONG (2026-09-01)
+
+Reader (`readRespond`) + Compose-lite (`compose`) đã dựng **đúng khuôn**: mỗi surface =
+một widget + nhánh resolver đã sẵn, KHÔNG đụng kernel. `LearningActivity` thêm hai trường
+CỘNG THÊM (`passage`, `composeChecklist`); ⭐ cố ý **không** có trường giữ «bài văn mẫu».
+
+Hai bất biến fail-closed MỚI, giữ bằng test + mutation (đỏ khi gỡ):
+- **READ gate** (Reader): câu hỏi bị khoá tới khi trẻ tự xác nhận đã đọc đoạn văn;
+  «đọc xong» KHÔNG phát `LearningEvent` (đọc ≠ mastery). Đoạn văn/câu hỏi thiếu ⇒ nói
+  KHÔNG HỖ TRỢ.
+- **REVEAL gate** (Compose = «SAM không viết hộ»): nút góp ý + checklist chỉ mở SAU khi
+  trẻ nộp nháp; văn KHÔNG chấm đúng/sai (`correct == null`); bằng chứng theo QUÁ TRÌNH —
+  nháp = `independentAttempt`, sửa-sau-góp-ý = `guidedAttempt` (có hỗ trợ), tự-soát-rồi-sửa
+  = `selfCorrection`.
+
+`shortText` vẫn `unsupported` (chưa đủ căn cứ surface). Map/Timeline/Lab vẫn CHƯA tạo.
+Bằng chứng: `reader_screen.dart` + `compose_lite_screen.dart` + 15 test; 233 test toàn suite xanh.
