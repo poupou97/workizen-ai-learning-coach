@@ -45,7 +45,10 @@ void main() {
   testWidgets('⭐ dạng CHƯA THỬ được nêu TÊN — coverage nhìn thấy được', (t) async {
     await pump(t);
     expect(data.unobservedCaseNames, contains('hai mẫu số không chia hết cho nhau'));
+    // ListView build lười — cuộn tới tile (đây cũng là smoke test cuộn của màn)
+    await t.scrollUntilVisible(
+        find.text('Mình chưa thử dạng này').first, 120,
+        scrollable: find.byType(Scrollable).first);
     expect(find.textContaining('hai mẫu số không chia hết'), findsWidgets);
-    expect(find.text('Mình chưa thử dạng này'), findsWidgets);
   });
 }
