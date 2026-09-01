@@ -28,3 +28,18 @@
 - CELEBRATE gắn claim thật (`mastered`/tiến bộ có bằng chứng) — mascot không được khen vượt bằng chứng, cùng luật với Parent Coach.
 - TRY_AGAIN là mặt định danh của `insufficientEvidence`/sai lần đầu — thất bại được thiết kế thành chuyện bình thường ("Không sao!").
 - THINKING dùng khi engine đang chẩn đoán — sự chờ đợi có gương mặt, không spinner trơ.
+
+
+## Cập nhật 2026-09-01 (WAL-47) — 13 CHIP TRẠNG THÁI PRODUCTION-USABLE
+
+`assets/mascot/sam-<state>.png` (256px + @64): hello · listen · think · probe · hint ·
+your-turn · step-back (cú đeo balo bước đi — SAM lùi lại có hình hài) · try-again (mặt
+hiền ấm, KHÔNG dùng mặt khóc) · explain (letterbox-on-blur) · admit-uncertainty ·
+celebrate-independence · camera-scan (kính lúp + badge camera) · review-due (đọc sách +
+badge đồng hồ). Kiểm nền tối 2D2D3A + nền sáng: `_proof-dark.png` / `_proof-light.png`.
+Sinh tất định bằng `tool/design/make_state_chips.py` (box tay-chọn từ lưới toạ độ).
+
+**Dạng CHIP TRÒN thay vì alpha-cut** — quyết định có lý do: nền sheet là gradient mờ,
+chroma-key local sẽ lem viền; chip viền tím dùng được trên MỌI nền (pattern avatar chuẩn),
+đủ cho slice 1. **Residual (design pass sau):** ① alpha-cut thật từng sprite; ② art GỐC cho
+CAMERA_SCAN/REVIEW_DUE thay badge lập trình (badge là giải pháp tạm đúng ngôn ngữ bộ cú).
