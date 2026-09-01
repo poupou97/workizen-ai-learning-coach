@@ -1,4 +1,4 @@
-# WAL-74 — GĐ2 batch ①+②: ContentUnit atomic từ corpus thật (3 cuốn Toán)
+# WAL-74 — GĐ2 batch ①+②+③: ContentUnit atomic từ corpus thật (5 cuốn: 3 Toán + 2 TV)
 
 **Ngày:** 2026-09-01 · 0 LLM · `tool/extract/extract_units.py` · output ngoài git (ADR-002)
 
@@ -78,3 +78,27 @@ applicability trên BÀI TẬP (WAL-33). Bug thật vá kèm: **'đ' (U+0111) kh
 zsh `set -- $b` không tách từ (lần 2 trong dự án) → OCR 0 trang, lỗi bị `>/dev/null`
 nuốt — chạy lại tường minh không loop. Marker TV («Đọc/Viết») nuốt bài toán bắt đầu
 bằng «Viết…» nếu trộn lexicon — tách SECTION_TOAN/SECTION_TV.
+
+
+---
+
+## Batch ③ (cùng ngày) — Tiếng Việt 5 hai tập, extractor RIÊNG theo cấu trúc đã đo
+
+`extract_units_tv.py` — viết SAU khi đo (69 header «Bài» 2-dòng, 5 section chữ-HOA-đứng-lẻ,
+16 «Ghi nhớ»); trang in lấy từ số chân trang (GĐ1 không có TOC dùng được cho sách này);
+header mồ côi + trang thiếu số in ĐẾM VÀ BÁO (7 + 46), không đoán.
+
+| Cuốn | Unit | RULE (Ghi nhớ) | EXERCISE | header ghép được |
+|---|---|---|---|---|
+| TV5 t1 | 589 | 3 | 469 | 32 (mồ côi 3) |
+| TV5 t2 | 560 | 13 | 434 | 30 (mồ côi 4) |
+
+**16 RULE = đúng tri thức ngữ pháp/tập làm văn lớp 5**: đại từ, câu đơn/câu ghép, nối vế
+bằng kết từ/cặp từ, liên kết câu (lặp từ · kết từ · đại từ), viết hoa danh từ/tên nước
+ngoài, cấu trúc đoạn văn (cảm xúc/tán thành/phản đối). **Chuỗi «liên kết câu» (b9→b11→b13)
+chính là nguyên liệu concept #3 xuyên-domain** (SKILLCASE-CONCEPT-3) — tiến trình case
+tự nhiên: lặp-từ → kết-từ → đại-từ.
+
+**TỔNG CORPUS GĐ2 sau 3 batch: 2.202 unit / 5 cuốn** (42 RULE · 1.706 EXERCISE).
+Residual: 2 RULE TV thiếu số trang in (chân trang OCR miss) — id vẫn truy pdf-page;
+box-detection và mapping case vẫn là batch ④.
