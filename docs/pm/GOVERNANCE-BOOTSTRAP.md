@@ -10,7 +10,7 @@
 
 ---
 
-## 1. Vì sao Jira/Confluence chưa tạo được — chặn ở CÔNG CỤ, không phải ở quyết định
+## 1. **[LỊCH SỬ]** ~~Vì sao Jira/Confluence chưa tạo được~~ — chặn ở CÔNG CỤ (đã hết hiệu lực 2026-09-01)
 
 Founder đã cấp quyền tạo. Tôi **không** tạo được, và đây là giới hạn đo được chứ không
 phải tôi ngại làm:
@@ -150,5 +150,5 @@ workizen-ai-learning-coach (space WAL)
 | | |
 |---|---|
 | GitHub | https://github.com/poupou97/workizen-ai-learning-coach (PRIVATE) |
-| Jira | `https://workizen.atlassian.net/browse/WAL` — ⛔ chưa tạo |
-| Confluence | `https://workizen.atlassian.net/wiki/spaces/WAL` — ⛔ chưa tạo |
+| Jira | `https://workizen.atlassian.net/browse/WAL` — ✅ hoạt động |
+| Confluence | `https://workizen.atlassian.net/wiki/spaces/WAL` — ✅ hoạt động |
