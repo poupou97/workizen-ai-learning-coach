@@ -7,6 +7,7 @@ library;
 
 import '../curriculum/concept.dart';
 import '../curriculum/pedagogical_boundary.dart';
+import '../curriculum/problem_applicability.dart';
 import '../curriculum/skill_case.dart';
 import '../student/mastery.dart';
 
@@ -15,22 +16,11 @@ import '../student/mastery.dart';
 /// Đây là chỗ *"đúng về toán học"* và *"đúng về sư phạm"* gặp nhau: điều kiện là
 /// thuộc tính của BÀI TOÁN, còn được phép dùng phương pháp nào là thuộc tính của
 /// HỌC SINH. Hàm này chỉ trả lời vế thứ nhất.
-String? fractionCase(int d1, int d2) {
-  if (d1 <= 0 || d2 <= 0) return null;
-
-  // ⭐⭐ Hai mẫu BẰNG NHAU là ca riêng, không phải biến thể của "chia hết".
-  //
-  // `5 % 5 == 0` nên bản trước xếp `3/5 + 1/5` vào ca chia hết, rồi Tutor nhận
-  // phương pháp "lấy mẫu số lớn hơn" — cho một bài KHÔNG CÓ bước quy đồng nào.
-  // Đó là phương pháp sai VỀ TOÁN HỌC lọt qua bất biến P0.
-  //
-  // Sách cũng xác nhận đây là ca riêng: cộng cùng mẫu số được dạy TRƯỚC quy đồng.
-  if (d1 == d2) return 'denominator-equal';
-
-  return (d1 % d2 == 0 || d2 % d1 == 0)
-      ? 'denominator-divisible'
-      : 'denominator-non-divisible';
-}
+/// F2 (siết 2026-09-01): nay chỉ là bề mặt tương thích của
+/// [analyzeFractionPair] — phân tích đầy đủ (gcd/lcm/bốn ca biên) nằm ở
+/// `problem_applicability.dart`, nơi mọi kết luận truy vết được về cấu trúc
+/// toán học thật thay vì một phép chia lấy dư.
+String? fractionCase(int d1, int d2) => analyzeFractionPair(d1, d2)?.skillCase;
 
 /// ⭐ Chọn ca để ĐỐI CHIẾU khi chẩn đoán `caseTransitionGap`.
 ///

@@ -36,13 +36,28 @@ class BktParams {
       BktParams(prior: 0.2, learn: 0.15, slip: 0.1, guess: 0.25);
 }
 
+/// ⭐ Hậu nghiệm Bayes dưới một cặp likelihood TÙY Ý.
+///
+/// Tách riêng để tầng bằng chứng (F3, `evidence_weighting.dart`) suy trọng số
+/// từ likelihood thay vì đặt hằng số: cặp bằng nhau ⇒ hậu nghiệm = tiên nghiệm
+/// — rơi ra từ công thức, không cần nhánh if đặc biệt nào.
+double bktPosterior(
+  double pMastery,
+  bool correct,
+  double pCorrectGivenKnown,
+  double pCorrectGivenUnknown,
+) {
+  final likKnown = correct ? pCorrectGivenKnown : 1 - pCorrectGivenKnown;
+  final likUnknown = correct ? pCorrectGivenUnknown : 1 - pCorrectGivenUnknown;
+  final num = pMastery * likKnown;
+  final den = num + (1 - pMastery) * likUnknown;
+  // Quan sát "không thể xảy ra" theo mô hình ⇒ không kết luận gì (fail closed).
+  return den == 0 ? pMastery : num / den;
+}
+
 /// Luật cập nhật BKT — hậu nghiệm Bayes rồi cộng xác suất học được.
 double bktUpdate(double pMastery, bool correct, BktParams p) {
-  final num = correct ? pMastery * (1 - p.slip) : pMastery * p.slip;
-  final other = correct
-      ? (1 - pMastery) * p.guess
-      : (1 - pMastery) * (1 - p.guess);
-  final posterior = num / (num + other);
+  final posterior = bktPosterior(pMastery, correct, 1 - p.slip, p.guess);
   return posterior + (1 - posterior) * p.learn;
 }
 
@@ -78,6 +93,9 @@ class CaseMastery {
     required this.pMastery,
     required this.evidenceCount,
     this.supportedCount = 0,
+    this.independentCorrect = 0,
+    this.independentIncorrect = 0,
+    this.lastIndependentEvidenceAt,
   });
 
   final String skillCaseId;
@@ -89,6 +107,18 @@ class CaseMastery {
   /// Lần trả lời có Tutor hỗ trợ. Giữ riêng để biết trẻ đã luyện bao nhiêu, mà
   /// không để nó len vào bằng chứng mastery.
   final int supportedCount;
+
+  /// ⭐ F1 — đếm riêng đúng/sai TỰ LÀM để đo **mâu thuẫn nội tại** của bằng
+  /// chứng. `pMastery` một mình không giữ được thông tin này: 5 đúng + 5 sai
+  /// xen kẽ và 2 đúng cuối chuỗi có thể cho cùng một belief, nhưng độ tin cậy
+  /// phải khác hẳn nhau.
+  final int independentCorrect;
+  final int independentIncorrect;
+
+  /// ⭐ F1/F5 — thời điểm bằng chứng ĐỘC LẬP gần nhất. `null` = chưa có. Là
+  /// đầu vào của trục *confidence* (bằng chứng cũ ⇒ bớt chắc), KHÔNG phải mô
+  /// hình quên (F5) — hai thứ đó tách nhau theo quyết định Founder.
+  final DateTime? lastIndependentEvidenceAt;
 
   /// ⭐ Chưa gặp **KHÁC** làm sai. Một ca chưa có bằng chứng phải là *chưa biết*, không
   /// phải *bằng 0* — nếu không, mọi học sinh mới đều trông như đang hỏng mọi thứ.
@@ -110,6 +140,7 @@ class CaseMastery {
     bool correct,
     BktParams p, {
     SupportLevel support = SupportLevel.none,
+    DateTime? at,
   }) {
     switch (support) {
       case SupportLevel.none:
@@ -118,6 +149,9 @@ class CaseMastery {
           pMastery: bktUpdate(pMastery, correct, p),
           evidenceCount: evidenceCount + 1,
           supportedCount: supportedCount,
+          independentCorrect: independentCorrect + (correct ? 1 : 0),
+          independentIncorrect: independentIncorrect + (correct ? 0 : 1),
+          lastIndependentEvidenceAt: at ?? lastIndependentEvidenceAt,
         );
       case SupportLevel.hint:
       case SupportLevel.workedStep:
@@ -126,6 +160,9 @@ class CaseMastery {
           pMastery: pMastery + (1 - pMastery) * p.learn,
           evidenceCount: evidenceCount,
           supportedCount: supportedCount + 1,
+          independentCorrect: independentCorrect,
+          independentIncorrect: independentIncorrect,
+          lastIndependentEvidenceAt: lastIndependentEvidenceAt,
         );
       case SupportLevel.fullSolution:
         return CaseMastery(
@@ -133,6 +170,9 @@ class CaseMastery {
           pMastery: pMastery,
           evidenceCount: evidenceCount,
           supportedCount: supportedCount + 1,
+          independentCorrect: independentCorrect,
+          independentIncorrect: independentIncorrect,
+          lastIndependentEvidenceAt: lastIndependentEvidenceAt,
         );
     }
   }

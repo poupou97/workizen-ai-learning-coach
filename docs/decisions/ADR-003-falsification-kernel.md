@@ -1,6 +1,9 @@
 # ADR-003 — Bốn lỗ hổng lộ ra khi cố ý phá kernel, và hai lỗ chưa vá
 
 **Ngày:** 2026-09-01 · **Trạng thái:** ACCEPTED (L2, agent tự quyết)
+**⚠️ cùng ngày:** Founder xếp F1–F3 là P0 *ngữ nghĩa*, không chỉ vá test — các bản vá
+F1/F3 dưới đây được **nâng cấp bởi ADR-004** (ConceptSummary + log bằng chứng thô);
+F2 siết thêm (đóng wildcard). Bảng PROPOSED giữ nguyên làm chứng tích giai đoạn.
 **Bằng chứng:** `test/e2e/falsification_test.dart` · 9 test · 4 phép đột biến đều đỏ
 
 ---

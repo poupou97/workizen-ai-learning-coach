@@ -151,7 +151,9 @@ Toán 9 tập một (mục lục + 2 tr. thuật ngữ). **Không** ingest lớp
 Gần như chắc là lỗi gõ của *coach*. Nay đã có 9 commit và một repo git thật. Đổi bây giờ
 vẫn rẻ; sau khi có CI/remote thì đắt. *Không tự đổi — quyết định định danh.*
 
-**FOUNDER_DECISION_REQUIRED — 2. Luật tổng hợp case → concept**
+**~~FOUNDER_DECISION_REQUIRED~~ — 2. Luật tổng hợp case → concept** · ✅ **ĐÃ CHỐT 2026-09-01**
+> Founder BÁC khung `min` vs `mean` — cả hai đều nén ba trục (mastery/coverage/confidence)
+> vào một vô hướng. Thay bằng `ConceptSummary` — ADR-004.
 ADR-001 chọn `min` vì *"vững nhất ở mức ca yếu nhất"* an toàn cho trẻ. **Chưa có dữ liệu
 thực nghiệm.** Lựa chọn khác: `mean` (dịu hơn, nhưng giấu ca hỏng), có trọng số theo số
 bằng chứng. Hệ quả: ảnh hưởng trực tiếp tần suất Parent Coach báo động.

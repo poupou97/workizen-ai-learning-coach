@@ -1,6 +1,9 @@
 # ADR-001 — Mastery đo theo SkillCase, mastery của Concept là giá trị suy ra
 
 **Ngày:** 2026-08-31 (overnight run) · **Trạng thái:** ACCEPTED (L2, agent tự quyết)
+**⚠️ 2026-09-01:** §luật tổng hợp (`min các ca có bằng chứng`) **bị thay bởi ADR-004** —
+Founder bác khung `min` vs `mean`; Concept nay tóm tắt bằng `ConceptSummary` ba trục
+(mastery/coverage/confidence). Phần mastery-đặt-ở-SkillCase **giữ nguyên hiệu lực**.
 **Bằng chứng:** đọc mã pyBKT + OATutor · `OPEN-SOURCE-ADAPTIVE-LEARNING-BENCHMARK.md`
 
 ---

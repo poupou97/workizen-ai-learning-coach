@@ -90,7 +90,7 @@ tệp hoặc commit thật.
 | E2 | Trích cấu trúc SGK v2 (tự phát hiện bố cục) | **DONE** | `parse_structure.py` · `95a7ec6` |
 | E2 | Cạnh prerequisite vẫn `llmInferred` — cần nguồn | **TODO** | báo cáo đêm, ô 🟡 |
 | E3 | Mastery theo SkillCase (BKT) | **DONE** | `ADR-001` · `mastery.dart` · 6 test |
-| E3 | Luật tổng hợp case → concept (`min` vs `mean`) | **BLOCKED** | `FOUNDER_DECISION_REQUIRED` — ADR-001 ghi rõ `min` là giả thuyết |
+| E3 | Luật tổng hợp case → concept | **CLOSED 2026-09-01** | Founder BÁC khung `min` vs `mean`; thay bằng ConceptSummary ba trục — ADR-004 |
 | E3 | Learning Evidence taxonomy | **IN PROGRESS** | doc `Status: HYPOTHESIS`; 4 tính chất §14 đã có test, taxonomy chưa thành kiểu riêng |
 | E4 | Rule engine + `DiagnosticOutcome` 7 mức | **DONE** | `adaptive_engine.dart` |
 | E4 | Next Best Action kèm lý do đọc được | **DONE** | `d.reason` · test thin slice |

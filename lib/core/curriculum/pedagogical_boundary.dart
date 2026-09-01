@@ -58,11 +58,18 @@ class TeachingMethod {
   final String name;
   final Set<String> appliesToConcepts;
 
-  /// ⭐ Ca mà phương pháp này xử lý. `null` = áp cho mọi ca của khái niệm.
+  /// ⭐ Ca mà phương pháp này xử lý.
   ///
   /// Đây là lỗ hổng của bản trước: phương pháp chỉ gate theo **lớp**, mà bằng
   /// chứng cho thấy phải gate theo **ca**. Một phương pháp đúng về toán học
   /// nhưng sai ca thì không được tới tay Tutor — cũng nghiêm như chưa được dạy.
+  ///
+  /// ⚠️ F2 (siết 2026-09-01): `null` KHÔNG còn nghĩa "áp cho mọi ca". Một
+  /// phương pháp không khai ca chỉ dùng được ở mức duyệt-khái-niệm
+  /// ([TutorScope.forConcept]); trong phạm vi MỘT BÀI CỤ THỂ nó bị loại với
+  /// [MethodRejection.caseNotDeclared]. Lý do: wildcard là cửa sau đưa một
+  /// phương pháp quy đồng tới bài cùng-mẫu-số — đúng lỗi F2, chỉ khác đường
+  /// vào. Phương pháp thật sự áp mọi ca thì khai TỪNG ca một cách tường minh.
   final String? skillCaseId;
 
   /// Khái niệm phải ĐÃ được giới thiệu thì method mới dùng được.
@@ -84,6 +91,10 @@ enum MethodRejection {
 
   /// Không xác định được ca ⇒ **fail closed**, không đoán.
   caseUnknown,
+
+  /// ⭐ F2 — phương pháp KHÔNG KHAI ca thì không được vào phạm vi một bài cụ
+  /// thể. "Không khai" là một dạng unknown, và unknown fail closed.
+  caseNotDeclared,
 }
 
 class MethodEligibility {
@@ -207,7 +218,12 @@ MethodEligibility eligibilityForProblem(
   if (exerciseCase == null) {
     return const MethodEligibility.rejected(MethodRejection.caseUnknown, {});
   }
-  if (m.skillCaseId != null && m.skillCaseId != exerciseCase) {
+  if (m.skillCaseId == null) {
+    // ⭐ F2: wildcard bị đóng. Xem doc của [TeachingMethod.skillCaseId].
+    return const MethodEligibility.rejected(
+        MethodRejection.caseNotDeclared, {});
+  }
+  if (m.skillCaseId != exerciseCase) {
     return MethodEligibility.rejected(
         MethodRejection.notApplicableToCase, {exerciseCase});
   }
