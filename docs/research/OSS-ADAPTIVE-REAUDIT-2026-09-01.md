@@ -28,3 +28,49 @@ ConceptSummary · AdaptiveDecision · TutorScope · ReviewSchedule.
 
 ## Điều các hệ này KHÔNG có mà WAL có (giữ làm định vị)
 Prerequisite graph xuyên lớp bám SGK thật · SkillCase (không hệ nào mô hình hoá "trường hợp" trong một concept) · ranh giới sư phạm fail-closed (TutorScope) · ba trục mastery/coverage/confidence · provenance citable. OATutor chọn bài trên **tập phẳng theo mastery thấp nhất** — không đồ thị, không ca.
+
+---
+
+## Bổ sung 2026-09-01 (WAL-55) — KT-PSP định danh lại + EdNet/OpenTutor audit nông
+
+### KT-PSP: KHÔNG PHẢI repo — là paper construct. 404 trước đây do đoán sai org.
+
+- Nguồn đúng: **arXiv 2512.00311** — *Tracing Mathematical Proficiency Through
+  Problem-Solving Processes* (Park et al.) [ACADEMIC]. Đề xuất task **KT-PSP**
+  (KT dùng QUÁ TRÌNH giải, không chỉ đúng/sai) + **StatusKT** (pipeline LLM
+  teacher→student→teacher trích proficiency làm tín hiệu trung gian) + dataset
+  KT-PSP-25. **Trang abs KHÔNG công bố mã/dataset** ⇒ không có OSS artifact để
+  audit — đóng câu hỏi "tìm nguồn": nguồn là paper, không phải repo.
+- OSS lân cận CÓ MÃ: **Oia-10/PSKT** (ACM MM'24 *Remembering is Not Applying*,
+  PyTorch) [OSS] — ⚠️ **KHÔNG có LICENSE file** ⇒ mặc định all-rights-reserved:
+  ĐỌC Ý TƯỞNG được, KHÔNG dùng mã. Schema dữ liệu: `user_id, problem_id,
+  skill_id, correct, time_stamp` — trùng phần lõi `LearningEvent` của ta.
+- Ý nghĩa cho SAM: văn liệu 2024–2025 đang đi đúng hướng ta đã đi —
+  **process-aware KT**. Taxonomy 7 EvidenceKind (selfCorrection, hint
+  provenance, support level) là "process signal" mà KT-PSP muốn có, nhưng của
+  ta TẤT ĐỊNH và giải thích được thay vì qua LLM pipeline. Camera→lời giải
+  viết tay của trẻ (tương lai) đúng là input KT-PSP nhắm tới.
+
+### EdNet (riiid) — audit nông đúng phạm vi
+
+- **License DATASET: CC BY-NC 4.0 — PHI THƯƠNG MẠI.** ⚠️ LEGAL: SAM là sản
+  phẩm thương mại tương lai ⇒ KHÔNG benchmark/train bất kỳ thành phần SẢN PHẨM
+  nào trên EdNet; chỉ tham khảo THIẾT KẾ SCHEMA. Ghi cùng ngăn với Legal Gate SGK.
+- Schema đáng học: KT1→KT4 tăng dần độ mịn hành vi (`elapsed_time`,
+  `action_type` enter/respond/submit, xem giải thích/bài giảng, `erase_choice`).
+  Xác nhận quyết định đã có: `timeSpent` là trường hạng nhất; taxonomy hành vi
+  của ta nằm ở vùng KT3–KT4 nhưng mang NGỮ NGHĨA sư phạm (hintRequested ≠
+  hintShown) thay vì log UI thô.
+
+### OpenTutor (github.com/opentutor — ICT Learning Sciences, USC)
+
+- Dialog-tutoring authoring: giáo viên tự soạn tutor hội thoại (<1h), chấm
+  câu trả lời mở bằng classifier. Trục KHÁC kernel (không mastery model theo
+  ca) — đúng dự đoán "mentor-style, khác trục". Đáng quay lại khi làm
+  **authoring workflow cho Generative Tutor** (WAL-30, gated) — bài học
+  "authoring qua công việc quen thuộc (tạo đề + chấm)" là pattern tốt.
+
+Sources: [arXiv 2512.00311](https://arxiv.org/abs/2512.00311) ·
+[Oia-10/PSKT](https://github.com/Oia-10/PSKT) ·
+[riiid/ednet](https://github.com/riiid/ednet) ·
+[github.com/opentutor](https://github.com/opentutor)
