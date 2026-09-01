@@ -17,9 +17,16 @@ import '../parent/parent_tonight_screen.dart';
 import 'mission_data.dart';
 
 class MissionCenterScreen extends StatelessWidget {
-  const MissionCenterScreen({super.key, required this.data});
+  const MissionCenterScreen({
+    super.key,
+    required this.data,
+    this.learnerName,
+  });
 
   final MissionData data;
+
+  /// Tên gọi từ HỒ SƠ THẬT (WAL-95). `null` ⇒ xưng hô trung tính, không bịa tên.
+  final String? learnerName;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +60,7 @@ class MissionCenterScreen extends StatelessWidget {
   Widget _greeting() => Row(children: [
         _samChip('assets/mascot/sam-hello.png', size: 44),
         const SizedBox(width: WalSpacing.sm),
-        Text('Chào ${data.studentName}!',
+        Text('Chào ${learnerName ?? data.studentName}!',
             style: const TextStyle(
                 fontSize: WalType.title,
                 fontWeight: FontWeight.w700,

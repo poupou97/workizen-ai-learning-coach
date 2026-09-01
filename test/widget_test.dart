@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/curriculum/skill_case.dart';
 import 'package:learning_coach/features/mission/mission_center_screen.dart';
+import 'package:learning_coach/core/store/learner_profile.dart';
+import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/main.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
 
@@ -55,12 +57,36 @@ void main() {
   });
 
   testWidgets('lối vào Bố mẹ dẫn tới màn Tối nay claim-gated', (tester) async {
-    await tester.pumpWidget(const HocCungSamApp());
+    // WAL-95: app nay khởi động từ KHO — seed sẵn hồ sơ để vào thẳng màn Hôm nay
+    // (đường onboarding có test riêng).
+    final store = JsonlLearnerStore();
+    await store.saveProfile(
+        const LearnerProfile(learnerId: 'l1', displayName: 'Minh', grade: 5));
+    await tester.pumpWidget(HocCungSamApp(store: store));
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Bố mẹ ▸'), 200,
         scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('Bố mẹ ▸'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Tối nay cùng'), findsOneWidget);
     expect(find.text('VIỆC CHO TỐI NAY · ~10 PHÚT'), findsOneWidget);
+  });
+
+  testWidgets('⭐ WAL-95: app chưa có hồ sơ ⇒ mở ONBOARDING, không bịa học sinh',
+      (tester) async {
+    await tester.pumpWidget(HocCungSamApp(store: JsonlLearnerStore()));
+    await tester.pumpAndSettle();
+    expect(find.text('Tớ gọi con là gì?'), findsOneWidget);
+    expect(find.textContaining('Chào Minh'), findsNothing);
+  });
+
+  testWidgets('có hồ sơ thật ⇒ màn Hôm nay chào ĐÚNG tên trong hồ sơ',
+      (tester) async {
+    final store = JsonlLearnerStore();
+    await store.saveProfile(
+        const LearnerProfile(learnerId: 'l9', displayName: 'Lan', grade: 5));
+    await tester.pumpWidget(HocCungSamApp(store: store));
+    await tester.pumpAndSettle();
+    expect(find.text('Chào Lan!'), findsOneWidget);
   });
 }
