@@ -12,6 +12,12 @@ nguyên văn (Founder gate §39 — legal/compliance commitment).
   hiệu lực), thay Nghị định 13/2023/NĐ-CP; hướng dẫn: Nghị định 356/2025/NĐ-CP.
 - [OFFICIAL] Dữ liệu trẻ em: xử lý phải có **đồng ý của trẻ từ đủ 7 tuổi** VÀ **đồng ý của
   cha mẹ/người giám hộ**; trẻ em thuộc nhóm bảo vệ đặc biệt.
+- [OFFICIAL] **Luật Trí tuệ nhân tạo 134/2025/QH15** (viện dẫn trong CV 5588/BGDĐT 19/8/2026,
+  bản scan trong repo) — hệ thống AI giáo dục cho trẻ em gần như chắc thuộc diện điều chỉnh;
+  đọc nguyên văn khi chạm phát hành (Founder gate).
+- [PRIMARY — CV 5588 §3] Trường học "không yêu cầu học sinh phải sử dụng tài khoản cá nhân
+  hoặc công cụ chưa được rà soát" ⇒ mô hình phân phối qua trường cần phương án không-tài-khoản
+  /local-first — khớp kiến trúc hiện tại.
 - Hệ quả sản phẩm: consent KHÔNG phải một checkbox — là **cặp đồng ý** (phụ huynh + trẻ ≥7
   tuổi) và phải thu TRƯỚC khi bất kỳ dữ liệu học tập nào rời máy. Tham chiếu quốc tế khi
   quốc tế hoá: COPPA (Mỹ, <13), GDPR-K (EU) — RESEARCH LATER.
