@@ -4,6 +4,5 @@
   "jiraProject": "WAL",
   "confluenceSpace": "WAL",
   "workforceDocs": "docs/pm/workforce",
-  "status": "PENDING_FOUNDER_CREATE",
-  "note": "AI Workforce config (ADR-059: một repo mỗi sản phẩm). ⚠️ jiraProject và confluenceSpace CHƯA TỒN TẠI tính đến 2026-09-01 — agent không tạo được Jira project / Confluence space (MCP Atlassian không có createJiraProject/createConfluenceSpace, không có acli, không có credential). Runtime sẽ lỗi cho tới khi founder tạo. Các bước chính xác: docs/pm/GOVERNANCE-BOOTSTRAP.md. Xoá trường status khi đã tạo xong."
+  "note": "AI Workforce config (ADR-059: một repo mỗi sản phẩm). Jira WAL + Confluence WAL tạo bởi Founder 2026-09-01; backfill 10 Epic + 34 issue + 16 trang Confluence (00–15) hoàn tất cùng ngày."
 }
