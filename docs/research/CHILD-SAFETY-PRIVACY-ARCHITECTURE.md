@@ -3,8 +3,12 @@
 **Ngày:** 2026-09-01 · **Trạng thái:** RESEARCH→DESIGN · đi TRƯỚC mọi tích hợp LLM thật (gate WAL-30)
 **Thang nguồn:** [OFFICIAL]=văn bản pháp luật/số hiệu đã xác minh qua nguồn pháp lý VN ·
 [PRIMARY]=kiến trúc đã có trong repo · [HYP]=đề xuất thiết kế
-**Lưu ý pháp lý:** đây là tài liệu KIẾN TRÚC; cam kết tuân thủ chính thức cần luật sư đọc
-nguyên văn (Founder gate §39 — legal/compliance commitment).
+**⚠️ LEGAL INTERPRETATION / REVIEW PENDING (Founder review §4, 2026-09-01):** SOURCE LAW ≠
+FINAL PRODUCT LEGAL INTERPRETATION. Mọi giả định triển khai trong doc này liên quan consent
+trẻ em/phụ huynh · lưu giữ ảnh · ranh giới PII · nghĩa vụ theo Luật AI đều mang nhãn
+**LEGAL-INTERPRETATION/REVIEW-PENDING** cho tới khi được thẩm định ngoài (luật sư đọc nguyên
+văn — Founder gate §39). Kiến trúc chọn hướng BẢO THỦ ngay bây giờ, nhưng KHÔNG tự chứng
+nhận tuân thủ.
 
 ## 1. Khung pháp lý VN hiện hành (điểm neo, không phải tư vấn pháp lý)
 
