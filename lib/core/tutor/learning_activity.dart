@@ -43,6 +43,8 @@ class LearningActivity {
     this.correctOption,
     this.sourcePage,
     this.sourceBook,
+    this.passage,
+    this.composeChecklist = const [],
   });
 
   final String activityId;
