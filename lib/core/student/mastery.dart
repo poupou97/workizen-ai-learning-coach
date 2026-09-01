@@ -46,32 +46,116 @@ double bktUpdate(double pMastery, bool correct, BktParams p) {
   return posterior + (1 - posterior) * p.learn;
 }
 
+/// ⭐⭐ Mức hỗ trợ Tutor đã cấp TRƯỚC khi học sinh trả lời.
+///
+/// Vì sao phải có: nếu không, `observe(true)` gộp chung "tự làm đúng" với "đúng
+/// sau khi được cho xem lời giải". Hai thứ đó nói hai điều khác hẳn nhau về việc
+/// đứa trẻ biết gì, và gộp lại tạo **vòng lặp tự xác nhận**:
+///
+///   Tutor gợi ý → trẻ làm đúng → mastery tăng → engine kết luận trẻ đã vững →
+///   thôi gợi ý → trẻ sai → gợi ý lại...
+///
+/// Can thiệp của chính hệ thống trở thành bằng chứng ủng hộ hệ thống. Đây là lỗi
+/// đo lường, không phải lỗi tham số — không tinh chỉnh `slip`/`guess` nào sửa được.
+enum SupportLevel {
+  /// Tự làm, không gợi ý. Bằng chứng đầy đủ.
+  none,
+
+  /// Được nhắc hướng đi, chưa cho bước cụ thể.
+  hint,
+
+  /// Được làm mẫu một bước.
+  workedStep,
+
+  /// Được xem trọn lời giải. **Không phải bằng chứng về mastery** — chép lại thứ
+  /// vừa đọc không chứng minh gì về việc tự làm được.
+  fullSolution,
+}
+
 class CaseMastery {
   const CaseMastery({
     required this.skillCaseId,
     required this.pMastery,
     required this.evidenceCount,
+    this.supportedCount = 0,
   });
 
   final String skillCaseId;
   final double pMastery;
+
+  /// ⭐ Chỉ đếm lần trả lời **tự làm**. Lần có hỗ trợ vào `supportedCount`.
   final int evidenceCount;
+
+  /// Lần trả lời có Tutor hỗ trợ. Giữ riêng để biết trẻ đã luyện bao nhiêu, mà
+  /// không để nó len vào bằng chứng mastery.
+  final int supportedCount;
 
   /// ⭐ Chưa gặp **KHÁC** làm sai. Một ca chưa có bằng chứng phải là *chưa biết*, không
   /// phải *bằng 0* — nếu không, mọi học sinh mới đều trông như đang hỏng mọi thứ.
   bool get hasEvidence => evidenceCount > 0;
 
-  CaseMastery observe(bool correct, BktParams p) => CaseMastery(
-        skillCaseId: skillCaseId,
-        pMastery: bktUpdate(pMastery, correct, p),
-        evidenceCount: evidenceCount + 1,
-      );
+  CaseMastery observe(bool correct, BktParams p) =>
+      observeWithSupport(correct, p, support: SupportLevel.none);
+
+  /// ⭐⭐ Cập nhật có tính tới mức hỗ trợ.
+  ///
+  /// - `none` — BKT chuẩn, tính là bằng chứng.
+  /// - `hint` / `workedStep` — **không** ghi công cho việc trả lời đúng (đúng ở
+  ///   đây không chứng minh tự làm được), nhưng vẫn cho số hạng `learn`: có dạy
+  ///   thì có khả năng đã học được. Không tính vào `evidenceCount`.
+  /// - `fullSolution` — belief **không đổi**. Không bằng chứng, không ghi công.
+  ///
+  /// Thà đánh giá thấp còn hơn công bố một đứa trẻ đã vững thứ nó chưa tự làm được.
+  CaseMastery observeWithSupport(
+    bool correct,
+    BktParams p, {
+    SupportLevel support = SupportLevel.none,
+  }) {
+    switch (support) {
+      case SupportLevel.none:
+        return CaseMastery(
+          skillCaseId: skillCaseId,
+          pMastery: bktUpdate(pMastery, correct, p),
+          evidenceCount: evidenceCount + 1,
+          supportedCount: supportedCount,
+        );
+      case SupportLevel.hint:
+      case SupportLevel.workedStep:
+        return CaseMastery(
+          skillCaseId: skillCaseId,
+          pMastery: pMastery + (1 - pMastery) * p.learn,
+          evidenceCount: evidenceCount,
+          supportedCount: supportedCount + 1,
+        );
+      case SupportLevel.fullSolution:
+        return CaseMastery(
+          skillCaseId: skillCaseId,
+          pMastery: pMastery,
+          evidenceCount: evidenceCount,
+          supportedCount: supportedCount + 1,
+        );
+    }
+  }
 
   static CaseMastery initial(String id, BktParams p) =>
       CaseMastery(skillCaseId: id, pMastery: p.prior, evidenceCount: 0);
 }
 
-enum MasteryState { unknown, learning, needsPractice, mastered }
+enum MasteryState {
+  unknown,
+  learning,
+  needsPractice,
+
+  /// ⭐⭐ Vững **mọi ca đã hỏi**, nhưng khái niệm còn ca CHƯA TỪNG hỏi.
+  ///
+  /// Không phải `mastered`: `min` chỉ chạy trên các ca có bằng chứng, nên nó
+  /// giấu trọn ca chưa gặp. Nói *"con đã nắm vững quy đồng"* khi một phần ba
+  /// khái niệm chưa được hỏi lần nào là công bố vượt bằng chứng — đúng thứ
+  /// ADR-001 chọn `min` để tránh.
+  coverageIncomplete,
+
+  mastered,
+}
 
 class ConceptMastery {
   const ConceptMastery({required this.conceptId, required this.cases});
@@ -90,11 +174,18 @@ class ConceptMastery {
     return seen.isEmpty ? null : seen.reduce((a, b) => a < b ? a : b);
   }
 
+  /// Còn ca nào của khái niệm chưa từng có bằng chứng?
+  bool get hasUnseenCase => cases.values.any((c) => !c.hasEvidence);
+
   MasteryState stateAt({double masteredAt = 0.85, double practiceBelow = 0.6}) {
     final d = derived;
     if (d == null) return MasteryState.unknown;
-    if (d >= masteredAt) return MasteryState.mastered;
-    return d < practiceBelow ? MasteryState.needsPractice : MasteryState.learning;
+    if (d < practiceBelow) return MasteryState.needsPractice;
+    if (d < masteredAt) return MasteryState.learning;
+    // ⭐⭐ Vững các ca đã hỏi. Nhưng còn ca chưa hỏi thì chưa được nói "vững".
+    return hasUnseenCase
+        ? MasteryState.coverageIncomplete
+        : MasteryState.mastered;
   }
 
   /// ⭐⭐ Ca nào vững, ca nào chưa — thứ mà mastery mức Concept **không thể** nói.

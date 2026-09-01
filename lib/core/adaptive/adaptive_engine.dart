@@ -17,9 +17,65 @@ import '../student/mastery.dart';
 /// HỌC SINH. Hàm này chỉ trả lời vế thứ nhất.
 String? fractionCase(int d1, int d2) {
   if (d1 <= 0 || d2 <= 0) return null;
+
+  // ⭐⭐ Hai mẫu BẰNG NHAU là ca riêng, không phải biến thể của "chia hết".
+  //
+  // `5 % 5 == 0` nên bản trước xếp `3/5 + 1/5` vào ca chia hết, rồi Tutor nhận
+  // phương pháp "lấy mẫu số lớn hơn" — cho một bài KHÔNG CÓ bước quy đồng nào.
+  // Đó là phương pháp sai VỀ TOÁN HỌC lọt qua bất biến P0.
+  //
+  // Sách cũng xác nhận đây là ca riêng: cộng cùng mẫu số được dạy TRƯỚC quy đồng.
+  if (d1 == d2) return 'denominator-equal';
+
   return (d1 % d2 == 0 || d2 % d1 == 0)
       ? 'denominator-divisible'
       : 'denominator-non-divisible';
+}
+
+/// ⭐ Chọn ca để ĐỐI CHIẾU khi chẩn đoán `caseTransitionGap`.
+///
+/// Bản trước lấy `b.strong.first` — phần tử đầu theo **thứ tự chèn của Map**.
+/// Câu nói với phụ huynh (*"con đã làm tốt dạng X"*) do đó phụ thuộc vào việc ai
+/// thêm ca nào vào map trước, chứ không phải vào sư phạm. Với hai ca thì không lộ;
+/// với ba ca trở lên thì nêu nhầm ca.
+///
+/// Thứ tự ưu tiên:
+///   ① ca vững được dạy GẦN NHẤT TRƯỚC ca đang vướng (theo `introducedGrade`) —
+///      đó mới là ca mà "luật đổi" so với nó;
+///   ② nếu không có dữ liệu lớp: ca nhiều bằng chứng nhất, rồi theo id.
+///      Tất định — không phụ thuộc thứ tự chèn.
+String? contrastCaseFor({
+  required List<String> strong,
+  required String currentCase,
+  required ConceptMastery mastery,
+  List<SkillCase> caseCatalogue = const [],
+}) {
+  if (strong.isEmpty) return null;
+
+  final byId = {for (final c in caseCatalogue) c.id: c};
+  final currentGrade = byId[currentCase]?.introducedGrade;
+
+  if (currentGrade != null) {
+    final adjacent = strong
+        .where((s) {
+          final g = byId[s]?.introducedGrade;
+          return g != null && g <= currentGrade;
+        })
+        .toList()
+      ..sort((a, b) {
+        final ga = byId[a]!.introducedGrade!, gb = byId[b]!.introducedGrade!;
+        return ga != gb ? gb.compareTo(ga) : a.compareTo(b);
+      });
+    if (adjacent.isNotEmpty) return adjacent.first;
+  }
+
+  final fallback = [...strong]
+    ..sort((a, b) {
+      final ea = mastery.cases[a]?.evidenceCount ?? 0;
+      final eb = mastery.cases[b]?.evidenceCount ?? 0;
+      return eb != ea ? eb.compareTo(ea) : a.compareTo(b);
+    });
+  return fallback.first;
 }
 
 class AdaptiveDecision {
@@ -46,6 +102,7 @@ AdaptiveDecision decide({
   required ConceptMastery mastery,
   required LearningStage stage,
   required List<TeachingMethod> catalogue,
+  List<SkillCase> caseCatalogue = const [],
   double strongAt = 0.85,
   double weakBelow = 0.6,
 }) {
@@ -69,10 +126,16 @@ AdaptiveDecision decide({
 
   // ⭐⭐ Ca đang gặp còn yếu NHƯNG có ca khác đã vững ⇒ không phải hỏng khái niệm.
   if (hereWeak && b.strong.isNotEmpty) {
+    final contrast = contrastCaseFor(
+      strong: b.strong,
+      currentCase: exerciseCase,
+      mastery: mastery,
+      caseCatalogue: caseCatalogue,
+    );
     return AdaptiveDecision(
       diagnosis: DiagnosticOutcome.caseTransitionGap,
       action: LearningAction.contrastCases,
-      reason: 'Con đã làm tốt dạng "${b.strong.first}". Bài này là dạng khác: '
+      reason: 'Con đã làm tốt dạng "$contrast". Bài này là dạng khác: '
           '"$exerciseCase". Cùng so hai dạng nhé.',
       scope: scope,
       remediation: RemediationStatus.remediateAvailable,

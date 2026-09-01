@@ -109,7 +109,7 @@ lên `LEGAL_APPROVED`. Chi tiết: [`TEXTBOOK-LICENSING-QUESTIONS.md`](docs/rese
 
 ```bash
 flutter pub get
-flutter test       # 39 test
+flutter test       # 48 test (39 chức năng + 9 falsification)
 flutter analyze
 ```
 
