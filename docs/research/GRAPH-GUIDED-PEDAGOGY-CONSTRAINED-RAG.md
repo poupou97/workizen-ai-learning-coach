@@ -35,8 +35,10 @@
 - Giữ: sourceId · trang IN (không phải trang PDF) · bbox · lessonId · loại · conceptIds/
   caseIds nếu đã map · provenance đầy đủ. `KnowledgeChunk` hiện có ~80% khung này
   (id/text/provenance/contentType/conceptIds/methodIds) — thiếu bbox + loại chuẩn hoá + caseIds.
-- [HYP] Đơn vị NHỎ NHẤT nên là Section/mục chứ không phải Lesson: bằng chứng concept #2 —
-  ranh giới ca nằm giữa các MỤC trong một bài.
+- ~~[HYP] Đơn vị NHỎ NHẤT nên là Section/mục~~ **[ĐÃ ĐO — WAL-41]: đơn vị tối thiểu =
+  ATOMIC pedagogical unit (RULE/EXAMPLE/EXERCISE...); Mục = CONTAINER + ranh giới
+  taught/untaught.** Bằng chứng: hàng rào chống rò tri-thức-tương-lai hoạt động chính vì
+  tr.39/tr.40 là unit riêng — xem WAL-41-RAG-RETRIEVAL-POC-RESULTS.md.
 
 ## 3. GRAPH FIRST, SEARCH SECOND (§19)
 
