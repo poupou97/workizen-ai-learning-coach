@@ -21,6 +21,7 @@ LOG="poc-out/wf-supervisor.log"
 mkdir -p poc-out
 
 idle=0
+waited=0   # số lần chờ lock liên tiếp (set -u đòi khai báo trước)
 say() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG"; }
 say "SUPERVISOR bắt đầu · dừng sau $MAX_IDLE vòng không có commit mới · trần $MAX_CYCLES vòng"
 
