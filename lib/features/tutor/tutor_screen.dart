@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
+import '../../core/tutor/tutor_feedback.dart';
 import 'tutor_session.dart';
 
 class TutorScreen extends StatefulWidget {
@@ -187,17 +188,16 @@ class _TutorScreenState extends State<TutorScreen> {
   }
 
   /// E1 — bốn chiều tách bạch. Không cộng dồn thành một "điểm".
+  /// Chuỗi lấy từ CORE `feedbackFor` — luật khen là TESTABLE RULE ở đó,
+  /// widget không tự viết lời khen (WAL-69).
   Widget _evidencePanel() {
     final o = s.outcome;
-    final praise = o.selfCorrected
-        ? 'Con tự tìm ra chỗ chưa đúng và tự sửa được — điều đó quý hơn cả đúng ngay lần đầu!'
-        : o.independent
-            ? 'Con tự làm được, không cần tớ gợi ý gì luôn! 🎉'
-            : 'Làm đúng rồi! Con đã kiên trì làm đến cùng — tớ thích điều đó.';
-    final evidenceLine = o.independent || o.selfCorrected
-        ? 'SAM ghi lại: con TỰ làm được bài dạng này.'
-        : 'Lần này có gợi ý nên tớ chưa tính là con tự làm được đâu — '
-            'mai mình thử một bài giống vậy mà không cần gợi ý nhé!';
+    final f = feedbackFor(
+        correct: o.correct,
+        maxSupport: o.maxSupport,
+        selfCorrected: o.selfCorrected);
+    final praise = f.praise;
+    final evidenceLine = f.evidenceLine;
     return ListView(children: [
       Center(child: Image.asset(_mascot, width: 96, height: 96)),
       const SizedBox(height: WalSpacing.md),

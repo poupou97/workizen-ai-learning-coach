@@ -3,7 +3,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:learning_coach/core/coach/parent_explanation.dart';
 import 'package:learning_coach/core/student/concept_summary.dart';
 import 'package:learning_coach/features/parent/parent_tonight_screen.dart';
 
