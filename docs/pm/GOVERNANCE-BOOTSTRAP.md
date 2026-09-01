@@ -83,7 +83,7 @@ tệp hoặc commit thật.
 |---|---|---|---|
 | E1 | Repository bootstrap + identity + remote | **DONE** | 11 commit · `poupou97/workizen-ai-learning-coach` · `088f26a` |
 | E1 | Bảo vệ corpus nhiều lớp | **DONE** | `ADR-002` · sandbox 4 ca có đối chứng |
-| E1 | Đăng ký repo thành submodule của umbrella | **BLOCKED** | repo cha phân kỳ ahead=2/behind=1 |
+| E1 | Convert AI Learning Coach thành submodule của umbrella (ADR-059) | **BLOCKED — theo lệnh Founder 2026-09-01** | KHÔNG resolve phân kỳ repo cha bây giờ; repo con GitHub là canonical; không đẩy thay đổi không liên quan lên repo cha |
 | E2 | Provenance model (4 mức `KnowledgeOrigin`) | **DONE** | `provenance.dart` · 4 test |
 | E2 | `CurriculumEdge` + citable theo loại khẳng định | **DONE** | `curriculum_edge.dart` · 4 test |
 | E2 | Chuỗi prerequisite xuyên lớp | **DONE** | `cross_grade_remediation_test.dart` · 6 test |
@@ -91,8 +91,11 @@ tệp hoặc commit thật.
 | E2 | Cạnh prerequisite vẫn `llmInferred` — cần nguồn | **TODO** | báo cáo đêm, ô 🟡 |
 | E3 | Mastery theo SkillCase (BKT) | **DONE** | `ADR-001` · `mastery.dart` · 6 test |
 | E3 | Luật tổng hợp case → concept | **CLOSED 2026-09-01** | Founder BÁC khung `min` vs `mean`; thay bằng ConceptSummary ba trục — ADR-004 |
-| E3 | Learning Evidence taxonomy | **IN PROGRESS** | doc `Status: HYPOTHESIS`; 4 tính chất §14 đã có test, taxonomy chưa thành kiểu riêng |
-| E4 | Rule engine + `DiagnosticOutcome` 7 mức | **DONE** | `adaptive_engine.dart` |
+| E3 | Learning Evidence taxonomy (7 loại sự kiện, log thô, replay) | **DONE** | `learning_evidence.dart` · `evidence_weighting.dart` · ADR-004 · 9 test |
+| E3 | ConceptSummary ba trục (mastery/coverage/confidence) | **DONE** | `concept_summary.dart` · ADR-004 · 14 test golden Founder |
+| E3 | Lịch ôn tách khỏi ước lượng (F5) | **DONE (khung + policy giả thuyết)** | `review_schedule.dart` · ADR-005 · 5 test |
+| E4 | Rule engine + `DiagnosticOutcome` 8 mức | **DONE** | `adaptive_engine.dart` · +`attributionUnresolved` (ADR-005) |
+| E4 | Q-matrix đa kỹ năng (F6) — quy công/quy lỗi | **DONE** | `exercise_skill_map.dart` · `multi_skill_diagnosis.dart` · ADR-005 · 9 test |
 | E4 | Next Best Action kèm lý do đọc được | **DONE** | `d.reason` · test thin slice |
 | E4 | Misconception học lúc chạy (không từ corpus) | **TODO** | giả thuyết "SGV là nguồn" đã bị **bác bằng đo** |
 | E5 | `TutorScope` = APPLICABLE ∩ ALLOWED, fail closed | **DONE** | `pedagogical_boundary.dart` · 5 test |
@@ -100,9 +103,9 @@ tệp hoặc commit thật.
 | E5 | Generative Tutor (LLM thật) | **TODO** | chưa có dòng mã nào |
 | E6 | OCR local Apple Vision | **DONE (POC VERIFIED)** | 0,37 s/trang · 0 đ · văn xuôi ~100% |
 | E6 | **OCR trên ảnh chụp điện thoại** | **TODO — P0** | mới đo trên bản quét; công thức toán 53% |
-| E6 | Exercise → Concept/SkillCase mapping | **BLOCKED** | chặn ở OCR công thức 53% |
+| E6 | Exercise → Concept/SkillCase mapping | **IN PROGRESS** | POC đo trên quét: precision 5/5, trần recall ~38–50%, đối chứng âm 0 false-positive — `OCR-PROBLEM-TO-CASE-POC.md` |
 | E7 | UI skeleton / Student experience | **TODO** | `lib/features/*` **rỗng hoàn toàn** |
-| E8 | Parent Coach | **TODO** | chưa có mã |
+| E8 | Parent Coach | **IN PROGRESS** | tầng phát ngôn `parent_explanation.dart` (F4, ADR-005, 7 test); UI chưa có |
 | E9 | SkillCase ở khái niệm thứ hai | **TODO** | mới xác minh sâu **một** khái niệm (`quy-dong`) |
 | E9 | Benchmark OSS adaptive learning | **DONE** | `OPEN-SOURCE-ADAPTIVE-LEARNING-BENCHMARK.md` |
 | E9 | Toán 4/5 — hai lớp hai phương pháp | **DONE** | lớp 4 Bài 57 tr.62 · lớp 5 Bài 6 tr.20 |
