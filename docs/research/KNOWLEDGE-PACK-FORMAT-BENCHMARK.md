@@ -44,11 +44,17 @@ Latency vô nghĩa ở scale này (<0,1ms cả hai).
    Modular chỉ trả giá xứng khi content ≫ overhead — hiện overhead ≫ content.
 4. Embeddings: **vẫn KHÔNG** (chưa có phép đo retrieval fail nào — luật ADR-006 giữ).
 
-## NGOẠI SUY 1–12 (đợi GĐ1 xong để điền số thật)
+## NGOẠI SUY 1–12 — ĐÃ ĐIỀN từ số GĐ1 (đo, không ước từ PDF)
 
-Chưa điền — GĐ1 đang chạy (480/531 cuốn lúc viết). Khi xong: bytes/bài-học đo được ×
-tổng số bài đếm được = footprint tầng structure; tầng ContentUnit cần mẫu GĐ2 để có
-mật độ unit/trang thật. **Cấm ước từ cỡ PDF** — sẽ bổ sung vào doc này cùng số GĐ1.
+| Tầng | Số đo | Ghi chú |
+|---|---|---|
+| Curriculum (AI 2422) | 27,6KB gzip | ĐO — cả khung 267 outcome |
+| Structure (7.199 bài, 531 cuốn, FTS) | **899KB SQLite / 113KB gzip** | **ĐO THẬT toàn corpus GĐ1** — 124 B/bài |
+| Text/ContentUnit toàn K-12 | ≈ **92MB thô / 30MB gzip** | NGOẠI SUY từ 2.301 trang OCR đo (1.472 B/trang × 62.729 trang × gzip 0,33); GĐ2 mẫu đo lại |
+| Text MỘT lớp | ≈ 7,7MB thô | dưới ngưỡng lật modular 10MB ⇒ **FULL vẫn đứng** (kể cả SGV; SGK thuần còn nhỏ hơn) |
+
+Kết cho ADR-006: FULL pack toàn K-12 (curriculum + structure + text nén) ≈ **30–35MB**
+— dư sức local-first, trong ngân sách «app lớn chấp nhận được» của Founder (100MB–2GB+).
 
 ## Residual
 

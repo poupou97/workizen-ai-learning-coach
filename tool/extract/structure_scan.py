@@ -68,6 +68,9 @@ def scan_book(pdf, grade):
                 rec['status'] = 'PARSE_FAIL'
                 rec['error'] = f'parse_toc p{pno}: {type(e).__name__}: {e}'
     rec['lessons'], rec['chapters'] = len(toc_entries), chapters
+    rec['lessonTitles'] = [
+        {'n': e.get('number'), 't': (e.get('title') or '')[:120],
+         'p': e.get('page_start')} for e in toc_entries]
     if not rec['tocPages'] and rec['status'] == 'OK':
         rec['status'] = 'NO_TOC_FOUND'  # LỖI TO, không giấu
     return rec

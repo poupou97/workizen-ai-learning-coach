@@ -23,7 +23,11 @@ def detect_columns(lines, gap=0.25):
 
 _FURNITURE = {'MỤC LỤC', 'TRANG', 'MUC LUC'}
 
-LESSON = re.compile(r'B[àa]i\s*(\d+)\s*[.．]\s*(.+)')
+# v3 (GĐ1 thật đo): «Bài» chỉ phủ 224/531 cuốn — Chuyên đề (lớp 10-12),
+# Chủ đề (Mĩ thuật/GDCD), Tuần (HĐTN), Unit (ngoại ngữ) là các quy ước khác.
+LESSON = re.compile(
+    r'(?:B[àa]i|Chuy[êe]n đ[êề]|Chủ đ[êề]|Tu[âầ]n|Unit)\s*(\d+)\s*[.．:]?\s+(.+)',
+    re.I)
 CHAPTER = re.compile(r'(?:Chương|Chủ đề)\s+([IVXLC]+|\d+)?\s*[.．]?\s*(.*)', re.I)
 
 def parse_toc(path):
