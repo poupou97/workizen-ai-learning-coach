@@ -103,15 +103,27 @@ class TutorSession {
   /// REVEAL gate: lời giải trọn vẹn chỉ sau ≥1 lần tự thử.
   bool get revealAllowed => hasAttempted;
 
+  static const policyId = 'tutor-session-v1';
+  String? _lastAnswerEventId;
+
   void _emit(EvidenceKind kind, bool? correct) {
+    final id = '$exerciseId#${_seq++}';
+    final isAnswer = correct != null;
     log = log.append(LearningEvent(
-      eventId: '$exerciseId#${_seq++}',
+      eventId: id,
       skillCaseId: skillCaseId,
       kind: kind,
       correct: correct,
       exerciseId: exerciseId,
       at: _now(),
+      // LINEAGE (§7): mức hỗ trợ TẠI sự kiện + policy + chuỗi pre/post —
+      // «đúng sau hint nhỏ» phải khác «đúng sau xem trọn lời giải» NGAY
+      // TRONG DỮ LIỆU, không phải suy đoán từ thứ tự log.
+      support: support,
+      policyId: policyId,
+      priorEventId: isAnswer ? _lastAnswerEventId : null,
     ));
+    if (isAnswer) _lastAnswerEventId = id;
   }
 
   /// Trẻ bấm "Xong". Một sự kiện, đúng loại, không đếm kép.

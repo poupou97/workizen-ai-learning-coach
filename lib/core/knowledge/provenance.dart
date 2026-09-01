@@ -17,6 +17,13 @@ enum KnowledgeOrigin {
   /// Trích dẫn được nguyên văn, kèm trang.
   sourceStated,
 
+  /// ⭐ Sách **DẠY QUA VÍ DỤ/HOẠT ĐỘNG** mà không phát biểu quy tắc.
+  /// Ca kiểm chuẩn: B57 Toán 4 — quy đồng dạy thuần bằng ví dụ mẫu, KHÔNG có
+  /// câu «Muốn quy đồng…» nào (đo trên corpus, WAL-74). Trích dẫn ĐƯỢC
+  /// (trang có thật) nhưng KHÔNG BAO GIỜ được render thành «sách nói rằng…» —
+  /// loại hỗ trợ là một phần của tính đúng trích dẫn (Founder Delta §2).
+  sourceDemonstrated,
+
   /// Sách chỉ **xếp thứ tự**. Mục lục đặt Bài 5 trước Bài 6 — đó là sự thật,
   /// nhưng sách KHÔNG nói "Bài 6 cần Bài 5".
   ///
@@ -75,6 +82,7 @@ class Provenance {
   /// dẫn là phá vỡ chính niềm tin đó.
   bool get citableAsTextbookFact =>
       (origin == KnowledgeOrigin.sourceStated ||
+          origin == KnowledgeOrigin.sourceDemonstrated ||
           origin == KnowledgeOrigin.sourceSequence) &&
       pageStart != null;
 

@@ -50,6 +50,11 @@ void main() {
     for (final o in KnowledgeOrigin.values) {
       final citable = switch (o) {
         KnowledgeOrigin.sourceStated => true,
+        // ⭐ DẠY-QUA-VÍ-DỤ (B57): trang/ví dụ CÓ THẬT ⇒ trích được sự tồn tại
+        // («SGK có ví dụ ở tr.62»), nhưng tầng phát ngôn phải render là
+        // MINH HOẠ — không bao giờ thành «sách nói rằng» (Delta §2: loại hỗ
+        // trợ là một phần của tính đúng trích dẫn).
+        KnowledgeOrigin.sourceDemonstrated => true,
         // ⭐ Thứ tự trong mục lục LÀ sự thật trong sách — trích dẫn được như
         // thứ tự. Nó chỉ không được dùng để phát biểu PHỤ THUỘC.
         KnowledgeOrigin.sourceSequence => true,
@@ -61,7 +66,7 @@ void main() {
       // Chỉ sách NÓI THẲNG mới được phát biểu quan hệ phụ thuộc.
       expect(p(o).citableAsDependency, o == KnowledgeOrigin.sourceStated);
     }
-    expect(KnowledgeOrigin.values, hasLength(4),
+    expect(KnowledgeOrigin.values, hasLength(5),
         reason: '⭐ thêm một KnowledgeOrigin mà không sửa chốt này ⇒ switch vét '
             'cạn ở trên KHÔNG biên dịch được. Đó là điều mong muốn.');
   });

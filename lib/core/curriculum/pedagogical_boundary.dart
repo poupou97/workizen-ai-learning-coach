@@ -15,6 +15,8 @@
 /// method rồi tự hỏi có được dùng không. Nó chỉ nhận **tập method đã được lọc**.
 library;
 
+import '../knowledge/provenance.dart';
+
 
 /// Vị trí học tập hiện tại — thứ quyết định cái gì được phép dùng.
 ///
@@ -52,6 +54,7 @@ class TeachingMethod {
     required this.requiresConcepts,
     required this.requiresTerminology,
     this.skillCaseId,
+    this.provenance,
   });
 
   final String id;
@@ -71,6 +74,13 @@ class TeachingMethod {
   /// phương pháp quy đồng tới bài cùng-mẫu-số — đúng lỗi F2, chỉ khác đường
   /// vào. Phương pháp thật sự áp mọi ca thì khai TỪNG ca một cách tường minh.
   final String? skillCaseId;
+
+  /// ⭐ NGUỒN của phương pháp (Founder Delta — pedagogical provenance):
+  /// sách dạy nó ở đâu, theo kiểu NÓI THẲNG ([KnowledgeOrigin.sourceStated])
+  /// hay DẠY QUA VÍ DỤ ([KnowledgeOrigin.sourceDemonstrated] — ca B57).
+  /// `null` = chưa truy được nguồn ⇒ FAIL CLOSED ở tầng phát ngôn: SAM
+  /// không được nói «SGK dạy cách này» — chỉ được nhận là cách của SAM.
+  final Provenance? provenance;
 
   /// Khái niệm phải ĐÃ được giới thiệu thì method mới dùng được.
   /// `bcnn-common-denominator` đòi `bcnn` — lớp 5 KNTT chưa có.

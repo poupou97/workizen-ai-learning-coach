@@ -99,7 +99,11 @@ def main():
                'lesson': lesson_of(p), 'pagePdf': p,
                'pagePrinted': p - offset, 'text': text,
                'provenance': {'origin': 'textbookVerbatim', 'source': BOOK,
-                              'extraction': 'deterministic-marker-v1'}}
+                              'extraction': 'deterministic-marker-v1',
+                              # DELTA §2: RULE = nguồn NÓI THẲNG; còn lại =
+                              # nguồn DẠY QUA HOẠT ĐỘNG — không đội lốt nhau
+                              'assertion': 'EXPLICIT' if role.startswith('RULE')
+                                  else 'DEMONSTRATED'}}
 
     section = None
     for p in sorted(pages):

@@ -19,6 +19,8 @@
 /// biệt đó, và không có tham số `slip`/`guess` nào khôi phục lại được.
 library;
 
+import 'mastery.dart';
+
 /// ⭐ Bảy loại sự kiện Founder liệt kê. Cố ý **không** gộp.
 ///
 /// Gộp là chỗ mất thông tin: `postHintSuccess` và `independentAttempt` cùng cho
@@ -77,6 +79,9 @@ class LearningEvent {
     this.exerciseId,
     this.format = ResponseFormat.freeResponse,
     this.timeSpent,
+    this.support,
+    this.policyId,
+    this.priorEventId,
   });
 
   final String eventId;
@@ -106,6 +111,23 @@ class LearningEvent {
   final Duration? timeSpent;
 
   final ResponseFormat format;
+
+  /// ⭐ LINEAGE (Founder Task Order 2026-09-01 §7 — gap ĐO ĐƯỢC): mức hỗ trợ
+  /// ĐANG HIỂN THỊ tại thời điểm sự kiện. Thiếu trường này, «đúng sau MỘT
+  /// gợi ý nhỏ» và «đúng sau khi xem TRỌN lời giải» đều chỉ là
+  /// `postHintSuccess` — chỉ tái dựng được gián tiếp bằng đếm hintRequested
+  /// đứng trước, và cách đó KHÔNG sống qua ghép session. `null` = sự kiện
+  /// từ nguồn không biết mức hỗ trợ (dữ liệu cũ) — fail closed, không đoán 0.
+  final SupportLevel? support;
+
+  /// Phiên bản chính sách tutor đã tạo ra can thiệp quanh sự kiện này —
+  /// để dữ liệu lịch sử không bị diễn giải lại theo chính sách mới
+  /// (cùng bất biến REPLAY MUST NOT SILENTLY REINTERPRET).
+  final String? policyId;
+
+  /// Sự kiện TRẢ LỜI liền trước trong cùng phiên — quan hệ pre/post quanh
+  /// can thiệp («sai → hint → đúng» lần được thành CHUỖI, không phải 3 điểm rời).
+  final String? priorEventId;
 
   /// Sự kiện này có phải một lần **trả lời** không (khác với một lần can thiệp).
   bool get isAttempt => switch (kind) {

@@ -73,7 +73,9 @@ def main():
                'lesson': lesson_of(p), 'pagePdf': p,
                'pagePrinted': printed.get(p), 'text': text,
                'provenance': {'origin': 'textbookVerbatim', 'source': BOOK,
-                              'extraction': 'deterministic-marker-tv-v1'}}
+                              'extraction': 'deterministic-marker-tv-v1',
+                              'assertion': 'EXPLICIT' if role == 'RULE'
+                                  else 'DEMONSTRATED'}}
 
     section = None
     for p in sorted(pages):
