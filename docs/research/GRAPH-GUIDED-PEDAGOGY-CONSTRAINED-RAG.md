@@ -3,6 +3,9 @@
 **Ngày:** 2026-09-01 · **Trạng thái:** RESEARCH · thang bằng chứng: [PRIMARY]=đo trong repo/corpus ·
 [OSS]=mã đã đọc · [ACADEMIC]=văn liệu (kiểm trích dẫn lại khi soạn ADR) · [HYP]=giả thuyết
 **Anti-pattern bị cấm (Founder §16):** PDF → chunk tuỳ tiện → embedding → topK → LLM.
+**⭐ RÀNG BUỘC ADR-006 (Founder, 2026-09-01):** runtime retrieval là **LOCAL trên thiết bị**
+(SAM Knowledge Pack compiled) — cloud không luôn-mở cho retrieval; mọi tầng dưới đây phải
+compile được thành artifacts local (graph + FTS + index đều chạy local được, đã có tiền lệ đo).
 
 ## 0. Vì sao RAG ngây thơ CHẾT với sản phẩm này — từ bằng chứng ĐÃ ĐO
 
