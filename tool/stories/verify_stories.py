@@ -13,7 +13,7 @@ SPEECH_VERBS = re.compile(
     r'(nói|viết|tuyên bố|căn dặn|khẳng định|trả lời|nhận xét|tổng kết|'
     r'kể|hỏi|dạy|khuyên|phát biểu|nhấn mạnh|chỉ rõ)\b')
 BOOKISH = re.compile(r'(kí|ký|truyện|sử|tập|toàn thư|sách|báo|tạp chí)\b', re.I)
-MODAL = re.compile(r'(có thể|sẽ|cần|nên|muốn)\s+\S{0,20}$')
+MODAL = re.compile(r'(có thể|sẽ|cần|nên|muốn)\s*$')
 EVENT_VERB = re.compile(
     r'(thành lập|ra đời|sinh|mất|qua đời|khởi nghĩa|xuất bản|hoàn thành|'
     r'chế tạo|phát minh|tìm ra|phát hiện|đọc bản|tuyên|ký|chiếm|đánh|'
@@ -39,7 +39,10 @@ def verify(i):
             return 'AUTO_VERIFIED', ['anchor năm sinh-mất']
         if len(name.split()) >= 2:
             return 'AUTO_VERIFIED', ['role-intro + tên đầy đủ']
-        return 'REVIEW_REQUIRED', ['tên một từ — dễ nhầm']
+        if i.get('role'):
+            # tên nước ngoài một từ (Aristotle, Cantor…) + role rõ ⇒ đủ neo
+            return 'AUTO_VERIFIED', ['role-intro + tên riêng một từ']
+        return 'REVIEW_REQUIRED', ['tên một từ không role — dễ nhầm']
     if t == 'QUOTE':
         person = i.get('person', '')
         if BOOKISH.search(person):
