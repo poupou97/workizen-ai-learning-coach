@@ -48,9 +48,16 @@ Future<void> main() async {
 
 class HocCungSamApp extends StatefulWidget {
   const HocCungSamApp(
-      {super.key, required this.store, this.ocr, this.storiesDbPath});
+      {super.key,
+      required this.store,
+      this.ocr,
+      this.storiesDbPath,
+      this.indexLoader = LessonIndex.loadForGrade});
 
   final LearnerStore store;
+
+  /// WAL-113 QA — inject được để test nạp index deterministic (mặc định: asset).
+  final Future<LessonIndex?> Function(int grade) indexLoader;
 
   /// `null` (test/desktop) ⇒ nút chụp giữ flow demo cũ — không giả camera.
   final EducationOcrAdapter? ocr;
@@ -83,7 +90,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   Future<void> _loadLessonIndex() async {
     final p = _profile;
     if (p == null) return;
-    final idx = await LessonIndex.loadForGrade(p.grade);
+    final idx = await widget.indexLoader(p.grade);
     if (mounted) setState(() => _lessonIndex = idx);
   }
 
@@ -152,6 +159,10 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
       _profile = p; // hồ sơ mới thành active — người vừa được thêm là người học
       _refreshMission();
     });
+    // WAL-113 QA (Nokia walk): app khởi động CHƯA có hồ sơ ⇒ _loadLessonIndex
+    // lúc _load() return sớm — phải nạp lại SAU khi onboarding tạo hồ sơ,
+    // không thì Môn học trống tới lần restart sau (bug thấy trên máy trắng).
+    _loadLessonIndex();
   }
 
   /// WAL-138 — chip «Ôn luyện»: bài ôn THẬT từ SGK (exercise KHÁC bài đã

@@ -150,6 +150,51 @@ void main() {
     expect(find.textContaining('chưa có đủ đoạn văn'), findsOneWidget);
   });
 
+  // ---- WAL-113 B1: câu hỏi MỞ từ corpus THẬT (SGK không in đáp án) --------
+  const openReading = LearningActivity(
+    activityId: '05-sgk-tieng-viet-5-tap-hai:l26:doc-hieu',
+    prompt:
+        '2. Chuyện gì đã xảy ra với cô bé Xa-đa-cô khi Hi-rô-si-ma bị ném bom?',
+    response: ResponseKind.readRespond,
+    conceptId: 'tv-doc-hieu',
+    passage: 'Ngày 16 tháng 7 năm 1945, nước Mỹ chế tạo được bom nguyên tử. '
+        'Hơn nửa tháng sau, chính phủ Mỹ quyết định ném cả hai quả bom mới '
+        'chế tạo xuống Nhật Bản.',
+    sourceBook: '05-sgk-tieng-viet-5-tap-hai',
+    sourcePage: 127,
+  );
+
+  testWidgets('⭐ WAL-113: câu hỏi MỞ — READ gate vẫn khoá, không bịa options',
+      (tester) async {
+    await _pump(tester, openReading);
+    expect(find.text('Con đọc xong rồi 📖'), findsOneWidget,
+        reason: 'không có options KHÔNG có nghĩa là unsupported — corpus thật');
+    expect(find.text('Con đã trả lời xong 🗣'), findsNothing,
+        reason: 'đột biến mở nút trả-lời trước khi đọc ⇒ đỏ');
+    await tester.tap(find.text('Con đọc xong rồi 📖'));
+    await tester.pumpAndSettle();
+    expect(find.text(openReading.prompt), findsOneWidget);
+    expect(find.text('Con đã trả lời xong 🗣'), findsOneWidget);
+  });
+
+  testWidgets('⭐ WAL-113: trả lời MỞ ⇒ MỘT attempt correct=null — UNKNOWN '
+      'không thành ĐÚNG hay SAI', (tester) async {
+    List<LearningEvent> out = const [];
+    await _pump(tester, openReading, onFinished: (e) => out = e);
+    await tester.tap(find.text('Con đọc xong rồi 📖'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Con đã trả lời xong 🗣'));
+    await tester.pumpAndSettle();
+    expect(out.single.kind, EvidenceKind.independentAttempt);
+    expect(out.single.correct, isNull,
+        reason: '⭐ đột biến ghi correct=true cho câu mở ⇒ test này đỏ');
+    expect(out.single.support, SupportLevel.none);
+    expect(out.any((e) => e.kind == EvidenceKind.finalCorrectness), isFalse,
+        reason: 'không chấm ⇒ không có finalCorrectness');
+    expect(find.textContaining('chưa có đáp án'), findsOneWidget,
+        reason: 'nói thật với trẻ: SAM không biết đúng/sai');
+  });
+
   testWidgets('không %, không điểm trên mọi trạng thái Reader', (tester) async {
     await _pump(tester, _reading);
     void scan() {

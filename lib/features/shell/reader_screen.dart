@@ -8,6 +8,9 @@
 /// - «Đọc xong» KHÔNG phải bằng chứng tri thức: nó chỉ MỞ màn trả lời, KHÔNG
 ///   phát LearningEvent nào (UNOBSERVED không bao giờ thành MASTERED).
 /// - Đáp án truy về đoạn văn; bài chưa biết đáp án ⇒ KHÔNG chấm (UNKNOWN ≠ SAI).
+/// - WAL-113 B1: câu hỏi MỞ (SGK TV5 KHÔNG in đáp án — corpus thật): trẻ trả
+///   lời bằng lời rồi tự xác nhận; Reader ghi ATTEMPT correct=null — không bịa
+///   options, không chấm, không biến UNKNOWN thành ĐÚNG.
 /// - Không %, không điểm; provenance hiển thị đúng LOẠI hỗ trợ nguồn.
 library;
 
@@ -55,7 +58,10 @@ class _ReaderScreenState extends State<ReaderScreen> {
   DateTime _at() => (widget.now ?? DateTime.now)();
 
   bool get _hasPassage => (a.passage ?? '').trim().isNotEmpty;
-  bool get _hasQuestion => a.options.isNotEmpty;
+
+  /// Câu hỏi CHỌN (có options) hoặc câu hỏi MỞ (chỉ có prompt — corpus TV5).
+  bool get _hasQuestion => a.options.isNotEmpty || a.prompt.trim().isNotEmpty;
+  bool get _openQuestion => a.options.isEmpty;
 
   void _emit(EvidenceKind kind, bool? correct) {
     _events.add(LearningEvent(
@@ -76,6 +82,15 @@ class _ReaderScreenState extends State<ReaderScreen> {
     if (_read) return;
     // Đọc-xong CHỈ mở màn trả lời — KHÔNG phát bằng chứng (đọc ≠ mastery).
     setState(() => _read = true);
+  }
+
+  /// Câu hỏi MỞ: trẻ trả lời BẰNG LỜI rồi tự xác nhận ⇒ ghi ATTEMPT với
+  /// correct=null — UNKNOWN không bao giờ thành ĐÚNG hay SAI (doctrine).
+  void _answeredOpen() {
+    if (_done) return;
+    _emit(EvidenceKind.independentAttempt, null);
+    setState(() => _done = true);
+    widget.onFinished?.call(_events);
   }
 
   void _pick(int i) {
@@ -221,7 +236,29 @@ class _ReaderScreenState extends State<ReaderScreen> {
               color: WalColors.surfaceLavender),
         ],
         const SizedBox(height: WalSpacing.md),
-        for (var i = 0; i < a.options.length; i++) ...[
+        if (_openQuestion) ...[
+          _card(const Text(
+              'Câu hỏi này con trả lời bằng lời của mình — con nói to câu '
+              'trả lời, hoặc kể cho bố mẹ/thầy cô nghe, rồi bấm nút dưới nhé.',
+              style: TextStyle(
+                  fontSize: WalType.body, color: WalColors.ink, height: 1.45))),
+          const SizedBox(height: WalSpacing.md),
+          SizedBox(
+            width: double.infinity,
+            height: WalSpacing.minTouch + 8,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                  backgroundColor: WalColors.primary500,
+                  shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(WalSpacing.radiusButton))),
+              onPressed: _answeredOpen,
+              child: const Text('Con đã trả lời xong 🗣',
+                  style: TextStyle(fontSize: WalType.body)),
+            ),
+          ),
+        ] else
+          for (var i = 0; i < a.options.length; i++) ...[
           SizedBox(
             width: double.infinity,
             height: WalSpacing.minTouch + 8,
