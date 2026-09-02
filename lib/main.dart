@@ -284,7 +284,11 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         onOpenSettings: () => Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (_) =>
-                                    SettingsScreen(stories: _stories))),
+                                    SettingsScreen(
+                                  stories: _stories,
+                                  profile: _profile,
+                                  store: widget.store,
+                                  index: _lessonIndex))),
                         todayStory: _stories
                             .todayEvents(DateTime.now())
                             .firstOrNull,
