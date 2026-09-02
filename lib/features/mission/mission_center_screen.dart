@@ -12,6 +12,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import '../../core/store/learner_profile.dart';
 import '../camera/camera_demo_flow.dart';
 import '../parent/parent_tonight_screen.dart';
 import 'mission_data.dart';
@@ -22,9 +23,20 @@ class MissionCenterScreen extends StatelessWidget {
     required this.data,
     this.learnerName,
     this.onStartHomework,
+    this.profiles = const [],
+    this.activeLearnerId,
+    this.onSelectProfile,
+    this.onAddProfile,
   });
 
   final MissionData data;
+
+  /// WAL-109 — multi-profile: danh sách hồ sơ trên máy + hồ sơ ĐANG HỌC.
+  /// Switch không logout; mọi flow phía dưới bind vào activeLearnerId.
+  final List<LearnerProfile> profiles;
+  final String? activeLearnerId;
+  final void Function(String learnerId)? onSelectProfile;
+  final VoidCallback? onAddProfile;
 
   /// WAL-108 — mở flow camera THẬT (learnerId + store xuyên suốt). `null` =
   /// môi trường chưa nối slice (test/demo cũ) ⇒ giữ flow demo.
@@ -62,15 +74,86 @@ class MissionCenterScreen extends StatelessWidget {
     );
   }
 
-  Widget _greeting() => Row(children: [
-        _samChip('assets/mascot/sam-hello.png', size: 44),
-        const SizedBox(width: WalSpacing.sm),
-        Text('Chào ${learnerName ?? data.studentName}!',
-            style: const TextStyle(
-                fontSize: WalType.title,
-                fontWeight: FontWeight.w700,
-                color: WalColors.ink)),
-      ]);
+  Widget _greeting() => Builder(
+      builder: (context) => Row(children: [
+            _samChip('assets/mascot/sam-hello.png', size: 44),
+            const SizedBox(width: WalSpacing.sm),
+            Expanded(
+              child: Text('Chào ${learnerName ?? data.studentName}!',
+                  style: const TextStyle(
+                      fontSize: WalType.title,
+                      fontWeight: FontWeight.w700,
+                      color: WalColors.ink)),
+            ),
+            // WAL-109 — switcher là CÔNG DÂN HẠNG NHẤT (§26): máy của chung,
+            // đổi người học phải dễ như đổi hồ sơ Netflix — và không logout.
+            if (onSelectProfile != null)
+              IconButton(
+                tooltip: 'Đổi người học',
+                onPressed: () => _showSwitcher(context),
+                icon: const Icon(Icons.switch_account_outlined,
+                    color: WalColors.primaryText),
+              ),
+          ]));
+
+  void _showSwitcher(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: WalColors.surface,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Padding(
+            padding: EdgeInsets.all(WalSpacing.sm),
+            child: Text('Ai đang học?',
+                style: TextStyle(
+                    fontSize: WalType.title,
+                    fontWeight: FontWeight.w700,
+                    color: WalColors.ink)),
+          ),
+          for (final p in profiles)
+            ListTile(
+              leading: CircleAvatar(
+                  backgroundColor: p.learnerId == activeLearnerId
+                      ? WalColors.primary500
+                      : WalColors.surfaceLavender,
+                  child: Text(p.displayName.characters.first,
+                      style: TextStyle(
+                          color: p.learnerId == activeLearnerId
+                              ? Colors.white
+                              : WalColors.ink))),
+              title: Text('${p.displayName} · Lớp ${p.grade}',
+                  style: const TextStyle(
+                      fontSize: WalType.body, color: WalColors.ink)),
+              trailing: p.learnerId == activeLearnerId
+                  ? const Icon(Icons.check, color: WalColors.primaryText)
+                  : null,
+              onTap: () {
+                Navigator.of(ctx).pop();
+                if (p.learnerId != activeLearnerId) {
+                  onSelectProfile?.call(p.learnerId);
+                }
+              },
+            ),
+          if (onAddProfile != null)
+            ListTile(
+              leading: const CircleAvatar(
+                  backgroundColor: WalColors.surfaceLavender,
+                  child:
+                      Icon(Icons.add, color: WalColors.primaryText)),
+              title: const Text('Thêm người học',
+                  style: TextStyle(
+                      fontSize: WalType.body, color: WalColors.ink)),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                onAddProfile?.call();
+              },
+            ),
+          const SizedBox(height: WalSpacing.sm),
+        ]),
+      ),
+    );
+  }
 
   Widget _nextActionCard() => Container(
         padding: const EdgeInsets.all(WalSpacing.lg),

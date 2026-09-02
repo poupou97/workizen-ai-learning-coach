@@ -45,6 +45,9 @@ class HocCungSamApp extends StatefulWidget {
 }
 
 class _HocCungSamAppState extends State<HocCungSamApp> {
+  // WAL-109 — DEVICE ≠ USER: máy giữ NHIỀU hồ sơ; mọi flow bind vào
+  // _profile (active learner). Switch không logout, không mất state ai cả.
+  List<LearnerProfile> _profiles = const [];
   LearnerProfile? _profile;
   bool _loading = true;
   Future<MissionData>? _mission;
@@ -59,9 +62,19 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     final ps = await widget.store.profiles();
     if (!mounted) return;
     setState(() {
+      _profiles = ps;
       _profile = ps.isEmpty ? null : ps.first;
       _loading = false;
       _refreshMission();
+    });
+  }
+
+  void _selectProfile(String learnerId) {
+    final p = _profiles.where((x) => x.learnerId == learnerId).firstOrNull;
+    if (p == null) return;
+    setState(() {
+      _profile = p;
+      _refreshMission(); // mission tính lại TỪ KHO của đúng learner này
     });
   }
 
@@ -76,9 +89,23 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     await widget.store.saveProfile(p);
     if (!mounted) return;
     setState(() {
-      _profile = p;
+      _profiles = [..._profiles, p];
+      _profile = p; // hồ sơ mới thành active — người vừa được thêm là người học
       _refreshMission();
     });
+  }
+
+  /// WAL-109 — thêm người học: dùng LẠI onboarding, không nhánh UI mới.
+  void _addProfile(BuildContext context) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => Scaffold(
+              body: SafeArea(
+                child: OnboardingScreen(onDone: (p) async {
+                  await _onboarded(p);
+                  if (context.mounted) Navigator.of(context).pop();
+                }),
+              ),
+            )));
   }
 
   @override
@@ -100,6 +127,10 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                       return MissionCenterScreen(
                         data: data,
                         learnerName: _profile!.displayName,
+                        profiles: _profiles,
+                        activeLearnerId: _profile!.learnerId,
+                        onSelectProfile: _selectProfile,
+                        onAddProfile: () => _addProfile(context),
                         onStartHomework: ocr == null
                             ? null
                             : () async {
