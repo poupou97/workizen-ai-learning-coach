@@ -58,4 +58,27 @@ void main() {
       expect(await a.recognizeExpression('x.jpg'), isNull);
     });
   });
+
+  group('⭐ WAL-33 mitigation ① — plausibility theo khối lớp', () {
+    test('mẫu số 1 (nhiễu gạch ngang) ⇒ loại ⇒ null (fail closed)', () {
+      expect(extractFractionExpression(['3/1 + 2/5']), isNull,
+          reason: '⭐ đột biến bỏ plausibility ⇒ test này đỏ');
+    });
+    test('tử >> mẫu (dính chữ số) ⇒ loại', () {
+      expect(extractFractionExpression(['97/2 + 1/3']), isNull);
+    });
+    test('mẫu > 99 (ngoài phạm vi tiểu học) ⇒ loại', () {
+      expect(extractFractionExpression(['1/2 + 3/125']), isNull);
+    });
+    test('biểu thức hợp lệ VẪN qua — filter không phạt oan', () {
+      expect(extractFractionExpression(['3/4 + 2/5']), '3/4 + 2/5');
+      expect(extractFractionExpression(['19/20 - 1/2']), '19/20 - 1/2',
+          reason: 'tử ≤ 3×mẫu — hợp lệ');
+    });
+    test('nhiễu bị loại + 1 biểu thức thật ⇒ NHẬN biểu thức thật', () {
+      expect(extractFractionExpression(['3/1 + 2/5', '3/4 + 2/5']),
+          '3/4 + 2/5',
+          reason: 'filter cứu ca hai-match-một-nhiễu (trước đây null oan)');
+    });
+  });
 }

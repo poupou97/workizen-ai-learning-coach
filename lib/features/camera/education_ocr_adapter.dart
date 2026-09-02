@@ -27,13 +27,31 @@ abstract class EducationOcrAdapter {
 /// - ≥2 biểu thức KHÁC NHAU trong cùng ảnh ⇒ null — trẻ chụp MỘT bài; hai
 ///   biểu thức nghĩa là khung hình lấy cả bài bên cạnh, tự chọn là đoán hộ;
 /// - đúng một biểu thức (kể cả lặp lại nhiều dòng) ⇒ chuẩn hoá «a/b + c/d».
+/// WAL-33 mitigation ① — PLAUSIBILITY số học theo khối tiểu học.
+///
+/// PHONE-SIM POC đo được: tăng recall mà không lọc plausibility là tăng
+/// tỷ lệ «biểu thức bịa» từ OCR nhiễu. Luật KHAI RÕ (không ngưỡng ngầm):
+/// - mẫu số 0 hoặc 1 ⇒ loại (phân số mẫu-1 không xuất hiện trong bài
+///   cộng-trừ phân số tiểu học; «/1» thường là nhiễu gạch ngang);
+/// - mẫu số > 99 ⇒ loại (ngoài phạm vi số tiểu học);
+/// - tử > 3×mẫu ⇒ loại (hỗn-số-hoá bất thường — thường là dính chữ số).
+/// Bị loại ⇒ KHÔNG vào tập ứng viên; nếu vì thế còn 0 ⇒ null (fail closed
+/// giữ nguyên — thà hỏi lại còn hơn nhận đề sai).
+bool plausibleGradeFraction(int a, int b, int c, int d) {
+  bool okPair(int t, int m) => m > 1 && m <= 99 && t <= 3 * m;
+  return okPair(a, b) && okPair(c, d);
+}
+
 String? extractFractionExpression(List<String> lines) {
   final re = RegExp(r'(\d{1,3})\s*/\s*(\d{1,3})\s*([+\-−])\s*(\d{1,3})\s*/\s*(\d{1,3})');
   final found = <String>{};
   for (final line in lines) {
     for (final m in re.allMatches(line)) {
+      final a = int.parse(m.group(1)!), b = int.parse(m.group(2)!);
+      final c = int.parse(m.group(4)!), d = int.parse(m.group(5)!);
+      if (!plausibleGradeFraction(a, b, c, d)) continue; // ① loại nhiễu
       final op = m.group(3) == '−' ? '-' : m.group(3)!;
-      found.add('${m.group(1)}/${m.group(2)} $op ${m.group(4)}/${m.group(5)}');
+      found.add('$a/$b $op $c/$d');
     }
   }
   if (found.length != 1) return null; // 0 hoặc nhiều ⇒ chưa chắc
