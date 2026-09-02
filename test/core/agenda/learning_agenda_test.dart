@@ -183,6 +183,14 @@ void main() {
     expect(a.kind, AgendaActionKind.rest);
   });
 
+  test('tín hiệu CÓ nhưng yếu (developing + cooldown = 0.25) → REST, không ép học', () {
+    final a = resolveAgenda(
+      [input('c-nhe', studiedToday: true)], // developing 0.5 → cooldown 0.25 < restBelow 0.4
+      today: _now,
+    );
+    expect(a.kind, AgendaActionKind.rest);
+  });
+
   test('mọi action không-REST truy được về tín hiệu + lý do đọc được', () {
     final a = resolveAgenda(
         [input('c', review: ReviewUrgency.reviewDue)],
