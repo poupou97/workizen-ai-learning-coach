@@ -12,6 +12,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import '../../core/agenda/learning_agenda.dart';
 import '../../core/store/learner_profile.dart';
 import '../camera/camera_demo_flow.dart';
 import '../parent/parent_tonight_screen.dart';
@@ -29,6 +30,7 @@ class MissionCenterScreen extends StatelessWidget {
     this.onAddProfile,
     this.onParentArea,
     this.onOpenSubjects,
+    this.onReview,
   });
 
   final MissionData data;
@@ -45,6 +47,9 @@ class MissionCenterScreen extends StatelessWidget {
 
   /// WAL-136 — mở MÔN HỌC (lesson picker từ corpus). `null` = nút mờ như cũ.
   final VoidCallback? onOpenSubjects;
+
+  /// WAL-138 — chip «Ôn luyện»: mở bài ôn THẬT (hoặc nói thật khi chưa tới hạn).
+  final VoidCallback? onReview;
 
   /// WAL-108 — mở flow camera THẬT (learnerId + store xuyên suốt). `null` =
   /// môi trường chưa nối slice (test/demo cũ) ⇒ giữ flow demo.
@@ -63,7 +68,15 @@ class MissionCenterScreen extends StatelessWidget {
           children: [
             _greeting(),
             const SizedBox(height: WalSpacing.md),
+            _askSamBar(),
+            const SizedBox(height: WalSpacing.sm),
+            _intentChips(),
+            const SizedBox(height: WalSpacing.md),
             _nextActionCard(),
+            if (data.upcomingSubjects.isNotEmpty) ...[
+              const SizedBox(height: WalSpacing.sm),
+              _upcomingRow(),
+            ],
             const SizedBox(height: WalSpacing.lg),
             if (data.reviews.isNotEmpty) ...[
               _sectionLabel('Ôn lại'),
@@ -87,11 +100,16 @@ class MissionCenterScreen extends StatelessWidget {
             _samChip('assets/mascot/sam-hello.png', size: 44),
             const SizedBox(width: WalSpacing.sm),
             Expanded(
-              child: Text('Chào ${learnerName ?? data.studentName}!',
-                  style: const TextStyle(
-                      fontSize: WalType.title,
-                      fontWeight: FontWeight.w700,
-                      color: WalColors.ink)),
+              child: InkWell(
+                onTap: onSelectProfile == null
+                    ? null
+                    : () => _showSwitcher(context),
+                child: Text('Chào ${learnerName ?? data.studentName}!',
+                    style: const TextStyle(
+                        fontSize: WalType.title,
+                        fontWeight: FontWeight.w700,
+                        color: WalColors.ink)),
+              ),
             ),
             // WAL-109 — switcher là CÔNG DÂN HẠNG NHẤT (§26): máy của chung,
             // đổi người học phải dễ như đổi hồ sơ Netflix — và không logout.
@@ -170,32 +188,141 @@ class MissionCenterScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(data.nextActionTitle,
+          if (data.agenda != null) ...[
+            const Text('VIỆC SAM ĐỀ XUẤT',
+                style: TextStyle(
+                    fontSize: WalType.secondary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.1,
+                    color: WalColors.inkSoft)),
+            const SizedBox(height: 4),
+          ],
+          Text(
+              data.agenda == null
+                  ? data.nextActionTitle
+                  : _agendaTitle(data.agenda!.kind),
               style: const TextStyle(
                   fontSize: WalType.title,
                   fontWeight: FontWeight.w700,
                   color: WalColors.primaryText)),
           const SizedBox(height: WalSpacing.sm),
           // ⭐ reason của engine — hiển thị NGUYÊN VĂN, UI không suy diễn thêm.
-          Text(data.decision.reason,
+          Text(data.agenda?.reason ?? data.decision.reason,
               style: const TextStyle(
                   fontSize: WalType.body, color: WalColors.ink, height: 1.45)),
-          const SizedBox(height: WalSpacing.md),
-          SizedBox(
-            height: WalSpacing.minTouch,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                  backgroundColor: WalColors.primary500,
-                  shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(WalSpacing.radiusButton))),
-              onPressed: onStartHomework ?? () {},
-              child: const Text('Bắt đầu',
-                  style: TextStyle(
-                      fontSize: WalType.body, fontWeight: FontWeight.w700)),
+          if (data.agenda?.kind != AgendaActionKind.rest) ...[
+            const SizedBox(height: WalSpacing.md),
+            SizedBox(
+              height: WalSpacing.minTouch,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                    backgroundColor: WalColors.primary500,
+                    shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(WalSpacing.radiusButton))),
+                onPressed: _startForAgenda() ?? onStartHomework ?? () {},
+                child: const Text('Bắt đầu',
+                    style: TextStyle(
+                        fontSize: WalType.body, fontWeight: FontWeight.w700)),
+              ),
             ),
+          ],
+        ]),
+      );
+
+  /// REST không có nút (nghỉ là nghỉ); review → onReview; còn lại → Môn học.
+  VoidCallback? _startForAgenda() => switch (data.agenda?.kind) {
+        null => null,
+        AgendaActionKind.rest => null,
+        AgendaActionKind.review ||
+        AgendaActionKind.retrieve =>
+          onReview ?? onOpenSubjects,
+        _ => onOpenSubjects ?? onStartHomework,
+      };
+
+  static String _agendaTitle(AgendaActionKind k) => switch (k) {
+        AgendaActionKind.learn => 'Học bài mới cùng SAM',
+        AgendaActionKind.practice => 'Luyện thêm cho chắc tay',
+        AgendaActionKind.review => 'Tới lúc ôn lại rồi',
+        AgendaActionKind.retrieve => 'Tự làm lại — không cần SAM',
+        AgendaActionKind.explain => 'Giảng lại cho SAM nghe',
+        AgendaActionKind.transfer => 'Thử bài dạng khác',
+        AgendaActionKind.assess => 'Kiểm tra nhỏ xem sao',
+        AgendaActionKind.rest => 'Hôm nay nghỉ ngơi nhé',
+      };
+
+  /// Ô hỏi SAM (home1) — TRẠNG THÁI TRUNG THỰC: voice/chat chưa mở (WAL-123),
+  /// không render một chat giả.
+  Widget _askSamBar() => Container(
+        padding: const EdgeInsets.symmetric(
+            horizontal: WalSpacing.md, vertical: WalSpacing.sm),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
+        ),
+        child: Row(children: [
+          const Icon(Icons.mic_none, color: WalColors.inkSoft, size: 20),
+          const SizedBox(width: WalSpacing.sm),
+          Expanded(
+            child: Text('SAM đang học cách trò chuyện — con bấm thẻ bên dưới nhé',
+                style: const TextStyle(
+                    fontSize: WalType.secondary, color: WalColors.inkSoft)),
           ),
         ]),
+      );
+
+  /// 5 Learning Intent chips (home1) — chip dẫn FLOW THẬT hoặc nói thật.
+  Widget _intentChips() => Builder(
+        builder: (context) => Wrap(
+          spacing: WalSpacing.sm,
+          runSpacing: WalSpacing.sm,
+          children: [
+            _chip('📘 Học trước', onOpenSubjects),
+            _chip('🔁 Ôn luyện', onReview),
+            _chip('📷 Làm bài tập', onStartHomework),
+            _chip('🧭 Học phương pháp',
+                () => _honestSheet(context,
+                    'Mỗi bài học có mục «Vì sao cách này?» kèm nguồn SGK — '
+                    'con vào một bài trong Môn học để xem nhé. SAM đang xây '
+                    'thư viện phương pháp riêng.')),
+            _chip('✅ Kiểm tra hiểu bài',
+                () => _honestSheet(context,
+                    'Phần kiểm tra đang được SAM chuẩn bị — khi mở, bài kiểm '
+                    'tra sẽ không có gợi ý và con làm hoàn toàn tự sức mình.')),
+          ],
+        ),
+      );
+
+  Widget _chip(String label, VoidCallback? onTap) => ActionChip(
+        onPressed: onTap,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+            side: BorderSide.none),
+        label: Text(label,
+            style: const TextStyle(
+                fontSize: WalType.secondary, color: WalColors.ink)),
+      );
+
+  void _honestSheet(BuildContext context, String message) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: WalColors.surface,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(
+            WalSpacing.lg, 0, WalSpacing.lg, WalSpacing.xl),
+        child: Text(message,
+            style: const TextStyle(
+                fontSize: WalType.body, color: WalColors.ink, height: 1.5)),
+      ),
+    );
+  }
+
+  Widget _upcomingRow() => Text(
+        'Sắp tới ở trường: ${data.upcomingSubjects.join(' · ')}',
+        style: const TextStyle(
+            fontSize: WalType.secondary, color: WalColors.inkSoft),
       );
 
   Widget _sectionLabel(String t) => Padding(

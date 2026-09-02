@@ -6,9 +6,11 @@
 library;
 
 import '../../core/adaptive/adaptive_engine.dart';
+import '../../core/agenda/learning_agenda.dart';
 import '../../core/knowledge/slice_curriculum.dart';
 import '../../core/store/learner_profile.dart';
 import '../../core/store/learner_store.dart';
+import '../../core/store/timetable.dart';
 import '../learning_session/slice_flow.dart' show masteryFromStore;
 import '../../core/curriculum/pedagogical_boundary.dart';
 import '../../core/curriculum/skill_case.dart';
@@ -33,10 +35,19 @@ class MissionData {
     required this.nextActionTitle,
     required this.reviews,
     required this.unobservedCaseNames,
+    this.agenda,
+    this.upcomingSubjects = const [],
   });
 
   final String studentName;
   final AdaptiveDecision decision;
+
+  /// WAL-138 — «Việc SAM đề xuất» qua resolveAgenda (WAL-102): REST là
+  /// first-class. `null` = đường demo/fixture cũ ⇒ UI rơi về decision card.
+  final NextBestLearningAction? agenda;
+
+  /// Môn có tiết HÔM NAY theo TKB (rỗng = không hiện khu «Sắp tới» — F13).
+  final List<String> upcomingSubjects;
 
   /// Tiêu đề thẻ hành động — dịch từ diagnosis, KHÔNG phải id nội bộ.
   final String nextActionTitle;
@@ -200,6 +211,33 @@ Future<MissionData> buildMissionFromStore({
   final mastery = await masteryFromStore(store, profile.learnerId, c);
   final names = {for (final sc in c.cases) sc.id: sc.condition};
 
+  // ── AGENDA (WAL-102): tín hiệu từ SỰ THẬT trong kho + TKB + nhịp hôm nay ──
+  final tt = await store.timetable(profile.learnerId);
+  final todaySessions =
+      await store.sessions(learnerId: profile.learnerId, onDay: t);
+  final summaryForAgenda = ConceptSummary.of(mastery,
+      knownCaseIds: {for (final sc in c.cases) sc.id}, now: t);
+  var worst = ReviewUrgency.nothingToReview;
+  for (final m in mastery.cases.values) {
+    if (!m.hasEvidence) continue;
+    final r = reviewStateOf(m, t);
+    if (r.urgency.index > worst.index) worst = r.urgency;
+  }
+  final agenda = resolveAgenda(
+    [
+      AgendaConceptInput(
+        conceptId: c.conceptId,
+        subjectId: c.subjectId,
+        summary: summaryForAgenda,
+        worstReview: worst,
+        studiedToday: todaySessions.isNotEmpty,
+      ),
+    ],
+    today: t,
+    sessionsToday: todaySessions.length,
+    timetable: tt,
+  );
+
   final decision = decide(
     conceptId: c.conceptId,
     exerciseCase: 'denominator-non-divisible', // mục tiêu của Bài 6
@@ -226,6 +264,8 @@ Future<MissionData> buildMissionFromStore({
   return MissionData(
     studentName: profile.displayName,
     decision: decision,
+    agenda: agenda,
+    upcomingSubjects: subjectsOn(tt, t),
     nextActionTitle: switch (decision.diagnosis) {
       DiagnosticOutcome.caseTransitionGap => 'Hôm nay mình thử dạng mới nhé',
       DiagnosticOutcome.executionError => 'Luyện thêm cho chắc tay',

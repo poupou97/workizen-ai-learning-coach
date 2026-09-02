@@ -67,6 +67,9 @@ void main() {
         reason: 'NO CROSS-LEARNER EVIDENCE CONTAMINATION: B chưa học gì');
 
     // SWITCH lại → A: state A y nguyên (mission lại tính từ kho của A).
+    // (home1 dài hơn — cuộn về đầu để header switcher build lại đã)
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 800));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.switch_account_outlined));
     await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Minh · Lớp 5'));

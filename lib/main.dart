@@ -19,9 +19,11 @@ import 'core/store/learner_profile.dart';
 import 'core/store/learner_store.dart';
 import 'features/camera/education_ocr_adapter.dart';
 import 'features/camera/mlkit_ocr_adapter.dart';
-import 'features/learning_session/slice_flow.dart';
 import 'features/mission/mission_center_screen.dart';
 import 'features/parent/parent_area.dart';
+import 'core/curriculum/canonical_problem.dart';
+import 'core/knowledge/provenance.dart';
+import 'features/learning_session/slice_flow.dart';
 import 'features/subjects/lesson_index.dart';
 import 'features/subjects/subjects_screen.dart';
 import 'features/mission/mission_data.dart';
@@ -113,6 +115,59 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     });
   }
 
+  /// WAL-138 — chip «Ôn luyện»: bài ôn THẬT từ SGK (exercise KHÁC bài đã
+  /// làm) khi có dạng đã học; chưa có gì để ôn ⇒ nói thật.
+  Future<void> _openReview(BuildContext context) async {
+    final p = _profile;
+    final idx = _lessonIndex;
+    final exs = idx?.exercisesForToan(6) ?? const [];
+    if (p == null || exs.length < 2) {
+      _honest(context,
+          'Chưa có bài nào tới hạn ôn — con học một bài mới trước nhé!');
+      return;
+    }
+    final log = await widget.store.evidenceFor(
+        learnerId: p.learnerId, skillCaseId: 'denominator-non-divisible');
+    if (log.events.isEmpty) {
+      if (context.mounted) {
+        _honest(context,
+            'Con chưa học dạng này nên chưa có gì để ôn — vào Môn học nhé!');
+      }
+      return;
+    }
+    final e = exs[1]; // bài KHÁC bài đầu — ôn không phải làm lại y hệt
+    if (!context.mounted) return;
+    await openCanonicalProblem(context,
+        problem: CanonicalProblem.fromCurriculum(
+          exerciseLabel: 'b6-on',
+          expression: e.expr,
+          provenance: Provenance(
+            origin: KnowledgeOrigin.sourceStated,
+            sourceId: e.book,
+            extractionMethod: 'qmap-v1',
+            confidence: 0.9,
+            grade: p.grade,
+            subject: 'Toán',
+            pageStart: e.page,
+          ),
+        ),
+        profile: p,
+        store: widget.store);
+    if (mounted) setState(_refreshMission);
+  }
+
+  void _honest(BuildContext context, String msg) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+        child: Text(msg,
+            style: const TextStyle(fontSize: 17, height: 1.5)),
+      ),
+    );
+  }
+
   /// WAL-109 — thêm người học: dùng LẠI onboarding, không nhánh UI mới.
   void _addProfile(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute(
@@ -151,6 +206,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         onAddProfile: () => _addProfile(context),
                         onParentArea: () => openParentArea(context,
                             store: widget.store, profiles: _profiles),
+                        onReview: () => _openReview(context),
                         onOpenSubjects: () async {
                           await Navigator.of(context).push(MaterialPageRoute(
                               builder: (_) => SubjectsScreen(
