@@ -42,9 +42,21 @@ for b in BOOKS:
         entry = {'exerciseUnitId': u['id'], 'book': b, 'lesson': u['lesson'],
                  'pagePrinted': u['pagePrinted'], 'version': VERSION}
         concepts = sorted(lesson_concepts.get((b, u['lesson']), []))
+        # expr dựng từ HÌNH HỌC không nằm nguyên văn trong text OCR (phân số
+        # chồng dọc) — khớp bằng chuỗi CHỮ SỐ của expr xuất hiện ĐÚNG THỨ TỰ
+        # trong text của unit cùng (book, lesson, trang in).
+        import re as _re
         matched = None
         for (bb, ll, expr), r in case_by_key.items():
-            if bb == b and ll == u['lesson'] and expr in u['text']:
+            if bb != b or ll != u['lesson'] or r['printed'] != u['pagePrinted']:
+                continue
+            digits = _re.findall(r'\d+', expr)
+            pos = 0; ok = True
+            for d in digits:
+                i = u['text'].find(d, pos)
+                if i < 0: ok = False; break
+                pos = i + len(d)
+            if ok:
                 matched = r
                 break
         if matched:
