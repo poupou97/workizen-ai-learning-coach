@@ -9,7 +9,7 @@ Chạy lại được nhiều lần khi OCR phủ thêm (idempotent — ghi đè
 """
 import json, os, re
 
-LESSON = re.compile(r'^Bài\s+(\d+)\b')
+LESSON = re.compile(r'^B[ÀA][IÌ]\s+(\d+)\b|^Bài\s+(\d+)\b')
 
 def is_title_line(t):
     letters = [c for c in t if c.isalpha()]
@@ -43,7 +43,7 @@ for d in docs:
                 continue
             for i, ln in enumerate(lines[:10]):
                 m = LESSON.match(ln['text'].strip())
-                if m and int(m.group(1)) == l['number']:
+                if m and int(m.group(1) or m.group(2)) == l['number']:
                     parts = []
                     for nxt in lines[i + 1:i + 4]:
                         t = nxt['text'].strip()

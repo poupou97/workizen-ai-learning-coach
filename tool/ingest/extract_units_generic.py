@@ -38,7 +38,7 @@ FAMILY_MARKERS = {
     'Địa lí': {'bang so lieu': 'TABLE'},
 }
 EX_STEM = re.compile(r'^(\d{1,2})\s*[.．]\s+\S')
-LESSON_HDR = re.compile(r'^Bài\s+(\d+)\b')
+LESSON_HDR = re.compile(r'^B[ÀA][IÌ]\s+(\d+)\b|^Bài\s+(\d+)\b')
 
 def extract(doc_id):
     ocr = f'poc-out/graph/ocr-body/{doc_id}'
@@ -66,7 +66,7 @@ def extract(doc_id):
         for l in lines[:6]:
             m = LESSON_HDR.match(l['text'].strip())
             if m and l['y'] < 0.2:
-                hdr_at.setdefault(int(m.group(1)), p)
+                hdr_at.setdefault(int(m.group(1) or m.group(2)), p)
     toc = {l['number']: l['pageStart'] for l in d.get('lessons', [])
            if l.get('pageStart')}
     offs = [hdr_at[n] - toc[n] for n in hdr_at if n in toc]
