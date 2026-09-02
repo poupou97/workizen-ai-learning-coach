@@ -18,3 +18,30 @@ INSIGHT không thấy transcript mặc định (§26.15); Parent Detail tabs: T�
 Teacher-comment block (33): DEFER — cần TeacherAssignment/authz (WAL-100 staged).
 F12 (càng nhiều số càng tốt): NO — mỗi số phải trả lời được «giúp gì tối nay». 
 F13 sibling comparison: REMOVE.
+
+## WAL-119 (2026-09-02) — VALUE MATRIX Premium (INSIGHT/COACHING/CONVENIENCE)
+
+Resolver: lib/core/platform/entitlement.dart (entitlement-v1) — ROLE×PIN×TIER,
+một chỗ quyết, không rải `if premium`. BASIC = quyền (consent/privacy/safety/
+export-delete/basic-status) FREE vô điều kiện.
+
+| Candidate | Loại | Data requirement (đã có?) |
+|---|---|---|
+| Daily Brief | INSIGHT | LearningSession/ngày (✓ JSONL) + tóm tắt tất định |
+| Weekly Insight | INSIGHT | sessions 7 ngày (✓) + trend |
+| Independent-vs-assisted | INSIGHT | support/interventionId (✓ WAL-114 lineage) |
+| Weakest SkillCase | INSIGHT | ConceptSummary.unobserved/weak (✓) |
+| Assessment insight | INSIGHT | SessionMode.assess (✓) — cần WAL-122 mode chạy |
+| Multi-week trend | INSIGHT | sessions nhiều tuần (✓ cấu trúc, cần thời gian thật) |
+| «Tối nay giúp con gì» | COACHING | parentTonightFor (✓ WAL-53) |
+| Parent Coach | COACHING | claim-gated summary (✓ WAL-35) + 10 flows ĐỪNG-làm |
+| Review plan | COACHING | ReviewSchedule (✓) |
+| Proactive recommendation | COACHING | resolveAgenda (✓) |
+| Multi-child overview | CONVENIENCE | multi-profile (✓ WAL-109) |
+| Cloud backup/sync | CONVENIENCE | CHƯA có — cần backend (gate spend) |
+| Ad-free family | CONVENIENCE | phụ thuộc quyết định ads (WAL-125 gate) |
+
+NEVER-MONETIZE (enforce bằng code — hỏi là ném lỗi): hint · answer ·
+assessment · mastery · evidence · child-data · streak · dependence-mechanics.
+PAYMENT ≠ LEARNING TRUTH: test quét cấm 'subscription/premium/tier' trong
+lib/core/{student,adaptive,curriculum,tutor,pedagogy}.

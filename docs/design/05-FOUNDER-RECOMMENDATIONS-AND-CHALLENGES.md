@@ -85,3 +85,11 @@ hiện KHÔNG đạt cho hint inline ⇒ thêm một lý do KEEP SHADOW (WAL-30)
 không bền cho free tier — củng cố deterministic-first (ADR hiện hành).
 OCR/STT/TTS: on-device (Hub, $0). Số liệu này bổ sung §29 AI COST của
 Checkpoint (comment trên WAL-112).
+
+## WAL-119 (2026-09-02) — ENTITLEMENT ARCHITECTURE (chưa payment)
+
+ROLE × AGE-POLICY × SUBSCRIPTION × CAPABILITY × SAFETY → ENTITLEMENT, một
+resolver (entitlement-v1). Premium = family-unit, bán INSIGHT+COACHING+
+CONVENIENCE (matrix: PARENT-UX-AUDIT.md §WAL-119); learning loop FREE bất
+biến theo CẤU TRÚC (engine không có chỗ nhận tier — test quét). Consent/
+privacy/export-delete không bao giờ paywall. Pricing/thu tiền = Founder Gate.
