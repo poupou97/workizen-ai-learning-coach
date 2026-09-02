@@ -29,7 +29,7 @@
 
 **Checkpoint #1 (§29) posted 2026-09-02 trên WAL-112**: P0-A+P0-B DONE (WAL-108 S24, WAL-113
 Nokia máy-trắng — TV Reader câu-hỏi-mở + Sử SourceReader 3 tầng + verdict docs/design/07;
-bug index-sau-onboarding fix kèm test). WAL-114 ✅ DONE (lineage end-to-end, b2bbdf9). NEXT: WAL-115 → Checkpoint #2.
+bug index-sau-onboarding fix kèm test). WAL-114 ✅ (lineage, b2bbdf9) · WAL-115 ✅ (unit economics — MODE A $0 theo cấu trúc, f265962; addendum AI COST trên WAL-112). NEXT: rà P0 còn lại → Checkpoint #2.
 
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
