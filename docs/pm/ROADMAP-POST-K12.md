@@ -31,9 +31,10 @@
 Nokia máy-trắng — TV Reader câu-hỏi-mở + Sử SourceReader 3 tầng + verdict docs/design/07;
 bug index-sau-onboarding fix kèm test). WAL-114 ✅ (lineage, b2bbdf9) · WAL-115 ✅ (unit economics — MODE A $0 theo cấu trúc, f265962; addendum AI COST trên WAL-112). WAL-110 ✅ (ADR-010 e9ffb56).
 **Checkpoint #2 posted 2026-09-02 trên WAL-112 — P0 HOÀN TẤT (108/113/109/110/114/115).**
-P1: WAL-132 ✅ (PresentationPolicy, 6b49869). WAL-144 đang chạy: TV/Sử ✅ (WAL-113) ·
-Essay/Compose ✅ (4d02075, walk+JSONL) · KHTN Experiment PREDICT-gate ✅ (75203c6, walk+JSONL);
-còn Địa (crop lược đồ) + Lý/Hoá 10-12 (mine units). Kế: 116 → 117 → 50 → 119/120; KS-F xen kẽ.
+P1: WAL-132 ✅ (PresentationPolicy, 6b49869) · WAL-144 ✅ (6 surface: TV/Sử/Essay/KHTN/Địa/
+Lý-Hoá-g10 — walks n23→n42, JSONL 4 môn mới, c557730). Đang chạy: WAL-116 (drawing taxonomy —
+classifier v2: 729 lệnh «vẽ», TECHNICAL 28% · GEOMETRY 19.1% · UNKNOWN 22.5%).
+Kế: 117 → 50 → 119/120; KS-F xen kẽ.
 
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
