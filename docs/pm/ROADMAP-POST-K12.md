@@ -11,7 +11,7 @@
 | P0-A | First Vertical Slice — Toán 5 B6 phân số khác mẫu, 17 bước Home→Next Action | **WAL-108** | GO. Không fake bằng static demo. S24 acceptance. |
 | P0-B | Cross-subject validation — TV Reader + Sử SourceReader + Architecture Verdict | **WAL-113 ✅** | blocked by 108. Không claim cross-subject vì interface nhìn generic. |
 | P0-C | Multi-profile / shared device — A→B→A isolation | **WAL-109** | NO CROSS-LEARNER EVIDENCE CONTAMINATION. |
-| P0-D | Hub Education Safety Adapter + capability audit 26 mục | **WAL-110** | OCR≠Evidence · Chat≠Tutor · Provider≠authority · Import≠curriculum · Analytics≠telemetry. |
+| P0-D | Hub Education Safety Adapter + capability audit 26 mục | **WAL-110 ✅** | OCR≠Evidence · Chat≠Tutor · Provider≠authority · Import≠curriculum · Analytics≠telemetry. |
 | P0-E | Pedagogical Provenance end-to-end — lineage 10 tầng, fail-closed 5 điều kiện | **WAL-114** | blocked by 108. Không fabricate citation. |
 | P0-F | Unit Economics — instrument runtime, MODE A/B/C, COGS Student Free | **WAL-115** | blocked by 108. Không build Ads SDK để chữa COGS. |
 | P1-A | Drawing/Diagram taxonomy từ corpus → rồi mới quyết surface | **WAL-116** | "vẽ" ≠ một interaction. |
@@ -29,7 +29,9 @@
 
 **Checkpoint #1 (§29) posted 2026-09-02 trên WAL-112**: P0-A+P0-B DONE (WAL-108 S24, WAL-113
 Nokia máy-trắng — TV Reader câu-hỏi-mở + Sử SourceReader 3 tầng + verdict docs/design/07;
-bug index-sau-onboarding fix kèm test). WAL-114 ✅ (lineage, b2bbdf9) · WAL-115 ✅ (unit economics — MODE A $0 theo cấu trúc, f265962; addendum AI COST trên WAL-112). NEXT: rà P0 còn lại → Checkpoint #2.
+bug index-sau-onboarding fix kèm test). WAL-114 ✅ (lineage, b2bbdf9) · WAL-115 ✅ (unit economics — MODE A $0 theo cấu trúc, f265962; addendum AI COST trên WAL-112). WAL-110 ✅ (ADR-010 e9ffb56).
+**Checkpoint #2 posted 2026-09-02 trên WAL-112 — P0 HOÀN TẤT (108/113/109/110/114/115).**
+P1 order đề xuất: WAL-144/132 → 116 → 117 → 50 → 119/120; KS-F xen kẽ.
 
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
