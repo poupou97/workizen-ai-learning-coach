@@ -113,6 +113,19 @@ for p in pdfs:
         'legal': 'localResearchOnly',
     })
 
+# F19 — DEDUPE theo checksum: file lẻ ở pdf/ root trùng bản trong dir lớp.
+# Giữ bản đường-dẫn-sâu (dir lớp), đánh dấu bản kia DUPLICATE — không xoá.
+seen = {}
+for r in reg:
+    key = r['checksum']
+    if key in seen:
+        shallow, deep = sorted([seen[key], r], key=lambda x: x['path'].count('/'))
+        shallow['duplicateOf'] = deep['sourceDocumentId']
+        shallow['ocrState'] = 'DUPLICATE'
+        seen[key] = deep
+    else:
+        seen[key] = r
+
 json.dump({'schemaVersion': 'registry-v1', 'documents': reg},
           open('poc-out/registry/source-registry.json', 'w'),
           ensure_ascii=False, indent=1)
