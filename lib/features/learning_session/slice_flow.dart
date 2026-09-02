@@ -71,21 +71,36 @@ Future<void> startHomeworkFlow(
     if (problem == null) continue; // chụp lại
 
     // CURRICULUM CONTEXT → SKILLCASE → TUTORSCOPE → METHOD → DIAGNOSTIC
-    final curriculum = curriculumFor(profile);
-    ConceptMastery? mastery;
-    if (curriculum != null) {
-      mastery = await masteryFromStore(store, profile.learnerId, curriculum);
-    }
-    await nav.push(MaterialPageRoute(
-        builder: (_) => ProblemContextScreen(
-              problem: problem,
-              profile: profile,
-              store: store,
-              curriculum: curriculum,
-              mastery: mastery,
-            )));
+    if (!nav.mounted) return;
+    await openCanonicalProblem(nav.context,
+        problem: problem, profile: profile, store: store);
     return;
   }
+}
+
+/// Mở MỘT bài (từ camera / SGK / tự gõ — mọi origin của CanonicalProblem)
+/// vào chuỗi context→diagnostic→tutor→evidence→state. Một đường, một luật.
+Future<void> openCanonicalProblem(
+  BuildContext context, {
+  required CanonicalProblem problem,
+  required LearnerProfile profile,
+  required LearnerStore store,
+}) async {
+  final nav = Navigator.of(context);
+  final curriculum = curriculumFor(profile);
+  ConceptMastery? mastery;
+  if (curriculum != null) {
+    mastery = await masteryFromStore(store, profile.learnerId, curriculum);
+  }
+  if (!nav.mounted) return;
+  await nav.push(MaterialPageRoute(
+      builder: (_) => ProblemContextScreen(
+            problem: problem,
+            profile: profile,
+            store: store,
+            curriculum: curriculum,
+            mastery: mastery,
+          )));
 }
 
 /// CURRICULUM CONTEXT + DIAGNOSTIC — «SAM hiểu bài này nằm ở đâu trong

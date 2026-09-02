@@ -22,6 +22,8 @@ import 'features/camera/mlkit_ocr_adapter.dart';
 import 'features/learning_session/slice_flow.dart';
 import 'features/mission/mission_center_screen.dart';
 import 'features/parent/parent_area.dart';
+import 'features/subjects/lesson_index.dart';
+import 'features/subjects/subjects_screen.dart';
 import 'features/mission/mission_data.dart';
 import 'features/onboarding/onboarding_screen.dart';
 
@@ -52,11 +54,19 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   LearnerProfile? _profile;
   bool _loading = true;
   Future<MissionData>? _mission;
+  LessonIndex? _lessonIndex; // WAL-136 — null = chưa build asset, nói thật
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  Future<void> _loadLessonIndex() async {
+    final p = _profile;
+    if (p == null) return;
+    final idx = await LessonIndex.loadForGrade(p.grade);
+    if (mounted) setState(() => _lessonIndex = idx);
   }
 
   Future<void> _load() async {
@@ -72,6 +82,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
       _loading = false;
       _refreshMission();
     });
+    _loadLessonIndex();
   }
 
   void _selectProfile(String learnerId) {
@@ -82,6 +93,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
       _refreshMission(); // mission tính lại TỪ KHO của đúng learner này
     });
     widget.store.saveActiveLearner(p.learnerId); // sống qua restart
+    _loadLessonIndex(); // grade có thể khác ⇒ index khác
   }
 
   void _refreshMission() {
@@ -139,6 +151,14 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         onAddProfile: () => _addProfile(context),
                         onParentArea: () => openParentArea(context,
                             store: widget.store, profiles: _profiles),
+                        onOpenSubjects: () async {
+                          await Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => SubjectsScreen(
+                                  profile: _profile!,
+                                  store: widget.store,
+                                  index: _lessonIndex)));
+                          if (mounted) setState(_refreshMission);
+                        },
                         onStartHomework: ocr == null
                             ? null
                             : () async {

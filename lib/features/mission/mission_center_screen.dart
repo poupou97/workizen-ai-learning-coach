@@ -28,6 +28,7 @@ class MissionCenterScreen extends StatelessWidget {
     this.onSelectProfile,
     this.onAddProfile,
     this.onParentArea,
+    this.onOpenSubjects,
   });
 
   final MissionData data;
@@ -41,6 +42,9 @@ class MissionCenterScreen extends StatelessWidget {
 
   /// WAL-109 — khu bố mẹ qua PIN gate. `null` = flow demo cũ (test cũ giữ).
   final VoidCallback? onParentArea;
+
+  /// WAL-136 — mở MÔN HỌC (lesson picker từ corpus). `null` = nút mờ như cũ.
+  final VoidCallback? onOpenSubjects;
 
   /// WAL-108 — mở flow camera THẬT (learnerId + store xuyên suốt). `null` =
   /// môi trường chưa nối slice (test/demo cũ) ⇒ giữ flow demo.
@@ -276,8 +280,8 @@ class MissionCenterScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius:
                         BorderRadius.circular(WalSpacing.radiusButton))),
-            onPressed: () {}, // bản đồ học — sau slice
-            child: const Text('Bản đồ ▸',
+            onPressed: onOpenSubjects,
+            child: const Text('Môn học ▸',
                 style: TextStyle(fontSize: WalType.body)),
           ),
         ),
