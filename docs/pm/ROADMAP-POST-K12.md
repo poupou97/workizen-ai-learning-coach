@@ -39,8 +39,10 @@ scale slice — fail-closed; bench store <1ms; §37 SCALE-có-điều-kiện ch�
 Founder, d5d87f9) · WAL-84 mốc-3 Nokia (100MB FTS p95 7ms; breakpoint ×105 tái xác nhận máy thấp)
 · WAL-33 mitigation ① (plausibility, 987550f). Còn mở: WAL-30 (chờ Founder) · WAL-84 (tier
 500MB+/battery) · WAL-33 (recall chờ ảnh thật) · WAL-50 (P3 — tokens/dark/motion/density XONG a43b70c, còn wire consumer)
-· WAL-84 mốc-4 670MB Nokia (FTS p95 49ms — interactive-class; mystery app-biến-mất = integration_test tự gỡ app, đã đính chính). Deferred: 121-124, 137-146 UI
-backlog, ALA 155-158, MA 159-162.
+· WAL-84 mốc-4 670MB Nokia (FTS p95 49ms — interactive-class; mystery app-biến-mất = integration_test tự gỡ app, đã đính chính). WAL-84 mốc-5 trọn tier (2.7GB/3.82M units Nokia:
+FTS p95 92ms — KHÔNG điểm gãy tới hết scale mục tiêu; ngưỡng đề xuất 4-5GB; FULL-vs-MODULAR
+thành câu hỏi product) · WAL-141 code+test (drill-down «cách khác» nói thật lý do, 2f0f3c9 —
+chờ walk). Deferred: 121-124, 137-140/142-146 UI backlog, ALA 155-158, MA 159-162.
 
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
