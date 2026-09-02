@@ -90,9 +90,12 @@ def main():
     # toàn bộ 1.706 bài tập — phần lớn là đọc/tìm/chọn/viết, không có biểu thức.
     # phạm vi ĐO TỪ TOC THẬT: chương phân số lớp 4 = B53 (khái niệm) → B66,
     # cộng ôn tập cuối năm B73; lớp 5 = B6 + ôn tập B29.
+    # tập hai: B69 «Ôn tập các phép tính với số TN, phân số, số thập phân»
+    # + B75 «Ôn tập chung» — đọc từ header OCR thật (title TOC parse = None).
     fr_lessons = {('04-sgk-toan-4-tap-hai', l) for l in range(53, 67)} | \
                  {('04-sgk-toan-4-tap-hai', 73)} | \
-                 {('05-sgk-toan-5-tap-mot', 6), ('05-sgk-toan-5-tap-mot', 29)}
+                 {('05-sgk-toan-5-tap-mot', 6), ('05-sgk-toan-5-tap-mot', 29)} | \
+                 {('05-sgk-toan-5-tap-hai', 69), ('05-sgk-toan-5-tap-hai', 75)}
     inscope = [u for u in units if u['role'] == 'EXERCISE'
                and (u['book'], u['lesson']) in fr_lessons]
     ex_total = sum(1 for u in units if u['role'] == 'EXERCISE')
@@ -103,7 +106,8 @@ def main():
     check('mapping không vượt phạm vi luật (chỉ chương phân số)',
           all((r['book'], r['lesson']) in fr_lessons for r in emap))
     # ⭐ CHƯƠNG TRÌNH LỌC NHẬN DẠNG: không sinh phép tính mà sách chưa dạy
-    first_arith = {'04-sgk-toan-4-tap-hai': 60, '05-sgk-toan-5-tap-mot': 1}
+    first_arith = {'04-sgk-toan-4-tap-hai': 60, '05-sgk-toan-5-tap-mot': 1,
+                   '05-sgk-toan-5-tap-hai': 36}  # đầu tập — phép PS dạy từ trước
     check('không có phép cộng/trừ phân số TRƯỚC bài đầu tiên dạy nó',
           all((r['lesson'] or 0) >= first_arith.get(r['book'], 0) for r in emap),
           'ca đã bắt: B53 «Khái niệm phân số» sinh «2/3 - 3/5» — loại')
