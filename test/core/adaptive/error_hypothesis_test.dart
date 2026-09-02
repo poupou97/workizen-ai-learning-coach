@@ -65,6 +65,14 @@ void main() {
     expect(h.single.supportingEvidence, containsAll(['e1', 'e2', 'e3']));
   });
 
+  test('MỘT lần sai + xin gợi ý → CHƯA đủ ngưỡng sai-lặp (2), im lặng', () {
+    final h = proposeErrorHypotheses(skillCaseId: 'B57', events: [
+      ev('e1', EvidenceKind.independentAttempt, correct: false),
+      ev('e2', EvidenceKind.hintRequested),
+    ]);
+    expect(h, isEmpty);
+  });
+
   test('sai lặp KHÔNG xin gợi ý → không đủ hai tín hiệu, im lặng', () {
     final h = proposeErrorHypotheses(skillCaseId: 'B57', events: [
       ev('e1', EvidenceKind.independentAttempt, correct: false),
