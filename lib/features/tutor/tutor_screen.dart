@@ -137,6 +137,12 @@ class _TutorScreenState extends State<TutorScreen> {
               fontSize: WalType.display,
               fontWeight: FontWeight.w700,
               color: WalColors.ink))),
+      const SizedBox(height: WalSpacing.sm),
+      _ladder(),
+      if (s.log.events.isNotEmpty) ...[
+        const SizedBox(height: WalSpacing.sm),
+        _stepsPanel(),
+      ],
       if (widget.provenance != null)
         Align(
           alignment: Alignment.centerLeft,
@@ -258,6 +264,91 @@ class _TutorScreenState extends State<TutorScreen> {
         ),
       ),
     ]);
+  }
+
+  /// WAL-139 (concept 13 «Mức độ gợi ý» — bản doctrine-safe): thang 4 nấc
+  /// HIỂN THỊ mức hỗ trợ HIỆN TẠI do ENGINE quyết (±1) — trẻ thấy mình đang
+  /// ở đâu, không chọn được nấc (chọn nấc = xin lời giải không cần thử).
+  Widget _ladder() {
+    const labels = ['Tự làm', 'Gợi ý', 'Làm mẫu', 'Lời giải'];
+    return Row(children: [
+      for (var i = 0; i < labels.length; i++) ...[
+        if (i > 0)
+          const Expanded(
+              child: Divider(color: WalColors.surfaceLavender, thickness: 2)),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: i == s.support.index
+                ? WalColors.primary500
+                : WalColors.surfaceLavender,
+            borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+          ),
+          child: Text(labels[i],
+              style: TextStyle(
+                  fontSize: WalType.secondary,
+                  fontWeight:
+                      i == s.support.index ? FontWeight.w700 : FontWeight.w400,
+                  color: i == s.support.index
+                      ? Colors.white
+                      : WalColors.inkSoft)),
+        ),
+      ],
+    ]);
+  }
+
+  /// WAL-139 (concept 14 «Các bước bạn đã làm»): dòng thời gian TRUNG THỰC
+  /// từ log phiên — đúng loại sự kiện, không cộng dồn thành điểm.
+  Widget _stepsPanel() {
+    final lines = <String>[];
+    for (final e in s.log.events) {
+      switch (e.kind) {
+        case EvidenceKind.independentAttempt:
+          lines.add(e.correct == true
+              ? '✓ Con tự làm: đúng!'
+              : '· Con thử: chưa đúng — không sao');
+        case EvidenceKind.selfCorrection:
+          lines.add('★ Con TỰ sửa được — tuyệt nhất đó!');
+        case EvidenceKind.hintRequested:
+          // hintRequested ghi TRƯỚC khi leo nấc (support = mức cũ) — nội dung
+          // ĐÃ ĐƯA nằm trong interventionId («…@nấc», WAL-108 §3).
+          final iid = e.interventionId ?? '';
+          lines.add(iid.contains('@fullSolution')
+              ? '✋ SAM đưa lời giải'
+              : iid.contains('@workedStep')
+                  ? '✋ SAM làm mẫu một bước'
+                  : iid.contains('@hint')
+                      ? '✋ SAM gợi ý một chút'
+                      : '✋ Con xin gợi ý'); // fail-closed: không có gì để đưa
+        case EvidenceKind.guidedAttempt:
+          lines.add('· Con thử với gợi ý: chưa đúng');
+        case EvidenceKind.postHintSuccess:
+          lines.add('✓ Đúng rồi (có gợi ý giúp)');
+        case EvidenceKind.hintShown || EvidenceKind.finalCorrectness:
+          break; // không thành dòng riêng — tránh đếm kép
+      }
+    }
+    if (lines.isEmpty) return const SizedBox.shrink();
+    return _card(
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('CÁC BƯỚC CON ĐÃ LÀM',
+              style: TextStyle(
+                  fontSize: WalType.secondary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.05,
+                  color: WalColors.inkSoft)),
+          const SizedBox(height: 6),
+          for (final l in lines)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Text(l,
+                  style: const TextStyle(
+                      fontSize: WalType.secondary,
+                      color: WalColors.ink,
+                      height: 1.35)),
+            ),
+        ]),
+        color: WalColors.surfaceLavender);
   }
 
   /// §7 — drill-down nguồn: WHAT/WHY/SOURCE/AUTHORITY + phiên bản. Chuỗi

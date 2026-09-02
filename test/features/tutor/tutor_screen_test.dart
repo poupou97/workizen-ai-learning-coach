@@ -46,8 +46,21 @@ Future<void> _pump(WidgetTester tester, TutorSession s,
 }
 
 Future<void> _answer(WidgetTester tester, String a) async {
+  // WAL-139: working list dài hơn (thang + các-bước); ListView build lười —
+  // scrollUntilVisible mới TÌM được item chưa build (ensureVisible thì không).
+  await tester.scrollUntilVisible(find.byType(TextField), 150,
+      scrollable: find.byType(Scrollable).first);
   await tester.enterText(find.byType(TextField), a);
+  await tester.scrollUntilVisible(find.text('Con làm xong rồi ✓'), 150,
+      scrollable: find.byType(Scrollable).first);
   await tester.tap(find.text('Con làm xong rồi ✓'));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _tapHint(WidgetTester tester, String label) async {
+  await tester.scrollUntilVisible(find.text(label), 150,
+      scrollable: find.byType(Scrollable).first);
+  await tester.tap(find.text(label));
   await tester.pumpAndSettle();
 }
 
@@ -61,8 +74,7 @@ void main() {
     await _answer(tester, '5/9'); // sai
     expect(find.textContaining('thử lại nhé'), findsOneWidget);
 
-    await tester.tap(find.text('Gợi ý cho tớ ✋'));
-    await tester.pumpAndSettle();
+    await _tapHint(tester, 'Gợi ý cho tớ ✋');
     expect(find.textContaining('mẫu số chung'), findsWidgets);
 
     await _answer(tester, '23/20'); // đúng sau gợi ý
@@ -81,10 +93,8 @@ void main() {
     await _pump(tester, s);
     expect(find.text('Xem lời giải'), findsNothing);
     // leo hết hai nấc gợi ý vẫn chưa thấy — vì chưa thử lần nào
-    await tester.tap(find.text('Gợi ý cho tớ ✋'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Gợi ý thêm ✋'));
-    await tester.pumpAndSettle();
+    await _tapHint(tester, 'Gợi ý cho tớ ✋');
+    await _tapHint(tester, 'Gợi ý thêm ✋');
     expect(find.text('Xem lời giải'), findsNothing);
     // thử một lần (sai) → nút mới xuất hiện
     await _answer(tester, '1/2');
