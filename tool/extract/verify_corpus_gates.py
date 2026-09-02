@@ -112,6 +112,19 @@ def main():
           all((r['lesson'] or 0) >= first_arith.get(r['book'], 0) for r in emap),
           'ca đã bắt: B53 «Khái niệm phân số» sinh «2/3 - 3/5» — loại')
 
+    # G5 — LearningObjective (WAL-76): nguồn nói thẳng, unmapped trung thực
+    import os as _os
+    _objp = 'poc-out/units/05-sgv-toan-5.objectives.json'
+    if _os.path.exists(_objp):
+        objs = load(_objp)
+        print('\nG5 learning objectives (SGV5 MỤC TIÊU)')
+        check('mọi objective gán được bài', all(o['lesson'] for o in objs))
+        check('mọi objective mang sourceStated',
+              all(o['origin'] == 'sourceStated' for o in objs))
+        check('concept unmapped giữ trung thực (không đoán 100%)',
+              any(o['conceptId'] == 'unmapped' for o in objs),
+              f"{sum(1 for o in objs if o['conceptId']!='unmapped')}/{len(objs)} mapped")
+
     print('\n' + ('🟢 SCALE GATE: TẤT CẢ XANH' if not FAILS
                   else f'🔴 GATE ĐỎ: {FAILS}'))
     sys.exit(1 if FAILS else 0)
