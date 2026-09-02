@@ -80,6 +80,8 @@ class LearningSession {
         if (e.policyId != null) 'policyId': e.policyId,
         if (e.priorEventId != null) 'priorEventId': e.priorEventId,
         if (e.interventionId != null) 'interventionId': e.interventionId,
+        // WAL-114: version tri thức sống qua lưu-đọc như policyId.
+        if (e.knowledgeVersion != null) 'knowledgeVersion': e.knowledgeVersion,
       };
 
   static LearningEvent? _eventFrom(Map<String, Object?> j) {
@@ -108,6 +110,7 @@ class LearningSession {
       policyId: j['policyId'] as String?,
       priorEventId: j['priorEventId'] as String?,
       interventionId: j['interventionId'] as String?,
+      knowledgeVersion: j['knowledgeVersion'] as String?,
     );
   }
 

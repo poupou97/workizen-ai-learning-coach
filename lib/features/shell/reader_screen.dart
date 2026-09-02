@@ -17,6 +17,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../../core/tutor/learning_activity.dart';
@@ -75,6 +76,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
       support: _hintShown ? SupportLevel.hint : SupportLevel.none,
       policyId: 'reader-v1',
       priorEventId: _events.isEmpty ? null : _events.last.eventId,
+      knowledgeVersion: knowledgeModelVersion, // WAL-114
     ));
   }
 

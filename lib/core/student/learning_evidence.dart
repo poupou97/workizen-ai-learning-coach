@@ -83,6 +83,7 @@ class LearningEvent {
     this.policyId,
     this.priorEventId,
     this.interventionId,
+    this.knowledgeVersion,
   });
 
   final String eventId;
@@ -135,6 +136,12 @@ class LearningEvent {
   /// nào đã giúp con» không truy được về đúng nội dung — lineage đứt ở nấc
   /// cuối. `null` = sự kiện không gắn can thiệp (hoặc dữ liệu cũ).
   final String? interventionId;
+
+  /// ⭐ WAL-114: PHIÊN BẢN MODEL TRI THỨC lúc sự kiện sinh ra — cặp với
+  /// [policyId] (tutor policy version). Cùng bất biến REPLAY MUST NOT
+  /// SILENTLY REINTERPRET: đổi model tri thức không được lặng lẽ đổi nghĩa
+  /// evidence cũ. `null` = dữ liệu trước WAL-114.
+  final String? knowledgeVersion;
 
   /// Sự kiện này có phải một lần **trả lời** không (khác với một lần can thiệp).
   bool get isAttempt => switch (kind) {

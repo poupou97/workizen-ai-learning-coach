@@ -17,6 +17,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../subjects/lesson_index.dart';
@@ -99,6 +100,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
       at: _at(),
       support: SupportLevel.none,
       policyId: 'source-reader-v1',
+      knowledgeVersion: knowledgeModelVersion, // WAL-114
     ));
     setState(() {
       _stance = i;

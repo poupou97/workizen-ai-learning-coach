@@ -19,6 +19,7 @@ library;
 
 import '../../core/curriculum/pedagogical_boundary.dart';
 import '../../core/student/learning_evidence.dart';
+import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/mastery.dart';
 
 /// Bài phân số "a/b ± c/d" đã bóc số — đầu vào rule-based của slice này.
@@ -131,6 +132,8 @@ class TutorSession {
           (isAnswer && support != SupportLevel.none
               ? _activeInterventionId
               : null),
+      // WAL-114: mọi evidence mang CẢ HAI version — tutor policy + knowledge.
+      knowledgeVersion: knowledgeModelVersion,
     ));
     if (isAnswer) _lastAnswerEventId = id;
   }

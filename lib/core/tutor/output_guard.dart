@@ -60,6 +60,22 @@ GuardVerdict validateTutorOutput({
     if (low.contains(term)) reasons.add('METHOD_NAME:$term');
   }
 
+  // ── WAL-114: CẤM LLM TỰ CHẾ TRÍCH DẪN — citation CHỈ được render tất định
+  // từ Provenance (sourceLineForChild), không bao giờ từ lời LLM. Một trích
+  // dẫn bịa («SGK trang N») phá đúng niềm tin mà provenance tồn tại để giữ. ──
+  for (final pat in [
+    RegExp(r'trang\s+\d+'),
+    RegExp(r'\bsgk\b'),
+    RegExp(r'sách nói'),
+    RegExp(r'theo sách'),
+  ]) {
+    final m = pat.firstMatch(low);
+    if (m != null) {
+      reasons.add('CITATION_FABRICATION:${m.group(0)}');
+      break;
+    }
+  }
+
   // ── luật khen: áp cho MỌI đối tượng («anh em tớ thông minh» vẫn cấm) ──
   for (final b in bannedAbilityPraise) {
     if (low.contains(b)) reasons.add('PRAISE:$b');

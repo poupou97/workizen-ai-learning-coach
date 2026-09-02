@@ -189,6 +189,8 @@ void main() {
     expect(out.single.correct, isNull,
         reason: '⭐ đột biến ghi correct=true cho câu mở ⇒ test này đỏ');
     expect(out.single.support, SupportLevel.none);
+    expect(out.single.knowledgeVersion, isNotNull,
+        reason: 'WAL-114: mọi evidence mang knowledge model version');
     expect(out.any((e) => e.kind == EvidenceKind.finalCorrectness), isFalse,
         reason: 'không chấm ⇒ không có finalCorrectness');
     expect(find.textContaining('chưa có đáp án'), findsOneWidget,

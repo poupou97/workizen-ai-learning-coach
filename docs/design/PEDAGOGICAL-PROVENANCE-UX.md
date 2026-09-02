@@ -18,3 +18,23 @@ PERMISSION} → UI 3 tầng:
 Fail-closed hiển thị: scope rỗng/method không phép ⇒ KHÔNG có TeachingAct để render
 ⇒ màn «SAM chưa chắc về bài này — mình hỏi cô/thử bài khác nhé» (không có nhánh
 «dạy đại»). Voice cùng luật: câu nói sinh ra từ cùng TeachingProvenance + output_guard.
+
+
+## WAL-114 (2026-09-02) — LINEAGE END-TO-END ĐÃ CODE HOÁ
+
+- `lib/core/knowledge/lineage.dart`: `lineageFor(event, catalogue, scope)` —
+  từ MỘT LearningEvent truy về ĐÚNG TRANG IN của sách nguồn, trả trace 7 chiều
+  WHAT/WHERE/WHY/HOW/SOURCE/AUTHORITY/PERMISSION (JSON in được), hoặc FAIL
+  CLOSED với mã: noTeachingIntervention · methodUnknown (provenance mismatch) ·
+  methodNotAllowed · missingSource · futureKnowledge · curriculumConflict.
+- Authority levels: SOURCE_EXPLICIT (sourceStated) / SOURCE_DEMONSTRATED
+  (sourceDemonstrated) / SAM_INFERRED (mọi thứ còn lại — kể cả sourceSequence:
+  mục lục không phải lời sách). Mint qua `explainTeaching` duy nhất.
+- Mọi evidence mới mang CẶP VERSION: `policyId` (tutor policy) +
+  `knowledgeVersion` (knowledge model — `knowledgeModelVersion`), sống qua
+  JSONL round-trip. Dữ liệu cũ `null` = trước WAL-114, fail-closed khi truy.
+- KHÔNG FABRICATE CITATION: `validateTutorOutput` chặn LLM tự nói
+  «SGK/trang N/sách nói/theo sách» (CITATION_FABRICATION) — trích dẫn chỉ
+  render tất định từ `Provenance.sourceLineForChild`.
+- Tests: test/core/knowledge/lineage_test.dart (7 chiều + 5 fail-closed + 
+  authority table + round-trip) · test/core/tutor/citation_guard_test.dart.
