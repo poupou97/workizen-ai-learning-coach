@@ -144,6 +144,17 @@ def main():
         check('mọi cạnh có evidence lần ngược được',
               all(e.get('evidence') for e in g['edges']))
 
+    # G7 — method catalogue (WAL-78): không method nào thiếu trang nguồn
+    _mp = 'poc-out/units/method-catalogue.json'
+    if _os.path.exists(_mp):
+        ms = load(_mp)
+        print('\nG7 method catalogue')
+        check('mọi method có trang nguồn', all(m.get('pagePrinted') for m in ms))
+        check('mọi method origin sourceStated (RULE lời sách)',
+              all(m['origin'] == 'sourceStated' for m in ms))
+        check('quy-dong có method ở CẢ lớp 4 và lớp 5 (ca chuẩn WAL-1)',
+              {4, 5} <= {m['grade'] for m in ms if m['conceptId'] == 'quy-dong'})
+
     print('\n' + ('🟢 SCALE GATE: TẤT CẢ XANH' if not FAILS
                   else f'🔴 GATE ĐỎ: {FAILS}'))
     sys.exit(1 if FAILS else 0)
