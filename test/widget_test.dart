@@ -72,7 +72,19 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Bố mẹ ▸'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Tối nay cùng'), findsOneWidget);
+    // WAL-109: khu bố mẹ nay có PIN gate — lần đầu là ĐẶT PIN (2 lần).
+    expect(find.text('Đặt PIN cho khu bố mẹ'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '1234');
+    await tester.tap(find.text('Đặt PIN'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '1234');
+    await tester.tap(find.text('Đặt PIN'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tình hình các con'), findsOneWidget);
+    // Đi tiếp vào «Tối nay» của đúng đứa trẻ — claim-gated như cũ.
+    await tester.tap(find.text('Tối nay cùng Minh ▸'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Tối nay cùng'), findsWidgets);
     expect(find.text('VIỆC CHO TỐI NAY · ~10 PHÚT'), findsOneWidget);
   });
 

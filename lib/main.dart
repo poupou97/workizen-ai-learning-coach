@@ -21,6 +21,7 @@ import 'features/camera/education_ocr_adapter.dart';
 import 'features/camera/mlkit_ocr_adapter.dart';
 import 'features/learning_session/slice_flow.dart';
 import 'features/mission/mission_center_screen.dart';
+import 'features/parent/parent_area.dart';
 import 'features/mission/mission_data.dart';
 import 'features/onboarding/onboarding_screen.dart';
 
@@ -60,10 +61,14 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
 
   Future<void> _load() async {
     final ps = await widget.store.profiles();
+    // WAL-109: máy của chung mở lại phải về ĐÚNG người học gần nhất.
+    final activeId = await widget.store.activeLearnerId();
     if (!mounted) return;
     setState(() {
       _profiles = ps;
-      _profile = ps.isEmpty ? null : ps.first;
+      _profile = ps.isEmpty
+          ? null
+          : ps.where((p) => p.learnerId == activeId).firstOrNull ?? ps.first;
       _loading = false;
       _refreshMission();
     });
@@ -76,6 +81,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
       _profile = p;
       _refreshMission(); // mission tính lại TỪ KHO của đúng learner này
     });
+    widget.store.saveActiveLearner(p.learnerId); // sống qua restart
   }
 
   void _refreshMission() {
@@ -131,6 +137,8 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         activeLearnerId: _profile!.learnerId,
                         onSelectProfile: _selectProfile,
                         onAddProfile: () => _addProfile(context),
+                        onParentArea: () => openParentArea(context,
+                            store: widget.store, profiles: _profiles),
                         onStartHomework: ocr == null
                             ? null
                             : () async {

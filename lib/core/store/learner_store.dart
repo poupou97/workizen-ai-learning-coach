@@ -46,6 +46,17 @@ abstract class LearnerStore {
   /// bình thường khi không có.
   Future<void> saveTimetable(String learnerId, List<TimetableEntry> entries);
   Future<List<TimetableEntry>> timetable(String learnerId);
+
+  /// WAL-109 §26 — Parent Mode gate. PIN là RÀO CHẮN TRẺ TÒ MÒ, không phải
+  /// bảo mật chống người lớn (ghi thật, không security theater). `null` =
+  /// chưa đặt — lần đầu vào khu bố mẹ sẽ đặt.
+  Future<void> saveParentPin(String pin);
+  Future<String?> parentPin();
+
+  /// WAL-109 — ai đang học, sống qua restart (máy của chung, mở app phải
+  /// về đúng người dùng gần nhất). `null` = chưa từng chọn.
+  Future<void> saveActiveLearner(String learnerId);
+  Future<String?> activeLearnerId();
 }
 
 /// Bản triển khai trên bộ nhớ + chuỗi JSONL — đủ cho app một máy, và là
@@ -165,6 +176,36 @@ class JsonlLearnerStore implements LearnerStore {
       ];
     }
     return latest ?? const [];
+  }
+
+  @override
+  Future<void> saveParentPin(String pin) async {
+    _lines.add(jsonEncode({'type': 'parentPin', 'pin': pin}));
+  }
+
+  @override
+  Future<String?> parentPin() async {
+    String? latest;
+    for (final r in _records('parentPin')) {
+      final p = r['pin'];
+      if (p is String) latest = p; // bản sau đè bản trước (đổi PIN được)
+    }
+    return latest;
+  }
+
+  @override
+  Future<void> saveActiveLearner(String learnerId) async {
+    _lines.add(jsonEncode({'type': 'activeLearner', 'learnerId': learnerId}));
+  }
+
+  @override
+  Future<String?> activeLearnerId() async {
+    String? latest;
+    for (final r in _records('activeLearner')) {
+      final id = r['learnerId'];
+      if (id is String) latest = id;
+    }
+    return latest;
   }
 
   @override

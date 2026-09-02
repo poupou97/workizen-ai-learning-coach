@@ -75,6 +75,24 @@ class FileLearnerStore implements LearnerStore {
       _mem.timetable(learnerId);
 
   @override
+  Future<void> saveParentPin(String pin) async {
+    await _mem.saveParentPin(pin);
+    await _flush();
+  }
+
+  @override
+  Future<String?> parentPin() => _mem.parentPin();
+
+  @override
+  Future<void> saveActiveLearner(String learnerId) async {
+    await _mem.saveActiveLearner(learnerId);
+    await _flush();
+  }
+
+  @override
+  Future<String?> activeLearnerId() => _mem.activeLearnerId();
+
+  @override
   Future<EvidenceLog> evidenceFor(
           {required String learnerId, required String skillCaseId}) =>
       _mem.evidenceFor(learnerId: learnerId, skillCaseId: skillCaseId);

@@ -27,6 +27,7 @@ class MissionCenterScreen extends StatelessWidget {
     this.activeLearnerId,
     this.onSelectProfile,
     this.onAddProfile,
+    this.onParentArea,
   });
 
   final MissionData data;
@@ -37,6 +38,9 @@ class MissionCenterScreen extends StatelessWidget {
   final String? activeLearnerId;
   final void Function(String learnerId)? onSelectProfile;
   final VoidCallback? onAddProfile;
+
+  /// WAL-109 — khu bố mẹ qua PIN gate. `null` = flow demo cũ (test cũ giữ).
+  final VoidCallback? onParentArea;
 
   /// WAL-108 — mở flow camera THẬT (learnerId + store xuyên suốt). `null` =
   /// môi trường chưa nối slice (test/demo cũ) ⇒ giữ flow demo.
@@ -281,10 +285,10 @@ class MissionCenterScreen extends StatelessWidget {
         SizedBox(
           height: WalSpacing.minTouch,
           child: TextButton(
-            // ⚠️ INTENT GATE chưa có — vào thẳng. Gate thật (xác nhận người
-            // lớn) đi cùng child-safety architecture; residual ghi ở WAL-53.
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => buildDemoParentTonight())),
+            // WAL-109: có onParentArea ⇒ đi PIN gate thật; không có ⇒ demo cũ.
+            onPressed: onParentArea ??
+                () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => buildDemoParentTonight())),
             child: const Text('Bố mẹ ▸',
                 style: TextStyle(
                     fontSize: WalType.secondary, color: WalColors.inkSoft)),
