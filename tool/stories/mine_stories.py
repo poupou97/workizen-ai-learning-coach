@@ -142,6 +142,13 @@ def main():
                 'INVENTION_DISCOVERY': f"{i.get('person') or '?'} {i.get('verb')} {str(i.get('what'))[:45]}"}.get(i['type'],'')
         print(f"  [{i['type'][:6]}|c{i['confidence']}] {s['subject']} {s['grade']} p{s['pagePdf']}: {head}")
         if len(seen) >= 4 and sum(byt[t] > 0 for t in byt) <= len(seen): break
-    # đếm ví dụ in tối đa 14 dòng
+    mani = dict(version=VER, totalCandidates=len(all_items),
+                byType=dict(byt),
+                bySubject=dict(subj),
+                sampleBooks=len(SAMPLE))
+    json.dump(mani, open('poc-out/stories/manifest-v0.json','w'),
+              ensure_ascii=False, indent=1)
+    print('manifest:', VER, len(all_items))
+
 if __name__ == '__main__':
     main()
