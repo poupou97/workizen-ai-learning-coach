@@ -44,6 +44,18 @@ LINE_SIGNALS = {
 }
 LESSON = re.compile(r'^\s*(BÀI|Bài)\s+(\d+)\b')
 
+# ── THCS/THPT KNTT (phát hiện p160-162 Toán 6): mục đánh số + bảng CẤU PHẦN
+# có THỜI LƯỢNG. Bổ sung v3 — không đổi field cũ (findings chỉ thêm).
+FIELDS_THCS = {
+    'objective':      J + r'\d?\s*M[ụu]c tiêu và yêu c[ầa]u c[ầa]n đ[ạa]t',
+    'teacherNote':    J + r'\d?\s*Nh[ữu]ng đi[ểe]m c[ầa]n l[ưu]u ý',
+    'activityFlow':   J + r'\d?\s*G[ợo]i ý t[ổo] ch[ứu]c các ho[ạa]t đ[ộo]ng',
+    'misconceptionSection': J + r'C[ả]nh báo sai l[ầa]m',
+    'assessment':     J + r'\d?\s*(G[ợo]i ý|H[ưu][ớo]ng d[ẫa]n) (ki[ểe]m tra, )?đánh giá',
+}
+# Dòng cấu-phần có thời lượng: «Tên hoạt động (k phút)» — pacing định lượng.
+TIMED = re.compile(r'\((\d{1,2})\s*ph[úu]t\)')
+
 # ── EN adapter (sgv-pedagogy-en-v1) — khung Global Success PHÁT HIỆN TỪ DỮ LIỆU
 # (không đoán trước): mỗi activity một block Goal/Input/Procedure/Outcome.
 EN_LESSON = re.compile(r'^\s*LESSON\s+(\d+)\b')
@@ -135,6 +147,16 @@ def mine(doc):
                 if re.match(pat, line):
                     findings.append(dict(field=field, page=page, headline=line.strip()[:140],
                                          lesson=lesson and lesson['no']))
+            for field, pat in FIELDS_THCS.items():
+                if re.match(pat, line):
+                    findings.append(dict(field=field, page=page, format='thcs-numbered',
+                                         headline=line.strip()[:140],
+                                         lesson=lesson and lesson['no']))
+            tm = TIMED.search(line)
+            if tm:
+                findings.append(dict(field='timedComponent', minutes=int(tm.group(1)),
+                                     page=page, headline=line.strip()[:140],
+                                     lesson=lesson and lesson['no']))
             for intent, pat in INTENTS.items():
                 if re.match(pat, line):
                     findings.append(dict(field='intent', intent=intent, page=page,

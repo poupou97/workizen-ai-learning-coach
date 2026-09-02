@@ -36,6 +36,16 @@ gần như một LearningExperienceBlueprint viết sẵn.
 **EN THCS/THPT (GS 7, 11)** — format ĐỔI THEO CẤP: không còn Goal-block; giàu `Objectives`
 (133 hit lớp 7, 44 lớp 11) theo unit. ⇒ NN cần adapter THEO CẤP, không một adapter cho cả dải.
 
+### 2b. Addendum (miner v3) — khung THCS/THPT KNTT khác Tiểu học
+
+SGV Toán 6 dùng mục ĐÁNH SỐ: «1 Mục tiêu và yêu cầu cần đạt» (1.1 Kiến thức / 1.2 Kĩ năng /
+1.3 Phẩm chất) → «2 Những điểm cần lưu ý khi chuẩn bị bài giảng» → «3 Gợi ý tổ chức các hoạt
+động dạy học» với **BẢNG CẤU PHẦN CÓ THỜI LƯỢNG**: mỗi hàng = (tên hoạt động, số phút, MỤC ĐÍCH
+YÊU CẦU, GỢI Ý THỰC HIỆN/ĐÁP ÁN). Đo được: **584 cấu phần có thời lượng trong MỘT cuốn Toán 6**
+(1→55 phút) — pacing định lượng cho PatternStep (WAL-128). Có mục ĐẶT TÊN «Cảnh báo sai lầm
+thường gặp» (p161, Bài 30) — misconception là section chính thức ở THCS, không chỉ dòng «lưu ý».
+⇒ SGV có ÍT NHẤT 3 khung theo cấp/bộ: Tiểu học VN, THCS/THPT VN đánh số + bảng, EN Goal-block.
+
 ## 3. Field coverage (số finding / family, sample)
 
 | Field | TOÁN | TV/VĂN | KHOA | SỬ | NN | KHÁC |
