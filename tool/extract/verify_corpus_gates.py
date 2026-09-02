@@ -19,9 +19,9 @@ def load(p):
 
 def main():
     units = []
-    for b in ['05-sgk-toan-5-tap-mot', '04-sgk-toan-4-tap-mot',
-              '04-sgk-toan-4-tap-hai', '05-sgk-tieng-viet-5-tap-mot',
-              '05-sgk-tieng-viet-5-tap-hai']:
+    for b in ['05-sgk-toan-5-tap-mot', '05-sgk-toan-5-tap-hai',
+              '04-sgk-toan-4-tap-mot', '04-sgk-toan-4-tap-hai',
+              '05-sgk-tieng-viet-5-tap-mot', '05-sgk-tieng-viet-5-tap-hai']:
         d = load(f'poc-out/units/{b}.json')
         grade = 4 if b.startswith('04') else 5
         vol = 2 if 'tap-hai' in b else 1
@@ -171,6 +171,31 @@ def main():
               all(r['skillCaseId'] == 'unresolved'
                   for e in q if e['tier'] == 'concept-only'
                   for r in e['requirements']))
+
+    # G9 — WAL-80: ba lớp lỗi còn thiếu của bộ 9 + tổng kết harness
+    print('\nG9 knowledge QA (WAL-80)')
+    # (7) nguồn mâu thuẫn: không hai method trùng định danh
+    if _os.path.exists('poc-out/units/method-catalogue.json'):
+        mc = load('poc-out/units/method-catalogue.json')
+        ids = [m['methodId'] for m in mc]
+        check('không nguồn mâu thuẫn: methodId duy nhất', len(ids) == len(set(ids)))
+    # (8) knowledge-bịa-từ-OCR: đối-chứng-âm — không expr nào từ trang đầu sách
+    # (mục lục/hướng dẫn, trang in < 6) lọt vào exercise-case-map
+    check('đối-chứng-âm: 0 biểu thức từ trang mục-lục/hướng-dẫn (in < 6)',
+          all(r['printed'] >= 6 for r in emap))
+    # (9) LLM không căn cứ: hiện trạng phải là 0 llmInferred toàn corpus phái sinh
+    _llm = 0
+    for _f in ['poc-out/units/rule-concept-map.json',
+               'poc-out/units/exercise-case-map.json',
+               'poc-out/units/method-catalogue.json',
+               'poc-out/units/qmatrix.json']:
+        if _os.path.exists(_f):
+            _llm += open(_f).read().count('llmInferred')
+    check('0 suy luận LLM trong corpus phái sinh (báo cáo riêng khi xuất hiện)',
+          _llm == 0, f'llmInferred: {_llm}')
+    print('     ℹ️  bản đồ 9 lớp lỗi → check: ①map-sai-bài=G5+offset ②rò-tương-lai=G2'
+          ' ③sai-concept=G3-B60 ④sai-case=G3 ⑤tiên-quyết-giả=G6 ⑥thiếu-provenance='
+          'G1/G4/G7 ⑦nguồn-mâu-thuẫn=G9 ⑧bịa-từ-OCR=G9-đối-chứng-âm ⑨LLM-không-căn-cứ=G9')
 
     print('\n' + ('🟢 SCALE GATE: TẤT CẢ XANH' if not FAILS
                   else f'🔴 GATE ĐỎ: {FAILS}'))
