@@ -129,6 +129,21 @@ def main():
               any(o['conceptId'] == 'unmapped' for o in objs),
               f"{sum(1 for o in objs if o['conceptId']!='unmapped')}/{len(objs)} mapped")
 
+    # G6 — cross-grade graph (WAL-77): thứ-tự không được đội lốt lời-sách
+    _gp = 'poc-out/graph/crossgrade-graph.json'
+    if _os.path.exists(_gp):
+        g = json.load(open(_gp))
+        print('\nG6 cross-grade graph')
+        check('mọi cạnh mang origin', all(e.get('origin') for e in g['edges']))
+        check('BUILDS_ON không bao giờ tự nhận sourceStated',
+              all(e['origin'] != 'sourceStated' for e in g['edges']
+                  if e['kind'] == 'BUILDS_ON'))
+        check('REQUIRES chỉ tồn tại khi sourceStated',
+              all(e['origin'] == 'sourceStated' for e in g['edges']
+                  if e['kind'] == 'REQUIRES'))
+        check('mọi cạnh có evidence lần ngược được',
+              all(e.get('evidence') for e in g['edges']))
+
     print('\n' + ('🟢 SCALE GATE: TẤT CẢ XANH' if not FAILS
                   else f'🔴 GATE ĐỎ: {FAILS}'))
     sys.exit(1 if FAILS else 0)
