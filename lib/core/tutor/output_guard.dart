@@ -79,16 +79,19 @@ GuardVerdict validateTutorOutput({
   bool childSaid(String f) => childStatedFacts.contains(f);
   final cd = facts.commonDenominator.toString();
   if (maxAllowed.index <= SupportLevel.hint.index) {
-    if (RegExp('(^|[^0-9])$cd([^0-9]|\$)').hasMatch(squashed)) {
+    if (!childSaid(cd) &&
+        RegExp('(^|[^0-9])$cd([^0-9]|\$)').hasMatch(squashed)) {
       reasons.add('ESCALATION:common-denominator-$cd-at-hint');
     }
     for (final f in facts.intermediateForms) {
-      if (squashed.contains(f)) reasons.add('ESCALATION:$f-at-hint');
+      if (!childSaid(f) && squashed.contains(f)) {
+        reasons.add('ESCALATION:$f-at-hint');
+      }
     }
   }
   if (maxAllowed != SupportLevel.fullSolution) {
     for (final a in facts.answerForms) {
-      if (squashed.contains(a)) reasons.add('REVEAL:$a');
+      if (!childSaid(a) && squashed.contains(a)) reasons.add('REVEAL:$a');
     }
   }
 
