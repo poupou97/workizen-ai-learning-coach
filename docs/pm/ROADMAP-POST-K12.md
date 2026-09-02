@@ -88,3 +88,19 @@ Pipeline: SOURCE→CANDIDATE→VERIFY→NORMALIZE→CURATED→UI. POC sample tr�
 KHÔNG chen trước UI core/M1/P0/KS. North star §36: trẻ suy nghĩ nhiều hơn, tự làm nhiều hơn,
 giải thích tốt hơn, dần cần SAM ít hơn — game là MỘT surface, không phải sản phẩm.
 Report đích: docs/research/SAM-ADAPTIVE-LEARNING-ACTIVITIES-OSS-REVIEW.md (một file duy nhất).
+
+## Multi-Agent Learning & Academic Perspective Graph (Founder Order 2026-09-02 #6 — Epic WAL-159, P2 · RESEARCH LATER)
+
+| WS | Ticket | Ghi chú |
+|---|---|---|
+| MA-A Research hai chiều (Solution/Academic Perspective) + ontology + repo study | WAL-160 | relates WAL-131 |
+| MA-B Graph Pattern Discovery — matcher trên graph thật, đếm instance | WAL-161 | blocked by 160; relates WAL-77 |
+| MA-C ≤3 POC (cross-grade / model-evolution / Historical Council) + eval cost/latency/pedagogy | WAL-162 | blocked by 161; relates WAL-158 |
+
+Thesis Founder: multi-agent = làm CẤU TRÚC tri thức/phương pháp/bằng chứng/góc nhìn hiện ra để
+HỌC SINH làm việc nhận thức — «Student cognitive work > AI conversation»; AI nói nhiều hơn mà
+học sinh nghĩ ít hơn = FAIL. Khoá: PERSON FOLLOWS CONCEPT · SOURCE FACT ≠ DOCUMENTED POSITION ≠
+RECONSTRUCTION ≠ SAM EXPLANATION ≠ STUDENT INTERPRETATION · multi-agent ≠ UI lộ agent ≠ nhiều
+LLM call (deterministic graph → planner → 1 LLM constrained → verifier). Learning Opportunity =
+Graph Pattern × Learner State × Curriculum Permission × Pedagogical Policy.
+KHÔNG chen trước P0/P1/ALA; KHÔNG persona chatbot; KHÔNG đổi production UI vì hướng này.
