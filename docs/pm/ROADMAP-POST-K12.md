@@ -38,7 +38,8 @@ memo, 3e69d12 — mở khoá WAL-121/123). WAL-119 ✅ (entitlement-v1, PAYMENT�
 scale slice — fail-closed; bench store <1ms; §37 SCALE-có-điều-kiện chờ Founder). WAL-125 ✅ research (memo+bảng+lawyer-questions, STOP trình
 Founder, d5d87f9) · WAL-84 mốc-3 Nokia (100MB FTS p95 7ms; breakpoint ×105 tái xác nhận máy thấp)
 · WAL-33 mitigation ① (plausibility, 987550f). Còn mở: WAL-30 (chờ Founder) · WAL-84 (tier
-500MB+/battery) · WAL-33 (recall chờ ảnh thật) · WAL-50 (P3). Deferred: 121-124, 137-146 UI
+500MB+/battery) · WAL-33 (recall chờ ảnh thật) · WAL-50 (P3 — tokens/dark/motion/density XONG a43b70c, còn wire consumer)
+· WAL-84 mốc-4 670MB Nokia (FTS p95 49ms — interactive-class; mystery app-biến-mất = integration_test tự gỡ app, đã đính chính). Deferred: 121-124, 137-146 UI
 backlog, ALA 155-158, MA 159-162.
 
 ## Founder Gates (không tự vượt)
