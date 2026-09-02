@@ -21,10 +21,15 @@ Pipeline order đề xuất, đối chiếu hiện trạng:
 | Misconception hypothesis | ❌ MISSING | cần CATALOG tất định (xem STUDENT-MODEL §3) — không LLM tự do |
 | Teaching response → Retry → Verification | ✅ thang ±1 + REVEAL gate + retry; verification = bài tương tự | transfer-verify chưa có (xem §4) |
 
-**Đề xuất nhỏ nhất có giá trị:** phân loại lỗi 3 mức TRONG-CA bằng luật tất định trên dữ liệu
-đã có: careless = sai lần đầu + selfCorrection ngay không cần hỗ trợ; procedural = sai ở ca
-đã từng vững (pMastery cao trước đó); conceptual = sai lặp + hintRequested + probe xác nhận
-ca nền yếu. KHÔNG cần model mới — là POLICY đọc log. Đánh nhãn là GIẢ THUYẾT, kiểm ở WAL-49.
+**Đề xuất nhỏ nhất có giá trị (SỬA theo Founder Directive 2026-09-02, delta C):** các luật
+tất định trên log (careless = sai lần đầu + selfCorrection ngay không hỗ trợ; procedural =
+sai ở ca từng vững; conceptual = sai lặp + hintRequested + probe xác nhận nền yếu) **chỉ được
+phép tạo `ErrorHypothesis`** — `{type, confidence, supportingEvidence, conflictingEvidence,
+source/policyId, status}` — KHÔNG BAO GIỜ là chân lý trực tiếp về learner. Phải phân biệt ba
+tầng: **OBSERVED ERROR** (sự kiện, bất biến) ≠ **ERROR HYPOTHESIS** (giả thuyết có độ tin,
+có bằng chứng thuận/nghịch, có nguồn) ≠ **CONFIRMED MISCONCEPTION** (chỉ sau probe/verify).
+LLM không bao giờ được mint misconception tự do thành truth; heuristic cũng vậy — cả hai chỉ
+đề xuất hypothesis vào cùng một khuôn. Kiểm giả thuyết ở WAL-49.
 
 ## 2. WS-C — TeachingStrategy như khái niệm CẤU TRÚC (không phải prompt to)
 
