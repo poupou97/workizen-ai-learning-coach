@@ -16,6 +16,12 @@ CURATED = [
     ('asset:sac-lo-ma-nho-statue', 'poc-out/pdf/07/07-sgk-lich-su-va-dia-li-7.pdf',
      11, (0.700, 0.360, 0.895, 0.585), 'STATUE_PHOTO', 'p:sác-lơ-ma-nhơ',
      'Hình 1. Tượng Hoàng đế Sác-lơ-ma-nhơ (742–814) ở Hăm-buốc — SGK LS&ĐL 7, trang PDF 11'),
+    ('asset:bui-xuan-phai-photo', 'poc-out/pdf/06/06-sgk-mi-thuat-6.pdf',
+     14, (0.440, 0.052, 0.910, 0.325), 'HISTORICAL_PHOTO', 'p:bùi-xuân-phái',
+     'Hoạ sĩ Bùi Xuân Phái — ảnh: Trần Chính Nghĩa (nguồn in trong sách) — SGK MT 6, trang PDF 14'),
+    ('asset:pho-hang-mam-1984', 'poc-out/pdf/06/06-sgk-mi-thuat-6.pdf',
+     14, (0.095, 0.498, 0.500, 0.712), 'ARTWORK', 'p:bùi-xuân-phái',
+     'Phố Hàng Mắm, 1984, tranh sơn dầu — Bảo tàng Mĩ thuật VN (nguồn in trong sách) — SGK MT 6, trang PDF 14'),
 ]
 
 def main():
