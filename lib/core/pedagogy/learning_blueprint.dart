@@ -15,6 +15,7 @@
 library;
 
 import '../student/learning_evidence.dart';
+import '../student/mastery.dart';
 import 'pedagogical_pattern.dart';
 import 'pedagogy_model.dart';
 
@@ -36,6 +37,7 @@ class LearningExperienceBlueprint {
     this.misconceptionIds = const [],
     this.transferRequired = false,
     this.reflectionRequired = false,
+    this.learnerFirst = false,
     this.version = blueprintVersion,
   });
 
@@ -69,6 +71,12 @@ class LearningExperienceBlueprint {
   final bool transferRequired;
   final bool reflectionRequired;
 
+  /// WAL-130 finding #1 → rule v0.1: TRẺ ĐI TRƯỚC. Blueprint quan-sát/sử-liệu
+  /// đòi hành động đầu tiên là của TRẺ — mọi sự kiện mang hỗ trợ ≥ workedStep
+  /// đứng TRƯỚC lần trả lời đầu tiên là vi phạm (demo-trước-quan-sát).
+  /// Mặc định false: blueprint DẠY BÀI MỚI (vd B6 Khám phá) được làm mẫu trước.
+  final bool learnerFirst;
+
   final PedagogySource source;
   final String version;
 }
@@ -89,6 +97,22 @@ List<String> blueprintViolations(
     if (e.skillCaseId.isNotEmpty &&
         !bp.skillCaseIds.contains(e.skillCaseId)) {
       out.add('CASE_OUT_OF_BLUEPRINT: ${e.eventId} ${e.skillCaseId}');
+    }
+  }
+
+  if (bp.learnerFirst) {
+    for (final e in log.events) {
+      // Trẻ ĐÃ tự đi một bước (không hỗ trợ) — từ đây scaffold là hợp lệ.
+      if (e.kind == EvidenceKind.independentAttempt ||
+          e.kind == EvidenceKind.selfCorrection) {
+        break;
+      }
+      // Mọi sự kiện (kể cả câu trả lời CÓ hỗ trợ) mang support ≥ workedStep
+      // trước lần tự-làm đầu tiên = demo-trước-quan-sát.
+      final s = e.support;
+      if (s != null && s.index >= SupportLevel.workedStep.index) {
+        out.add('LEARNER_FIRST_VIOLATED: ${e.eventId} ${s.name} trước lần tự làm đầu');
+      }
     }
   }
 

@@ -125,8 +125,8 @@ void main() {
 
   group('KHOA HỌC — quan sát trước; LIMITATION v0 phát hiện chủ đích', () {
     const c = 'quan-sat-ghi-nhan';
-    test('⚠️ CHARACTERIZATION: demo TRƯỚC khi trẻ quan sát — v0 CHƯA bắt '
-        '(thiếu rule SEQUENCE_ORDER) — finding cho blueprint v1', () {
+    test('✅ v0.1 (WAL-131 trả nợ finding #1): demo TRƯỚC khi trẻ quan sát '
+        '⇒ LEARNER_FIRST_VIOLATED', () {
       final v = blueprintViolations(
           blueprintKhoa4QuanSat,
           log(c, [
@@ -135,9 +135,19 @@ void main() {
                 correct: true, support: SupportLevel.workedStep),
             ev(c, EvidenceKind.independentAttempt, correct: true),
           ]));
-      expect(v, isEmpty,
-          reason: 'v0 không có rule thứ tự — GHI NHẬN là gap, File 04 §KHTN; '
-              'khi thêm SEQUENCE_ORDER rule thì test này PHẢI đổi');
+      expect(v.any((x) => x.startsWith('LEARNER_FIRST_VIOLATED')), isTrue);
+    });
+
+    test('trẻ quan sát trước rồi mới được scaffold: 0 vi phạm learnerFirst',
+        () {
+      final v = blueprintViolations(
+          blueprintKhoa4QuanSat,
+          log(c, [
+            ev(c, EvidenceKind.independentAttempt, correct: false),
+            ev(c, EvidenceKind.postHintSuccess,
+                correct: true, support: SupportLevel.workedStep),
+          ]));
+      expect(v.where((x) => x.startsWith('LEARNER_FIRST')), isEmpty);
     });
   });
 

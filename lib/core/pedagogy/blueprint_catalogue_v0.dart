@@ -181,6 +181,7 @@ const blueprintSu10SuLieu = LearningExperienceBlueprint(
   ],
   // Sử: SAM không «giải hộ» kết luận — không reveal.
   assistanceCap: AssistanceRung.strategicHint,
+  learnerFirst: true, // trẻ quan sát/đọc nguồn TRƯỚC
   evidenceRequired: [EvidenceKind.independentAttempt],
   source: PedagogySource(
     authority: PedagogyAuthority.sourceExplicit,
@@ -214,6 +215,7 @@ const blueprintKhoa4QuanSat = LearningExperienceBlueprint(
     ]),
   ],
   assistanceCap: AssistanceRung.partialScaffold,
+  learnerFirst: true, // trẻ quan sát/đọc nguồn TRƯỚC
   evidenceRequired: [EvidenceKind.independentAttempt],
   source: PedagogySource(
     authority: PedagogyAuthority.sourceExplicit,
