@@ -75,3 +75,16 @@ không rebuild corpus). OCR-perfection không bao giờ là blocker của UI.
 | KS-F Cross-subject + device validation + checkpoint §36 | WAL-153 |
 
 Pipeline: SOURCE→CANDIDATE→VERIFY→NORMALIZE→CURATED→UI. POC sample trước, đo precision, mới scale.
+
+## Adaptive Learning Activities Research (Founder Order 2026-09-02 #5 — Epic WAL-154, P2 · SAU CÙNG)
+
+| WS | Ticket | Ghi chú |
+|---|---|---|
+| ALA-A Discovery/shortlist/matrix + gamification review | WAL-155 | discovery nhẹ được phép sớm |
+| ALA-B Hub Game AI + Academy deep audit | WAL-156 | được phép lật verdict matrix nếu có bằng chứng |
+| ALA-C Primitives + Adaptive Activity Engine proposal | WAL-157 | blocked by 155 |
+| ALA-D Signature activities (Bắt lỗi SAM, Dạy lại SAM…) + ≤3 POC recs | WAL-158 | blocked by 155+156 |
+
+KHÔNG chen trước UI core/M1/P0/KS. North star §36: trẻ suy nghĩ nhiều hơn, tự làm nhiều hơn,
+giải thích tốt hơn, dần cần SAM ít hơn — game là MỘT surface, không phải sản phẩm.
+Report đích: docs/research/SAM-ADAPTIVE-LEARNING-ACTIVITIES-OSS-REVIEW.md (một file duy nhất).
