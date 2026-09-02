@@ -21,12 +21,12 @@ ActivityGuide(G) · Assessment-mode. Simulation = R&D gate (F16 đo trước).
 - **Reading:** Text → Reader[READ gate] → câu hỏi → trả lời → feedbackFor → reflection. [chạy thật rồi — WAL-113 B1, câu hỏi mở không chấm]
 - **Writing:** Đề → hiểu → outline → draft(independent) → SAM critique (không viết hộ) →
   revise(selfCorrection) → reflection. [Compose-lite đã đúng khung]
-- **Science:** Hiện tượng → Observation → giả thuyết(learner) → Experiment/data → Table
+- **Science:** Hiện tượng → Observation → giả thuyết(learner) → Experiment/data → Table [PREDICT-gate + Experiment chạy thật — WAL-144]
   → giải thích → kết luận + evidence experiment-reasoning.
 - **History:** Sự kiện → context → SourceReader[3 nhãn: NGUỒN NÓI/DIỄN GIẢI/EM KẾT LUẬN]
   → chronology(Timeline) → claim → giải thích. [SourceReader prototype chạy thật — WAL-113 B2;
   chronology/claim còn lại ở WAL-144]
-- **Geography:** Map → locate → layer → so sánh → data-reasoning → kết luận.
+- **Geography:** Map → locate → layer → so sánh → data-reasoning → kết luận. [MapReader chạy thật — WAL-144]
 - **Creative/Performance (G):** prompt → thực hiện → artifact (chụp/ghi âm — Camera/
   record Hub) → tự đánh giá checklist → phản hồi nỗ lực (không chấm).
 - **Language (EN):** 4 kỹ năng tách: nghe(TTS/audio)→đáp; nói(STT)→phản hồi phát âm [R];
