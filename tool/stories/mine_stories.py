@@ -7,7 +7,7 @@ confidence từ chất-lượng-OCR (tỉ lệ dấu tiếng Việt hợp lệ),
 """
 import json, os, re, sys, collections, unicodedata
 
-VER = 'stories-v0'
+VER = 'stories-v0.1'
 SAMPLE = [
  '06-sgk-ngu-van-6-tap-mot','10-sgk-ngu-van-10-tap-hai','03-sgk-tieng-viet-3-tap-mot',
  '10-sgk-lich-su-10','04-sgk-lich-su-va-dia-li-4','07-sgk-lich-su-va-dia-li-7',
@@ -19,6 +19,11 @@ SAMPLE = [
 NOISE = re.compile(r'NĐ-CP|QĐ-BGDĐT|QĐ-TTg|Bản quyền|NHÀ XUẤT BẢN|ISBN|Tái bản|Chủ biên|Hội đồng|thẩm định', re.I)
 NAME = r"[A-ZĐ][a-zà-ỹ]+(?:[\s\-][A-ZĐa-zà-ỹ][a-zà-ỹ\-]*){0,4}"
 P_BIRTH = re.compile(r'(' + NAME + r')\s*\(\s*(\d{3,4})\s*[–\-]\s*(\d{3,4})\s*\)')
+# v0.1: (năm–năm) sau TRIỀU ĐẠI/SỰ KIỆN không phải năm sinh-mất
+DYNASTY = re.compile(r'^(Nguyên|Đinh|Lý|Trần|Trân|Minh|Thanh|Tống|Đường|Hán|Tuỳ|Tùy|Ngô|Lê|Nguyễn|Hồ|Mạc|Mỹ|Anh|Pháp|Đức|Nga|Nhật)$')
+EVENTISH = re.compile(r'(Khởi nghĩa|Chiến tranh|Kháng chiến|Cách mạng|thời kì|Thời kì|triều|Triều|nhà)\b')
+# v0.1: tên bị nuốt động từ — cắt tại từ thường tiếng Việt đi sau tên
+VERB_TAIL = re.compile(r'\s+(đã|không|mà|là|được|và|khi|sau|trước|cùng|vẫn|chuyên|từng|nói|viết|sáng tác|đặt)\b.*$')
 P_INTRO = re.compile(r'(nhà (?:thơ|văn|bác học|khoa học|toán học|vật lí|hoá học|sử học|giáo dục|soạn nhạc)|nhạc sĩ|hoạ sĩ|họa sĩ|danh nhân|anh hùng)\s+(' + NAME + r')')
 P_QUOTE = re.compile(r'"([^"]{15,220})"\s*[\.\s]*\(\s*(' + NAME + r')(?:\s*,\s*([^)]{3,80}))?\)')
 P_EVENT = re.compile(r'([Nn]ăm\s+(\d{3,4})|[Nn]gày\s+(\d{1,2})[\-/](\d{1,2})[\-/](\d{4}))[\s,:]([^.]{15,180}\.)')
@@ -55,24 +60,54 @@ def mine(did, reg):
             continue  # bìa/pháp lý — nguồn nhiễu chính đo được ở probe
         for m in P_BIRTH.finditer(text):
             name, b, dth = m.group(1), int(m.group(2)), int(m.group(3))
-            if not (700 <= b <= 2010 and b < dth <= 2026 and dth - b < 110):
-                continue  # OCR corruption («7642») ⇒ loại — không REVIEW bừa v0
+            if not (700 <= b <= 2010 and b < dth <= 2026 and 15 <= dth - b < 110):
+                continue  # OCR corruption / khoảng phi-nhân ⇒ loại
+            name = VERB_TAIL.sub('', name).strip()
+            if DYNASTY.match(name) or EVENTISH.search(name) or len(name) < 3:
+                continue  # triều đại/sự kiện mang (năm–năm) — không phải người
             add('PERSON', page, text[max(0,m.start()-60):m.end()+120],
                 name=name, birthYear=b, deathYear=dth)
         for m in P_INTRO.finditer(text):
+            name = VERB_TAIL.sub('', m.group(2)).strip()
+            if len(name) < 3 or EVENTISH.search(name):
+                continue
             add('PERSON', page, text[max(0,m.start()-40):m.end()+120],
-                name=m.group(2), role=m.group(1))
+                name=name, role=m.group(1))
         for m in P_QUOTE.finditer(text):
-            add('QUOTE', page, text[max(0,m.start()-40):m.end()+40],
-                quote=m.group(1), person=m.group(2), citedSource=m.group(3))
+            person = m.group(2).strip()
+            # «Theo X» / tên sách = TRÍCH VĂN BẢN, không phải lời danh nhân
+            before = text[max(0, m.start(2)-8):m.start(2)]
+            is_excerpt = ('Theo' in before or person.startswith('Theo')
+                          or person.lower().startswith(('truyện', 'ca dao',
+                              'tục ngữ', 'sách', 'báo')))
+            add('SOURCE_EXCERPT' if is_excerpt else 'QUOTE', page,
+                text[max(0,m.start()-40):m.end()+40],
+                quote=m.group(1), person=person.removeprefix('Theo').strip(),
+                citedSource=m.group(3))
         for m in P_EVENT.finditer(text):
+            body = m.group(6)
+            # v0.1: loại ngôn-ngữ-bài-tập/caption — đòi dấu hiệu SỰ KIỆN
+            if re.search(r'em hãy|quan sát|bài tập|biểu đồ|bảng số liệu|lớp \d', body, re.I):
+                continue
             add('EVENT', page, m.group(0)[:260],
                 year=int(m.group(2) or m.group(5)),
                 monthDay=(f'{int(m.group(4)):02d}-{int(m.group(3)):02d}'
                           if m.group(3) else None))
         for m in P_INV.finditer(text):
+            ctx = text[max(0, m.start()-50):m.start(2)]
+            # mục-đích/bài-tập: «em/học sinh… để tìm ra…» ⇒ không phải khám phá
+            if re.search(r'\b(em|con|học sinh|chúng ta|để|nhằm|giúp)\s*$', ctx) or \
+               re.search(r'em hãy|thí nghiệm đơn giản|bài tập', ctx, re.I):
+                continue
+            person = m.group(1)
+            if person:
+                person = VERB_TAIL.sub('', person).strip() or None
+            # v0.1 precision-first: đòi NĂM hoặc PERSON hợp lệ gần đó
+            window = text[max(0,m.start()-80):m.end()+40]
+            if not person and not re.search(r'\b1\d{3}\b|\b20[0-2]\d\b', window):
+                continue
             add('INVENTION_DISCOVERY', page, m.group(0)[:260],
-                person=m.group(1), verb=m.group(2), what=m.group(3)[:120])
+                person=person, verb=m.group(2), what=m.group(3)[:120])
     return out
 
 def main():
