@@ -93,3 +93,8 @@ resolver (entitlement-v1). Premium = family-unit, bán INSIGHT+COACHING+
 CONVENIENCE (matrix: PARENT-UX-AUDIT.md §WAL-119); learning loop FREE bất
 biến theo CẤU TRÚC (engine không có chỗ nhận tier — test quét). Consent/
 privacy/export-delete không bao giờ paywall. Pricing/thu tiền = Founder Gate.
+
+## WAL-125 (2026-09-02) — ADS/TRẺ EM: research memo đã nộp
+Xem docs/safety/ADS-CHILDREN-LEGAL-RESEARCH.md — bảng band×loại (Grade 1-2
+NO ADS; personalized FORBIDDEN mọi band; contextual = NEEDS-LEGAL; teacher
+surface là ứng viên ít rủi ro nhất) + 5 câu hỏi lawyer. STOP — Founder quyết.
