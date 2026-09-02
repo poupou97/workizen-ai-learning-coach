@@ -47,3 +47,14 @@
 | 38 | Settings | SCREEN | MODIFY | Settings + consent parent-gated | Hub pattern | R | P2 | WAL-146 | BYOK parent |
 
 **Đếm:** 38/38 có owner. Milestone WAL-135 = #05+#06+#07 (mới) + #08-17 (đã chạy S24). Không orphan.
+
+## Annex A — Capability MỚI sau 38 concept (Founder Order 2026-09-02 #4)
+
+**SAM Knowledge Stories — «Kho khám phá của SAM»** (Epic **WAL-147**, KS-A→F = WAL-148→153):
+curated discovery layer từ corpus tất cả môn (danh nhân/quote/sự kiện/phát minh/khám phá/tác
+phẩm/địa danh). 38 concepts không phải giới hạn sản phẩm — capability này ẢNH HƯỞNG các concept:
+#05 Home (thẻ «Ngày này năm xưa» — WAL-153/138), Loading (verified quote), #07 Lesson (hero/
+enrichment), #36 Library/#38 Settings (entry «Kho khám phá» — mở khoá một phần từ holder WAL-146),
+#27 History (SourceReader dùng chung person/event), Search. Invariants: VERIFIED SOURCE REQUIRED ·
+SOURCE FACT ≠ SAM EXPLANATION · SOURCE IMAGE ≠ AI ILLUSTRATION · PRECISION > RECALL · KHÔNG BIẾT
+→ KHÔNG BỊA.

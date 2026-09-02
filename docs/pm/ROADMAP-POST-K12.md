@@ -62,3 +62,16 @@ bị chặn thật. Làn chính: WAL-108 (device walk ✓) → **WAL-132** surfa
 môn/bài → enrichment scoped khi màn cần (WAL-133: SOURCE_ASSET có provenance đầy đủ /
 SAM_GENERATED «Minh họa của SAM» / UI_DECORATIVE; OCR lại chỉ scoped book/page/lesson/asset,
 không rebuild corpus). OCR-perfection không bao giờ là blocker của UI.
+
+## Knowledge Stories (Founder Order 2026-09-02 #4 — Epic WAL-147, P1 HIGH)
+
+| WS | Ticket |
+|---|---|
+| KS-A Sample đa-môn + model + precision | WAL-148 |
+| KS-B Verification + review states + quote rules | WAL-149 |
+| KS-C Portrait/visual extraction (WAL-133 assets) | WAL-150 |
+| KS-D Local store + FTS search | WAL-151 |
+| KS-E Discovery UI slice (Settings/Library/Detail/Loading/Today) | WAL-152 |
+| KS-F Cross-subject + device validation + checkpoint §36 | WAL-153 |
+
+Pipeline: SOURCE→CANDIDATE→VERIFY→NORMALIZE→CURATED→UI. POC sample trước, đo precision, mới scale.
