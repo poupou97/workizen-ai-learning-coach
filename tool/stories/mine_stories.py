@@ -137,9 +137,9 @@ def main():
         if sum(1 for s in seen if s == key) >= 3: continue
         seen.add(key)
         s = i['source']
-        head = {'PERSON': i.get('name'), 'QUOTE': f"{i.get('person')}: «{str(i.get('quote'))[:60]}…»",
+        head = {'SOURCE_EXCERPT': '[trích] '+str(i.get('quote'))[:50], 'PERSON': i.get('name'), 'QUOTE': f"{i.get('person')}: «{str(i.get('quote'))[:60]}…»",
                 'EVENT': f"{i.get('year')} — {i['source']['textEvidence'][:50]}",
-                'INVENTION_DISCOVERY': f"{i.get('person') or '?'} {i.get('verb')} {str(i.get('what'))[:45]}"}[i['type']]
+                'INVENTION_DISCOVERY': f"{i.get('person') or '?'} {i.get('verb')} {str(i.get('what'))[:45]}"}.get(i['type'],'')
         print(f"  [{i['type'][:6]}|c{i['confidence']}] {s['subject']} {s['grade']} p{s['pagePdf']}: {head}")
         if len(seen) >= 4 and sum(byt[t] > 0 for t in byt) <= len(seen): break
     # đếm ví dụ in tối đa 14 dòng
