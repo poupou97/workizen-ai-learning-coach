@@ -53,3 +53,12 @@ STUDENT FREE · TEACHER FREE · PARENT BASIC FREE · PARENT PREMIUM (family unit
 | 8 | Presentation Policy + Surface Binding | WAL-132 |
 
 Invariant trung tâm: **LLM KHÔNG PHẢI PEDAGOGICAL AUTHORITY** — chỉ realization trong contract. Artifacts: `docs/pedagogy/01→05`. Versioning thêm: pedagogyModelVersion, blueprintVersion, presentationPolicyVersion — replay không silently reinterpret. Không đảo UI trước pedagogy.
+
+## Founder Direction 2026-09-02 (tối) — UI/UX FIRST + Content Enrichment on demand
+
+Production UI/UX **được mở** (hết chốt chờ-checkpoint): triển khai UI từ 38 concept + Design
+System + dữ liệu thật hiện có + subject surfaces. Không mở lại data/OCR foundation trừ khi UI
+bị chặn thật. Làn chính: WAL-108 (device walk ✓) → **WAL-132** surfaces + visual identity theo
+môn/bài → enrichment scoped khi màn cần (WAL-133: SOURCE_ASSET có provenance đầy đủ /
+SAM_GENERATED «Minh họa của SAM» / UI_DECORATIVE; OCR lại chỉ scoped book/page/lesson/asset,
+không rebuild corpus). OCR-perfection không bao giờ là blocker của UI.
