@@ -69,15 +69,16 @@ class LessonIndex {
           for (final b in v.whereType<Map>())
             BookLessons(
               sourceDocumentId: '${b['sourceDocumentId']}',
-              volume: b['volume'] as String?,
+              // volume có thể là int hoặc String tuỳ nguồn registry — chịu kiểu.
+              volume: b['volume'] == null ? null : '${b['volume']}',
               lessons: [
                 for (final l in (b['lessons'] as List? ?? const [])
                     .whereType<Map>())
-                  if (l['no'] is int)
+                  if (l['no'] is num)
                     LessonRef(
-                        no: l['no'] as int,
+                        no: (l['no'] as num).toInt(),
                         title: l['title'] as String?,
-                        pageStart: l['pageStart'] as int?),
+                        pageStart: (l['pageStart'] as num?)?.toInt()),
               ],
             )
         ];
@@ -96,7 +97,7 @@ class LessonIndex {
                   expr: e['expr'] as String,
                   book: '${e['book']}',
                   skillCaseId: e['skillCaseId'] as String?,
-                  page: e['page'] as int?),
+                  page: (e['page'] as num?)?.toInt()),
         ];
       });
     }
