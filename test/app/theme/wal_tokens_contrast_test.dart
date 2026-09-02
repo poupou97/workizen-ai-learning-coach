@@ -54,6 +54,15 @@ void main() {
       'mintText/white': (WalColors.mintText, WalColors.white),
       'warnText/white': (WalColors.warnText, WalColors.white),
       for (final s in LearningStateToken.values) 'state:${s.name}': (s.fg, s.bg),
+      // WAL-50 — dark palette CÙNG LUẬT, không ngoại lệ:
+      'dark:ink/surface': (WalColorsDark.ink, WalColorsDark.surface),
+      'dark:ink/card': (WalColorsDark.ink, WalColorsDark.surfaceCard),
+      'dark:inkSoft/surface': (WalColorsDark.inkSoft, WalColorsDark.surface),
+      'dark:primaryText/surface': (WalColorsDark.primaryText, WalColorsDark.surface),
+      'dark:primaryText/lavender': (WalColorsDark.primaryText, WalColorsDark.surfaceLavender),
+      'dark:mintText/surface': (WalColorsDark.mintText, WalColorsDark.surface),
+      'dark:pinkText/surface': (WalColorsDark.pinkText, WalColorsDark.surface),
+      'dark:warnText/surface': (WalColorsDark.warnText, WalColorsDark.surface),
     };
     final failures = <String>[];
     pairs.forEach((name, p) {
@@ -69,6 +78,27 @@ void main() {
     expect(contrast(WalColors.accent500, WalColors.white), lessThan(4.5),
         reason: 'chính vì nó KHÔNG đạt trên nền sáng nên luật cấm tồn tại — '
             'con số làm luật, không phải khẩu vị');
+  });
+
+  test('⭐ WAL-50: THCS/THPT «âm lượng» THẤP HƠN tiểu học — đo bằng số', () {
+    final p = WalBandDensity.primary;
+    final lo = WalBandDensity.lowerSecondary;
+    final up = WalBandDensity.upperSecondary;
+    expect(lo.mascotChip, lessThan(p.mascotChip),
+        reason: '⭐ đột biến cho THCS to bằng tiểu học ⇒ đỏ (MASCOT-AUDIT #1)');
+    expect(lo.celebrateScale, lessThan(p.celebrateScale));
+    expect(lo.showStickers, isFalse);
+    expect(up.celebrateScale, 0.0, reason: 'THPT: không confetti');
+    expect(WalBandDensity.forGradeBandLabel('6-9'), same(lo));
+    expect(WalBandDensity.forGradeBandLabel('3-5'), same(p));
+  });
+
+  test('motion: CELEBRATE là duration dài nhất (một chỗ được rình rang), '
+      'tap ngắn nhất', () {
+    expect(WalMotion.celebrate, greaterThan(WalMotion.stage));
+    expect(WalMotion.tap, lessThan(WalMotion.gentle));
+    expect(WalMotion.thinkingLoop, greaterThan(WalMotion.celebrate),
+        reason: 'loop chờ ≠ hiệu ứng — chậm và đều');
   });
 
   test('mọi LearningStateToken có bg ≠ fg và đủ 8 trạng thái thiết kế', () {

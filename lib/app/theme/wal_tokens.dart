@@ -55,3 +55,72 @@ abstract final class WalType {
   // Tiểu học đọc trước: thân bài ≥16, tối thiểu tuyệt đối 14 (chữ phụ).
   static const display = 28.0, title = 22.0, body = 17.0, secondary = 15.0;
 }
+
+
+/// WAL-50 — DARK PALETTE: cặp chữ/nền tối, CÙNG LUẬT contrast-test ≥4.5:1
+/// (không thêm màu nào thiếu cặp). Nền tối ấm — không đen tuyệt đối (OLED
+/// smearing + chữ trẻ em cần nền dịu).
+abstract final class WalColorsDark {
+  static const surface = Color(0xFF17171F);
+  static const surfaceCard = Color(0xFF232330);
+  static const surfaceLavender = Color(0xFF2A2440);
+
+  static const ink = Color(0xFFECECF4); // chữ chính trên nền tối
+  static const inkSoft = Color(0xFFB6B6C8);
+  static const primaryText = Color(0xFFC4B5FD); // tím sáng đọc được
+  static const mintText = Color(0xFF6EE7C7);
+  static const pinkText = Color(0xFFF9A8D4);
+  static const warnText = Color(0xFFFBBF24);
+}
+
+/// WAL-50 — MOTION TOKENS: duration/curve theo NGHĨA, không theo màn.
+/// Spec 12 state: docs/design/MOTION-SPEC-12-STATE.md — mọi state chỉ được
+/// dùng token ở đây (đổi nhịp = đổi MỘT chỗ).
+abstract final class WalMotion {
+  /// phản hồi chạm/chip — nhanh, không phô trương
+  static const tap = Duration(milliseconds: 120);
+
+  /// xuất hiện nội dung/hint — đủ thấy, không sốt ruột
+  static const gentle = Duration(milliseconds: 240);
+
+  /// chuyển màn/stage
+  static const stage = Duration(milliseconds: 320);
+
+  /// CELEBRATE — duy nhất được «rình rang», và chỉ khi claim THẬT
+  static const celebrate = Duration(milliseconds: 480);
+
+  /// vòng lặp THINKING (engine đang chẩn đoán)
+  static const thinkingLoop = Duration(milliseconds: 1200);
+}
+
+/// WAL-50 — CHẾ ĐỘ GỌN THCS (band 6-9): «âm lượng» mascot/hiệu ứng thấp hơn
+/// (MASCOT-AUDIT rủi ro #1: lệch tiểu học). Một design system — N policy band.
+class WalBandDensity {
+  const WalBandDensity._(
+      {required this.mascotChip,
+      required this.mascotHero,
+      required this.celebrateScale,
+      required this.showStickers});
+
+  final double mascotChip; // size mascot cạnh lời thoại
+  final double mascotHero; // size mascot màn kết quả
+  final double celebrateScale; // 1.0 = confetti đầy đủ; 0 = chỉ chữ
+  final bool showStickers;
+
+  static const primary = WalBandDensity._(
+      mascotChip: 56, mascotHero: 96, celebrateScale: 1.0, showStickers: true);
+
+  /// THCS: mascot nhỏ hơn, celebrate tiết chế, không sticker.
+  static const lowerSecondary = WalBandDensity._(
+      mascotChip: 40, mascotHero: 64, celebrateScale: 0.5, showStickers: false);
+
+  /// THPT: tối giản — mascot chỉ còn dấu hiệu, không hiệu ứng.
+  static const upperSecondary = WalBandDensity._(
+      mascotChip: 32, mascotHero: 48, celebrateScale: 0.0, showStickers: false);
+
+  static WalBandDensity forGradeBandLabel(String label) => switch (label) {
+        '6-9' => lowerSecondary,
+        '10-12' => upperSecondary,
+        _ => primary, // '1-2' và '3-5' giữ mặc định tiểu học
+      };
+}
