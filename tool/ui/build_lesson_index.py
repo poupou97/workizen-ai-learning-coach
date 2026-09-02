@@ -142,6 +142,66 @@ for f in sorted(glob.glob(f'poc-out/graph/ocr-body/{su_book}/p*.json')):
             samGloss=SAM_GLOSS.get(pdf)))
         break                 # một khối mỗi trang là đủ cho slice
 
+# ---- khoaExperiments (WAL-144 #KHTN): khối THÍ NGHIỆM thật từ Khoa học 5 ----
+# Trang có cả «Chuẩn bị:» và «Tiến hành:» = một khối thí nghiệm SGK.
+# Giữ VERBATIM (kể cả lỗi OCR nhỏ) — không viết lại lời sách.
+kh_book = f'0{GRADE}-sgk-khoa-hoc-{GRADE}'
+kh_lessons = []
+for d in docs:
+    if d['sourceDocumentId'] == kh_book:
+        kh_lessons = sorted(
+            [(l['pageStart'], l['number'], l.get('title'))
+             for l in d.get('lessons', [])
+             if l.get('pageStart') is not None and l.get('number') is not None])
+
+def kh_lesson_for(printed):
+    hit = None
+    for ps, no, title in kh_lessons:
+        if ps <= printed:
+            hit = (no, title)
+    return hit
+
+khoa_experiments = []
+for f in sorted(glob.glob(f'poc-out/graph/ocr-body/{kh_book}/p*.json')):
+    j = json.load(open(f))
+    lines = [l['text'] for l in j['lines']]
+    txt = '\n'.join(lines)
+    if 'Chuẩn bị:' not in txt or 'Tiến hành:' not in txt:
+        continue
+    pdf = int(re.search(r'p(\d+)\.json', f).group(1))
+    # OCR có thể dính «Chuẩn bị:» giữa dòng — dò bằng chứa, không startswith.
+    i_cb = next(i for i, t in enumerate(lines) if 'Chuẩn bị:' in t)
+    i_th = next(i for i, t in enumerate(lines) if 'Tiến hành' in t)
+    # title: dòng đánh-số gần nhất phía trên «Chuẩn bị:»
+    title = None
+    for t in reversed(lines[:i_cb]):
+        if re.match(r'^\d+\.\s+\S', t):
+            title = re.sub(r'^\d+\.\s+', '', t).strip()
+            break
+    steps, du_doan, quan_sat = [], None, None
+    for t in lines[i_th + 1:i_th + 12]:
+        if t.startswith('- '):
+            steps.append(t[2:].strip())
+        elif t.startswith('Dự đoán'):
+            du_doan = t.strip()
+        elif re.match(r'^(Sau .{0,30})?[Qq]uan sát', t):
+            quan_sat = t.strip()
+        elif t.startswith('?') or t.startswith('Hình'):
+            break
+    if not steps or title is None:
+        continue  # khối không đọc được cấu trúc ⇒ bỏ, không bịa
+    printed = int(lines[-1]) if lines[-1].strip().isdigit() else pdf - 1
+    les = kh_lesson_for(printed)
+    khoa_experiments.append(dict(
+        book=kh_book, page=printed, pagePdf=pdf,
+        lesson=les[0] if les else None,
+        lessonTitle=(les[1] or None) if les else None,
+        title=title,
+        chuanBi=' '.join(x.strip() for x in lines[i_cb:i_th]).replace('Chuẩn bị:', '', 1).strip(),
+        tienHanh=steps,
+        duDoan=du_doan,
+        quanSat=quan_sat))
+
 for v in subjects.values():
     v.sort(key=lambda b: (b['volume'] or '9', b['sourceDocumentId']))
 out = dict(grade=GRADE, version='lesson-index-v2',
@@ -149,7 +209,8 @@ out = dict(grade=GRADE, version='lesson-index-v2',
            toanExercises={str(k): v for k, v in sorted(ex_by_lesson.items())},
            tvReadings=tv_readings,
            tvWritings=tv_writings,
-           suSources=su_sources)
+           suSources=su_sources,
+           khoaExperiments=khoa_experiments)
 os.makedirs('assets/pack', exist_ok=True)
 path = f'assets/pack/lesson-index-g{GRADE}.json'
 json.dump(out, open(path, 'w'), ensure_ascii=False)
@@ -157,7 +218,7 @@ n_les = sum(len(l['lessons']) for v in subjects.values() for l in v)
 print(f'{path}: {len(subjects)} môn, {n_les} bài, exToán '
       f'{sum(len(v) for v in ex_by_lesson.values())}, '
       f'tvReadings {len(tv_readings)}, tvWritings {len(tv_writings)}, '
-      f'suSources {len(su_sources)}')
+      f'suSources {len(su_sources)}, khoaExperiments {len(khoa_experiments)}')
 for r in tv_readings[:3]:
     print('  TV:', r['book'][-7:], 'L', r['lesson'], 'p', r['page'],
           len(r['questions']), 'câu hỏi —', r['passage'][:50])

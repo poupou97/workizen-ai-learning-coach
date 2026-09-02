@@ -75,6 +75,30 @@ class TvWriting {
   final String prompt;
 }
 
+/// WAL-144 #KHTN — khối THÍ NGHIỆM thật từ SGK Khoa học (Chuẩn bị/Tiến hành
+/// VERBATIM — không viết lại lời sách; thiếu bước ⇒ không thành object).
+class KhoaExperiment {
+  const KhoaExperiment(
+      {required this.book,
+      required this.title,
+      required this.chuanBi,
+      required this.tienHanh,
+      this.page,
+      this.lesson,
+      this.duDoan,
+      this.quanSat});
+  final String book;
+  final int? page;
+  final int? lesson;
+  final String title;
+  final String chuanBi;
+  final List<String> tienHanh;
+
+  /// Câu «Dự đoán…» in trong sách — có nó thì surface phải PREDICT-gate.
+  final String? duDoan;
+  final String? quanSat;
+}
+
 /// WAL-113 B2 — khối «TƯ LIỆU.» nguyên văn từ SGK Sử-Địa (ocr-body).
 /// [samGloss] là DIỄN GIẢI CỦA SAM (curated, systemDerived) — UI bắt buộc dán
 /// nhãn riêng, KHÔNG BAO GIỜ trình bày như lời của nguồn.
@@ -103,7 +127,8 @@ class LessonIndex {
       required this.toanExercises,
       this.tvReadings = const [],
       this.tvWritings = const [],
-      this.suSources = const []});
+      this.suSources = const [],
+      this.khoaExperiments = const []});
 
   final int grade;
   final Map<String, List<BookLessons>> subjects;
@@ -111,6 +136,7 @@ class LessonIndex {
   final List<TvReading> tvReadings;
   final List<TvWriting> tvWritings;
   final List<SuSource> suSources;
+  final List<KhoaExperiment> khoaExperiments;
 
   List<CorpusExercise> exercisesForToan(int lessonNo) =>
       toanExercises[lessonNo] ?? const [];
@@ -127,6 +153,11 @@ class LessonIndex {
 
   List<SuSource> suSourcesFor(int lessonNo) =>
       [for (final s in suSources) if (s.lesson == lessonNo) s];
+
+  List<KhoaExperiment> experimentsFor(int? lessonNo) => [
+        for (final e in khoaExperiments)
+          if (lessonNo != null && e.lesson == lessonNo) e
+      ];
 
   static LessonIndex? fromJsonString(String raw) {
     final Object? j;
@@ -227,13 +258,35 @@ class LessonIndex {
             samGloss: e['samGloss'] as String?));
       }
     }
+    final ke = <KhoaExperiment>[];
+    final kj = j['khoaExperiments'];
+    if (kj is List) {
+      for (final e in kj.whereType<Map>()) {
+        final steps = [
+          for (final t in (e['tienHanh'] as List? ?? const []))
+            if (t is String) t
+        ];
+        // thiếu bước tiến hành hoặc title ⇒ KHÔNG phải thí nghiệm dùng được.
+        if (e['title'] is! String || steps.isEmpty) continue;
+        ke.add(KhoaExperiment(
+            book: '${e['book']}',
+            page: (e['page'] as num?)?.toInt(),
+            lesson: (e['lesson'] as num?)?.toInt(),
+            title: e['title'] as String,
+            chuanBi: '${e['chuanBi'] ?? ''}',
+            tienHanh: steps,
+            duDoan: e['duDoan'] as String?,
+            quanSat: e['quanSat'] as String?));
+      }
+    }
     return LessonIndex(
         grade: grade,
         subjects: subjects,
         toanExercises: ex,
         tvReadings: tv,
         tvWritings: tw,
-        suSources: su);
+        suSources: su,
+        khoaExperiments: ke);
   }
 
   /// `null` khi máy này chưa build asset (poc-out chưa có) — hợp lệ, nói thật.

@@ -14,6 +14,7 @@ import '../../core/store/learning_session.dart';
 import '../../core/tutor/learning_activity.dart';
 import '../history/source_reader.dart';
 import '../learning_session/slice_flow.dart';
+import '../science/experiment_screen.dart';
 import '../shell/compose_lite_screen.dart';
 import '../shell/reader_screen.dart';
 import '../shell/session_recorder.dart';
@@ -36,6 +37,7 @@ class SubjectHomeScreen extends StatelessWidget {
   bool get _isToan => subject == 'Toán';
   bool get _isTv => subject == 'Tiếng Việt';
   bool get _isSu => subject == 'LS&ĐL';
+  bool get _isKhoa => subject == 'Khoa học';
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +54,11 @@ class SubjectHomeScreen extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     color: WalColors.ink)),
             const SizedBox(height: WalSpacing.sm),
+            // WAL-144 #KHTN: mục lục Khoa học 5 chưa map bài↔trang tin cậy
+            // (số bài trùng/thiếu pageStart) — thí nghiệm hiện thành mục RIÊNG,
+            // KHÔNG gán bừa vào bài (nói thật hơn là đoán).
+            if (_isKhoa && index.khoaExperiments.isNotEmpty)
+              _experimentsTile(context),
             for (final b in books) ...[
               if (b.volume != null || books.length > 1)
                 Padding(
@@ -167,6 +174,64 @@ class SubjectHomeScreen extends StatelessWidget {
     );
     openCanonicalProblem(context,
         problem: problem, profile: profile, store: store);
+  }
+
+  Widget _experimentsTile(BuildContext context) {
+    final n = index.khoaExperiments.length;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: WalSpacing.sm),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+        child: ListTile(
+          title: const Text('🔬 Thí nghiệm trong sách',
+              style: TextStyle(
+                  fontSize: WalType.body,
+                  fontWeight: FontWeight.w600,
+                  color: WalColors.ink)),
+          subtitle: Text('$n thí nghiệm từ SGK — dự đoán rồi làm thử',
+              style: const TextStyle(
+                  fontSize: WalType.secondary, color: WalColors.inkSoft)),
+          trailing:
+              const Icon(Icons.chevron_right, color: WalColors.primaryText),
+          onTap: () => showModalBottomSheet<void>(
+            context: context,
+            backgroundColor: WalColors.surface,
+            builder: (sheet) => SafeArea(
+              child: ListView(shrinkWrap: true, children: [
+                for (final ex in index.khoaExperiments)
+                  ListTile(
+                    title: Text(ex.title,
+                        style: const TextStyle(
+                            fontSize: WalType.body, color: WalColors.ink)),
+                    subtitle: Text('tr. ${ex.page}',
+                        style: const TextStyle(
+                            fontSize: WalType.secondary,
+                            color: WalColors.inkSoft)),
+                    onTap: () {
+                      Navigator.of(sheet).pop();
+                      _openExperiment(context, ex);
+                    },
+                  ),
+              ]),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openExperiment(BuildContext context, KhoaExperiment ex) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => ExperimentScreen(
+              experiment: ex,
+              onFinished: (events) => recordSession(
+                  store: store,
+                  learnerId: profile.learnerId,
+                  subjectId: 'khoa-hoc',
+                  events: events,
+                  trigger: SessionTrigger.manual),
+            )));
   }
 
   /// Bài có NHIỀU hoạt động (đọc + viết…): cho trẻ CHỌN — không nuốt hoạt động.

@@ -26,7 +26,15 @@ const _sample = '''
    "attribution":"(Theo Ngô Sỹ Liên..., Đại Việt sử ký toàn thư, Tập I)",
    "samGloss":"Nguồn này cho thấy việc dời đô có tính toán."},
   {"book":"05-sgk-lich-su-va-dia-li-5","page":18,"lesson":3,
-   "excerpt":"khối hỏng: KHÔNG có attribution — phải bị loại"}]}
+   "excerpt":"khối hỏng: KHÔNG có attribution — phải bị loại"}],
+ "khoaExperiments":[{"book":"05-sgk-khoa-hoc-5","page":16,"lesson":null,
+   "title":"Tách muối ra khỏi dung dịch muối",
+   "chuanBi":"Muối ăn, 1 bát sứ chịu nhiệt, 1 cốc thuỷ tinh...",
+   "tienHanh":["Cho 1 thìa muối ăn vào cốc thuỷ tinh chứa 80 ml nước, khuấy đều."],
+   "duDoan":"Dự đoán hiện tượng xảy ra với dung dịch muối khi đun.",
+   "quanSat":"Sau vài phút, quan sát hiện tượng xảy ra."},
+  {"book":"05-sgk-khoa-hoc-5","page":99,"title":"Khối hỏng KHÔNG có bước",
+   "chuanBi":"x","tienHanh":[]}]}
 ''';
 
 void main() {
@@ -82,6 +90,12 @@ void main() {
     final w = idx.writingsForTv('05-sgk-tieng-viet-5-tap-mot', 4).single;
     expect(w.prompt, contains('viết bài văn'));
     expect(idx.writingsForTv('05-sgk-tieng-viet-5-tap-mot', 99), isEmpty);
+    // WAL-144 #KHTN: thí nghiệm parse; khối KHÔNG có bước tiến hành bị loại.
+    expect(idx.khoaExperiments, hasLength(1),
+        reason: '⭐ khối thiếu tienHanh KHÔNG được thành object (fail closed)');
+    final ex = idx.khoaExperiments.single;
+    expect(ex.title, contains('Tách muối'));
+    expect(ex.duDoan, isNotNull, reason: 'bài này sách IN câu Dự đoán');
   });
 
   test('JSON vỡ / thiếu grade ⇒ null (fail closed)', () {
