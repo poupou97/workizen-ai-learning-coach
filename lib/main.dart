@@ -10,20 +10,26 @@
 library;
 
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
+import 'core/stories/stories_store.dart';
 import 'core/store/file_store.dart';
 import 'core/store/learner_profile.dart';
 import 'core/store/learner_store.dart';
 import 'features/camera/education_ocr_adapter.dart';
 import 'features/camera/mlkit_ocr_adapter.dart';
 import 'features/mission/mission_center_screen.dart';
+import 'features/discovery/story_detail_screen.dart';
 import 'features/parent/parent_area.dart';
+import 'features/settings/settings_screen.dart';
 import 'core/curriculum/canonical_problem.dart';
 import 'core/knowledge/provenance.dart';
 import 'features/learning_session/slice_flow.dart';
+import 'features/discovery/splash_quote.dart';
 import 'features/subjects/lesson_index.dart';
 import 'features/subjects/subjects_screen.dart';
 import 'features/mission/mission_data.dart';
@@ -34,16 +40,24 @@ Future<void> main() async {
   final dir = await getApplicationDocumentsDirectory();
   final store = await FileLearnerStore.open(
       File('${dir.path}/hoc-cung-sam/learner-store.jsonl'));
-  runApp(HocCungSamApp(store: store, ocr: MlkitEducationOcrAdapter()));
+  runApp(HocCungSamApp(
+      store: store,
+      ocr: MlkitEducationOcrAdapter(),
+      storiesDbPath: '${dir.path}/hoc-cung-sam/sam-stories.db'));
 }
 
 class HocCungSamApp extends StatefulWidget {
-  const HocCungSamApp({super.key, required this.store, this.ocr});
+  const HocCungSamApp(
+      {super.key, required this.store, this.ocr, this.storiesDbPath});
 
   final LearnerStore store;
 
   /// `null` (test/desktop) ⇒ nút chụp giữ flow demo cũ — không giả camera.
   final EducationOcrAdapter? ocr;
+
+  /// WAL-152 — nơi copy sam-stories.db từ asset. `null` = không nạp kho
+  /// khám phá (test cũ giữ nguyên hành vi).
+  final String? storiesDbPath;
 
   @override
   State<HocCungSamApp> createState() => _HocCungSamAppState();
@@ -57,6 +71,8 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   bool _loading = true;
   Future<MissionData>? _mission;
   LessonIndex? _lessonIndex; // WAL-136 — null = chưa build asset, nói thật
+  StoriesStore _stories = StoriesStore.open('/khong-co'); // rỗng tới khi nạp
+  StoryItem? _splashQuote;
 
   @override
   void initState() {
@@ -71,7 +87,30 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (mounted) setState(() => _lessonIndex = idx);
   }
 
+  Future<void> _loadStories() async {
+    final path = widget.storiesDbPath;
+    if (path == null) return;
+    try {
+      final f = File(path);
+      if (!f.existsSync()) {
+        final bytes = await rootBundle.load('assets/pack/sam-stories.db');
+        await f.parent.create(recursive: true);
+        await f.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+      }
+      final s = StoriesStore.open(path);
+      if (!mounted) return;
+      setState(() {
+        _stories = s;
+        final quotes = s.loadingQuotes();
+        if (quotes.isNotEmpty) {
+          _splashQuote = quotes[Random(DateTime.now().day).nextInt(quotes.length)];
+        }
+      });
+    } catch (_) {/* thiếu asset ⇒ kho rỗng, UI nói thật */}
+  }
+
   Future<void> _load() async {
+    _loadStories(); // song song — không chặn profiles
     final ps = await widget.store.profiles();
     // WAL-109: máy của chung mở lại phải về ĐÚNG người học gần nhất.
     final activeId = await widget.store.activeLearnerId();
@@ -156,6 +195,18 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (mounted) setState(_refreshMission);
   }
 
+  /// «Bạn có biết?» — một mục VERIFIED bất kỳ, ổn định trong ngày.
+  StoryItem? _didYouKnow() {
+    if (_stories.isEmpty) return null;
+    final pool = [
+      ..._stories.byType('EVENT'),
+      ..._stories.byType('INVENTION_DISCOVERY'),
+      ..._stories.byType('PERSON'),
+    ];
+    if (pool.isEmpty) return null;
+    return pool[Random(DateTime.now().day).nextInt(pool.length)];
+  }
+
   void _honest(BuildContext context, String msg) {
     showModalBottomSheet<void>(
       context: context,
@@ -186,7 +237,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
         title: 'Học cùng SAM',
         debugShowCheckedModeBanner: false,
         home: _loading
-            ? const Scaffold(body: SizedBox.shrink())
+            ? (_splashQuote == null
+                ? const Scaffold(body: SizedBox.shrink())
+                : SplashQuoteScreen(quote: _splashQuote!))
             : _profile == null
                 ? OnboardingScreen(onDone: _onboarded)
                 : FutureBuilder<MissionData>(
@@ -207,6 +260,18 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         onParentArea: () => openParentArea(context,
                             store: widget.store, profiles: _profiles),
                         onReview: () => _openReview(context),
+                        onOpenSettings: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    SettingsScreen(stories: _stories))),
+                        todayStory: _stories
+                            .todayEvents(DateTime.now())
+                            .firstOrNull,
+                        didYouKnowStory: _didYouKnow(),
+                        onOpenStory: (st) => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) => StoryDetailScreen(
+                                    item: st, stories: _stories))),
                         onOpenSubjects: () async {
                           await Navigator.of(context).push(MaterialPageRoute(
                               builder: (_) => SubjectsScreen(

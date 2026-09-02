@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/agenda/learning_agenda.dart';
+import '../../core/stories/stories_store.dart';
 import '../../core/store/learner_profile.dart';
 import '../camera/camera_demo_flow.dart';
 import '../parent/parent_tonight_screen.dart';
@@ -31,6 +32,10 @@ class MissionCenterScreen extends StatelessWidget {
     this.onParentArea,
     this.onOpenSubjects,
     this.onReview,
+    this.onOpenSettings,
+    this.todayStory,
+    this.didYouKnowStory,
+    this.onOpenStory,
   });
 
   final MissionData data;
@@ -50,6 +55,15 @@ class MissionCenterScreen extends StatelessWidget {
 
   /// WAL-138 — chip «Ôn luyện»: mở bài ôn THẬT (hoặc nói thật khi chưa tới hạn).
   final VoidCallback? onReview;
+
+  /// WAL-152 — Settings/Thêm (entry Kho khám phá). `null` = ẩn icon.
+  final VoidCallback? onOpenSettings;
+
+  /// «Ngày này năm xưa» — CHỈ khi có event VERIFIED đúng ngày (§14);
+  /// không có ⇒ [didYouKnowStory] với nhãn KHÁC — không giả Today.
+  final StoryItem? todayStory;
+  final StoryItem? didYouKnowStory;
+  final void Function(StoryItem)? onOpenStory;
 
   /// WAL-108 — mở flow camera THẬT (learnerId + store xuyên suốt). `null` =
   /// môi trường chưa nối slice (test/demo cũ) ⇒ giữ flow demo.
@@ -76,6 +90,10 @@ class MissionCenterScreen extends StatelessWidget {
             if (data.upcomingSubjects.isNotEmpty) ...[
               const SizedBox(height: WalSpacing.sm),
               _upcomingRow(),
+            ],
+            if (todayStory != null || didYouKnowStory != null) ...[
+              const SizedBox(height: WalSpacing.md),
+              _discoveryCard(),
             ],
             const SizedBox(height: WalSpacing.lg),
             if (data.reviews.isNotEmpty) ...[
@@ -118,6 +136,13 @@ class MissionCenterScreen extends StatelessWidget {
                 tooltip: 'Đổi người học',
                 onPressed: () => _showSwitcher(context),
                 icon: const Icon(Icons.switch_account_outlined,
+                    color: WalColors.primaryText),
+              ),
+            if (onOpenSettings != null)
+              IconButton(
+                tooltip: 'Thêm',
+                onPressed: onOpenSettings,
+                icon: const Icon(Icons.more_horiz,
                     color: WalColors.primaryText),
               ),
           ]));
@@ -315,6 +340,45 @@ class MissionCenterScreen extends StatelessWidget {
         child: Text(message,
             style: const TextStyle(
                 fontSize: WalType.body, color: WalColors.ink, height: 1.5)),
+      ),
+    );
+  }
+
+  /// WAL-152 — thẻ khám phá trên Home: Today THẬT hoặc «Bạn có biết?» —
+  /// hai nhãn KHÁC nhau, không bao giờ giả «ngày này năm xưa» (§14).
+  Widget _discoveryCard() {
+    final st = todayStory ?? didYouKnowStory!;
+    final isToday = todayStory != null;
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+        onTap: onOpenStory == null ? null : () => onOpenStory!(st),
+        child: Padding(
+          padding: const EdgeInsets.all(WalSpacing.md),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(isToday ? '📅 NGÀY NÀY NĂM XƯA' : '💡 BẠN CÓ BIẾT?',
+                style: const TextStyle(
+                    fontSize: WalType.secondary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.05,
+                    color: WalColors.primaryText)),
+            const SizedBox(height: 6),
+            Text(st.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontSize: WalType.body,
+                    fontWeight: FontWeight.w600,
+                    color: WalColors.ink)),
+            const SizedBox(height: 2),
+            Text(st.sourceLine,
+                style: const TextStyle(
+                    fontSize: WalType.secondary, color: WalColors.inkSoft)),
+          ]),
+        ),
       ),
     );
   }
