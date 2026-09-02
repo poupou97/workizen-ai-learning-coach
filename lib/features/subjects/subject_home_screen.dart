@@ -14,6 +14,7 @@ import '../../core/store/learning_session.dart';
 import '../../core/tutor/learning_activity.dart';
 import '../history/source_reader.dart';
 import '../learning_session/slice_flow.dart';
+import '../shell/compose_lite_screen.dart';
 import '../shell/reader_screen.dart';
 import '../shell/session_recorder.dart';
 import 'lesson_index.dart';
@@ -95,16 +96,23 @@ class SubjectHomeScreen extends StatelessWidget {
     final readings = _isTv
         ? index.readingsForTv(b.sourceDocumentId, l.no)
         : const <TvReading>[];
+    final writings = _isTv
+        ? index.writingsForTv(b.sourceDocumentId, l.no)
+        : const <TvWriting>[];
     final sources = _isSu ? index.suSourcesFor(l.no) : const <SuSource>[];
-    final openable =
-        exercises.isNotEmpty || readings.isNotEmpty || sources.isNotEmpty;
-    final subtitle = exercises.isNotEmpty
-        ? '${exercises.length} bài tập từ SGK — vào học ngay'
-        : readings.isNotEmpty
-            ? '${readings.length} bài đọc từ SGK — đọc rồi trả lời'
-            : sources.isNotEmpty
-                ? '${sources.length} tư liệu gốc từ SGK — đọc nguồn rồi tự kết luận'
-                : 'SAM đang học bài này — con chụp bài tập để học cùng nhé';
+    final openable = exercises.isNotEmpty ||
+        readings.isNotEmpty ||
+        writings.isNotEmpty ||
+        sources.isNotEmpty;
+    final parts = <String>[
+      if (exercises.isNotEmpty) '${exercises.length} bài tập',
+      if (readings.isNotEmpty) '${readings.length} bài đọc',
+      if (writings.isNotEmpty) '${writings.length} đề viết',
+      if (sources.isNotEmpty) '${sources.length} tư liệu gốc',
+    ];
+    final subtitle = parts.isNotEmpty
+        ? '${parts.join(' · ')} từ SGK — vào học ngay'
+        : 'SAM đang học bài này — con chụp bài tập để học cùng nhé';
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),
       // Material bọc ListTile — nền + ink vẽ đúng chỗ (assertion framework).
@@ -129,11 +137,8 @@ class SubjectHomeScreen extends StatelessWidget {
             : null,
           onTap: !openable
               ? null
-              : () => exercises.isNotEmpty
-                  ? _openExercise(context, l, exercises.first)
-                  : readings.isNotEmpty
-                      ? _openReading(context, readings.first)
-                      : _openSource(context, sources.first),
+              : () => _openLesson(
+                  context, l, exercises, readings, writings, sources),
         ),
       ),
     );
@@ -162,6 +167,80 @@ class SubjectHomeScreen extends StatelessWidget {
     );
     openCanonicalProblem(context,
         problem: problem, profile: profile, store: store);
+  }
+
+  /// Bài có NHIỀU hoạt động (đọc + viết…): cho trẻ CHỌN — không nuốt hoạt động.
+  void _openLesson(
+      BuildContext context,
+      LessonRef l,
+      List<CorpusExercise> exercises,
+      List<TvReading> readings,
+      List<TvWriting> writings,
+      List<SuSource> sources) {
+    final actions = <(String, VoidCallback)>[
+      if (exercises.isNotEmpty)
+        ('🧮 Làm bài tập', () => _openExercise(context, l, exercises.first)),
+      if (readings.isNotEmpty)
+        ('📖 Đọc bài', () => _openReading(context, readings.first)),
+      if (writings.isNotEmpty)
+        ('✍️ Luyện viết', () => _openWriting(context, writings.first)),
+      if (sources.isNotEmpty)
+        ('📜 Đọc tư liệu gốc', () => _openSource(context, sources.first)),
+    ];
+    if (actions.length == 1) {
+      actions.single.$2();
+      return;
+    }
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: WalColors.surface,
+      builder: (sheet) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Padding(
+            padding: EdgeInsets.all(WalSpacing.md),
+            child: Text('Bài này có mấy việc — con chọn nhé',
+                style: TextStyle(
+                    fontSize: WalType.body,
+                    fontWeight: FontWeight.w600,
+                    color: WalColors.ink)),
+          ),
+          for (final a in actions)
+            ListTile(
+              title: Text(a.$1,
+                  style: const TextStyle(
+                      fontSize: WalType.body, color: WalColors.ink)),
+              onTap: () {
+                Navigator.of(sheet).pop();
+                a.$2();
+              },
+            ),
+          const SizedBox(height: WalSpacing.sm),
+        ]),
+      ),
+    );
+  }
+
+  /// WAL-144 — TV: đề VIẾT thật → Compose (dàn ý → nháp → góp ý → sửa;
+  /// SAM KHÔNG viết hộ — không tồn tại chỗ chứa bài mẫu). Evidence một chỗ ghi.
+  void _openWriting(BuildContext context, TvWriting w) {
+    final activity = LearningActivity(
+      activityId: '${w.book}:l${w.lesson}:viet',
+      prompt: w.prompt,
+      response: ResponseKind.compose,
+      conceptId: 'tv-viet',
+      sourceBook: w.book,
+      sourcePage: w.page,
+    );
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => ComposeLiteScreen(
+              activity: activity,
+              onFinished: (events) => recordSession(
+                  store: store,
+                  learnerId: profile.learnerId,
+                  subjectId: 'tieng-viet',
+                  events: events,
+                  trigger: SessionTrigger.manual),
+            )));
   }
 
   /// WAL-113 B1 — TV: đoạn văn + câu hỏi NGUYÊN VĂN từ units (textbookVerbatim).

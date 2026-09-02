@@ -68,6 +68,18 @@ for path in sorted(glob.glob(f'poc-out/units/0{GRADE}-sgk-tieng-viet-{GRADE}-*.j
                 book=book, lesson=lesson, page=p.get('pagePrinted'),
                 passage=p['text'].strip(), questions=qs))
 
+# ---- tvWritings (WAL-144 Essay): bài «Viết…» thật — đề + trang, KHÔNG mẫu ---
+W_RE = re.compile(r'^\s*\d*\.?\s*(Viết|Dựa vào[^.]{0,80}viết)', re.U)
+tv_writings = []
+for path in sorted(glob.glob(f'poc-out/units/0{GRADE}-sgk-tieng-viet-{GRADE}-*.json')):
+    data = json.load(open(path))
+    for u in data['units']:
+        if (u['role'] == 'EXERCISE' and u.get('lesson') is not None
+                and W_RE.match(u['text']) and len(u['text']) <= 400):
+            tv_writings.append(dict(
+                book=data['book'], lesson=u['lesson'],
+                page=u.get('pagePrinted'), prompt=u['text'].strip()))
+
 # ---- suSources (WAL-113 B2): khối «TƯ LIỆU.» nguyên văn từ ocr-body Sử ------
 # samGloss = DIỄN GIẢI CỦA SAM (curated tay, systemDerived) — UI phải dán nhãn
 # «SAM diễn giải», KHÔNG BAO GIỜ render như lời của nguồn.
@@ -136,6 +148,7 @@ out = dict(grade=GRADE, version='lesson-index-v2',
            subjects={k: v for k, v in sorted(subjects.items())},
            toanExercises={str(k): v for k, v in sorted(ex_by_lesson.items())},
            tvReadings=tv_readings,
+           tvWritings=tv_writings,
            suSources=su_sources)
 os.makedirs('assets/pack', exist_ok=True)
 path = f'assets/pack/lesson-index-g{GRADE}.json'
@@ -143,7 +156,8 @@ json.dump(out, open(path, 'w'), ensure_ascii=False)
 n_les = sum(len(l['lessons']) for v in subjects.values() for l in v)
 print(f'{path}: {len(subjects)} môn, {n_les} bài, exToán '
       f'{sum(len(v) for v in ex_by_lesson.values())}, '
-      f'tvReadings {len(tv_readings)}, suSources {len(su_sources)}')
+      f'tvReadings {len(tv_readings)}, tvWritings {len(tv_writings)}, '
+      f'suSources {len(su_sources)}')
 for r in tv_readings[:3]:
     print('  TV:', r['book'][-7:], 'L', r['lesson'], 'p', r['page'],
           len(r['questions']), 'câu hỏi —', r['passage'][:50])

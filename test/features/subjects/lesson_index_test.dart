@@ -18,6 +18,8 @@ const _sample = '''
  "tvReadings":[{"book":"05-sgk-tieng-viet-5-tap-mot","lesson":1,"page":8,
    "passage":"THANH ÂM CỦA GIÓ Chúng tôi đi chăn trâu, ngày nào cũng qua suối.",
    "questions":[{"prompt":"1. Khung cảnh thiên nhiên được miêu tả thế nào?","page":9}]}],
+ "tvWritings":[{"book":"05-sgk-tieng-viet-5-tap-mot","lesson":4,"page":25,
+   "prompt":"1. Dựa vào dàn ý đã lập, viết bài văn theo yêu cầu của đề bài."}],
  "suSources":[{"book":"05-sgk-lich-su-va-dia-li-5","page":41,"lesson":9,
    "lessonTitle":"TRIỀU LÝ VÀ VIỆC ĐỊNH ĐÔ Ở THĂNG LONG",
    "excerpt":"Trong Chiếu dời đô có đoạn ...",
@@ -55,6 +57,8 @@ void main() {
     expect(idx.exercisesForToan(6), isNotEmpty, reason: 'B6 có bài tập thật');
     // WAL-113: file thật phải mang cross-subject data (build từ poc-out).
     expect(idx.tvReadings, isNotEmpty, reason: 'TV5 có bài đọc mined thật');
+    expect(idx.tvWritings.length, greaterThan(30),
+        reason: '57 đề «Viết» mined thật từ TV5 hai tập');
     expect(idx.suSources, hasLength(2),
         reason: '2 khối TƯ LIỆU thật (đội Hoàng Sa + Chiếu dời đô)');
     expect(idx.suSources.every((s) => s.attribution.endsWith(')')), isTrue,
@@ -74,6 +78,10 @@ void main() {
     expect(su.single.attribution, contains('Đại Việt sử ký'));
     expect(idx.suSourcesFor(9).single.samGloss, contains('tính toán'));
     expect(idx.suSourcesFor(3), isEmpty, reason: 'khối hỏng đã bị loại');
+    // WAL-144: đề viết thật — CHỈ có đề, không trường bài mẫu (cấu trúc).
+    final w = idx.writingsForTv('05-sgk-tieng-viet-5-tap-mot', 4).single;
+    expect(w.prompt, contains('viết bài văn'));
+    expect(idx.writingsForTv('05-sgk-tieng-viet-5-tap-mot', 99), isEmpty);
   });
 
   test('JSON vỡ / thiếu grade ⇒ null (fail closed)', () {

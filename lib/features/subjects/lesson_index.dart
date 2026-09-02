@@ -62,6 +62,19 @@ class TvReading {
   final List<TvQuestion> questions;
 }
 
+/// WAL-144 — đề bài VIẾT thật từ units TV («Viết…», «Dựa vào… viết»).
+/// ⭐ Cố ý CHỈ có đề — không trường nào chứa bài mẫu (REVEAL gate của Compose
+/// đúng theo cấu trúc dữ liệu, cùng họ LearningActivity.composeChecklist).
+class TvWriting {
+  const TvWriting(
+      {required this.book, required this.lesson, required this.prompt,
+      this.page});
+  final String book;
+  final int lesson;
+  final int? page;
+  final String prompt;
+}
+
 /// WAL-113 B2 — khối «TƯ LIỆU.» nguyên văn từ SGK Sử-Địa (ocr-body).
 /// [samGloss] là DIỄN GIẢI CỦA SAM (curated, systemDerived) — UI bắt buộc dán
 /// nhãn riêng, KHÔNG BAO GIỜ trình bày như lời của nguồn.
@@ -89,12 +102,14 @@ class LessonIndex {
       required this.subjects,
       required this.toanExercises,
       this.tvReadings = const [],
+      this.tvWritings = const [],
       this.suSources = const []});
 
   final int grade;
   final Map<String, List<BookLessons>> subjects;
   final Map<int, List<CorpusExercise>> toanExercises;
   final List<TvReading> tvReadings;
+  final List<TvWriting> tvWritings;
   final List<SuSource> suSources;
 
   List<CorpusExercise> exercisesForToan(int lessonNo) =>
@@ -103,6 +118,11 @@ class LessonIndex {
   List<TvReading> readingsForTv(String book, int lessonNo) => [
         for (final r in tvReadings)
           if (r.book == book && r.lesson == lessonNo) r
+      ];
+
+  List<TvWriting> writingsForTv(String book, int lessonNo) => [
+        for (final w in tvWritings)
+          if (w.book == book && w.lesson == lessonNo) w
       ];
 
   List<SuSource> suSourcesFor(int lessonNo) =>
@@ -179,6 +199,18 @@ class LessonIndex {
             ]));
       }
     }
+    final tw = <TvWriting>[];
+    final wj = j['tvWritings'];
+    if (wj is List) {
+      for (final w in wj.whereType<Map>()) {
+        if (w['prompt'] is! String || w['lesson'] is! num) continue;
+        tw.add(TvWriting(
+            book: '${w['book']}',
+            lesson: (w['lesson'] as num).toInt(),
+            page: (w['page'] as num?)?.toInt(),
+            prompt: w['prompt'] as String));
+      }
+    }
     final su = <SuSource>[];
     final uj = j['suSources'];
     if (uj is List) {
@@ -200,6 +232,7 @@ class LessonIndex {
         subjects: subjects,
         toanExercises: ex,
         tvReadings: tv,
+        tvWritings: tw,
         suSources: su);
   }
 
