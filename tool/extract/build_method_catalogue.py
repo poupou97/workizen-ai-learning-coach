@@ -31,7 +31,9 @@ for i, r in enumerate(rules):
         continue
     grade = 4 if r['book'].startswith('04') else 5
     cat.append({
-        'methodId': f"m:{r['conceptId']}:g{grade}:b{r['lesson']}",
+        # 2 RULE cùng bài = 2 phát biểu CÓ TRANG RIÊNG — id phải phân biệt
+        # (gate G9-⑦ đã bắt trùng khi id chỉ theo bài).
+        'methodId': f"m:{r['conceptId']}:g{grade}:b{r['lesson']}:p{u['pagePrinted']}:{i}",
         'conceptId': r['conceptId'],
         'grade': grade,
         'book': r['book'],
