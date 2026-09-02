@@ -114,10 +114,14 @@ def main():
 
     # G5 — LearningObjective (WAL-76): nguồn nói thẳng, unmapped trung thực
     import os as _os
-    _objp = 'poc-out/units/05-sgv-toan-5.objectives.json'
-    if _os.path.exists(_objp):
-        objs = load(_objp)
-        print('\nG5 learning objectives (SGV5 MỤC TIÊU)')
+    _objfiles = ['poc-out/units/05-sgv-toan-5.objectives.json',
+                 'poc-out/units/04-sgv-toan-4.objectives.json']
+    objs = []
+    for _objp in _objfiles:
+        if _os.path.exists(_objp):
+            objs += load(_objp)
+    if objs:
+        print('\nG5 learning objectives (SGV MỤC TIÊU, Toán 4-5)')
         check('mọi objective gán được bài', all(o['lesson'] for o in objs))
         check('mọi objective mang sourceStated',
               all(o['origin'] == 'sourceStated' for o in objs))
