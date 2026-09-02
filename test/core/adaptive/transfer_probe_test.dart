@@ -81,6 +81,38 @@ void main() {
       expect(r.distance, 0);
     });
 
+    test('bảng khoảng cách: wordProblem = 2, family khác = 1, cùng = 0', () {
+      expect(
+          transferDistance(
+              SurfaceFamily.bareExpression, SurfaceFamily.wordProblem),
+          2);
+      expect(
+          transferDistance(
+              SurfaceFamily.wordProblem, SurfaceFamily.comparison),
+          2);
+      expect(
+          transferDistance(
+              SurfaceFamily.bareExpression, SurfaceFamily.comparison),
+          1);
+      expect(
+          transferDistance(
+              SurfaceFamily.visualModel, SurfaceFamily.visualModel),
+          0);
+    });
+
+    test('distance thắng id từ điển: bài wordProblem id NHỎ vẫn thua', () {
+      final r = nextTransferProbe(
+        skillCaseId: 'B57',
+        dominantSurface: SurfaceFamily.bareExpression,
+        seenTemplates: {'t-cu'},
+        pool: [
+          cand('a-word', surface: SurfaceFamily.wordProblem, template: 't-w'),
+          cand('z-so', surface: SurfaceFamily.comparison, template: 't-c'),
+        ],
+      );
+      expect(r!.exerciseId, 'z-so');
+    });
+
     test('wordProblem xa hơn comparison (bảng khoảng cách cố định)', () {
       final r = nextTransferProbe(
         skillCaseId: 'B57',
