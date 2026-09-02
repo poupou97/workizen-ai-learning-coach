@@ -31,6 +31,9 @@ import 'core/knowledge/provenance.dart';
 import 'features/learning_session/slice_flow.dart';
 import 'features/discovery/splash_quote.dart';
 import 'features/subjects/lesson_index.dart';
+import 'app/theme/band_density_scope.dart';
+import 'app/theme/wal_tokens.dart' show WalBandDensity;
+import 'core/pedagogy/presentation_policy.dart' show bandForGrade;
 import 'features/subjects/subjects_screen.dart';
 import 'features/mission/mission_data.dart';
 import 'features/onboarding/onboarding_screen.dart';
@@ -247,7 +250,14 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   Widget build(BuildContext context) => MaterialApp(
         title: 'Học cùng SAM',
         debugShowCheckedModeBanner: false,
-        home: _loading
+        home: BandDensityScope(
+          density: WalBandDensity.forGradeBandLabel(
+              bandForGrade(_profile?.grade ?? 3)?.label ?? '3-5'),
+          child: _homeChild(),
+        ),
+      );
+
+  Widget _homeChild() => _loading
             ? (_splashQuote == null
                 ? const Scaffold(body: SizedBox.shrink())
                 : SplashQuoteScreen(quote: _splashQuote!))
@@ -306,6 +316,5 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                               },
                       );
                     },
-                  ),
-      );
+                  );
 }

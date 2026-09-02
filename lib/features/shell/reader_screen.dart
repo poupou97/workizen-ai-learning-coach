@@ -16,6 +16,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/learning_evidence.dart';
@@ -154,7 +155,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   List<Widget> _unsupportedView() => [
         Center(
             child: Image.asset('assets/mascot/sam-admit-uncertainty.png',
-                width: 96, height: 96)),
+                width: densityOf(context).mascotHero, height: densityOf(context).mascotHero)),
         const SizedBox(height: WalSpacing.md),
         _card(const Text(
             'Bài này tớ chưa có đủ đoạn văn hoặc câu hỏi để cùng con đọc. '
@@ -167,7 +168,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
 
   List<Widget> _readingView() => [
         Row(children: [
-          Image.asset('assets/mascot/sam-listen.png', width: 56, height: 56),
+          Image.asset('assets/mascot/sam-listen.png', width: densityOf(context).mascotChip, height: densityOf(context).mascotChip),
           const SizedBox(width: WalSpacing.md),
           const Expanded(
             child: Text('Con đọc kỹ đoạn văn này trước nhé — đọc xong rồi mình '
@@ -205,8 +206,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
                   : _hintShown
                       ? 'assets/mascot/sam-hint.png'
                       : 'assets/mascot/sam-your-turn.png',
-              width: 56,
-              height: 56),
+              width: densityOf(context).mascotChip,
+              height: densityOf(context).mascotChip),
           const SizedBox(width: WalSpacing.md),
           Expanded(
             child: Text(
@@ -301,7 +302,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
       return [
         Center(
             child: Image.asset('assets/mascot/sam-admit-uncertainty.png',
-                width: 96, height: 96)),
+                width: densityOf(context).mascotHero, height: densityOf(context).mascotHero)),
         const SizedBox(height: WalSpacing.md),
         _card(const Text(
             'Tớ chưa có đáp án của bài này nên chưa dám nói đúng hay chưa. '
@@ -321,8 +322,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
               maxSupport == SupportLevel.none
                   ? 'assets/mascot/sam-celebrate-independence.png'
                   : 'assets/mascot/sam-explain.png',
-              width: 96,
-              height: 96)),
+              width: densityOf(context).mascotHero,
+              height: densityOf(context).mascotHero)),
       const SizedBox(height: WalSpacing.md),
       _card(Text(f.praise,
           style: const TextStyle(

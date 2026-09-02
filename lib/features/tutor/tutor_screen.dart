@@ -9,6 +9,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/knowledge/provenance.dart';
 import '../../core/knowledge/slice_curriculum.dart';
@@ -117,7 +118,7 @@ class _TutorScreenState extends State<TutorScreen> {
     // (logic thật nằm trong session; UI chỉ không hứa thứ session sẽ từ chối).
     return ListView(children: [
       Row(children: [
-        Image.asset(_mascot, width: 56, height: 56),
+        Image.asset(_mascot, width: densityOf(context).mascotChip, height: densityOf(context).mascotChip),
         const SizedBox(width: WalSpacing.md),
         Expanded(
           child: Text(
@@ -226,7 +227,7 @@ class _TutorScreenState extends State<TutorScreen> {
     final praise = f.praise;
     final evidenceLine = f.evidenceLine;
     return ListView(children: [
-      Center(child: Image.asset(_mascot, width: 96, height: 96)),
+      Center(child: Image.asset(_mascot, width: densityOf(context).mascotHero, height: densityOf(context).mascotHero)),
       const SizedBox(height: WalSpacing.md),
       _card(Text(praise,
           style: const TextStyle(

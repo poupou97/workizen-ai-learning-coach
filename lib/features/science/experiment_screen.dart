@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/learning_evidence.dart';
@@ -184,7 +185,7 @@ class _ExperimentScreenState extends State<ExperimentScreen> {
   List<Widget> _doneView() => [
         Center(
             child: Image.asset('assets/mascot/sam-celebrate-independence.png',
-                width: 96, height: 96)),
+                width: densityOf(context).mascotHero, height: densityOf(context).mascotHero)),
         const SizedBox(height: WalSpacing.md),
         if (_needsPrediction)
           _labeled(
@@ -224,7 +225,7 @@ class _ExperimentScreenState extends State<ExperimentScreen> {
       ];
 
   Widget _samRow(String asset, String text) => Row(children: [
-        Image.asset('assets/mascot/$asset', width: 56, height: 56),
+        Image.asset('assets/mascot/$asset', width: densityOf(context).mascotChip, height: densityOf(context).mascotChip),
         const SizedBox(width: WalSpacing.md),
         Expanded(
             child: Text(text,

@@ -16,6 +16,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/learning_evidence.dart';
@@ -173,7 +174,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   List<Widget> _unsupportedView() => [
         Center(
             child: Image.asset('assets/mascot/sam-admit-uncertainty.png',
-                width: 96, height: 96)),
+                width: densityOf(context).mascotHero, height: densityOf(context).mascotHero)),
         const SizedBox(height: WalSpacing.md),
         _card(const Text(
             'Tư liệu này tớ chưa có đủ nguyên văn hoặc nguồn dẫn — tớ không '
@@ -186,7 +187,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
 
   List<Widget> _sourceView() => [
         Row(children: [
-          Image.asset('assets/mascot/sam-listen.png', width: 56, height: 56),
+          Image.asset('assets/mascot/sam-listen.png', width: densityOf(context).mascotChip, height: densityOf(context).mascotChip),
           const SizedBox(width: WalSpacing.md),
           const Expanded(
             child: Text(
@@ -248,7 +249,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   List<Widget> _doneView() => [
         Center(
             child: Image.asset('assets/mascot/sam-explain.png',
-                width: 96, height: 96)),
+                width: densityOf(context).mascotHero, height: densityOf(context).mascotHero)),
         const SizedBox(height: WalSpacing.md),
         _conclusionCard(StudentConclusion(kConclusionStances[_stance!])),
         const SizedBox(height: WalSpacing.md),

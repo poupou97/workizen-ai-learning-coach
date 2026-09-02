@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/learning_evidence.dart';
@@ -65,8 +66,8 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
                   Center(
                       child: Image.asset(
                           'assets/mascot/sam-celebrate-independence.png',
-                          width: 96,
-                          height: 96)),
+                          width: densityOf(context).mascotHero,
+                          height: densityOf(context).mascotHero)),
                   const SizedBox(height: WalSpacing.md),
                   _card(const Text(
                       'Tớ ghi lại là con đã đọc bản đồ và tự chỉ ra rồi nhé — '
