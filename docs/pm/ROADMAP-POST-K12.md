@@ -34,7 +34,7 @@ bug index-sau-onboarding fix kèm test). WAL-114 ✅ (lineage, b2bbdf9) · WAL-1
 P1: WAL-132 ✅ (PresentationPolicy, 6b49869) · WAL-144 ✅ (6 surface: TV/Sử/Essay/KHTN/Địa/
 Lý-Hoá-g10 — walks n23→n42, JSONL 4 môn mới, c557730). WAL-116 ✅ (taxonomy 729 lệnh «vẽ» → SHARED ENGINE +
 SPECIALIZED MODES, POC object model, 6488318). WAL-117 ✅ (EN adapter v2 + child-speech
-memo, 3e69d12 — mở khoá WAL-121/123). WAL-119 ✅ (entitlement-v1, PAYMENT≠TRUTH cấu trúc, a92571f). WAL-120 ✅ (matrix+POC+pilot design, 420e158). Kế: WAL-118 (P1-C — mở khoá bởi 113/144) → KS-F (WAL-153) → 50(P3).
+memo, 3e69d12 — mở khoá WAL-121/123). WAL-119 ✅ (entitlement-v1, PAYMENT≠TRUTH cấu trúc, a92571f). WAL-120 ✅ (matrix+POC+pilot design, 420e158). WAL-118 ✅ (bảng 6-câu: 5 VALIDATED thật / 4 evidence-chờ / 2 không-claim, 80c0470). Kế: KS-F (WAL-153) → 50(P3).
 
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
