@@ -62,3 +62,26 @@ Slice: GIỮ WAL-108 (Toán 5 B6) + MỞ RỘNG bắt buộc** thêm 2 bounded c
 (Reader — đã build, chi phí ~0) + Sử source-reading mini (SourceReader mộc) để chống
 Math-overfit ngay trong slice [§26/§38 order]. **AG Founder cần quyết sau:** ①child-ads
 legal/luật sư ②pricing Premium ③teacher pilot scope ④canary generative ⑤ngày bật P0 slice.
+
+
+## WAL-115 (2026-09-02) — COGS / UNIT ECONOMICS: SỐ ĐO THẬT
+
+Đo (N=50 run LLM thật, haiku qua CLI, usage thật — tool/eval/unit_economics.py):
+cost/turn μ=$0.0116 · p95=$0.0201 · out-tokens μ=837 · latency μ=14.0s p95=21.9s.
+⚠️ harness CLI mang system prompt ~17k cached ⇒ đây là TRẦN THÔ; API trực tiếp
+với cage prompt gọn sẽ thấp hơn — giữ số đo, không tự chiết khấu.
+
+| Mode (LLM turns/phiên — mô hình khai rõ) | nhẹ 1 phiên/ngày | vừa 2 | nặng 4 |
+|---|---|---|---|
+| A deterministic (0 — CẤU TRÚC, test giữ) | $0.00 | $0.00 | $0.00 |
+| B minimal-generative (2 = cap hint ladder) | $0.70 | $1.40 | $2.79 |
+| C LLM-heavy (8 ≈ mọi lượt) | $2.79 | $5.59 | $11.17 |
+
+Kết luận đề xuất (quyết định = Founder): **Student Free credible ở MODE A vô
+điều kiện** (engine không có đường ra network — unit_economics_test quét import
+giữ bằng test, một phiên thật sai→hint→đúng chạy ~µs CPU cục bộ). MODE B chỉ
+khả thi khi (1) cage prompt gọn + cache, (2) latency giải quyết — p95 21.9s
+hiện KHÔNG đạt cho hint inline ⇒ thêm một lý do KEEP SHADOW (WAL-30). MODE C
+không bền cho free tier — củng cố deterministic-first (ADR hiện hành).
+OCR/STT/TTS: on-device (Hub, $0). Số liệu này bổ sung §29 AI COST của
+Checkpoint (comment trên WAL-112).
