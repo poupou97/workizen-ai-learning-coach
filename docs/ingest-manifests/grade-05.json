@@ -1,0 +1,42 @@
+{
+ "batchId": "grade-05",
+ "documents": 37,
+ "ocr": {
+  "DONE": 37
+ },
+ "pages": 4851,
+ "lessons": 595,
+ "lessonsTitled": 173,
+ "unitsK12": 7663,
+ "roleDist": {
+  "SECTION_TEXT": 33,
+  "ACTIVITY": 1214,
+  "EXERCISE": 6289,
+  "RULE_CANDIDATE": 8,
+  "EXPERIMENT": 4,
+  "OBSERVATION": 11,
+  "NOTE": 60,
+  "READING": 43,
+  "EXAMPLE": 1
+ },
+ "anomalies": [
+  "05-sgk-am-nhac-5: offset UNCALIBRATED",
+  "05-sgk-cong-nghe-5: offset UNCALIBRATED",
+  "05-sgk-hoat-dong-trai-nghiem-5: offset UNCALIBRATED",
+  "05-sgk-mi-thuat-5: offset UNCALIBRATED",
+  "05-sgk-tieng-anh-5-global-success-tap-hai: offset UNCALIBRATED",
+  "05-sgk-tieng-anh-5-global-success-tap-mot: offset UNCALIBRATED",
+  "05-sgk-tieng-han-5-tap-hai: offset UNCALIBRATED",
+  "05-sgk-tieng-han-5-tap-mot: offset UNCALIBRATED",
+  "05-sgk-tieng-nhat-5-tap-hai: offset UNCALIBRATED",
+  "05-sgk-tieng-nhat-5-tap-mot: offset UNCALIBRATED",
+  "05-sgk-tieng-phap-5: offset UNCALIBRATED",
+  "05-sgk-tieng-trung-quoc-5-tap-hai: offset UNCALIBRATED",
+  "05-sgk-tieng-trung-quoc-5-tap-mot: offset UNCALIBRATED",
+  "05-sgv-am-nhac-5: offset UNCALIBRATED",
+  "05-sgv-hoat-dong-trai-nghiem-5: offset UNCALIBRATED",
+  "05-sgv-mi-thuat-5: offset UNCALIBRATED",
+  "05-sgv-tieng-anh-5-global-success: offset UNCALIBRATED",
+  "05-sgv-tieng-phap-5: offset UNCALIBRATED"
+ ]
+}

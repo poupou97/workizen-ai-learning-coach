@@ -1,0 +1,38 @@
+{
+ "batchId": "grade-08",
+ "documents": 33,
+ "ocr": {
+  "DONE": 33
+ },
+ "pages": 4748,
+ "lessons": 489,
+ "lessonsTitled": 138,
+ "unitsK12": 9906,
+ "roleDist": {
+  "SECTION_TEXT": 33,
+  "EXERCISE": 7813,
+  "ACTIVITY": 1673,
+  "EXPERIMENT": 30,
+  "OBSERVATION": 4,
+  "SOURCE_TEXT": 6,
+  "NOTE": 63,
+  "CONCEPT_EXPLANATION": 21,
+  "EXAMPLE": 246,
+  "RULE_CANDIDATE": 8,
+  "READING": 9
+ },
+ "anomalies": [
+  "08-sbt-tieng-anh-8-global-success: offset UNCALIBRATED",
+  "08-sgk-cong-nghe-8: offset UNCALIBRATED",
+  "08-sgk-giao-duc-cong-dan-8: offset UNCALIBRATED",
+  "08-sgk-hoat-dong-trai-nghiem-huong-nghiep-8: offset UNCALIBRATED",
+  "08-sgk-tieng-anh-8-global-success: offset UNCALIBRATED",
+  "08-sgk-tieng-nhat-8: offset UNCALIBRATED",
+  "08-sgk-tieng-phap-8: offset UNCALIBRATED",
+  "08-sgk-tieng-trung-quoc-8: offset UNCALIBRATED",
+  "08-sgv-hoat-dong-trai-nghiem-huong-nghiep-8: offset UNCALIBRATED",
+  "08-sgv-tieng-anh-8-global-success: offset UNCALIBRATED",
+  "08-sgv-tieng-phap-8: offset UNCALIBRATED",
+  "08-sgv-tieng-trung-quoc-8: offset UNCALIBRATED"
+ ]
+}

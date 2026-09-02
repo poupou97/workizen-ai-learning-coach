@@ -1,0 +1,159 @@
+{
+ "snapshotId": "K12-2026-09-02",
+ "timestamp": "2026-09-02T18:41:13",
+ "ingestionCommit": "a3d13ef",
+ "versions": {
+  "registry": "registry-v1",
+  "structure": "structure-v1",
+  "genericExtractor": "generic-gdpt2018-v1",
+  "toanTvExtractor": "extract_units-v2",
+  "qmatrix": "qmap-v1",
+  "objectives": "sgv-muctieu-v1"
+ },
+ "corpus": {
+  "documents": 531,
+  "duplicates": 6,
+  "docStatus": {
+   "SUCCESS": 531
+  },
+  "pages": 62729,
+  "grades": 12,
+  "subjects": 31,
+  "sgk": 301,
+  "sgv": 220
+ },
+ "structural": {
+  "lessons": 7626,
+  "lessonsTitled": 2219,
+  "structureStatus": {
+   "NO_TOC": 125,
+   "OK": 129,
+   "OK_ALT_bai": 26,
+   "PARTIAL": 237,
+   "OK_ALT_tuan": 13,
+   "OK_ALT_chuDe": 1
+  },
+  "coverageNote": "OK+OK_ALT+PARTIAL có lesson boundary; NO_TOC chỉ có trang"
+ },
+ "semantic": {
+  "unitsK12Generic": 126552,
+  "unitsGateToanTV": 2584,
+  "docsExtracted": 525,
+  "learningObjectives": 569,
+  "methods": 29,
+  "qmatrixExercises": 1109,
+  "crossGradeEdges": 5,
+  "llmInferred": 0,
+  "coverageNote": "SEMANTIC ≠ STRUCTURAL: tầng generic v1 = khung hoạt động GDPT2018 + family markers; semantic SÂU (concept/case mapping) mới có Toán 4-5 + TV5. KHÔNG claim hiểu-100%%-curriculum."
+ },
+ "perGrade": {
+  "grade-01": {
+   "units": 4317,
+   "lessons": 466,
+   "titled": 136,
+   "ocr": {
+    "DONE": 21
+   },
+   "anomalies": 9
+  },
+  "grade-02": {
+   "units": 5645,
+   "lessons": 475,
+   "titled": 160,
+   "ocr": {
+    "DONE": 21
+   },
+   "anomalies": 12
+  },
+  "grade-03": {
+   "units": 8172,
+   "lessons": 550,
+   "titled": 203,
+   "ocr": {
+    "DONE": 37
+   },
+   "anomalies": 21
+  },
+  "grade-04": {
+   "units": 9165,
+   "lessons": 608,
+   "titled": 199,
+   "ocr": {
+    "DONE": 41
+   },
+   "anomalies": 23
+  },
+  "grade-05": {
+   "units": 7663,
+   "lessons": 595,
+   "titled": 173,
+   "ocr": {
+    "DONE": 37
+   },
+   "anomalies": 18
+  },
+  "grade-06": {
+   "units": 8687,
+   "lessons": 527,
+   "titled": 189,
+   "ocr": {
+    "DONE": 32
+   },
+   "anomalies": 14
+  },
+  "grade-07": {
+   "units": 9588,
+   "lessons": 445,
+   "titled": 122,
+   "ocr": {
+    "DONE": 32
+   },
+   "anomalies": 15
+  },
+  "grade-08": {
+   "units": 9906,
+   "lessons": 489,
+   "titled": 138,
+   "ocr": {
+    "DONE": 33
+   },
+   "anomalies": 12
+  },
+  "grade-09": {
+   "units": 10689,
+   "lessons": 473,
+   "titled": 136,
+   "ocr": {
+    "DONE": 37
+   },
+   "anomalies": 14
+  },
+  "grade-10": {
+   "units": 17017,
+   "lessons": 1005,
+   "titled": 295,
+   "ocr": {
+    "DONE": 83
+   },
+   "anomalies": 34
+  },
+  "grade-11": {
+   "units": 18767,
+   "lessons": 1059,
+   "titled": 228,
+   "ocr": {
+    "DONE": 79
+   },
+   "anomalies": 38
+  },
+  "grade-12": {
+   "units": 16936,
+   "lessons": 934,
+   "titled": 240,
+   "ocr": {
+    "DONE": 78
+   },
+   "anomalies": 40
+  }
+ }
+}

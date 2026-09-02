@@ -1,0 +1,31 @@
+{
+ "batchId": "grade-02",
+ "documents": 21,
+ "ocr": {
+  "DONE": 21
+ },
+ "pages": 2680,
+ "lessons": 475,
+ "lessonsTitled": 160,
+ "unitsK12": 5645,
+ "roleDist": {
+  "SECTION_TEXT": 21,
+  "ACTIVITY": 1220,
+  "EXERCISE": 4244,
+  "READING": 160
+ },
+ "anomalies": [
+  "02-sgk-am-nhac-2: offset UNCALIBRATED",
+  "02-sgk-hoat-dong-trai-nghiem-2: offset UNCALIBRATED",
+  "02-sgk-mi-thuat-2: offset UNCALIBRATED",
+  "02-sgk-tieng-anh-2-global-success: offset UNCALIBRATED",
+  "02-sgk-tieng-viet-2-tap-hai: offset UNCALIBRATED",
+  "02-sgk-tieng-viet-2-tap-mot: offset UNCALIBRATED",
+  "02-sgk-tu-nhien-va-xa-hoi-2: offset UNCALIBRATED",
+  "02-sgv-am-nhac-2: offset UNCALIBRATED",
+  "02-sgv-hoat-dong-trai-nghiem-2: offset UNCALIBRATED",
+  "02-sgv-mi-thuat-2: offset UNCALIBRATED",
+  "02-sgv-tieng-anh-2-global-success: offset UNCALIBRATED",
+  "02-sgv-tieng-viet-2-tap-hai: offset UNCALIBRATED"
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "batchId": "grade-06",
+ "documents": 32,
+ "ocr": {
+  "DONE": 32
+ },
+ "pages": 4030,
+ "lessons": 527,
+ "lessonsTitled": 189,
+ "unitsK12": 8687,
+ "roleDist": {
+  "SECTION_TEXT": 32,
+  "ACTIVITY": 1833,
+  "EXERCISE": 6400,
+  "EXPERIMENT": 18,
+  "NOTE": 149,
+  "OBSERVATION": 23,
+  "SOURCE_TEXT": 4,
+  "CONCEPT_EXPLANATION": 18,
+  "RULE_CANDIDATE": 2,
+  "EXAMPLE": 200,
+  "READING": 8
+ },
+ "anomalies": [
+  "06-sgk-am-nhac-6: offset UNCALIBRATED",
+  "06-sgk-cong-nghe-6: offset UNCALIBRATED",
+  "06-sgk-giao-duc-cong-dan-6: offset UNCALIBRATED",
+  "06-sgk-hoat-dong-trai-nghiem-huong-nghiep-6: offset UNCALIBRATED",
+  "06-sgk-tieng-anh-6-tap-1-global-success: offset UNCALIBRATED",
+  "06-sgk-tieng-anh-6-tap-2-global-success: offset UNCALIBRATED",
+  "06-sgk-tieng-phap-6: offset UNCALIBRATED",
+  "06-sgk-tieng-trung-quoc-6: offset UNCALIBRATED",
+  "06-sgk-toan-6-tap-hai: offset UNCALIBRATED",
+  "06-sgv-am-nhac-6: offset UNCALIBRATED",
+  "06-sgv-hoat-dong-trai-nghiem-huong-nghiep-6: offset UNCALIBRATED",
+  "06-tieng-duc-6: offset UNCALIBRATED",
+  "06-tieng-nga-6-tap-hai: offset UNCALIBRATED",
+  "06-tieng-nga-6-tap-mot: offset UNCALIBRATED"
+ ]
+}
