@@ -145,6 +145,10 @@ for f in sorted(glob.glob(f'poc-out/graph/ocr-body/{su_book}/p*.json')):
 # ---- khoaExperiments (WAL-144 #KHTN): khối THÍ NGHIỆM thật từ Khoa học 5 ----
 # Trang có cả «Chuẩn bị:» và «Tiến hành:» = một khối thí nghiệm SGK.
 # Giữ VERBATIM (kể cả lỗi OCR nhỏ) — không viết lại lời sách.
+EXPERIMENT_BOOKS = {  # môn × sách theo lớp — khối «Chuẩn bị/Dụng cụ + Tiến hành»
+    5: [('Khoa học', '05-sgk-khoa-hoc-5')],
+    10: [('Vật lí', '10-sgk-vat-li-10'), ('Hoá học', '10-sgk-hoa-hoc-10')],
+}
 kh_book = f'0{GRADE}-sgk-khoa-hoc-{GRADE}'
 kh_lessons = []
 for d in docs:
@@ -162,16 +166,25 @@ def kh_lesson_for(printed):
     return hit
 
 khoa_experiments = []
-for f in sorted(glob.glob(f'poc-out/graph/ocr-body/{kh_book}/p*.json')):
+_exp_sources = []
+for subj, bk in EXPERIMENT_BOOKS.get(GRADE, []):
+    for f in sorted(glob.glob(f'poc-out/graph/ocr-body/{bk}/p*.json')):
+        _exp_sources.append((subj, bk, f))
+for subj, bk, f in _exp_sources:
     j = json.load(open(f))
     lines = [l['text'] for l in j['lines']]
     txt = '\n'.join(lines)
-    if 'Chuẩn bị:' not in txt or 'Tiến hành:' not in txt:
+    # tiểu học: «Chuẩn bị:»; lớp 10: «Dụng cụ» — cùng vai trò chuẩn-bị.
+    prep_key = 'Chuẩn bị:' if 'Chuẩn bị:' in txt else (
+        'Dụng cụ' if 'Dụng cụ' in txt else None)
+    if prep_key is None or 'Tiến hành' not in txt:
         continue
     pdf = int(re.search(r'p(\d+)\.json', f).group(1))
-    # OCR có thể dính «Chuẩn bị:» giữa dòng — dò bằng chứa, không startswith.
-    i_cb = next(i for i, t in enumerate(lines) if 'Chuẩn bị:' in t)
-    i_th = next(i for i, t in enumerate(lines) if 'Tiến hành' in t)
+    i_cb = next(i for i, t in enumerate(lines) if prep_key in t)
+    i_th = next((i for i, t in enumerate(lines[i_cb:], start=i_cb)
+                 if 'Tiến hành' in t), None)
+    if i_th is None:
+        continue
     # title: dòng đánh-số gần nhất phía trên «Chuẩn bị:»
     title = None
     for t in reversed(lines[:i_cb]):
@@ -191,16 +204,32 @@ for f in sorted(glob.glob(f'poc-out/graph/ocr-body/{kh_book}/p*.json')):
     if not steps or title is None:
         continue  # khối không đọc được cấu trúc ⇒ bỏ, không bịa
     printed = int(lines[-1]) if lines[-1].strip().isdigit() else pdf - 1
-    les = kh_lesson_for(printed)
+    les = kh_lesson_for(printed) if bk == kh_book else None
     khoa_experiments.append(dict(
-        book=kh_book, page=printed, pagePdf=pdf,
+        subject=subj,
+        book=bk, page=printed, pagePdf=pdf,
         lesson=les[0] if les else None,
         lessonTitle=(les[1] or None) if les else None,
         title=title,
-        chuanBi=' '.join(x.strip() for x in lines[i_cb:i_th]).replace('Chuẩn bị:', '', 1).strip(),
+        chuanBi=' '.join(x.strip() for x in lines[i_cb:i_th])
+            .replace('Chuẩn bị:', '', 1).strip(),
         tienHanh=steps,
         duDoan=du_doan,
         quanSat=quan_sat))
+
+# ---- diaMaps (WAL-144 #28 Địa): bản đồ SGK đã crop (human-curation) --------
+# Câu hỏi VERBATIM từ trang khai thác hình (p013 trang in 11).
+DIA_MAPS = [
+    dict(subject='LS&ĐL', book='05-sgk-lich-su-va-dia-li-5', page=10,
+         asset='map-ls-dia-5-p012-tu-nhien-vn.png',
+         caption='Hình 1. Bản đồ tự nhiên Việt Nam',
+         questions=[
+             'Kể tên và xác định trên bản đồ một số khoáng sản ở nước ta.',
+             'Nêu vai trò của tài nguyên khoáng sản đối với sự phát triển kinh tế.',
+         ])
+] if GRADE == 5 else []
+dia_maps = [m for m in DIA_MAPS
+            if os.path.exists(f"assets/pack/{m['asset']}")]  # asset chưa crop ⇒ bỏ
 
 for v in subjects.values():
     v.sort(key=lambda b: (b['volume'] or '9', b['sourceDocumentId']))
@@ -210,7 +239,8 @@ out = dict(grade=GRADE, version='lesson-index-v2',
            tvReadings=tv_readings,
            tvWritings=tv_writings,
            suSources=su_sources,
-           khoaExperiments=khoa_experiments)
+           khoaExperiments=khoa_experiments,
+           diaMaps=dia_maps)
 os.makedirs('assets/pack', exist_ok=True)
 path = f'assets/pack/lesson-index-g{GRADE}.json'
 json.dump(out, open(path, 'w'), ensure_ascii=False)
@@ -218,7 +248,8 @@ n_les = sum(len(l['lessons']) for v in subjects.values() for l in v)
 print(f'{path}: {len(subjects)} môn, {n_les} bài, exToán '
       f'{sum(len(v) for v in ex_by_lesson.values())}, '
       f'tvReadings {len(tv_readings)}, tvWritings {len(tv_writings)}, '
-      f'suSources {len(su_sources)}, khoaExperiments {len(khoa_experiments)}')
+      f'suSources {len(su_sources)}, khoaExperiments {len(khoa_experiments)}, '
+      f'diaMaps {len(dia_maps)}')
 for r in tv_readings[:3]:
     print('  TV:', r['book'][-7:], 'L', r['lesson'], 'p', r['page'],
           len(r['questions']), 'câu hỏi —', r['passage'][:50])

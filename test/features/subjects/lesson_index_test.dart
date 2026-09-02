@@ -27,7 +27,7 @@ const _sample = '''
    "samGloss":"Nguồn này cho thấy việc dời đô có tính toán."},
   {"book":"05-sgk-lich-su-va-dia-li-5","page":18,"lesson":3,
    "excerpt":"khối hỏng: KHÔNG có attribution — phải bị loại"}],
- "khoaExperiments":[{"book":"05-sgk-khoa-hoc-5","page":16,"lesson":null,
+ "khoaExperiments":[{"subject":"Khoa học","book":"05-sgk-khoa-hoc-5","page":16,"lesson":null,
    "title":"Tách muối ra khỏi dung dịch muối",
    "chuanBi":"Muối ăn, 1 bát sứ chịu nhiệt, 1 cốc thuỷ tinh...",
    "tienHanh":["Cho 1 thìa muối ăn vào cốc thuỷ tinh chứa 80 ml nước, khuấy đều."],

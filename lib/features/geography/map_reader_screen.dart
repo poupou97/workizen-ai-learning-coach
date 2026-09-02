@@ -1,0 +1,165 @@
+/// WAL-144 #28 Địa — MAP READER (bounded): BẢN ĐỒ THẬT từ SGK (SOURCE_ASSET
+/// crop, provenance đầy đủ) + câu hỏi khai thác VERBATIM.
+///
+/// Bất biến:
+/// - Ảnh là SOURCE_ASSET từ sách — caption in trong sách hiển thị cùng nguồn;
+///   không ảnh minh hoạ AI nào ở đây (SOURCE IMAGE ≠ AI ILLUSTRATION).
+/// - Câu hỏi mở «chỉ trên bản đồ» — trẻ làm bằng mắt/tay, SAM KHÔNG chấm
+///   (correct=null); một sự kiện khi hoàn tất, policy map-reader-v1.
+/// - Không %, không điểm.
+library;
+
+import 'package:flutter/material.dart';
+
+import '../../app/theme/wal_tokens.dart';
+import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
+import '../../core/student/learning_evidence.dart';
+import '../../core/student/mastery.dart';
+import '../subjects/lesson_index.dart';
+
+class MapReaderScreen extends StatefulWidget {
+  const MapReaderScreen({super.key, required this.map, this.onFinished, this.now});
+
+  final DiaMap map;
+  final void Function(List<LearningEvent> events)? onFinished;
+  final DateTime Function()? now;
+
+  @override
+  State<MapReaderScreen> createState() => _MapReaderScreenState();
+}
+
+class _MapReaderScreenState extends State<MapReaderScreen> {
+  bool _done = false;
+
+  DiaMap get m => widget.map;
+  DateTime _at() => (widget.now ?? DateTime.now)();
+
+  void _finish() {
+    if (_done) return;
+    setState(() => _done = true);
+    widget.onFinished?.call([
+      LearningEvent(
+        eventId: '${m.book}:p${m.page}:map#0',
+        skillCaseId: 'dia-doc-ban-do',
+        kind: EvidenceKind.independentAttempt,
+        correct: null, // chỉ-trên-bản-đồ là việc của mắt/tay — SAM không chấm
+        exerciseId: '${m.book}:p${m.page}:map',
+        conceptIds: const ['dia-ban-do'],
+        at: _at(),
+        support: SupportLevel.none,
+        policyId: 'map-reader-v1',
+        knowledgeVersion: knowledgeModelVersion,
+      )
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: WalColors.surface,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(WalSpacing.lg),
+          children: _done
+              ? [
+                  Center(
+                      child: Image.asset(
+                          'assets/mascot/sam-celebrate-independence.png',
+                          width: 96,
+                          height: 96)),
+                  const SizedBox(height: WalSpacing.md),
+                  _card(const Text(
+                      'Tớ ghi lại là con đã đọc bản đồ và tự chỉ ra rồi nhé — '
+                      'tớ không chấm; con kể cho thầy cô nghe con tìm thấy gì.',
+                      style: TextStyle(
+                          fontSize: WalType.body,
+                          color: WalColors.ink,
+                          height: 1.45))),
+                  const SizedBox(height: WalSpacing.lg),
+                  _primary('Về danh sách bài',
+                      () => Navigator.of(context).maybePop()),
+                ]
+              : [
+                  _card(Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('BẢN ĐỒ TRONG SÁCH',
+                            style: TextStyle(
+                                fontSize: WalType.secondary,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.6,
+                                color: WalColors.inkSoft)),
+                        const SizedBox(height: WalSpacing.sm),
+                        // Phóng to/di chuyển được — bản đồ là để soi.
+                        SizedBox(
+                          height: 420,
+                          child: InteractiveViewer(
+                            maxScale: 6,
+                            child: Image.asset('assets/pack/${m.asset}',
+                                fit: BoxFit.contain),
+                          ),
+                        ),
+                        const SizedBox(height: WalSpacing.sm),
+                        Text(m.caption,
+                            style: const TextStyle(
+                                fontSize: WalType.secondary,
+                                color: WalColors.inkSoft)),
+                      ])),
+                  const SizedBox(height: WalSpacing.md),
+                  _card(Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('NHÌN TRÊN BẢN ĐỒ, EM HÃY:',
+                            style: TextStyle(
+                                fontSize: WalType.secondary,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.6,
+                                color: WalColors.inkSoft)),
+                        const SizedBox(height: WalSpacing.sm),
+                        for (final q in m.questions)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: WalSpacing.sm),
+                            child: Text('• $q',
+                                style: const TextStyle(
+                                    fontSize: WalType.body,
+                                    color: WalColors.ink,
+                                    height: 1.5)),
+                          ),
+                      ])),
+                  const SizedBox(height: WalSpacing.md),
+                  _primary('Con đã chỉ được trên bản đồ ✅', _finish),
+                  const SizedBox(height: WalSpacing.md),
+                  Text('Nguồn: SGK ${m.subject} 5 · tr. ${m.page}',
+                      style: const TextStyle(
+                          fontSize: WalType.secondary,
+                          color: WalColors.inkSoft)),
+                ],
+        ),
+      ),
+    );
+  }
+
+  Widget _primary(String label, VoidCallback onPressed) => SizedBox(
+        width: double.infinity,
+        height: WalSpacing.minTouch + 8,
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+              backgroundColor: WalColors.primary500,
+              shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(WalSpacing.radiusButton))),
+          onPressed: onPressed,
+          child: Text(label, style: const TextStyle(fontSize: WalType.body)),
+        ),
+      );
+
+  Widget _card(Widget child) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(WalSpacing.lg),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(WalSpacing.radiusCard)),
+        child: child,
+      );
+}

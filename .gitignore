@@ -24,3 +24,4 @@ build/
 *.iml
 .flutter-plugins*
 research/oss/
+assets/pack/*.png

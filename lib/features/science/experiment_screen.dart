@@ -171,7 +171,7 @@ class _ExperimentScreenState extends State<ExperimentScreen> {
                     _primary('Em làm xong thí nghiệm ✅', _finish),
                   ],
                   const SizedBox(height: WalSpacing.md),
-                  Text('Nguồn: SGK Khoa học 5 · tr. ${e.page}',
+                  Text('Nguồn: SGK ${e.subject} · tr. ${e.page}',
                       style: const TextStyle(
                           fontSize: WalType.secondary,
                           color: WalColors.inkSoft)),

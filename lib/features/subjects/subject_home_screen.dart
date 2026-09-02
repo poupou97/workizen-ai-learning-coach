@@ -14,6 +14,7 @@ import '../../core/store/learning_session.dart';
 import '../../core/tutor/learning_activity.dart';
 import '../history/source_reader.dart';
 import '../learning_session/slice_flow.dart';
+import '../geography/map_reader_screen.dart';
 import '../science/experiment_screen.dart';
 import '../shell/compose_lite_screen.dart';
 import '../shell/reader_screen.dart';
@@ -37,7 +38,8 @@ class SubjectHomeScreen extends StatelessWidget {
   bool get _isToan => subject == 'Toán';
   bool get _isTv => subject == 'Tiếng Việt';
   bool get _isSu => subject == 'LS&ĐL';
-  bool get _isKhoa => subject == 'Khoa học';
+  List<KhoaExperiment> get _experiments =>
+      index.experimentsForSubject(subject);
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +59,9 @@ class SubjectHomeScreen extends StatelessWidget {
             // WAL-144 #KHTN: mục lục Khoa học 5 chưa map bài↔trang tin cậy
             // (số bài trùng/thiếu pageStart) — thí nghiệm hiện thành mục RIÊNG,
             // KHÔNG gán bừa vào bài (nói thật hơn là đoán).
-            if (_isKhoa && index.khoaExperiments.isNotEmpty)
-              _experimentsTile(context),
+            if (_experiments.isNotEmpty) _experimentsTile(context),
+            if (index.mapsForSubject(subject).isNotEmpty)
+              _mapsTile(context),
             for (final b in books) ...[
               if (b.volume != null || books.length > 1)
                 Padding(
@@ -177,7 +180,7 @@ class SubjectHomeScreen extends StatelessWidget {
   }
 
   Widget _experimentsTile(BuildContext context) {
-    final n = index.khoaExperiments.length;
+    final n = _experiments.length;
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),
       child: Material(
@@ -199,7 +202,7 @@ class SubjectHomeScreen extends StatelessWidget {
             backgroundColor: WalColors.surface,
             builder: (sheet) => SafeArea(
               child: ListView(shrinkWrap: true, children: [
-                for (final ex in index.khoaExperiments)
+                for (final ex in _experiments)
                   ListTile(
                     title: Text(ex.title,
                         style: const TextStyle(
@@ -221,6 +224,40 @@ class SubjectHomeScreen extends StatelessWidget {
     );
   }
 
+  Widget _mapsTile(BuildContext context) {
+    final maps = index.mapsForSubject(subject);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: WalSpacing.sm),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+        child: ListTile(
+          title: const Text('🗺️ Bản đồ trong sách',
+              style: TextStyle(
+                  fontSize: WalType.body,
+                  fontWeight: FontWeight.w600,
+                  color: WalColors.ink)),
+          subtitle: Text(
+              '${maps.length} bản đồ từ SGK — nhìn rồi chỉ ra',
+              style: const TextStyle(
+                  fontSize: WalType.secondary, color: WalColors.inkSoft)),
+          trailing:
+              const Icon(Icons.chevron_right, color: WalColors.primaryText),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => MapReaderScreen(
+                    map: maps.first,
+                    onFinished: (events) => recordSession(
+                        store: store,
+                        learnerId: profile.learnerId,
+                        subjectId: 'dia-li',
+                        events: events,
+                        trigger: SessionTrigger.manual),
+                  ))),
+        ),
+      ),
+    );
+  }
+
   void _openExperiment(BuildContext context, KhoaExperiment ex) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => ExperimentScreen(
@@ -228,7 +265,11 @@ class SubjectHomeScreen extends StatelessWidget {
               onFinished: (events) => recordSession(
                   store: store,
                   learnerId: profile.learnerId,
-                  subjectId: 'khoa-hoc',
+                  subjectId: switch (ex.subject) {
+                    'Vật lí' => 'vat-li',
+                    'Hoá học' => 'hoa-hoc',
+                    _ => 'khoa-hoc',
+                  },
                   events: events,
                   trigger: SessionTrigger.manual),
             )));

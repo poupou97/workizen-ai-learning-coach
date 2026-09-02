@@ -83,10 +83,15 @@ class KhoaExperiment {
       required this.title,
       required this.chuanBi,
       required this.tienHanh,
+      this.subject = 'Khoa học',
       this.page,
       this.lesson,
       this.duDoan,
       this.quanSat});
+
+  /// Môn của khối (Khoa học / Vật lí / Hoá học…) — tile môn nào hiện khối
+  /// môn đó, không trộn.
+  final String subject;
   final String book;
   final int? page;
   final int? lesson;
@@ -97,6 +102,24 @@ class KhoaExperiment {
   /// Câu «Dự đoán…» in trong sách — có nó thì surface phải PREDICT-gate.
   final String? duDoan;
   final String? quanSat;
+}
+
+/// WAL-144 #28 — BẢN ĐỒ SGK đã crop (SOURCE_ASSET, human-curation, WAL-43:
+/// localResearchOnly — PNG gitignored, bundle local). Câu hỏi VERBATIM.
+class DiaMap {
+  const DiaMap(
+      {required this.subject,
+      required this.book,
+      required this.asset,
+      required this.caption,
+      required this.questions,
+      this.page});
+  final String subject;
+  final String book;
+  final int? page;
+  final String asset; // tên file trong assets/pack/
+  final String caption; // caption in trong sách
+  final List<String> questions;
 }
 
 /// WAL-113 B2 — khối «TƯ LIỆU.» nguyên văn từ SGK Sử-Địa (ocr-body).
@@ -128,7 +151,8 @@ class LessonIndex {
       this.tvReadings = const [],
       this.tvWritings = const [],
       this.suSources = const [],
-      this.khoaExperiments = const []});
+      this.khoaExperiments = const [],
+      this.diaMaps = const []});
 
   final int grade;
   final Map<String, List<BookLessons>> subjects;
@@ -137,6 +161,7 @@ class LessonIndex {
   final List<TvWriting> tvWritings;
   final List<SuSource> suSources;
   final List<KhoaExperiment> khoaExperiments;
+  final List<DiaMap> diaMaps;
 
   List<CorpusExercise> exercisesForToan(int lessonNo) =>
       toanExercises[lessonNo] ?? const [];
@@ -154,10 +179,11 @@ class LessonIndex {
   List<SuSource> suSourcesFor(int lessonNo) =>
       [for (final s in suSources) if (s.lesson == lessonNo) s];
 
-  List<KhoaExperiment> experimentsFor(int? lessonNo) => [
-        for (final e in khoaExperiments)
-          if (lessonNo != null && e.lesson == lessonNo) e
-      ];
+  List<DiaMap> mapsForSubject(String subject) =>
+      [for (final m in diaMaps) if (m.subject == subject) m];
+
+  List<KhoaExperiment> experimentsForSubject(String subject) =>
+      [for (final e in khoaExperiments) if (e.subject == subject) e];
 
   static LessonIndex? fromJsonString(String raw) {
     final Object? j;
@@ -269,6 +295,7 @@ class LessonIndex {
         // thiếu bước tiến hành hoặc title ⇒ KHÔNG phải thí nghiệm dùng được.
         if (e['title'] is! String || steps.isEmpty) continue;
         ke.add(KhoaExperiment(
+            subject: '${e['subject'] ?? 'Khoa học'}',
             book: '${e['book']}',
             page: (e['page'] as num?)?.toInt(),
             lesson: (e['lesson'] as num?)?.toInt(),
@@ -279,6 +306,27 @@ class LessonIndex {
             quanSat: e['quanSat'] as String?));
       }
     }
+    final dm = <DiaMap>[];
+    final mj = j['diaMaps'];
+    if (mj is List) {
+      for (final m in mj.whereType<Map>()) {
+        final qs = [
+          for (final q in (m['questions'] as List? ?? const []))
+            if (q is String) q
+        ];
+        // thiếu asset/caption/câu hỏi ⇒ không phải bản đồ dùng được.
+        if (m['asset'] is! String || m['caption'] is! String || qs.isEmpty) {
+          continue;
+        }
+        dm.add(DiaMap(
+            subject: '${m['subject'] ?? 'LS&ĐL'}',
+            book: '${m['book']}',
+            page: (m['page'] as num?)?.toInt(),
+            asset: m['asset'] as String,
+            caption: m['caption'] as String,
+            questions: qs));
+      }
+    }
     return LessonIndex(
         grade: grade,
         subjects: subjects,
@@ -286,7 +334,8 @@ class LessonIndex {
         tvReadings: tv,
         tvWritings: tw,
         suSources: su,
-        khoaExperiments: ke);
+        khoaExperiments: ke,
+        diaMaps: dm);
   }
 
   /// `null` khi máy này chưa build asset (poc-out chưa có) — hợp lệ, nói thật.
