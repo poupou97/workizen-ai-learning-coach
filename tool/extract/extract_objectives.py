@@ -31,7 +31,9 @@ KEYS = [
 BOOK = sys.argv[1] if len(sys.argv) > 1 else '05-sgv-toan-5'
 D = f'poc-out/graph/ocr-body/{BOOK}'
 LESSON = re.compile(r'^Bài\s+(\d+)\b')
-MUCTIEU = re.compile(r'^[IVX\d]*\.?\s*M[ỤU]C TI[ÊE]U\s*$')
+# header thật trong SGV in số La Mã, OCR nhiễu thành 'L'/'I.'/'Ш' — match
+# dòng NGẮN kết thúc bằng MỤC TIÊU thay vì đoán đúng tiền tố nhiễu.
+MUCTIEU = re.compile(r'^.{0,4}M[ỤU]C TI[ÊE]U\s*$')
 ENDBLOCK = re.compile(r'CHU[ẨA]N B[ỊI]|HO[ẠA]T Đ[ỘO]NG D[ẠA]Y')
 
 out, cur_lesson, in_block, mode, cur = [], None, False, None, None
