@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
+import '../../core/curriculum/pedagogical_boundary.dart';
 import '../../core/knowledge/provenance.dart';
 import '../../core/knowledge/slice_curriculum.dart';
 import '../../core/student/learning_evidence.dart';
@@ -23,12 +24,17 @@ class TutorScreen extends StatefulWidget {
   const TutorScreen({
     super.key,
     required this.session,
+    this.catalogue = const [],
     required this.expression,
     this.onFinished,
     this.provenance,
   });
 
   final TutorSession session;
+
+  /// WAL-141 — catalogue ĐẦY ĐỦ (kể cả method ngoài ca) để drill-down
+  /// «trong chương trình còn cách khác» nói thật vì sao SAM không dùng.
+  final List<TeachingMethod> catalogue;
   final String expression;
 
   /// §3/§7 — provenance NHÌN THẤY TỪ TUTOR START: Why This Method + nguồn +
@@ -396,6 +402,69 @@ class _TutorScreenState extends State<TutorScreen> {
               'Phiên bản: ${TutorSession.policyId} · $knowledgeModelVersion',
               style: const TextStyle(
                   fontSize: WalType.secondary, color: WalColors.inkSoft)),
+          // WAL-141 — CÁCH KHÁC trong chương trình: mỗi cách một nguồn RIÊNG
+          // (mint qua explainTeaching — không copy sourceLine của cách chính);
+          // cách không áp cho ca ⇒ nói thật LÝ DO, không giấu.
+          ...(){
+            final others = [
+              for (final m in widget.catalogue)
+                if (m.id != p.method.id) m
+            ];
+            if (others.isEmpty) return const <Widget>[];
+            return <Widget>[
+              const SizedBox(height: WalSpacing.md),
+              const Text('Trong chương trình còn cách khác:',
+                  style: TextStyle(
+                      fontSize: WalType.body,
+                      fontWeight: FontWeight.w700,
+                      color: WalColors.ink)),
+              for (final m in others) ...[
+                const SizedBox(height: WalSpacing.sm),
+                Builder(builder: (_) {
+                  final elig = eligibilityForProblem(
+                      m, s.scope.targetConcept, s.skillCaseId, s.scope.stage);
+                  final line = elig.eligible
+                      ? (explainTeaching(
+                                  scope: s.scope,
+                                  methodId: m.id,
+                                  exerciseCase: s.skillCaseId)
+                              ?.sourceLineForChild ??
+                          'Đây là cách của SAM — con có thể kiểm lại cùng thầy cô nhé.')
+                      : switch (elig.rejection) {
+                          MethodRejection.notApplicableToCase =>
+                            'Cách này dành cho DẠNG BÀI KHÁC '
+                                '(${m.skillCaseId}) — bài này không thuộc dạng '
+                                'đó nên SAM không dùng.',
+                          _ =>
+                            'Cách này chưa nằm trong phạm vi chương trình của bài.',
+                        };
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(WalSpacing.md),
+                    decoration: BoxDecoration(
+                        color: WalColors.white,
+                        borderRadius:
+                            BorderRadius.circular(WalSpacing.radiusChip)),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('«${m.name}»',
+                              style: const TextStyle(
+                                  fontSize: WalType.body,
+                                  fontWeight: FontWeight.w600,
+                                  color: WalColors.ink)),
+                          const SizedBox(height: 4),
+                          Text(line,
+                              style: const TextStyle(
+                                  fontSize: WalType.secondary,
+                                  color: WalColors.inkSoft,
+                                  height: 1.4)),
+                        ]),
+                  );
+                }),
+              ],
+            ];
+          }(),
         ]),
       ),
     );

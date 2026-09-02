@@ -34,7 +34,12 @@ void main() {
     final (session, tp) = build();
     await tester.pumpWidget(MaterialApp(
         home: TutorScreen(
-            session: session, expression: '3/4 + 2/5', provenance: tp)));
+            session: session,
+            expression: '3/4 + 2/5',
+            catalogue: curriculumFor(const LearnerProfile(
+                    learnerId: 'l', displayName: 'M', grade: 5))!
+                .catalogue,
+            provenance: tp)));
 
     // TỪ TUTOR START — chưa bấm gì đã thấy lối vào nguồn.
     expect(find.text('Vì sao cách này? · Nguồn'), findsOneWidget);
@@ -53,6 +58,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('tutor-session-v1'), findsOneWidget);
     expect(find.textContaining(knowledgeModelVersion), findsOneWidget);
+
+    // WAL-141 — «cách khác» drill-down: take-larger hiện với LÝ DO THẬT
+    // (dành cho dạng chia-hết — bài này không thuộc), KHÔNG mượn nguồn
+    // của cách chính.
+    await tester.drag(find.byType(ListView).last, const Offset(0, -300));
+    await tester.pumpAndSettle();
+    expect(find.text('Trong chương trình còn cách khác:'), findsOneWidget);
+    expect(find.text('«Giữ mẫu số lớn hơn làm mẫu số chung»'), findsOneWidget);
+    expect(find.textContaining('DẠNG BÀI KHÁC'), findsOneWidget,
+        reason: '⭐ đột biến copy sourceLine cách chính cho cách khác ⇒ đỏ');
+    expect(find.textContaining('trang 77'), findsNothing,
+        reason: 'cách không áp ⇒ KHÔNG render citation như thể đang dạy nó');
   });
 
   testWidgets('không truyền provenance ⇒ không có chip (không bịa nguồn)',

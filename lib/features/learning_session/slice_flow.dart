@@ -282,6 +282,7 @@ class ProblemContextScreen extends StatelessWidget {
         builder: (_) => TutorScreen(
             session: session,
             expression: problem.expression,
+            catalogue: c.catalogue, // WAL-141: drill-down «cách khác»
             provenance: provenance)));
     // LEARNING EVIDENCE — ghi MỘT LẦN, kể cả bài bỏ dở (bằng chứng thật).
     final events = session.log.events;
