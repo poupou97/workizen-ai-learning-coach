@@ -104,3 +104,10 @@ RECONSTRUCTION ≠ SAM EXPLANATION ≠ STUDENT INTERPRETATION · multi-agent ≠
 LLM call (deterministic graph → planner → 1 LLM constrained → verifier). Learning Opportunity =
 Graph Pattern × Learner State × Curriculum Permission × Pedagogical Policy.
 KHÔNG chen trước P0/P1/ALA; KHÔNG persona chatbot; KHÔNG đổi production UI vì hướng này.
+
+**Delta 2026-09-02 — PRIOR ART FIRST:** trước mọi ontology/architecture mới phải nghiên cứu
+Educational KG có sẵn — seeds: EduKG (Tsinghua/THU-KEG) · K12-KGraph · KnowEdu · tự search thêm;
+protocol SEARCH→VERIFY→CLONE→INSPECT(code/data/pipeline/license)→RUN, không chỉ README, không
+copy code vào production; comparison matrix Research × SAM × Extension; mục FALSIFY IT (8 kết
+luận phủ định hợp lệ); đầu ra: 2 hypothesis verdicts + khuyến nghị TỐI ĐA 1 bounded graph POC.
+«DO NOT INVENT AN EDUCATIONAL GRAPH FROM ZERO.»
