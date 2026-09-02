@@ -42,3 +42,10 @@ SourceReader+Compose · Địa: Map+Table+Chart · Tin/CN: Procedure+Artifact(Ca
 NN: Voice+Reader+Quiz · AI: theo strand A-D → Reader+Reflection+Diagram (KHÔNG
 chat-tool list) · ÂN/MT/GDTC/HĐTN: Activity-guide surface (G) — hướng dẫn + phản hồi,
 không chấm.
+
+
+## WAL-116 addendum — Drawing (đo 729 lệnh «vẽ»)
+Drawing KHÔNG phải một interaction: TECHNICAL 28% · GEOMETRY 19.3% · DIAGRAM
+10.6% · ARTISTIC 8.1% · GRAPH/CHART 9.1% (bảng đầy đủ: docs/design/02 §WAL-116).
+Verdict: SHARED ENGINE + SPECIALIZED MODES; POC object model tại
+lib/core/drawing/drawing_model.dart; UNKNOWN giữ UNKNOWN.

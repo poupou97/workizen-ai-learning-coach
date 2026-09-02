@@ -39,3 +39,30 @@ chỉ nói về transition/browsing của môn đó.
 trên cùng bài — recognize≠apply≠write phải là SkillCase riêng (store đã thuận). Toán:
 EXAMPLE 1.305 ⇒ worked-example là bước dạy chuẩn — TeachingAct DEMONSTRATE có chất liệu
 thật ở mọi lớp.
+
+## WAL-116 (2026-09-02) — «VẼ» TAXONOMY: SỐ ĐO THẬT + VERDICT
+
+Classifier rule minh bạch (tool/design/classify_ve.py, v3 — «vẽ» ở VỊ TRÍ LỆNH,
+không đếm nhắc-tới-vẽ giữa văn; OCR-variant «đoạn thắng» đã vá; rule đầu khớp
+thắng, in samples để kiểm mắt): **729 lệnh «vẽ»** trong SGK toàn corpus.
+
+| Loại | n | % | Chủ lực |
+|---|---|---|---|
+| TECHNICAL | 204 | 28.0% | Công nghệ 8/10/11 + Mĩ thuật 10-12 (bản vẽ kĩ thuật/phác thảo) |
+| UNKNOWN | 160 | 21.9% | giữ nguyên UNKNOWN — không ép |
+| GEOMETRY | 141 | 19.3% | Toán 2/6-9 (đoạn thẳng/hình/đường tròn) |
+| DIAGRAM | 77 | 10.6% | TN&XH/KHTN/HĐTN (sơ đồ) |
+| ARTISTIC | 59 | 8.1% | Mĩ thuật/HĐTN tiểu học |
+| GRAPH | 35 | 4.8% | Vật lí/Toán (đồ thị) |
+| CHART | 31 | 4.3% | Toán (biểu đồ) |
+| ANNOTATE/MAP_SKETCH/VECTOR | 22 | 3.0% | rải rác |
+
+**VERDICT: SHARED ENGINE + SPECIALIZED MODES** — không ONE-DRAWING-SURFACE:
+GEOMETRY cần ràng buộc số kiểm được (độ dài/góc — engine chấm được «vẽ đúng»
+không cần mắt); TECHNICAL cần lớp + chú thích kích thước (tiêu chí = checklist
+cấu trúc, không chấm thẩm mỹ); CHART/GRAPH cần data-binding; ARTISTIC tự do
+(không chấm). Stroke/layer/undo dùng chung. POC object model 2 loại top:
+`lib/core/drawing/drawing_model.dart` (+ test trên 2 bài THẬT: «Vẽ đoạn thẳng
+AB 9 cm» Toán 2, «Vẽ phác thảo sản phẩm» Công nghệ). UNKNOWN 21.9% giữ nguyên
+UNKNOWN — phần lớn là «vẽ» trong tên bài đọc/lời kể, không phải lệnh vẽ được.
+Hub Canvas (WAL-110 matrix): ứng viên reuse cho engine chung — adapter khi build.
