@@ -34,6 +34,7 @@ enum AgendaActionKind {
 
 enum AgendaSignalKind {
   reviewOverdue,
+  teacherIntent,
   reviewDue,
   weakCase,
   unobservedCoverage,
@@ -234,6 +235,10 @@ NextBestLearningAction resolveAgenda(
   required DateTime today,
   int sessionsToday = 0,
   List<TimetableEntry> timetable = const [],
+
+  /// Tín hiệu từ nguồn ngoài học-trạng (vd teacherIntentSignals — WAL-106).
+  /// Đi qua CÙNG một resolve: không nguồn nào có đường tắt quanh ưu tiên.
+  List<AgendaSignal> extraSignals = const [],
   AgendaPolicy policy = const AgendaPolicy(),
 }) {
   if (sessionsToday >= policy.enoughSessionsToday) {
@@ -246,7 +251,8 @@ NextBestLearningAction resolveAgenda(
 
   final signals = [
     for (final c in concepts)
-      ...signalsFor(c, policy: policy)
+      ...signalsFor(c, policy: policy),
+    ...extraSignals,
   ]..sort((a, b) {
       if (a.strength != b.strength) return b.strength.compareTo(a.strength);
       if (a.kind.index != b.kind.index) return a.kind.index - b.kind.index;
