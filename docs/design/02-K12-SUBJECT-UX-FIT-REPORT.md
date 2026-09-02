@@ -66,3 +66,13 @@ cấu trúc, không chấm thẩm mỹ); CHART/GRAPH cần data-binding; ARTISTI
 AB 9 cm» Toán 2, «Vẽ phác thảo sản phẩm» Công nghệ). UNKNOWN 21.9% giữ nguyên
 UNKNOWN — phần lớn là «vẽ» trong tên bài đọc/lời kể, không phải lệnh vẽ được.
 Hub Canvas (WAL-110 matrix): ứng viên reuse cho engine chung — adapter khi build.
+
+## WAL-117 (2026-09-02) — EN SECTION (thay caveat «VN lexicon không áp được»)
+
+EN adapter v2 đo 6.758 unit SGK EN: OTHER 66.9% (content), PRONUNCIATION 7.5%,
+LISTENING 6.3%, INTERACTION 4.8%, READING 4.0%, SPEAKING 3.8%, WRITING 3.3%,
+VOCAB 1.7%, GRAMMAR 1.6% — bảng × lớp và limitation trộn-cột:
+docs/research/SAM-EN-ADAPTER-AND-CHILD-SPEECH-MEMO.md. Mapping: Reader/Compose/
+QuizSelect dùng lại được cho READING/WRITING/VOCAB-GRAMMAR; LISTENING cần audio
+bản quyền (chưa có trong corpus — gate); SPEAKING/PRON chờ P2-C với verdict
+on-device-only cho giọng trẻ.
