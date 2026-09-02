@@ -106,7 +106,11 @@ class TutorSession {
   static const policyId = 'tutor-session-v1';
   String? _lastAnswerEventId;
 
-  void _emit(EvidenceKind kind, bool? correct) {
+  /// Can thiệp ĐANG treo trên màn hình — mọi câu trả lời khi support > none
+  /// mang id này: «đúng sau gợi ý NÀO» nằm trong dữ liệu (§3 Master Order).
+  String? _activeInterventionId;
+
+  void _emit(EvidenceKind kind, bool? correct, {String? interventionId}) {
     final id = '$exerciseId#${_seq++}';
     final isAnswer = correct != null;
     log = log.append(LearningEvent(
@@ -122,6 +126,11 @@ class TutorSession {
       support: support,
       policyId: policyId,
       priorEventId: isAnswer ? _lastAnswerEventId : null,
+      conceptIds: [scope.targetConcept],
+      interventionId: interventionId ??
+          (isAnswer && support != SupportLevel.none
+              ? _activeInterventionId
+              : null),
     ));
     if (isAnswer) _lastAnswerEventId = id;
   }
@@ -162,8 +171,13 @@ class TutorSession {
   /// là bằng chứng siêu nhận thức, độc lập với việc SAM có gì để đưa.
   String? requestHint() {
     assert(!finished);
-    _emit(EvidenceKind.hintRequested, null);
-    if (scope.allowedMethods.isEmpty) return null; // fail closed
+    if (scope.allowedMethods.isEmpty) {
+      // Bí vẫn là bằng chứng siêu nhận thức — ghi CẢ khi fail closed, nhưng
+      // KHÔNG có interventionId: không can thiệp nào đã thực sự xảy ra.
+      _emit(EvidenceKind.hintRequested, null);
+      return null; // fail closed
+    }
+    final method = scope.allowedMethods.first;
     final next = switch (support) {
       SupportLevel.none => SupportLevel.hint,
       SupportLevel.hint => SupportLevel.workedStep,
@@ -171,14 +185,21 @@ class TutorSession {
         revealAllowed ? SupportLevel.fullSolution : SupportLevel.workedStep,
       SupportLevel.fullSolution => SupportLevel.fullSolution,
     };
+    // ⭐ §3 «exact hint identity»: sự kiện xin-gợi-ý mang định danh của ĐÚNG
+    // nội dung sẽ hiển thị (kể cả khi đứng yên nhắc lại nấc cũ).
+    final delivered =
+        (next == support && support != SupportLevel.none) ? support : next;
+    _activeInterventionId = interventionIdFor(policyId, method.id, delivered);
+    _emit(EvidenceKind.hintRequested, null,
+        interventionId: _activeInterventionId);
     if (next == support && support != SupportLevel.none) {
       // đứng yên (REVEAL chưa mở hoặc đã kịch thang) — nhắc lại nấc hiện tại
-      return hintTextFor(scope.allowedMethods.first, support, problem);
+      return hintTextFor(method, support, problem);
     }
     support = next;
     if (next.index > maxSupport.index) maxSupport = next;
     _supportRaisedSinceWrong = true;
-    return hintTextFor(scope.allowedMethods.first, support, problem);
+    return hintTextFor(method, support, problem);
   }
 
   TutorOutcome get outcome => TutorOutcome(
@@ -190,6 +211,12 @@ class TutorSession {
             log.events.any((e) => e.kind == EvidenceKind.selfCorrection),
       );
 }
+
+/// Định danh can thiệp — «policy/method@nấc». Đủ để truy về đúng nội dung đã
+/// hiển thị: [hintTextFor] là hàm TẤT ĐỊNH của bộ ba này cộng với chính bài.
+String interventionIdFor(
+        String policyId, String methodId, SupportLevel level) =>
+    '$policyId/$methodId@${level.name}';
 
 /// Nội dung gợi ý RULE-BASED — chỉ từ method trong scope, số lấy từ chính bài.
 /// Ba nấc tương ứng AutoTutor pump→hint→assertion (prior art WAL-64).

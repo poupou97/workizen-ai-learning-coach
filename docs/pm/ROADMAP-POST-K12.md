@@ -40,3 +40,16 @@ STUDENT FREE · TEACHER FREE · PARENT BASIC FREE · PARENT PREMIUM (family unit
 
 ## Concept reconciliation
 38 concept = reference, không phải spec. ~24 routes / ~16 surfaces = PROPOSED v0.1. POC được falsify; mọi thay đổi verdict cập nhật `docs/design/03-38-CONCEPT-SCREEN-REAUDIT.md` — không silently drift.
+
+## Pedagogy layer (Founder Order 2026-09-02 #2 — Epic WAL-126)
+
+| Phase | Workstream | Ticket |
+|---|---|---|
+| 1 | SGV Pedagogy Mining (File 01) | WAL-127 |
+| 2 | Pedagogical Pattern Model + ladder v2/misconception/transfer/age/provenance (File 02) | WAL-128 |
+| 3 | LearningExperienceBlueprint + 5-10 mẫu (File 03) | WAL-129 |
+| 4-6 | 5-Subject Pedagogy Validation (File 04) | WAL-130 |
+| 7 | Pedagogical QA Harness + LLM Realization Contract (File 05) | WAL-131 |
+| 8 | Presentation Policy + Surface Binding | WAL-132 |
+
+Invariant trung tâm: **LLM KHÔNG PHẢI PEDAGOGICAL AUTHORITY** — chỉ realization trong contract. Artifacts: `docs/pedagogy/01→05`. Versioning thêm: pedagogyModelVersion, blueprintVersion, presentationPolicyVersion — replay không silently reinterpret. Không đảo UI trước pedagogy.

@@ -79,6 +79,7 @@ class LearningSession {
         if (e.support != null) 'support': e.support!.name,
         if (e.policyId != null) 'policyId': e.policyId,
         if (e.priorEventId != null) 'priorEventId': e.priorEventId,
+        if (e.interventionId != null) 'interventionId': e.interventionId,
       };
 
   static LearningEvent? _eventFrom(Map<String, Object?> j) {
@@ -106,6 +107,7 @@ class LearningSession {
           : null,
       policyId: j['policyId'] as String?,
       priorEventId: j['priorEventId'] as String?,
+      interventionId: j['interventionId'] as String?,
     );
   }
 

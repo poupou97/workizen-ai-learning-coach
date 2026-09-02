@@ -6,6 +6,10 @@
 library;
 
 import '../../core/adaptive/adaptive_engine.dart';
+import '../../core/knowledge/slice_curriculum.dart';
+import '../../core/store/learner_profile.dart';
+import '../../core/store/learner_store.dart';
+import '../learning_session/slice_flow.dart' show masteryFromStore;
 import '../../core/curriculum/pedagogical_boundary.dart';
 import '../../core/curriculum/skill_case.dart';
 import '../../core/student/concept_summary.dart';
@@ -147,6 +151,87 @@ MissionData buildDemoMission({DateTime? now}) {
             displayName: 'Quy đồng — ${names['denominator-divisible']!}',
             urgency: review.urgency),
     ],
+    unobservedCaseNames: [
+      for (final id in summary.unobservedCases)
+        if (names.containsKey(id)) names[id]!
+    ],
+  );
+}
+
+/// ⭐ WAL-108 — mission «Hôm nay» từ KHO THẬT: replay bằng chứng của learner
+/// NÀY (không fixture), decide/review/unobserved đều sinh từ trạng thái đó.
+/// Vòng khép kín: học xong → recordSession → màn Hôm nay đổi theo — đo được.
+///
+/// Grade ngoài phạm vi slice ⇒ fail closed: nói thẳng «chưa có nội dung»,
+/// KHÔNG mượn nội dung lớp 5 dạy lớp khác.
+Future<MissionData> buildMissionFromStore({
+  required LearnerProfile profile,
+  required LearnerStore store,
+  DateTime? now,
+}) async {
+  final t = now ?? DateTime.now();
+  final c = curriculumFor(profile);
+  if (c == null) {
+    final stage = LearningStage(
+      grade: profile.grade,
+      bookSeries: profile.bookSeries ?? 'chua-ro',
+      lessonId: 'chua-co-noi-dung',
+      conceptsIntroduced: const {},
+      methodsIntroduced: const {},
+      terminologyIntroduced: const {},
+    );
+    final d = decide(
+      conceptId: 'quy-dong',
+      exerciseCase: null,
+      mastery: const ConceptMastery(conceptId: 'quy-dong', cases: {}),
+      stage: stage,
+      catalogue: const [],
+    );
+    return MissionData(
+      studentName: profile.displayName,
+      decision: d,
+      nextActionTitle:
+          'SAM chưa có nội dung lớp ${profile.grade} — sắp có nhé',
+      reviews: const [],
+      unobservedCaseNames: const [],
+    );
+  }
+
+  final mastery = await masteryFromStore(store, profile.learnerId, c);
+  final names = {for (final sc in c.cases) sc.id: sc.condition};
+
+  final decision = decide(
+    conceptId: c.conceptId,
+    exerciseCase: 'denominator-non-divisible', // mục tiêu của Bài 6
+    mastery: mastery,
+    stage: c.stage,
+    catalogue: c.catalogue,
+    caseCatalogue: c.cases,
+  );
+  final summary =
+      ConceptSummary.of(mastery, knownCaseIds: {...names.keys}, now: t);
+
+  final reviews = <ReviewItem>[];
+  for (final sc in c.cases) {
+    final m = mastery.cases[sc.id];
+    if (m == null || !m.hasEvidence) continue;
+    final r = reviewStateOf(m, t);
+    if (r.urgency == ReviewUrgency.reviewDue ||
+        r.urgency == ReviewUrgency.overdue) {
+      reviews.add(ReviewItem(
+          displayName: 'Quy đồng — ${names[sc.id]!}', urgency: r.urgency));
+    }
+  }
+
+  return MissionData(
+    studentName: profile.displayName,
+    decision: decision,
+    nextActionTitle: switch (decision.diagnosis) {
+      DiagnosticOutcome.caseTransitionGap => 'Hôm nay mình thử dạng mới nhé',
+      DiagnosticOutcome.executionError => 'Luyện thêm cho chắc tay',
+      _ => 'Cùng SAM tìm hiểu tiếp nhé',
+    },
+    reviews: reviews,
     unobservedCaseNames: [
       for (final id in summary.unobservedCases)
         if (names.containsKey(id)) names[id]!

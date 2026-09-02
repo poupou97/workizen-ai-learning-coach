@@ -82,6 +82,7 @@ class LearningEvent {
     this.support,
     this.policyId,
     this.priorEventId,
+    this.interventionId,
   });
 
   final String eventId;
@@ -128,6 +129,12 @@ class LearningEvent {
   /// Sự kiện TRẢ LỜI liền trước trong cùng phiên — quan hệ pre/post quanh
   /// can thiệp («sai → hint → đúng» lần được thành CHUỖI, không phải 3 điểm rời).
   final String? priorEventId;
+
+  /// ⭐ §3 Master Order — «exact hint/intervention identity»: định danh CAN
+  /// THIỆP đã hiển thị quanh sự kiện (policy/method@nấc). Thiếu nó, «gợi ý
+  /// nào đã giúp con» không truy được về đúng nội dung — lineage đứt ở nấc
+  /// cuối. `null` = sự kiện không gắn can thiệp (hoặc dữ liệu cũ).
+  final String? interventionId;
 
   /// Sự kiện này có phải một lần **trả lời** không (khác với một lần can thiệp).
   bool get isAttempt => switch (kind) {

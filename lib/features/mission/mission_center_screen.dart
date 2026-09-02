@@ -21,9 +21,14 @@ class MissionCenterScreen extends StatelessWidget {
     super.key,
     required this.data,
     this.learnerName,
+    this.onStartHomework,
   });
 
   final MissionData data;
+
+  /// WAL-108 — mở flow camera THẬT (learnerId + store xuyên suốt). `null` =
+  /// môi trường chưa nối slice (test/demo cũ) ⇒ giữ flow demo.
+  final VoidCallback? onStartHomework;
 
   /// Tên gọi từ HỒ SƠ THẬT (WAL-95). `null` ⇒ xưng hô trung tính, không bịa tên.
   final String? learnerName;
@@ -93,7 +98,7 @@ class MissionCenterScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.circular(WalSpacing.radiusButton))),
-              onPressed: () {}, // nối T1 ở slice camera (WAL-52)
+              onPressed: onStartHomework ?? () {},
               child: const Text('Bắt đầu',
                   style: TextStyle(
                       fontSize: WalType.body, fontWeight: FontWeight.w700)),
@@ -167,7 +172,7 @@ class MissionCenterScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.circular(WalSpacing.radiusButton))),
-              onPressed: () => openCameraDemo(context),
+              onPressed: onStartHomework ?? () => openCameraDemo(context),
               icon: const Icon(Icons.photo_camera_outlined),
               label: const Text('Chụp bài tập',
                   style: TextStyle(fontSize: WalType.body)),

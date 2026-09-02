@@ -10,8 +10,11 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import '../../core/knowledge/provenance.dart';
+import '../../core/knowledge/slice_curriculum.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
+import '../../core/tutor/teaching_provenance.dart';
 import '../../core/tutor/tutor_feedback.dart';
 import 'tutor_session.dart';
 
@@ -21,10 +24,15 @@ class TutorScreen extends StatefulWidget {
     required this.session,
     required this.expression,
     this.onFinished,
+    this.provenance,
   });
 
   final TutorSession session;
   final String expression;
+
+  /// §3/§7 — provenance NHÌN THẤY TỪ TUTOR START: Why This Method + nguồn +
+  /// authority + phiên bản. `null` = flow cũ chưa nối (demo) — không bịa.
+  final TeachingProvenance? provenance;
 
   /// Log đầy đủ của phiên — nơi duy nhất model được phép "biết" chuyện gì
   /// đã xảy ra. Test đọc cái này để chứng minh UI khen mà model không ghi công.
@@ -129,6 +137,19 @@ class _TutorScreenState extends State<TutorScreen> {
               fontSize: WalType.display,
               fontWeight: FontWeight.w700,
               color: WalColors.ink))),
+      if (widget.provenance != null)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => _showProvenance(context),
+            icon: const Icon(Icons.menu_book_outlined,
+                size: 18, color: WalColors.primaryText),
+            label: const Text('Vì sao cách này? · Nguồn',
+                style: TextStyle(
+                    fontSize: WalType.secondary,
+                    color: WalColors.primaryText)),
+          ),
+        ),
       if (_hintText != null && _hintText!.isNotEmpty) ...[
         const SizedBox(height: WalSpacing.md),
         _card(
@@ -237,6 +258,55 @@ class _TutorScreenState extends State<TutorScreen> {
         ),
       ),
     ]);
+  }
+
+  /// §7 — drill-down nguồn: WHAT/WHY/SOURCE/AUTHORITY + phiên bản. Chuỗi
+  /// nguồn lấy NGUYÊN VĂN từ core (sourceLineForChild — mutation-guarded):
+  /// sourceDemonstrated không bao giờ render thành «sách nói rằng».
+  void _showProvenance(BuildContext context) {
+    final p = widget.provenance!;
+    final authority = switch (p.authority) {
+      KnowledgeOrigin.sourceStated => 'Sách nói thẳng quy tắc này.',
+      KnowledgeOrigin.sourceDemonstrated =>
+        'Sách dạy cách này qua ví dụ (không phát biểu quy tắc).',
+      _ => 'Cách của SAM — chưa có chỗ dựa trong sách.',
+    };
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: WalColors.surface,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(
+            WalSpacing.lg, 0, WalSpacing.lg, WalSpacing.xl),
+        child: ListView(shrinkWrap: true, children: [
+          Text('Cách «${p.method.name}»',
+              style: const TextStyle(
+                  fontSize: WalType.title,
+                  fontWeight: FontWeight.w700,
+                  color: WalColors.ink)),
+          const SizedBox(height: WalSpacing.sm),
+          Text(p.whyLineForChild,
+              style: const TextStyle(
+                  fontSize: WalType.body, color: WalColors.ink, height: 1.45)),
+          const SizedBox(height: WalSpacing.sm),
+          Text(p.sourceLineForChild,
+              style: const TextStyle(
+                  fontSize: WalType.body,
+                  fontWeight: FontWeight.w600,
+                  color: WalColors.primaryText,
+                  height: 1.45)),
+          const SizedBox(height: WalSpacing.sm),
+          Text(authority,
+              style: const TextStyle(
+                  fontSize: WalType.secondary, color: WalColors.inkSoft)),
+          const SizedBox(height: WalSpacing.md),
+          Text(
+              'Phiên bản: ${TutorSession.policyId} · $knowledgeModelVersion',
+              style: const TextStyle(
+                  fontSize: WalType.secondary, color: WalColors.inkSoft)),
+        ]),
+      ),
+    );
   }
 
   Widget _dim(String label, String value) => Padding(

@@ -66,6 +66,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Bố mẹ ▸'), 200,
         scrollable: find.byType(Scrollable).first);
+    // mission nay lắp từ KHO (WAL-108) — list dài hơn fixture cũ; kéo nút vào
+    // hẳn viewport trước khi bấm để tap không trượt hit-area.
+    await tester.ensureVisible(find.text('Bố mẹ ▸'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Bố mẹ ▸'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Tối nay cùng'), findsOneWidget);
