@@ -9,7 +9,7 @@
 | # | Workstream | Ticket | Ghi chú |
 |---|---|---|---|
 | P0-A | First Vertical Slice — Toán 5 B6 phân số khác mẫu, 17 bước Home→Next Action | **WAL-108** | GO. Không fake bằng static demo. S24 acceptance. |
-| P0-B | Cross-subject validation — TV Reader + Sử SourceReader + Architecture Verdict | **WAL-113** | blocked by 108. Không claim cross-subject vì interface nhìn generic. |
+| P0-B | Cross-subject validation — TV Reader + Sử SourceReader + Architecture Verdict | **WAL-113 ✅** | blocked by 108. Không claim cross-subject vì interface nhìn generic. |
 | P0-C | Multi-profile / shared device — A→B→A isolation | **WAL-109** | NO CROSS-LEARNER EVIDENCE CONTAMINATION. |
 | P0-D | Hub Education Safety Adapter + capability audit 26 mục | **WAL-110** | OCR≠Evidence · Chat≠Tutor · Provider≠authority · Import≠curriculum · Analytics≠telemetry. |
 | P0-E | Pedagogical Provenance end-to-end — lineage 10 tầng, fail-closed 5 điều kiện | **WAL-114** | blocked by 108. Không fabricate citation. |
@@ -26,6 +26,10 @@
 | P2-D | Knowledge Pack real-device scale 100MB→2GB+, FULL vs MODULAR | **WAL-84** | In Progress. Breakpoint 654ms→4.6ms đã vá. |
 | P2-E | Business experiments — fake-door, pilot design, canary, ads research | **WAL-124** | blocked by 119. KHÔNG ad SDK, KHÔNG thu tiền thật. |
 | GATE | Ads for children — legal research VN + Play Families + Apple Kids | **WAL-125** | Research-only → trình Founder. |
+
+**Checkpoint #1 (§29) posted 2026-09-02 trên WAL-112**: P0-A+P0-B DONE (WAL-108 S24, WAL-113
+Nokia máy-trắng — TV Reader câu-hỏi-mở + Sử SourceReader 3 tầng + verdict docs/design/07;
+bug index-sau-onboarding fix kèm test). NEXT: WAL-114 → 115 → Checkpoint #2.
 
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
