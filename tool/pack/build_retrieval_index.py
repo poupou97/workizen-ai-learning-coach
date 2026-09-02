@@ -33,6 +33,7 @@ con.executescript('''
 CREATE TABLE unit(id TEXT PRIMARY KEY, book TEXT, grade INT, vol INT,
                   lesson INT, role TEXT, page INT, text TEXT);
 CREATE VIRTUAL TABLE unit_fts USING fts5(text, content='unit', content_rowid='rowid');
+CREATE INDEX idx_unit_scope ON unit(grade, vol, lesson);
 ''')
 for u in units:
     con.execute('INSERT INTO unit VALUES (?,?,?,?,?,?,?,?)',

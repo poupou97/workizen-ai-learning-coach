@@ -4,6 +4,8 @@
 /// — prompt chỉ chừa cho LLM «HOW TO SAY IT». Cage lấy từ buildTutorPrompt
 /// THẬT (production), tình huống nối thêm phía dưới; baseline lấy từ
 /// hintTextFor/feedbackFor THẬT — không viết tay hai lần.
+library;
+
 import 'dart:convert';
 import 'dart:io';
 

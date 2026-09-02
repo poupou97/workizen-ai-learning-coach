@@ -141,7 +141,69 @@ void main() {
     }
     bench('corruption_fails_cleanly', failedCleanly ? 1 : 0, 'bool');
 
+    // ── MỐC 100MB: pack synthetic 105MB / 191.216 unit (nhân bản cấu trúc
+    // — đo SCALE, ghi rõ synthetic; nội dung không phải corpus mới) ──
+    final synPath = '${dir.path}/sam-synthetic-100mb.db';
+    final synCopy = await timed(() async {
+      final data =
+          await rootBundle.load('assets/pack/sam-synthetic-100mb.db');
+      await File(synPath).writeAsBytes(data.buffer.asUint8List(), flush: true);
+    });
+    bench('100mb_asset_copy', synCopy);
+    final sw2 = Stopwatch()..start();
+    final sdb = sqlite3.open(synPath);
+    bench('100mb_cold_open', sw2.elapsedMicroseconds / 1000.0);
+    final synCount =
+        sdb.select('SELECT COUNT(*) c FROM unit').first['c'] as int;
+    bench('100mb_unit_count', synCount, 'rows');
+    final synFts = <double>[];
+    for (final q in queries) {
+      synFts.add(await timed(() async {
+        sdb.select(
+            'SELECT rowid FROM unit_fts WHERE unit_fts MATCH ? LIMIT 10',
+            ['"$q"']);
+      }));
+    }
+    synFts.sort();
+    bench('100mb_fts_p50', synFts[synFts.length ~/ 2]);
+    bench('100mb_fts_p95', synFts[(synFts.length * 0.95).floor()]);
+    final synMixed = await timed(() async {
+      for (var i = 0; i < 20; i++) {
+        sdb.select(
+            'SELECT u.id FROM unit u JOIN unit_fts f ON u.rowid=f.rowid '
+            "WHERE f.unit_fts MATCH ? AND (u.grade<5 OR (u.grade=5 AND "
+            'u.vol=1 AND u.lesson<=6)) LIMIT 10',
+            ['"quy đồng"']);
+      }
+    });
+    bench('100mb_mixed_20x', synMixed);
+    final synScope = await timed(() async {
+      for (var i = 0; i < 20; i++) {
+        sdb.select(
+            'SELECT id FROM unit WHERE (grade<5) OR (grade=5 AND vol=1 AND '
+            'lesson<=?) ORDER BY grade, vol, lesson LIMIT 50', [6 + i]);
+      }
+    });
+    bench('100mb_graph_scope_20x', synScope);
+    // ĐIỂM GÃY tìm thấy ở lần đo đầu (641ms — full scan 191k rows).
+    // Thuốc: index scope. Đo lại SAU index để chứng minh bằng số.
+    final idxBuild = await timed(() async {
+      sdb.execute('CREATE INDEX IF NOT EXISTS idx_unit_scope '
+          'ON unit(grade, vol, lesson)');
+    });
+    bench('100mb_scope_index_build', idxBuild);
+    final synScopeIdx = await timed(() async {
+      for (var i = 0; i < 20; i++) {
+        sdb.select(
+            'SELECT id FROM unit WHERE (grade<5) OR (grade=5 AND vol=1 AND '
+            'lesson<=?) ORDER BY grade, vol, lesson LIMIT 50', [6 + i]);
+      }
+    });
+    bench('100mb_graph_scope_indexed_20x', synScopeIdx);
+    sdb.dispose();
+
     expect(unitCount, 2584);
+    expect(synCount, 191216);
     expect(failedCleanly, true);
   });
 }
