@@ -46,6 +46,7 @@ VERIFY = [
  ('EVENT','10-sgk-lich-su-10',44,'Hen-ri Pho'),
  ('EVENT','04-sgk-lich-su-va-dia-li-4',88,'Tuyên ngôn Độc lập'),
  ('EVENT','07-sgk-lich-su-va-dia-li-7',164,'Nam Cực'),
+ ('EVENT','06-sgk-am-nhac-6',64,'lá cờ Tố quốc tung bay'),
  # ── INVENTION / DISCOVERY ──
  ('INVENTION_DISCOVERY','10-sgk-lich-su-10',43,'E-đi-xơn'),
  # kim-chỉ-nam LS&ĐL7 p16: v0.1 loại vì thiếu người/năm gần (false-negative

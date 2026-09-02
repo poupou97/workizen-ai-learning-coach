@@ -26,7 +26,7 @@ EVENTISH = re.compile(r'(Khởi nghĩa|Chiến tranh|Kháng chiến|Cách mạng
 VERB_TAIL = re.compile(r'\s+(đã|không|mà|là|được|và|khi|sau|trước|cùng|vẫn|chuyên|từng|nói|viết|sáng tác|đặt)\b.*$')
 P_INTRO = re.compile(r'(nhà (?:thơ|văn|bác học|khoa học|toán học|vật lí|hoá học|sử học|giáo dục|soạn nhạc)|nhạc sĩ|hoạ sĩ|họa sĩ|danh nhân|anh hùng)\s+(' + NAME + r')')
 P_QUOTE = re.compile(r'"([^"]{15,220})"\s*[\.\s]*\(\s*(' + NAME + r')(?:\s*,\s*([^)]{3,80}))?\)')
-P_EVENT = re.compile(r'([Nn]ăm\s+(\d{3,4})|[Nn]gày\s+(\d{1,2})[\-/](\d{1,2})[\-/](\d{4}))[\s,:]([^.]{15,180}\.)')
+P_EVENT = re.compile(r'([Nn]ăm\s+(\d{3,4})|[Nn]gày\s+(\d{1,2})[\-/](\d{1,2})[\-/](\d{4})|[Nn]gày\s+(\d{1,2})\s+tháng\s+(\d{1,2})\s+năm\s+(\d{4}))[\s,:]([^.]{15,180}\.)')
 P_INV = re.compile(r'(' + NAME + r')?[^.]{0,60}(phát minh ra|sáng chế ra|tìm ra|khám phá ra|phát hiện ra)\s+([^.]{5,120}\.)')
 
 def viet_quality(t):
@@ -85,14 +85,17 @@ def mine(did, reg):
                 quote=m.group(1), person=person.removeprefix('Theo').strip(),
                 citedSource=m.group(3))
         for m in P_EVENT.finditer(text):
-            body = m.group(6)
+            body = m.group(9)
             # v0.1: loại ngôn-ngữ-bài-tập/caption — đòi dấu hiệu SỰ KIỆN
             if re.search(r'em hãy|quan sát|bài tập|biểu đồ|bảng số liệu|lớp \d', body, re.I):
                 continue
-            add('EVENT', page, m.group(0)[:260],
-                year=int(m.group(2) or m.group(5)),
-                monthDay=(f'{int(m.group(4)):02d}-{int(m.group(3)):02d}'
-                          if m.group(3) else None))
+            year = int(m.group(2) or m.group(5) or m.group(8))
+            md = None
+            if m.group(3):
+                md = f'{int(m.group(4)):02d}-{int(m.group(3)):02d}'
+            elif m.group(6):
+                md = f'{int(m.group(7)):02d}-{int(m.group(6)):02d}'
+            add('EVENT', page, m.group(0)[:260], year=year, monthDay=md)
         for m in P_INV.finditer(text):
             ctx = text[max(0, m.start()-50):m.start(2)]
             # mục-đích/bài-tập: «em/học sinh… để tìm ra…» ⇒ không phải khám phá
