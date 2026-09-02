@@ -50,8 +50,23 @@ void main() {
     expect(find.textContaining('SAM đang học bài này'), findsOneWidget,
         reason: 'bài 9 chưa có exercises — nói thật');
 
-    // Mở bài 6 → vào Problem Context với đúng biểu thức từ corpus.
+    // Toán B6 giờ có 2 hoạt động (làm bài + nguồn) ⇒ sheet chọn (WAL-141 #17).
     await t.tap(find.textContaining('Cộng, trừ hai phân số'));
+    await t.pumpAndSettle();
+    expect(find.text('📖 Nguồn bài học'), findsOneWidget);
+    // Nguồn bài học: cả 2 cách với sourceLine ĐÚNG LUẬT (demonstrated ≠ sách nói)
+    await t.tap(find.text('📖 Nguồn bài học'));
+    await t.pumpAndSettle();
+    expect(find.textContaining('làm theo ví dụ trong SGK Toán 5, trang 21'),
+        findsOneWidget);
+    expect(find.textContaining('làm theo ví dụ trong SGK Toán 4, trang 77'),
+        findsOneWidget, reason: 'take-larger cũng demonstrated — cùng luật');
+    expect(find.textContaining('sách nói'), findsNothing);
+    await t.tapAt(const Offset(400, 50)); // đóng sheet
+    await t.pumpAndSettle();
+    await t.tap(find.textContaining('Cộng, trừ hai phân số'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('🧮 Làm bài tập'));
     await t.pumpAndSettle();
     expect(find.text('1/2 - 1/5'), findsOneWidget,
         reason: 'bài THẬT từ SGK (cur: origin), không placeholder');

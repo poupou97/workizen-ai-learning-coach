@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/curriculum/canonical_problem.dart';
 import '../../core/knowledge/provenance.dart';
+import '../../core/knowledge/slice_curriculum.dart';
+import '../../core/tutor/teaching_provenance.dart' show sourceLineForChildOf;
 import '../../core/store/learner_profile.dart';
 import '../../core/store/learner_store.dart';
 import '../../core/store/learning_session.dart';
@@ -286,6 +288,8 @@ class SubjectHomeScreen extends StatelessWidget {
     final actions = <(String, VoidCallback)>[
       if (exercises.isNotEmpty)
         ('🧮 Làm bài tập', () => _openExercise(context, l, exercises.first)),
+      if (exercises.isNotEmpty && _isToan)
+        ('📖 Nguồn bài học', () => _openSourceInfo(context)),
       if (readings.isNotEmpty)
         ('📖 Đọc bài', () => _openReading(context, readings.first)),
       if (writings.isNotEmpty)
@@ -321,6 +325,55 @@ class SubjectHomeScreen extends StatelessWidget {
               },
             ),
           const SizedBox(height: WalSpacing.sm),
+        ]),
+      ),
+    );
+  }
+
+  /// WAL-141 #17 — «Nguồn bài học» từ Subject Home: các cách trong chương
+  /// trình + nguồn — render qua sourceLineForChildOf (một luật, một chỗ).
+  void _openSourceInfo(BuildContext context) {
+    final c = curriculumFor(profile);
+    if (c == null) return;
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: WalColors.surface,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(
+            WalSpacing.lg, 0, WalSpacing.lg, WalSpacing.xl),
+        child: ListView(shrinkWrap: true, children: [
+          const Text('Nguồn bài học',
+              style: TextStyle(
+                  fontSize: WalType.title,
+                  fontWeight: FontWeight.w700,
+                  color: WalColors.ink)),
+          const SizedBox(height: WalSpacing.sm),
+          for (final m in c.catalogue) ...[
+            const SizedBox(height: WalSpacing.sm),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(WalSpacing.md),
+              decoration: BoxDecoration(
+                  color: WalColors.white,
+                  borderRadius: BorderRadius.circular(WalSpacing.radiusChip)),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('«${m.name}»',
+                        style: const TextStyle(
+                            fontSize: WalType.body,
+                            fontWeight: FontWeight.w600,
+                            color: WalColors.ink)),
+                    const SizedBox(height: 4),
+                    Text(sourceLineForChildOf(m.provenance),
+                        style: const TextStyle(
+                            fontSize: WalType.secondary,
+                            color: WalColors.primaryText,
+                            height: 1.4)),
+                  ]),
+            ),
+          ],
         ]),
       ),
     );

@@ -46,24 +46,26 @@ class TeachingProvenance {
           : null;
 
   /// Dòng nguồn cho TRẺ — tuổi-thích-ứng tầng chữ, không thuật ngữ kỹ thuật.
-  String get sourceLineForChild {
-    final p = source;
-    if (p == null) {
-      return 'Đây là cách của SAM — con có thể kiểm lại cùng thầy cô nhé.';
-    }
-    final where = 'SGK ${p.subject ?? ''} ${p.grade ?? ''}'.trim();
-    return switch (p.origin) {
-      KnowledgeOrigin.sourceStated =>
-        'Theo $where, trang ${p.pageStart}.',
-      KnowledgeOrigin.sourceDemonstrated =>
-        'SAM làm theo ví dụ trong $where, trang ${p.pageStart}.',
-      // sequence không phải chỗ dựa cho MỘT phương pháp — coi như cách của SAM
-      _ => 'Đây là cách của SAM — con có thể kiểm lại cùng thầy cô nhé.',
-    };
-  }
+  String get sourceLineForChild => sourceLineForChildOf(source);
 
   /// Vì-sao-cách-này cho TRẺ.
   String get whyLineForChild => methodReason;
+}
+
+/// LUẬT RENDER NGUỒN — một chỗ duy nhất (WAL-141 #17 tái dùng cho sheet
+/// «Nguồn bài học»); mutation-guard của sourceLineForChild phủ luôn hàm này.
+String sourceLineForChildOf(Provenance? p) {
+  if (p == null || !p.citableAsTextbookFact) {
+    return 'Đây là cách của SAM — con có thể kiểm lại cùng thầy cô nhé.';
+  }
+  final where = 'SGK ${p.subject ?? ''} ${p.grade ?? ''}'.trim();
+  return switch (p.origin) {
+    KnowledgeOrigin.sourceStated => 'Theo $where, trang ${p.pageStart}.',
+    KnowledgeOrigin.sourceDemonstrated =>
+      'SAM làm theo ví dụ trong $where, trang ${p.pageStart}.',
+    // sequence không phải chỗ dựa cho MỘT phương pháp — coi như cách của SAM
+    _ => 'Đây là cách của SAM — con có thể kiểm lại cùng thầy cô nhé.',
+  };
 }
 
 /// Mint DUY NHẤT. Trả `null` (fail closed) khi:
