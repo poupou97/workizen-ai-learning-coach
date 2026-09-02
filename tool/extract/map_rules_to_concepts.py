@@ -32,6 +32,11 @@ KEYS = [
     ('doi cho cac so hang', 'tinh-chat-giao-hoan-cong'),
     ('doi cho cac thua so', 'tinh-chat-giao-hoan-nhan'),
     ('trung binh cong', 'so-trung-binh-cong'),
+    # tập hai (batch ⑤) — từ khoá đọc từ RULE thật in ra khi chạy:
+    ('ti so phan tram cua hai so', 'ti-so-phan-tram'),
+    ('the tich cua hinh hop chu nhat', 'the-tich-hinh-hop-chu-nhat'),
+    ('the tich cua hinh lap phuong', 'the-tich-hinh-lap-phuong'),
+    ('van toc cua chuyen dong', 'van-toc'),
 ]
 
 out = []
