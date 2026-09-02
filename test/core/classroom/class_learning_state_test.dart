@@ -11,13 +11,14 @@ ConceptSummary sum({
   int correct = 4,
   int incorrect = 0,
   int supported = 0,
-  Set<String> known = const {'ca1'},
+  String caseId = 'ca1',
+  Set<String>? known,
 }) =>
     ConceptSummary.of(
       ConceptMastery(conceptId: 'c', cases: {
         if (evidence > 0 || supported > 0)
-          'ca1': CaseMastery(
-            skillCaseId: 'ca1',
+          caseId: CaseMastery(
+            skillCaseId: caseId,
             pMastery: pMastery,
             evidenceCount: evidence,
             independentCorrect: correct,
@@ -26,7 +27,7 @@ ConceptSummary sum({
             lastIndependentEvidenceAt: evidence > 0 ? _now : null,
           ),
       }),
-      knownCaseIds: known,
+      knownCaseIds: known ?? {caseId},
       now: _now,
     );
 
@@ -64,6 +65,19 @@ void main() {
     expect(st.commonWeakCases.first.$1, 'ca1');
     expect(st.commonWeakCases.first.$2, ['hs-a', 'hs-b']);
     expect(st.developing, ['hs-kha']);
+  });
+
+  test('mode sắp theo SỐ EM giảm dần — tên ca không đảo được thứ tự', () {
+    final weakZ = sum(pMastery: 0.3, correct: 0, incorrect: 4, caseId: 'ca-z');
+    final weakA = sum(pMastery: 0.3, correct: 0, incorrect: 4, caseId: 'ca-a');
+    final st = classConceptState('c', [
+      row('hs1', weakZ),
+      row('hs2', weakZ),
+      row('hs3', weakA),
+    ]);
+    // ca-z có 2 em, ca-a có 1 em ⇒ ca-z đứng trước dù 'ca-a' < 'ca-z'
+    expect(st.commonWeakCases.map((e) => e.$1), ['ca-z', 'ca-a']);
+    expect(st.commonWeakCases.first.$2, ['hs1', 'hs2']);
   });
 
   test('unobservedByAll = giao các tập: một em từng được quan sát ca đó '
