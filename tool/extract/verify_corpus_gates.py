@@ -155,6 +155,23 @@ def main():
         check('quy-dong có method ở CẢ lớp 4 và lớp 5 (ca chuẩn WAL-1)',
               {4, 5} <= {m['grade'] for m in ms if m['conceptId'] == 'quy-dong'})
 
+    # G8 — Q-matrix (WAL-79): bất định được GIỮ, không ép đầy-đủ-biết
+    _qp = 'poc-out/units/qmatrix.json'
+    if _os.path.exists(_qp):
+        q = load(_qp)
+        print('\nG8 Q-matrix')
+        check('mọi entry mang mapping version', all(e.get('version') for e in q))
+        check('bất định được giữ (unresolved/unmapped > 0 — trung thực)',
+              any(e['tier'] != 'mapped-case' for e in q))
+        check('mapped-case luôn có đủ concept + case',
+              all(r.get('conceptId') and r.get('skillCaseId') not in (None, 'unresolved')
+                  for e in q if e['tier'] == 'mapped-case'
+                  for r in e['requirements']))
+        check('concept-only không bao giờ tự nhận case',
+              all(r['skillCaseId'] == 'unresolved'
+                  for e in q if e['tier'] == 'concept-only'
+                  for r in e['requirements']))
+
     print('\n' + ('🟢 SCALE GATE: TẤT CẢ XANH' if not FAILS
                   else f'🔴 GATE ĐỎ: {FAILS}'))
     sys.exit(1 if FAILS else 0)
