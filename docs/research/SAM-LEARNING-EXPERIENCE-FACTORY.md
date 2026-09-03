@@ -353,6 +353,51 @@ thí nghiệm để cổng «qua», thì cổng thành vô nghĩa và nợ đi t
 căn về bài bằng **toạ độ trang + ranh giới bài đã xác thực**, và bài nào không căn được thì
 mang `UNKNOWN` — hiện lên ở mức **sách**, không bịa gắn vào một bài.
 
+### C-009 · ✅ Tìm ra nguyên nhân gốc của C-006/C-007/C-008 — và sửa được
+
+Đào tiếp từ C-008. Nguyên nhân **không** phải cửa sổ quét (`structure_scan.py` OCR 8 trang
+đầu + 5 trang cuối) — mục lục của `05-sgk-khoa-hoc-5` **nằm gọn ở trang PDF 5 và ĐÃ được
+OCR**. Nguyên nhân nằm ở chỗ đọc nó.
+
+**Mục lục HAI CỘT bị đọc lẫn.** `parse_structure.py` v2 có phát hiện cột, nhưng hai chỗ
+đóng cứng làm nó gộp hai cột thành một:
+
+1. `detect_columns(gap=0.25)` — thân cột trái kết thúc ở x≈0.4, thân cột phải bắt đầu ở
+   x≈0.5; cách nhau 0.1 < 0.25 nên **bị gộp**.
+2. Cột số trang lấy theo `x > 0.80` — đúng với mục lục MỘT cột. Ở mục lục hai cột, số trang
+   của cột TRÁI nằm **giữa trang** (x≈0.46) nên bị coi là chữ thân bài.
+
+Hậu quả đúng như đã đo ở C-008: «Bài 1» nhận **trang 64** của «Bài 17» ở cột phải ⇒ hai dãy
+đơn điệu chồng nhau ⇒ 56% đầu cuốn sách không bài nào phủ ⇒ 5 thí nghiệm ở trang 5–56 không
+gắn được vào bài nào.
+
+**Cách sửa (tất định, 0 LLM)** — `tool/corpus/toc_columns.py`, ba luật:
+
+| Luật | Vì sao |
+|---|---|
+| Cột số trang = **cụm x của dòng TOÀN CHỮ SỐ**, không đoán trước vị trí | mỗi cột số trang định ra một DẢI; chữ bên trái nó thuộc dải ấy |
+| Giữ lại **TỪ KHOÁ** đã khớp (`bai`/`chuDe`/`tuan`/`unit`) | «Chủ đề 1» và «Bài 1» đánh số ĐỘC LẬP — gộp chung là sinh số trùng giả |
+| Đơn vị bài **theo từng cuốn**: có `bai` thì `bai`; không thì loại phổ biến nhất | Âm nhạc 3 **không có «Bài» nào** — «Chủ đề N» chính là đơn vị học. Lọc cứng `bai` xoá sạch mục lục cuốn đó |
+
+Thêm một lỗi nhỏ mà hậu quả to: `đ` **không phải** `d` có dấu, nên bỏ dấu bằng NFD vẫn phải
+thay riêng — thiếu dòng đó thì «Chủ đề» rơi nhầm vào rổ «Bài».
+
+**Kết quả đo trên 415 cuốn có trang mục lục đã OCR:**
+
+| | Cũ | Mới |
+|---|---|---|
+| Cuốn tốt lên / như cũ / xấu đi | — | **243 / 139 / 33** |
+| Tổng số bài **TRÙNG SỐ** toàn corpus | 1.776 | **1.048** (−41%) |
+| `05-sgk-khoa-hoc-5` | 36 mục · 3 trùng · phủ 0.39 · hở đầu 0.56 | **30 bài · 0 trùng · đơn điệu · trang 5→108** |
+
+Khoa học 5 nay ra **đúng 30 bài + 6 chủ đề** — đúng cấu trúc thật của cuốn sách.
+
+**Còn lại**: 33 cuốn xấu đi, hầu hết là Tiếng Việt (quy ước «Tuần»/«Chủ điểm» chưa phủ).
+Chưa nối vào pipeline: đổi `curriculum-structure.json` là sinh lại pack và ảnh hưởng máy
+thật, nên bước nối phải có đối chiếu trước/sau riêng.
+
+---
+
 ---
 
 ## 6. Trôi kiến trúc đang mở
@@ -365,7 +410,7 @@ mang `UNKNOWN` — hiện lên ở mức **sách**, không bịa gắn vào mộ
 | D-4 | 11% bài không có khoá định danh duy nhất | compiler chưa phát khoá cho phần này |
 | D-5 | finding SGV chưa gán được về bài (C-007) | blueprint theo bài chưa dựng tự động được |
 | D-6 | `authority` chỉ có một giá trị trong toàn bộ 13.634 finding | phân loại thẩm quyền hiện **không phân loại gì** |
-| D-7 | hoạt động (thí nghiệm/đọc/tư liệu) mang `lesson: null` | có nội dung nhưng **không bài nào mở được nó** (C-008) |
+| D-7 | hoạt động (thí nghiệm/đọc/tư liệu) mang `lesson: null` | có nội dung nhưng **không bài nào mở được nó** (C-008) — nguyên nhân gốc tìm ra ở C-009 |
 
 Ba mục D-1..D-3 là lý do **không được** đẻ blueprint hàng loạt trước: chưa có gì tiêu thụ chúng.
 
