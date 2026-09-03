@@ -21,6 +21,23 @@ class LessonRef {
   final int? pageStart;
 }
 
+/// Bỏ bản ghi TRÙNG HỆT (cùng số, cùng tên, cùng trang in) trong một cuốn.
+///
+/// Đo trên pack lớp 5: 7/251 bản ghi như vậy ở GDTC, LS&ĐL, Tin học — trẻ thấy
+/// «Bài 1» hai dòng liền nhau, không dòng nào nói thêm điều gì. Bỏ một bản ghi
+/// KHÔNG mất thông tin nào vì hai bản ghi giống nhau từng trường.
+///
+/// ⭐ Cố ý KHÔNG gộp theo số bài: GDTC đánh số LẠI theo từng chủ đề nên có 5
+/// bài mang số 1, mỗi bài một tên và một trang khác nhau — đó là cấu trúc THẬT
+/// của cuốn sách, không phải lỗi. Gộp theo số là xoá bài của trẻ.
+List<LessonRef> _dedupeLessons(List<LessonRef> ls) {
+  final seen = <String>{};
+  return [
+    for (final l in ls)
+      if (seen.add('${l.no}|${l.title}|${l.pageStart}')) l,
+  ];
+}
+
 class BookLessons {
   const BookLessons(
       {required this.sourceDocumentId, this.volume, required this.lessons});
@@ -386,7 +403,7 @@ class LessonIndex {
               sourceDocumentId: '${b['sourceDocumentId']}',
               // volume có thể là int hoặc String tuỳ nguồn registry — chịu kiểu.
               volume: b['volume'] == null ? null : '${b['volume']}',
-              lessons: [
+              lessons: _dedupeLessons([
                 for (final l in (b['lessons'] as List? ?? const [])
                     .whereType<Map>())
                   if (l['no'] is num)
@@ -394,7 +411,7 @@ class LessonIndex {
                         no: (l['no'] as num).toInt(),
                         title: l['title'] as String?,
                         pageStart: (l['pageStart'] as num?)?.toInt()),
-              ],
+              ]),
             )
         ];
       });
