@@ -13,7 +13,9 @@ import '../discovery/discovery_library_screen.dart';
 import '../learning_map/learning_map_screen.dart';
 import '../progress/progress_screen.dart';
 import '../student/sessions_screen.dart';
+import '../profile/profile_screen.dart';
 import '../subjects/lesson_index.dart';
+import '../timetable/timetable_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen(
@@ -21,12 +23,20 @@ class SettingsScreen extends StatelessWidget {
       required this.stories,
       this.profile,
       this.store,
-      this.index});
+      this.index,
+      this.profiles = const [],
+      this.onProfileChanged});
 
   final StoriesStore stories;
   final LearnerProfile? profile;
   final LearnerStore? store;
   final LessonIndex? index;
+
+  /// WAL-137: hồ sơ khác trên cùng máy — màn Hồ sơ nói rõ «đang sửa của ai».
+  final List<LearnerProfile> profiles;
+
+  /// Gọi sau khi sửa hồ sơ để cả app nạp lại đúng người.
+  final void Function(LearnerProfile saved)? onProfileChanged;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -78,6 +88,31 @@ class SettingsScreen extends StatelessWidget {
                 _entry(context, '🕰️', 'Các phiên học',
                     'Lịch sử phiên — tự làm hay có SAM giúp',
                     (c) => SessionsScreen(profile: profile!, store: store!)),
+                const SizedBox(height: WalSpacing.sm),
+                // WAL-137 — hồ sơ + thời khoá biểu.
+                _entry(
+                    context,
+                    '👤',
+                    'Hồ sơ của ${profile!.displayName}',
+                    'Tên, lớp đang học, năm sinh (không bắt buộc)',
+                    (c) => ProfileScreen(
+                        profile: profile!,
+                        store: store!,
+                        onSaved: onProfileChanged,
+                        otherProfiles: [
+                          for (final p in profiles)
+                            if (p.learnerId != profile!.learnerId) p
+                        ])),
+                const SizedBox(height: WalSpacing.sm),
+                _entry(
+                    context,
+                    '🗓️',
+                    'Thời khoá biểu',
+                    'Không bắt buộc — chỉ giúp SAM xếp thứ tự gợi ý',
+                    (c) => TimetableScreen(
+                        profile: profile!,
+                        store: store!,
+                        subjects: index?.subjects.keys.toList() ?? const [])),
               ],
               const SizedBox(height: WalSpacing.md),
               const Text(
