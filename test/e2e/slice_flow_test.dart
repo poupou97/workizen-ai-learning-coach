@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/adaptive/adaptive_engine.dart';
 import 'package:learning_coach/core/curriculum/pedagogical_boundary.dart';
 import 'package:learning_coach/core/knowledge/provenance.dart';
-import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
@@ -18,26 +17,56 @@ import 'package:learning_coach/features/learning_session/slice_flow.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
 import 'package:learning_coach/features/shell/session_recorder.dart';
 import 'package:learning_coach/features/tutor/tutor_session.dart';
+import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
+import '../support/curriculum.dart';
 
 const _p5 = LearnerProfile(learnerId: 'l-5', displayName: 'Minh', grade: 5);
 
 void main() {
-  group('CURRICULUM CONTEXT — fail closed theo grade', () {
-    test('grade 5 ⇒ có context Bài 6; grade khác ⇒ null (không dạy sai cấp)',
-        () {
-      expect(curriculumFor(_p5), isNotNull);
+  group('CURRICULUM CONTEXT — fail closed theo ĐỊNH DANH BÀI', () {
+    // WAL-170: trước đây fail-closed đo bằng LỚP («grade != 5 ⇒ null»), nghĩa
+    // là mọi bài của trẻ lớp 5 đều nhận chương trình + provenance của Toán 5
+    // Bài 6. Nay tra khớp ĐÚNG BÀI; lớp chỉ còn là bộ lọc của màn tình-hình-học.
+    test('⭐⭐ bài KHÁC trong cùng cuốn KHÔNG mượn được chương trình Bài 6', () {
+      expect(curriculumForLesson(toan5Bai6Key), isNotNull);
+      for (final other in [
+        const LessonKey(
+            sourceDocumentId: '05-sgk-toan-5-tap-mot', number: 7, pageStart: 23),
+        const LessonKey(
+            sourceDocumentId: '05-sgk-khoa-hoc-5', number: 1, pageStart: 64),
+        // đúng số bài, đúng sách, SAI trang in ⇒ vẫn là bài khác
+        const LessonKey(
+            sourceDocumentId: '05-sgk-toan-5-tap-mot', number: 6, pageStart: 99),
+        // thiếu trang in ⇒ không đủ định danh ⇒ không khớp
+        const LessonKey(sourceDocumentId: '05-sgk-toan-5-tap-mot', number: 6),
+      ]) {
+        expect(curriculumForLesson(other), isNull,
+            reason: '⭐⭐ đột biến tra theo lớp/số bài ⇒ $other mượn được '
+                'provenance trang 21 SGK Toán ⇒ đỏ');
+      }
+    });
+
+    test('⭐ lớp khác ⇒ không có dòng chương trình nào', () {
       for (final g in [1, 2, 3, 4, 6, 9, 12]) {
         expect(
-            curriculumFor(LearnerProfile(
-                learnerId: 'l-x', displayName: 'X', grade: g)),
-            isNull,
+            curriculaForLearner(
+                LearnerProfile(learnerId: 'x', displayName: 'X', grade: g)),
+            isEmpty,
             reason: 'grade $g phải fail closed');
       }
+      expect(curriculaForLearner(_p5), hasLength(1));
+    });
+
+    test('⭐ bài CHỤP ĐƯỢC: không dòng nào nhận ra đề ⇒ null, không mượn bừa',
+        () {
+      expect(curriculumForProblem(_p5, '1/2 + 1/3'), isNotNull);
+      expect(curriculumForProblem(_p5, 'Quan sát cây đậu sau ba ngày'), isNull,
+          reason: '⭐ đột biến trả dòng đầu tiên của lớp ⇒ đỏ');
     });
 
     test('provenance method từ corpus: sourceDemonstrated ⇒ «làm theo ví dụ», '
         'KHÔNG «sách nói rằng»', () {
-      final c = curriculumFor(_p5)!;
+      final c = toan5Bai6;
       final scope = TutorScope.forProblem(c.conceptId,
           'denominator-non-divisible', c.stage, c.catalogue);
       final tp = explainTeaching(
@@ -54,7 +83,7 @@ void main() {
   group('§3 — BCNN không thể xuất hiện ở Math5 B6', () {
     test('mọi nấc hint của mọi method trong catalogue: không BCNN/bội chung',
         () {
-      final c = curriculumFor(_p5)!;
+      final c = toan5Bai6;
       final fp = FractionProblem.parse('3/4 + 2/5')!;
       for (final m in c.catalogue) {
         for (final level in SupportLevel.values) {
@@ -68,7 +97,7 @@ void main() {
     });
 
     test('BCNN cũng không có mặt trong catalogue để mà lọt', () {
-      final c = curriculumFor(_p5)!;
+      final c = toan5Bai6;
       expect(
           c.catalogue.any((m) =>
               m.id.toLowerCase().contains('bcnn') ||
@@ -79,7 +108,7 @@ void main() {
 
   group('lineage — «exact hint identity» xuyên phiên (§3/§7)', () {
     TutorSession newSession() {
-      final c = curriculumFor(_p5)!;
+      final c = toan5Bai6;
       final fp = FractionProblem.parse('3/4 + 2/5')!;
       final exerciseCase = fractionCase(fp.b, fp.d)!;
       return TutorSession(
@@ -138,7 +167,7 @@ void main() {
           contains('hai mẫu số không chia hết cho nhau'));
 
       // Phiên: trẻ tự làm đúng (INDEPENDENT ATTEMPT → LEARNING EVIDENCE).
-      final c = curriculumFor(_p5)!;
+      final c = toan5Bai6;
       final fp = FractionProblem.parse('3/4 + 2/5')!;
       final exerciseCase = fractionCase(fp.b, fp.d)!;
       final s = TutorSession(

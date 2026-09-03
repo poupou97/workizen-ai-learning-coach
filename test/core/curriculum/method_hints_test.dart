@@ -10,15 +10,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/curriculum/fraction_problem.dart';
 import 'package:learning_coach/core/curriculum/pedagogical_boundary.dart';
 import 'package:learning_coach/core/curriculum/solvable_problem.dart';
-import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
-import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/student/mastery.dart' show SupportLevel;
 import 'package:learning_coach/features/tutor/tutor_session.dart' show hintTextFor;
-
-const _p5 = LearnerProfile(learnerId: 't', displayName: 'T', grade: 5);
+import '../../support/curriculum.dart';
 
 TeachingMethod _byId(String id) =>
-    curriculumFor(_p5)!.catalogue.firstWhere((m) => m.id == id);
+    toan5Bai6.catalogue.firstWhere((m) => m.id == id);
 
 /// Bài của một môn KHÔNG PHẢI toán — chỉ tồn tại trong test, để chứng minh
 /// `hintTextFor` chạy được mà không biết gì về phân số.
@@ -84,7 +81,7 @@ void main() {
   });
 
   test('mọi phương pháp trong chương trình đều CÓ lời dạy đủ ba nấc', () {
-    for (final m in curriculumFor(_p5)!.catalogue) {
+    for (final m in toan5Bai6.catalogue) {
       final h = m.hints;
       expect(h, isNotNull, reason: '${m.id} thiếu lời dạy');
       expect(h!.hint.trim(), isNotEmpty);

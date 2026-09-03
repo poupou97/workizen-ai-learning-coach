@@ -37,7 +37,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Future<void> _load() async {
-    final c = curriculumFor(widget.profile);
+    // WAL-170: màn này nói về BẰNG CHỨNG của trẻ (không trưng nguồn của một
+    // bài) ⇒ lấy các dòng chương trình đã nạp cho lớp. Nhiều dòng thì chưa có
+    // luật gộp claim ⇒ chỉ tổng hợp khi có ĐÚNG một dòng, còn lại nói thật là
+    // chưa kể được — không trộn bằng chứng hai khái niệm thành một câu.
+    final all = curriculaForLearner(widget.profile);
+    final c = all.length == 1 ? all.single : null;
     ConceptMastery? m;
     if (c != null) {
       m = await masteryFromStore(

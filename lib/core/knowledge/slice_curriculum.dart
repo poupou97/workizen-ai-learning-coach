@@ -63,11 +63,89 @@ class SliceCurriculum {
   final List<SkillCase> cases;
 }
 
-/// Context theo HỒ SƠ THẬT. `null` = ngoài phạm vi slice (grade ≠ 5) —
-/// fail closed: tầng trên phải để SAM nhận «chưa chắc», không dạy bừa.
-SliceCurriculum? curriculumFor(LearnerProfile p) {
-  if (p.grade != 5) return null;
-  return const SliceCurriculum(
+/// ⭐⭐ WAL-170 — ĐỊNH DANH MỘT BÀI, đủ chặt để tra chương trình.
+///
+/// KHÔNG dựa vào số bài một mình. Đo trên corpus (7.626 bản ghi bài):
+/// - `number` là DISPLAY METADATA, nghĩa đổi theo họ sách — corpus mang
+///   `unitKind` ∈ {bai, tuan, chuDe}, và Tiếng Anh Global Success đánh số theo
+///   UNIT (tập một: 2,3,4,5,8,9,10). GDTC lớp 5 có 5 bài cùng mang số 1.
+/// - Bộ ba (sách, số, trang in) là DUY NHẤT ở 6.856/7.626 bản ghi (89%);
+///   770 bản ghi còn nhập nhằng ở 131 cuốn.
+///
+/// Vì không có khoá tự nhiên nào chắc 100%, chương trình phải khai định danh
+/// TƯỜNG MINH và tra khớp CHÍNH XÁC. Không khớp ⇒ `null` ⇒ fail closed.
+class LessonKey {
+  const LessonKey({
+    required this.sourceDocumentId,
+    required this.number,
+    this.pageStart,
+  });
+
+  final String sourceDocumentId;
+
+  /// Số IN TRÊN SÁCH. Giữ để hiển thị và để so khớp, KHÔNG dùng một mình.
+  final int number;
+
+  /// Trang in nơi bài bắt đầu — mảnh phân biệt hai bài trùng số trong một
+  /// cuốn. `null` khi TOC miner chưa bắt được (2.033/7.626 bản ghi).
+  final int? pageStart;
+
+  /// Dạng chuỗi để làm khoá `Map` hằng. Hằng số không cho phép khoá là object
+  /// có `==` riêng, nên định danh đi qua chuỗi chuẩn hoá này.
+  String get canonical => '$sourceDocumentId#$number@${pageStart ?? '-'}';
+
+  @override
+  bool operator ==(Object other) =>
+      other is LessonKey && other.canonical == canonical;
+
+  @override
+  int get hashCode => canonical.hashCode;
+
+  @override
+  String toString() => canonical;
+}
+
+/// Đăng ký chương trình THEO BÀI. Thêm một bài = thêm MỘT DÒNG ở bảng này.
+///
+/// ⭐ Khoá là định danh CHÍNH XÁC của bài (sách + số + trang in), không phải
+/// lớp. Trước WAL-170 việc tra chỉ hỏi `p.grade != 5`, nghĩa là MỌI bài của
+/// trẻ lớp 5 đều nhận provenance của Toán 5 Bài 6 — «Nguồn bài học» của một
+/// bài Khoa học sẽ trưng ra trang 21 SGK Toán. Đó là nói dối về nguồn.
+const Map<String, SliceCurriculum> _curriculumByLesson = {
+  // 05-sgk-toan-5-tap-mot · Bài 6 · trang in 20 (corpus: pageStart 20,
+  // titleSource ocr-header:p21).
+  '05-sgk-toan-5-tap-mot#6@20': _toan5Bai6,
+};
+
+/// Chương trình cho ĐÚNG bài này. Không có dòng nào khớp ⇒ `null`.
+///
+/// Đây là đường DUY NHẤT để một màn hình xin chương trình của một bài cụ thể.
+SliceCurriculum? curriculumForLesson(LessonKey key) =>
+    _curriculumByLesson[key.canonical];
+
+/// Các dòng chương trình đã nạp cho LỚP của trẻ — dùng cho màn hình nói về
+/// TÌNH HÌNH HỌC (bản đồ, tiến trình, thẻ bố mẹ). Những màn đó nói về bằng
+/// chứng của trẻ, không trưng nguồn của một bài, nên lọc theo lớp là trung
+/// thực. Chúng KHÔNG được dùng để trả lời «bài này lấy từ đâu».
+List<SliceCurriculum> curriculaForLearner(LearnerProfile p) =>
+    [for (final c in _curriculumByLesson.values) if (c.stage.grade == p.grade) c];
+
+/// Chương trình cho MỘT BÀI CHỤP ĐƯỢC (camera / tự gõ) — nơi không có định
+/// danh bài nào cả.
+///
+/// Hỏi từng dòng chương trình trong lớp của trẻ: «anh có NHẬN RA đề này
+/// không?» Đúng MỘT dòng nhận ⇒ dùng dòng đó. Không dòng nào ⇒ ngoài phạm vi.
+/// Nhiều hơn một ⇒ NHẬP NHẰNG ⇒ cũng fail closed: thà nhận chưa chắc còn hơn
+/// dạy bằng chương trình của bài khác.
+SliceCurriculum? curriculumForProblem(LearnerProfile p, String expression) {
+  final hits = [
+    for (final c in curriculaForLearner(p))
+      if (c.classifyCase(expression) != null) c
+  ];
+  return hits.length == 1 ? hits.single : null;
+}
+
+const SliceCurriculum _toan5Bai6 = SliceCurriculum(
     subjectId: 'toan',
     conceptId: 'quy-dong',
     activityLabel: 'Toán 5 · Bài 6 · Cộng, trừ hai phân số khác mẫu số',
@@ -161,4 +239,3 @@ SliceCurriculum? curriculumFor(LearnerProfile p) {
           introducedGrade: 5),
     ],
   );
-}

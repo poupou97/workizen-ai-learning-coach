@@ -28,7 +28,7 @@ import 'features/parent/parent_area.dart';
 import 'features/settings/settings_screen.dart';
 import 'core/curriculum/canonical_problem.dart';
 import 'core/knowledge/provenance.dart';
-import 'core/knowledge/slice_curriculum.dart' show curriculumFor;
+import 'core/knowledge/slice_curriculum.dart' show curriculaForLearner;
 import 'features/learning_session/slice_flow.dart';
 import 'features/assessment/assessment_screen.dart';
 import 'features/assessment/learner_confirm.dart';
@@ -256,7 +256,8 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   /// không sinh ra bằng chứng, chỉ sinh ra một con số.
   Future<void> _openAssessment(BuildContext context) async {
     final p = _profile;
-    final c = p == null ? null : curriculumFor(p);
+    final cs = p == null ? const [] : curriculaForLearner(p);
+    final c = cs.length == 1 ? cs.single : null;
     final exs = _lessonIndex?.exercisesForToan(6) ?? const [];
     if (p == null || c == null || exs.length < 2) {
       _honest(context,

@@ -7,15 +7,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/adaptive/adaptive_engine.dart';
 import 'package:learning_coach/core/curriculum/pedagogical_boundary.dart';
 import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
-import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/tutor/teaching_provenance.dart';
 import 'package:learning_coach/features/tutor/tutor_screen.dart';
 import 'package:learning_coach/features/tutor/tutor_session.dart';
+import '../../support/curriculum.dart';
 
 void main() {
   (TutorSession, TeachingProvenance) build() {
-    final c = curriculumFor(const LearnerProfile(
-        learnerId: 'l', displayName: 'M', grade: 5))!;
+    final c = toan5Bai6;
     final fp = FractionProblem.parse('3/4 + 2/5')!;
     final exerciseCase = fractionCase(fp.b, fp.d)!;
     final scope = TutorScope.forProblem(
@@ -36,8 +35,7 @@ void main() {
         home: TutorScreen(
             session: session,
             expression: '3/4 + 2/5',
-            catalogue: curriculumFor(const LearnerProfile(
-                    learnerId: 'l', displayName: 'M', grade: 5))!
+            catalogue: toan5Bai6
                 .catalogue,
             provenance: tp)));
 

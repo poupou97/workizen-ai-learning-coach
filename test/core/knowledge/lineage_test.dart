@@ -9,14 +9,13 @@ import 'package:learning_coach/core/curriculum/pedagogical_boundary.dart';
 import 'package:learning_coach/core/knowledge/lineage.dart';
 import 'package:learning_coach/core/knowledge/provenance.dart';
 import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
-import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
+import '../../support/curriculum.dart';
 
 void main() {
-  final c = curriculumFor(
-      const LearnerProfile(learnerId: 'l', displayName: 'M', grade: 5))!;
+  final c = toan5Bai6;
   final scope = TutorScope.forProblem(
       'quy-dong', 'denominator-non-divisible', c.stage, c.catalogue);
 

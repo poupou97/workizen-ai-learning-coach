@@ -4,15 +4,14 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/adaptive/adaptive_engine.dart';
 import 'package:learning_coach/core/curriculum/pedagogical_boundary.dart';
-import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
 import 'package:learning_coach/core/pedagogy/blueprint_catalogue_v0.dart';
 import 'package:learning_coach/core/pedagogy/learning_blueprint.dart';
 import 'package:learning_coach/core/pedagogy/pedagogy_model.dart';
 import 'package:learning_coach/core/pedagogy/source_misconception.dart';
-import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
 import 'package:learning_coach/features/tutor/tutor_session.dart';
+import '../../support/curriculum.dart';
 
 void main() {
   group('catalogue v0 — 8 blueprint, 5 family, nguồn đầy đủ', () {
@@ -61,8 +60,7 @@ void main() {
 
   group('⭐ blueprint DRIVE phiên TutorSession THẬT (Toán 5 B6)', () {
     TutorSession run() {
-      final c = curriculumFor(const LearnerProfile(
-          learnerId: 'l', displayName: 'M', grade: 5))!;
+      final c = toan5Bai6;
       final fp = FractionProblem.parse('3/4 + 2/5')!;
       final ec = fractionCase(fp.b, fp.d)!;
       return TutorSession(

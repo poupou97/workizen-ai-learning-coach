@@ -152,7 +152,7 @@ class SubjectHomeScreen extends StatelessWidget {
         trailing: openable
             ? const Icon(Icons.chevron_right, color: WalColors.primaryText)
             : null,
-          onTap: !openable ? null : () => _openLesson(context, l, acts),
+          onTap: !openable ? null : () => _openLesson(context, b, l, acts),
         ),
       ),
     );
@@ -330,8 +330,17 @@ class SubjectHomeScreen extends StatelessWidget {
         ExperimentActivity() => '1 thí nghiệm',
       };
 
-  void _openLesson(
-      BuildContext context, LessonRef l, List<LessonActivity> acts) {
+  void _openLesson(BuildContext context, BookLessons b, LessonRef l,
+      List<LessonActivity> acts) {
+    // ⭐ WAL-170 — ĐỊNH DANH CHÍNH XÁC của bài đang mở: sách + số in + trang
+    // in. Trước đây chỗ này hỏi `curriculumFor(profile)`, tức chỉ hỏi LỚP,
+    // nên «Nguồn bài học» của BẤT KỲ bài nào cũng trưng ra trang 21 SGK
+    // Toán 5. Nay không khớp đúng bài thì không có mục đó — fail closed.
+    final key = LessonKey(
+        sourceDocumentId: b.sourceDocumentId,
+        number: l.no,
+        pageStart: l.pageStart);
+    final curriculum = curriculumForLesson(key);
     // Vét cạn trên `sealed`: thêm loại việc mới mà quên nối UI ⇒ không biên
     // dịch được, thay vì im lặng biến mất khỏi sheet.
     final actions = <(String, VoidCallback)>[
@@ -358,11 +367,9 @@ class SubjectHomeScreen extends StatelessWidget {
               () => _openExperiment(context, experiment)
             ),
         },
-      // «Nguồn bài học» phụ thuộc CÓ chương trình cho hồ sơ này, không phụ
-      // thuộc môn tên gì — cùng luật fail-closed của curriculumFor.
-      if (acts.whereType<ExerciseActivity>().isNotEmpty &&
-          curriculumFor(profile) != null)
-        ('📖 Nguồn bài học', () => _openSourceInfo(context)),
+      // «Nguồn bài học» chỉ hiện khi có chương trình của ĐÚNG bài này.
+      if (acts.whereType<ExerciseActivity>().isNotEmpty && curriculum != null)
+        ('📖 Nguồn bài học', () => _openSourceInfo(context, curriculum)),
     ];
     if (actions.length == 1) {
       actions.single.$2();
@@ -399,9 +406,7 @@ class SubjectHomeScreen extends StatelessWidget {
 
   /// WAL-141 #17 — «Nguồn bài học» từ Subject Home: các cách trong chương
   /// trình + nguồn — render qua sourceLineForChildOf (một luật, một chỗ).
-  void _openSourceInfo(BuildContext context) {
-    final c = curriculumFor(profile);
-    if (c == null) return;
+  void _openSourceInfo(BuildContext context, SliceCurriculum c) {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,

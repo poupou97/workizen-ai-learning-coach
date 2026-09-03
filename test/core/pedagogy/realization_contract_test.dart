@@ -3,20 +3,18 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/curriculum/pedagogical_boundary.dart';
-import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
 import 'package:learning_coach/core/pedagogy/pedagogy_model.dart';
 import 'package:learning_coach/core/pedagogy/realization_contract.dart';
-import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/student/mastery.dart';
 import 'package:learning_coach/core/tutor/output_guard.dart';
+import '../../support/curriculum.dart';
 
 RealizationRequest req({
   TeachingAct act = TeachingAct.smallHint,
   AssistanceRung rung = AssistanceRung.smallHint,
   bool exam = false,
 }) {
-  final c = curriculumFor(
-      const LearnerProfile(learnerId: 'l', displayName: 'M', grade: 5))!;
+  final c = toan5Bai6;
   final scope = TutorScope.forProblem(
       c.conceptId, 'denominator-non-divisible', c.stage, c.catalogue);
   return RealizationRequest(
