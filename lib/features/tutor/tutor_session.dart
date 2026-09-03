@@ -18,44 +18,14 @@
 library;
 
 import '../../core/curriculum/pedagogical_boundary.dart';
+import '../../core/curriculum/solvable_problem.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/mastery.dart';
 
-/// Bài phân số "a/b ± c/d" đã bóc số — đầu vào rule-based của slice này.
-class FractionProblem {
-  const FractionProblem(this.a, this.b, this.op, this.c, this.d);
-  final int a, b, c, d;
-  final String op; // '+' | '-'
-
-  /// null nếu không phải dạng "a/b ± c/d" — tầng trên phải fail closed.
-  static FractionProblem? parse(String expr) {
-    final m = RegExp(
-            r'^\s*(\d{1,3})\s*/\s*(\d{1,3})\s*([+\-−])\s*(\d{1,3})\s*/\s*(\d{1,3})\s*$')
-        .firstMatch(expr);
-    if (m == null) return null;
-    return FractionProblem(
-        int.parse(m.group(1)!),
-        int.parse(m.group(2)!),
-        m.group(3)! == '−' ? '-' : m.group(3)!,
-        int.parse(m.group(4)!),
-        int.parse(m.group(5)!));
-  }
-
-  int get resultNum => op == '+' ? a * d + c * b : a * d - c * b;
-  int get resultDen => b * d;
-
-  /// Đáp án của trẻ dạng "x/y" hoặc số nguyên; chấp nhận phân số CHƯA rút gọn
-  /// có cùng giá trị (SGK Toán 5 chấp nhận cả hai dạng ở bước quy đồng).
-  bool checkAnswer(String raw) {
-    final f = RegExp(r'^\s*(-?\d{1,6})\s*(?:/\s*(\d{1,6})\s*)?$').firstMatch(raw);
-    if (f == null) return false;
-    final n = int.parse(f.group(1)!);
-    final d0 = f.group(2) == null ? 1 : int.parse(f.group(2)!);
-    if (d0 == 0) return false;
-    return n * resultDen == resultNum * d0;
-  }
-}
+// WAL-168: `FractionProblem` đã chuyển xuống `core/curriculum` (tri thức miền,
+// không phải UI). Vẫn xuất lại ở đây để mọi chỗ import cũ không phải đổi.
+export '../../core/curriculum/fraction_problem.dart' show FractionProblem;
 
 /// Kết quả một lần trẻ bấm "Xong" — UI vẽ theo cái này, không tự suy.
 enum SubmitOutcome { independentCorrect, selfCorrected, supportedCorrect, wrong }
@@ -86,7 +56,10 @@ class TutorSession {
 
   final String exerciseId;
   final String skillCaseId;
-  final FractionProblem problem;
+
+  /// ⭐ WAL-168: phiên dạy KHÔNG mang kiểu của một môn. Trước đây trường này
+  /// là `FractionProblem`, nên môn thứ hai không vào nổi runtime.
+  final SolvableProblem problem;
   final TutorScope scope;
   final DateTime Function() _now;
 
@@ -221,31 +194,22 @@ String interventionIdFor(
         String policyId, String methodId, SupportLevel level) =>
     '$policyId/$methodId@${level.name}';
 
-/// Nội dung gợi ý RULE-BASED — chỉ từ method trong scope, số lấy từ chính bài.
-/// Ba nấc tương ứng AutoTutor pump→hint→assertion (prior art WAL-64).
-String hintTextFor(TeachingMethod m, SupportLevel level, FractionProblem p) {
-  final byProduct = m.id == 'common-denom-by-product';
-  switch (level) {
-    case SupportLevel.none:
-      return '';
-    case SupportLevel.hint:
-      return byProduct
-          ? 'Hai mẫu số ${p.b} và ${p.d} không chia hết cho nhau. '
-              'Muốn cộng được thì hai phân số phải cùng mẫu số — '
-              'con nghĩ xem mẫu số chung lấy thế nào nhé?'
-          : 'Con thử xem mẫu số lớn hơn có chia hết cho mẫu số kia không?';
-    case SupportLevel.workedStep:
-      return byProduct
-          ? 'Bước đầu tiên: lấy mẫu số chung là ${p.b} × ${p.d} = ${p.b * p.d}. '
-              'Giờ con quy đồng hai phân số về mẫu ${p.b * p.d} nhé — đến lượt con!'
-          : 'Bước đầu tiên: giữ nguyên phân số có mẫu lớn hơn, '
-              'quy đồng phân số còn lại. Đến lượt con!';
-    case SupportLevel.fullSolution:
-      final mc = p.b * p.d;
-      return 'Cả bài nhé: mẫu số chung là ${p.b} × ${p.d} = $mc. '
-          '${p.a}/${p.b} = ${p.a * p.d}/$mc và ${p.c}/${p.d} = ${p.c * p.b}/$mc. '
-          'Vậy ${p.a}/${p.b} ${p.op} ${p.c}/${p.d} = '
-          '${p.resultNum}/$mc. '
-          'Mai mình làm lại một bài giống thế này không cần SAM nhé!';
-  }
+/// Nội dung gợi ý RULE-BASED — mẫu câu lấy từ CHÍNH PHƯƠNG PHÁP, số lấy từ
+/// chính bài. Ba nấc tương ứng AutoTutor pump→hint→assertion (prior art WAL-64).
+///
+/// ⭐ WAL-168: hàm này KHÔNG còn biết phương pháp nào là phương pháp nào, và
+/// không còn biết bài là phân số hay không. Thêm một phương pháp = thêm
+/// [MethodHints] vào dòng dữ liệu của nó — không sửa hàm này.
+///
+/// Phương pháp chưa có mẫu câu ⇒ chuỗi rỗng: SAM im lặng chứ không bịa lời dạy.
+String hintTextFor(TeachingMethod m, SupportLevel level, SolvableProblem p) {
+  final h = m.hints;
+  if (h == null || level == SupportLevel.none) return '';
+  final template = switch (level) {
+    SupportLevel.none => '',
+    SupportLevel.hint => h.hint,
+    SupportLevel.workedStep => h.workedStep,
+    SupportLevel.fullSolution => h.fullSolution,
+  };
+  return h.fill(template, p.slots);
 }
