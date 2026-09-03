@@ -11,31 +11,13 @@
 /// thẳng, chặt hơn cả bản cũ vốn không kiểm tên bao giờ.
 library;
 
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'
-    show CachingAssetBundle, rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/features/geography/map_reader_screen.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
 
-/// PNG 1×1 hợp lệ — đủ để dựng widget, KHÔNG cần crop SGK.
-final _onePx = base64Decode(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhf'
-    'DwAChwGA60e6kgAAAABJRU5ErkJggg==');
-
-class _PackStubBundle extends CachingAssetBundle {
-  @override
-  Future<ByteData> load(String key) async => key.startsWith('assets/pack/')
-      ? ByteData.view(Uint8List.fromList(_onePx).buffer)
-      : rootBundle.load(key);
-}
-
-Widget _host(Widget child) =>
-    DefaultAssetBundle(bundle: _PackStubBundle(), child: MaterialApp(home: child));
+import '../../support/pack_bundle.dart';
 
 const _map = DiaMap(
   subject: 'LS&ĐL',
@@ -54,7 +36,7 @@ const _map = DiaMap(
 
 void main() {
   testWidgets('bản đồ + caption + câu hỏi VERBATIM hiện; nguồn có trang', (t) async {
-    await t.pumpWidget(_host(const MapReaderScreen(map: _map)));
+    await t.pumpWidget(packHost(const MapReaderScreen(map: _map)));
     await t.pump();
     expect(find.text('BẢN ĐỒ TRONG SÁCH'), findsOneWidget);
     expect(find.text('Hình 1. Bản đồ tự nhiên Việt Nam'), findsOneWidget);
@@ -75,7 +57,7 @@ void main() {
 
   testWidgets('⭐ hoàn tất ⇒ MỘT event correct=null policy map-reader-v1', (t) async {
     List<LearningEvent> out = const [];
-    await t.pumpWidget(_host(MapReaderScreen(
+    await t.pumpWidget(packHost(MapReaderScreen(
         map: _map,
         now: () => DateTime(2026, 9, 2, 22),
         onFinished: (e) => out = e)));
@@ -93,9 +75,7 @@ void main() {
 
   testWidgets('⭐ WAL-163: máy dựng THIẾU crop bản đồ ⇒ nói thật một câu, '
       'câu hỏi vẫn đọc được (không ô đỏ giữa bài học)', (t) async {
-    await t.pumpWidget(DefaultAssetBundle(
-        bundle: _MissingPackBundle(),
-        child: const MaterialApp(home: MapReaderScreen(map: _map))));
+    await t.pumpWidget(missingPackHost(const MapReaderScreen(map: _map)));
     await t.pump();
     // WAL-133: câu này nay do MÔ HÌNH TÀI SẢN sở hữu (missingNoticeOf), một
     // chỗ cho mọi ảnh nguồn — không phải mỗi màn tự chế một câu.
@@ -103,15 +83,4 @@ void main() {
     expect(find.textContaining('Kể tên và xác định trên bản đồ'), findsOneWidget,
         reason: 'thiếu ảnh KHÔNG được cắt mất phần học được');
   });
-}
-
-/// Bundle giả lập máy KHÔNG có pack — mọi khoá assets/pack/ ném như thật.
-class _MissingPackBundle extends CachingAssetBundle {
-  @override
-  Future<ByteData> load(String key) async {
-    if (key.startsWith('assets/pack/')) {
-      throw FlutterError('Unable to load asset: "$key".');
-    }
-    return rootBundle.load(key);
-  }
 }
