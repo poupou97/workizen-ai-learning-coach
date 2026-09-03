@@ -18,13 +18,26 @@ import '../../core/student/concept_summary.dart';
 import '../../core/student/evidence_weighting.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
+import '../../core/adaptive/review_priority.dart';
 import '../../core/student/review_schedule.dart';
 
-/// Một mục ôn tới hạn — tên hiển thị + độ khẩn từ ReviewSchedule.
+/// Một mục ôn — tên hiển thị + độ khẩn (sự việc từ lịch) + MỨC ƯU TIÊN và
+/// CÂU CHỮ do resolver quyết (WAL-164 / Founder D2).
+///
+/// UI KHÔNG tự suy từ một câu sai: nó hiển thị `reason` mà resolver đưa.
 class ReviewItem {
-  const ReviewItem({required this.displayName, required this.urgency});
+  const ReviewItem({
+    required this.displayName,
+    required this.urgency,
+    this.priority = ReviewPriority.normal,
+    this.reason = '',
+    this.becauseOfError = false,
+  });
   final String displayName;
   final ReviewUrgency urgency;
+  final ReviewPriority priority;
+  final String reason;
+  final bool becauseOfError;
 }
 
 /// Toàn bộ dữ liệu màn Hôm nay.
@@ -249,16 +262,23 @@ Future<MissionData> buildMissionFromStore({
   final summary =
       ConceptSummary.of(mastery, knownCaseIds: {...names.keys}, now: t);
 
+  // WAL-164 (Founder D2): mission KHÔNG tự suy ưu tiên nữa — nó tiêu thụ
+  // resolver. Lịch giãn cách vẫn là SỰ VIỆC (urgency); resolver quyết mức và
+  // câu chữ. `prerequisiteCaseIds` để RỖNG vì chưa có nguồn tiền-đề-của-bài
+  // đáng tin; bịa ra nó là mở đường cho mức `today` nổ bậy.
+  final candidates = resolveReviewCandidates(mastery: mastery, now: t);
   final reviews = <ReviewItem>[];
-  for (final sc in c.cases) {
-    final m = mastery.cases[sc.id];
-    if (m == null || !m.hasEvidence) continue;
-    final r = reviewStateOf(m, t);
-    if (r.urgency == ReviewUrgency.reviewDue ||
-        r.urgency == ReviewUrgency.overdue) {
-      reviews.add(ReviewItem(
-          displayName: 'Quy đồng — ${names[sc.id]!}', urgency: r.urgency));
-    }
+  for (final cand in candidates) {
+    final name = names[cand.skillCaseId];
+    final m = mastery.cases[cand.skillCaseId];
+    if (name == null || m == null) continue;
+    reviews.add(ReviewItem(
+      displayName: 'Quy đồng — $name',
+      urgency: reviewStateOf(m, t).urgency,
+      priority: cand.priority,
+      reason: cand.reason,
+      becauseOfError: cand.becauseOfError,
+    ));
   }
 
   return MissionData(
