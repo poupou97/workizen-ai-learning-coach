@@ -1,2 +1,5 @@
 *.db
 lesson-index-*.json
+# WAL-167 — bìa SGK trích từ PDF: cùng luật WAL-43, KHÔNG commit.
+covers/
+*.webp
