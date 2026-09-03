@@ -97,7 +97,19 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
                           child: InteractiveViewer(
                             maxScale: 6,
                             child: Image.asset('assets/pack/${m.asset}',
-                                fit: BoxFit.contain),
+                                fit: BoxFit.contain,
+                                // Crop bản đồ là asset LOCAL (WAL-43: không vào
+                                // repo). Máy dựng bản build thiếu nó thì hỏng
+                                // TỬ TẾ — nói thật một câu, không phải ô đỏ
+                                // vỡ giữa bài học.
+                                errorBuilder: (_, _, _) => const Center(
+                                    child: Text(
+                                        'Máy này chưa có ảnh bản đồ của bài — '
+                                        'các câu hỏi bên dưới vẫn đọc được.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: WalType.secondary,
+                                            color: WalColors.inkSoft)))),
                           ),
                         ),
                         const SizedBox(height: WalSpacing.sm),
