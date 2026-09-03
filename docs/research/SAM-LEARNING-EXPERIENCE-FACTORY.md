@@ -251,6 +251,48 @@ lộ trừu tượng sai**.
 - **Cảnh báo**: 53/251 bản ghi rỗng ở lớp 5 **đều** là bản ghi thiếu trang — một nguyên nhân duy
   nhất, không phải hai.
 
+### C-007 · ⚠️ BÁC BỎ — «SGV findings → blueprint theo từng bài» KHÔNG chạy trên dữ liệu hôm nay
+
+Đây là giả thuyết nền của Blueprint Compiler. Đo xong thì **sai**.
+
+**Cái đang có (thật, dùng được):** 13.634 finding sư phạm trích từ **18 cuốn SGV**
+(`poc-out/pedagogy/findings/`), mỗi finding mang `field`, `page`, `headline`, `authority`,
+`extractionMethod`. Trường hay gặp nhất: `perExerciseGuide` 2.227 · `intent` 1.931 ·
+`teacherNote` 924 · `objective` 708 · `procedure` 590. Đây là **cấu trúc sư phạm có toạ độ**.
+
+**Ba thứ bị bác bỏ:**
+
+1. **Finding KHÔNG chứa lời dạy.** 0/13.634 finding có trường văn bản dài quá 200 ký tự —
+   chỉ có `headline` + toạ độ. ⇒ **Compiler không thể sinh lời dạy.** Mọi câu hướng dẫn
+   sinh ra từ đây sẽ là **bịa**. Đây chính là ranh giới Founder yêu cầu: đủ bằng chứng cho
+   *cấu trúc*, không đủ cho *lời*.
+
+2. **Trường `lesson` của finding không tin được.** Ở `04-sgv-khoa-hoc-4`, «Bài 31» ôm 285
+   finding trải từ trang 15 đến 152 — cả cuốn sách, không phải một bài. Đo toàn bộ:
+   **15/15 tài liệu** có ít nhất một «bài» trải hơn 40 trang. Nhưng **median spread chỉ 2–6
+   trang** ở nhiều cuốn ⇒ chẩn đoán chính xác là **thùng chứa gom**: khi bắt tiêu đề bài
+   thất bại, finding rơi vào bài đọc được gần nhất.
+
+3. **Không sửa được bằng cách lấy TOC của SGV làm khung.** Bản thân TOC của SGV tự mâu
+   thuẫn: **10/18 cuốn** có số bài trùng và/hoặc thứ tự trang không đơn điệu theo số bài
+   (`04-sgv-khoa-hoc-4`: 37 bài khai, 28 có trang, 5 số trùng, thứ tự sai). Luật lọc
+   «giữ finding có trang nằm trong khoảng trang của bài» giữ lại **0/350** — vì cả hai vế
+   đều hỏng, không phải vì luật sai.
+
+**Luật compiler rút ra:**
+- Đơn vị bám của bằng chứng SGV là **TRANG**, không phải số bài. Trang là toạ độ đo được;
+  số bài là suy diễn của miner.
+- Cần một bước **căn trang → bài** cho SGV trước khi có blueprint theo bài. Chừng nào chưa
+  có, finding SGV chỉ đỡ được claim **mức sách** hoặc **mức trang**.
+- `authority` hiện **chỉ có một giá trị** `SOURCE_EXPLICIT` cho cả 13.634 finding. Một
+  trường phân loại chỉ có một giá trị thì **không phân loại gì cả**. Compiler phải **tự suy
+  ra** `SOURCE_DEMONSTRATED` / `INFERRED` / `UNKNOWN`, không được thừa kế.
+
+**Ý nghĩa với cổng kiến trúc:** không chặn. Cổng cần một dòng chương trình cho môn thứ hai;
+dòng đó dựng được từ **hoạt động phía SGK** (thí nghiệm, đọc, tư liệu) với method **có
+provenance nhưng KHÔNG có lời dạy** ⇒ SAM im lặng ở phần gợi ý (bất biến WAL-168), trẻ vẫn
+làm được việc và vẫn sinh bằng chứng. Thà im còn hơn bịa.
+
 ---
 
 ## 6. Trôi kiến trúc đang mở
@@ -261,6 +303,8 @@ lộ trừu tượng sai**.
 | D-2 | 8 blueprint, **0 cái được runtime dùng** | blueprint chưa lái trải nghiệm nào |
 | D-3 | `KnowledgeContentProvider` **0 implementation** | seam nội dung chưa nối |
 | D-4 | 11% bài không có khoá định danh duy nhất | compiler chưa phát khoá cho phần này |
+| D-5 | finding SGV chưa gán được về bài (C-007) | blueprint theo bài chưa dựng tự động được |
+| D-6 | `authority` chỉ có một giá trị trong toàn bộ 13.634 finding | phân loại thẩm quyền hiện **không phân loại gì** |
 
 Ba mục D-1..D-3 là lý do **không được** đẻ blueprint hàng loạt trước: chưa có gì tiêu thụ chúng.
 
@@ -310,9 +354,16 @@ Nguyên tắc khi tỉ lệ ngoại lệ tăng: **không vá từng bài** — c
 
 ## 9. Việc kế tiếp của nhà máy
 
-1. Nối **một blueprint có thật** vào runtime (gỡ trôi D-2), bắt đầu từ `blueprintQuyDongB6` vì
-   nó đã trỏ đúng bài G-1.
-2. Compiler phát **định danh bài** + **mức thẩm quyền**, chạy thử trên một họ nội dung.
-3. Cổng kiến trúc: **môn thứ hai + lớp thứ hai** chạy Book → Lesson → Learn → Evidence, không
-   Dart riêng theo bài. Qua rồi mới thêm sách/bài chủ yếu bằng data/config.
-4. Sửa ingestion Tiếng Anh theo C-006 (có SGV làm nguồn đối chiếu).
+Thứ tự này đổi sau C-007: **không** bắt đầu bằng compiler-sinh-blueprint, vì dữ liệu chưa
+đỡ nổi.
+
+1. **Cổng kiến trúc trước** — môn thứ hai + lớp thứ hai chạy Book → Lesson → Learn →
+   Evidence, không Dart riêng theo bài. Dựng dòng chương trình từ **hoạt động phía SGK**
+   (thí nghiệm Khoa học), method **có provenance, không có lời dạy** ⇒ SAM im lặng ở phần
+   gợi ý thay vì bịa.
+2. **Nối một blueprint có thật vào runtime** (gỡ trôi D-2), bắt đầu từ `blueprintQuyDongB6`
+   vì nó đã trỏ đúng bài G-1. Chưa sinh blueprint hàng loạt.
+3. **Căn trang → bài cho SGV** (D-5). Đây là điều kiện cần của compiler; trước bước này mọi
+   blueprint sinh tự động đều gán sai bài.
+4. **Compiler tự suy mức thẩm quyền** (D-6), không thừa kế `SOURCE_EXPLICIT` có sẵn.
+5. Sửa ingestion Tiếng Anh theo C-006 (có SGV cùng bộ làm nguồn đối chiếu).
