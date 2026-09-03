@@ -81,7 +81,15 @@ strict, cấm force-push/xoá nhánh, giữ admin bypass. Bật xong lộ ngay b
 `required check` (PR tài liệu treo PENDING vĩnh viễn) — đã bỏ lọc ở `pull_request`. Quy trình từ
 nay: nhánh → PR → CI → merge. LOCAL GREEN ≠ MERGEABLE.
 
-**WAL-164 📋 MỚI** (Founder D2): Review Priority Resolver — câu SAI sinh BẰNG CHỨNG, không tự động
+**WAL-164 ✅ DONE** (Founder D2 đã thi hành): `resolveReviewCandidates` — bảng luật MỘT CHỖ, tất
+định, 11 test + 4 đột biến bị giết. Mission nay TIÊU THỤ resolver, câu chữ đến từ resolver chứ màn
+không tự chế (trước đây mọi mục ôn nói cùng một câu «Tới lúc gặp lại rồi», kể cả khi lý do thật là
+«làm được nhờ SAM giúp»). Walk Nokia n87: sau câu sai, Hôm nay hiện «Ôn lại — Con còn vướng dạng
+này, mình gặp lại trong ít ngày tới nhé» mà thẻ chính vẫn KHÔNG hoá báo động — đúng đường giữa D2.
+`prerequisiteCaseIds` để RỖNG vì chưa có nguồn tiền-đề-của-bài đáng tin (bịa ra là mở đường cho mức
+`today` nổ bậy).
+
+**WAL-164 (mô tả gốc)** (Founder D2): Review Priority Resolver — câu SAI sinh BẰNG CHỨNG, không tự động
 thành báo động. Bảng luật: slip đơn lẻ giữ normal · tự-làm-sai + mapping tin cậy ⇒ ôn 1–3 ngày ·
 hiểu sai LẶP LẠI ⇒ nâng · tiền đề yếu cho bài đang học ⇒ được vào Today · mapping không chắc ⇒
 fail conservative · đúng-có-trợ-giúp ⇒ ôn sớm hơn nhưng KHÔNG phải failure. Hàng đợi: sau 137/140/145.

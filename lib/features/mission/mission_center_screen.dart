@@ -405,10 +405,15 @@ class MissionCenterScreen extends StatelessWidget {
                 color: WalColors.inkSoft)),
       );
 
+  /// WAL-164: câu chữ đến TỪ RESOLVER, màn không tự chế. Trước đây mọi mục
+  /// ôn đều nói cùng một câu «Tới lúc gặp lại rồi» — kể cả khi lý do thật là
+  /// «con làm được nhờ SAM giúp» hoặc «một câu lỡ tay». Nói chung chung như
+  /// thế là bỏ mất đúng phần có ích cho trẻ.
   Widget _reviewTile(ReviewItem r) => _tile(
         chip: _samChip('assets/mascot/sam-review-due.png'),
         title: r.displayName,
-        subtitle: 'Tới lúc gặp lại rồi', // KHÔNG đỏ, không hối thúc
+        subtitle:
+            r.reason.isEmpty ? 'Tới lúc gặp lại rồi' : r.reason, // KHÔNG hối thúc
         state: LearningStateToken.reviewDue,
       );
 
