@@ -111,6 +111,20 @@ Danh sách family dưới đây là **giả thuyết**, corpus + SGV + lần tri
 Problem Solving · Reading & Evidence · Inquiry & Investigation · Spatial & Data ·
 Language & Communication · Creation & Performance · Scenario & Reflection.
 
+**Phân cấp KHÔNG được đóng cứng một kiểu.** Corpus đã bác bỏ cả «số bài là định danh» lẫn
+«mọi sách cùng một cây»:
+
+| Sách | Cây thật đo được |
+|---|---|
+| Tiếng Việt | Sách → **Tuần** → Bài → *Đọc / Nói và nghe / Viết* |
+| GDTC | Sách → **Chủ đề** → Bài (số bài **đánh lại** mỗi chủ đề) |
+| Khoa học | Sách → **Chủ đề** → Bài |
+| Tiếng Anh | Sách → **Unit** |
+
+⇒ mô hình cần là `ContentNode` mang **vai trò ngữ nghĩa** (`UNIT` · `THEME` · `WEEK` ·
+`CHAPTER` · `TOPIC` · `LESSON` · `ACTIVITY`…), tên vai trò còn đổi được theo bằng chứng.
+**Định danh bền = vị trí trong cây + provenance nguồn**, không phải số bài hiển thị.
+
 **Bốn thứ KHÔNG được đánh đồng:**
 
 - **Subject** (môn) — nhãn hành chính của sách.
@@ -122,6 +136,15 @@ Language & Communication · Creation & Performance · Scenario & Reflection.
 ---
 
 ## 4. Experience Pattern Registry
+
+> ⚠️ **BÀI ≠ MỘT TRẢI NGHIỆM NGUYÊN TỬ.** Mục lục Tiếng Việt liệt kê *Đọc* / *Nói và nghe* /
+> *Viết* **bên trong cùng một bài** — sách tự nói rằng một bài gồm nhiều hoạt động sư phạm
+> khác nhau. Nên giả thuyết làm việc là
+> `Bài → ActivityBlueprint[] → Experience Pattern → Surface Composition`,
+> và **chọn pattern ở mức HOẠT ĐỘNG**, không ép cả bài vào một pattern. EP-002 (đọc) và
+> EP-005 (viết) rất có thể là hai hoạt động của **cùng một bài** Tiếng Việt, không phải hai
+> bài khác nhau.
+
 
 Giữ **bộ pattern nhỏ nhất giải thích được sự đa dạng thật**, không đẻ hàng trăm pattern sớm.
 
@@ -434,6 +457,48 @@ Mọi regex đòi từ khoá đều ra 0 mục.
 
 **Còn lại**: 37 cuốn (Tiếng Việt lớp 1–3) ra ít bài hơn bản cũ — cột số bài của các cuốn đó
 chưa nhận đủ. Phải xong trước khi nối vào pipeline.
+
+---
+
+### C-011 · ⚠️ «Bài» Tiếng Việt trong pack hiện tại thật ra là «TUẦN»
+
+Điều tra 37 cuốn tụt hạng (Founder: *nếu parser mới làm xấu dữ liệu cũ thì fail closed và
+điều tra*). Kết quả bác bỏ chính dữ liệu cũ:
+
+`03-sgk-tieng-viet-3-tap-mot` — bản cũ có 13 «bài» mang số **3, 5, 6, 9…18**, trang 27…145.
+Đó là **số TUẦN**, không phải số bài. `02-sgk-tieng-viet-2-tap-hai` cũng vậy: «bài» 19…35 là
+tuần 19–35 (tuần chạy tiếp qua tập hai). Đọc đúng bảng thì ra **28 bài, đánh số 1…28, đủ
+trang, 0 trùng**.
+
+⇒ **Đây là lời giải thích cho nợ đã ghi ở WAL-166**: 34/68 hoạt động Tiếng Việt tập hai bị
+mồ côi vì hoạt động khoá theo *bài* còn mục lục khoá theo *tuần*. Không phải lệch offset —
+là **sai đơn vị**.
+
+**Nguyên nhân kỹ thuật chung** (không phải chuyện riêng cuốn nào): mục lục Tiếng Việt trải
+**4 trang** (p5–p8) nhưng `structure_scan` chỉ nhận trang có chữ «MỤC LỤC» hoặc ≥3 dòng khớp
+regex bài ⇒ **chỉ nhận trang đầu**, mất 3/4 số bài. Trang nối tiếp chỉ lặp lại **dòng tiêu đề
+cột**, và OCR có khi nuốt mất chính dòng đó (p007 chỉ đọc ra «Nội dung», «Trang») ⇒ phải
+**thừa kế hình học cột** từ trang trước của cùng cuốn, và chỉ nhận trang **liền kề**.
+
+**Chính sách hoà dữ liệu — không bao giờ để bản mới làm xấu bản cũ:**
+nhận bản mới khi số bài **dùng được** (có trang **và** nằm trên xương sống đơn điệu) không
+giảm và số bài trùng không tăng; ngược lại **giữ bản cũ + `REVIEW_REQUIRED`**. Đếm trần «có
+trang» là sai — mục lục hai cột đọc lẫn vẫn cho nhiều bài «có trang», nhưng là trang của bài
+khác.
+
+| Toàn corpus | Cũ | Sau hoà |
+|---|---|---|
+| Cuốn lấy bản mới / giữ cũ để điều tra | — | **318 / 145** |
+| Tổng bài | 7.626 | 8.254 |
+| Bài **có trang** | 5.593 | **6.345** |
+| Bài **trùng số** | 1.776 | **1.554** (−12%) |
+
+Bốn cuốn lớp 5 đang chạy trên máy thật đều lấy bản mới; `05-sgk-toan-5-tap-mot` **không đổi**
+(35 bài/29 trang/0 trùng) — cuốn vốn đã đúng thì không bị xáo.
+
+**Hệ quả cho mô hình nội dung (Founder Delta):** bảng Tiếng Việt cho ra **hai tầng cùng lúc**
+— `Tuần` và `Bài` — nên bộ đọc nay phát ra node kèm **vai trò**, chứ không phải một danh sách
+bài phẳng. Đây là mảnh bằng chứng đầu tiên cho mô hình `ContentNode(role)` tổng quát; xem §3.
 
 ---
 
