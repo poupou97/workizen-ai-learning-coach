@@ -94,6 +94,18 @@ registry, thiếu ⇒ bỏ bản đồ. MapReader là consumer thật (Nokia n78
 `git ls-files assets/pack/`. 10 test, 3 đột biến bị giết. **Còn**: crop tool ≥3 môn (curate bbox
 người làm), visual identity doc, `SamGeneratedAsset` chưa có chỗ dùng thật.
 
+**WAL-137 ✅ + WAL-140 🔄 + WAL-145 ✅** (2026-09-03, mỗi ticket một PR qua cổng CI):
+· **137** hồ sơ + TKB: đổi lớp giữ nguyên learnerId (bằng chứng không mồ côi), năm sinh tuỳ chọn,
+TKB rỗng hợp lệ + test cấu trúc cấm suy ra BÀI từ môn (F4). ⚠️ một đột biến SỐNG SÓT lần đầu
+(suy lớp từ năm sinh) vì test cấu trúc chỉ grep tên biến — vá bằng test HÀNH VI. Walk n81-n82.
+· **140** gate chất lượng WAL-65 nay chạy trên KHUNG SỐNG (trước đó là mã chết): lấy mẫu kênh Y
+tôn trọng stride, tiết nhịp 700ms, NHẮC-KHÔNG-CHẶN có test giữ. Walk n83. Còn: artifact-capture
+(P1) + hiệu chỉnh ngưỡng trên khung thật ⇒ để In Progress.
+· **145** quyền dữ liệu: `exportLearner`/`deleteLearner` — xoá là XOÁ THẬT (ngoại lệ duy nhất của
+append-only, có lý do đứng trên luật ấy), không đụng dữ liệu con khác, xuống đĩa ngay. Walk n84-n86:
+tệp xuất ra đĩa thật, **0 lần chứa PIN bố mẹ**. Đi máy còn lộ màn PIN TRÀN 8.8px khi bàn phím hiện
+— sửa + test hồi quy (bỏ sửa ⇒ test đỏ).
+
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
 

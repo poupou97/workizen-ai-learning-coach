@@ -57,6 +57,21 @@ abstract class LearnerStore {
   /// về đúng người dùng gần nhất). `null` = chưa từng chọn.
   Future<void> saveActiveLearner(String learnerId);
   Future<String?> activeLearnerId();
+
+  /// ⭐ WAL-145 — QUYỀN DỮ LIỆU của gia đình (NĐ13/2023: dữ liệu trẻ em).
+  ///
+  /// [exportLearner] trả JSONL chứa MỌI bản ghi của ĐÚNG một người học —
+  /// không thiếu (để lấy được thật) và không thừa (không kèm dữ liệu của
+  /// anh chị em).
+  Future<String> exportLearner(String learnerId);
+
+  /// ⭐⭐ XOÁ LÀ XOÁ THẬT — không cờ, không tombstone. Trả về SỐ bản ghi đã
+  /// gỡ, để tầng trên nói con số thật với phụ huynh thay vì «đã xoá xong».
+  ///
+  /// Đây là ngoại lệ DUY NHẤT của luật append-only, và nó có lý do đứng trên
+  /// luật ấy: quyền được xoá không thể thoả bằng cách đánh dấu. Bản ghi của
+  /// những người học KHÁC không được đụng tới.
+  Future<int> deleteLearner(String learnerId);
 }
 
 /// Bản triển khai trên bộ nhớ + chuỗi JSONL — đủ cho app một máy, và là
@@ -191,6 +206,28 @@ class JsonlLearnerStore implements LearnerStore {
       if (p is String) latest = p; // bản sau đè bản trước (đổi PIN được)
     }
     return latest;
+  }
+
+  @override
+  Future<String> exportLearner(String learnerId) async =>
+      [for (final l in _lines) if (_belongsTo(l, learnerId)) l].join('\n');
+
+  @override
+  Future<int> deleteLearner(String learnerId) async {
+    final before = _lines.length;
+    _lines.removeWhere((l) => _belongsTo(l, learnerId));
+    return before - _lines.length;
+  }
+
+  /// Một dòng thuộc về ai. Dòng KHÔNG mang `learnerId` (pin bố mẹ, người học
+  /// đang chọn) là dữ liệu của MÁY, không của trẻ ⇒ không xuất, không xoá.
+  bool _belongsTo(String line, String learnerId) {
+    try {
+      final j = jsonDecode(line);
+      return j is Map && j['learnerId'] == learnerId;
+    } catch (_) {
+      return false; // dòng hỏng ⇒ không dám nhận là của ai
+    }
   }
 
   @override

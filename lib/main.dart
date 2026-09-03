@@ -216,6 +216,21 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (mounted) setState(_refreshMission);
   }
 
+  /// WAL-145 — ghi bản xuất dữ liệu của MỘT người học ra tệp trong thư mục
+  /// tài liệu của app. Không gửi đi đâu: quyền lấy dữ liệu ra không được biến
+  /// thành một đường dữ liệu trẻ rời máy.
+  Future<String?> _saveExport(String learnerId, String jsonl) async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final f = File('${dir.path}/hoc-cung-sam/export-$learnerId.jsonl');
+      await f.parent.create(recursive: true);
+      await f.writeAsString(jsonl, flush: true);
+      return f.path;
+    } catch (_) {
+      return null; // ghi không được ⇒ nói thật, không bịa đường dẫn
+    }
+  }
+
   /// WAL-137 — sửa hồ sơ xong: thay TẠI CHỖ trong danh sách và nạp lại
   /// mission + mục lục. `learnerId` không đổi nên mọi bằng chứng vẫn thuộc
   /// đúng người — đổi lớp KHÔNG đụng sổ học (bất biến 2, WAL-95).
@@ -370,7 +385,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         onSelectProfile: _selectProfile,
                         onAddProfile: () => _addProfile(context),
                         onParentArea: () => openParentArea(context,
-                            store: widget.store, profiles: _profiles),
+                            store: widget.store,
+                            profiles: _profiles,
+                            saveExport: _saveExport),
                         onReview: () => _openReview(context),
                         onAssess: () => _openAssessment(context),
                         onOpenSettings: () => Navigator.of(context).push(

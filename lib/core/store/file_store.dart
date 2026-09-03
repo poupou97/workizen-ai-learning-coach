@@ -75,6 +75,19 @@ class FileLearnerStore implements LearnerStore {
       _mem.timetable(learnerId);
 
   @override
+  Future<String> exportLearner(String learnerId) =>
+      _mem.exportLearner(learnerId);
+
+  /// Xoá rồi PHẢI ghi đè tệp ngay: nếu chỉ xoá trong bộ nhớ, dữ liệu vẫn nằm
+  /// trên đĩa và lần mở sau nó sống lại — «đã xoá» hoá ra là nói dối.
+  @override
+  Future<int> deleteLearner(String learnerId) async {
+    final n = await _mem.deleteLearner(learnerId);
+    await _flush();
+    return n;
+  }
+
+  @override
   Future<void> saveParentPin(String pin) async {
     await _mem.saveParentPin(pin);
     await _flush();

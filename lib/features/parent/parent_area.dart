@@ -17,6 +17,7 @@ import '../../core/store/learner_profile.dart';
 import '../../core/store/learner_store.dart';
 import '../../core/student/concept_summary.dart';
 import '../learning_session/slice_flow.dart' show masteryFromStore;
+import 'family_manager_screen.dart';
 import 'parent_tonight_screen.dart';
 
 /// Lối vào duy nhất: PIN (đặt lần đầu / nhập) → Tình hình các con.
@@ -24,6 +25,7 @@ Future<void> openParentArea(
   BuildContext context, {
   required LearnerStore store,
   required List<LearnerProfile> profiles,
+  Future<String?> Function(String learnerId, String jsonl)? saveExport,
 }) async {
   final nav = Navigator.of(context);
   final existing = await store.parentPin();
@@ -31,7 +33,8 @@ Future<void> openParentArea(
       builder: (_) => ParentPinScreen(store: store, existingPin: existing)));
   if (ok != true || !nav.mounted) return;
   nav.push(MaterialPageRoute(
-      builder: (_) => ParentOverviewScreen(store: store, profiles: profiles)));
+      builder: (_) => ParentOverviewScreen(
+          store: store, profiles: profiles, saveExport: saveExport)));
 }
 
 class ParentPinScreen extends StatefulWidget {
@@ -92,7 +95,11 @@ class _ParentPinScreenState extends State<ParentPinScreen> {
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: WalColors.surface,
         body: SafeArea(
-          child: Padding(
+          // WAL-145 (đi máy Nokia): bàn phím số đẩy màn tràn 8.8px trên
+          // 1080×1920 — bản debug hiện sọc vàng-đen, bản phát hành thì CẮT
+          // mất nút. Cho cuộn: màn nhập liệu nào cũng phải sống được khi bàn
+          // phím chiếm nửa dưới.
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(WalSpacing.lg),
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -199,10 +206,16 @@ Future<({ParentExplanation explanation, AdaptiveDecision decision,
 /// «TÌNH HÌNH CÁC CON» — mỗi con một thẻ, KHÔNG xếp hạng (§26.9).
 class ParentOverviewScreen extends StatelessWidget {
   const ParentOverviewScreen(
-      {super.key, required this.store, required this.profiles});
+      {super.key,
+      required this.store,
+      required this.profiles,
+      this.saveExport});
 
   final LearnerStore store;
   final List<LearnerProfile> profiles;
+
+  /// WAL-145 — ghi bản xuất ra tệp. `null` ⇒ màn nói thật là máy chưa ghi được.
+  final Future<String?> Function(String learnerId, String jsonl)? saveExport;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -227,6 +240,32 @@ class ParentOverviewScreen extends StatelessWidget {
               ),
               const SizedBox(height: WalSpacing.md),
               for (final p in profiles) _ChildCard(profile: p, store: store),
+              const SizedBox(height: WalSpacing.sm),
+              // WAL-145 #34 — quyền dữ liệu, tách hẳn khỏi phần kể chuyện học.
+              Material(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+                child: ListTile(
+                  leading: const Text('👨‍👩‍👧', style: TextStyle(fontSize: 26)),
+                  title: const Text('Quản lý gia đình',
+                      style: TextStyle(
+                          fontSize: WalType.body,
+                          fontWeight: FontWeight.w700,
+                          color: WalColors.ink)),
+                  subtitle: const Text(
+                      'Lấy dữ liệu của con ra, hoặc xoá đi',
+                      style: TextStyle(
+                          fontSize: WalType.secondary,
+                          color: WalColors.inkSoft)),
+                  trailing: const Icon(Icons.chevron_right,
+                      color: WalColors.primaryText),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => FamilyManagerScreen(
+                          store: store,
+                          profiles: profiles,
+                          saveExport: saveExport))),
+                ),
+              ),
             ],
           ),
         ),
