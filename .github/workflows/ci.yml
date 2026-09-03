@@ -20,9 +20,19 @@ name: CI
 # (thứ cần review). Nhánh chưa mở PR không chạy — mọi lần merge đều đã qua
 # analyze + toàn bộ test ở máy, nên đây là bỏ một lớp TRÙNG, không bỏ kiểm chứng.
 #
-# `paths-ignore` bị LẶP LẠI có chủ ý: GitHub Actions KHÔNG hỗ trợ anchor/alias
-# của YAML (`&x` / `*x`) — viết gọn thì file vẫn hợp lệ nhưng GitHub từ chối
-# lúc chạy. Sửa hai chỗ vẫn hơn hỏng im lặng.
+# ⭐ `pull_request` CỐ Ý KHÔNG có `paths-ignore`.
+#
+# Từ 2026-09-03 `main` bật branch protection với check bắt buộc «Analyze & Test»
+# (Founder D1). GitHub coi «job không chạy» KHÁC «job đã pass»: một PR chỉ sửa
+# tài liệu sẽ không sinh check nào, nên check bắt buộc treo PENDING VĨNH VIỄN và
+# PR không bao giờ merge được. Đó là cái bẫy kinh điển của cặp
+# `paths-ignore` + `required status check`.
+#
+# Nên PR nào cũng chạy — kể cả PR chỉ sửa .md. Đổi lại là ~3 phút runner cho
+# một PR tài liệu; rẻ hơn nhiều so với một cổng merge hỏng âm thầm.
+#
+# `push` thì GIỮ `paths-ignore`: commit tài liệu đẩy thẳng lên main không cần
+# chạy lại thứ PR đã kiểm.
 on:
   push:
     branches: [main]
@@ -30,9 +40,6 @@ on:
       - 'docs/**'
       - '**/*.md'
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
 
 # Push liên tiếp cùng một ref ⇒ huỷ run cũ, đỡ phút runner.
 concurrency:
