@@ -293,10 +293,14 @@ def choose(old_lessons, new_lessons):
         (`05-sgk-khoa-hoc-5`: Bài 1 nhận trang 64 của Bài 17). Chỉ phần tự nhất
         quán mới là nội dung dùng được.
         """
-        pairs = [(l['number'], l['pageStart']) for l in ls if l.get('pageStart')]
+        # ⭐ DISTINCT: bản mới thường bỏ bớt dòng vì thôi đếm trùng — 
+        # `01-sgk-hoat-dong-trai-nghiem-1` từ 30 dòng/9 trùng xuống 21 dòng/0
+        # trùng, tức GIỮ NGUYÊN nội dung phân biệt được và bỏ rác. Đếm cả dòng
+        # trùng sẽ chấm bản cũ cao hơn và chặn đúng bản sửa.
+        pairs = sorted({(l['number'], l['pageStart'])
+                        for l in ls if l.get('pageStart')})
         if not pairs:
             return 0
-        pairs.sort()
         best = [1] * len(pairs)
         for i in range(len(pairs)):
             for j in range(i):

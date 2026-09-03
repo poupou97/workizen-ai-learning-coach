@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/curriculum/canonical_problem.dart';
+import '../../core/curriculum/subject_id.dart';
 import '../../core/knowledge/provenance.dart';
 import '../../core/knowledge/slice_curriculum.dart';
 import '../../core/tutor/teaching_provenance.dart' show sourceLineForChildOf;
@@ -295,11 +296,10 @@ class SubjectHomeScreen extends StatelessWidget {
               onFinished: (events) => recordSession(
                   store: store,
                   learnerId: profile.learnerId,
-                  subjectId: switch (ex.subject) {
-                    'Vật lí' => 'vat-li',
-                    'Hoá học' => 'hoa-hoc',
-                    _ => 'khoa-hoc',
-                  },
+                  // WAL-173: mã môn suy từ TÊN, không tra bảng cứng. Nhánh cũ
+                  // dồn mọi môn lạ về 'khoa-hoc' ⇒ thêm Sinh học là bằng chứng
+                  // của trẻ bị ghi SAI MÔN mà không ai báo.
+                  subjectId: subjectIdOf(ex.subject),
                   events: events,
                   trigger: SessionTrigger.manual),
             )));
