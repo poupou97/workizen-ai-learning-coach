@@ -42,8 +42,13 @@ Founder, d5d87f9) · WAL-84 mốc-3 Nokia (100MB FTS p95 7ms; breakpoint ×105 t
 · WAL-84 mốc-4 670MB Nokia (FTS p95 49ms — interactive-class; mystery app-biến-mất = integration_test tự gỡ app, đã đính chính). WAL-84 mốc-5 trọn tier (2.7GB/3.82M units Nokia:
 FTS p95 92ms — KHÔNG điểm gãy tới hết scale mục tiêu; ngưỡng đề xuất 4-5GB; FULL-vs-MODULAR
 thành câu hỏi product) · WAL-141 ✅ (drill-down #16 walked n50-n53 + #17 «Nguồn bài học» SubjectHome, 97f68a7).
-WAL-142 code+test ✅ (Progress/Map/Sessions phủ truths — maxSupportIn/explainConcept/
-reviewStateOf/badge-chỉ-khi-evidence, 3 mutations killed, 3a48621; walk device đang chạy). Deferred: 121-124, 137-140/142-146 UI backlog, ALA 155-158, MA 159-162.
+WAL-142 ✅ DONE (Progress/Map/Sessions phủ truths — maxSupportIn/explainConcept/
+reviewStateOf/badge-chỉ-khi-evidence, 3 mutations killed, 3a48621; walk Nokia n57-n65 xác nhận
+claim-gate «1 lần đúng CHƯA đủ kết luận» hiện đúng trên máy). QA máy lộ lỗi Bản đồ đổ 251 dòng
+theo thứ tự JSON ⇒ bài có badge bị chôn dưới ~200 dòng — sửa 6bb66b5 (môn có bằng chứng lên đầu
++ mở sẵn, môn khác gập kèm số bài, nhãn Tập 1/2; 2 mutations killed). ⚠️ bản sửa CHƯA đi lại máy
+(Nokia rút lúc build xong) — việc đầu tiên khi cắm lại. Nợ: badge còn gắn slice cứng Toán-B6,
+tổng quát hoá khi curriculum mở môn. Deferred: 121-124, 137-140/143-146 UI backlog, ALA 155-158, MA 159-162.
 
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
