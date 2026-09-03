@@ -3,6 +3,8 @@
 /// từ nay compiler + test giữ, không phải mắt người.
 library;
 
+import 'dart:math' as math;
+
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -43,6 +45,28 @@ double contrast(Color a, Color b) {
 }
 
 void main() {
+  test('⭐ WAL-140: chữ nhắc trên nền ĐEN của màn chụp đạt WCAG AA', () {
+    // Màn chụp có nền đen tuyệt đối (camera preview). Vàng của bảng SÁNG đặt
+    // lên đó là chữ tối trên nền tối — nên màn ấy phải dùng cặp của bảng TỐI.
+    double lum(Color c) {
+      double ch(double v) =>
+          v <= 0.03928 ? v / 12.92 : math.pow((v + 0.055) / 1.055, 2.4) as double;
+      return 0.2126 * ch(c.r) + 0.7152 * ch(c.g) + 0.0722 * ch(c.b);
+    }
+
+    double ratio(Color a, Color b) {
+      final l1 = lum(a), l2 = lum(b);
+      final hi = l1 > l2 ? l1 : l2, lo = l1 > l2 ? l2 : l1;
+      return (hi + 0.05) / (lo + 0.05);
+    }
+
+    expect(ratio(WalColorsDark.warnText, const Color(0xFF000000)),
+        greaterThanOrEqualTo(4.5),
+        reason: 'lời nhắc chụp phải đọc được trên nền đen');
+    expect(ratio(WalColors.warnText, const Color(0xFF000000)), lessThan(4.5),
+        reason: 'ghi lại VÌ SAO không được dùng vàng bảng sáng ở đó');
+  });
+
   test('⭐⭐ MỌI cặp chữ/nền khai báo đạt WCAG AA ≥ 4.5:1 — ĐO, không tin mắt', () {
     final pairs = <String, (Color fg, Color bg)>{
       'ink/surface': (WalColors.ink, WalColors.surface),
