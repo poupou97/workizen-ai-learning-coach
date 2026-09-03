@@ -113,13 +113,22 @@ class DiaMap {
       required this.asset,
       required this.caption,
       required this.questions,
+      required this.pagePdf,
+      required this.bboxFrac,
+      required this.extractionVersion,
       this.page});
   final String subject;
   final String book;
-  final int? page;
+  final int? page; // trang IN
   final String asset; // tên file trong assets/pack/
   final String caption; // caption in trong sách
   final List<String> questions;
+
+  /// WAL-133 — provenance của CROP: thiếu thì không dựng được `SourceAsset`,
+  /// và khi ấy KHÔNG được nói với trẻ «đây là hình trong sách».
+  final int pagePdf;
+  final List<double> bboxFrac;
+  final String extractionVersion;
 }
 
 /// WAL-113 B2 — khối «TƯ LIỆU.» nguyên văn từ SGK Sử-Địa (ocr-body).
@@ -318,13 +327,27 @@ class LessonIndex {
         if (m['asset'] is! String || m['caption'] is! String || qs.isEmpty) {
           continue;
         }
+        // ⭐ WAL-133: thiếu provenance crop ⇒ BỎ. Không cắt lại/kiểm chứng
+        // được thì không có quyền trình bày như hình trong sách.
+        final bbox = [
+          for (final v in (m['bboxFrac'] as List? ?? const []))
+            if (v is num) v.toDouble()
+        ];
+        if (m['pagePdf'] is! num ||
+            bbox.length != 4 ||
+            m['extractionVersion'] is! String) {
+          continue;
+        }
         dm.add(DiaMap(
             subject: '${m['subject'] ?? 'LS&ĐL'}',
             book: '${m['book']}',
             page: (m['page'] as num?)?.toInt(),
             asset: m['asset'] as String,
             caption: m['caption'] as String,
-            questions: qs));
+            questions: qs,
+            pagePdf: (m['pagePdf'] as num).toInt(),
+            bboxFrac: bbox,
+            extractionVersion: m['extractionVersion'] as String));
       }
     }
     return LessonIndex(

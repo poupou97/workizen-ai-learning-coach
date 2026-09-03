@@ -43,6 +43,9 @@ const _map = DiaMap(
   page: 10,
   asset: 'map-ls-dia-5-p012-tu-nhien-vn.png',
   caption: 'Hình 1. Bản đồ tự nhiên Việt Nam',
+  pagePdf: 12,
+  bboxFrac: [0.075, 0.05, 0.935, 0.905],
+  extractionVersion: 'map-crop-v1',
   questions: [
     'Kể tên và xác định trên bản đồ một số khoáng sản ở nước ta.',
     'Nêu vai trò của tài nguyên khoáng sản đối với sự phát triển kinh tế.',
@@ -94,7 +97,9 @@ void main() {
         bundle: _MissingPackBundle(),
         child: const MaterialApp(home: MapReaderScreen(map: _map))));
     await t.pump();
-    expect(find.textContaining('chưa có ảnh bản đồ'), findsOneWidget);
+    // WAL-133: câu này nay do MÔ HÌNH TÀI SẢN sở hữu (missingNoticeOf), một
+    // chỗ cho mọi ảnh nguồn — không phải mỗi màn tự chế một câu.
+    expect(find.textContaining('chưa có ảnh của bài'), findsOneWidget);
     expect(find.textContaining('Kể tên và xác định trên bản đồ'), findsOneWidget,
         reason: 'thiếu ảnh KHÔNG được cắt mất phần học được');
   });

@@ -13,6 +13,8 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
+import '../../core/assets/learning_asset.dart';
+import '../shell/learning_asset_image.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
@@ -96,20 +98,22 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
                           height: 420,
                           child: InteractiveViewer(
                             maxScale: 6,
-                            child: Image.asset('assets/pack/${m.asset}',
-                                fit: BoxFit.contain,
-                                // Crop bản đồ là asset LOCAL (WAL-43: không vào
-                                // repo). Máy dựng bản build thiếu nó thì hỏng
-                                // TỬ TẾ — nói thật một câu, không phải ô đỏ
-                                // vỡ giữa bài học.
-                                errorBuilder: (_, _, _) => const Center(
-                                    child: Text(
-                                        'Máy này chưa có ảnh bản đồ của bài — '
-                                        'các câu hỏi bên dưới vẫn đọc được.',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            fontSize: WalType.secondary,
-                                            color: WalColors.inkSoft)))),
+                            // WAL-133: đi qua MÔ HÌNH TÀI SẢN — dựng được
+                            // `SourceAsset` nghĩa là provenance crop đầy đủ;
+                            // thiếu thì `DiaMap` đã bị loại từ tầng parse.
+                            // Nhãn + cách hỏng khi thiếu tệp do model quyết,
+                            // không do màn này tự chế.
+                            child: LearningAssetImage(
+                                asset: SourceAsset(
+                                  path: 'assets/pack/${m.asset}',
+                                  sourceDocumentId: m.book,
+                                  pagePdf: m.pagePdf,
+                                  pagePrinted: m.page,
+                                  bboxFrac: m.bboxFrac,
+                                  extractionVersion: m.extractionVersion,
+                                  caption: m.caption,
+                                ),
+                                fit: BoxFit.contain),
                           ),
                         ),
                         const SizedBox(height: WalSpacing.sm),

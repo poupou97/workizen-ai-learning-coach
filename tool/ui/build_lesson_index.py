@@ -228,8 +228,26 @@ DIA_MAPS = [
              'Nêu vai trò của tài nguyên khoáng sản đối với sự phát triển kinh tế.',
          ])
 ] if GRADE == 5 else []
-dia_maps = [m for m in DIA_MAPS
-            if os.path.exists(f"assets/pack/{m['asset']}")]  # asset chưa crop ⇒ bỏ
+# WAL-133: bản đồ chỉ được coi là SOURCE_ASSET khi CHỨNG MINH ĐƯỢC cách cắt.
+# Registry crop giữ pagePdf/bboxFrac/extraction; thiếu bất kỳ thứ nào ⇒ BỎ bài
+# đó, vì lúc ấy ta không còn cắt lại/kiểm chứng được và không được quyền nói
+# với trẻ rằng «đây là hình trong sách».
+_REG = 'poc-out/ui-assets/map-assets.json'
+_reg = {}
+if os.path.exists(_REG):
+    for a in json.load(open(_REG)).get('assets', []):
+        _reg[a.get('asset')] = a
+dia_maps = []
+for m in DIA_MAPS:
+    if not os.path.exists(f"assets/pack/{m['asset']}"):
+        continue  # asset chưa crop trên máy này
+    r = _reg.get(m['asset'])
+    if not r or not r.get('extraction') or r.get('pagePdf') is None \
+            or len(r.get('bboxFrac') or []) != 4:
+        print(f"  ⚠️ BỎ {m['asset']}: registry thiếu provenance crop")
+        continue
+    dia_maps.append(dict(m, pagePdf=r['pagePdf'], bboxFrac=r['bboxFrac'],
+                         extractionVersion=r['extraction']))
 
 for v in subjects.values():
     v.sort(key=lambda b: (b['volume'] or '9', b['sourceDocumentId']))
