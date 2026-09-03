@@ -1,6 +1,12 @@
 /// WAL-142 #19 — LEARNING MAP: cây bài THẬT theo môn (lesson-index) + trạng
 /// thái HONEST per-lesson: chỉ bài có evidence mới có badge — không tô màu
 /// tiến-độ-ảo cho bài chưa học.
+///
+/// WAL-142 QA (Nokia n64): bản đầu đổ THẲNG 251 dòng theo thứ tự map JSON ⇒
+/// GDTC đứng đầu, bài DUY NHẤT có badge (Toán B6) nằm dưới ~200 dòng — đúng
+/// dữ liệu nhưng CHÔN mất điều màn này sinh ra để nói. Sửa: môn CÓ BẰNG CHỨNG
+/// lên đầu và mở sẵn; môn khác gập lại kèm số bài (vẫn mở xem được — không
+/// giấu dữ liệu, chỉ thôi bắt trẻ cuộn).
 library;
 
 import 'package:flutter/material.dart';
@@ -30,6 +36,10 @@ class LearningMapScreen extends StatefulWidget {
 class _LearningMapScreenState extends State<LearningMapScreen> {
   ConceptClaim? _b6Claim; // slice: chỉ Toán B6 có mastery thật hôm nay
   bool _loaded = false;
+  final Set<String> _open = {};
+
+  /// Môn đang có bằng chứng thật (slice hiện tại: Toán). `null` = kho trắng.
+  String? get _evidenceSubject => _b6Claim == null ? null : 'Toán';
 
   @override
   void initState() {
@@ -51,7 +61,21 @@ class _LearningMapScreenState extends State<LearningMapScreen> {
             .claim;
       }
     }
-    if (mounted) setState(() => _loaded = true);
+    if (mounted) {
+      setState(() {
+        _loaded = true;
+        final s = _evidenceSubject;
+        if (s != null) _open.add(s); // môn đang học: mở sẵn
+      });
+    }
+  }
+
+  /// Môn có bằng chứng lên trước; còn lại GIỮ NGUYÊN thứ tự mục lục.
+  List<String> _orderedSubjects(LessonIndex idx) {
+    final s = _evidenceSubject;
+    final keys = idx.subjects.keys.toList();
+    if (s == null || !keys.contains(s)) return keys;
+    return [s, ...keys.where((k) => k != s)];
   }
 
   @override
@@ -76,22 +100,55 @@ class _LearningMapScreenState extends State<LearningMapScreen> {
                         style: TextStyle(
                             fontSize: WalType.body, color: WalColors.inkSoft))
                   else
-                    for (final subject in idx.subjects.keys) ...[
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: WalSpacing.sm),
-                        child: Text(subject,
-                            style: const TextStyle(
-                                fontSize: WalType.title,
-                                fontWeight: FontWeight.w700,
-                                color: WalColors.ink)),
-                      ),
-                      for (final b in idx.subjects[subject]!)
-                        for (final l in b.lessons) _lessonRow(subject, l),
-                    ],
+                    for (final subject in _orderedSubjects(idx))
+                      _subjectBlock(idx, subject),
                 ],
               ),
       ),
+    );
+  }
+
+  Widget _subjectBlock(LessonIndex idx, String subject) {
+    final books = idx.subjects[subject]!;
+    final total = books.fold<int>(0, (n, b) => n + b.lessons.length);
+    final open = _open.contains(subject);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: () => setState(
+              () => open ? _open.remove(subject) : _open.add(subject)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: WalSpacing.sm),
+            child: Row(children: [
+              Expanded(
+                child: Text('$subject · $total bài',
+                    style: const TextStyle(
+                        fontSize: WalType.title,
+                        fontWeight: FontWeight.w700,
+                        color: WalColors.ink)),
+              ),
+              Icon(open ? Icons.expand_less : Icons.expand_more,
+                  color: WalColors.inkSoft),
+            ]),
+          ),
+        ),
+        if (open)
+          for (final b in books) ...[
+            // Nhiều tập trong một môn ⇒ nói rõ tập nào, không để «Bài 1» lặp
+            // hai lần trông như lỗi.
+            if (books.length > 1 && b.volume != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text('Tập ${b.volume}',
+                    style: const TextStyle(
+                        fontSize: WalType.secondary,
+                        fontWeight: FontWeight.w700,
+                        color: WalColors.inkSoft)),
+              ),
+            for (final l in b.lessons) _lessonRow(subject, l),
+          ],
+      ],
     );
   }
 

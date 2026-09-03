@@ -1,4 +1,5 @@
 /// WAL-142 #19 — Map: badge CHỈ khi có evidence thật — không tiến-độ-ảo.
+/// + QA Nokia n64: môn CÓ bằng chứng phải nổi lên đầu và mở sẵn, môn khác gập.
 library;
 
 import 'package:flutter/material.dart';
@@ -13,17 +14,54 @@ import 'package:learning_coach/features/subjects/lesson_index.dart';
 
 const _p = LearnerProfile(learnerId: 'l', displayName: 'M', grade: 5);
 
+/// GDTC đứng TRƯỚC trong mục lục — đúng như file thật g5 (thứ tự map JSON).
 LessonIndex _idx() => LessonIndex.fromJsonString('''
-{"grade":5,"subjects":{"Toán":[{"sourceDocumentId":"05-sgk-toan-5-tap-mot",
- "volume":"1","lessons":[{"no":6,"title":"CỘNG, TRỪ HAI PHÂN SỐ","pageStart":20},
- {"no":7,"title":null,"pageStart":24}]}]},"toanExercises":{}}
+{"grade":5,"subjects":{
+ "GDTC":[{"sourceDocumentId":"05-sgk-giao-duc-the-chat-5","volume":null,
+  "lessons":[{"no":1,"title":"BÀI TẬP ĐỘI HÌNH ĐỘI NGŨ","pageStart":6}]}],
+ "Toán":[{"sourceDocumentId":"05-sgk-toan-5-tap-mot","volume":"1",
+  "lessons":[{"no":6,"title":"CỘNG, TRỪ HAI PHÂN SỐ","pageStart":20},
+  {"no":7,"title":null,"pageStart":24}]},
+  {"sourceDocumentId":"05-sgk-toan-5-tap-hai","volume":"2",
+  "lessons":[{"no":80,"title":"DIỆN TÍCH HÌNH TAM GIÁC","pageStart":8}]}]},
+ "toanExercises":{}}
 ''')!;
+
+Future<void> _pump(WidgetTester t, LearnerStore store) async {
+  await t.pumpWidget(MaterialApp(
+      home: LearningMapScreen(profile: _p, store: store, index: _idx())));
+  await t.pumpAndSettle();
+}
+
+Future<LearnerStore> _storeWithB6() async {
+  final store = JsonlLearnerStore();
+  await store.appendSession(LearningSession(
+    sessionId: 's1',
+    learnerId: 'l',
+    subjectId: 'toan',
+    startedAt: DateTime(2026, 9, 2, 19),
+    trigger: SessionTrigger.manual,
+    events: [
+      LearningEvent(
+          eventId: 'e#0',
+          skillCaseId: 'denominator-non-divisible',
+          kind: EvidenceKind.independentAttempt,
+          correct: true,
+          at: DateTime(2026, 9, 2, 19),
+          support: SupportLevel.none,
+          conceptIds: const ['quy-dong']),
+    ],
+  ));
+  return store;
+}
 
 void main() {
   testWidgets('⭐ kho trắng ⇒ KHÔNG badge nào (không tiến-độ-ảo)', (t) async {
-    await t.pumpWidget(MaterialApp(
-        home: LearningMapScreen(
-            profile: _p, store: JsonlLearnerStore(), index: _idx())));
+    await _pump(t, JsonlLearnerStore());
+    expect(find.text('Toán · 3 bài'), findsOneWidget);
+    // Chưa có bằng chứng ⇒ không mở sẵn môn nào; mở tay vẫn xem được mục lục.
+    expect(find.textContaining('Bài 6'), findsNothing);
+    await t.tap(find.text('Toán · 3 bài'));
     await t.pumpAndSettle();
     expect(find.textContaining('Bài 6'), findsOneWidget);
     expect(find.text('đang học cùng SAM'), findsNothing,
@@ -31,27 +69,23 @@ void main() {
   });
 
   testWidgets('có evidence B6 ⇒ badge hiện đúng MỘT bài', (t) async {
-    final store = JsonlLearnerStore();
-    await store.appendSession(LearningSession(
-      sessionId: 's1',
-      learnerId: 'l',
-      subjectId: 'toan',
-      startedAt: DateTime(2026, 9, 2, 19),
-      trigger: SessionTrigger.manual,
-      events: [
-        LearningEvent(
-            eventId: 'e#0',
-            skillCaseId: 'denominator-non-divisible',
-            kind: EvidenceKind.independentAttempt,
-            correct: true,
-            at: DateTime(2026, 9, 2, 19),
-            support: SupportLevel.none,
-            conceptIds: const ['quy-dong']),
-      ],
-    ));
-    await t.pumpWidget(MaterialApp(
-        home: LearningMapScreen(profile: _p, store: store, index: _idx())));
-    await t.pumpAndSettle();
+    await _pump(t, await _storeWithB6());
     expect(find.text('đang học cùng SAM'), findsOneWidget);
+  });
+
+  testWidgets(
+      '⭐ QA n64: môn có bằng chứng LÊN ĐẦU + mở sẵn; môn khác gập lại '
+      '(bài có badge không bị chôn dưới hàng trăm dòng)', (t) async {
+    await _pump(t, await _storeWithB6());
+    final toan = t.getTopLeft(find.text('Toán · 3 bài')).dy;
+    final gdtc = t.getTopLeft(find.text('GDTC · 1 bài')).dy;
+    expect(toan, lessThan(gdtc),
+        reason: '⭐ đột biến giữ thứ tự JSON ⇒ đỏ');
+    // Toán mở sẵn (thấy bài), GDTC gập (không thấy bài của nó).
+    expect(find.textContaining('Bài 6'), findsOneWidget);
+    expect(find.textContaining('ĐỘI HÌNH ĐỘI NGŨ'), findsNothing);
+    // Hai tập ⇒ nói rõ tập nào, «Bài 6» và «Bài 80» không lẫn.
+    expect(find.text('Tập 1'), findsOneWidget);
+    expect(find.text('Tập 2'), findsOneWidget);
   });
 }
