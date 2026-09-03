@@ -293,6 +293,43 @@ dòng đó dựng được từ **hoạt động phía SGK** (thí nghiệm, đ�
 provenance nhưng KHÔNG có lời dạy** ⇒ SAM im lặng ở phần gợi ý (bất biến WAL-168), trẻ vẫn
 làm được việc và vẫn sinh bằng chứng. Thà im còn hơn bịa.
 
+### C-008 · ⚠️ Cổng kiến trúc bị chặn — nhưng KHÔNG phải vì Dart
+
+Cổng đòi: **môn thứ hai + lớp thứ hai** chạy Book → Lesson → Learn → Evidence mà không thêm
+Dart theo bài. Đo xong: **không qua được hôm nay**, và lý do đáng giá hơn cả cái cổng.
+
+**Không phải vì thiếu mã.** Sau WAL-166/168/170 runtime đã trung tính: `activitiesFor` hỏi
+dữ liệu chứ không hỏi tên môn, `classifyCase` nằm trong dòng dữ liệu, lời dạy là dữ liệu,
+tra chương trình theo định danh bài. Không có nhánh Dart nào theo môn còn lại trên đường
+Book → Lesson → Learn.
+
+**Chặn vì HOẠT ĐỘNG KHÔNG GẮN ĐƯỢC VÀO BÀI:**
+
+| Đo | Kết quả |
+|---|---|
+| Thí nghiệm Khoa học lớp 5 | 5 khối có thật, verbatim Chuẩn bị/Tiến hành — **`lesson: null` cả 5** ⇒ **0/5** gắn được vào bài |
+| Thí nghiệm lớp 10 (Vật lí 2, Hoá học 3) | có thật — **`lesson: null` cả 5** |
+| Gắn theo KHOẢNG TRANG (Vật lí 10) | thí nghiệm ở trang in 61, 73; bài đầu tiên có trang là **Bài 2 ở trang 91** ⇒ không bài nào chứa |
+| Sách Hoá học 10 | `10-sgk-hoa-hoc-10` **không có trong mục lục g10** (chỉ có bản chuyên đề) ⇒ thí nghiệm trỏ vào cuốn không có bài nào |
+| Giả thuyết «lệch trang in ↔ trang PDF» | **BÁC BỎ**: offset đo được chỉ **1–2 trang** (`05-sgk-toan-5-tap-mot` 23↔22, `05-sgk-khoa-hoc-5` 17↔16, `05-sgk-lich-su-va-dia-li-5` 12↔10). Không giải thích được khoảng cách 5→64 |
+
+Trên máy thật khớp đúng số đo: Book Home của Khoa học 5 **có** thẻ «Thí nghiệm trong sách ·
+5 thí nghiệm» ở mức **sách**, nhưng **mọi bài** đều nói «SAM đang học bài này» — vì không bài
+nào nhận được thí nghiệm nào.
+
+**Nguyên nhân gốc — một vấn đề đeo ba mặt nạ:**
+
+C-006 (Tiếng Anh mất trang) · C-007 (finding SGV gán sai bài) · C-008 (hoạt động không gắn
+được vào bài) **đều là cùng một thứ**: **quy trình nạp gán sai/không gán được đơn vị bài.**
+Nội dung có thật, toạ độ trang có thật; cái thiếu là **phép căn giữa nội dung và bài.**
+
+**Đây chính là điều cổng sinh ra để phát hiện.** Nếu lúc này đi viết tay `lesson: 3` cho năm
+thí nghiệm để cổng «qua», thì cổng thành vô nghĩa và nợ đi thẳng vào sản phẩm. **Không làm.**
+
+**Luật rút ra cho nhà máy:** hoạt động (thí nghiệm, đoạn đọc, tư liệu, bài tập) phải được
+căn về bài bằng **toạ độ trang + ranh giới bài đã xác thực**, và bài nào không căn được thì
+mang `UNKNOWN` — hiện lên ở mức **sách**, không bịa gắn vào một bài.
+
 ---
 
 ## 6. Trôi kiến trúc đang mở
@@ -305,6 +342,7 @@ làm được việc và vẫn sinh bằng chứng. Thà im còn hơn bịa.
 | D-4 | 11% bài không có khoá định danh duy nhất | compiler chưa phát khoá cho phần này |
 | D-5 | finding SGV chưa gán được về bài (C-007) | blueprint theo bài chưa dựng tự động được |
 | D-6 | `authority` chỉ có một giá trị trong toàn bộ 13.634 finding | phân loại thẩm quyền hiện **không phân loại gì** |
+| D-7 | hoạt động (thí nghiệm/đọc/tư liệu) mang `lesson: null` | có nội dung nhưng **không bài nào mở được nó** (C-008) |
 
 Ba mục D-1..D-3 là lý do **không được** đẻ blueprint hàng loạt trước: chưa có gì tiêu thụ chúng.
 
@@ -357,10 +395,9 @@ Nguyên tắc khi tỉ lệ ngoại lệ tăng: **không vá từng bài** — c
 Thứ tự này đổi sau C-007: **không** bắt đầu bằng compiler-sinh-blueprint, vì dữ liệu chưa
 đỡ nổi.
 
-1. **Cổng kiến trúc trước** — môn thứ hai + lớp thứ hai chạy Book → Lesson → Learn →
-   Evidence, không Dart riêng theo bài. Dựng dòng chương trình từ **hoạt động phía SGK**
-   (thí nghiệm Khoa học), method **có provenance, không có lời dạy** ⇒ SAM im lặng ở phần
-   gợi ý thay vì bịa.
+1. **CĂN HOẠT ĐỘNG VỀ BÀI** (C-008) — điều kiện cần của cổng kiến trúc, và là cùng một
+   nguyên nhân gốc với C-006/C-007. Không có bước này thì nội dung có thật vẫn không tới
+   được bài nào, và cổng không thể qua bằng cách trung thực.
 2. **Nối một blueprint có thật vào runtime** (gỡ trôi D-2), bắt đầu từ `blueprintQuyDongB6`
    vì nó đã trỏ đúng bài G-1. Chưa sinh blueprint hàng loạt.
 3. **Căn trang → bài cho SGV** (D-5). Đây là điều kiện cần của compiler; trước bước này mọi
