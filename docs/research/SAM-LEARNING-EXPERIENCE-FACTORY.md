@@ -502,6 +502,49 @@ bài phẳng. Đây là mảnh bằng chứng đầu tiên cho mô hình `Conten
 
 ---
 
+### C-012 · ✅ CỔNG KIẾN TRÚC #2 QUA — thêm sách CHỈ BẰNG DỮ LIỆU
+
+Chọn **Vật lí 10** làm phép thử: một môn **và** một lớp mà runtime **chưa từng biết**, khác
+cả Toán 5 lẫn Khoa học 5.
+
+Trên máy thật, thêm một người học lớp 10 (rồi xoá đi sau khi đo):
+
+```
+Giá sách lớp 10 (41 bìa thật)
+  → Vật lí 10 (34 bài, tên bài thật)
+    → Bài 14 · Định luật 1 newton — «1 thí nghiệm từ SGK, vào học ngay»
+      → CHUẨN BỊ / TIẾN HÀNH nguyên văn SGK
+        → EM QUAN SÁT ĐƯỢC → bằng chứng
+```
+
+Bốn điều kiện của cổng, kiểm được:
+
+| Điều kiện | Kết quả |
+|---|---|
+| Zero lesson-specific Dart | ✅ không viết dòng nào |
+| Zero book-name branch trong runtime | ✅ |
+| Zero subject-name branch trong runtime dùng chung | ✅ sau khi gỡ nốt `switch` cuối ở WAL-173 |
+| Zero lời dạy viết cứng | ✅ chữ hiện ra là nguyên văn SGK, không prose của SAM |
+
+**Mã mới phải viết, và phân loại đúng như Founder yêu cầu:**
+
+| Việc | Loại |
+|---|---|
+| `subjectIdOf()` thay `switch` theo tên môn | **adapter dùng lại được** — thêm môn không sửa dòng nào |
+| Đọc mục lục hai họ + trang nối tiếp | **compiler capability** (tầng nạp) |
+| Gắn hoạt động về bài theo trang của CHÍNH cuốn | **compiler capability** — bỏ một hardcode theo tên môn nữa |
+| Tên sách «Chuyên đề · Hoá học» | **adapter hiển thị** — tra slug về tên môn có dấu CÓ THẬT trong registry |
+
+**Không có mục nào là SCALABILITY FAILURE trong vòng này.**
+
+**Bằng chứng phụ, đáng giá**: khi có hai người học trên cùng máy, bằng chứng của Na (lớp 5)
+**không bị đụng** — «Ôn lại: Quy đồng…» vẫn nguyên. Cô lập theo `learnerId` đứng vững trên
+máy thật, không chỉ trong test.
+
+Khung: `GATE2-n01`…`GATE2-n06`.
+
+---
+
 ---
 
 ## 6. Trôi kiến trúc đang mở

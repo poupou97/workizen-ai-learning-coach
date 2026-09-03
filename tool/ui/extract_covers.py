@@ -14,17 +14,50 @@ WAL-43: ảnh vào `assets/pack/covers/` (gitignore), registry vào poc-out.
 import json
 import os
 import sys
+import unicodedata
 
 import fitz
 from PIL import Image
 
 VER = 'cover-v1'
+
+def _slug(t):
+    k = unicodedata.normalize('NFD', (t or '').lower())
+    k = ''.join(c for c in k if not unicodedata.combining(c)).replace('đ', 'd')
+    return '-'.join(''.join(c if c.isalnum() else ' ' for c in k).split())
+
+
+# Nhiều cuốn dùng CHUNG một `subject`: lớp 10 có 10 cuốn đều mang «Chuyên đề»,
+# nên tên hiện ra là «Chuyên đề 10» y hệt nhau và trẻ không phân biệt nổi Hoá
+# học với Sinh học (đo trên máy, khung GATE2-n01). Môn thật nằm trong
+# `nameExtra` nhưng ở dạng slug KHÔNG DẤU. Thay vì hiện slug cho trẻ đọc, tra
+# ngược slug đó về đúng tên môn CÓ DẤU của một cuốn khác trong chính registry —
+# vẫn là trường có thật, không OCR bìa, không tự đặt tên.
+_SUBJECT_BY_SLUG = {}
+
+
+def _display_subject(d):
+    subj = d.get('subject') or ''
+    extra = d.get('nameExtra') or ''
+    if not extra:
+        return subj
+    key = _slug(extra.replace('hoc-tap-', ''))
+    for part in (key, key.replace('chuyen-de-', '')):
+        for n in range(len(part.split('-')), 0, -1):
+            cand = '-'.join(part.split('-')[-n:])
+            hit = _SUBJECT_BY_SLUG.get(cand)
+            if hit and _slug(hit) != _slug(subj):
+                return f'{subj} · {hit}'
+    return subj
+
 GRADE = int(sys.argv[1]) if len(sys.argv) > 1 else None
 REG = 'poc-out/registry/source-registry.json'
 OUT = 'assets/pack/covers'
 
 _reg = json.load(open(REG))
 docs = _reg['documents'] if isinstance(_reg, dict) else _reg
+_SUBJECT_BY_SLUG.update({_slug(x.get('subject')): x.get('subject')
+                         for x in docs if x.get('subject')})
 
 os.makedirs(OUT, exist_ok=True)
 os.makedirs('poc-out/ui-assets', exist_ok=True)
@@ -52,7 +85,12 @@ for d in docs:
     # Tên hiển thị: dựng từ TRƯỜNG CÓ THẬT trong registry. Không đọc chữ trên
     # bìa (OCR bìa sai một chữ là gọi sai tên sách của trẻ).
     vol = d.get('volume')
-    title = f"{d.get('subject')} {d.get('grade')}"
+    # ⭐ Nhiều cuốn dùng CHUNG một `subject` — lớp 10 có 10 cuốn đều mang
+    # subject «Chuyên đề», nên tên hiện ra là «Chuyên đề 10» y hệt nhau và trẻ
+    # không phân biệt nổi Hoá học với Sinh học (đo trên máy: khung GATE2-n01).
+    # `nameExtra` mang phần còn lại của tên file — dùng nó để tách, vẫn là
+    # TRƯỜNG CÓ THẬT trong registry, không OCR bìa.
+    title = f"{_display_subject(d)} {d.get('grade')}"
     covers.append(dict(
         sourceDocumentId=d['sourceDocumentId'], subject=d.get('subject'),
         grade=d.get('grade'), volume=vol, title=title,
