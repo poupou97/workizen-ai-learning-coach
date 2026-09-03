@@ -58,6 +58,15 @@ nói thật khi thiếu crop. Run 33709174817/33709383804 XANH, main = 32c0592. 
 trình: xác minh test trong `git clone` sạch, vì file gitignore làm test xanh giả ở máy dev.
 ⚠️ Founder quyết: bật branch protection thì «vỡ là không merge được» — hiện chưa bật.
 
+**WAL-143 ✅ Kiểm tra hiểu bài** (af921d9 + c207878, CI xanh): mặt tiền của
+`AssistancePolicy.assessment` — dependency WAL-122 hoá ra đã thoả ở tầng engine (WAL-104), repo
+thắng ticket. Cấm gợi ý bằng CẤU TRÚC (test quét mã nguồn cấm 5 chuỗi), cùng bộ chấm với lúc học,
+không parse được ⇒ không dám chấm, kết quả không điểm-số, hỏi đúng người trước khi ghi bằng chứng
+độc lập. Walk Nokia n70-n77: 2 đúng 1 sai ⇒ vẫn «chưa đủ để kết luận (7 lần tự làm)». 487 test,
+3+1 đột biến bị giết. Nợ: MCQ-family TN&XH (#20); chọn câu theo ca yếu thay vì 3 bài đầu.
+⚠️ **Founder quyết (A/B)**: con vừa sai một câu mà Hôm nay vẫn «nghỉ ngơi nhé» — giữ nguyên
+(không nag) hay cho lỗi MỚI nâng ưu tiên sớm hơn lịch 7 ngày? Không tự đổi chính sách ôn tập.
+
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
 
