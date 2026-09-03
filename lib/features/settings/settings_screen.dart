@@ -116,8 +116,10 @@ class SettingsScreen extends StatelessWidget {
               ],
               const SizedBox(height: WalSpacing.md),
               const Text(
-                'Các mục cài đặt khác (hồ sơ, quyền riêng tư, thông báo…) '
-                'đang được SAM xây — sẽ xuất hiện ở đây khi sẵn sàng.',
+                // WAL-137: hồ sơ ĐÃ có ở trên — bỏ khỏi danh sách «đang xây»,
+                // vì một câu hứa thừa cũng là một câu không đúng.
+                'Các mục cài đặt khác (quyền riêng tư, thông báo…) đang được '
+                'SAM xây — sẽ xuất hiện ở đây khi sẵn sàng.',
                 style: TextStyle(
                     fontSize: WalType.secondary,
                     color: WalColors.inkSoft,
