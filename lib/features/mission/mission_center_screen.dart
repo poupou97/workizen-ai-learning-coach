@@ -32,6 +32,7 @@ class MissionCenterScreen extends StatelessWidget {
     this.onParentArea,
     this.onOpenSubjects,
     this.onReview,
+    this.onAssess,
     this.onOpenSettings,
     this.todayStory,
     this.didYouKnowStory,
@@ -55,6 +56,10 @@ class MissionCenterScreen extends StatelessWidget {
 
   /// WAL-138 — chip «Ôn luyện»: mở bài ôn THẬT (hoặc nói thật khi chưa tới hạn).
   final VoidCallback? onReview;
+
+  /// WAL-143 — «Kiểm tra hiểu bài». `null` = máy này chưa đủ dữ liệu ⇒ chip
+  /// nói thật thay vì mở màn rỗng.
+  final VoidCallback? onAssess;
 
   /// WAL-152 — Settings/Thêm (entry Kho khám phá). `null` = ẩn icon.
   final VoidCallback? onOpenSettings;
@@ -310,10 +315,12 @@ class MissionCenterScreen extends StatelessWidget {
                     'Mỗi bài học có mục «Vì sao cách này?» kèm nguồn SGK — '
                     'con vào một bài trong Môn học để xem nhé. SAM đang xây '
                     'thư viện phương pháp riêng.')),
-            _chip('✅ Kiểm tra hiểu bài',
-                () => _honestSheet(context,
-                    'Phần kiểm tra đang được SAM chuẩn bị — khi mở, bài kiểm '
-                    'tra sẽ không có gợi ý và con làm hoàn toàn tự sức mình.')),
+            _chip(
+                '✅ Kiểm tra hiểu bài',
+                onAssess ??
+                    () => _honestSheet(context,
+                        'Máy này chưa nạp đủ bài để kiểm tra — con vào Môn học '
+                        'làm vài bài trước, rồi SAM mới kiểm tra được.')),
           ],
         ),
       );

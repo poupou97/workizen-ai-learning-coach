@@ -28,7 +28,13 @@ import 'features/parent/parent_area.dart';
 import 'features/settings/settings_screen.dart';
 import 'core/curriculum/canonical_problem.dart';
 import 'core/knowledge/provenance.dart';
+import 'core/knowledge/slice_curriculum.dart' show curriculumFor;
 import 'features/learning_session/slice_flow.dart';
+import 'features/assessment/assessment_screen.dart';
+import 'features/assessment/assessment_result_screen.dart';
+import 'features/shell/session_recorder.dart';
+import 'core/store/learning_session.dart' show SessionMode, SessionTrigger;
+import 'core/student/concept_summary.dart';
 import 'features/discovery/splash_quote.dart';
 import 'features/subjects/lesson_index.dart';
 import 'app/theme/band_density_scope.dart';
@@ -209,6 +215,63 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (mounted) setState(_refreshMission);
   }
 
+  /// WAL-143 — «Kiểm tra hiểu bài»: cùng engine, luật `AssistancePolicy
+  /// .assessment` (không gợi ý, không chữa giữa chừng, mode assess).
+  ///
+  /// ⭐ KHÔNG THI ĐIỀU CHƯA DẠY: chưa có bằng chứng nào về dạng này ⇒ nói
+  /// thật và mời học trước. Kiểm tra một đứa trẻ về thứ nó chưa được học
+  /// không sinh ra bằng chứng, chỉ sinh ra một con số.
+  Future<void> _openAssessment(BuildContext context) async {
+    final p = _profile;
+    final c = p == null ? null : curriculumFor(p);
+    final exs = _lessonIndex?.exercisesForToan(6) ?? const [];
+    if (p == null || c == null || exs.length < 2) {
+      _honest(context,
+          'Máy này chưa nạp đủ bài để kiểm tra — con vào Môn học làm vài bài '
+          'trước, rồi SAM mới kiểm tra được.');
+      return;
+    }
+    final log = await widget.store.evidenceFor(
+        learnerId: p.learnerId, skillCaseId: 'denominator-non-divisible');
+    if (log.events.isEmpty) {
+      if (context.mounted) {
+        _honest(context,
+            'Con chưa học dạng này nên SAM chưa kiểm tra — mình học trước đã '
+            'nhé, rồi kiểm tra mới nói lên điều gì.');
+      }
+      return;
+    }
+    if (!context.mounted) return;
+    final nav = Navigator.of(context);
+    await nav.push(MaterialPageRoute(
+        builder: (_) => AssessmentScreen(
+              items: exs.take(3).toList(),
+              onFinished: (events, answers) async {
+                final rec = await recordSession(
+                  store: widget.store,
+                  learnerId: p.learnerId,
+                  subjectId: c.subjectId,
+                  events: events,
+                  trigger: SessionTrigger.assessment,
+                  mode: SessionMode.assess,
+                );
+                final m = await masteryFromStore(
+                    widget.store, p.learnerId, c);
+                if (!nav.mounted) return;
+                nav.pushReplacement(MaterialPageRoute(
+                    builder: (_) => AssessmentResultScreen(
+                          answers: answers,
+                          summary: ConceptSummary.of(m,
+                              knownCaseIds: {for (final k in c.cases) k.id},
+                              now: DateTime.now()),
+                          violations: rec.violations,
+                          onDone: () => nav.pop(),
+                        )));
+              },
+            )));
+    if (mounted) setState(_refreshMission);
+  }
+
   /// «Bạn có biết?» — một mục VERIFIED bất kỳ, ổn định trong ngày.
   StoryItem? _didYouKnow() {
     if (_stories.isEmpty) return null;
@@ -281,6 +344,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         onParentArea: () => openParentArea(context,
                             store: widget.store, profiles: _profiles),
                         onReview: () => _openReview(context),
+                        onAssess: () => _openAssessment(context),
                         onOpenSettings: () => Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (_) =>
