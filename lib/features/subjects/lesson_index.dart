@@ -196,6 +196,45 @@ class IndexedSourceAsset {
       );
 }
 
+/// ⭐ WAL-166 — MỘT VIỆC trẻ có thể làm trong một bài, **không hỏi tên môn**.
+///
+/// Trước đây màn Subject Home quyết định bài có mở được không bằng
+/// `_isToan/_isTv/_isSu`: môn nào không nằm trong ba tên tiếng Việt đó thì dù
+/// pack CÓ dữ liệu vẫn không bấm được. Đo trên pack lớp 5 thật: Khoa học có
+/// 5 thí nghiệm và Tiếng Anh là môn lớn nhất corpus, cả hai đều không có
+/// đường vào.
+///
+/// Nay câu hỏi đổi thành «bài này CÓ việc gì không», và câu trả lời đến từ
+/// DỮ LIỆU. `sealed` ⇒ thêm loại việc mới là mọi chỗ tiêu thụ đỏ ngay.
+sealed class LessonActivity {
+  const LessonActivity();
+}
+
+final class ExerciseActivity extends LessonActivity {
+  const ExerciseActivity(this.items);
+  final List<CorpusExercise> items;
+}
+
+final class ReadingActivity extends LessonActivity {
+  const ReadingActivity(this.reading);
+  final TvReading reading;
+}
+
+final class WritingActivity extends LessonActivity {
+  const WritingActivity(this.writing);
+  final TvWriting writing;
+}
+
+final class SourceActivity extends LessonActivity {
+  const SourceActivity(this.source);
+  final SuSource source;
+}
+
+final class ExperimentActivity extends LessonActivity {
+  const ExperimentActivity(this.experiment);
+  final KhoaExperiment experiment;
+}
+
 class LessonIndex {
   const LessonIndex(
       {required this.grade,
@@ -236,6 +275,27 @@ class LessonIndex {
 
   List<DiaMap> mapsForSubject(String subject) =>
       [for (final m in diaMaps) if (m.subject == subject) m];
+
+  /// ⭐ WAL-166 — mọi việc gắn được vào MỘT bài của MỘT cuốn sách.
+  ///
+  /// Lọc theo `book` ở mọi loại — kể cả tư liệu Sử, thứ trước đây chỉ lọc
+  /// theo số bài nên bài số 9 của sách khác có thể lôi nhầm tư liệu.
+  List<LessonActivity> activitiesFor(
+      {required String book, required int lessonNo}) {
+    final ex = [
+      for (final e in exercisesForToan(lessonNo))
+        if (e.book == book) e
+    ];
+    return [
+      if (ex.isNotEmpty) ExerciseActivity(ex),
+      for (final r in readingsForTv(book, lessonNo)) ReadingActivity(r),
+      for (final w in writingsForTv(book, lessonNo)) WritingActivity(w),
+      for (final s in suSources)
+        if (s.book == book && s.lesson == lessonNo) SourceActivity(s),
+      for (final e in khoaExperiments)
+        if (e.book == book && e.lesson == lessonNo) ExperimentActivity(e),
+    ];
+  }
 
   List<IndexedSourceAsset> sourceAssetsFor(String subject) =>
       [for (final a in sourceAssets) if (a.subject == subject) a];
