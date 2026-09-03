@@ -398,6 +398,45 @@ thật, nên bước nối phải có đối chiếu trước/sau riêng.
 
 ---
 
+### C-010 · Mục lục có HAI HỌ, và họ thứ hai lộ ra phân cấp thật
+
+33 cuốn tụt hạng sau C-009 hầu hết là Tiếng Việt. Đọc OCR thì thấy lý do: **Tiếng Việt
+không viết «Bài 1. …» — nó KẺ BẢNG.**
+
+```
+Tuần | Bài | Nội dung                | Trang
+     |     | NHỮNG TRẢI NGHIỆM THÚ VỊ|   9
+  1  |  1  | Đọc: Ngày gặp lại       |  10
+     |     | Nói và nghe: Mùa hè…    |  11
+     |     | Viết: Nghe-viết…        |  12
+```
+
+Số bài là **chữ số trần trong cột riêng**; chữ «Bài» chỉ xuất hiện MỘT lần ở dòng tiêu đề.
+Mọi regex đòi từ khoá đều ra 0 mục.
+
+**Hai điều quan trọng hơn cả bản sửa:**
+
+1. **Phân cấp thật hiện ra: Sách → Tuần → Bài.** Số bài **lặp lại qua từng tuần** ⇒ số bài
+   một mình **không bao giờ** đủ làm định danh. Đây là bằng chứng độc lập thứ hai cho
+   WAL-170 (bằng chứng thứ nhất là GDTC đánh số lại theo chủ đề).
+2. **Một «Bài» Tiếng Việt là KHỐI NHIỀU HOẠT ĐỘNG** — cột nội dung liệt kê *Đọc* / *Nói và
+   nghe* / *Viết* bên trong cùng một bài. Sách tự liệt kê hoạt động của bài. Đây đúng là thứ
+   EP-002 và EP-005 cần, và là đường vào tự nhiên để gắn hoạt động vào bài cho môn Tiếng
+   Việt — khác hẳn Toán (một bài = một chuỗi bài tập).
+
+**Đo lại sau khi thêm họ BẢNG** (415 cuốn có trang mục lục đã OCR):
+
+| | Trước C-009 | Sau C-009 | Sau C-010 |
+|---|---|---|---|
+| Tốt lên / như cũ / xấu đi | — | 243 / 139 / 33 | **276 / 139 / 37** |
+| Số bài trùng số toàn corpus | 1.776 | 1.048 | **1.051** |
+| Cuốn dùng họ BẢNG | — | — | **49** |
+
+**Còn lại**: 37 cuốn (Tiếng Việt lớp 1–3) ra ít bài hơn bản cũ — cột số bài của các cuốn đó
+chưa nhận đủ. Phải xong trước khi nối vào pipeline.
+
+---
+
 ---
 
 ## 6. Trôi kiến trúc đang mở
