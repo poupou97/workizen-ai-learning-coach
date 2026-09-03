@@ -28,6 +28,15 @@ void main() {
             'KHÔNG kéo theo thư mục con — đây đúng là lỗi đã xảy ra trên Nokia.');
   });
 
+  test('⭐ THƯ MỤC bìa phải có trong git, không chỉ có trên máy tôi', () {
+    // Nội dung bìa gitignore (WAL-43) và git KHÔNG theo dõi thư mục rỗng ⇒
+    // trên bản checkout sạch thư mục đã khai báo trong pubspec biến mất và
+    // `flutter analyze` đỏ: asset_directory_does_not_exist. Máy tôi xanh vì
+    // có sẵn 22 tấm bìa — đúng họ lỗi «test kiểm tủ đồ của một người».
+    expect(File('assets/pack/${BookRef.coverDir}.gitkeep').existsSync(), isTrue,
+        reason: '⭐ đột biến xoá file mốc ⇒ đỏ (CI đã đỏ đúng chỗ này).');
+  });
+
   test('⭐ bìa NGOÀI thư mục đã khai báo ⇒ sách không lên giá (fail closed)',
       () {
     final idx = LessonIndex.fromJsonString('''
