@@ -16,10 +16,16 @@
 /// test giữ bất biến «BCNN không thể xuất hiện ở Math5 B6» (§3 Master Order).
 library;
 
+import '../curriculum/fraction_problem.dart' show fractionSumCase;
 import '../curriculum/pedagogical_boundary.dart';
 import '../curriculum/skill_case.dart';
 import '../store/learner_profile.dart';
 import 'provenance.dart';
+
+/// Phân LOẠI CA của một bài: chuỗi đề → id ca trong chương trình, `null` khi
+/// không nhận ra. Đây là chỗ DUY NHẤT còn biết môn — và nó thuộc về dữ liệu
+/// của bài, không thuộc runtime (WAL-168).
+typedef CaseClassifier = String? Function(String expression);
 
 /// Phiên bản model tri thức — đi vào provenance drill-down và mọi phiên ghi.
 const String knowledgeModelVersion = 'slice-toan5-b6-v1+qmap-v1';
@@ -34,10 +40,21 @@ class SliceCurriculum {
     required this.stage,
     required this.catalogue,
     required this.cases,
+    required this.classifyCase,
   });
 
   final String subjectId;
   final String conceptId;
+
+  /// ⭐ WAL-168 — «bài này thuộc DẠNG nào»: hàm của HỌ MÔN, đặt trong DÒNG DỮ
+  /// LIỆU của bài chứ không trong màn hình.
+  ///
+  /// Trước đây `ProblemContextScreen` tự gọi `FractionProblem.parse` rồi
+  /// `fractionCase(...)` — mẩu kiến thức-môn duy nhất còn nằm trong màn dùng
+  /// chung, và là lý do môn thứ hai không dạy được gì (Architecture Gate).
+  /// Nay thêm một bài phân số = trỏ tới `fractionSumCase`; thêm một họ môn mới
+  /// = viết MỘT classifier dùng chung cho mọi bài của họ đó.
+  final CaseClassifier classifyCase;
 
   /// Nhãn hoạt động cho trẻ/phụ huynh — «Bài tập về nhà · Toán 5 · Bài 6».
   final String activityLabel;
@@ -54,6 +71,7 @@ SliceCurriculum? curriculumFor(LearnerProfile p) {
     subjectId: 'toan',
     conceptId: 'quy-dong',
     activityLabel: 'Toán 5 · Bài 6 · Cộng, trừ hai phân số khác mẫu số',
+    classifyCase: fractionSumCase,
     stage: LearningStage(
       grade: 5,
       bookSeries: 'kntt',
@@ -70,6 +88,21 @@ SliceCurriculum? curriculumFor(LearnerProfile p) {
         skillCaseId: 'denominator-non-divisible',
         requiresConcepts: {'phan-so', 'nhan-so-tu-nhien'},
         requiresTerminology: {'mẫu số chung'},
+        // WAL-168 — LỜI DẠY LÀ DỮ LIỆU. Nguyên văn ba nấc trước đây nằm trong
+        // `hintTextFor`; chữ không đổi một dấu, chỉ đổi chỗ ở: nay đi cùng
+        // phương pháp (thứ có provenance), số do bài điền vào slot.
+        hints: MethodHints(
+          hint: 'Hai mẫu số {b} và {d} không chia hết cho nhau. '
+              'Muốn cộng được thì hai phân số phải cùng mẫu số — '
+              'con nghĩ xem mẫu số chung lấy thế nào nhé?',
+          workedStep: 'Bước đầu tiên: lấy mẫu số chung là {b} × {d} = {product}. '
+              'Giờ con quy đồng hai phân số về mẫu {product} nhé — đến lượt con!',
+          fullSolution: 'Cả bài nhé: mẫu số chung là {b} × {d} = {product}. '
+              '{a}/{b} = {aOverProduct}/{product} và '
+              '{c}/{d} = {cOverProduct}/{product}. '
+              'Vậy {a}/{b} {op} {c}/{d} = {resultNum}/{product}. '
+              'Mai mình làm lại một bài giống thế này không cần SAM nhé!',
+        ),
         // m:quy-dong:g5:b6:p21 — dạy qua ví dụ ⇒ sourceDemonstrated.
         provenance: Provenance(
           origin: KnowledgeOrigin.sourceDemonstrated,
@@ -90,6 +123,18 @@ SliceCurriculum? curriculumFor(LearnerProfile p) {
         skillCaseId: 'denominator-divisible',
         requiresConcepts: {'phan-so', 'chia-het'},
         requiresTerminology: {'mẫu số chung'},
+        // Cách lớp 4 — cố ý KHÔNG nêu số: giữ nguyên văn bản cũ, vốn hỏi lại
+        // chứ không đưa số (trẻ phải tự nhìn ra mẫu nào chia hết cho mẫu nào).
+        hints: MethodHints(
+          hint: 'Con thử xem mẫu số lớn hơn có chia hết cho mẫu số kia không?',
+          workedStep: 'Bước đầu tiên: giữ nguyên phân số có mẫu lớn hơn, '
+              'quy đồng phân số còn lại. Đến lượt con!',
+          fullSolution: 'Cả bài nhé: mẫu số chung là {b} × {d} = {product}. '
+              '{a}/{b} = {aOverProduct}/{product} và '
+              '{c}/{d} = {cOverProduct}/{product}. '
+              'Vậy {a}/{b} {op} {c}/{d} = {resultNum}/{product}. '
+              'Mai mình làm lại một bài giống thế này không cần SAM nhé!',
+        ),
         // m:quy-dong:g4:b60:p77 — ca lớp 4, dạy qua ví dụ.
         provenance: Provenance(
           origin: KnowledgeOrigin.sourceDemonstrated,

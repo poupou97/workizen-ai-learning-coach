@@ -128,8 +128,11 @@ class ProblemContextScreen extends StatelessWidget {
     final c = curriculum;
     if (c == null || mastery == null) return _outOfScope(context);
 
+    // ⭐ WAL-168: màn này KHÔNG biết bài thuộc môn nào. Phân loại ca đến từ
+    // DÒNG DỮ LIỆU của bài (`c.classifyCase`), nên thêm môn thứ hai không phải
+    // sửa runtime — đó là Architecture Gate của Founder.
+    final exerciseCase = c.classifyCase(problem.expression);
     final fp = FractionProblem.parse(problem.expression);
-    final exerciseCase = fp == null ? null : fractionCase(fp.b, fp.d);
     final decision = decide(
       conceptId: c.conceptId,
       exerciseCase: exerciseCase,

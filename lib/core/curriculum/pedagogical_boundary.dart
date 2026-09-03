@@ -46,6 +46,37 @@ class LearningStage {
   final Set<String> terminologyIntroduced;
 }
 
+/// ⭐ WAL-168 — LỜI DẠY LÀ DỮ LIỆU, không phải mã.
+///
+/// Trước đây `hintTextFor` là một `switch` viết tay trong Dart, rẽ nhánh theo
+/// `method.id` và nội suy số học phân số. Mỗi phương pháp mới = một hàm prose
+/// mới. Ở quy mô 531 cuốn thì đó là hàng nghìn hàm — đúng cảnh báo
+/// «HARDCODED BLUEPRINT ≠ SCALABILITY» của Founder.
+///
+/// Nay mẫu câu đi cùng PHƯƠNG PHÁP (thứ có nguồn, có provenance), số do BÀI
+/// điền qua [SolvableProblem.slots]. Slot viết `{tên}`; slot thiếu thì giữ
+/// nguyên dấu ngoặc để lỗi LỘ RA, không âm thầm thành câu cụt.
+class MethodHints {
+  const MethodHints({
+    required this.hint,
+    required this.workedStep,
+    required this.fullSolution,
+  });
+
+  /// Gợi ý nhỏ — hỏi lại, KHÔNG đưa bước.
+  final String hint;
+
+  /// Bước đầu tiên, rồi trả lượt cho trẻ.
+  final String workedStep;
+
+  /// Lời giải trọn vẹn — chỉ tới đây sau khi trẻ đã tự thử (REVEAL gate).
+  final String fullSolution;
+
+  String fill(String template, Map<String, String> slots) =>
+      template.replaceAllMapped(RegExp(r'\{(\w+)\}'),
+          (m) => slots[m.group(1)] ?? m.group(0)!);
+}
+
 class TeachingMethod {
   const TeachingMethod({
     required this.id,
@@ -55,7 +86,12 @@ class TeachingMethod {
     required this.requiresTerminology,
     this.skillCaseId,
     this.provenance,
+    this.hints,
   });
+
+  /// Mẫu lời dạy. `null` = phương pháp CHƯA có lời dạy ⇒ tầng tutor fail
+  /// closed (không tự bịa câu), chứ không rơi về một câu chung chung.
+  final MethodHints? hints;
 
   final String id;
   final String name;
