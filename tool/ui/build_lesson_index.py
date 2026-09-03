@@ -249,6 +249,30 @@ for m in DIA_MAPS:
     dia_maps.append(dict(m, pagePdf=r['pagePdf'], bboxFrac=r['bboxFrac'],
                          extractionVersion=r['extraction']))
 
+# ---- books (WAL-167): manifest sách + bìa thật, để trẻ nhận ra cuốn sách ----
+# Chỉ nhận sách CÓ bìa trên máy này VÀ có bài trong mục lục — sách không mở ra
+# được cái gì thì không lên giá.
+_COVERS = 'poc-out/ui-assets/book-covers.json'
+_cov = {}
+if os.path.exists(_COVERS):
+    for b in json.load(open(_COVERS)).get('books', []):
+        _cov[b.get('sourceDocumentId')] = b
+_lessons_by_book = {}
+for subj, blist in subjects.items():
+    for b in blist:
+        _lessons_by_book[b['sourceDocumentId']] = (subj, len(b['lessons']))
+books = []
+for sid, (subj, n) in sorted(_lessons_by_book.items()):
+    c = _cov.get(sid)
+    if not c or not os.path.exists(f"assets/pack/{c['cover']}"):
+        print(f'  ⚠️ {sid}: chưa có bìa trên máy này ⇒ không lên giá sách')
+        continue
+    books.append(dict(sourceDocumentId=sid, subject=subj, grade=GRADE,
+                      volume=c.get('volume'), title=c.get('title'),
+                      volumeLabel=c.get('volumeLabel'), cover=c['cover'],
+                      bookSeries=c.get('bookSeries'), lessonCount=n,
+                      pageCount=c.get('pageCount')))
+
 # ---- sourceAssets (WAL-133): hình SGK đã crop, provenance đầy đủ ----------
 # Chỉ nhận asset CÓ MẶT trên máy này và ĐỦ provenance; thiếu ⇒ bỏ, không để UI
 # hứa một hình không dựng lại được.
@@ -279,7 +303,8 @@ out = dict(grade=GRADE, version='lesson-index-v2',
            suSources=su_sources,
            khoaExperiments=khoa_experiments,
            diaMaps=dia_maps,
-           sourceAssets=source_assets)
+           sourceAssets=source_assets,
+           books=books)
 os.makedirs('assets/pack', exist_ok=True)
 path = f'assets/pack/lesson-index-g{GRADE}.json'
 json.dump(out, open(path, 'w'), ensure_ascii=False)
@@ -289,6 +314,7 @@ print(f'{path}: {len(subjects)} môn, {n_les} bài, exToán '
       f'tvReadings {len(tv_readings)}, tvWritings {len(tv_writings)}, '
       f'suSources {len(su_sources)}, khoaExperiments {len(khoa_experiments)}, '
       f'diaMaps {len(dia_maps)}, '
+      f'books {len(books)}, '
       f'sourceAssets {len(source_assets)} '
       f'({len({a["subject"] for a in source_assets})} môn)')
 for r in tv_readings[:3]:

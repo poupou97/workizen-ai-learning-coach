@@ -41,7 +41,9 @@ import 'features/subjects/lesson_index.dart';
 import 'app/theme/band_density_scope.dart';
 import 'app/theme/wal_tokens.dart' show WalBandDensity;
 import 'core/pedagogy/presentation_policy.dart' show bandForGrade;
+import 'features/subjects/book_shelf_screen.dart';
 import 'features/subjects/subjects_screen.dart';
+import 'features/subjects/subject_home_screen.dart';
 import 'features/mission/mission_data.dart';
 import 'features/onboarding/onboarding_screen.dart';
 
@@ -408,12 +410,29 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                             MaterialPageRoute(
                                 builder: (_) => StoryDetailScreen(
                                     item: st, stories: _stories))),
+                        // WAL-167 — cửa trước nay là GIÁ SÁCH khi máy có bìa
+                        // thật; chưa có bìa thì vẫn vào lưới môn như cũ
+                        // (không chặn việc học vì thiếu ảnh).
                         onOpenSubjects: () async {
+                          final idx = _lessonIndex;
                           await Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => SubjectsScreen(
-                                  profile: _profile!,
-                                  store: widget.store,
-                                  index: _lessonIndex)));
+                              builder: (ctx) => idx != null && idx.books.isNotEmpty
+                                  ? BookShelfScreen(
+                                      profile: _profile!,
+                                      index: idx,
+                                      onOpenBook: (b) => Navigator.of(ctx).push(
+                                          MaterialPageRoute(
+                                              builder: (_) => SubjectHomeScreen(
+                                                    profile: _profile!,
+                                                    store: widget.store,
+                                                    index: idx,
+                                                    subject: b.subject,
+                                                    book: b,
+                                                  ))))
+                                  : SubjectsScreen(
+                                      profile: _profile!,
+                                      store: widget.store,
+                                      index: idx)));
                           if (mounted) setState(_refreshMission);
                         },
                         onStartHomework: ocr == null

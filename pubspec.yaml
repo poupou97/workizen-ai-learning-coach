@@ -62,6 +62,10 @@ flutter:
   assets:
     - assets/mascot/
     - assets/pack/
+    # Khai báo thư mục trong Flutter KHÔNG đệ quy: `assets/pack/` không gói
+    # `assets/pack/covers/`. Thiếu dòng này, bìa nằm trên đĩa nhưng máy thật
+    # dựng ra giá sách trắng chữ (đo trên Nokia, WAL-167 n89).
+    - assets/pack/covers/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

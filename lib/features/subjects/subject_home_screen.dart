@@ -31,6 +31,7 @@ class SubjectHomeScreen extends StatelessWidget {
     required this.store,
     required this.index,
     required this.subject,
+    this.book,
   });
 
   final LearnerProfile profile;
@@ -38,19 +39,35 @@ class SubjectHomeScreen extends StatelessWidget {
   final LessonIndex index;
   final String subject;
 
+  /// WAL-167 — khi mở TỪ GIÁ SÁCH: màn này thành «Book Home», chỉ hiện bài của
+  /// đúng cuốn đó và mang tên cuốn đó. Cùng một màn, hai lối vào — không tạo
+  /// màn thứ hai cho cùng một việc.
+  final BookRef? book;
+
   List<KhoaExperiment> get _experiments =>
       index.experimentsForSubject(subject);
 
   @override
   Widget build(BuildContext context) {
-    final books = index.subjects[subject] ?? const <BookLessons>[];
+    final all = index.subjects[subject] ?? const <BookLessons>[];
+    final books = book == null
+        ? all
+        : [
+            for (final b in all)
+              if (b.sourceDocumentId == book!.sourceDocumentId) b
+          ];
+    final title = book == null
+        ? '$subject · Lớp ${profile.grade}'
+        : (book!.volumeLabel == null
+            ? book!.title
+            : '${book!.title} · ${book!.volumeLabel}');
     return Scaffold(
       backgroundColor: WalColors.surface,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(WalSpacing.lg),
           children: [
-            Text('$subject · Lớp ${profile.grade}',
+            Text(title,
                 style: const TextStyle(
                     fontSize: WalType.display,
                     fontWeight: FontWeight.w700,
@@ -68,7 +85,7 @@ class SubjectHomeScreen extends StatelessWidget {
             if (index.sourceAssetsFor(subject).isNotEmpty)
               _sourceAssetsTile(context),
             for (final b in books) ...[
-              if (b.volume != null || books.length > 1)
+              if (book == null && (b.volume != null || books.length > 1))
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: WalSpacing.sm),
                   child: Text(

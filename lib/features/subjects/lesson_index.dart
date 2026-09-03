@@ -196,6 +196,56 @@ class IndexedSourceAsset {
       );
 }
 
+/// ⭐ WAL-167 — MỘT CUỐN SÁCH có thật, kèm bìa thật.
+///
+/// Trẻ nhận ra sách bằng BÌA trước khi đọc được tên môn. Bìa là trang 1 của
+/// PDF nên trích được tự động cho cả 531 cuốn — khác hẳn hình trong ruột sách
+/// (phải có người chấm khung cắt).
+///
+/// `title` dựng từ TRƯỜNG CÓ THẬT trong registry (môn + lớp), KHÔNG đọc chữ
+/// trên bìa: OCR bìa sai một chữ là gọi sai tên sách của trẻ.
+class BookRef {
+  /// Thư mục bìa, tính từ `assets/pack/`. Phải TRÙNG một dòng trong
+  /// `pubspec.yaml`: Flutter khai báo asset theo THƯ MỤC và **không đệ quy**,
+  /// nên bìa để ngoài thư mục đã khai báo là ảnh không bao giờ dựng được trên
+  /// máy thật — dù file nằm sờ sờ trên đĩa (WAL-167 n89).
+  static const String coverDir = 'covers/';
+
+  const BookRef({
+    required this.sourceDocumentId,
+    required this.subject,
+    required this.title,
+    required this.cover,
+    required this.lessonCount,
+    this.volumeLabel,
+    this.volume,
+    this.bookSeries,
+    this.pageCount,
+  });
+
+  final String sourceDocumentId;
+  final String subject;
+  final String title;
+
+  /// Đường dẫn trong `assets/pack/` — bìa là SOURCE_ASSET (WAL-43: không commit).
+  final String cover;
+  final int lessonCount;
+
+  /// «Tập 1» — `null` khi sách không chia tập.
+  final String? volumeLabel;
+
+  /// Số tập để XẾP THỨ TỰ. Không có thì `null` — không đoán từ tên file:
+  /// `tap-hai` xếp trước `tap-mot` theo bảng chữ cái là đúng chuỗi, sai sách.
+  final int? volume;
+
+  /// ⭐ Bộ sách (Kết nối tri thức / Chân trời sáng tạo / Cánh Diều).
+  /// Registry chưa có trường này ⇒ hiện luôn `null`. Giữ CHIỀU DỮ LIỆU để
+  /// không khoá kiến trúc vào «chỉ tồn tại một bộ sách», nhưng KHÔNG bịa giá
+  /// trị và KHÔNG dựng UI chọn bộ khi chưa có nhu cầu thật (Founder Delta §3).
+  final String? bookSeries;
+  final int? pageCount;
+}
+
 /// ⭐ WAL-166 — MỘT VIỆC trẻ có thể làm trong một bài, **không hỏi tên môn**.
 ///
 /// Trước đây màn Subject Home quyết định bài có mở được không bằng
@@ -245,7 +295,8 @@ class LessonIndex {
       this.suSources = const [],
       this.khoaExperiments = const [],
       this.diaMaps = const [],
-      this.sourceAssets = const []});
+      this.sourceAssets = const [],
+      this.books = const []});
 
   final int grade;
   final Map<String, List<BookLessons>> subjects;
@@ -256,6 +307,7 @@ class LessonIndex {
   final List<KhoaExperiment> khoaExperiments;
   final List<DiaMap> diaMaps;
   final List<IndexedSourceAsset> sourceAssets;
+  final List<BookRef> books;
 
   List<CorpusExercise> exercisesForToan(int lessonNo) =>
       toanExercises[lessonNo] ?? const [];
@@ -275,6 +327,16 @@ class LessonIndex {
 
   List<DiaMap> mapsForSubject(String subject) =>
       [for (final m in diaMaps) if (m.subject == subject) m];
+
+  List<BookRef> booksForSubject(String subject) =>
+      [for (final b in books) if (b.subject == subject) b];
+
+  BookRef? bookById(String id) {
+    for (final b in books) {
+      if (b.sourceDocumentId == id) return b;
+    }
+    return null;
+  }
 
   /// ⭐ WAL-166 — mọi việc gắn được vào MỘT bài của MỘT cuốn sách.
   ///
@@ -491,6 +553,37 @@ class LessonIndex {
             lesson: (a['lesson'] as num?)?.toInt()));
       }
     }
+    final bk = <BookRef>[];
+    final bj = j['books'];
+    if (bj is List) {
+      for (final b in bj.whereType<Map>()) {
+        // Thiếu bìa hoặc thiếu định danh ⇒ KHÔNG lên giá sách (fail closed):
+        // một ô trống trên giá còn tệ hơn không có giá.
+        if (b['sourceDocumentId'] is! String ||
+            b['subject'] is! String ||
+            b['title'] is! String ||
+            b['cover'] is! String) {
+          continue;
+        }
+        // Bìa ngoài thư mục đã khai báo trong pubspec là bìa KHÔNG BAO GIỜ
+        // dựng được trên máy thật ⇒ coi như không có bìa.
+        if (!(b['cover'] as String).startsWith(BookRef.coverDir)) continue;
+        bk.add(BookRef(
+            sourceDocumentId: b['sourceDocumentId'] as String,
+            subject: b['subject'] as String,
+            title: b['title'] as String,
+            cover: b['cover'] as String,
+            lessonCount: (b['lessonCount'] as num?)?.toInt() ?? 0,
+            volumeLabel: b['volumeLabel'] as String?,
+            volume: switch (b['volume']) {
+              final num v => v.toInt(),
+              final String s => int.tryParse(s),
+              _ => null,
+            },
+            bookSeries: b['bookSeries'] as String?,
+            pageCount: (b['pageCount'] as num?)?.toInt()));
+      }
+    }
     return LessonIndex(
         grade: grade,
         subjects: subjects,
@@ -500,7 +593,8 @@ class LessonIndex {
         suSources: su,
         khoaExperiments: ke,
         diaMaps: dm,
-        sourceAssets: sa);
+        sourceAssets: sa,
+        books: bk);
   }
 
   /// `null` khi máy này chưa build asset (poc-out chưa có) — hợp lệ, nói thật.
