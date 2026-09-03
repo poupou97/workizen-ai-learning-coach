@@ -63,8 +63,18 @@ for d in docs:
         bookSeries=None,
         extraction=VER, legal='localResearchOnly'))
 
-json.dump(dict(version=VER, books=covers),
-          open('poc-out/ui-assets/book-covers.json', 'w'),
+# ⭐ GỘP, không ghi đè: chạy `extract_covers.py 10` mà thay sạch registry thì
+# lần dựng pack lớp 5 kế tiếp sẽ ra GIÁ SÁCH RỖNG — hỏng im lặng, đúng loại
+# nguy nhất. Giữ bìa của các lớp khác, chỉ thay phần của lớp đang chạy.
+_REG = 'poc-out/ui-assets/book-covers.json'
+_kept = []
+if GRADE is not None and os.path.exists(_REG):
+    try:
+        _kept = [b for b in json.load(open(_REG)).get('books', [])
+                 if b.get('grade') != GRADE]
+    except Exception:
+        _kept = []
+json.dump(dict(version=VER, books=_kept + covers), open(_REG, 'w'),
           ensure_ascii=False, indent=1)
 tot = sum(os.path.getsize(f'{OUT}/{c["sourceDocumentId"]}.webp') for c in covers)
 print(f'{len(covers)} bìa · {tot/1024:.0f} KB · trung bình {tot/max(len(covers),1)/1024:.1f} KB/bìa')
