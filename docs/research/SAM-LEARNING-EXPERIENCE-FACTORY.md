@@ -50,6 +50,29 @@ theo từng bài.**
 | `structureStatus` PARTIAL | 237 tài liệu | như trên |
 | `structureStatus` NO_TOC | 125 tài liệu | như trên |
 | Khoá (sách, số, trang) DUY NHẤT | 6.856/7.626 (89%) | đo trực tiếp |
+| **Mục lục DÙNG ĐƯỢC NGAY** | **122/531 cuốn (22%)** | `tool/corpus/toc_health.py` |
+
+### 2.1b Sức khoẻ mục lục toàn corpus — `tool/corpus/toc_health.py`
+
+Chặng **validation tự động** của nhà máy: chấm từng cuốn, phân loại kiểu hỏng, rồi mới
+nhắm việc sửa. Không sửa mò từng cuốn. Một cuốn có thể mang nhiều cờ.
+
+| Cờ | Số cuốn | Nghĩa |
+|---|---|---|
+| `DUP_NUMBERS` | 147 (27%) | số bài trùng trong cùng cuốn |
+| `HEAD_UNCOVERED` | 135 (25%) | mục lục bắt đầu quá muộn ⇒ **nửa đầu sách không bài nào phủ** |
+| `NO_TOC` | 125 (23%) | không bắt được mục lục |
+| `OK` | **122 (22%)** | **dùng được ngay** |
+| `NON_MONOTONIC` | 119 (22%) | số bài tăng mà trang không tăng ⇒ xương sống gãy |
+| `PARTIAL_COVERAGE` | 118 (22%) | mục lục phủ dưới 40% số trang cuốn sách |
+| `NO_PAGES` | 13 (2%) | có bài, không trang nào |
+
+`05-sgk-khoa-hoc-5` (ca C-008): `xươngSống=0.5 · phủ=0.39 · hởĐầu=0.56` — **56% đầu cuốn
+sách không có bài nào phủ**, đúng chỗ 5 thí nghiệm nằm (trang in 5–56). Đây là lý do đo
+được, không phải phỏng đoán.
+
+**Ý nghĩa**: 78% số cuốn cần sửa mục lục trước khi hoạt động gắn được vào bài. Đây là việc
+của **ingestion**, không phải của runtime — và nó chặn cổng kiến trúc (C-008).
 
 ### 2.2 Pack lớp 5 (bản đang chạy trên máy thật)
 
