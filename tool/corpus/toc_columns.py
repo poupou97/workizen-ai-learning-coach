@@ -143,10 +143,17 @@ def header_row(lines, y_tol=0.02):
     return best if {'bai', 'trang'} <= set(best) else {}
 
 
-def parse_table(path, y_tol=0.02):
-    """Đọc mục lục dạng BẢNG. Giữ cả `Tuần` làm phân cấp trên bài."""
+def parse_table(path, y_tol=0.02, hdr=None):
+    """Đọc mục lục dạng BẢNG. Giữ cả `Tuần` làm phân cấp trên bài.
+
+    `hdr` truyền vào = hình học cột THỪA KẾ từ trang mục lục trước của cùng
+    cuốn. Trang tiếp theo của một bảng dùng ĐÚNG bộ cột ấy, nhưng OCR hay nuốt
+    mất chữ tiêu đề (đo được: `03-sgk-tieng-viet-3-tap-mot` p007 chỉ đọc ra
+    «Nội dung» và «Trang»). Thừa kế là suy luận về BỐ CỤC, không phải đoán nội
+    dung — và nó phải đến từ chính cuốn đó, không phải mặc định toàn corpus.
+    """
     lines = json.load(open(path))['lines']
-    hdr = header_row(lines)
+    hdr = header_row(lines) or hdr
     if not hdr:
         return []
     x_bai, x_trang = hdr['bai'], hdr['trang']
@@ -210,12 +217,97 @@ def lessons_of(entries):
     return [e for e in entries if e['unitKind'] == kind]
 
 
-def parse_any(path):
+def parse_any(path, hdr=None):
     """Bảng trước, danh sách sau. Hai HỌ mục lục, một đường vào."""
-    t = parse_table(path)
+    t = parse_table(path, hdr=hdr)
     if t:
         return t, ['bảng']
     return parse(path)
+
+
+def parse_book(ocr_dir, toc_pages=()):
+    """Đọc TOÀN BỘ mục lục của một cuốn, kể cả trang NỐI TIẾP.
+
+    `structure_scan` nhận trang mục lục bằng «có chữ MỤC LỤC» hoặc «≥3 dòng
+    khớp regex bài». Trang nối tiếp của bảng KHÔNG có cả hai — nó chỉ lặp lại
+    dòng tiêu đề cột. Đo được: Tiếng Việt 3 tập một có mục lục ở trang 5–8 mà
+    chỉ trang 5 được nhận ⇒ mất 3/4 số bài. Đây là nguyên nhân chung của nhóm
+    cuốn tụt hạng, không phải chuyện riêng của cuốn nào.
+    """
+    import os
+    entries, hdr, used = [], None, []
+    for f in sorted(os.listdir(ocr_dir)):
+        if not f.endswith('.json'):
+            continue
+        path = os.path.join(ocr_dir, f)
+        try:
+            lines = json.load(open(path))['lines']
+        except Exception:
+            continue
+        page = json.load(open(path))['pdf_page']
+        h = header_row(lines)
+        if h:
+            hdr = h
+        is_toc = bool(h) or page in toc_pages
+        # trang NỐI TIẾP: không đọc được tiêu đề, nhưng cùng cuốn đã có bảng và
+        # trang này vẫn có cột số trang ở đúng chỗ ⇒ coi là phần tiếp của bảng.
+        # …nhưng chỉ khi trang này LIỀN KỀ khối mục lục đang đọc. Bảng tra
+        # cứu ở cuối sách cũng có cột số trang; thiếu điều kiện liền kề thì nó
+        # lọt vào (đo được: trang 152 của Tiếng Việt 3 tập một).
+        if (not is_toc and hdr and used and page - used[-1] <= 1 and any(
+                l['text'].strip().isdigit() and abs(l['x'] - hdr['trang']) < 0.04
+                for l in lines)):
+            is_toc = True
+        if not is_toc:
+            continue
+        used.append(page)
+        e, _ = parse_any(path, hdr=hdr)
+        entries += e
+    return entries, used
+
+
+def choose(old_lessons, new_lessons):
+    """Chọn giữa mục lục CŨ và MỚI — không bao giờ để bản mới làm xấu dữ liệu.
+
+    Founder (WAL-172): «Nếu parser family mới làm xấu dữ liệu cũ: fail closed /
+    preserve old evidence and investigate.»
+
+    «Xấu đi» phải hiểu là MẤT NỘI DUNG NEO ĐƯỢC VÀO TRANG, không phải «ít dòng
+    hơn». Bản mới thường ra ít dòng hơn vì thôi đếm chủ đề/tuần thành bài — đó
+    là sửa đúng, không phải mất mát. Đo được: `01-sgk-giao-duc-the-chat-1` từ
+    26 dòng/21 trùng xuống 21 dòng/16 trùng.
+
+    Nên: nhận bản mới khi số bài CÓ TRANG không giảm và số bài trùng không tăng.
+    Ngược lại ⇒ GIỮ BẢN CŨ, gắn cờ `REVIEW_REQUIRED` — cờ ấy là việc phải điều
+    tra, không phải thứ để im lặng bỏ qua.
+    """
+    def dup(ls):
+        nums = [l['number'] for l in ls]
+        return len(nums) - len(set(nums))
+
+    def usable(ls):
+        """Bài vừa CÓ TRANG vừa nằm trên XƯƠNG SỐNG đơn điệu của cuốn.
+
+        Đếm trần số bài có trang là sai: mục lục hai cột đọc lẫn vẫn cho ra
+        nhiều bài «có trang», nhưng trang ấy là trang của bài khác
+        (`05-sgk-khoa-hoc-5`: Bài 1 nhận trang 64 của Bài 17). Chỉ phần tự nhất
+        quán mới là nội dung dùng được.
+        """
+        pairs = [(l['number'], l['pageStart']) for l in ls if l.get('pageStart')]
+        if not pairs:
+            return 0
+        pairs.sort()
+        best = [1] * len(pairs)
+        for i in range(len(pairs)):
+            for j in range(i):
+                if pairs[j][1] <= pairs[i][1]:
+                    best[i] = max(best[i], best[j] + 1)
+        return max(best)
+
+    if (usable(new_lessons) >= usable(old_lessons)
+            and dup(new_lessons) <= dup(old_lessons)):
+        return new_lessons, 'NEW'
+    return old_lessons, 'REVIEW_REQUIRED'
 
 
 def main():
