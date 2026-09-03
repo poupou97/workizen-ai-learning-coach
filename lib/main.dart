@@ -216,6 +216,21 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (mounted) setState(_refreshMission);
   }
 
+  /// WAL-137 — sửa hồ sơ xong: thay TẠI CHỖ trong danh sách và nạp lại
+  /// mission + mục lục. `learnerId` không đổi nên mọi bằng chứng vẫn thuộc
+  /// đúng người — đổi lớp KHÔNG đụng sổ học (bất biến 2, WAL-95).
+  void _onProfileEdited(LearnerProfile saved) {
+    setState(() {
+      _profiles = [
+        for (final p in _profiles)
+          if (p.learnerId == saved.learnerId) saved else p
+      ];
+      if (_profile?.learnerId == saved.learnerId) _profile = saved;
+      _refreshMission();
+    });
+    _loadLessonIndex(); // lớp có thể đã đổi ⇒ mục lục khác
+  }
+
   /// WAL-143 — «Kiểm tra hiểu bài»: cùng engine, luật `AssistancePolicy
   /// .assessment` (không gợi ý, không chữa giữa chừng, mode assess).
   ///
@@ -365,7 +380,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                                   stories: _stories,
                                   profile: _profile,
                                   store: widget.store,
-                                  index: _lessonIndex))),
+                                  index: _lessonIndex,
+                                  profiles: _profiles,
+                                  onProfileChanged: _onProfileEdited))),
                         todayStory: _stories
                             .todayEvents(DateTime.now())
                             .firstOrNull,
