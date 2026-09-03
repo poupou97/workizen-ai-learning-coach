@@ -38,9 +38,6 @@ class SubjectHomeScreen extends StatelessWidget {
   final LessonIndex index;
   final String subject;
 
-  bool get _isToan => subject == 'Toán';
-  bool get _isTv => subject == 'Tiếng Việt';
-  bool get _isSu => subject == 'LS&ĐL';
   List<KhoaExperiment> get _experiments =>
       index.experimentsForSubject(subject);
 
@@ -107,27 +104,12 @@ class SubjectHomeScreen extends StatelessWidget {
   }
 
   Widget _lessonTile(BuildContext context, BookLessons b, LessonRef l) {
-    final exercises =
-        _isToan ? index.exercisesForToan(l.no) : const <CorpusExercise>[];
-    // WAL-113: TV mở bằng bài đọc thật; Sử mở bằng TƯ LIỆU gốc — cùng luật
-    // «chỉ mở khi có dữ liệu thật», không surface nào bịa nội dung.
-    final readings = _isTv
-        ? index.readingsForTv(b.sourceDocumentId, l.no)
-        : const <TvReading>[];
-    final writings = _isTv
-        ? index.writingsForTv(b.sourceDocumentId, l.no)
-        : const <TvWriting>[];
-    final sources = _isSu ? index.suSourcesFor(l.no) : const <SuSource>[];
-    final openable = exercises.isNotEmpty ||
-        readings.isNotEmpty ||
-        writings.isNotEmpty ||
-        sources.isNotEmpty;
-    final parts = <String>[
-      if (exercises.isNotEmpty) '${exercises.length} bài tập',
-      if (readings.isNotEmpty) '${readings.length} bài đọc',
-      if (writings.isNotEmpty) '${writings.length} đề viết',
-      if (sources.isNotEmpty) '${sources.length} tư liệu gốc',
-    ];
+    // ⭐ WAL-166: hỏi DỮ LIỆU «bài này có việc gì», không hỏi «môn tên gì».
+    // Luật cũ «chỉ mở khi có dữ liệu thật» giữ nguyên — chỉ bỏ ba nhánh cứng
+    // theo tên môn, thứ đang khoá Khoa học và Tiếng Anh ở ngoài.
+    final acts = index.activitiesFor(book: b.sourceDocumentId, lessonNo: l.no);
+    final openable = acts.isNotEmpty;
+    final parts = [for (final a in acts) _countLabel(a)];
     final subtitle = parts.isNotEmpty
         ? '${parts.join(' · ')} từ SGK — vào học ngay'
         : 'SAM đang học bài này — con chụp bài tập để học cùng nhé';
@@ -153,10 +135,7 @@ class SubjectHomeScreen extends StatelessWidget {
         trailing: openable
             ? const Icon(Icons.chevron_right, color: WalColors.primaryText)
             : null,
-          onTap: !openable
-              ? null
-              : () => _openLesson(
-                  context, l, exercises, readings, writings, sources),
+          onTap: !openable ? null : () => _openLesson(context, l, acts),
         ),
       ),
     );
@@ -310,24 +289,48 @@ class SubjectHomeScreen extends StatelessWidget {
   }
 
   /// Bài có NHIỀU hoạt động (đọc + viết…): cho trẻ CHỌN — không nuốt hoạt động.
+  /// Phụ đề đếm việc — một chỗ, vét cạn trên `sealed`.
+  static String _countLabel(LessonActivity a) => switch (a) {
+        ExerciseActivity(:final items) => '${items.length} bài tập',
+        ReadingActivity() => '1 bài đọc',
+        WritingActivity() => '1 đề viết',
+        SourceActivity() => '1 tư liệu gốc',
+        ExperimentActivity() => '1 thí nghiệm',
+      };
+
   void _openLesson(
-      BuildContext context,
-      LessonRef l,
-      List<CorpusExercise> exercises,
-      List<TvReading> readings,
-      List<TvWriting> writings,
-      List<SuSource> sources) {
+      BuildContext context, LessonRef l, List<LessonActivity> acts) {
+    // Vét cạn trên `sealed`: thêm loại việc mới mà quên nối UI ⇒ không biên
+    // dịch được, thay vì im lặng biến mất khỏi sheet.
     final actions = <(String, VoidCallback)>[
-      if (exercises.isNotEmpty)
-        ('🧮 Làm bài tập', () => _openExercise(context, l, exercises.first)),
-      if (exercises.isNotEmpty && _isToan)
+      for (final a in acts)
+        switch (a) {
+          ExerciseActivity(:final items) => (
+              '🧮 Làm bài tập',
+              () => _openExercise(context, l, items.first)
+            ),
+          ReadingActivity(:final reading) => (
+              '📖 Đọc bài',
+              () => _openReading(context, reading)
+            ),
+          WritingActivity(:final writing) => (
+              '✍️ Luyện viết',
+              () => _openWriting(context, writing)
+            ),
+          SourceActivity(:final source) => (
+              '📜 Đọc tư liệu gốc',
+              () => _openSource(context, source)
+            ),
+          ExperimentActivity(:final experiment) => (
+              '🔬 Làm thí nghiệm',
+              () => _openExperiment(context, experiment)
+            ),
+        },
+      // «Nguồn bài học» phụ thuộc CÓ chương trình cho hồ sơ này, không phụ
+      // thuộc môn tên gì — cùng luật fail-closed của curriculumFor.
+      if (acts.whereType<ExerciseActivity>().isNotEmpty &&
+          curriculumFor(profile) != null)
         ('📖 Nguồn bài học', () => _openSourceInfo(context)),
-      if (readings.isNotEmpty)
-        ('📖 Đọc bài', () => _openReading(context, readings.first)),
-      if (writings.isNotEmpty)
-        ('✍️ Luyện viết', () => _openWriting(context, writings.first)),
-      if (sources.isNotEmpty)
-        ('📜 Đọc tư liệu gốc', () => _openSource(context, sources.first)),
     ];
     if (actions.length == 1) {
       actions.single.$2();
