@@ -15,7 +15,7 @@ SourceAsset _src() => SourceAsset(
       pagePrinted: 10,
       bboxFrac: const [0.07, 0.05, 0.93, 0.9],
       extractionVersion: 'map-crop-v1',
-      caption: 'Hình 1. Bản đồ tự nhiên Việt Nam',
+      printedCaption: 'Hình 1. Bản đồ tự nhiên Việt Nam',
     );
 
 void main() {
@@ -27,7 +27,7 @@ void main() {
               pagePdf: 1,
               bboxFrac: const [0, 0, 1, 1],
               extractionVersion: 'v1',
-              caption: 'c',
+              printedCaption: 'c',
             ),
         throwsA(isA<AssertionError>()),
         reason: '⭐ crop từ SGK lọt vào vùng commit ⇒ vi phạm bản quyền im lặng');
@@ -42,7 +42,7 @@ void main() {
               pagePdf: 1,
               bboxFrac: const [0, 0, 1], // thiếu một số
               extractionVersion: 'v1',
-              caption: 'c',
+              printedCaption: 'c',
             ),
         throwsA(isA<AssertionError>()));
     expect(
@@ -52,7 +52,7 @@ void main() {
               pagePdf: 1,
               bboxFrac: const [0, 0, 1, 1],
               extractionVersion: '', // không biết cắt kiểu gì
-              caption: 'c',
+              printedCaption: 'c',
             ),
         throwsA(isA<AssertionError>()));
   });
@@ -75,7 +75,7 @@ void main() {
       pagePdf: 3,
       bboxFrac: const [0, 0, 1, 1],
       extractionVersion: 'v1',
-      caption: 'c',
+      printedCaption: 'c',
     );
     expect(sourceLineOf(a), 'sach-x');
     expect(sourceLineOf(a), isNot(contains('trang')));

@@ -7,6 +7,8 @@ library;
 
 import 'dart:convert';
 
+import '../../core/assets/learning_asset.dart';
+
 import 'package:flutter/services.dart' show rootBundle;
 
 class LessonRef {
@@ -152,6 +154,48 @@ class SuSource {
   final String? samGloss;
 }
 
+/// WAL-133 — hình SGK đã crop, mang ĐỦ provenance để dựng `SourceAsset`.
+/// Thiếu một mảnh nào là tầng parse loại thẳng — không có object nửa vời.
+class IndexedSourceAsset {
+  const IndexedSourceAsset(
+      {required this.subject,
+      required this.assetType,
+      required this.asset,
+      required this.sourceDocumentId,
+      required this.pagePdf,
+      required this.bboxFrac,
+      required this.extractionVersion,
+      this.pagePrinted,
+      this.printedCaption,
+      this.samGloss,
+      this.lesson});
+
+  final String subject;
+
+  /// MAP / FIGURE / EXPERIMENT / PORTRAIT… — dùng để xếp chỗ, không để claim.
+  final String assetType;
+  final String asset;
+  final String sourceDocumentId;
+  final int pagePdf;
+  final int? pagePrinted;
+  final List<double> bboxFrac;
+  final String extractionVersion;
+  final String? printedCaption;
+  final String? samGloss;
+  final int? lesson;
+
+  SourceAsset toAsset() => SourceAsset(
+        path: 'assets/pack/$asset',
+        sourceDocumentId: sourceDocumentId,
+        pagePdf: pagePdf,
+        pagePrinted: pagePrinted,
+        bboxFrac: bboxFrac,
+        extractionVersion: extractionVersion,
+        printedCaption: printedCaption,
+        samGloss: samGloss,
+      );
+}
+
 class LessonIndex {
   const LessonIndex(
       {required this.grade,
@@ -161,7 +205,8 @@ class LessonIndex {
       this.tvWritings = const [],
       this.suSources = const [],
       this.khoaExperiments = const [],
-      this.diaMaps = const []});
+      this.diaMaps = const [],
+      this.sourceAssets = const []});
 
   final int grade;
   final Map<String, List<BookLessons>> subjects;
@@ -171,6 +216,7 @@ class LessonIndex {
   final List<SuSource> suSources;
   final List<KhoaExperiment> khoaExperiments;
   final List<DiaMap> diaMaps;
+  final List<IndexedSourceAsset> sourceAssets;
 
   List<CorpusExercise> exercisesForToan(int lessonNo) =>
       toanExercises[lessonNo] ?? const [];
@@ -190,6 +236,9 @@ class LessonIndex {
 
   List<DiaMap> mapsForSubject(String subject) =>
       [for (final m in diaMaps) if (m.subject == subject) m];
+
+  List<IndexedSourceAsset> sourceAssetsFor(String subject) =>
+      [for (final a in sourceAssets) if (a.subject == subject) a];
 
   List<KhoaExperiment> experimentsForSubject(String subject) =>
       [for (final e in khoaExperiments) if (e.subject == subject) e];
@@ -350,6 +399,38 @@ class LessonIndex {
             extractionVersion: m['extractionVersion'] as String));
       }
     }
+    final sa = <IndexedSourceAsset>[];
+    final aj = j['sourceAssets'];
+    if (aj is List) {
+      for (final a in aj.whereType<Map>()) {
+        final bbox = [
+          for (final v in (a['bboxFrac'] as List? ?? const []))
+            if (v is num) v.toDouble()
+        ];
+        // Thiếu bất kỳ mảnh provenance nào ⇒ KHÔNG dựng được SourceAsset,
+        // nên cũng không được phép nằm trong index.
+        if (a['asset'] is! String ||
+            a['subject'] is! String ||
+            a['sourceDocumentId'] is! String ||
+            a['pagePdf'] is! num ||
+            a['extractionVersion'] is! String ||
+            bbox.length != 4) {
+          continue;
+        }
+        sa.add(IndexedSourceAsset(
+            subject: a['subject'] as String,
+            assetType: '${a['assetType'] ?? 'FIGURE'}',
+            asset: a['asset'] as String,
+            sourceDocumentId: a['sourceDocumentId'] as String,
+            pagePdf: (a['pagePdf'] as num).toInt(),
+            pagePrinted: (a['pagePrinted'] as num?)?.toInt(),
+            bboxFrac: bbox,
+            extractionVersion: a['extractionVersion'] as String,
+            printedCaption: a['printedCaption'] as String?,
+            samGloss: a['samGloss'] as String?,
+            lesson: (a['lesson'] as num?)?.toInt()));
+      }
+    }
     return LessonIndex(
         grade: grade,
         subjects: subjects,
@@ -358,7 +439,8 @@ class LessonIndex {
         tvWritings: tw,
         suSources: su,
         khoaExperiments: ke,
-        diaMaps: dm);
+        diaMaps: dm,
+        sourceAssets: sa);
   }
 
   /// `null` khi máy này chưa build asset (poc-out chưa có) — hợp lệ, nói thật.
