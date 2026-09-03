@@ -46,6 +46,39 @@ FLUTTER_CHANNEL: "main"
 «ổn định hơn» — stable có thể mang Dart cũ hơn và `flutter pub get` gãy ngay.
 Khi nâng toolchain ở máy, sửa pin này cùng lúc.
 
+## Cổng merge (từ 2026-09-03, Founder D1)
+
+`main` có branch protection: check **«Analyze & Test» phải PASS**, nhánh phải
+cập nhật (strict), **cấm force-push**, **cấm xoá nhánh**. Admin (Founder) vẫn
+bypass được — đó là chủ ý, không phải lỗ hổng.
+
+**LOCAL GREEN ≠ MERGEABLE.** Máy dev có sẵn corpus, asset đã crop, `build/`
+còn cache — nó xanh vì môi trường của nó, không phải vì mã đúng. Chỉ môi trường
+sạch mới nói được điều đó.
+
+Hệ quả cho cách làm việc: đi qua **nhánh + PR**, chờ CI, rồi mới merge. Đẩy
+thẳng lên `main` bằng quyền admin thì vượt cổng — làm được, nhưng làm là tự bỏ
+đúng thứ vừa dựng lên.
+
+Lưu ý cái bẫy đã tránh: `pull_request` KHÔNG có `paths-ignore`, vì GitHub coi
+«job không chạy» khác «job đã pass» — PR chỉ sửa tài liệu sẽ treo PENDING vĩnh
+viễn nếu bị lọc đường dẫn.
+
+## Tái hiện lỗi môi trường: dùng clone sạch
+
+Khi nghi một lỗi đến từ asset/gói/môi trường, **đừng tin `build/` ở máy**.
+Bằng chứng từ WAL-163: tạm `mv` file PNG đi rồi chạy lại — vẫn XANH, vì bundle
+asset trong `build/` còn bản cache. Suýt kết luận nhầm là «lỗi chỉ có ở CI».
+
+Cách đúng:
+
+```
+git clone <repo> /tmp/repro && cd /tmp/repro
+git checkout <nhánh> && flutter pub get && flutter test
+```
+
+Clone sạch không có file gitignore nào — đúng thứ CI và mọi máy khác nhìn thấy.
+
 ## Khi CI đỏ
 
 Sửa code, đừng nới ngưỡng. Không thêm `--no-fatal-warnings`, không `continue-on-error`,
