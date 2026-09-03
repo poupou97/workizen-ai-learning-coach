@@ -22,6 +22,7 @@ import '../shell/compose_lite_screen.dart';
 import '../shell/reader_screen.dart';
 import '../shell/session_recorder.dart';
 import 'lesson_index.dart';
+import 'source_gallery_screen.dart';
 
 class SubjectHomeScreen extends StatelessWidget {
   const SubjectHomeScreen({
@@ -64,6 +65,11 @@ class SubjectHomeScreen extends StatelessWidget {
             if (_experiments.isNotEmpty) _experimentsTile(context),
             if (index.mapsForSubject(subject).isNotEmpty)
               _mapsTile(context),
+            // WAL-133: hình SGK đã crop của MÔN NÀY — chỉ hiện khi có asset
+            // thật kèm đủ provenance (tầng parse đã loại thứ không chứng minh
+            // được), nên tile này không bao giờ mở ra một màn rỗng.
+            if (index.sourceAssetsFor(subject).isNotEmpty)
+              _sourceAssetsTile(context),
             for (final b in books) ...[
               if (b.volume != null || books.length > 1)
                 Padding(
@@ -221,6 +227,32 @@ class SubjectHomeScreen extends StatelessWidget {
               ]),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _sourceAssetsTile(BuildContext context) {
+    final assets = index.sourceAssetsFor(subject);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: WalSpacing.sm),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+        child: ListTile(
+          title: const Text('🖼️ Hình trong sách',
+              style: TextStyle(
+                  fontSize: WalType.body,
+                  fontWeight: FontWeight.w600,
+                  color: WalColors.ink)),
+          subtitle: Text('${assets.length} hình chụp từ SGK — phóng to xem được',
+              style: const TextStyle(
+                  fontSize: WalType.secondary, color: WalColors.inkSoft)),
+          trailing:
+              const Icon(Icons.chevron_right, color: WalColors.primaryText),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) =>
+                  SourceGalleryScreen(subject: subject, assets: assets))),
         ),
       ),
     );

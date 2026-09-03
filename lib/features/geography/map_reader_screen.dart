@@ -111,7 +111,7 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
                                   pagePrinted: m.page,
                                   bboxFrac: m.bboxFrac,
                                   extractionVersion: m.extractionVersion,
-                                  caption: m.caption,
+                                  printedCaption: m.caption,
                                 ),
                                 fit: BoxFit.contain),
                           ),

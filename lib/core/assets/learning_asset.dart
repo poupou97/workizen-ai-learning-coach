@@ -33,7 +33,8 @@ final class SourceAsset extends LearningAsset {
     required this.pagePdf,
     required this.bboxFrac,
     required this.extractionVersion,
-    required this.caption,
+    this.printedCaption,
+    this.samGloss,
     this.pagePrinted,
   })  : assert(sourceDocumentId != '', 'crop không nguồn thì không dùng được'),
         assert(bboxFrac.length == 4, 'khung cắt phải đủ 4 số'),
@@ -54,8 +55,19 @@ final class SourceAsset extends LearningAsset {
   final List<double> bboxFrac;
   final String extractionVersion;
 
-  /// Caption IN trong sách, nguyên văn.
-  final String caption;
+  /// Caption IN trong sách, NGUYÊN VĂN — `null` khi sách không in caption nào.
+  ///
+  /// WAL-133 slice 2 phát hiện: hình phân số SGK Toán 5 tr.22 KHÔNG có caption
+  /// in. Bản đầu bắt buộc trường này, nên muốn dùng thì phải tự viết một câu
+  /// rồi đặt vào ô «nguyên văn sách» — đúng kiểu nói dối mà cả mô hình sinh ra
+  /// để chặn. Thà để `null` và UI im, còn hơn có chữ mà chữ ấy không phải của
+  /// sách.
+  final String? printedCaption;
+
+  /// Lời của SAM về hình này (curated, systemDerived). UI BẮT BUỘC dán nhãn
+  /// riêng — không bao giờ trộn vào chỗ của caption sách. Cùng luật với
+  /// `SuSource.samGloss`.
+  final String? samGloss;
 }
 
 /// Hình SAM tự dựng. `what` là điều BẮT BUỘC nói ra — UI không có cách nào

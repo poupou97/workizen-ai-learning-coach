@@ -232,7 +232,7 @@ DIA_MAPS = [
 # Registry crop giữ pagePdf/bboxFrac/extraction; thiếu bất kỳ thứ nào ⇒ BỎ bài
 # đó, vì lúc ấy ta không còn cắt lại/kiểm chứng được và không được quyền nói
 # với trẻ rằng «đây là hình trong sách».
-_REG = 'poc-out/ui-assets/map-assets.json'
+_REG = 'poc-out/ui-assets/source-assets.json'  # WAL-133: registry CHUNG mọi môn
 _reg = {}
 if os.path.exists(_REG):
     for a in json.load(open(_REG)).get('assets', []):
@@ -249,6 +249,26 @@ for m in DIA_MAPS:
     dia_maps.append(dict(m, pagePdf=r['pagePdf'], bboxFrac=r['bboxFrac'],
                          extractionVersion=r['extraction']))
 
+# ---- sourceAssets (WAL-133): hình SGK đã crop, provenance đầy đủ ----------
+# Chỉ nhận asset CÓ MẶT trên máy này và ĐỦ provenance; thiếu ⇒ bỏ, không để UI
+# hứa một hình không dựng lại được.
+source_assets = []
+for a in _reg.values():
+    if not os.path.exists(f"assets/pack/{a.get('asset','')}"):
+        continue
+    if a.get('pagePdf') is None or len(a.get('bboxFrac') or []) != 4 \
+            or not a.get('extraction') or not a.get('subject'):
+        print(f"  ⚠️ BỎ asset {a.get('asset')}: thiếu provenance")
+        continue
+    source_assets.append(dict(
+        asset=a['asset'], subject=a['subject'],
+        assetType=a.get('assetType', 'FIGURE'),
+        sourceDocumentId=a.get('sourceDocumentId', ''),
+        pagePdf=a['pagePdf'], pagePrinted=a.get('pagePrinted'),
+        bboxFrac=a['bboxFrac'], extractionVersion=a['extraction'],
+        printedCaption=a.get('printedCaption'), samGloss=a.get('samGloss'),
+        lesson=a.get('lesson')))
+
 for v in subjects.values():
     v.sort(key=lambda b: (b['volume'] or '9', b['sourceDocumentId']))
 out = dict(grade=GRADE, version='lesson-index-v2',
@@ -258,7 +278,8 @@ out = dict(grade=GRADE, version='lesson-index-v2',
            tvWritings=tv_writings,
            suSources=su_sources,
            khoaExperiments=khoa_experiments,
-           diaMaps=dia_maps)
+           diaMaps=dia_maps,
+           sourceAssets=source_assets)
 os.makedirs('assets/pack', exist_ok=True)
 path = f'assets/pack/lesson-index-g{GRADE}.json'
 json.dump(out, open(path, 'w'), ensure_ascii=False)
@@ -267,7 +288,9 @@ print(f'{path}: {len(subjects)} môn, {n_les} bài, exToán '
       f'{sum(len(v) for v in ex_by_lesson.values())}, '
       f'tvReadings {len(tv_readings)}, tvWritings {len(tv_writings)}, '
       f'suSources {len(su_sources)}, khoaExperiments {len(khoa_experiments)}, '
-      f'diaMaps {len(dia_maps)}')
+      f'diaMaps {len(dia_maps)}, '
+      f'sourceAssets {len(source_assets)} '
+      f'({len({a["subject"] for a in source_assets})} môn)')
 for r in tv_readings[:3]:
     print('  TV:', r['book'][-7:], 'L', r['lesson'], 'p', r['page'],
           len(r['questions']), 'câu hỏi —', r['passage'][:50])
