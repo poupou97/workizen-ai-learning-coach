@@ -50,6 +50,14 @@ theo thứ tự JSON ⇒ bài có badge bị chôn dưới ~200 dòng — sửa 
 (Nokia rút lúc build xong) — việc đầu tiên khi cắm lại. Nợ: badge còn gắn slice cứng Toán-B6,
 tổng quát hoá khi curriculum mở môn. Deferred: 121-124, 137-140/143-146 UI backlog, ALA 155-158, MA 159-162.
 
+**WAL-163 ✅ CI GATE** (2026-09-03, blocker billing tháo): `.github/workflows/ci.yml` — analyze +
+toàn suite trên PR/main, hẹp có chủ ý (không build/ký/deploy/secrets). Run đầu 33708714147 ĐỎ vì
+lỗi THẬT: map_reader_test phụ thuộc crop PNG chỉ có ở máy tôi (gitignore WAL-43) — «xanh» từ
+WAL-144 mà không ai biết. Sửa: tiêm bundle test + assert tên asset (chặt hơn bản cũ) + errorBuilder
+nói thật khi thiếu crop. Run 33709174817/33709383804 XANH, main = 32c0592. Bài học đã thành quy
+trình: xác minh test trong `git clone` sạch, vì file gitignore làm test xanh giả ở máy dev.
+⚠️ Founder quyết: bật branch protection thì «vỡ là không merge được» — hiện chưa bật.
+
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
 
