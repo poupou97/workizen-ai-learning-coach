@@ -67,7 +67,26 @@ không parse được ⇒ không dám chấm, kết quả không điểm-số, h
 ⚠️ **Founder quyết (A/B)**: con vừa sai một câu mà Hôm nay vẫn «nghỉ ngơi nhé» — giữ nguyên
 (không nag) hay cho lỗi MỚI nâng ưu tiên sớm hơn lịch 7 ngày? Không tự đổi chính sách ôn tập.
 
-**WAL-133 🔄 slice 1** (07d1459, CI xanh): `sealed LearningAsset` 3 loại — `SourceAsset` không dựng
+**WAL-133 ✅ DONE slice 1+2** (7b3ea37, CI xanh): pipeline `SourceAsset` chạy thật ở **3 môn** —
+LS&ĐL bản đồ tr.10, Toán hình phân số tr.22, Khoa học ảnh thí nghiệm «Hình 5» tr.16 (walk WiFi
+n78-n80). Công cụ: `preview_page_grid.py` (lưới 0.1 chấm bbox bằng mắt) + `crop_source_assets.py`
+(một registry chung). ⭐ Cắt tới môn THỨ HAI mới lộ lỗ hổng model: hình Toán không có caption in
+trong sách, mà model slice 1 bắt buộc `caption` ⇒ phải bịa lời sách. Sửa: `printedCaption` nullable
++ `samGloss` có nhãn «SAM NÓI THÊM» riêng. ⚠️ CI bắt lỗi «test đo tủ đồ của tôi» LẦN THỨ HAI (đếm
+chữ lệch vì máy có PNG) ⇒ dựng `test/support/pack_bundle.dart` (packHost/missingPackHost) để sửa
+bằng cấu trúc chứ không bằng trí nhớ. Cố ý để lại: `SamGeneratedAsset` chưa có chỗ dùng thật.
+
+**WAL-163 ✅ D1 THI HÀNH** (e987399): branch protection `main` — check «Analyze & Test» bắt buộc,
+strict, cấm force-push/xoá nhánh, giữ admin bypass. Bật xong lộ ngay bẫy `paths-ignore` ×
+`required check` (PR tài liệu treo PENDING vĩnh viễn) — đã bỏ lọc ở `pull_request`. Quy trình từ
+nay: nhánh → PR → CI → merge. LOCAL GREEN ≠ MERGEABLE.
+
+**WAL-164 📋 MỚI** (Founder D2): Review Priority Resolver — câu SAI sinh BẰNG CHỨNG, không tự động
+thành báo động. Bảng luật: slip đơn lẻ giữ normal · tự-làm-sai + mapping tin cậy ⇒ ôn 1–3 ngày ·
+hiểu sai LẶP LẠI ⇒ nâng · tiền đề yếu cho bài đang học ⇒ được vào Today · mapping không chắc ⇒
+fail conservative · đúng-có-trợ-giúp ⇒ ôn sớm hơn nhưng KHÔNG phải failure. Hàng đợi: sau 137/140/145.
+
+**WAL-133 (cũ) slice 1** (07d1459, CI xanh): `sealed LearningAsset` 3 loại — `SourceAsset` không dựng
 được nếu thiếu nguồn/trang/bbox/extractionVersion, và assert luôn «phải nằm dưới assets/pack/»
 (WAL-43). Hình SAM vẽ KHÔNG mượn được dòng nguồn; nhãn «Minh hoạ của SAM» không tắt được bằng tham
 số. Fallback theo loại (ảnh nguồn NÓI, trang trí IM). Builder+DiaMap tải provenance crop từ
