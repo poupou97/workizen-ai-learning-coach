@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
 import 'package:learning_coach/features/subjects/source_gallery_screen.dart';
 
+import '../../support/pack_bundle.dart';
+
 const _withCaption = IndexedSourceAsset(
   subject: 'Khoa học',
   assetType: 'EXPERIMENT',
@@ -35,9 +37,8 @@ const _noCaptionButGloss = IndexedSourceAsset(
 void main() {
   testWidgets('caption IN trong sách ⇒ hiện; dòng nguồn có trang in',
       (t) async {
-    await t.pumpWidget(const MaterialApp(
-        home: SourceGalleryScreen(
-            subject: 'Khoa học', assets: [_withCaption])));
+    await t.pumpWidget(packHost(
+        const SourceGalleryScreen(subject: 'Khoa học', assets: [_withCaption])));
     await t.pump();
     expect(find.text('Hình 5'), findsOneWidget);
     expect(find.textContaining('05-sgk-khoa-hoc-5 · trang 16'), findsOneWidget);
@@ -47,9 +48,8 @@ void main() {
 
   testWidgets('⭐ sách KHÔNG in caption ⇒ KHÔNG bịa; lời SAM PHẢI có nhãn',
       (t) async {
-    await t.pumpWidget(const MaterialApp(
-        home: SourceGalleryScreen(
-            subject: 'Toán', assets: [_noCaptionButGloss])));
+    await t.pumpWidget(packHost(const SourceGalleryScreen(
+        subject: 'Toán', assets: [_noCaptionButGloss])));
     await t.pump();
     // ⭐ Lời SAM chỉ được xuất hiện KÈM nhãn — không bao giờ đứng trần như
     // thể sách nói.
@@ -71,9 +71,8 @@ void main() {
 
   testWidgets('⭐ màn nói rõ đây là hình CHỤP TỪ SÁCH, không phải SAM vẽ',
       (t) async {
-    await t.pumpWidget(const MaterialApp(
-        home: SourceGalleryScreen(
-            subject: 'Toán', assets: [_noCaptionButGloss])));
+    await t.pumpWidget(packHost(const SourceGalleryScreen(
+        subject: 'Toán', assets: [_noCaptionButGloss])));
     await t.pump();
     expect(find.textContaining('không phải hình SAM vẽ'), findsOneWidget);
   });
