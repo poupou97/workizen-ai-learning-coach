@@ -104,6 +104,88 @@ def parse(path, y_tol=0.013):
     return entries, pcols
 
 
+# ---------------------------------------------------------------------------
+# HỌ MỤC LỤC THỨ HAI: BẢNG có dòng tiêu đề cột
+#
+# Tiếng Việt 3/4/5 KHÔNG viết «Bài 1. …» mà kẻ bảng:
+#     Tuần | Bài | Nội dung              | Trang
+#          |     | NHỮNG TRẢI NGHIỆM…    |   9
+#       1  |  1  | Đọc: Ngày gặp lại     |  10
+#          |     | Nói và nghe: Mùa hè…  |  11
+# Số bài là CHỮ SỐ TRẦN nằm trong cột riêng; chữ «Bài» chỉ xuất hiện MỘT lần ở
+# dòng tiêu đề. Regex đòi từ khoá sẽ ra 0 mục — đúng 33 cuốn tụt hạng khi đo.
+#
+# Đây cũng là chỗ lộ ra PHÂN CẤP THẬT mà Founder yêu cầu giữ:
+# Sách → Tuần → Bài. Số bài LẶP LẠI qua từng tuần, nên số bài một mình không
+# bao giờ đủ làm định danh (khớp WAL-170).
+_HEADERS = {'tuan': 'tuan', 'bai': 'bai', 'noidung': 'noiDung', 'trang': 'trang'}
+
+
+def _slug(t):
+    k = unicodedata.normalize('NFD', t.strip().lower())
+    k = ''.join(c for c in k if not unicodedata.combining(c))
+    return ''.join(c for c in k.replace('đ', 'd') if c.isalpha())
+
+
+def header_row(lines, y_tol=0.02):
+    """Tìm dòng tiêu đề cột. Trả về {tên cột: x}, rỗng nếu không phải bảng."""
+    cands = [l for l in lines if _slug(l['text']) in _HEADERS]
+    if len(cands) < 3:
+        return {}
+    # nhóm theo y — tiêu đề cột nằm cùng một hàng
+    cands.sort(key=lambda l: l['y'])
+    best = {}
+    for anchor in cands:
+        row = {_HEADERS[_slug(l['text'])]: l['x'] for l in cands
+               if abs(l['y'] - anchor['y']) < y_tol}
+        if len(row) > len(best):
+            best = row
+    return best if {'bai', 'trang'} <= set(best) else {}
+
+
+def parse_table(path, y_tol=0.02):
+    """Đọc mục lục dạng BẢNG. Giữ cả `Tuần` làm phân cấp trên bài."""
+    lines = json.load(open(path))['lines']
+    hdr = header_row(lines)
+    if not hdr:
+        return []
+    x_bai, x_trang = hdr['bai'], hdr['trang']
+    x_tuan = hdr.get('tuan')
+    x_noi = hdr.get('noiDung', (x_bai + x_trang) / 2)
+    body = sorted(lines, key=lambda l: l['y'])
+
+    def digits_near(x, tol=0.06):
+        return [l for l in body if l['text'].strip().isdigit()
+                and len(l['text'].strip()) <= 3 and abs(l['x'] - x) < tol]
+
+    out, week = [], None
+    for l in body:
+        if x_tuan is not None and l in digits_near(x_tuan, 0.05):
+            week = int(l['text'])
+            continue
+        if l not in digits_near(x_bai, 0.05):
+            continue
+        n = int(l['text'])
+        # Tiêu đề cột «Nội dung» được canh GIỮA cột, còn chữ thì canh TRÁI —
+        # lấy theo x của tiêu đề sẽ trượt hết. Nhận mọi dòng chữ nằm giữa cột
+        # số bài và cột số trang.
+        # ⭐ Một «Bài» Tiếng Việt là KHỐI NHIỀU HOẠT ĐỘNG (Đọc / Nói và nghe /
+        # Viết) — cột nội dung liệt kê từng hoạt động, không phải một tên bài.
+        # Lấy dòng TRÊN CÙNG của khối làm tên; các dòng còn lại là hoạt động
+        # bên trong, cần mô hình riêng (ghi ở Living Research).
+        block = [q for q in body
+                 if abs(q['y'] - l['y']) < y_tol * 1.5
+                 and x_bai + 0.02 < q['x'] < x_trang - 0.02
+                 and not q['text'].strip().isdigit()]
+        block.sort(key=lambda q: q['y'])
+        title = block[0]['text'].strip() if block else None
+        page = next((int(q['text']) for q in digits_near(x_trang)
+                     if abs(q['y'] - l['y']) < y_tol), None)
+        out.append({'unitKind': 'bai', 'number': n, 'title': title,
+                    'pageStart': page, 'week': week})
+    return out
+
+
 def lesson_unit_kind(entries):
     """Đơn vị BÀI của một cuốn là loại nào?
 
@@ -128,10 +210,19 @@ def lessons_of(entries):
     return [e for e in entries if e['unitKind'] == kind]
 
 
+def parse_any(path):
+    """Bảng trước, danh sách sau. Hai HỌ mục lục, một đường vào."""
+    t = parse_table(path)
+    if t:
+        return t, ['bảng']
+    return parse(path)
+
+
 def main():
     path = sys.argv[1]
-    entries, pcols = parse(path)
-    print(f'cột số trang phát hiện được: {[round(p, 2) for p in pcols]}')
+    entries, pcols = parse_any(path)
+    print('bố cục: ' + (', '.join(pcols) if pcols and isinstance(pcols[0], str)
+                        else f'cột số trang {[round(p, 2) for p in pcols]}'))
     print(f'{len(entries)} mục:')
     for e in entries:
         print(f"  {e['unitKind']:9s} {e['number']:3d} · trang "
