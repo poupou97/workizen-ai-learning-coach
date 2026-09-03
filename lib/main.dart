@@ -31,6 +31,7 @@ import 'core/knowledge/provenance.dart';
 import 'core/knowledge/slice_curriculum.dart' show curriculumFor;
 import 'features/learning_session/slice_flow.dart';
 import 'features/assessment/assessment_screen.dart';
+import 'features/assessment/learner_confirm.dart';
 import 'features/assessment/assessment_result_screen.dart';
 import 'features/shell/session_recorder.dart';
 import 'core/store/learning_session.dart' show SessionMode, SessionTrigger;
@@ -239,6 +240,18 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
             'Con chưa học dạng này nên SAM chưa kiểm tra — mình học trước đã '
             'nhé, rồi kiểm tra mới nói lên điều gì.');
       }
+      return;
+    }
+    if (!context.mounted) return;
+    // ⭐ Máy của chung: hỏi cho chắc TRƯỚC khi sinh bằng chứng độc lập.
+    final who = await confirmLearner(context, profiles: _profiles, active: p);
+    if (who == null) return; // đóng sheet = đổi ý, không ghi gì
+    if (who.learnerId != p.learnerId) {
+      _selectProfile(who.learnerId);
+      if (!context.mounted) return;
+      _honest(context,
+          'SAM đã chuyển sang sổ học của ${who.displayName} — con bấm «Kiểm '
+          'tra hiểu bài» lại một lần nữa nhé.');
       return;
     }
     if (!context.mounted) return;
