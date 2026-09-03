@@ -1,0 +1,96 @@
+# CI cho «Học cùng SAM» (WAL-163).
+#
+# PHẠM VI CỐ Ý HẸP: chỉ static analysis + unit/widget test.
+# KHÔNG build APK/IPA, KHÔNG ký, KHÔNG deploy, KHÔNG secrets, KHÔNG matrix OS.
+#
+# VÌ SAO CỔNG NÀY ĐÁNG CÓ, dù suite vẫn chạy được ở máy:
+# suite này chở các LUẬT BẤT BIẾN của sản phẩm, thứ vỡ ÂM THẦM chứ không
+# crash — không %/điểm/XP/streak trong UI của trẻ, không SDK quảng cáo trong
+# pubspec, PAYMENT ≠ LEARNING TRUTH, không bịa trích dẫn SGK, corpus không lọt
+# vào repo. Ở máy thì «nhớ chạy»; ở đây thì không merge được nếu vỡ.
+#
+# Lịch sử: repo private của tài khoản này từng KHÔNG chạy được Actions —
+# job chết ở giây thứ 3, không step nào, annotation «The job was not started
+# because recent account payments have failed or your spending limit needs to
+# be increased». Đó là chặn thanh toán, không phải hết phút (repo public cùng
+# tài khoản vẫn xanh). Blocker tháo ngày 2026-09-03.
+name: CI
+
+# Chạy ở hai chỗ có giá trị thật: `main` (thứ sẽ phát hành) và Pull Request
+# (thứ cần review). Nhánh chưa mở PR không chạy — mọi lần merge đều đã qua
+# analyze + toàn bộ test ở máy, nên đây là bỏ một lớp TRÙNG, không bỏ kiểm chứng.
+#
+# `paths-ignore` bị LẶP LẠI có chủ ý: GitHub Actions KHÔNG hỗ trợ anchor/alias
+# của YAML (`&x` / `*x`) — viết gọn thì file vẫn hợp lệ nhưng GitHub từ chối
+# lúc chạy. Sửa hai chỗ vẫn hơn hỏng im lặng.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+
+# Push liên tiếp cùng một ref ⇒ huỷ run cũ, đỡ phút runner.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # PIN theo đúng toolchain đang dùng ở máy (2026-09-03):
+  #   $ flutter --version
+  #   Flutter 3.48.0-0.3.pre • channel main • Dart 3.13.0
+  # pubspec yêu cầu `sdk: ^3.13.0-201.0.dev` nên KHÔNG hạ về stable tuỳ tiện:
+  # stable có thể mang Dart cũ hơn → `flutter pub get` gãy ngay.
+  FLUTTER_VERSION: "3.48.0-0.3.pre"
+  FLUTTER_CHANNEL: "main"
+
+jobs:
+  analyze-test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # `sqlite3` (kho «Kho khám phá của SAM») dlopen "libsqlite3.so" lúc chạy;
+      # ubuntu runner chỉ có sẵn libsqlite3.so.0, thiếu symlink .so →
+      # test stories/discovery sẽ đỏ hàng loạt nếu không cài.
+      - name: Cài native sqlite3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsqlite3-dev
+
+      - name: Setup Flutter (pinned)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Cache pub-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pubcache-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pubcache-
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      # NGƯỠNG MẶC ĐỊNH — không cờ nới lỏng nào. Local 2026-09-03:
+      # «No issues found!». Nếu bước này đỏ vì lint: SỬA CODE, đừng thêm cờ.
+      - name: flutter analyze
+        run: flutter analyze
+
+      # Toàn bộ suite. Test cần corpus thật (lesson-index, pack bench) tự
+      # markTestSkipped khi thiếu asset — corpus KHÔNG BAO GIỜ vào repo (WAL-43),
+      # nên runner không có nó là đúng thiết kế, không phải thiếu sót.
+      - name: flutter test
+        run: flutter test
