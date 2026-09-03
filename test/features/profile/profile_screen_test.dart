@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
@@ -14,6 +13,7 @@ import 'package:learning_coach/core/student/mastery.dart';
 import 'package:learning_coach/features/learning_session/slice_flow.dart'
     show masteryFromStore;
 import 'package:learning_coach/features/profile/profile_screen.dart';
+import '../../support/curriculum.dart';
 
 const _na = LearnerProfile(learnerId: 'na', displayName: 'Na', grade: 5);
 const _bi = LearnerProfile(learnerId: 'bi', displayName: 'Bi', grade: 3);
@@ -53,7 +53,7 @@ void main() {
     final store = JsonlLearnerStore();
     await store.saveProfile(_na);
     await _seed(store, _na, [_ev('e0', correct: true), _ev('e1', correct: true)]);
-    final before = await masteryFromStore(store, 'na', curriculumFor(_na)!);
+    final before = await masteryFromStore(store, 'na', toan5Bai6);
 
     LearnerProfile? saved;
     await t.pumpWidget(MaterialApp(
@@ -66,7 +66,7 @@ void main() {
 
     expect(saved!.grade, 4);
     expect(saved!.learnerId, 'na', reason: '⭐ đổi lớp KHÔNG được đổi danh tính');
-    final after = await masteryFromStore(store, 'na', curriculumFor(_na)!);
+    final after = await masteryFromStore(store, 'na', toan5Bai6);
     expect(after.cases.length, before.cases.length);
     for (final k in before.cases.keys) {
       expect(after.cases[k]!.independentCorrect,
@@ -109,7 +109,7 @@ void main() {
     await _seed(store, _na, [_ev('a0', correct: true), _ev('a1', correct: true)]);
     await _seed(store, _bi, [_ev('b0', correct: false)]);
 
-    final c = curriculumFor(_na)!;
+    final c = toan5Bai6;
     Future<ConceptMastery> m(String id) => masteryFromStore(store, id, c);
 
     final naFirst = await m('na');

@@ -11,7 +11,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
 import 'package:learning_coach/core/store/assistance_policy.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
@@ -25,6 +24,7 @@ import 'package:learning_coach/features/learning_session/slice_flow.dart'
     show masteryFromStore;
 import 'package:learning_coach/features/shell/session_recorder.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
+import '../../support/curriculum.dart';
 
 const _p = LearnerProfile(learnerId: 'l', displayName: 'Na', grade: 5);
 
@@ -135,7 +135,7 @@ void main() {
         events: ev,
         trigger: SessionTrigger.assessment,
         mode: SessionMode.assess);
-    final c = curriculumFor(_p)!;
+    final c = toan5Bai6;
     final m = await masteryFromStore(store, _p.learnerId, c);
     final s = ConceptSummary.of(m,
         knownCaseIds: {for (final k in c.cases) k.id},

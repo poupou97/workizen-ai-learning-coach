@@ -194,7 +194,8 @@ Future<MissionData> buildMissionFromStore({
   DateTime? now,
 }) async {
   final t = now ?? DateTime.now();
-  final c = curriculumFor(profile);
+  final all = curriculaForLearner(profile);
+  final c = all.length == 1 ? all.single : null;
   if (c == null) {
     final stage = LearningStage(
       grade: profile.grade,

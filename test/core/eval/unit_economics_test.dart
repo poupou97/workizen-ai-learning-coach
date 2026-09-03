@@ -11,11 +11,10 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/adaptive/adaptive_engine.dart';
 import 'package:learning_coach/core/curriculum/pedagogical_boundary.dart';
-import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
-import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/student/evidence_weighting.dart';
 import 'package:learning_coach/core/student/mastery.dart';
 import 'package:learning_coach/features/tutor/tutor_session.dart';
+import '../../support/curriculum.dart';
 
 void main() {
   test('⭐ MODE A THEO CẤU TRÚC: lib/ không có import LLM/network nào', () {
@@ -39,8 +38,7 @@ void main() {
   });
 
   test('đo ops tất định của MỘT phiên thật (sai→hint→đúng) — 0 LLM call', () {
-    final c = curriculumFor(
-        const LearnerProfile(learnerId: 'l', displayName: 'M', grade: 5))!;
+    final c = toan5Bai6;
     final fp = FractionProblem.parse('3/4 + 2/5')!;
     final ec = fractionCase(fp.b, fp.d)!;
     final sw = Stopwatch()..start();

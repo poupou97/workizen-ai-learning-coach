@@ -184,7 +184,8 @@ class _ParentPinScreenState extends State<ParentPinScreen> {
 Future<({ParentExplanation explanation, AdaptiveDecision decision,
     Map<String, String> names})?> parentTonightFor(
     LearnerProfile p, LearnerStore store) async {
-  final c = curriculumFor(p);
+  final all = curriculaForLearner(p);
+  final c = all.length == 1 ? all.single : null;
   if (c == null) return null; // ngoài slice — nói thật ở thẻ, không bịa
   final mastery = await masteryFromStore(store, p.learnerId, c);
   final names = {for (final sc in c.cases) sc.id: sc.condition};

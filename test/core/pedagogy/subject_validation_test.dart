@@ -8,12 +8,11 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/curriculum/pedagogical_boundary.dart';
-import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
 import 'package:learning_coach/core/pedagogy/blueprint_catalogue_v0.dart';
 import 'package:learning_coach/core/pedagogy/learning_blueprint.dart';
-import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
+import '../../support/curriculum.dart';
 
 const _sim = 'scenario-sim-v1';
 var _seq = 0;
@@ -52,8 +51,7 @@ void main() {
 
     test('FUTURE-KNOWLEDGE LEAKAGE: học sinh lớp 4 chưa có thuật ngữ «mẫu số '
         'chung» ⇒ TutorScope RỖNG với method lớp 5 — kernel thật chặn', () {
-      final c5 = curriculumFor(const LearnerProfile(
-          learnerId: 'l', displayName: 'M', grade: 5))!;
+      final c5 = toan5Bai6;
       const stage4 = LearningStage(
         grade: 4,
         bookSeries: 'kntt',

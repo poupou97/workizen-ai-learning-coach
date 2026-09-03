@@ -48,8 +48,9 @@ class _LearningMapScreenState extends State<LearningMapScreen> {
   }
 
   Future<void> _load() async {
-    final c = curriculumFor(widget.profile);
-    if (c != null) {
+    // WAL-170: màn này nói về BẰNG CHỨNG của trẻ, không trưng nguồn của
+    // một bài ⇒ lọc theo lớp là trung thực. Nhiều dòng thì duyệt hết.
+    for (final c in curriculaForLearner(widget.profile)) {
       final m = await masteryFromStore(
           widget.store, widget.profile.learnerId, c);
       final hasEvidence =

@@ -87,7 +87,10 @@ Future<void> openCanonicalProblem(
   required LearnerStore store,
 }) async {
   final nav = Navigator.of(context);
-  final curriculum = curriculumFor(profile);
+  // ⭐ WAL-170: bài chụp KHÔNG có định danh bài ⇒ hỏi từng dòng chương
+  // trình «anh có nhận ra đề này không». Không ai nhận, hoặc nhiều hơn
+  // một, đều fail closed — không mượn chương trình của bài khác.
+  final curriculum = curriculumForProblem(profile, problem.expression);
   ConceptMastery? mastery;
   if (curriculum != null) {
     mastery = await masteryFromStore(store, profile.learnerId, curriculum);

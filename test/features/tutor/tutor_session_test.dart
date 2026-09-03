@@ -7,11 +7,10 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/curriculum/pedagogical_boundary.dart';
-import 'package:learning_coach/core/knowledge/slice_curriculum.dart';
-import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
 import 'package:learning_coach/features/tutor/tutor_session.dart';
+import '../../support/curriculum.dart';
 
 const _stage = LearningStage(
   grade: 5,
@@ -24,8 +23,7 @@ const _stage = LearningStage(
 
 /// WAL-168: lấy ĐÚNG method của sản phẩm thay vì chép lại — lời dạy nay là dữ
 /// liệu đi cùng method, nên fixture chép tay sẽ kiểm một bản sao không có lời.
-final _method = curriculumFor(const LearnerProfile(
-        learnerId: 't', displayName: 'T', grade: 5))!
+final _method = toan5Bai6
     .catalogue
     .firstWhere((m) => m.id == 'common-denom-by-product');
 
