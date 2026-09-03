@@ -67,6 +67,14 @@ không parse được ⇒ không dám chấm, kết quả không điểm-số, h
 ⚠️ **Founder quyết (A/B)**: con vừa sai một câu mà Hôm nay vẫn «nghỉ ngơi nhé» — giữ nguyên
 (không nag) hay cho lỗi MỚI nâng ưu tiên sớm hơn lịch 7 ngày? Không tự đổi chính sách ôn tập.
 
+**WAL-133 🔄 slice 1** (07d1459, CI xanh): `sealed LearningAsset` 3 loại — `SourceAsset` không dựng
+được nếu thiếu nguồn/trang/bbox/extractionVersion, và assert luôn «phải nằm dưới assets/pack/»
+(WAL-43). Hình SAM vẽ KHÔNG mượn được dòng nguồn; nhãn «Minh hoạ của SAM» không tắt được bằng tham
+số. Fallback theo loại (ảnh nguồn NÓI, trang trí IM). Builder+DiaMap tải provenance crop từ
+registry, thiếu ⇒ bỏ bản đồ. MapReader là consumer thật (Nokia n78). Test WAL-43 THẬT chạy
+`git ls-files assets/pack/`. 10 test, 3 đột biến bị giết. **Còn**: crop tool ≥3 môn (curate bbox
+người làm), visual identity doc, `SamGeneratedAsset` chưa có chỗ dùng thật.
+
 ## Founder Gates (không tự vượt)
 Textbook licensing (WAL-43) · child-ads commitment (WAL-125) · Premium pricing · production payment · external pilot go-live · generative learner-visible (WAL-30 KEEP SHADOW) · real-learner claim (WAL-49) · major cloud spend · destructive ops · irreversible branding.
 
