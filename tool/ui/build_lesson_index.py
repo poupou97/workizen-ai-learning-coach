@@ -149,18 +149,24 @@ EXPERIMENT_BOOKS = {  # môn × sách theo lớp — khối «Chuẩn bị/Dụn
     5: [('Khoa học', '05-sgk-khoa-hoc-5')],
     10: [('Vật lí', '10-sgk-vat-li-10'), ('Hoá học', '10-sgk-hoa-hoc-10')],
 }
-kh_book = f'0{GRADE}-sgk-khoa-hoc-{GRADE}'
-kh_lessons = []
+# WAL-172: gắn khối thí nghiệm về bài bằng TRANG IN của CHÍNH CUỐN chứa nó.
+# Bản trước dựng bảng trang→bài từ một cuốn Khoa học đóng cứng theo tên, nên
+# Vật lí 10 và Hoá học 10 không bao giờ gắn được — cùng họ lỗi «hỏi tên môn»
+# đã bỏ ở WAL-166. Nay mỗi cuốn tự có bảng của nó.
+_lesson_pages = {}
 for d in docs:
-    if d['sourceDocumentId'] == kh_book:
-        kh_lessons = sorted(
-            [(l['pageStart'], l['number'], l.get('title'))
-             for l in d.get('lessons', [])
-             if l.get('pageStart') is not None and l.get('number') is not None])
+    ls = sorted([(l['pageStart'], l['number'], l.get('title'))
+                 for l in d.get('lessons', [])
+                 if l.get('pageStart') is not None and l.get('number') is not None])
+    if ls:
+        _lesson_pages[d['sourceDocumentId']] = ls
 
-def kh_lesson_for(printed):
+
+def lesson_for(book, printed):
+    """Bài chứa trang in này trong cuốn `book`. Không có bảng ⇒ None (fail
+    closed): thà không gắn còn hơn gắn vào bài của cuốn khác."""
     hit = None
-    for ps, no, title in kh_lessons:
+    for ps, no, title in _lesson_pages.get(book, ()):
         if ps <= printed:
             hit = (no, title)
     return hit
@@ -204,7 +210,7 @@ for subj, bk, f in _exp_sources:
     if not steps or title is None:
         continue  # khối không đọc được cấu trúc ⇒ bỏ, không bịa
     printed = int(lines[-1]) if lines[-1].strip().isdigit() else pdf - 1
-    les = kh_lesson_for(printed) if bk == kh_book else None
+    les = lesson_for(bk, printed) if printed is not None else None
     khoa_experiments.append(dict(
         subject=subj,
         book=bk, page=printed, pagePdf=pdf,
