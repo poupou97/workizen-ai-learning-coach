@@ -138,7 +138,7 @@ class SubjectHomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
         child: ListTile(
         title: Text(
-          l.title == null ? 'Bài ${l.no}' : 'Bài ${l.no} · ${_titleCase(l.title!)}',
+          _lessonLabel(b, l),
           style: const TextStyle(
               fontSize: WalType.body,
               fontWeight: FontWeight.w600,
@@ -307,6 +307,21 @@ class SubjectHomeScreen extends StatelessWidget {
 
   /// Bài có NHIỀU hoạt động (đọc + viết…): cho trẻ CHỌN — không nuốt hoạt động.
   /// Phụ đề đếm việc — một chỗ, vét cạn trên `sealed`.
+  /// Nhãn của một bài. Số bài LẶP LẠI trong cùng cuốn là chuyện có thật —
+  /// GDTC đánh số lại theo từng chủ đề — nên khi lặp thì phải nói thêm cái gì
+  /// PHÂN BIỆT ĐƯỢC, nếu không trẻ thấy hai dòng «Bài 1» y hệt và tưởng máy
+  /// hỏng (đo trên Nokia, khung MAIN-n03 môn Khoa học).
+  ///
+  /// Thứ tự ưu tiên: tên bài (nếu miner bắt được) → trang IN. Không có cả hai
+  /// thì để «Bài N» trần — KHÔNG bịa thứ tự «(1)», «(2)» vì con số đó không
+  /// tồn tại trong sách.
+  static String _lessonLabel(BookLessons b, LessonRef l) {
+    if (l.title != null) return 'Bài ${l.no} · ${_titleCase(l.title!)}';
+    final repeated = b.lessons.where((o) => o.no == l.no).length > 1;
+    if (repeated && l.pageStart != null) return 'Bài ${l.no} · trang ${l.pageStart}';
+    return 'Bài ${l.no}';
+  }
+
   static String _countLabel(LessonActivity a) => switch (a) {
         ExerciseActivity(:final items) => '${items.length} bài tập',
         ReadingActivity() => '1 bài đọc',
