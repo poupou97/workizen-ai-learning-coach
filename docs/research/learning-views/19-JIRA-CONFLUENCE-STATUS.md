@@ -32,7 +32,8 @@ to publish; `.workforce.json` in the repo root names the space.
 
 - Branch `research/learning-views-concept` (worktree), base `3f0c160` (WAL-206 merged).
 - Commit scope: `docs/research/learning-views/` only. No pack data, no ZIPs, no PDFs, no images.
-- PR → `main`, CI (`flutter analyze` + `flutter test`, runs on every PR by design) → Founder merge.
+- PR **#55** → `main` (https://github.com/poupou97/workizen-ai-learning-coach/pull/55), CI
+  (`flutter analyze` + `flutter test`, runs on every PR by design) → Founder merge.
 - Desktop bundle: `~/Desktop/HOC-CUNG-SAM-LEARNING-VIEWS-RESEARCH-<YYYYMMDD-HHMM>.zip` and
   `…-LATEST.zip` — the same 21 markdown files, nothing else.
 

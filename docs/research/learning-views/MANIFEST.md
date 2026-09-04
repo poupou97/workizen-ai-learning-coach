@@ -2,7 +2,7 @@
 
 **Bundle:** `HOC-CUNG-SAM-LEARNING-VIEWS-RESEARCH-20260905-0010.zip` (= `…-LATEST.zip`) ·
 **Repo path:** `docs/research/learning-views/` · **Branch:** `research/learning-views-concept` ·
-**Jira:** WAL-207 (Relates → WAL-206) · **Model:** Fable 5.1 · **Status:** RESEARCH + ARCHITECTURE
+**PR:** #55 · **Jira:** WAL-207 (Relates → WAL-206) · **Model:** Fable 5.1 · **Status:** RESEARCH + ARCHITECTURE
 HYPOTHESIS ONLY — no implementation, no decision recorded.
 
 | # | File | One line |
