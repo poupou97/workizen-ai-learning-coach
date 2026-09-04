@@ -202,11 +202,18 @@ class _ExperimentScreenState extends State<ExperimentScreen> {
                 style: const TextStyle(
                     fontSize: WalType.body, color: WalColors.ink))),
         const SizedBox(height: WalSpacing.md),
-        _card(const Text(
-            'So sánh dự đoán với điều em thấy — giống hay khác đều quý: '
-            'nhà khoa học học từ chính chỗ khác nhau đó. Tớ không chấm '
-            'đúng/sai; con kể cho thầy cô nghe kết quả nhé.',
-            style: TextStyle(
+        // ⭐⭐ WAL-176 — câu chốt PHẢI khớp việc trẻ vừa thật sự làm: bài
+        // không có bước dự đoán (SGK không in) thì không được nhắc «dự đoán»
+        // — nhắc một việc trẻ chưa từng làm là câu nói không thật, dù nghe
+        // hợp lý ở bài khác.
+        _card(Text(
+            _needsPrediction
+                ? 'So sánh dự đoán với điều em thấy — giống hay khác đều quý: '
+                    'nhà khoa học học từ chính chỗ khác nhau đó. Tớ không chấm '
+                    'đúng/sai; con kể cho thầy cô nghe kết quả nhé.'
+                : 'Điều em quan sát được rất đáng quý. Tớ không chấm đúng/sai; '
+                    'con kể cho thầy cô nghe kết quả nhé.',
+            style: const TextStyle(
                 fontSize: WalType.body, color: WalColors.ink, height: 1.45))),
         const SizedBox(height: WalSpacing.lg),
         SizedBox(

@@ -59,6 +59,34 @@ class SubjectHomeScreen extends StatelessWidget {
   List<KhoaExperiment> get _experiments =>
       index.experimentsForSubject(subject);
 
+  /// ⭐⭐ WAL-176 (Missing #1) — Home ĐÃ đề nghị đúng bài + đúng ý định (lý do
+  /// thật, không đoán); màn này KHÔNG được hỏi lại. Đi thẳng qua `_startIntent`
+  /// — CÙNG một đường trẻ tự chọn cũng đi, không tạo đường thứ hai cho cùng
+  /// một việc (WAL-166 §subtitle, «một luật, một chỗ»).
+  ///
+  /// Không thấy đúng bài/hoạt động ⇒ im lặng bỏ qua — Home lỡ đề nghị bài đã
+  /// biến mất thì SAM không được ép mở một bài rỗng.
+  void openLessonWithIntent(
+    BuildContext context, {
+    required String sourceDocumentId,
+    required int lessonNo,
+    required LearningIntent intent,
+  }) {
+    final b = (index.subjects[subject] ?? const <BookLessons>[])
+        .where((x) => x.sourceDocumentId == sourceDocumentId)
+        .firstOrNull;
+    if (b == null) return;
+    final l = b.lessons.where((x) => x.no == lessonNo).firstOrNull;
+    if (l == null) return;
+    final acts = index.activitiesFor(book: b.sourceDocumentId, lessonNo: l.no);
+    if (acts.isEmpty) return;
+    final key = LessonKey(
+        sourceDocumentId: b.sourceDocumentId,
+        number: l.no,
+        pageStart: l.pageStart);
+    _startIntent(context, b, l, acts, intent, curriculumForLesson(key));
+  }
+
   @override
   Widget build(BuildContext context) {
     final all = index.subjects[subject] ?? const <BookLessons>[];

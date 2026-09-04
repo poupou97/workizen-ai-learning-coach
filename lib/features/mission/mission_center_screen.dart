@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/agenda/learning_agenda.dart';
+import '../../core/intent/next_lesson.dart';
 import '../../core/stories/stories_store.dart';
 import '../../core/store/learner_profile.dart';
 import '../camera/camera_demo_flow.dart';
@@ -37,6 +38,8 @@ class MissionCenterScreen extends StatelessWidget {
     this.todayStory,
     this.didYouKnowStory,
     this.onOpenStory,
+    this.bookRecommendation,
+    this.onStartRecommendation,
   });
 
   final MissionData data;
@@ -76,6 +79,15 @@ class MissionCenterScreen extends StatelessWidget {
 
   /// Tên gọi từ HỒ SƠ THẬT (WAL-95). `null` ⇒ xưng hô trung tính, không bịa tên.
   final String? learnerName;
+
+  /// ⭐⭐ WAL-176 (Missing #1) — gợi ý Ở CẤP SÁCH từ TKB (Khoa học, Sử…), khi
+  /// agenda Toán (WAL-102) chưa có gì khẩn (không phải review/retrieve).
+  /// `null` = không có căn cứ thật ⇒ thẻ giữ nguyên hành vi cũ, không bịa.
+  final HomeRecommendation? bookRecommendation;
+
+  /// Bấm «Bắt đầu» khi thẻ đang hiện [bookRecommendation]: đưa thẳng trẻ vào
+  /// ĐÚNG sách/bài/ý định — KHÔNG hỏi lại (SAM đã hỏi xong ở Home rồi).
+  final void Function(HomeRecommendation)? onStartRecommendation;
 
   @override
   Widget build(BuildContext context) {
@@ -211,54 +223,84 @@ class MissionCenterScreen extends StatelessWidget {
     );
   }
 
-  Widget _nextActionCard() => Container(
-        padding: const EdgeInsets.all(WalSpacing.lg),
-        decoration: BoxDecoration(
-          color: WalColors.surfaceLavender,
-          borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
-        ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (data.agenda != null) ...[
-            const Text('VIỆC SAM ĐỀ XUẤT',
-                style: TextStyle(
-                    fontSize: WalType.secondary,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.1,
-                    color: WalColors.inkSoft)),
-            const SizedBox(height: 4),
-          ],
-          Text(
-              data.agenda == null
-                  ? data.nextActionTitle
-                  : _agendaTitle(data.agenda!.kind),
-              style: const TextStyle(
-                  fontSize: WalType.title,
+  /// Toán (WAL-102) đang có việc do BẰNG CHỨNG thúc — bậc cao nhất trong thứ
+  /// tự đã chốt (Convergence §10: bằng chứng → TKB → làm dở → không có gì).
+  bool get _agendaIsEvidenceUrgent =>
+      data.agenda?.kind == AgendaActionKind.review ||
+      data.agenda?.kind == AgendaActionKind.retrieve;
+
+  /// ⭐⭐ WAL-176 — gợi ý sách qua TKB chỉ được lên tiếng khi Toán KHÔNG đang
+  /// khẩn vì bằng chứng thật. Nó ĐƯỢC PHÉP thay «nghỉ» của Toán: `rest` chỉ
+  /// có nghĩa «Toán hôm nay không có gì mới», không phải «cả ngày không có gì
+  /// để làm» — một tiết Khoa học thật ngày mai là lý do khác, không phải SAM
+  /// nói lại cùng một việc.
+  HomeRecommendation? get _effectiveRecommendation =>
+      _agendaIsEvidenceUrgent ? null : bookRecommendation;
+
+  Widget _nextActionCard() {
+    final rec = _effectiveRecommendation;
+    final hasProposal = rec != null || data.agenda != null;
+    final title = rec != null
+        ? '${rec.subject} · Bài ${rec.lessonNo}'
+        : (data.agenda == null
+            ? data.nextActionTitle
+            : _agendaTitle(data.agenda!.kind));
+    // ⭐ reason đến từ resolver (agenda hoặc HomeRecommendation) — hiển thị
+    // NGUYÊN VĂN, UI không suy diễn thêm.
+    final reason =
+        rec != null ? rec.reason : (data.agenda?.reason ?? data.decision.reason);
+    final showButton =
+        rec != null || data.agenda?.kind != AgendaActionKind.rest;
+    final onPressed = rec != null
+        ? (onStartRecommendation == null
+            ? null
+            : () => onStartRecommendation!(rec))
+        : (_startForAgenda() ?? onStartHomework ?? () {});
+    return Container(
+      padding: const EdgeInsets.all(WalSpacing.lg),
+      decoration: BoxDecoration(
+        color: WalColors.surfaceLavender,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (hasProposal) ...[
+          const Text('VIỆC SAM ĐỀ XUẤT',
+              style: TextStyle(
+                  fontSize: WalType.secondary,
                   fontWeight: FontWeight.w700,
-                  color: WalColors.primaryText)),
-          const SizedBox(height: WalSpacing.sm),
-          // ⭐ reason của engine — hiển thị NGUYÊN VĂN, UI không suy diễn thêm.
-          Text(data.agenda?.reason ?? data.decision.reason,
-              style: const TextStyle(
-                  fontSize: WalType.body, color: WalColors.ink, height: 1.45)),
-          if (data.agenda?.kind != AgendaActionKind.rest) ...[
-            const SizedBox(height: WalSpacing.md),
-            SizedBox(
-              height: WalSpacing.minTouch,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                    backgroundColor: WalColors.primary500,
-                    shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(WalSpacing.radiusButton))),
-                onPressed: _startForAgenda() ?? onStartHomework ?? () {},
-                child: const Text('Bắt đầu',
-                    style: TextStyle(
-                        fontSize: WalType.body, fontWeight: FontWeight.w700)),
-              ),
+                  letterSpacing: 1.1,
+                  color: WalColors.inkSoft)),
+          const SizedBox(height: 4),
+        ],
+        Text(title,
+            style: const TextStyle(
+                fontSize: WalType.title,
+                fontWeight: FontWeight.w700,
+                color: WalColors.primaryText)),
+        const SizedBox(height: WalSpacing.sm),
+        Text(reason,
+            style: const TextStyle(
+                fontSize: WalType.body, color: WalColors.ink, height: 1.45)),
+        if (showButton) ...[
+          const SizedBox(height: WalSpacing.md),
+          SizedBox(
+            height: WalSpacing.minTouch,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                  backgroundColor: WalColors.primary500,
+                  shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(WalSpacing.radiusButton))),
+              onPressed: onPressed,
+              child: const Text('Bắt đầu',
+                  style: TextStyle(
+                      fontSize: WalType.body, fontWeight: FontWeight.w700)),
             ),
-          ],
-        ]),
-      );
+          ),
+        ],
+      ]),
+    );
+  }
 
   /// REST không có nút (nghỉ là nghỉ); review → onReview; còn lại → Môn học.
   VoidCallback? _startForAgenda() => switch (data.agenda?.kind) {
