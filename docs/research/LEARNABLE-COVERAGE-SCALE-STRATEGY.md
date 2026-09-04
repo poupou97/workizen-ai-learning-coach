@@ -163,6 +163,161 @@ liệu registry hiện có sẵn dữ liệu bbox nào tái dùng được (WAL-
 có bbox cho source-assets — có thể là điểm khởi đầu, chưa kiểm) trước khi coi
 đây là ứng viên P0 thật.
 
+---
+
+## Tin học — full-chain validation (Founder Delta thứ ba, 2026-09-04)
+
+Founder yêu cầu đo TOÀN CHUỖI (SGK Question → pedagogical role → question+
+options → SGV answer-link → existing Surface → learner answer → deterministic
+correctness → Evidence), không chỉ "trích được nhiều MCQ". Kết quả dưới đây
+dựa trên xác minh tay SÂU (đối chiếu logic nội dung, không chỉ khớp số) trên
+một số ca thật, cộng với đo tần suất marker trên toàn bộ 10 cuốn SGV lớp 3-12.
+
+### Phát hiện quan trọng nhất: SGK một mình KHÔNG đủ để biết vai trò sư phạm
+
+Kiểm tra trực tiếp trên trang SGK (lớp 9, trang 20) chứa câu hỏi đã xác minh
+an toàn: **KHÔNG có nhãn "CÂU HỎI" nào in trên trang SGK** trước câu hỏi đó —
+câu chỉ xuất hiện trần trụi là "1. Hành vi nào sau đây..." ngay sau đoạn tóm
+tắt kiến thức, không phân biệt được bằng mắt (hay bằng heuristic đọc SGK) với
+một câu hỏi thảo luận nhóm nằm trong "Hoạt động N" (không an toàn để chấm).
+**Vai trò sư phạm chỉ suy ra được từ chính cấu trúc SGV** (nó tự gọi đúng
+từng khối là "Câu hỏi (hoạt động củng cố kiến thức)" / "Hoạt động luyện tập"
+/ "Hoạt động vận dụng" / "Hoạt động N" trần) — nghĩa là một extractor chỉ đọc
+SGK, dù tốt đến đâu, KHÔNG THỂ tự phân biệt câu nào an toàn để chấm. Bắt buộc
+phải neo vào cấu trúc SGV.
+
+### Ca xác minh đầy đủ chuỗi (2 ca, đối chiếu logic nội dung không chỉ khớp số)
+
+**Ca 1 — lớp 9, "Câu hỏi (hoạt động củng cố kiến thức)", đơn-lựa-chọn:**
+SGK tr.20: "1. Hành vi nào sau đây... KHÔNG vi phạm pháp luật... A. Đăng bài
+gây mâu thuẫn vùng miền. B. Quảng cáo hàng cấm. C. Sử dụng trái phép tài
+khoản. D. Chia sẻ thông tin về lớp học lập trình trực tuyến." ↔ SGV: "Câu hỏi
+(hoạt động củng cố kiến thức) — 1. Đáp án: D." — ĐÚNG theo logic nội dung (D
+là hành vi DUY NHẤT không vi phạm/phi đạo đức trong 4 lựa chọn) — không chỉ
+khớp vị trí, khớp cả nghĩa.
+
+**Ca 2 — lớp 9, "Hoạt động luyện tập", ĐA-lựa-chọn (phát hiện quan trọng):**
+Cùng trang, mục LUYỆN TẬP: "1. Cách nào giúp tránh tác động tiêu cực... A.
+Không dùng thiết bị số liên tục. B. Không xem video phản cảm. C. Giảm thời
+gian dùng điện thoại. D. Tập thể dục thể thao." ↔ SGV: "Hoạt động luyện tập —
+1. Đáp án: A, B, C." — **BA đáp án đúng, không phải một** — `LearningActivity.
+correctOption` (kiểu `int` đơn) hiện KHÔNG biểu diễn được câu hỏi này. Nếu cứ
+lấy đáp án đầu tiên (A) làm "correctOption" sẽ SAI — đúng loại "false trusted
+answer" Founder cấm.
+
+**Ca phản chứng (âm tính, quan trọng không kém)**: câu hỏi dạng A/B/C/D trong
+mục "Hoạt động 1" (lớp 9, "tác động tiêu cực của công nghệ") — SGV tự ghi rõ
+đây là "HS thảo luận nhóm để trả lời" (nhiệm vụ thảo luận nhóm, GV chấm bằng
+quan sát định tính) — KHÔNG có "Đáp án" đơn nhất nào trong SGV cho mục này,
+dù hình thức nhìn y hệt MCQ. Nếu chỉ dựa "phát hiện A/B/C/D" sẽ trích NHẦM
+đây thành một MCQ có đáp án — xác nhận CHÍNH XÁC cảnh báo Founder bằng bằng
+chứng, không phải suy đoán.
+
+### Đo theo 8 tiêu chí Founder yêu cầu
+
+| Tiêu chí | Kết quả |
+|---|---|
+| **MCQ extraction precision/recall** | Chưa đo trên diện rộng (mới ~4 ca tay) — không báo số % chưa đủ căn cứ. |
+| **OPTION accuracy** | Tốt trên các ca đã kiểm — A/B/C/D tách đúng, đúng thứ tự, đúng nội dung nguyên văn. |
+| **SGK↔SGV answer-link precision** | 2/2 ca xác minh sâu ĐÚNG theo logic nội dung — nhưng liên kết hiện dựa vào ĐỐI CHIẾU CHỦ ĐỀ + THỨ TỰ XUẤT HIỆN tay, chưa có thuật toán liên kết tự động được kiểm chứng ở quy mô lớn. Rủi ro thật: SGV không lặp lại toàn văn câu hỏi, chỉ ghi "N. Đáp án: X" — khớp đúng số thứ tự N với đúng câu N bên SGK, đúng đúng LESSON, là điều kiện bắt buộc, chưa kiểm định tự động. |
+| **ANSWER coverage** | KHÔNG đều theo lớp: mật độ "Đáp án" trong SGV lớp 6-11 cao (grep: 93 file SGV lớp 6-11 chứa cụm "Câu hỏi (hoạt động củng cố kiến thức)"); lớp 3 dùng RUBRIC ĐỊNH TÍNH (Thông tư 27 — "Hoàn thành tốt/Hoàn thành...") thay vì đáp án đúng/sai — KHÔNG PHẢI thiếu sót, là THIẾT KẾ CHƯƠNG TRÌNH khác cho tiểu học; lớp 12 chỉ 2 lần xuất hiện toàn cuốn — thưa, có thể không đủ mật độ để đáng làm. |
+| **PEDAGOGICAL ROLE accuracy** | Phân biệt được RÕ 4 vai trò khác nhau bằng cấu trúc SGV (Câu hỏi=an toàn chấm; Luyện tập=an toàn NHƯNG có thể đa-lựa-chọn; Vận dụng=mở, không đáp án đơn; Hoạt động N trần=thảo luận nhóm, KHÔNG an toàn) — nhưng chỉ xác nhận trên 1 lớp (9) sâu; chưa kiểm 4 vai trò này có giữ nguyên nghĩa qua các lớp 6-11 khác. |
+| **LESSON attribution** | `units-k12` báo lesson-attached 99%+ cho SGK Tin học mọi lớp (đo trước đó) — nhưng đây là attachment ở tầng UNIT thô, chưa kiểm cho riêng luồng SGK↔SGV mới này. |
+| **FALSE TRUSTED ANSWER rate** | **0/2 trên các ca đã xác minh SÂU** — nhưng cỡ mẫu quá nhỏ để tuyên bố "gần như 0" theo đúng yêu cầu Founder; ca phản chứng "Hoạt động 1" cho thấy RỦI RO CÓ THẬT nếu bỏ qua bước neo-vào-SGV. |
+| **VALID Evidence-capable lessons unlocked** | Chưa đo — cần thuật toán liên kết SGK↔SGV chạy thật trên nhiều bài trước khi có con số, không đoán. |
+
+### Kết luận tạm thời: TÍN HIỆU DƯƠNG TÍNH THẬT, NHƯNG CHƯA ĐỦ ĐỂ IMPLEMENT
+
+Khác hẳn Ngữ văn (heuristic không có điểm dừng tự nhiên), pattern SGV
+"Câu hỏi (hoạt động củng cố kiến thức)" **có vẻ đóng và generalize được**
+(cùng cụm từ nguyên văn xuất hiện ở CẢ lớp 6 và lớp 9, cách nhau nhiều cuốn
+sách/tác giả phần — gợi ý đây là QUY ƯỚC THUẬT NGỮ CHUẨN của chương trình
+GDPT 2018 cho môn Tin học, không phải văn phong riêng một cuốn), và phạm vi
+đo được rõ ràng (lớp 6-11 có, lớp 3 và 12 không — do thiết kế chương trình
+khác, không phải lỗi). Đây khớp đúng nhánh "structure is reusable and finite"
+trong khung quyết định Founder đưa ra.
+
+**Nhưng CHƯA đủ bằng chứng để bounded-implement ngay**, vì 3 lý do cụ thể:
+1. SGK↔SGV answer-link mới xác minh tay 2 ca — cần một vòng đo tự động trên
+   ít nhất 10-15 ca (nhiều lớp, nhiều bài) trước khi tin cậy được ở quy mô.
+2. Đơn-lựa-chọn vs đa-lựa-chọn (Đáp án: D. vs Đáp án: A, B, C.) cần phân biệt
+   được TỰ ĐỘNG trước khi chấm — `LearningActivity` hiện chỉ có
+   `correctOption: int` đơn, câu đa-lựa-chọn phải bị LOẠI (không đoán một
+   phương án là "đáp án chính"), không phải bịa cho vừa khuôn dữ liệu.
+3. Chưa kiểm 4 vai trò sư phạm (Câu hỏi/Luyện tập/Vận dụng/Hoạt động N) có
+   GIỮ NGUYÊN nghĩa qua các lớp 6-11 khác lớp 9, hay biến thiên (sẽ lặp lại
+   kết cục Ngữ văn nếu biến thiên).
+
+**Không tạo trừu tượng "SOURCE-GROUNDED ASSESSMENT ACTIVITY" bây giờ** — đúng
+chỉ đạo Founder "prove reuse first, don't build the abstraction yet".
+
+### Vòng đo tự động (thay số tay bằng số script) — phát hiện quan trọng thứ hai: format KHÔNG đồng nhất
+
+Viết script quét toàn bộ "Đáp án" trong SGV Tin học 10 lớp (3-12), phân loại
+theo header đi trước. Kết quả lộ ra một sự thật **quan trọng hơn số đếm**:
+**định dạng câu trả lời KHÔNG đồng nhất giữa các lớp**, dù cùng là "SGV Tin
+học" cùng bộ GDPT 2018:
+
+| Lớp | Định dạng đáp án thực tế thấy | Máy đọc được bằng regex đơn giản? |
+|---|---|---|
+| 3 | "Đáp án: 1. — Con vật sống dưới nước: ..." (liệt kê mô tả, KHÔNG phải MCQ) | Không áp dụng — không phải câu hỏi trắc nghiệm |
+| 4 | Đủ loại trộn: "A", "A và D", "1-c; 2-d; 3-b; 4-a" (nối cặp), dưới header "Hoạt động N" trần | Một phần — nhưng vai trò sư phạm không rõ (xem dưới) |
+| 6, 9, 11, 12 | **"N. Đáp án: X."** hoặc **"N. Đáp án: A, B, C."**, luôn ngay sau header **"Câu hỏi (hoạt động củng cố kiến thức)"** | **Có — một regex, đúng cả 4 lớp, không cần chỉnh riêng từng cuốn** |
+| 7 | "(Đáp án: A)" — **gắn NGAY TRONG dòng câu hỏi**, không phải dòng riêng; hoặc "Đáp án được mô tả trong bảng bên." (văn xuôi, không có chữ cái trích được) | Không — cần một cú pháp trích khác hẳn |
+| 10 | "Đáp án: Không.", "Đáp án: C.", "Đáp án: Sai." — không có số câu đứng trước, và đáp án không phải lúc nào cũng là chữ cái (Có/Không/Đúng/Sai) | Không — cần một cú pháp trích khác hẳn |
+
+Đếm thô (script, không phải tay) trên 4 lớp có định dạng SẠCH — quét
+"Câu hỏi (hoạt động củng cố kiến thức)"/"Hoạt động củng cố kiến thức" + dòng
+"N. Đáp án: ..." **trên cùng trang**:
+
+| Lớp | Trang có header đóng | Dòng "N. Đáp án:" bắt được cùng trang | Trong đó đa-lựa-chọn |
+|---|---|---|---|
+| 6 | 23 | 8 | 2 |
+| 9 | 22 | 5 | 1 |
+| 11 | 57 | 11 | 2 |
+| 12 | 49 | 2 | 0 |
+
+Số "trang có header" cao hơn hẳn số "dòng đáp án bắt cùng trang" — nghĩa là
+nhiều khối câu-hỏi-đáp-án trải sang TRANG KẾ TIẾP (OCR cắt theo trang PDF,
+không theo khối nội dung); con số 26 dòng đáp án bắt được là **CẬN DƯỚI**,
+chưa phải số thật — cần quét cửa sổ 2 trang mới ra số chính xác.
+
+**Đây chính là kiểu bằng chứng khiến Ngữ văn bị FALSIFIED, nhưng ở đây phạm
+vi hẹp hơn và có ranh giới rõ**: format "N. Đáp án: X[, Y, Z]." dưới header
+"Câu hỏi (hoạt động củng cố kiến thức)" là **MỘT quy ước duy nhất, xuất hiện
+y hệt trên 4 cuốn sách độc lập** (lớp 6, 9, 11, 12 — khác tác giả/năm biên
+soạn từng phần) — đúng dấu hiệu của MỘT QUY ƯỚC CHƯƠNG TRÌNH CHUNG (GDPT
+2018), không phải trùng hợp văn phong một cuốn. Nhưng 6 lớp còn lại (3, 4, 5,
+7, 8, 10) mỗi lớp một kiểu khác — nếu cố phủ hết 10 lớp sẽ lặp lại đúng bẫy
+"tích luỹ heuristic riêng từng sách" mà Founder cấm.
+
+### Quyết định cuối: SHIP MỘT PHẦN (bounded), không phải toàn bộ Tin học
+
+**Phạm vi ship**: CHỈ 4 lớp có định dạng sạch, đơn nhất (6, 9, 11, 12), CHỈ
+loại câu hỏi đơn-lựa-chọn dưới header "Câu hỏi (hoạt động củng cố kiến
+thức)"/"Hoạt động củng cố kiến thức". Đa-lựa-chọn (≈19% số câu trong tập đã
+đo — 5/26) bị LOẠI KHỎI tự động chấm ở vòng này (đánh dấu SAM_SUPPORTABLE/
+PRACTICE, không đoán một đáp án làm "correctOption", theo đúng yêu cầu
+"unknown must fail closed"). 6 lớp còn lại (3, 4, 5, 7, 8, 10) — KHÔNG động
+tới ở vòng này; ghi nhận là cơ hội tương lai cần cú pháp trích riêng từng
+định dạng, không phải một phần của POC này.
+
+**Điều kiện bắt buộc trước khi merge** (thu hẹp đúng rủi ro FALSE TRUSTED
+ANSWER về gần 0 như Founder yêu cầu, vì mới xác minh tay 2/26 cặp):
+1. Viết bước xác minh liên kết SGK↔SGV TỰ ĐỘNG (so khớp số thứ tự câu + nội
+   dung câu hỏi giữa hai tài liệu) chạy trên TOÀN BỘ ~26+ cặp (số thật sau
+   khi quét cửa sổ 2 trang) trước khi cho bất kỳ cặp nào vào Evidence —
+   không tin theo vị trí/số thứ tự đơn thuần.
+2. Cặp nào không xác minh sạch (số câu lệch, nội dung không khớp, hoặc nằm
+   dưới header "Hoạt động N" trần không rõ vai trò) → UNKNOWN, hiển thị như
+   PRACTICE (không chấm), KHÔNG tự tạo CandidateEvidence.
+3. Đa-lựa-chọn → loại khỏi vòng chấm tự động, không đoán.
+
+**Không tạo trừu tượng "SOURCE-GROUNDED ASSESSMENT ACTIVITY"** ở bước này —
+4 cuốn cùng dùng một quy ước là tín hiệu tốt nhưng chưa đủ để đặt tên một mô
+hình chung; đúng theo chỉ đạo Founder, việc đặt tên trừu tượng chờ tới khi có
+thêm một họ môn học thứ hai chứng minh cùng pattern tái dùng được.
+
 **Noise patterns identified for whoever builds the dedicated extractor next**
 (raw OCR of grade 6, "Dế Mèn phiêu lưu kí" excerpt, pages 16-18): footnote
 definitions interleaved at page bottoms (`(1) Chết ngay đuôi: chết ngay lập
