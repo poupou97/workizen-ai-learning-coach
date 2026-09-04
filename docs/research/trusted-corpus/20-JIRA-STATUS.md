@@ -8,6 +8,6 @@
 | pattern registry (preserved, not implemented) | WAL-203, WAL-205 | untouched |
 | corpus census ticket | WAL-197 | the layout census here is a different axis (layout, not activity patterns); no new ticket |
 | Founder review of the data-architecture proposal | WAL-196 | this study's SDM (11) is input to that review, not a decision |
-| PR | `research/tc-v1-trusted-corpus-feasibility` → main — docs (`docs/research/trusted-corpus/`) + scripts (`tool/corpus/tc_*.py`, `tool/corpus/tc_gold/`) + `.gitignore` for the bake-off venvs | see MANIFEST for the merged PR number |
+| PR | **#56** https://github.com/poupou97/workizen-ai-learning-coach/pull/56 — `research/tc-v1-trusted-corpus-feasibility` → main — docs (`docs/research/trusted-corpus/`) + scripts (`tool/corpus/tc_*.py`, `tool/corpus/tc_gold/`) + `.gitignore` for the bake-off venvs | merged after CI "Analyze & Test" passed |
 
 No epic was created (WAL-195 already covers the area). One ticket was created, as the order allowed (1–3). No issue links beyond WAL-206 were added to keep the board quiet.
