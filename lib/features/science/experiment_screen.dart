@@ -110,7 +110,9 @@ class _ExperimentScreenState extends State<ExperimentScreen> {
               : [
                   _samRow(
                       'sam-think.png',
-                      'Thí nghiệm trong SGK: «${e.title}». '
+                      'Thí nghiệm trong SGK: «${e.title}». Bài này có nhiều '
+                      'bước làm, SAM trình bày lần lượt từng bước để con dễ '
+                      'theo. '
                       '${_needsPrediction ? 'Con DỰ ĐOÁN trước rồi mới làm nhé — nhà khoa học là vậy đó.' : 'Con đọc kỹ các bước rồi làm cùng người lớn nhé.'}'),
                   const SizedBox(height: WalSpacing.md),
                   _labeled(
