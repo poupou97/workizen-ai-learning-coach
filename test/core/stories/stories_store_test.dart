@@ -37,6 +37,23 @@ void main() {
     expect(person!.name, isNotEmpty);
   });
 
+  test(
+      '⭐ PERSON không có năm sinh-mất ⇒ title vẫn tự giải thích được, '
+      'không phải chuỗi phiên âm trần trụi vô nghĩa', () {
+    if (!exists) {
+      markTestSkipped('pack chưa build trên máy này');
+      return;
+    }
+    final s = StoriesStore.open(path);
+    final gram = s.search('Gram').firstWhere(
+        (x) => x.type == 'PERSON' && x.title.startsWith('Hen Krit'));
+    // Bug thật tìm thấy trên Nokia: card «Bạn có biết?» chỉ hiện title, và
+    // title thuần phiên âm không kèm năm sinh-mất đọc như chuỗi vô nghĩa.
+    // Fix: lấy lại nguyên văn tên gốc trong ngoặc mà SGK đã in sẵn kế bên
+    // tên phiên âm trong câu nguồn — không suy luận, không LLM.
+    expect(gram.title, 'Hen Krit-chừn Gioa-chim G-ram (Hans Christian Joachim Gram)');
+  });
+
   test('todayEvents: ngày không có event ⇒ RỖNG, không fabricate (§14)', () {
     if (!exists) {
       markTestSkipped('pack chưa build trên máy này');
