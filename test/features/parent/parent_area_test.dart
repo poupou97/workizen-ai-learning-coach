@@ -106,4 +106,45 @@ void main() {
     expect(find.text('Tối nay cùng Minh ▸'), findsOneWidget);
     expect(find.text('Tối nay cùng Lan ▸'), findsOneWidget);
   });
+
+  testWidgets(
+      '⭐⭐ WAL-180 — "Gần đây" đọc CÙNG evidence Learning Map, không hệ '
+      'tính riêng', (tester) async {
+    final store = await seed();
+    // Bằng chứng của Minh trong seed() KHÔNG có lineage (dữ liệu trước
+    // WAL-178) ⇒ không được bịa dòng "Gần đây" nào cho nó.
+    await tester.pumpWidget(MaterialApp(
+        home: ParentOverviewScreen(store: store, profiles: const [_a, _b])));
+    await tester.pumpAndSettle();
+    expect(find.text('GẦN ĐÂY'), findsNothing,
+        reason: 'event thiếu lineage ⇒ không có gì trung thực để kể');
+
+    // Thêm MỘT sự kiện có lineage thật cho Minh — "Gần đây" phải xuất hiện
+    // và dùng ĐÚNG câu chữ của learningMapStateFor/parentLineFor.
+    await store.appendSession(LearningSession(
+      sessionId: 's-a2',
+      learnerId: 'l-a',
+      subjectId: 'khoa-hoc',
+      startedAt: DateTime(2026, 9, 4),
+      trigger: SessionTrigger.manual,
+      events: [
+        LearningEvent(
+          eventId: 'a2',
+          skillCaseId: 'khtn-thi-nghiem',
+          kind: EvidenceKind.independentAttempt,
+          at: DateTime(2026, 9, 4),
+          sourceDocumentId: '05-sgk-khoa-hoc-5',
+          lessonNo: 1,
+        ),
+      ],
+    ));
+    await tester.pumpWidget(MaterialApp(
+        home: ParentOverviewScreen(store: store, profiles: const [_a, _b])));
+    await tester.pumpAndSettle();
+    expect(find.text('GẦN ĐÂY'), findsOneWidget);
+    expect(find.textContaining('Con đã tự làm được Bài 1'), findsOneWidget,
+        reason: '⭐⭐ đột biến bịa câu khác evidence thật ⇒ đỏ');
+    // Không % / điểm số nào trong khu Gần đây.
+    expect(find.textContaining('%'), findsNothing);
+  });
 }
