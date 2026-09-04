@@ -1,0 +1,20 @@
+{
+ "book": "04-sgk-khoa-hoc-4", "page": 30, "printed_page": 29, "grade": 4, "subject": "Khoa học", "docType": "SGK",
+ "why": "WAL-206 gold: review lesson opener whose body is a MIND-MAP diagram (Hình 1) of 9 labelled boxes around two hubs — diagram text must not become a passage",
+ "features": ["diagram", "colored_box", "figure", "lesson_start", "question_block"],
+ "lesson": {"number": 7, "title": "Ôn tập chủ đề Chất", "note": "page is the lesson start (Bài 7 header)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.10, 0.06, 0.08, 0.06], "text": "Bài 7", "anchor": "Bài 7"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.20, 0.09, 0.36, 0.03], "text": "ÔN TẬP CHỦ ĐỀ CHẤT", "anchor": "ÔN TẬP CHỦ ĐỀ CHẤT"},
+  {"id": "b03", "order": 3, "role": "objective", "bbox": [0.25, 0.15, 0.55, 0.02], "text": "Tóm tắt được những nội dung chính đã học dưới dạng sơ đồ.", "anchor": "Tóm tắt được những nội dung"},
+  {"id": "b04", "order": 4, "role": "objective", "bbox": [0.25, 0.175, 0.67, 0.04], "text": "Vận dụng được kiến thức về nước, không khí để giải thích cũng như xử lí một số tình huống đơn giản trong đời sống.", "anchor": "Vận dụng được kiến thức về"},
+  {"id": "b05", "order": 5, "role": "question", "bbox": [0.12, 0.235, 0.78, 0.045], "text": "Em đã được học những gì từ chủ đề Chất? Điều gì làm em thích nhất về nước và không khí?", "anchor": "Em đã được học những gì", "contiguous": true, "notes": "KHỞI ĐỘNG box (hand icon)"},
+  {"id": "b06", "order": 6, "role": "question", "bbox": [0.12, 0.305, 0.78, 0.045], "text": "1. Đọc thông tin trong hình 1 và nói với bạn về những nội dung đã học trong chủ đề Chất.", "anchor": "1. Đọc thông tin trong hình 1", "contiguous": true, "rel": {"refers_figure": "b07"}},
+  {"id": "b07", "order": 7, "role": "figure_label", "bbox": [0.12, 0.34, 0.80, 0.55], "text": null, "anchor": "TÍNH CHẤT CỦA NƯỚC", "notes": "mind map: hub CHẤT → Nước (TÍNH CHẤT CỦA NƯỚC · Ô NHIỄM NGUỒN NƯỚC · VAI TRÒ CỦA NƯỚC · TIẾT KIỆM NƯỚC · SỰ CHUYỂN THỂ CỦA NƯỚC) and Không khí (KHÔNG KHÍ CÓ Ở ĐÂU? · VAI TRÒ CỦA KHÔNG KHÍ · Ô NHIỄM KHÔNG KHÍ · GIÓ). Each box = title + 1–3 short lines. A parser may emit the 9 boxes as separate labelled blocks; emitting them as one running passage is an error."},
+  {"id": "b08", "order": 8, "role": "caption", "bbox": [0.49, 0.905, 0.06, 0.015], "text": "Hình 1", "anchor": "Hình 1", "rel": {"caption_of": "b07"}},
+  {"id": "b09", "order": 9, "role": "page_number", "bbox": [0.86, 0.945, 0.03, 0.015], "text": "29", "anchor": "29"}
+ ],
+ "flex_groups": [],
+ "critical": ["mind-map boxes concatenated into a reading passage = corrupted science content", "'KHÔNG KHÍ CÓ Ở ĐÂU?' (a box title) emitted as a learner question = heading-as-question", "b03/b04 objectives emitted as passage = objective-as-content"]
+}

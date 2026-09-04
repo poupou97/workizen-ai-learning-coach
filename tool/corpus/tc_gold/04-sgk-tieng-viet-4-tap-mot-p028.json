@@ -1,0 +1,29 @@
+{
+ "book": "04-sgk-tieng-viet-4-tap-mot", "page": 28, "printed_page": 27, "grade": 4, "subject": "Tiếng Việt", "docType": "SGK",
+ "why": "grade-4 reading page: end of a reading passage CONTINUED from the previous page, source attribution, a glossary (Từ ngữ), 5 comprehension questions (Q1 has 4 keyword chips laid out side by side), then a language exercise with 8 lettered options in a 4×2 grid and a fill-in table with '?' cells",
+ "features": ["continuation", "table", "side_by_side", "colored_box", "question_block", "mcq_options", "answer_slots", "attribution"],
+ "lesson": {"number": 6, "title": "Bài 6 — Nghệ sĩ trống", "note": "reading text 'Nghệ sĩ trống' (Mi-lô) is Bài 6 of Tiếng Việt 4 tập một (KNTT); page continues the lesson"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "body", "bbox": [0.15, 0.06, 0.76, 0.065], "text": "Thế rồi, Mi-lô thuyết phục cha cho cô tham gia một lớp nhạc cụ. Trống tim-pan-ni, trống công-ga, trống bông-gô,… loại nào cô cũng chơi được. Thầy giáo nhận ra tài năng của Mi-lô và bắt đầu dạy cô mỗi ngày.", "anchor": "Thế rồi, Mi-lô thuyết phục cha", "contiguous": true, "notes": "reading passage continued from the previous page"},
+  {"id": "b02", "order": 2, "role": "body", "bbox": [0.15, 0.13, 0.76, 0.045], "text": "– Sẽ đến ngày mình được chơi trong một ban nhạc thứ thiệt. – Mi-lô thầm nghĩ.", "anchor": "Sẽ đến ngày mình được chơi", "contiguous": true},
+  {"id": "b03", "order": 3, "role": "body", "bbox": [0.15, 0.18, 0.76, 0.065], "text": "Khi chị gái Cu-chi-tô thành lập A-na-ca-ô-na, nhóm nhảy nữ đầu tiên của Cu-ba, cô bé Mi-lô 10 tuổi đã gia nhập ban nhạc với vai trò của một tay trống. Nghe tiếng trống của Mi-lô, ai cũng muốn nhún nhảy.", "anchor": "Khi chị gái Cu-chi-tô thành lập", "contiguous": true},
+  {"id": "b04", "order": 4, "role": "body", "bbox": [0.15, 0.25, 0.76, 0.045], "text": "Cứ cố gắng như vậy, cuối cùng Mi-lô đã trở thành một nghệ sĩ trống nổi tiếng thế giới.", "anchor": "Cứ cố gắng như vậy, cuối cùng", "contiguous": true},
+  {"id": "b05", "order": 5, "role": "attribution", "bbox": [0.43, 0.30, 0.48, 0.02], "text": "(Theo Truyện kể hằng đêm dành cho các cô bé cá tính)", "anchor": "(Theo Truyện kể hằng đêm"},
+  {"id": "b06", "order": 6, "role": "heading", "bbox": [0.15, 0.325, 0.08, 0.02], "text": "Từ ngữ", "anchor": "Từ ngữ"},
+  {"id": "b07", "order": 7, "role": "footnote", "bbox": [0.15, 0.345, 0.76, 0.06], "text": "– Cu-ba: một nước ở châu Mỹ, thủ đô là Ha-va-na.\n– Chim ruồi: loài chim nhỏ nhất trong các loài chim, khi bay có thể giữ nguyên một vị trí, cánh vỗ nhiều lần tạo ra tiếng vo ve như tiếng ruồi.", "anchor": "Cu-ba: một nước ở châu Mỹ", "contiguous": true, "notes": "glossary — must not be spliced into the passage"},
+  {"id": "b08", "order": 8, "role": "question", "bbox": [0.15, 0.42, 0.50, 0.02], "text": "1. Bài đọc cho biết những thông tin gì về Mi-lô?", "anchor": "1. Bài đọc cho biết những thông tin"},
+  {"id": "b09", "order": 9, "role": "option", "bbox": [0.22, 0.45, 0.62, 0.03], "text": "ước mơ | nơi ở | đam mê | thành tích nổi bật", "anchor": "ước mơ", "rel": {"options_of": "b08"}, "notes": "4 keyword chips side by side (hints, not MCQ answers)"},
+  {"id": "b10", "order": 10, "role": "question", "bbox": [0.15, 0.49, 0.74, 0.02], "text": "2. Mọi người làm gì khi thấy Mi-lô chơi trống? Vì sao họ lại làm như vậy?", "anchor": "2. Mọi người làm gì khi thấy"},
+  {"id": "b11", "order": 11, "role": "question", "bbox": [0.15, 0.515, 0.76, 0.045], "text": "3. Hành trình trở thành nghệ sĩ trống nổi tiếng thế giới của Mi-lô có những thuận lợi và khó khăn gì?", "anchor": "3. Hành trình trở thành nghệ sĩ", "contiguous": true},
+  {"id": "b12", "order": 12, "role": "question", "bbox": [0.15, 0.56, 0.76, 0.045], "text": "4. Dựa vào bài đọc, hãy cho biết vì sao Mi-lô trở thành một nghệ sĩ trống nổi tiếng thế giới.", "anchor": "4. Dựa vào bài đọc, hãy cho biết", "contiguous": true},
+  {"id": "b13", "order": 13, "role": "question", "bbox": [0.15, 0.605, 0.66, 0.02], "text": "5. Em có ấn tượng nhất với hành động nào của Mi-lô? Vì sao?", "anchor": "5. Em có ấn tượng nhất với"},
+  {"id": "b14", "order": 14, "role": "question", "bbox": [0.15, 0.655, 0.55, 0.02], "text": "1. Những sự vật nào dưới đây được gọi là nhạc cụ?", "anchor": "1. Những sự vật nào dưới đây", "notes": "Luyện từ và câu exercise 1 (magnifier icon)"},
+  {"id": "b15", "order": 15, "role": "option", "bbox": [0.18, 0.68, 0.64, 0.05], "text": "A. trống đồng\nB. pi-a-nô\nC. sáo trúc\nD. ghi-ta\nE. chuông\nG. vi-ô-lông\nH. còi\nI. trống cơm", "anchor": "A. trống đồng", "rel": {"options_of": "b14"}, "notes": "8 options in a 4-column × 2-row grid; option order is A B C D / E G H I (row-major)"},
+  {"id": "b16", "order": 16, "role": "question", "bbox": [0.15, 0.735, 0.50, 0.02], "text": "2. Tìm từ ngữ phù hợp với các cột trong bảng.", "anchor": "2. Tìm từ ngữ phù hợp với"},
+  {"id": "b17", "order": 17, "role": "table", "bbox": [0.18, 0.76, 0.72, 0.14], "text": null, "anchor": "Nghề nghiệp", "notes": "header Nghề nghiệp | Công việc | Sản phẩm; rows: hoạ sĩ | vẽ | tranh; nhạc sĩ | ? | ?; nhà văn | ? | ?; kiến trúc sư | ? | ?"},
+  {"id": "b18", "order": 18, "role": "page_number", "bbox": [0.88, 0.94, 0.04, 0.02], "text": "27", "anchor": "27"}
+ ],
+ "flex_groups": [],
+ "critical": ["b07 glossary spliced into the passage b01–b04 = contamination", "options read column-wise (A E B G …) = option order changed", "'?' table cells emitted as questions = answer-slot confusion", "b01 presented as the start of the reading text = cross-page fragment as whole"]
+}

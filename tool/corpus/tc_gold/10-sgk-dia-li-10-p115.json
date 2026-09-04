@@ -1,0 +1,15 @@
+{
+ "book": "10-sgk-dia-li-10", "page": 115, "printed_page": 114, "grade": 10, "subject": "Địa lí", "docType": "SGK",
+ "why": "back-matter pronunciation index: two side-by-side 3-column tables (Phiên âm | Nguyên ngữ | Trang) with letter-group rows — dense (163 OCR lines); NOT lesson content",
+ "features": ["three_col", "table", "back_matter", "dense"],
+ "lesson": {"number": null, "title": "BẢNG PHIÊN ÂM (back matter)", "note": "must NOT be attached to any lesson; safe outcome = no learning unit"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.42, 0.065, 0.22, 0.025], "text": "BẢNG PHIÊN ÂM", "anchor": "BẢNG PHIÊN ÂM"},
+  {"id": "b02", "order": 2, "role": "table", "bbox": [0.10, 0.11, 0.38, 0.81], "text": null, "anchor": "A-la-xca", "notes": "left table: header Phiên âm / Nguyên ngữ / Trang; groups A (A-la-xca Alaska 43 … Át-lan-ta Atlanta 96), Ă (Ăng-gô-la Angola 18, 60), B (Bai-can … Bu-san Busan 96), C (Ca-dắc-xtan … Ca-ta Qatar 81)"},
+  {"id": "b03", "order": 3, "role": "table", "bbox": [0.52, 0.11, 0.38, 0.81], "text": null, "anchor": "Cam-pu-chia", "notes": "right table: Cam-pu-chia Cambodia 7, 8, 9 … Cư-rô-si-ô Kuroshio 43; Đ (Đa-nuýp, Đu-bai); Ê (Ê-cu-a-đo, Ê-ti-ô-pi-a); G (Gia-mai-ca … Guy-a-na); H (Hi-ma-lay-a, Hô-cai-đô); K (Kếp-tao Cape Town 96); I (Im-ma-nu-en Căng Immanuel Kant 15, In-đô-nê-xi-a, I-ran)"},
+  {"id": "b04", "order": 4, "role": "page_number", "bbox": [0.10, 0.94, 0.04, 0.015], "text": "114", "anchor": "114"}
+ ],
+ "flex_groups": [],
+ "critical": ["rows of the two tables interleaved = cross-column contamination", "table rows emitted as body/passage = fabricated reading content", "page attached to a lesson (e.g. the last TOC lesson) = wrong lesson"]
+}

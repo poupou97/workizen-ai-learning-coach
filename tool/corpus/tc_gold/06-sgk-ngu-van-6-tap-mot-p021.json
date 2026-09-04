@@ -1,0 +1,26 @@
+{
+ "book": "06-sgk-ngu-van-6-tap-mot", "page": 21, "printed_page": 20, "grade": 6, "subject": "Ngữ văn", "docType": "SGK",
+ "why": "Thực hành tiếng Việt page: numbered exercises with an embedded italic excerpt (bold key words), an EMPTY fill-in table (Từ đơn / Từ phức: Từ ghép, Từ láy), a long pink knowledge box (Nhận biết từ đơn và từ phức) beside exercises 1–2, three section labels (TỪ ĐƠN VÀ TỪ PHỨC / NGHĨA CỦA TỪ NGỮ / BIỆN PHÁP TU TỪ)",
+ "features": ["side_by_side", "sidebar", "table", "colored_box", "question_block", "italic_quotation"],
+ "lesson": {"number": 1, "title": "Bài 1 — Tôi và các bạn: Thực hành tiếng Việt", "note": "practice section of Bài 1"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.09, 0.075, 0.40, 0.04], "text": "Thực hành tiếng Việt", "anchor": "Thực hành tiếng Việt"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.10, 0.125, 0.23, 0.02], "text": "TỪ ĐƠN VÀ TỪ PHỨC", "anchor": "TỪ ĐƠN VÀ TỪ PHỨC"},
+  {"id": "b03", "order": 3, "role": "question", "bbox": [0.09, 0.155, 0.43, 0.04], "text": "1. Kẻ bảng dưới đây vào vở và điền các từ in đậm trong đoạn văn sau vào ô phù hợp:", "anchor": "1. Kẻ bảng dưới đây vào vở", "contiguous": true, "column": 1},
+  {"id": "b04", "order": 4, "role": "body", "bbox": [0.12, 0.20, 0.40, 0.11], "text": "Đôi cánh tôi, trước kia ngắn hủn hoẳn bây giờ thành cái áo dài kín xuống tận chấm đuôi. Mỗi khi tôi vũ lên, đã nghe tiếng phành phạch giòn giã. Lúc tôi đi bách bộ thì cả người tôi rung rinh một màu nâu bóng mỡ soi gương được và rất ưa nhìn.", "anchor": "Đôi cánh tôi, trước kia ngắn", "contiguous": true, "column": 1, "notes": "excerpt; bold words (tôi, hủn hoẳn, nghe, phành phạch giòn giã, người, rung rinh, bóng mỡ, ưa nhìn) are the exercise data"},
+  {"id": "b05", "order": 5, "role": "table", "bbox": [0.12, 0.325, 0.40, 0.12], "text": null, "anchor": "Từ đơn", "notes": "empty 2-level header table: Từ đơn | Từ phức (Từ ghép | Từ láy); body cells blank"},
+  {"id": "b06", "order": 6, "role": "question", "bbox": [0.09, 0.46, 0.43, 0.075], "text": "2. Trong Bài học đường đời đầu tiên có những từ láy mô phỏng âm thanh như: véo von, hừ hừ. Hãy tìm thêm những từ láy khác thuộc loại này ở trong văn bản.", "anchor": "2. Trong Bài học đường đời", "contiguous": true, "column": 1},
+  {"id": "b07", "order": 7, "role": "question", "bbox": [0.09, 0.54, 0.50, 0.02], "text": "3. Tìm và nêu tác dụng của từ láy trong các câu sau:", "anchor": "3. Tìm và nêu tác dụng"},
+  {"id": "b08", "order": 8, "role": "body", "bbox": [0.09, 0.565, 0.82, 0.06], "text": "– Thỉnh thoảng, muốn thử sự lợi hại của những chiếc vuốt, tôi co cẳng lên, đạp phanh phách vào các ngọn cỏ.\n– Hai cái răng đen nhánh lúc nào cũng nhai ngoàm ngoạp như hai lưỡi liềm máy làm việc.", "anchor": "Thỉnh thoảng, muốn thử sự lợi hại", "contiguous": true},
+  {"id": "b09", "order": 9, "role": "sidebar", "bbox": [0.56, 0.135, 0.34, 0.37], "text": null, "anchor": "Nhận biết từ đơn và từ phức", "contiguous": true, "column": 2, "notes": "knowledge box: title + 3 bullets: 'Quan sát những từ sau đây để nhận biết từ đơn và từ phức: tôi, dế, đi, nhọn hoắt, cá đuôi cờ, ngơ ngác, lêu nghêu, bè bè.' / 'Có thể thấy, trong những từ này, các từ tôi, dế, đi là từ đơn vì mỗi từ chỉ có một tiếng.' / 'Nhọn hoắt, cá đuôi cờ, ngơ ngác, lêu nghêu, bè bè là những từ phức vì mỗi từ gồm có hai hoặc nhiều hơn hai tiếng. … lặp lại cả âm đầu và vần (bè bè).'"},
+  {"id": "b10", "order": 10, "role": "heading", "bbox": [0.10, 0.65, 0.23, 0.02], "text": "NGHĨA CỦA TỪ NGỮ", "anchor": "NGHĨA CỦA TỪ NGỮ"},
+  {"id": "b11", "order": 11, "role": "question", "bbox": [0.09, 0.685, 0.82, 0.08], "text": "4. Từ ngữ trong Bài học đường đời đầu tiên được dùng rất sáng tạo. Một số từ ngữ được dùng theo nghĩa khác với nghĩa thông thường, chẳng hạn nghèo trong nghèo sức, mưa dầm sùi sụt trong điệu hát mưa dầm sùi sụt. Hãy giải thích nghĩa thông thường của nghèo, mưa dầm sùi sụt và nghĩa trong văn bản của những từ ngữ này.", "anchor": "4. Từ ngữ trong Bài học đường đời", "contiguous": true},
+  {"id": "b12", "order": 12, "role": "question", "bbox": [0.09, 0.765, 0.70, 0.02], "text": "5. Đặt câu với mỗi thành ngữ sau: ăn xổi ở thì, tắt lửa tối đèn, hôi như cú mèo.", "anchor": "5. Đặt câu với mỗi thành ngữ"},
+  {"id": "b13", "order": 13, "role": "heading", "bbox": [0.10, 0.81, 0.23, 0.02], "text": "BIỆN PHÁP TU TỪ", "anchor": "BIỆN PHÁP TU TỪ"},
+  {"id": "b14", "order": 14, "role": "question", "bbox": [0.09, 0.845, 0.82, 0.06], "text": "6. Trong đoạn trích Bài học đường đời đầu tiên có những hình ảnh so sánh thú vị, sinh động. Hãy tìm một số câu văn có sử dụng biện pháp tu từ so sánh trong văn bản này và chỉ ra tác dụng của biện pháp tu từ đó.", "anchor": "6. Trong đoạn trích Bài học đường đời", "contiguous": true},
+  {"id": "b15", "order": 15, "role": "page_number", "bbox": [0.09, 0.945, 0.03, 0.015], "text": "20", "anchor": "20"}
+ ],
+ "flex_groups": [["b03", "b04", "b05", "b06"], ["b09"]],
+ "critical": ["b09 knowledge box (which CONTAINS the answers: tôi/dế/đi = từ đơn …) spliced into exercises = answer leaked as question content", "b04 excerpt merged with b09 = contamination of two texts", "empty table headers emitted as body = fabricated content"]
+}

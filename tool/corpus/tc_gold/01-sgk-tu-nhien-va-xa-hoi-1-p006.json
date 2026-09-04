@@ -1,0 +1,13 @@
+{
+ "book": "01-sgk-tu-nhien-va-xa-hoi-1", "page": 6, "printed_page": 5, "grade": 1, "subject": "TN&XH", "docType": "SGK",
+ "why": "grade-1 TABLE OF CONTENTS page (second page of the TOC): a 3-column table (Chủ đề | NỘI DUNG | Trang) with theme rows and 'Bài N title … page' rows — the census flagged it as a colour-heavy visual page; it is the source of lesson structure and must NOT be attached to any lesson",
+ "features": ["table", "toc", "color_heavy", "front_matter"],
+ "lesson": {"number": null, "title": "MỤC LỤC (front matter)", "note": "must NOT be attached to a lesson; the rows are lesson metadata (WAL-172 TOC parsing)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "table", "bbox": [0.10, 0.15, 0.80, 0.76], "text": null, "anchor": "THỰC VẬT VÀ ĐỘNG VẬT", "notes": "header Chủ đề | NỘI DUNG | Trang. Rows: 4 THỰC VẬT VÀ ĐỘNG VẬT 60; Bài 15 Cây xung quanh em 60; Bài 16 Chăm sóc và bảo vệ cây trồng 66; Bài 17 Con vật quanh em 70; Bài 18 Chăm sóc và bảo vệ vật nuôi 76; Bài 19 Ôn tập chủ đề Thực vật và động vật 80; 5 CON NGƯỜI VÀ SỨC KHOẺ 82; Bài 20 Cơ thể em 82; Bài 21 Các giác quan của cơ thể 88; Bài 22 Ăn, uống hằng ngày 94; Bài 23 Vận động và nghỉ ngơi 98; Bài 24 Tự bảo vệ mình 102; Bài 25 Ôn tập chủ đề Con người và sức khoẻ 106; 6 TRÁI ĐẤT VÀ BẦU TRỜI 108; Bài 26 Cùng khám phá bầu trời 108; Bài 27 Thời tiết luôn thay đổi 114; Bài 28 Ôn tập chủ đề Trái Đất và bầu trời 120; Một số thuật ngữ dùng trong sách 122"},
+  {"id": "b02", "order": 2, "role": "page_number", "bbox": [0.86, 0.925, 0.06, 0.03], "text": "5", "anchor": "5"}
+ ],
+ "flex_groups": [],
+ "critical": ["TOC rows emitted as lesson content / questions = fabricated content", "page attached to a lesson = wrong lesson", "page numbers column misaligned with titles (Bài 15 → 66) = wrong lesson→page mapping for the whole book"]
+}

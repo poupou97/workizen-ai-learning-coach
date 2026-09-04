@@ -1,0 +1,27 @@
+{
+ "book": "12-sgk-toan-12-tap-hai", "page": 20, "printed_page": 19, "grade": 12, "subject": "Toán", "docType": "SGK",
+ "why": "grade-12 calculus lesson opener: two-column info box (THUẬT NGỮ | KIẾN THỨC, KĨ NĂNG), intro text wrapping beside a picture of solids, section/sub-section headings with math, HĐ1 with an integral (2-D notation), a boxed rule with a displayed integral formula, a graph figure (Hình 4.12) beside the rule box",
+ "features": ["formula", "sidebar", "figure", "caption", "side_by_side", "colored_box", "lesson_start", "integral_notation"],
+ "lesson": {"number": 13, "title": "Ứng dụng hình học của tích phân", "note": "page is the lesson start (Bài 13)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.07, 0.07, 0.17, 0.07], "text": "Bài 13", "anchor": "Bài 13"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.33, 0.08, 0.38, 0.06], "text": "ỨNG DỤNG HÌNH HỌC CỦA TÍCH PHÂN", "anchor": "ỨNG DỤNG HÌNH HỌC"},
+  {"id": "b03", "order": 3, "role": "heading", "bbox": [0.12, 0.175, 0.13, 0.02], "text": "THUẬT NGỮ", "anchor": "THUẬT NGỮ", "column": 1},
+  {"id": "b04", "order": 4, "role": "sidebar", "bbox": [0.12, 0.20, 0.20, 0.07], "text": "Hình phẳng\nThể tích\nKhối tròn xoay", "anchor": "Hình phẳng", "column": 1},
+  {"id": "b05", "order": 5, "role": "heading", "bbox": [0.38, 0.175, 0.23, 0.02], "text": "KIẾN THỨC, KĨ NĂNG", "anchor": "KIẾN THỨC, KĨ NĂNG", "column": 2},
+  {"id": "b06", "order": 6, "role": "objective", "bbox": [0.37, 0.20, 0.52, 0.045], "text": "Sử dụng tích phân để tính diện tích của một số hình phẳng.\nSử dụng tích phân để tính thể tích của một số vật thể.", "anchor": "Sử dụng tích phân để tính diện tích", "column": 2},
+  {"id": "b07", "order": 7, "role": "body", "bbox": [0.09, 0.30, 0.41, 0.10], "text": "Trong phần Hình học ở Trung học cơ sở và lớp 11, chúng ta đã được học công thức tính thể tích của nhiều vật thể trong không gian như khối lăng trụ, khối chóp, khối chóp cụt đều, khối trụ, khối nón, khối cầu. Tuy nhiên, ta thường phải thừa nhận các công thức này.", "anchor": "Trong phần Hình học ở Trung học", "contiguous": true},
+  {"id": "b08", "order": 8, "role": "body", "bbox": [0.09, 0.41, 0.41, 0.13], "text": "Bài học này sẽ cung cấp một phương pháp tổng quát giúp ta thiết lập một cách dễ dàng tất cả các công thức tính diện tích và thể tích đã được học trong Hình học, cũng như tính được diện tích của những hình phẳng và thể tích của những vật thể phức tạp hơn gặp trong thực tiễn.", "anchor": "Bài học này sẽ cung cấp", "contiguous": true},
+  {"id": "b09", "order": 9, "role": "heading", "bbox": [0.09, 0.555, 0.62, 0.02], "text": "1. ỨNG DỤNG TÍCH PHÂN ĐỂ TÍNH DIỆN TÍCH HÌNH PHẲNG", "anchor": "1. ỨNG DỤNG TÍCH PHÂN ĐỂ TÍNH"},
+  {"id": "b10", "order": 10, "role": "heading", "bbox": [0.09, 0.585, 0.82, 0.045], "text": "a) Hình phẳng giới hạn bởi một đồ thị hàm số, trục hoành và hai đường thẳng x = a, x = b", "anchor": "a) Hình phẳng giới hạn bởi", "formula": true},
+  {"id": "b11", "order": 11, "role": "heading", "bbox": [0.09, 0.635, 0.40, 0.02], "text": "HĐ1. Nhận biết công thức tính diện tích", "anchor": "HĐ1. Nhận biết công thức"},
+  {"id": "b12", "order": 12, "role": "question", "bbox": [0.09, 0.66, 0.55, 0.10], "text": null, "anchor": "Xét hình phẳng giới hạn bởi đường thẳng", "formula": true, "contiguous": true, "notes": "Xét hình phẳng giới hạn bởi đường thẳng y = f(x) = x + 1, trục hoành và hai đường thẳng x = −2, x = 1 (H.4.12). a) Tính diện tích S của hình phẳng này. b) Tính ∫₋₂¹ |f(x)| dx và so sánh với S."},
+  {"id": "b13", "order": 13, "role": "figure_label", "bbox": [0.62, 0.64, 0.30, 0.19], "text": null, "anchor": "y = x + 1", "notes": "coordinate graph: axes x, y; line y = x + 1; ticks −2, −1, O, 1, 2; shaded region"},
+  {"id": "b14", "order": 14, "role": "caption", "bbox": [0.72, 0.84, 0.10, 0.02], "text": "Hình 4.12", "anchor": "Hình 4.12", "rel": {"caption_of": "b13"}},
+  {"id": "b15", "order": 15, "role": "rule", "bbox": [0.10, 0.775, 0.45, 0.13], "text": null, "anchor": "Diện tích S của hình phẳng giới hạn bởi đồ thị", "formula": true, "contiguous": true, "notes": "Diện tích S của hình phẳng giới hạn bởi đồ thị của hàm số f(x) liên tục, trục hoành và hai đường thẳng x = a, x = b (a < b), được tính bằng công thức S = ∫ₐᵇ |f(x)| dx."},
+  {"id": "b16", "order": 16, "role": "page_number", "bbox": [0.90, 0.945, 0.04, 0.02], "text": "19", "anchor": "19"}
+ ],
+ "flex_groups": [["b03", "b04"], ["b05", "b06"], ["b13", "b14"]],
+ "critical": ["integral bounds (−2, 1; a, b) detached from ∫ = corrupted math", "graph tick labels (−2 −1 O 1 2) spliced into b12/b15 = contamination", "b06 objectives or b15 rule emitted as learner questions = objective/rule-as-question", "b04 term list emitted as passage = fabricated content"]
+}

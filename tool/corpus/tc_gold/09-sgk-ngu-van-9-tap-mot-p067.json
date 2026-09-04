@@ -1,0 +1,28 @@
+{
+ "book": "09-sgk-ngu-van-9-tap-mot", "page": 67, "printed_page": 66, "grade": 9, "subject": "Ngữ văn", "docType": "SGK",
+ "why": "WAL-206 gold, the Ngữ văn falsification page: pre-reading question, poem (lục bát couplets, indented alternately) with footnote markers, a right-side 'Theo dõi' reading-strategy box beside the poem, and a long footnote block (8 notes) below a rule",
+ "features": ["sidebar", "footnote", "poem", "side_by_side", "reading_strategy_box"],
+ "lesson": {"number": 3, "title": "Hồn nước nằm trong tiếng mẹ cha (Bài 3)", "note": "Văn bản 1 of Bài 3 — the lesson unit is the reading text 'Kim – Kiều gặp gỡ'"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.12, 0.085, 0.16, 0.025], "text": "VĂN BẢN 1", "anchor": "VĂN BẢN 1"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.13, 0.13, 0.22, 0.025], "text": "TRƯỚC KHI ĐỌC", "anchor": "TRƯỚC KHI ĐỌC"},
+  {"id": "b03", "order": 3, "role": "question", "bbox": [0.13, 0.16, 0.78, 0.04], "text": "Hãy giới thiệu một tác phẩm văn học hoặc bộ phim có câu chuyện tình yêu để lại cho em ấn tượng đẹp.", "anchor": "Hãy giới thiệu một tác phẩm", "contiguous": true},
+  {"id": "b04", "order": 4, "role": "heading", "bbox": [0.13, 0.21, 0.20, 0.025], "text": "ĐỌC VĂN BẢN", "anchor": "ĐỌC VĂN BẢN"},
+  {"id": "b05", "order": 5, "role": "heading", "bbox": [0.35, 0.245, 0.33, 0.04], "text": "Kim – Kiều gặp gỡ(1)", "anchor": "Kim – Kiều gặp gỡ"},
+  {"id": "b06", "order": 6, "role": "heading", "bbox": [0.36, 0.29, 0.32, 0.02], "text": "Trích Truyện Kiều(2), NGUYỄN DU", "anchor": "Trích Truyện Kiều", "notes": "source line / attribution"},
+  {"id": "b07", "order": 7, "role": "body", "bbox": [0.16, 0.335, 0.38, 0.20], "text": "Nẻo xa mới tỏ mặt người,\nKhách(3) đà xuống ngựa tới nơi tự tình.\nHài văn(4) lần bước dặm xanh(5),\nMột vùng như thể cây quỳnh cành dao(6).\nChàng Vương(7) quen mặt ra chào,\nHai kiều e lệ nép vào dưới hoa.\nNguyên người quanh quất đâu xa,\nHọ Kim tên Trọng vốn nhà trâm anh(8).", "anchor": "Nẻo xa mới tỏ mặt người", "contiguous": true, "notes": "poem: 8 lines, line breaks are meaning-bearing; footnote markers (3)…(8) are superscripts"},
+  {"id": "b08", "order": 8, "role": "sidebar", "bbox": [0.62, 0.35, 0.32, 0.06], "text": "Theo dõi\nSự xuất hiện của nhân vật Kim Trọng.", "anchor": "Theo dõi", "contiguous": true, "notes": "reading-strategy box beside the poem — NEVER part of the poem text"},
+  {"id": "b09", "order": 9, "role": "footnote", "bbox": [0.13, 0.555, 0.80, 0.035], "text": "(1) Nhan đề đoạn trích do người biên soạn đặt.", "anchor": "Nhan đề đoạn trích do"},
+  {"id": "b10", "order": 10, "role": "footnote", "bbox": [0.13, 0.565, 0.80, 0.20], "text": null, "anchor": "Truyện Kiều có tên chữ là", "notes": "footnote (2): long summary of Truyện Kiều, 2 paragraphs ending '…trăm mối'."},
+  {"id": "b11", "order": 11, "role": "footnote", "bbox": [0.13, 0.81, 0.80, 0.02], "text": "(3) Khách: chỉ Kim Trọng.", "anchor": "Khách: chỉ Kim Trọng"},
+  {"id": "b12", "order": 12, "role": "footnote", "bbox": [0.13, 0.825, 0.80, 0.02], "text": "(4) Hài văn: giày có thêu những đường vân nổi.", "anchor": "Hài văn: giày có thêu"},
+  {"id": "b13", "order": 13, "role": "footnote", "bbox": [0.13, 0.84, 0.80, 0.02], "text": "(5) Dặm xanh: chỉ lối đi trên bãi cỏ xanh.", "anchor": "Dặm xanh: chỉ lối đi"},
+  {"id": "b14", "order": 14, "role": "footnote", "bbox": [0.13, 0.855, 0.80, 0.035], "text": "(6) Cây quỳnh cành dao: quỳnh và dao là hai giống cây cảnh thường được trồng cùng nhau; ở đây ý nói khi Kim Trọng bước đi thì cảnh vật xung quanh cũng như bừng lên vẻ đẹp tươi sáng, hài hoà.", "anchor": "Cây quỳnh cành dao: quỳnh và"},
+  {"id": "b15", "order": 15, "role": "footnote", "bbox": [0.13, 0.89, 0.80, 0.02], "text": "(7) Chàng Vương: Vương Quan, em trai của Thuý Kiều và Thuý Vân.", "anchor": "Chàng Vương: Vương Quan"},
+  {"id": "b16", "order": 16, "role": "footnote", "bbox": [0.13, 0.905, 0.80, 0.02], "text": "(8) Nhà trâm anh: nhà quyền quý.", "anchor": "Nhà trâm anh: nhà quyền quý"},
+  {"id": "b17", "order": 17, "role": "page_number", "bbox": [0.11, 0.955, 0.03, 0.015], "text": "66", "anchor": "66"}
+ ],
+ "flex_groups": [["b08"]],
+ "critical": ["b08 'Theo dõi…' spliced into the poem lines = contamination (the original Ngữ văn failure)", "footnotes spliced into the poem = contamination", "b06 attribution dropped = wrong source attribution", "poem line breaks lost = meaning-changing reading order for verse"]
+}

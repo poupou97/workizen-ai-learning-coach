@@ -1,0 +1,28 @@
+{
+ "book": "10-sgk-vat-li-10", "page": 89, "printed_page": 88, "grade": 10, "subject": "Vật lí", "docType": "SGK",
+ "why": "physics experiment page: text column (equipment list with numbered references, activity box with 3 questions using vector symbols, 9 numbered procedure steps, a fraction formula) beside a figure column (3 photos with numeric labels, captions Hình 22.3 / Hình 22.4 a) b))",
+ "features": ["two_col", "figure", "caption", "formula", "colored_box", "question_block", "experiment"],
+ "lesson": {"number": 22, "title": "Thực hành: Tổng hợp lực (Bài 22)", "note": "figures 22.3/22.4 → lesson 22; running head CHƯƠNG III"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "running_head", "bbox": [0.10, 0.045, 0.25, 0.015], "text": "CHƯƠNG III – ĐỘNG LỰC HỌC", "anchor": "CHƯƠNG III – ĐỘNG LỰC HỌC"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.09, 0.075, 0.40, 0.02], "text": "II. TỔNG HỢP HAI LỰC SONG SONG", "anchor": "II. TỔNG HỢP HAI LỰC SONG SONG"},
+  {"id": "b03", "order": 3, "role": "heading", "bbox": [0.09, 0.105, 0.35, 0.02], "text": "1. Dụng cụ thí nghiệm (Hình 22.3)", "anchor": "1. Dụng cụ thí nghiệm", "notes": "numbered sub-heading, NOT a question"},
+  {"id": "b04", "order": 4, "role": "body", "bbox": [0.09, 0.13, 0.55, 0.17], "text": "– Bảng thép (1).\n– Hai lò xo xoắn chịu được lực kéo tối đa là 5 N, dài khoảng 60 mm (2).\n– Thanh treo nhẹ, cứng, dài 400 mm. Trên thanh có gắn thước và ba con trượt có gắn móc treo (3).\n– Các quả nặng có khối lượng bằng nhau 50 g (4).\n– Hai đế nam châm để gắn lò xo (5).\n– Giá đỡ có trục Φ10 mm, cắm lên đế ba chân (6).\n– Bút dùng để đánh dấu.", "anchor": "Bảng thép (1)", "contiguous": true, "notes": "equipment list; the (n) markers refer to labels in the photo"},
+  {"id": "b05", "order": 5, "role": "heading", "bbox": [0.09, 0.305, 0.34, 0.02], "text": "2. Thiết kế phương án thí nghiệm", "anchor": "2. Thiết kế phương án thí nghiệm"},
+  {"id": "b06", "order": 6, "role": "body", "bbox": [0.12, 0.33, 0.52, 0.04], "text": "Xác định lực tổng hợp của hai lực mà giá của các lực đó song song.", "anchor": "Xác định lực tổng hợp của", "contiguous": true},
+  {"id": "b07", "order": 7, "role": "activity", "bbox": [0.12, 0.375, 0.52, 0.06], "text": "Gắn hai đế nam châm lên bảng thép, treo thanh kim loại lên hai đế nam châm bằng hai lò xo, treo các quả nặng vào hai đầu thanh, làm lò xo dãn ra một khoảng và thảo luận:", "anchor": "Gắn hai đế nam châm lên bảng thép, treo thanh", "contiguous": true},
+  {"id": "b08", "order": 8, "role": "question", "bbox": [0.13, 0.435, 0.51, 0.06], "text": null, "anchor": "1. Làm thế nào thay thế hai lực", "formula": true, "notes": "1. Làm thế nào thay thế hai lực F⃗1 và F⃗2 bằng một lực F⃗ mà thanh vẫn ở vị trí như khi chịu tác dụng của hai lực F⃗1 và F⃗2?"},
+  {"id": "b09", "order": 9, "role": "question", "bbox": [0.13, 0.495, 0.51, 0.02], "text": null, "anchor": "2. Làm thế nào để hai lực", "formula": true, "notes": "2. Làm thế nào để hai lực F⃗1 và F⃗2 song song."},
+  {"id": "b10", "order": 10, "role": "question", "bbox": [0.13, 0.515, 0.51, 0.02], "text": null, "anchor": "3. Làm thế nào xác định lực tổng hợp", "formula": true},
+  {"id": "b11", "order": 11, "role": "heading", "bbox": [0.09, 0.55, 0.25, 0.02], "text": "3. Tiến hành thí nghiệm", "anchor": "3. Tiến hành thí nghiệm"},
+  {"id": "b12", "order": 12, "role": "body", "bbox": [0.09, 0.575, 0.55, 0.34], "text": null, "anchor": "1. Gắn hai đế nam châm lên bảng thép, sau đó", "contiguous": true, "formula": true, "notes": "9 numbered procedure steps (not questions); step 9 ends with the fraction formula F1/F2 = d2/d1 = OB/OAlt = (AB − OAlt)/OAlt and 'và điền vào mẫu Bảng 22.2.'"},
+  {"id": "b13", "order": 13, "role": "figure_label", "bbox": [0.68, 0.095, 0.22, 0.24], "text": null, "anchor": "3", "notes": "photo of the apparatus with labels 1–6"},
+  {"id": "b14", "order": 14, "role": "caption", "bbox": [0.68, 0.34, 0.22, 0.045], "text": "Hình 22.3. Bộ thí nghiệm tổng hợp hai lực song song cùng chiều", "anchor": "Hình 22.3. Bộ thí nghiệm", "rel": {"caption_of": "b13"}},
+  {"id": "b15", "order": 15, "role": "figure_label", "bbox": [0.65, 0.40, 0.25, 0.47], "text": null, "anchor": "a)", "notes": "two photos a) and b) with labels A, B, O"},
+  {"id": "b16", "order": 16, "role": "caption", "bbox": [0.68, 0.875, 0.22, 0.03], "text": "Hình 22.4. Thí nghiệm tổng hợp hai lực song song", "anchor": "Hình 22.4. Thí nghiệm tổng hợp", "rel": {"caption_of": "b15"}},
+  {"id": "b17", "order": 17, "role": "page_number", "bbox": [0.08, 0.945, 0.03, 0.015], "text": "88", "anchor": "88"}
+ ],
+ "flex_groups": [["b13", "b14"], ["b15", "b16"]],
+ "critical": ["procedure steps (b12) emitted as 9 learner questions = instruction-as-question", "photo labels (1–6, A/B/O) spliced into the equipment list = contamination", "'5 N', '60 mm', '400 mm', '50 g', 'Φ10 mm' altered = corrupted physics data", "fraction formula flattened = corrupted math"]
+}

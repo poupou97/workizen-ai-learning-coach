@@ -1,0 +1,22 @@
+{
+ "book": "11-sgk-ngu-van-11-tap-mot", "page": 39, "printed_page": 38, "grade": 11, "subject": "Ngữ văn", "docType": "SGK",
+ "why": "true TWO-COLUMN literature page: left column = end of exercise 1 excerpt (Nam Cao) + exercise 2 with two excerpts (Kim Lân); right column = a grey box holding an excerpt (Nguyễn Tuân) that CONTINUES FROM THE PREVIOUS PAGE followed by a model analysis paragraph; italic quotations, source attributions in parentheses",
+ "features": ["two_col", "continuation", "colored_box", "attribution", "italic_quotation"],
+ "lesson": {"number": 1, "title": "Bài 1 — Thực hành tiếng Việt: Đặc điểm cơ bản của ngôn ngữ nói và ngôn ngữ viết", "note": "practice section inside Bài 1; page has no heading"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "body", "bbox": [0.09, 0.07, 0.45, 0.02], "text": "Rồi vừa xốc Chí Phèo, cụ vừa phàn nàn:", "anchor": "Rồi vừa xốc Chí Phèo", "column": 1},
+  {"id": "b02", "order": 2, "role": "body", "bbox": [0.09, 0.10, 0.45, 0.115], "text": "– Khổ quá! Giá có tôi ở nhà thì có đâu đến nỗi. Ta nói chuyện với nhau, thế nào cũng xong. Người lớn cả, chỉ một câu chuyện với nhau là đủ. Chỉ tại thằng lí Cường nóng tính không nghĩ trước nghĩ sau. Ai, chứ anh với nó còn có họ kia đấy.", "anchor": "– Khổ quá! Giá có tôi", "contiguous": true, "column": 1},
+  {"id": "b03", "order": 3, "role": "attribution", "bbox": [0.37, 0.225, 0.17, 0.02], "text": "(Nam Cao, Chí Phèo)", "anchor": "(Nam Cao, Chí Phèo)", "column": 1},
+  {"id": "b04", "order": 4, "role": "question", "bbox": [0.09, 0.255, 0.45, 0.045], "text": "2. Phân tích các đặc điểm cơ bản của ngôn ngữ viết trong đoạn trích sau:", "anchor": "2. Phân tích các đặc điểm", "column": 1},
+  {"id": "b05", "order": 5, "role": "body", "bbox": [0.09, 0.31, 0.45, 0.185], "text": "Cái đói đã tràn đến xóm này tự lúc nào. Những gia đình từ những vùng Nam Định, Thái Bình, đội chiếu lũ lượt bồng bế, dắt díu nhau lên xanh xám như những bóng ma, và nằm ngổn ngang khắp lều chợ. Người chết như ngả rạ. Không buổi sáng nào người trong làng đi chợ, đi làm đồng không gặp ba bốn cái thây nằm còng queo bên đường. Không khí vẩn lên mùi ẩm thối của rác rưởi và mùi gây của xác người.", "anchor": "Cái đói đã tràn đến xóm", "contiguous": true, "column": 1},
+  {"id": "b06", "order": 6, "role": "body", "bbox": [0.09, 0.505, 0.45, 0.16], "text": "[…] Ngã tư xóm chợ về chiều càng xác xơ, heo hút. Từng trận gió từ cánh đồng thổi vào, ngăn ngắt. Hai bên dãy phố, úp súp, tối om, không nhà nào có ánh đèn, lửa. Dưới những gốc đa, gốc gạo xù xì, bóng những người đói dật dờ đi lại lặng lẽ như những bóng ma. Tiếng quạ trên mấy cây gạo ngoài bãi chợ cứ gào lên từng hồi thê thiết.", "anchor": "Ngã tư xóm chợ về chiều", "contiguous": true, "column": 1},
+  {"id": "b07", "order": 7, "role": "attribution", "bbox": [0.39, 0.68, 0.15, 0.02], "text": "(Kim Lân, Vợ nhặt)", "anchor": "(Kim Lân, Vợ nhặt)", "column": 1},
+  {"id": "b08", "order": 8, "role": "body", "bbox": [0.57, 0.08, 0.32, 0.31], "text": null, "anchor": "tiếng kiểng và mõ đều đặn thưa thớt", "contiguous": true, "column": 2, "notes": "CONTINUATION of the excerpt started on the previous page (Nguyễn Tuân, Chữ người tử tù); italic blue text inside the grey box. Ends '…muốn từ biệt vũ trụ.'"},
+  {"id": "b09", "order": 9, "role": "attribution", "bbox": [0.65, 0.395, 0.24, 0.02], "text": "(Nguyễn Tuân, Chữ người tử tù)", "anchor": "(Nguyễn Tuân, Chữ người tử tù)", "column": 2},
+  {"id": "b10", "order": 10, "role": "body", "bbox": [0.57, 0.42, 0.32, 0.39], "text": null, "anchor": "Trong đoạn văn trên, nhà văn Nguyễn Tuân", "contiguous": true, "column": 2, "notes": "model analysis paragraph (the worked example), ends '…như một cảnh trong phim.'"},
+  {"id": "b11", "order": 11, "role": "page_number", "bbox": [0.09, 0.945, 0.04, 0.02], "text": "38", "anchor": "38"}
+ ],
+ "flex_groups": [["b01", "b02", "b03", "b04", "b05", "b06", "b07"], ["b08", "b09", "b10"]],
+ "critical": ["left/right columns interleaved line by line = cross-column contamination of two different literary texts (meaning destroyed)", "b08 (a continuation) presented as the start of a text = cross-page fragment presented as whole", "attribution (b03/b07/b09) attached to the wrong excerpt = wrong source attribution", "b10 (model answer) treated as learner question or as excerpt = answer-as-question"]
+}

@@ -1,0 +1,26 @@
+{
+ "book": "07-sgk-khoa-hoc-tu-nhien-7", "page": 21, "printed_page": 20, "grade": 7, "subject": "KHTN", "docType": "SGK",
+ "why": "single-column page whose structure is carried by coloured boxes: an activity box (Chuẩn bị/Thực hiện/Thảo luận + 2 questions), a question box, body with a footnote marker, a second question box, a footnote",
+ "features": ["colored_box", "activity_box", "question_block", "footnote", "continuation_lesson"],
+ "lesson": {"number": 3, "title": "Nguyên tố hoá học", "note": "page inside Bài 3 (no lesson header on page; heading II continues the lesson)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.12, 0.09, 0.45, 0.02], "text": "Nhận biết nguyên tố hoá học dựa vào số proton", "anchor": "Nhận biết nguyên tố hoá học", "notes": "activity title inside the hand-icon activity box"},
+  {"id": "b02", "order": 2, "role": "activity", "bbox": [0.12, 0.11, 0.76, 0.06], "text": "Chuẩn bị: 12 tấm thẻ ghi thông tin (p, n) của các nguyên tử sau: A (1, 0); D (1, 1); E (1, 2); G (6, 6); L (6, 8); M (7, 7); Q (8, 8); R (8, 9); T (8, 10); X (20, 20); Y (19, 20); Z (19, 21). Thực hiện: xếp các thẻ thuộc cùng một nguyên tố vào một ô vuông. Thảo luận nhóm và trả lời câu hỏi:", "anchor": "Chuẩn bị: 12 tấm thẻ", "contiguous": true, "notes": "the (p, n) pairs are the data of the activity — any digit corruption is a critical science error"},
+  {"id": "b03", "order": 3, "role": "question", "bbox": [0.12, 0.185, 0.40, 0.02], "text": "1. Em có thể xếp được bao nhiêu ô vuông?", "anchor": "1. Em có thể xếp được"},
+  {"id": "b04", "order": 4, "role": "question", "bbox": [0.12, 0.205, 0.52, 0.02], "text": "2. Các nguyên tử nào thuộc cùng một nguyên tố hoá học?", "anchor": "2. Các nguyên tử nào thuộc"},
+  {"id": "b05", "order": 5, "role": "question", "bbox": [0.12, 0.27, 0.76, 0.07], "text": "1. Trong tự nhiên, có một số loại nguyên tử mà trong hạt nhân cùng có một proton nhưng có thể có số neutron khác nhau: không có neutron, có một hoặc hai neutron. Hãy giải thích tại sao các loại nguyên tử này đều thuộc về một nguyên tố hoá học là hydrogen.", "anchor": "1. Trong tự nhiên, có một số", "contiguous": true},
+  {"id": "b06", "order": 6, "role": "question", "bbox": [0.12, 0.345, 0.76, 0.04], "text": "2. Số hiệu nguyên tử oxygen là 8. Số proton trong hạt nhân nguyên tử của nguyên tố oxygen là bao nhiêu?", "anchor": "2. Số hiệu nguyên tử oxygen", "contiguous": true},
+  {"id": "b07", "order": 7, "role": "heading", "bbox": [0.09, 0.415, 0.53, 0.025], "text": "II – Tên gọi và kí hiệu của nguyên tố hoá học", "anchor": "II – Tên gọi và kí hiệu"},
+  {"id": "b08", "order": 8, "role": "heading", "bbox": [0.09, 0.445, 0.33, 0.02], "text": "1. Tên gọi của nguyên tố hoá học", "anchor": "1. Tên gọi của nguyên tố", "notes": "numbered sub-heading — NOT a learner question"},
+  {"id": "b09", "order": 9, "role": "body", "bbox": [0.12, 0.47, 0.78, 0.125], "text": "Một số nguyên tố hoá học đã được biết đến từ thời cổ xưa như vàng (gold), bạc (silver), sắt (iron), thuỷ ngân (mercury), thiếc (tin), đồng (copper), chì (lead). Trong khi đó lại có nhiều nguyên tố mới được tìm thấy gần đây như rutherfordium, bohrium,... Tên gọi của các nguyên tố hoá học được đặt theo các cách khác nhau. Ngày nay, tên gọi của các nguyên tố được quy định dùng thống nhất trên toàn thế giới theo IUPAC(1) (xem Bảng tuần hoàn trang 25).", "anchor": "Một số nguyên tố hoá học đã", "contiguous": true},
+  {"id": "b10", "order": 10, "role": "question", "bbox": [0.12, 0.635, 0.76, 0.04], "text": "Hãy tìm hiểu và thảo luận nhóm về nguồn gốc tên gọi của một số nguyên tố có nhiều ứng dụng trong cuộc sống như đồng, sắt và nhôm.", "anchor": "Hãy tìm hiểu và thảo luận nhóm", "contiguous": true},
+  {"id": "b11", "order": 11, "role": "heading", "bbox": [0.09, 0.705, 0.33, 0.02], "text": "2. Kí hiệu của nguyên tố hoá học", "anchor": "2. Kí hiệu của nguyên tố", "notes": "numbered sub-heading — NOT a learner question"},
+  {"id": "b12", "order": 12, "role": "body", "bbox": [0.12, 0.735, 0.78, 0.08], "text": "Mỗi nguyên tố hoá học có một kí hiệu hoá học riêng. Kí hiệu hoá học được quy định dùng thống nhất trên toàn thế giới. Kí hiệu hoá học gồm một hoặc hai chữ cái có trong tên gọi của nguyên tố, trong đó chữ cái đầu được viết ở dạng chữ in hoa và chữ cái sau viết thường (xem Bảng 3.1).", "anchor": "Mỗi nguyên tố hoá học có một", "contiguous": true},
+  {"id": "b13", "order": 13, "role": "body", "bbox": [0.12, 0.82, 0.78, 0.04], "text": "Ví dụ: Kí hiệu hoá học của nguyên tố hydrogen là H, của nguyên tố oxygen là O, của nguyên tố lithium là Li.", "anchor": "Ví dụ: Kí hiệu hoá học của", "contiguous": true},
+  {"id": "b14", "order": 14, "role": "footnote", "bbox": [0.09, 0.885, 0.78, 0.04], "text": "(1) IUPAC là viết tắt của tên tiếng Anh International Union of Pure and Applied Chemistry, nghĩa là Liên minh Quốc tế về Hoá học cơ bản và Hoá học ứng dụng.", "anchor": "IUPAC là viết tắt của tên"},
+  {"id": "b15", "order": 15, "role": "page_number", "bbox": [0.06, 0.945, 0.03, 0.015], "text": "20", "anchor": "20"}
+ ],
+ "flex_groups": [],
+ "critical": ["b08/b11 emitted as learner question = heading-as-question", "b14 footnote spliced into b13 = contamination", "digits in b02 (p, n) pairs altered = corrupted science data"]
+}

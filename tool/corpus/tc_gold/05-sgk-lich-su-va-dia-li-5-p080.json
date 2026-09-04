@@ -1,0 +1,20 @@
+{
+ "book": "05-sgk-lich-su-va-dia-li-5", "page": 80, "printed_page": 78, "grade": 5, "subject": "LS&ĐL", "docType": "SGK",
+ "why": "geography page dominated by a physical MAP (Hình 3. Bản đồ tự nhiên Trung Quốc) with ~60 map labels, a legend box (CHÚ GIẢI) and a numbered-country box; body paragraph above, caption below, section heading, question box, and a body paragraph with numbers (1,4 tỉ, 56, 90 %)",
+ "features": ["figure", "diagram", "map", "table", "caption", "overlap", "question_block", "dense_labels"],
+ "lesson": {"number": 17, "title": "Nước Cộng hoà Nhân dân Trung Hoa (Bài 17)", "note": "page inside Bài 17 (Trung Quốc); the census stratum said lesson 15 by TOC offset — scorer uses the TOC range of the book and this note flags a possible offset error"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "body", "bbox": [0.09, 0.06, 0.83, 0.09], "text": "Miền Tây gồm các dãy núi cao, sơn nguyên đồ sộ xen lẫn các bồn địa. Miền Tây có khí hậu khắc nghiệt, mưa ít nên hình thành những vùng hoang mạc và bán hoang mạc; đất cằn cỗi. Đây là nơi bắt nguồn của nhiều con sông chảy vào Đông Nam Á và miền Đông Trung Quốc.", "anchor": "Miền Tây gồm các dãy núi cao", "contiguous": true},
+  {"id": "b02", "order": 2, "role": "figure_label", "bbox": [0.07, 0.17, 0.88, 0.52], "text": null, "anchor": "CA-DẮC-XTAN", "notes": "map labels (≈60): countries (CA-DẮC-XTAN, LIÊN BANG NGA, MÔNG CỔ, ẤN ĐỘ, NÊ-PAN, BU-TAN, MI-AN-MA, LÀO, VIỆT NAM, THÁI LAN, HÀN QUỐC, CHDCND TRIỀU TIÊN), relief (DÃY THIÊN SƠN, BỒN ĐỊA TA-RIM, SƠN NGUYÊN TÂY TẠNG, DÃY HI-MA-LAY-A, DÃY CÔN LUÂN, CAO NGUYÊN HOÀNG THỔ, BỒN ĐỊA TỨ XUYÊN, ĐỒNG BẰNG HOA BẮC/HOA TRUNG/HOA NAM/ĐÔNG BẮC, DÃY ĐẠI HƯNG AN), rivers/lakes, seas (BIỂN HOÀNG HẢI, BIỂN HOA ĐÔNG, BIỂN ĐÔNG), heights (7 723, 6 282), graticule (70°, 90°, 110°, 130°, 40°, 20°), BẮC KINH, đảo Đài Loan, đảo Hải Nam, Chí tuyến Bắc — rotated/curved text; must NEVER be emitted as prose"},
+  {"id": "b03", "order": 3, "role": "table", "bbox": [0.07, 0.535, 0.32, 0.155], "text": null, "anchor": "CHÚ GIẢI", "notes": "legend: Phân tầng độ cao 0 200 500 1 000 2 000 3 000 5 000 (Dưới 0 m … Trên 5 000 m); Sông, Hồ, Thủ đô, Biên giới quốc gia, Biên giới quốc gia chưa xác định; 6 282 Điểm độ cao; Hoang mạc; LÀO Tên quốc gia; scale 320 0 320 640 km"},
+  {"id": "b04", "order": 4, "role": "table", "bbox": [0.80, 0.625, 0.14, 0.065], "text": "Các nước đánh số\n1. Áp-ga-ni-xtan\n2. Pa-ki-xtan\n3. Tát-gi-ki-xtan", "anchor": "Các nước đánh số"},
+  {"id": "b05", "order": 5, "role": "caption", "bbox": [0.37, 0.71, 0.28, 0.02], "text": "Hình 3. Bản đồ tự nhiên Trung Quốc", "anchor": "Hình 3. Bản đồ tự nhiên Trung Quốc", "rel": {"caption_of": "b02"}},
+  {"id": "b06", "order": 6, "role": "heading", "bbox": [0.09, 0.745, 0.12, 0.02], "text": "3. Dân cư", "anchor": "3. Dân cư"},
+  {"id": "b07", "order": 7, "role": "question", "bbox": [0.13, 0.79, 0.65, 0.02], "text": "Đọc thông tin, em hãy nêu một số đặc điểm dân cư của Trung Quốc.", "anchor": "Đọc thông tin, em hãy nêu"},
+  {"id": "b08", "order": 8, "role": "body", "bbox": [0.09, 0.835, 0.83, 0.07], "text": "Trung Quốc là một trong những nước đông dân nhất thế giới với số dân hơn 1,4 tỉ người (năm 2024). Trung Quốc có 56 dân tộc, trong đó hơn 90% là dân tộc Hán. Mỗi dân tộc có đặc trưng riêng tạo nên một nền văn hoá đa dạng và giàu bản sắc.", "anchor": "Trung Quốc là một trong những nước", "contiguous": true},
+  {"id": "b09", "order": 9, "role": "page_number", "bbox": [0.10, 0.935, 0.04, 0.02], "text": "78", "anchor": "78"}
+ ],
+ "flex_groups": [["b03", "b04"]],
+ "critical": ["map labels (b02) emitted as body/passage = fabricated geography text (the most dangerous failure on this page)", "'1,4 tỉ', '56', '90%', '2024' altered = corrupted data", "legend numbers (0 200 500 …) spliced into b08 = contamination", "b06 heading emitted as question = heading-as-question"]
+}

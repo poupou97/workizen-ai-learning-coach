@@ -1,0 +1,27 @@
+{
+ "book": "04-sgk-khoa-hoc-4", "page": 78, "printed_page": 77, "grade": 4, "subject": "Khoa học", "docType": "SGK",
+ "why": "science page: last step of a procedure box beside a figure (Bước 5 + oven drawing + caption Hình 5), practice item 2, three questions of which one refers to a 3-photo figure (Hình 6, labels a/b/c), a dash follow-up task, then two side-by-side boxes (Em đã học | Em có thể)",
+ "features": ["side_by_side", "figure", "caption", "colored_box", "question_block", "continuation"],
+ "lesson": {"number": 20, "title": "Nấm men và nấm mốc (Bài 20)", "note": "last page of the lesson; KNTT Khoa học 4 Bài 20 — the census stratum said lesson 21 by TOC offset; scorer uses the TOC range and this note flags a possible offset error"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "body", "bbox": [0.13, 0.085, 0.42, 0.10], "text": "Bước 5. Nướng bánh ở nhiệt độ khoảng từ 170 °C đến 200 °C trong khoảng thời gian từ 15 phút đến 20 phút cho đến khi bánh chín vàng đều.", "anchor": "Bước 5. Nướng bánh ở nhiệt độ", "contiguous": true, "notes": "procedure step continued from the previous page"},
+  {"id": "b02", "order": 2, "role": "figure_label", "bbox": [0.55, 0.085, 0.10, 0.02], "text": "Bước 5", "anchor": "Bước 5", "notes": "label over the oven drawing"},
+  {"id": "b03", "order": 3, "role": "caption", "bbox": [0.62, 0.195, 0.26, 0.02], "text": "Hình 5. Quy trình làm bánh mì", "anchor": "Hình 5. Quy trình làm bánh mì", "rel": {"caption_of": "drawing"}},
+  {"id": "b04", "order": 4, "role": "question", "bbox": [0.13, 0.245, 0.40, 0.02], "text": "2. Thực hành từ bước 1 đến bước 3.", "anchor": "2. Thực hành từ bước 1"},
+  {"id": "b05", "order": 5, "role": "question", "bbox": [0.13, 0.27, 0.66, 0.02], "text": "Báo cáo kết quả: Nhận xét về độ nở của bột mì trước và sau khi ủ.", "anchor": "Báo cáo kết quả: Nhận xét về"},
+  {"id": "b06", "order": 6, "role": "question", "bbox": [0.13, 0.31, 0.66, 0.02], "text": "1. Nấm men có tác dụng gì trong quy trình làm bánh mì nêu trên?", "anchor": "1. Nấm men có tác dụng gì"},
+  {"id": "b07", "order": 7, "role": "question", "bbox": [0.13, 0.335, 0.40, 0.02], "text": "2. Giai đoạn ủ ở bước 3 có tác dụng gì?", "anchor": "2. Giai đoạn ủ ở bước 3"},
+  {"id": "b08", "order": 8, "role": "question", "bbox": [0.13, 0.36, 0.78, 0.04], "text": "3. – Nêu tên các sản phẩm trong hình 6 và cho biết vai trò của nấm men trong việc tạo ra các sản phẩm đó.", "anchor": "3. – Nêu tên các sản phẩm", "contiguous": true, "rel": {"refers_figure": "b09"}},
+  {"id": "b09", "order": 9, "role": "figure_label", "bbox": [0.17, 0.41, 0.74, 0.19], "text": null, "anchor": "a", "notes": "three photos labelled a (beer), b (bread), c (steamed buns) — the question requires the images"},
+  {"id": "b10", "order": 10, "role": "caption", "bbox": [0.47, 0.605, 0.06, 0.015], "text": "Hình 6", "anchor": "Hình 6", "rel": {"caption_of": "b09"}},
+  {"id": "b11", "order": 11, "role": "question", "bbox": [0.15, 0.635, 0.76, 0.04], "text": "– Tìm hiểu và chia sẻ những ứng dụng khác của một số nấm men trong chế biến thực phẩm.", "anchor": "Tìm hiểu và chia sẻ những ứng dụng", "contiguous": true},
+  {"id": "b12", "order": 12, "role": "heading", "bbox": [0.12, 0.695, 0.12, 0.02], "text": "Em đã học", "anchor": "Em đã học"},
+  {"id": "b13", "order": 13, "role": "sidebar", "bbox": [0.13, 0.73, 0.38, 0.17], "text": "Một số nấm được dùng làm thức ăn có hình dạng, màu sắc khác nhau. Ví dụ: nấm hương, mộc nhĩ, nấm sò, nấm kim châm,…\nNấm men được ứng dụng rộng rãi trong chế biến thực phẩm nhằm tạo ra các sản phẩm lên men như bánh mì, rượu, bia,…", "anchor": "Một số nấm được dùng làm", "contiguous": true, "column": 1},
+  {"id": "b14", "order": 14, "role": "heading", "bbox": [0.62, 0.70, 0.12, 0.02], "text": "Em có thể", "anchor": "Em có thể"},
+  {"id": "b15", "order": 15, "role": "sidebar", "bbox": [0.64, 0.73, 0.27, 0.11], "text": "1. Chọn được nấm để làm thức ăn.\n2. Dùng nấm men để làm một số loại bánh như bánh mì, bánh bao,…", "anchor": "1. Chọn được nấm để làm", "contiguous": true, "column": 2},
+  {"id": "b16", "order": 16, "role": "page_number", "bbox": [0.86, 0.945, 0.03, 0.015], "text": "77", "anchor": "77"}
+ ],
+ "flex_groups": [["b12", "b13"], ["b14", "b15"]],
+ "critical": ["b13/b15 interleaved line by line = cross-column contamination (WAL-204 class)", "b15 items ('1. Chọn được nấm…') emitted as learner questions = objective-as-question", "b08 asked without the photos = figure-dependent question presented as text-only", "'170 °C … 200 °C', '15 phút … 20 phút' altered = corrupted data"]
+}

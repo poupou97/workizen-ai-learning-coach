@@ -1,0 +1,27 @@
+{
+ "book": "07-sgk-toan-7-tap-hai", "page": 41, "printed_page": 40, "grade": 7, "subject": "Toán", "docType": "SGK",
+ "why": "grade-7 algebra page dense with exponents and fractions: worked example (continued from previous page), two mascot speech bubbles at the right margin, HĐ1/HĐ2 activities with a/b/c sub-items laid out side by side, a boxed rule with a formula, Luyện tập 1 with three side-by-side items, section 2 heading, polynomial long division laid out as a 2-D scheme",
+ "features": ["formula", "sidebar", "side_by_side", "colored_box", "continuation", "speech_bubble", "question_block", "math_layout"],
+ "lesson": {"number": 28, "title": "Phép chia đa thức một biến (Bài 28)", "note": "page inside Bài 28"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "body", "bbox": [0.10, 0.065, 0.62, 0.11], "text": null, "anchor": "3. Để thực hiện phép chia", "formula": true, "contiguous": true, "notes": "3. Để thực hiện phép chia 6x⁴ cho (−2x³), ta làm như sau: • Chia hai hệ số: 6 : (−2) = −3. • Chia hai luỹ thừa của biến: x⁴ : x³ = x. • Nhân hai kết quả trên, ta tìm được thương là −3x. — worked example (NOT a question)"},
+  {"id": "b02", "order": 2, "role": "speech_bubble", "bbox": [0.69, 0.065, 0.24, 0.045], "text": "Nhớ lại quy tắc chia hai luỹ thừa cùng cơ số nhé!", "anchor": "Nhớ lại quy tắc chia hai", "contiguous": true},
+  {"id": "b03", "order": 3, "role": "heading", "bbox": [0.14, 0.185, 0.36, 0.02], "text": "Khi nào thì axⁿ chia hết cho bxᵐ?", "anchor": "Khi nào thì", "formula": true, "notes": "section question-heading (a heading that is phrased as a question; it is the topic, not a learner task)"},
+  {"id": "b04", "order": 4, "role": "question", "bbox": [0.08, 0.215, 0.60, 0.05], "text": null, "anchor": "HĐ1 Tìm thương của mỗi phép chia hết sau", "formula": true, "notes": "HĐ1: Tìm thương của mỗi phép chia hết sau: a) 12x³ : 4x; b) (−2x⁴) : x⁴; c) 2x⁵ : 5x². — three items side by side"},
+  {"id": "b05", "order": 5, "role": "speech_bubble", "bbox": [0.79, 0.20, 0.13, 0.065], "text": "12x³ : 4x được hiểu là 12x³ : (4x).", "anchor": "12x³ : 4x được hiểu là", "formula": true},
+  {"id": "b06", "order": 6, "role": "question", "bbox": [0.08, 0.28, 0.84, 0.09], "text": null, "anchor": "HĐ2 Giả sử x ≠ 0. Hãy cho biết", "formula": true, "contiguous": true, "notes": "HĐ2 Giả sử x ≠ 0. Hãy cho biết: a) Với điều kiện nào (của hai số mũ) thì thương hai luỹ thừa của x cũng là một luỹ thừa của x với số mũ nguyên dương? b) Thương hai luỹ thừa của x cùng bậc bằng bao nhiêu?"},
+  {"id": "b07", "order": 7, "role": "rule", "bbox": [0.10, 0.395, 0.82, 0.075], "text": null, "anchor": "Cho hai đơn thức", "formula": true, "contiguous": true, "notes": "boxed rule: Cho hai đơn thức axᵐ và bxⁿ (m, n ∈ ℕ; a, b ∈ ℝ và b ≠ 0). Khi đó nếu m ≥ n thì phép chia axᵐ cho bxⁿ là phép chia hết và ta có: axᵐ : bxⁿ = (a/b) x^(m−n) (quy ước: x⁰ = 1)."},
+  {"id": "b08", "order": 8, "role": "heading", "bbox": [0.08, 0.49, 0.13, 0.02], "text": "Luyện tập 1", "anchor": "Luyện tập 1"},
+  {"id": "b09", "order": 9, "role": "question", "bbox": [0.10, 0.52, 0.60, 0.05], "text": null, "anchor": "Thực hiện các phép chia sau", "formula": true, "notes": "Thực hiện các phép chia sau: a) 3x⁷ : ½x⁴; b) (−2x) : x; c) 0,25x⁵ : (−5x²). — three items side by side"},
+  {"id": "b10", "order": 10, "role": "heading", "bbox": [0.08, 0.59, 0.65, 0.025], "text": "2 CHIA ĐA THỨC CHO ĐA THỨC, TRƯỜNG HỢP CHIA HẾT", "anchor": "CHIA ĐA THỨC CHO ĐA THỨC"},
+  {"id": "b11", "order": 11, "role": "heading", "bbox": [0.14, 0.64, 0.20, 0.02], "text": "Cách đặt tính chia", "anchor": "Cách đặt tính chia"},
+  {"id": "b12", "order": 12, "role": "body", "bbox": [0.10, 0.67, 0.82, 0.045], "text": null, "anchor": "Để chia đa thức", "formula": true, "notes": "Để chia đa thức A = 2x⁴ − 13x³ + 15x² + 11x − 3 cho đa thức B = x² − 4x − 3, ta làm như sau:"},
+  {"id": "b13", "order": 13, "role": "body", "bbox": [0.10, 0.715, 0.82, 0.08], "text": null, "anchor": "Bước 1. Đặt tính chia", "formula": true, "notes": "Bước 1. Đặt tính chia tương tự chia hai số tự nhiên. Lấy hạng tử bậc cao nhất của A chia cho hạng tử bậc cao nhất của B: 2x⁴ : x² = 2x²."},
+  {"id": "b14", "order": 14, "role": "body", "bbox": [0.10, 0.795, 0.82, 0.03], "text": null, "anchor": "Bước 2. Lấy A trừ đi tích", "formula": true, "notes": "Bước 2. Lấy A trừ đi tích B · (2x²), ta được dư thứ nhất là −5x³ + 21x² + 11x − 3:"},
+  {"id": "b15", "order": 15, "role": "formula", "bbox": [0.10, 0.82, 0.82, 0.09], "text": null, "anchor": "2x⁴ − 13x³ + 15x²", "formula": true, "notes": "long-division scheme (2-D): dividend | divisor; B·(2x²) →, A − B·(2x²) →, (Dư thứ nhất); ← 2x⁴ : x² = 2x². Linear text cannot represent it faithfully."},
+  {"id": "b16", "order": 16, "role": "page_number", "bbox": [0.09, 0.945, 0.03, 0.015], "text": "40", "anchor": "40"}
+ ],
+ "flex_groups": [["b02"], ["b05"]],
+ "critical": ["exponents flattened (6x4, 2x3) or signs lost = corrupted math content (every line of this page)", "b01/b12–b15 worked example steps emitted as learner questions = instruction-as-question", "speech bubbles spliced into HĐ1/HĐ2 = contamination", "long-division scheme linearised = meaning-changing reading order"]
+}

@@ -1,0 +1,31 @@
+{
+ "book": "02-sgk-toan-2-tap-hai", "page": 48, "printed_page": 47, "grade": 2, "subject": "Toán", "docType": "SGK",
+ "why": "grade-2 math lesson opener: Khám phá section made of base-ten block pictures with comparison statements beside/below them (the pictures ARE the content), then Hoạt động exercise 1 with two picture pairs and a '? ? ?' answer slot",
+ "features": ["color_heavy", "figure", "diagram", "side_by_side", "elementary_visual", "lesson_start", "formula"],
+ "lesson": {"number": 50, "title": "So sánh các số tròn trăm, tròn chục", "note": "page is the lesson start (Bài 50)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.07, 0.05, 0.14, 0.05], "text": "Bài 50", "anchor": "Bài 50"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.26, 0.06, 0.48, 0.07], "text": "SO SÁNH CÁC SỐ TRÒN TRĂM, TRÒN CHỤC", "anchor": "SO SÁNH CÁC SỐ TRÒN TRĂM"},
+  {"id": "b03", "order": 3, "role": "heading", "bbox": [0.17, 0.18, 0.15, 0.03], "text": "Khám phá", "anchor": "Khám phá"},
+  {"id": "b04", "order": 4, "role": "heading", "bbox": [0.14, 0.23, 0.32, 0.02], "text": "a) So sánh các số tròn trăm.", "anchor": "a) So sánh các số tròn trăm", "notes": "sub-heading of a worked demonstration — not a learner question"},
+  {"id": "b05", "order": 5, "role": "figure_label", "bbox": [0.20, 0.25, 0.45, 0.08], "text": null, "anchor": "200 < 300", "notes": "two base-ten block groups (2 hundreds | 3 hundreds) with '200 < 300' under them"},
+  {"id": "b06", "order": 6, "role": "formula", "bbox": [0.67, 0.25, 0.12, 0.05], "text": "200 < 300\n300 > 200", "anchor": "200 < 300", "formula": true},
+  {"id": "b07", "order": 7, "role": "heading", "bbox": [0.14, 0.35, 0.32, 0.02], "text": "b) So sánh các số tròn chục.", "anchor": "b) So sánh các số tròn chục"},
+  {"id": "b08", "order": 8, "role": "formula", "bbox": [0.24, 0.385, 0.42, 0.075], "text": "120 > 110", "anchor": "120 > 110", "formula": true, "notes": "pictures (1 hundred + 2 tens | 1 hundred + 1 ten) and '120 > 110' beneath"},
+  {"id": "b09", "order": 9, "role": "formula", "bbox": [0.55, 0.385, 0.12, 0.05], "text": "120 > 110\n110 < 120", "anchor": "120 > 110", "formula": true},
+  {"id": "b10", "order": 10, "role": "formula", "bbox": [0.23, 0.49, 0.42, 0.075], "text": "250 < 350", "anchor": "250 < 350", "formula": true},
+  {"id": "b11", "order": 11, "role": "formula", "bbox": [0.58, 0.49, 0.12, 0.05], "text": "250 < 350\n350 > 250", "anchor": "250 < 350", "formula": true},
+  {"id": "b12", "order": 12, "role": "formula", "bbox": [0.23, 0.59, 0.55, 0.085], "text": "610 > 590", "anchor": "610 > 590", "formula": true},
+  {"id": "b13", "order": 13, "role": "formula", "bbox": [0.76, 0.595, 0.12, 0.05], "text": "610 > 590\n590 < 610", "anchor": "610 > 590", "formula": true},
+  {"id": "b14", "order": 14, "role": "heading", "bbox": [0.17, 0.735, 0.15, 0.03], "text": "hoạt động", "anchor": "hoạt động"},
+  {"id": "b15", "order": 15, "role": "question", "bbox": [0.11, 0.78, 0.40, 0.025], "text": "1. Đếm rồi so sánh các số tròn trăm.", "anchor": "Đếm rồi so sánh các số tròn trăm", "notes": "exercise 1 — the answer for b) is the '? ? ?' slot; a) shows the example 400 > 200"},
+  {"id": "b16", "order": 16, "role": "figure_label", "bbox": [0.14, 0.81, 0.35, 0.09], "text": null, "anchor": "a)", "notes": "a) pictures (4 hundreds | 2 hundreds) with '400 > 200' below = worked example"},
+  {"id": "b17", "order": 17, "role": "formula", "bbox": [0.29, 0.885, 0.11, 0.02], "text": "400 > 200", "anchor": "400 > 200", "formula": true},
+  {"id": "b18", "order": 18, "role": "figure_label", "bbox": [0.52, 0.81, 0.38, 0.09], "text": null, "anchor": "b)", "notes": "b) pictures (3 hundreds | 5 hundreds) with answer slot '? ? ?'"},
+  {"id": "b19", "order": 19, "role": "answer_slot", "bbox": [0.64, 0.885, 0.14, 0.02], "text": "? ? ?", "anchor": "? ? ?", "notes": "blank to fill — must not be emitted as a question or as content"},
+  {"id": "b20", "order": 20, "role": "page_number", "bbox": [0.87, 0.945, 0.04, 0.02], "text": "47", "anchor": "47"}
+ ],
+ "flex_groups": [["b05", "b06"], ["b08", "b09"], ["b10", "b11"], ["b12", "b13"], ["b16", "b17"], ["b18", "b19"]],
+ "critical": ["comparison symbols '<'/'>' flipped or dropped = corrupted math content (the whole lesson is these symbols)", "'? ? ?' answer slot emitted as a question = answer/question confusion", "block pictures counted wrongly = the lesson cannot be taught from text alone (multimodal source)"]
+}

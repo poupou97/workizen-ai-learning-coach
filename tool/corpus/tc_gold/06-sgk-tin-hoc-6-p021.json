@@ -1,0 +1,27 @@
+{
+ "book": "06-sgk-tin-hoc-6", "page": 21, "printed_page": 20, "grade": 6, "subject": "Tin học", "docType": "SGK",
+ "why": "informatics lesson opener: objectives box, a dialogue (An/Minh) as warm-up, section heading, an activity box with 2 questions, a TWO-COLUMN bullet passage with a sticky-note callout inside the right column, and a summary (Ghi nhớ) box",
+ "features": ["side_by_side", "two_col_region", "sidebar", "colored_box", "dialogue", "lesson_start", "question_block"],
+ "lesson": {"number": 5, "title": "Internet", "note": "page is the lesson start (BÀI 5)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.12, 0.07, 0.13, 0.05], "text": "BÀI 5", "anchor": "BÀI 5"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.28, 0.075, 0.18, 0.03], "text": "INTERNET", "anchor": "INTERNET"},
+  {"id": "b03", "order": 3, "role": "heading", "bbox": [0.30, 0.15, 0.17, 0.02], "text": "SAU BÀI NÀY EM SẼ:", "anchor": "SAU BÀI NÀY EM SẼ"},
+  {"id": "b04", "order": 4, "role": "objective", "bbox": [0.30, 0.17, 0.45, 0.06], "text": "Biết Internet là gì.\nNêu được một số đặc điểm chính của Internet.\nNêu được một số lợi ích chính của Internet.", "anchor": "Biết Internet là gì", "notes": "3 objective bullets — not learner questions"},
+  {"id": "b05", "order": 5, "role": "body", "bbox": [0.09, 0.275, 0.82, 0.14], "text": "An: Mẹ tớ có việc gấp cần đi công tác ngay nhưng bận quá chưa đến phòng vé máy bay được.\nMinh: Quá đơn giản! Mẹ bạn có thể đặt vé trên Internet mà không cần phải đến phòng vé.\nAn: Vậy sao?\nMinh: Các hãng hàng không đăng tin về các chuyến bay, giờ bay, giá vé trên Internet. Nếu có kết nối Internet, mẹ bạn có thể tìm thông tin, đặt vé và thanh toán.\nAn: Thật tuyệt! Tớ sẽ nói với mẹ ngay.", "anchor": "An: Mẹ tớ có việc gấp", "contiguous": true, "notes": "warm-up dialogue; speaker turns are meaning-bearing"},
+  {"id": "b06", "order": 6, "role": "heading", "bbox": [0.09, 0.44, 0.15, 0.02], "text": "1. INTERNET", "anchor": "1. INTERNET"},
+  {"id": "b07", "order": 7, "role": "heading", "bbox": [0.13, 0.47, 0.22, 0.02], "text": "Hoạt động 1 Internet", "anchor": "Hoạt động 1"},
+  {"id": "b08", "order": 8, "role": "question", "bbox": [0.14, 0.50, 0.25, 0.02], "text": "1. Em hiểu Internet là gì?", "anchor": "1. Em hiểu Internet là gì"},
+  {"id": "b09", "order": 9, "role": "question", "bbox": [0.14, 0.52, 0.56, 0.02], "text": "2. Người sử dụng có thể làm được những gì khi truy cập Internet?", "anchor": "2. Người sử dụng có thể làm"},
+  {"id": "b10", "order": 10, "role": "body", "bbox": [0.10, 0.59, 0.38, 0.10], "text": "Các tổ chức và cá nhân trên khắp thế giới có thể cung cấp và tiếp nhận thông tin bằng cách kết nối máy tính của họ thành một mạng. Internet là một mạng toàn cầu được tạo ra để liên kết những mạng máy tính như thế.", "anchor": "Các tổ chức và cá nhân trên", "contiguous": true, "column": 1},
+  {"id": "b11", "order": 11, "role": "body", "bbox": [0.10, 0.695, 0.38, 0.10], "text": "Muốn truy cập Internet thì máy tính của người sử dụng cần có kết nối với Internet. Người sử dụng cần đăng kí với nhà cung cấp dịch vụ Internet (Internet Service Provider - ISP) để được hỗ trợ cài đặt và cấp quyền truy cập Internet.", "anchor": "Muốn truy cập Internet thì", "contiguous": true, "column": 1},
+  {"id": "b12", "order": 12, "role": "body", "bbox": [0.53, 0.59, 0.38, 0.04], "text": "Người sử dụng truy cập Internet để tìm kiếm, chia sẻ và trao đổi thông tin.", "anchor": "Người sử dụng truy cập Internet để", "contiguous": true, "column": 2},
+  {"id": "b13", "order": 13, "role": "body", "bbox": [0.53, 0.63, 0.38, 0.14], "text": "Các dịch vụ thông tin phổ biến trên Internet gồm: mạng thông tin toàn cầu (World Wide Web - WWW), tìm kiếm, thư điện tử, điện thoại, phát thanh, truyền hình, mạng xã hội, lưu trữ, trao đổi dữ liệu, kinh doanh,…", "anchor": "Các dịch vụ thông tin phổ biến", "contiguous": true, "column": 2, "notes": "text wraps around the sticky note (b14) — lines shorten on the right"},
+  {"id": "b14", "order": 14, "role": "sidebar", "bbox": [0.76, 0.68, 0.14, 0.09], "text": "Internet là mạng của các mạng máy tính.", "anchor": "Internet là mạng của các mạng", "notes": "sticky-note callout inside the right column"},
+  {"id": "b15", "order": 15, "role": "sidebar", "bbox": [0.14, 0.82, 0.74, 0.11], "text": "Internet là mạng liên kết các mạng máy tính trên khắp thế giới.\nMáy tính có thể được kết nối với Internet thông qua một nhà cung cấp dịch vụ Internet.\nNgười sử dụng truy cập Internet để tìm kiếm, chia sẻ, lưu trữ và trao đổi thông tin.\nCó nhiều dịch vụ thông tin khác nhau trên Internet: WWW, tìm kiếm, thư điện tử,…", "anchor": "Internet là mạng liên kết các", "contiguous": true, "notes": "Ghi nhớ summary box (orange)"},
+  {"id": "b16", "order": 16, "role": "page_number", "bbox": [0.07, 0.945, 0.03, 0.015], "text": "20", "anchor": "20"}
+ ],
+ "flex_groups": [["b10", "b11"], ["b12", "b13", "b14"]],
+ "critical": ["b10/b11 interleaved with b12/b13 = cross-column contamination", "b14 sticky note spliced into b13 = contamination", "b04 objectives emitted as questions/passage = objective-as-content", "dialogue speaker labels lost = meaning-changing"]
+}

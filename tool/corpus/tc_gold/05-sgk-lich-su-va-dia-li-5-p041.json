@@ -1,0 +1,22 @@
+{
+ "book": "05-sgk-lich-su-va-dia-li-5", "page": 41, "printed_page": 39, "grade": 5, "subject": "LS&ĐL", "docType": "SGK",
+ "why": "WAL-206 gold: text box (story + source attribution) beside a photo with caption, then LUYỆN TẬP with a fill-in timeline table (Sự kiện / Thời gian), VẬN DỤNG",
+ "features": ["side_by_side", "figure", "caption", "table", "colored_box", "question_block", "attribution"],
+ "lesson": {"number": 9, "title": "Đấu tranh giành độc lập thời kì Bắc thuộc (Bài 9)", "note": "last page of the lesson (Luyện tập/Vận dụng)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "body", "bbox": [0.10, 0.085, 0.52, 0.16], "text": "Nghe tin Hoằng Tháo sắp đến, Ngô Quyền cho người đem cọc lớn vạt nhọn, đầu bịt sắt đóng ngầm trên sông Bạch Đằng. Khi thuỷ triều lên, Ngô Quyền cho thuyền ra khiêu chiến rồi giả vờ thua và rút chạy để dụ quân giặc vào trận địa. Đợi lúc thuỷ triều xuống, ông tổ chức cho quân phản công, khiến chiến thuyền của giặc va vào bãi cọc, bị vỡ và đắm rất nhiều. Hoằng Tháo tử trận, quân ta đại thắng.", "anchor": "Nghe tin Hoằng Tháo sắp đến", "contiguous": true},
+  {"id": "b02", "order": 2, "role": "body", "bbox": [0.10, 0.25, 0.52, 0.075], "text": "Chiến thắng Bạch Đằng của Ngô Quyền đã chấm dứt hoàn toàn ách đô hộ của phong kiến phương Bắc, mở ra thời kì độc lập, tự chủ lâu dài cho dân tộc.", "anchor": "Chiến thắng Bạch Đằng của Ngô Quyền", "contiguous": true},
+  {"id": "b03", "order": 3, "role": "attribution", "bbox": [0.14, 0.33, 0.48, 0.06], "text": "(Theo Đăng Khoa, Hoài Thu, Ngô Quyền và trận chiến trên sông Bạch Đằng, NXB Văn hoá Thông tin, 2014)", "anchor": "(Theo Đăng Khoa, Hoài Thu", "notes": "source attribution of the story — must stay attached to b01–b02"},
+  {"id": "b04", "order": 4, "role": "caption", "bbox": [0.65, 0.325, 0.25, 0.04], "text": "Hình 3. Tượng đài Ngô Quyền (thành phố Hải Phòng)", "anchor": "Hình 3. Tượng đài Ngô Quyền", "rel": {"caption_of": "photo"}},
+  {"id": "b05", "order": 5, "role": "heading", "bbox": [0.16, 0.445, 0.14, 0.025], "text": "LUYỆN TẬP", "anchor": "LUYỆN TẬP"},
+  {"id": "b06", "order": 6, "role": "question", "bbox": [0.10, 0.49, 0.80, 0.045], "text": "1. Hãy vẽ và hoàn thiện trục thời gian (theo gợi ý dưới đây vào vở) thể hiện một số cuộc đấu tranh tiêu biểu trong thời kì Bắc thuộc.", "anchor": "1. Hãy vẽ và hoàn thiện trục", "contiguous": true, "rel": {"uses_table": "b07"}},
+  {"id": "b07", "order": 7, "role": "table", "bbox": [0.14, 0.54, 0.72, 0.12], "text": null, "anchor": "Sự kiện", "notes": "timeline table 2 rows × 4 cells: Sự kiện: Khởi nghĩa Hai Bà Trưng | ? | ? | ? ; Thời gian: 40 – 43 | ? | ? | 938. The '?' cells are blanks the learner fills — a parser that emits '?' cells as questions or drops '938' corrupts the exercise"},
+  {"id": "b08", "order": 8, "role": "question", "bbox": [0.10, 0.685, 0.80, 0.045], "text": "2. Kể lại câu chuyện về một nhân vật tiêu biểu trong cuộc đấu tranh chống Bắc thuộc mà em sưu tầm được.", "anchor": "2. Kể lại câu chuyện về", "contiguous": true},
+  {"id": "b09", "order": 9, "role": "heading", "bbox": [0.16, 0.765, 0.14, 0.025], "text": "VẬN DỤNG", "anchor": "VẬN DỤNG"},
+  {"id": "b10", "order": 10, "role": "question", "bbox": [0.10, 0.805, 0.80, 0.045], "text": "Tìm hiểu và kể tên một số di tích lịch sử, đường phố, trường học,… liên quan đến những nhân vật tiêu biểu trong cuộc đấu tranh chống Bắc thuộc.", "anchor": "Tìm hiểu và kể tên một số", "contiguous": true},
+  {"id": "b11", "order": 11, "role": "page_number", "bbox": [0.87, 0.945, 0.03, 0.015], "text": "39", "anchor": "39"}
+ ],
+ "flex_groups": [["b03"], ["b04"]],
+ "critical": ["b04 caption spliced into the story b01/b02 = contamination", "b03 attribution detached or dropped = wrong source attribution", "table cells '?' emitted as learner questions = answer/question confusion", "'40 – 43'/'938' altered = corrupted history data"]
+}

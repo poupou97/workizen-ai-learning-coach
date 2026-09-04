@@ -29,3 +29,7 @@ assets/pack/*.png
 # Python bytecode — sản phẩm phái sinh, không vào git
 __pycache__/
 *.pyc
+
+# Trusted-corpus study: isolated bake-off venvs (never project dependencies)
+.venv-bakeoff/
+.venv-bakeoff-*/

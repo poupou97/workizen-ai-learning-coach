@@ -1,0 +1,26 @@
+{
+ "book": "05-sgk-toan-5-tap-mot", "page": 92, "printed_page": 91, "grade": 5, "subject": "Toán", "docType": "SGK",
+ "why": "elementary geometry lesson opener: a CHỦ ĐỀ (theme) banner above the lesson banner, illustration with three speech bubbles, then three dashed boxes side by side each holding a triangle drawing + a definition, and a dashed box with two drawings beside two bullet definitions",
+ "features": ["color_heavy", "figure", "diagram", "side_by_side", "speech_bubble", "lesson_start", "theme_start"],
+ "lesson": {"number": 25, "title": "Hình tam giác. Diện tích hình tam giác", "note": "page starts both Chủ đề 5 and Bài 25; the theme title must not become the lesson title"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.13, 0.05, 0.14, 0.09], "text": "Chủ đề 5", "anchor": "Chủ đề 5"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.30, 0.06, 0.55, 0.08], "text": "MỘT SỐ HÌNH PHẲNG. CHU VI VÀ DIỆN TÍCH", "anchor": "MỘT SỐ HÌNH PHẲNG", "notes": "theme title (not the lesson)"},
+  {"id": "b03", "order": 3, "role": "heading", "bbox": [0.08, 0.17, 0.14, 0.04], "text": "Bài 25", "anchor": "Bài 25"},
+  {"id": "b04", "order": 4, "role": "heading", "bbox": [0.23, 0.19, 0.53, 0.07], "text": "HÌNH TAM GIÁC. DIỆN TÍCH HÌNH TAM GIÁC", "anchor": "HÌNH TAM GIÁC. DIỆN TÍCH"},
+  {"id": "b05", "order": 5, "role": "heading", "bbox": [0.15, 0.305, 0.14, 0.03], "text": "Khám phá", "anchor": "Khám phá"},
+  {"id": "b06", "order": 6, "role": "heading", "bbox": [0.45, 0.33, 0.16, 0.02], "text": "Hình tam giác", "anchor": "Hình tam giác"},
+  {"id": "b07", "order": 7, "role": "speech_bubble", "bbox": [0.20, 0.35, 0.16, 0.05], "text": "Tớ gấp thuyền có hai cánh buồm này.", "anchor": "Tớ gấp thuyền có hai cánh"},
+  {"id": "b08", "order": 8, "role": "speech_bubble", "bbox": [0.55, 0.36, 0.33, 0.06], "text": "Cánh buồm bên trái có hai cạnh vuông góc với nhau. Cánh buồm bên phải có ba góc nhọn.", "anchor": "Cánh buồm bên trái có hai cạnh", "contiguous": true},
+  {"id": "b09", "order": 9, "role": "speech_bubble", "bbox": [0.61, 0.50, 0.29, 0.07], "text": "Cánh buồm bên trái có dạng hình tam giác vuông, cánh buồm bên phải có dạng hình tam giác nhọn đấy!", "anchor": "Cánh buồm bên trái có dạng", "contiguous": true},
+  {"id": "b10", "order": 10, "role": "heading", "bbox": [0.14, 0.58, 0.18, 0.02], "text": "a) Hình tam giác", "anchor": "a) Hình tam giác"},
+  {"id": "b11", "order": 11, "role": "body", "bbox": [0.21, 0.69, 0.17, 0.08], "text": "Hình tam giác có 3 góc nhọn gọi là hình tam giác nhọn.", "anchor": "Hình tam giác có 3 góc nhọn", "contiguous": true, "column": 1, "notes": "definition under the first triangle"},
+  {"id": "b12", "order": 12, "role": "body", "bbox": [0.43, 0.69, 0.17, 0.08], "text": "Hình tam giác có một góc vuông gọi là hình tam giác vuông.", "anchor": "Hình tam giác có một góc vuông", "contiguous": true, "column": 2},
+  {"id": "b13", "order": 13, "role": "body", "bbox": [0.66, 0.69, 0.17, 0.06], "text": "Hình tam giác có một góc tù gọi là hình tam giác tù.", "anchor": "Hình tam giác có một góc tù", "contiguous": true, "column": 3},
+  {"id": "b14", "order": 14, "role": "body", "bbox": [0.54, 0.80, 0.36, 0.08], "text": "Hình tam giác có 3 cạnh bằng nhau gọi là hình tam giác đều.\nHình tam giác đều có 3 góc bằng nhau và cùng bằng 60°.", "anchor": "Hình tam giác có 3 cạnh bằng nhau", "contiguous": true},
+  {"id": "b15", "order": 15, "role": "page_number", "bbox": [0.87, 0.945, 0.04, 0.02], "text": "91", "anchor": "91"}
+ ],
+ "flex_groups": [["b07"], ["b08"], ["b09"]],
+ "critical": ["b11/b12/b13 interleaved line by line ('Hình tam giác Hình tam giác có Hình tam giác có …') = three definitions destroyed (WAL-204 class)", "theme title b02 attached as the lesson title = wrong lesson identity", "speech bubbles emitted as body definitions = contamination"]
+}
