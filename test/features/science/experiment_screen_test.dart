@@ -5,6 +5,10 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/core/context/learning_context.dart';
+import 'package:learning_coach/core/intent/learning_intent.dart';
+import 'package:learning_coach/core/pedagogy/pedagogy_model.dart'
+    show TeachingAct;
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/features/science/experiment_screen.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
@@ -32,12 +36,22 @@ const _nen = KhoaExperiment(
   quanSat: 'Quan sát và nhận xét sự biến đổi trạng thái của nến vụn.',
 );
 
+const _ctx = LearningContext(
+    learnerId: 'na',
+    grade: 5,
+    subject: 'Khoa học',
+    sourceDocumentId: '05-sgk-khoa-hoc-5',
+    lessonNo: 3,
+    intent: LearningIntent.prepare);
+
 Future<void> _pump(WidgetTester t, KhoaExperiment e,
-    {void Function(List<LearningEvent>)? onFinished}) async {
+    {void Function(List<LearningEvent>)? onFinished,
+    LearningContext context = _ctx}) async {
   await t.pumpWidget(MaterialApp(
       home: ExperimentScreen(
     key: ValueKey(e.page),
     experiment: e,
+    learningContext: context,
     now: () => DateTime(2026, 9, 2, 21),
     onFinished: onFinished,
   )));
@@ -88,6 +102,13 @@ void main() {
         reason: '⭐ đột biến chấm quan sát thành đúng/sai ⇒ test đỏ');
     expect(out.single.policyId, 'experiment-v1');
     expect(out.single.knowledgeVersion, isNotNull);
+    // ⭐⭐ WAL-178/182 — lineage đến từ LearningContext (không tự bịa trong
+    // widget), và act ghi lại đúng nước đi sư phạm đã xảy ra.
+    expect(out.single.sourceDocumentId, _ctx.sourceDocumentId);
+    expect(out.single.lessonNo, _ctx.lessonNo);
+    expect(out.single.act, TeachingAct.askExplanation);
+    expect(out.single.learnerText, 'Nến chảy ra rồi đông lại',
+        reason: '⭐⭐ đột biến bỏ chữ trẻ viết ⇒ đỏ — trước đây bị vứt khi pop');
     expect(find.text('EM QUAN SÁT ĐƯỢC'), findsOneWidget);
     expect(find.textContaining('không chấm'), findsOneWidget,
         reason: 'nói thật với trẻ về việc không chấm');
@@ -132,5 +153,43 @@ void main() {
     await t.tap(find.text('Chốt dự đoán — xem các bước 🔬'));
     await t.pumpAndSettle();
     scan();
+  });
+
+  // ⭐⭐ WAL-178 — Evidence Validator: màn không tự mint evidence nữa, cửa
+  // duy nhất là validateCandidateEvidence. Hai luật fail-closed kiểm ở đây.
+
+  testWidgets('⭐⭐ ý định lookup ⇒ Trace, KHÔNG sinh Evidence dù trẻ có viết',
+      (t) async {
+    List<LearningEvent>? out;
+    await _pump(t, _nen,
+        context: const LearningContext(
+            learnerId: 'na',
+            grade: 5,
+            subject: 'Khoa học',
+            sourceDocumentId: '05-sgk-khoa-hoc-5',
+            lessonNo: 3,
+            intent: LearningIntent.lookup),
+        onFinished: (e) => out = e);
+    await t.enterText(
+        find.byType(TextField).first, 'Nến chảy ra rồi đông lại');
+    await t.scrollUntilVisible(find.text('Em làm xong thí nghiệm ✅'), 150,
+        scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text('Em làm xong thí nghiệm ✅'));
+    await t.pumpAndSettle();
+    expect(out, isEmpty,
+        reason: '⭐⭐ đột biến sinh evidence từ tra cứu ⇒ đỏ — WAL-175: '
+            'lookup sinh Trace, không sinh Evidence, bất kể trẻ viết gì');
+  });
+
+  testWidgets('⭐ chữ trẻ viết rỗng ⇒ Trace, không phải "sai"', (t) async {
+    List<LearningEvent>? out;
+    await _pump(t, _nen, onFinished: (e) => out = e);
+    await t.scrollUntilVisible(find.text('Em làm xong thí nghiệm ✅'), 150,
+        scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text('Em làm xong thí nghiệm ✅'));
+    await t.pumpAndSettle();
+    expect(out, isEmpty,
+        reason: 'im lặng không phải bằng chứng SAI — không có gì để chấm '
+            'thì không có gì để ghi, không phải ghi một sự kiện "sai"');
   });
 }

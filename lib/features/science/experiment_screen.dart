@@ -17,16 +17,29 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
+import '../../core/context/learning_context.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
+import '../../core/pedagogy/pedagogy_model.dart' show TeachingAct;
+import '../../core/student/evidence_validator.dart';
 import '../../core/student/learning_evidence.dart';
-import '../../core/student/mastery.dart';
 import '../subjects/lesson_index.dart';
 
 class ExperimentScreen extends StatefulWidget {
   const ExperimentScreen(
-      {super.key, required this.experiment, this.onFinished, this.now});
+      {super.key,
+      required this.experiment,
+      required this.learningContext,
+      this.onFinished,
+      this.now});
 
   final KhoaExperiment experiment;
+
+  /// ⭐⭐ WAL-178/182 — "SAM đang đứng ở đâu" khi màn này mở: sách/bài/ý định
+  /// đã biết TỪ TRƯỚC (Home → Book Home → đây), không hỏi lại. Màn này CHỈ
+  /// đọc `context.intent` để quyết observation có sinh Evidence hay chỉ
+  /// Trace (`lookup`) — không tự suy pedagogy nào khác từ nó.
+  final LearningContext learningContext;
+
   final void Function(List<LearningEvent> events)? onFinished;
   final DateTime Function()? now;
 
@@ -61,20 +74,28 @@ class _ExperimentScreenState extends State<ExperimentScreen> {
   void _finish() {
     if (_done) return;
     setState(() => _done = true);
-    widget.onFinished?.call([
-      LearningEvent(
-        eventId: '${e.book}:p${e.page}#0',
-        skillCaseId: 'khtn-thi-nghiem',
-        kind: EvidenceKind.independentAttempt,
-        correct: null, // ⭐ quan sát không bị máy chấm — UNKNOWN ≠ SAI
-        exerciseId: '${e.book}:p${e.page}',
-        conceptIds: const ['khtn-quan-sat'],
-        at: _at(),
-        support: SupportLevel.none,
-        policyId: 'experiment-v1',
-        knowledgeVersion: knowledgeModelVersion,
-      )
-    ]);
+    // ⭐⭐ WAL-178 — màn này KHÔNG tự mint LearningEvent nữa. Nó trả một
+    // CLAIM (CandidateEvidence); validateCandidateEvidence là cửa duy nhất
+    // quyết claim đó có thành bằng chứng thật hay chỉ Trace (vd `lookup`,
+    // hoặc trẻ chưa viết gì — "(em chưa ghi)" không phải bằng chứng).
+    final candidate = CandidateEvidence(
+      skillCaseId: 'khtn-thi-nghiem',
+      conceptIds: const ['khtn-quan-sat'],
+      exerciseId: '${e.book}:p${e.page}',
+      // Trẻ vừa GIẢI THÍCH lại điều quan sát được — đúng nghĩa self-explanation
+      // (Chi), không phải hint/demo nào từ SAM ⇒ act đúng là askExplanation.
+      act: TeachingAct.askExplanation,
+      learnerText: _observeCtrl.text,
+      policyId: 'experiment-v1',
+      knowledgeVersion: knowledgeModelVersion,
+    );
+    final event = validateCandidateEvidence(
+      candidate,
+      context: widget.learningContext,
+      eventId: '${e.book}:p${e.page}#0',
+      at: _at(),
+    );
+    widget.onFinished?.call(event == null ? const [] : [event]);
   }
 
   @override
