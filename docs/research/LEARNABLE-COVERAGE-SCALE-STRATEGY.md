@@ -94,6 +94,75 @@ vì cố tự động hoá 100%.
 
 **Tin học giữ làm candidate tiếp theo, không mất** — theo đúng chỉ đạo.
 
+---
+
+## Tin học — tiến độ điều tra (Founder Delta thứ hai, 2026-09-04): PHÁT HIỆN
+QUAN TRỌNG, CHƯA ĐỦ BẰNG CHỨNG ĐỂ QUYẾT — tiếp tục điều tra trước khi implement
+
+Founder cảnh báo tường minh: *"Không được đồng nhất A/B/C/D phát hiện được =
+Quiz hợp lệ = Evidence hợp lệ."* Điều tra ban đầu (10 cuốn Tin học lớp 3-12,
+đều có SGV, lesson-attachment 99%+) đã XÁC NHẬN cảnh báo này đúng, bằng bằng
+chứng cụ thể, không phải suy đoán:
+
+**Phát hiện 1 — answer-grounding THẬT SỰ tồn tại (mới, chưa từng thấy ở môn
+nào khác phiên này)**: SGV Tin học (lớp 3,6,9 xác nhận qua grep, lớp 12 chưa
+thấy) có mục "Đáp án" thật, đúng định dạng, khớp CHÍNH XÁC với câu hỏi bên
+SGK — xác minh tay một ca đầy đủ: SGK lớp 6 bài 1 "1. Em hãy ghép mỗi mục ở
+cột A với một mục phù hợp ở cột B" (1) Thông tin (2) Dữ liệu (3) Vật mang tin
+↔ (a)(b)(c) — SGV: "Đáp án: 1 - b, 2 - a, 3 - c." khớp đúng. Đây là môn ĐẦU
+TIÊN phiên này có đáp án thật trong nguồn (Toán/TV/Khoa học/Sử đều KHÔNG in
+đáp án — luật "UNKNOWN ≠ SAI" tồn tại chính vì lý do đó).
+
+**Phát hiện 2 — nhưng "câu hỏi" không phải MỘT dạng, mà NHIỀU dạng tương tác
+khác nhau, đổi theo từng bài, không theo một quy ước cố định theo lớp**:
+đo trực tiếp trên OCR gốc nhiều lớp:
+- Lớp 6 bài 1, câu 1: GHÉP CỘT (matching column A↔B) — không phải MCQ.
+- Lớp 6 bài 1, câu 2: PHÂN LOẠI (mỗi dòng là "thông tin" hay "dữ liệu"?) —
+  không phải MCQ.
+- Lớp 7: câu hỏi MỞ gắn với hình ảnh ("Các thiết bị trong hình làm việc với
+  dạng thông tin nào?") — không có lựa chọn nào để chọn.
+- Lớp 9: MCQ đơn lựa chọn thật, có A/B/C/D — dạng DUY NHẤT khớp giả thiết ban
+  đầu "phát hiện A/B/C/D".
+- Lớp 10: câu hỏi thảo luận/quan điểm ("Theo em bạn nào nói đúng?", gắn với
+  hội thoại giữa các nhân vật) — không có đáp án đơn nhất.
+
+**Ý nghĩa**: một heuristic đơn ("tìm dòng có A./B./C./D.") sẽ bỏ sót hầu hết
+câu hỏi Tin học thật (chỉ bắt được lớp 9-style) VÀ — nguy hiểm hơn theo đúng
+cảnh báo Founder — có thể bắt NHẦM một câu hỏi ghép-cột hoặc phân-loại rồi cố
+ép vào khuôn MCQ, tạo ra một "lựa chọn đúng" KHÔNG tồn tại trong sách (chính
+là false trusted evidence Founder nói "nặng hơn thiếu"). PEDAGOGICAL ROLE
+cũng khác nhau thật (SGK tự ghi: "Câu hỏi" = tự kiểm tra hiểu bài; "Luyện
+tập" = củng cố; "Vận dụng" = áp dụng thực tiễn, khả năng KHÔNG có đáp án đơn
+nhất; "Trò chơi" = SGK tự ghi rõ "không phải nội dung bắt buộc" — nên loại
+hẳn khỏi Evidence, không chỉ khỏi MCQ).
+
+**Chưa đủ để quyết ship/stop** — mới xác minh sâu 1 lớp (6) + lấy mẫu nông
+3 lớp khác (7,9,10). Bước tiếp theo (chưa làm): thu hẹp phạm vi CHỈ tới dạng
+MCQ đơn-lựa-chọn có đáp án SGV thật (giống lớp 9) — kiểm xem dạng NÀY RIÊNG
+có mốc đóng, hữu hạn, generalize được qua nhiều lớp/sách như "Chuẩn bị/Tiến
+hành" của WAL-190, hay cũng biến thiên theo từng sách (sẽ lặp lại kết cục
+Ngữ văn). Các dạng khác (ghép cột, phân loại, mở, thảo luận) xếp tạm vào
+SAM_SUPPORTABLE/PRACTICE CANDIDATE — không tự động thành Learnable — đúng
+hướng dẫn Founder, cho tới khi có Surface + Evidence contract phù hợp riêng
+cho từng dạng (hiện chưa có Surface nào cho "ghép cột"/"phân loại" trong
+runtime — `options`/`correctOption` của `LearningActivity` chỉ giả định
+đơn-lựa-chọn).
+
+**Bổ sung Opportunity Map — hướng nghiên cứu tương lai, KHÔNG build ngay**:
+**LAYOUT-AWARE CONTENT EXTRACTION** — bài học rút ra từ falsification Ngữ
+văn (OCR dòng-theo-dòng làm mất ngữ nghĩa bố cục, không phân biệt được cột
+chính văn với hộp sidebar) có thể áp dụng rộng hơn: Khoa học 5 (trang
+đầu-bài nhiều hình/hộp, đã xác nhận corrupt ở C-013/phiên trước), có thể cả
+Sử/Địa (nhiều hình + chú thích). Nếu có toạ độ bbox theo cột/khối thay vì chỉ
+dòng OCR phẳng, CẢ BA nhóm nhiễu (sidebar Ngữ văn, hộp graphic Khoa học,
+matching-column Tin học) có thể giải được bằng MỘT khả năng chung (phân vùng
+theo layout trước khi đọc thứ tự) thay vì ba bộ heuristic riêng — đúng tinh
+thần "shared capability, không phải N one-off". KHÔNG xếp P0 — cần đo được
+corpus có bao nhiêu trang thực sự cần layout-aware (không phải toàn bộ) và
+liệu registry hiện có sẵn dữ liệu bbox nào tái dùng được (WAL-133 registry đã
+có bbox cho source-assets — có thể là điểm khởi đầu, chưa kiểm) trước khi coi
+đây là ứng viên P0 thật.
+
 **Noise patterns identified for whoever builds the dedicated extractor next**
 (raw OCR of grade 6, "Dế Mèn phiêu lưu kí" excerpt, pages 16-18): footnote
 definitions interleaved at page bottoms (`(1) Chết ngay đuôi: chết ngay lập
