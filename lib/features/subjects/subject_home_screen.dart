@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/curriculum/canonical_problem.dart';
 import '../../core/curriculum/subject_id.dart';
+import '../../core/intent/learning_intent.dart';
+import '../../core/store/timetable.dart';
 import '../../core/knowledge/provenance.dart';
 import '../../core/knowledge/slice_curriculum.dart';
 import '../../core/tutor/teaching_provenance.dart' show sourceLineForChildOf;
@@ -33,6 +35,8 @@ class SubjectHomeScreen extends StatelessWidget {
     required this.index,
     required this.subject,
     this.book,
+    this.timetable = const [],
+    this.reviewDueSubjects = const {},
   });
 
   final LearnerProfile profile;
@@ -44,6 +48,13 @@ class SubjectHomeScreen extends StatelessWidget {
   /// đúng cuốn đó và mang tên cuốn đó. Cùng một màn, hai lối vào — không tạo
   /// màn thứ hai cho cùng một việc.
   final BookRef? book;
+
+  /// WAL-175 — hai tín hiệu để SAM ĐỀ NGHỊ ý định. Rỗng ⇒ SAM không đề nghị và
+  /// hỏi thẳng; nó KHÔNG được bịa lý do (fail closed).
+  final List<TimetableEntry> timetable;
+
+  /// Mã môn đang có chỗ vướng / đến hạn ôn — bằng chứng thắng thời khoá biểu.
+  final Set<String> reviewDueSubjects;
 
   List<KhoaExperiment> get _experiments =>
       index.experimentsForSubject(subject);
@@ -343,38 +354,249 @@ class SubjectHomeScreen extends StatelessWidget {
     final curriculum = curriculumForLesson(key);
     // Vét cạn trên `sealed`: thêm loại việc mới mà quên nối UI ⇒ không biên
     // dịch được, thay vì im lặng biến mất khỏi sheet.
-    final actions = <(String, VoidCallback)>[
-      for (final a in acts)
-        switch (a) {
-          ExerciseActivity(:final items) => (
-              '🧮 Làm bài tập',
-              () => _openExercise(context, l, items.first)
-            ),
-          ReadingActivity(:final reading) => (
-              '📖 Đọc bài',
-              () => _openReading(context, reading)
-            ),
-          WritingActivity(:final writing) => (
-              '✍️ Luyện viết',
-              () => _openWriting(context, writing)
-            ),
-          SourceActivity(:final source) => (
-              '📜 Đọc tư liệu gốc',
-              () => _openSource(context, source)
-            ),
-          ExperimentActivity(:final experiment) => (
-              '🔬 Làm thí nghiệm',
-              () => _openExperiment(context, experiment)
-            ),
-        },
-      // «Nguồn bài học» chỉ hiện khi có chương trình của ĐÚNG bài này.
-      if (acts.whereType<ExerciseActivity>().isNotEmpty && curriculum != null)
-        ('📖 Nguồn bài học', () => _openSourceInfo(context, curriculum)),
-    ];
-    if (actions.length == 1) {
-      actions.single.$2();
+    // ⭐⭐ WAL-175 — Ý ĐỊNH, không phải danh sách việc.
+    //
+    // Trước đây chỗ này hỏi «Bài này có mấy việc — con chọn nhé»: đó là từ vựng
+    // của `LessonActivity` rò ra giao diện, và nó làm MẤT ý định — vào bằng
+    // «học trước» hay «ôn luyện» thì cũng ra cùng một danh sách (Convergence
+    // §25, khoảng cách lớn nhất giữa mã và mô hình).
+    //
+    // Nay: SAM ĐỀ NGHỊ một ý định kèm LÝ DO nhìn thấy được; trẻ đổi được sang
+    // bất kỳ ý định nào bài này làm được. Không có căn cứ thật ⇒ SAM HỎI, không
+    // bịa lý do (fail closed).
+    final available = availableIntents(
+      hasExercises: acts.whereType<ExerciseActivity>().isNotEmpty,
+      hasAnyActivity: acts.isNotEmpty,
+      hasSource: curriculum != null || acts.isNotEmpty,
+    );
+    if (available.isEmpty) return;
+
+    // ⭐ KHÔNG hỏi ý định khi ý định không đổi được gì. Nếu mọi ý định bài này
+    // cho ra CÙNG một chuỗi hoạt động thì bộ chọn là lựa chọn giả — thêm một
+    // chạm mà không thêm nghĩa. «Cùng bài, khác ý định, khác trải nghiệm» chỉ
+    // đúng khi nó thật sự khác.
+    final byIntent = {
+      for (final i in available)
+        i: activitiesForIntent(i, acts).map((a) => a.runtimeType).toList()
+    };
+    final distinct = byIntent.values.map((v) => v.join('|')).toSet();
+    if (distinct.length <= 1) {
+      _startIntent(context, b, l, acts, available.first, curriculum);
       return;
     }
+
+    final proposal = proposeIntent(
+      subject: subject,
+      now: DateTime.now(),
+      available: available,
+      timetable: timetable,
+      reviewDue: reviewDueSubjects.contains(subjectIdOf(subject)),
+    );
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: WalColors.surface,
+      showDragHandle: true,
+      // Bọc cuộn: máy thấp / bàn phím lên thì bộ chọn vẫn tới được lựa chọn
+      // CUỐI. Không bọc thì «Xem trong sách» tràn khỏi màn và KHÔNG BẤM ĐƯỢC —
+      // đúng lỗi đã dính ở màn PIN (WAL-145), test bắt được ở đây.
+      isScrollControlled: true,
+      builder: (sheet) => SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+              WalSpacing.lg, 0, WalSpacing.lg, WalSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(_lessonLabel(b, l),
+                  style: const TextStyle(
+                      fontSize: WalType.body,
+                      fontWeight: FontWeight.w700,
+                      color: WalColors.ink)),
+              const SizedBox(height: WalSpacing.sm),
+              // SAM nói lý do TRƯỚC, rồi mới tới lựa chọn. Không có lý do thì
+              // hỏi thẳng — không dựng một câu cho có.
+              Text(
+                  proposal == null
+                      ? 'Con muốn bắt đầu thế nào?'
+                      : proposal.reason,
+                  style: const TextStyle(
+                      fontSize: WalType.secondary, color: WalColors.inkSoft)),
+              const SizedBox(height: WalSpacing.md),
+              for (final i in _intentOrder(available, proposal?.intent))
+                _intentTile(sheet, i, proposed: i == proposal?.intent,
+                    onTap: () {
+                  Navigator.of(sheet).pop();
+                  _startIntent(context, b, l, acts, i, curriculum);
+                }),
+            ],
+          ),
+        ),
+        ),
+      ),
+    );
+  }
+
+  /// Ý định được đề nghị lên đầu; «xem trong sách» LUÔN xuống cuối.
+  ///
+  /// Tra cứu là lối ra hợp lệ (Convergence, tranh luận #1) nhưng nếu đặt ngang
+  /// hàng thị giác với việc học thì nó là lựa chọn rẻ nhất về nỗ lực — trẻ sẽ
+  /// chọn nó. Đây là khẳng định về TRỌNG SỐ, không phải về tính chính đáng, và
+  /// nó kiểm được bằng số liệu dùng thật (Convergence U1).
+  static List<LearningIntent> _intentOrder(
+      Set<LearningIntent> available, LearningIntent? proposed) {
+    const rank = [
+      LearningIntent.review,
+      LearningIntent.prepare,
+      LearningIntent.practice,
+      LearningIntent.lookup,
+    ];
+    final rest = [
+      for (final i in rank)
+        if (available.contains(i) && i != proposed) i
+    ];
+    return [?proposed, ...rest];
+  }
+
+  static (String, String) _intentText(LearningIntent i) => switch (i) {
+        // Ngôn ngữ TÌNH HUỐNG của trẻ, không phải từ vựng sư phạm
+        // («ôn tập», «chuẩn bị» là từ của người lớn).
+        LearningIntent.prepare => ('🌱', 'Mai có tiết này'),
+        LearningIntent.review => ('🔁', 'Cô dạy rồi, con ôn lại'),
+        LearningIntent.practice => ('✏️', 'Con có bài tập'),
+        LearningIntent.lookup => ('📖', 'Xem trong sách'),
+      };
+
+  Widget _intentTile(BuildContext sheet, LearningIntent i,
+      {required bool proposed, required VoidCallback onTap}) {
+    final (icon, label) = _intentText(i);
+    final quiet = i == LearningIntent.lookup;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: WalSpacing.sm),
+      child: Material(
+        color: proposed
+            ? WalColors.primary500
+            : (quiet ? Colors.transparent : WalColors.surfaceLavender),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+          side: quiet && !proposed
+              ? const BorderSide(color: WalColors.surfaceLavender)
+              : BorderSide.none,
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: WalSpacing.md, vertical: WalSpacing.md),
+            child: Row(children: [
+              Text(icon, style: const TextStyle(fontSize: WalType.body)),
+              const SizedBox(width: WalSpacing.sm),
+              Expanded(
+                child: Text(label,
+                    style: TextStyle(
+                        fontSize: WalType.body,
+                        fontWeight:
+                            proposed ? FontWeight.w700 : FontWeight.w600,
+                        color: proposed ? Colors.white : WalColors.ink)),
+              ),
+              if (proposed)
+                const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Ý định XẾP THỨ TỰ hoạt động — cùng bài, khác ý định, khác thứ tự vào.
+  ///
+  /// ⭐ KHÔNG nuốt hoạt động: một bài Tiếng Việt có Đọc + Viết thì cả hai phải
+  /// tới được, dù ý định nào. Bản đầu của tôi chỉ mở hoạt động ĐẦU TIÊN hợp ý
+  /// định, và thế là «Luyện viết» biến mất khỏi sản phẩm — test bắt được.
+  static List<LessonActivity> activitiesForIntent(
+      LearningIntent intent, List<LessonActivity> acts) {
+    int rank(LessonActivity a) => switch (intent) {
+          // Chuẩn bị: quan sát/dự đoán trước, đọc sau, bài tập cuối.
+          LearningIntent.prepare => switch (a) {
+              ExperimentActivity() => 0,
+              ReadingActivity() => 1,
+              SourceActivity() => 2,
+              WritingActivity() => 3,
+              ExerciseActivity() => 4,
+            },
+          // Ôn / bài tập: việc sinh bằng chứng trước.
+          LearningIntent.review || LearningIntent.practice => switch (a) {
+              ExerciseActivity() => 0,
+              ExperimentActivity() => 1,
+              ReadingActivity() => 2,
+              WritingActivity() => 3,
+              SourceActivity() => 4,
+            },
+          // Tra cứu: nguồn trước, và KHÔNG mời bài tập (không sinh bằng chứng).
+          LearningIntent.lookup => switch (a) {
+              SourceActivity() => 0,
+              ReadingActivity() => 1,
+              ExperimentActivity() => 2,
+              WritingActivity() => 3,
+              ExerciseActivity() => 9,
+            },
+        };
+    final out = [...acts]..sort((x, y) => rank(x).compareTo(rank(y)));
+    return intent == LearningIntent.lookup
+        ? [for (final a in out) if (a is! ExerciseActivity) a]
+        : out;
+  }
+
+  /// Nhãn + hành động của một hoạt động. Vét cạn trên `sealed` — thêm loại việc
+  /// mới mà quên nối UI thì không biên dịch được.
+  (String, VoidCallback) _activityAction(
+          BuildContext context, LessonRef l, LessonActivity a) =>
+      switch (a) {
+        ExerciseActivity(:final items) => (
+            '🧮 Làm bài tập',
+            () => _openExercise(context, l, items.first)
+          ),
+        ReadingActivity(:final reading) => (
+            '📖 Đọc bài',
+            () => _openReading(context, reading)
+          ),
+        WritingActivity(:final writing) => (
+            '✍️ Luyện viết',
+            () => _openWriting(context, writing)
+          ),
+        SourceActivity(:final source) => (
+            '📜 Đọc tư liệu gốc',
+            () => _openSource(context, source)
+          ),
+        ExperimentActivity(:final experiment) => (
+            '🔬 Làm thí nghiệm',
+            () => _openExperiment(context, experiment)
+          ),
+      };
+
+  void _startIntent(BuildContext context, BookLessons b, LessonRef l,
+      List<LessonActivity> acts, LearningIntent intent, SliceCurriculum? c) {
+    final ordered = activitiesForIntent(intent, acts);
+
+    // Tra cứu mà bài không có nguồn nào ⇒ «Nguồn bài học» của chương trình.
+    if (intent == LearningIntent.lookup && ordered.isEmpty) {
+      if (c != null) _openSourceInfo(context, c);
+      return;
+    }
+    if (ordered.isEmpty) return;
+    if (ordered.length == 1) {
+      _activityAction(context, l, ordered.single).$2();
+      return;
+    }
+    // Nhiều việc trong cùng một ý định ⇒ để trẻ chọn việc, KHÔNG tự chọn hộ.
+    final actions = [
+      for (final a in ordered) _activityAction(context, l, a),
+      if (intent == LearningIntent.lookup && c != null)
+        ('📖 Nguồn bài học', () => _openSourceInfo(context, c)),
+    ];
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: WalColors.surface,
@@ -382,7 +604,7 @@ class SubjectHomeScreen extends StatelessWidget {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           const Padding(
             padding: EdgeInsets.all(WalSpacing.md),
-            child: Text('Bài này có mấy việc — con chọn nhé',
+            child: Text('Con muốn làm phần nào trước?',
                 style: TextStyle(
                     fontSize: WalType.body,
                     fontWeight: FontWeight.w600,

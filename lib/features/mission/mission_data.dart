@@ -32,8 +32,13 @@ class ReviewItem {
     this.priority = ReviewPriority.normal,
     this.reason = '',
     this.becauseOfError = false,
+    this.subjectId,
   });
   final String displayName;
+
+  /// WAL-175 — môn của việc ôn này. Cần để BẰNG CHỨNG thắng THỜI KHOÁ BIỂU khi
+  /// SAM đề nghị ý định ở đúng cuốn sách đó (Convergence §10).
+  final String? subjectId;
   final ReviewUrgency urgency;
   final ReviewPriority priority;
   final String reason;
@@ -173,7 +178,9 @@ MissionData buildDemoMission({DateTime? now}) {
           review.urgency == ReviewUrgency.overdue)
         ReviewItem(
             displayName: 'Quy đồng — ${names['denominator-divisible']!}',
-            urgency: review.urgency),
+            urgency: review.urgency,
+            // fixture demo là Toán — không có `SliceCurriculum` ở nhánh này.
+            subjectId: 'toan'),
     ],
     unobservedCaseNames: [
       for (final id in summary.unobservedCases)
@@ -279,6 +286,7 @@ Future<MissionData> buildMissionFromStore({
       priority: cand.priority,
       reason: cand.reason,
       becauseOfError: cand.becauseOfError,
+      subjectId: c.subjectId,
     ));
   }
 
