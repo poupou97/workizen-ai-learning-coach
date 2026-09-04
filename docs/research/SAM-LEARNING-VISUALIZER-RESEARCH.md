@@ -1,7 +1,9 @@
 # SAM Learning Visualizer — research + challenge (Founder Product Addition, 2026-09-04)
 
-**Status:** RESEARCH DONE, verdict below. Không code template mới trước khi corpus có bằng
-chứng — xem §4.
+**Status:** RESEARCH DONE, WAL-185 shipped, Founder đã review (§9). **CAPABILITY HYPOTHESIS
+VẪN MỞ — CHƯA CHỨNG MINH TOÀN BỘ**, chỉ một phần đã proven. Không code template mới trước
+khi corpus có bằng chứng — xem §4. Không xây thêm UI/ticket Visualizer chỉ vì nghiên cứu
+này tồn tại — xem §9 điều kiện kích hoạt lại.
 
 **Mode đã theo:** UNDERSTAND INTENT → AUDIT HUB → RESEARCH SAM → CHALLENGE → VERDICT.
 
@@ -142,3 +144,44 @@ tính riêng.
 4. TRACE ≠ EVIDENCE dùng đúng khuôn READ gate của Reader (ADR-009) — không luật mới.
 5. Age-density: dùng chung nguyên tắc AGE-ADAPTIVE-UX.md đã có (band 1-2/3-5/6-9/10-12),
    không xây engine tuổi riêng cho visualizer.
+
+## 9. Founder Review (2026-09-04) — chốt trạng thái sau WAL-185
+
+**PASS** cho research + WAL-185 (CI xanh, Nokia verify còn hiệu lực). Nhưng khoanh vùng rõ
+để không ai đọc nhầm sau này: WAL-185 chứng minh *"SAM giải thích được vì sao một
+representation ĐÃ CÓ là phù hợp"* — KHÔNG chứng minh toàn bộ giả thuyết *"structured
+curriculum knowledge → reusable, source-grounded representation, tái dùng qua nhiều loại
+nội dung khác nhau"*. Giữ SAM Learning Visualizer là **capability hypothesis MỞ**, không
+phải hạng mục đã ship xong.
+
+**Đã chứng minh (PROVEN):**
+- `ExperimentActivity` → Process representation.
+- `DiaMap` → Spatial representation.
+- SAM tự giải thích lựa chọn representation (WAL-185).
+
+**CHƯA chứng minh (UNPROVEN) — không xây chỉ để "đóng" giả thuyết, chờ áp lực nội dung thật:**
+- Generic representation composition (một renderer nhận nhiều hình dạng khác nhau).
+- Automatic semantic template selection (bộ chọn tự động từ nội dung).
+- Mindmap education adaptation, Comparison, Cause-Effect, Concept Map, Review Sheet.
+
+**BỊ CHẶN (BLOCKED):** History Timeline — chờ corpus có cấu trúc sự kiện (§4).
+
+**Điều kiện kích hoạt lại** (audit kiến trúc lần nữa CHỈ KHI một trong các điều sau xảy ra
+thật, không suy đoán trước):
+- xuất hiện case thứ BA thật sự khác hình dạng cả Process lẫn Spatial;
+- CÙNG một representation cần dùng lại ở NHIỀU môn khác nhau;
+- mapping activity→screen bắt đầu LẶP logic (dấu hiệu cần trừu tượng hoá);
+- corpus Lịch sử có cấu trúc sự kiện/ngày tháng thật;
+- MỘT nội dung cần representation KHÁC NHAU tuỳ LearningIntent (xem falsification bên dưới);
+- hoặc surface hiện có không diễn đạt được một trải nghiệm học tập cần thiết.
+
+**Falsification quan trọng nhất cho tương lai** (chưa ép chạy — chờ corpus cho phép):
+CÙNG MỘT nội dung + KHÁC LearningIntent ⇒ KHÁC representation hữu ích. Ví dụ khi corpus
+Lịch sử đủ cấu trúc: cùng một bài, PREPARE ⇒ dòng thời gian ngắn + nhân vật chính; REVIEW ⇒
+nguyên nhân/kết quả + review sheet gọn; LOOKUP ⇒ representation chi tiết theo nguồn. Đây sẽ
+chứng minh giả thuyết Founder SÂU HƠN nhiều so với việc chỉ ánh xạ ActivityType→Screen đã
+có — nhưng KHÔNG ép chạy test này trước khi có dữ liệu nguồn thật.
+
+**Doctrine giữ nguyên cho phần còn lại của giả thuyết:** REUSE BEFORE BUILD · SOURCE
+STRUCTURE BEFORE VISUALIZATION · NO STRUCTURED FACT ⇒ NO AUTHORITATIVE VISUAL FACT · xây
+trừu tượng hoá khi case thứ ba tạo áp lực thật, không xây trước.
