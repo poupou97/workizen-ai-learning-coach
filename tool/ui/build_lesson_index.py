@@ -146,7 +146,12 @@ for f in sorted(glob.glob(f'poc-out/graph/ocr-body/{su_book}/p*.json')):
 # Trang có cả «Chuẩn bị:» và «Tiến hành:» = một khối thí nghiệm SGK.
 # Giữ VERBATIM (kể cả lỗi OCR nhỏ) — không viết lại lời sách.
 EXPERIMENT_BOOKS = {  # môn × sách theo lớp — khối «Chuẩn bị/Dụng cụ + Tiến hành»
+    4: [('Khoa học', '04-sgk-khoa-hoc-4')],
     5: [('Khoa học', '05-sgk-khoa-hoc-5')],
+    6: [('KHTN', '06-sgk-khoa-hoc-tu-nhien-6')],
+    7: [('KHTN', '07-sgk-khoa-hoc-tu-nhien-7')],
+    8: [('KHTN', '08-sgk-khoa-hoc-tu-nhien-8')],
+    9: [('KHTN', '09-sgk-khoa-hoc-tu-nhien-9')],
     10: [('Vật lí', '10-sgk-vat-li-10'), ('Hoá học', '10-sgk-hoa-hoc-10')],
 }
 # WAL-172: gắn khối thí nghiệm về bài bằng TRANG IN của CHÍNH CUỐN chứa nó.
@@ -191,15 +196,32 @@ for subj, bk, f in _exp_sources:
                  if 'Tiến hành' in t), None)
     if i_th is None:
         continue
-    # title: dòng đánh-số gần nhất phía trên «Chuẩn bị:»
+    # title: KHTN 6-9 tự đặt tên rõ «Thí nghiệm N: ...» ngay sát Chuẩn bị —
+    # ưu tiên mốc này (tin cậy hơn) trước khi rơi về mốc «N. ...» cũ của tiểu
+    # học, thứ vốn để bắt cả câu hỏi đánh số đứng trước — sai bài Vật lí 9
+    # «Trong trường hợp thí nghiệm...» (thật ra là câu hỏi của TN trước) đã
+    # lộ ra khi mở rộng sang KHTN 6-9.
     title = None
-    for t in reversed(lines[:i_cb]):
-        if re.match(r'^\d+\.\s+\S', t):
-            title = re.sub(r'^\d+\.\s+', '', t).strip()
+    for t in reversed(lines[max(0, i_cb - 6):i_cb]):
+        m = re.match(r'^Thí nghiệm\s*\d*\s*[:.]\s*(\S.*)$', t)
+        if m:
+            title = m.group(1).strip()
             break
+    if title is None:
+        for t in reversed(lines[:i_cb]):
+            if re.match(r'^\d+\.\s+\S', t):
+                title = re.sub(r'^\d+\.\s+', '', t).strip()
+                break
     steps, du_doan, quan_sat = [], None, None
+    # KHTN 6-9: đôi khi bước đầu viết NGAY sau dấu hai chấm cùng dòng
+    # («Tiến hành: Dùng panh kẹp...») thay vì xuống dòng rồi mới «- ...».
+    inline = re.match(r'^Tiến hành\s*:\s*(\S.*)$', lines[i_th])
+    if inline:
+        steps.append(inline.group(1).strip())
     for t in lines[i_th + 1:i_th + 12]:
-        if t.startswith('- '):
+        # Fail closed: một nhãn hình/ký hiệu lạc trong vùng bước («- AgNO3»)
+        # không phải một bước thật — bước thật luôn là một câu, nhiều từ.
+        if t.startswith('- ') and len(t[2:].strip()) >= 10 and ' ' in t[2:].strip():
             steps.append(t[2:].strip())
         elif t.startswith('Dự đoán'):
             du_doan = t.strip()
