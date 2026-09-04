@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/app/theme/band_density_scope.dart';
 import 'package:learning_coach/app/theme/wal_tokens.dart';
+import 'package:learning_coach/core/context/learning_context.dart';
 import 'package:learning_coach/core/tutor/learning_activity.dart';
 import 'package:learning_coach/features/shell/reader_screen.dart';
 
@@ -15,9 +16,11 @@ const _a = LearningActivity(
   conceptId: 'c',
   passage: 'Đoạn văn thật để đọc.',
 );
+const _ctx = LearningContext(learnerId: 'na', grade: 5);
 
 Future<double> _chipWidth(WidgetTester t, {WalBandDensity? d}) async {
-  final screen = ReaderScreen(key: UniqueKey(), activity: _a);
+  final screen =
+      ReaderScreen(key: UniqueKey(), activity: _a, learningContext: _ctx);
   await t.pumpWidget(MaterialApp(
       home: d == null
           ? screen

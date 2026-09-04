@@ -18,6 +18,8 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
+import '../../core/context/learning_context.dart';
+import '../../core/intent/learning_intent.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
@@ -29,12 +31,18 @@ class ReaderScreen extends StatefulWidget {
   const ReaderScreen({
     super.key,
     required this.activity,
+    required this.learningContext,
     this.provenance,
     this.onFinished,
     this.now,
   });
 
   final LearningActivity activity;
+
+  /// ⭐⭐ WAL-189 — cùng luật WAL-175/178 đã có ở Experiment: `lookup` sinh
+  /// TRACE, không sinh EVIDENCE. `_emit` đọc field này trước khi ghi bất kỳ
+  /// sự kiện nào (xem bên dưới).
+  final LearningContext learningContext;
 
   /// Vì sao SAM dạy cách này + nguồn — `null` ⇒ màn KHÔNG nói gì về nguồn.
   final TeachingProvenance? provenance;
@@ -66,6 +74,10 @@ class _ReaderScreenState extends State<ReaderScreen> {
   bool get _openQuestion => a.options.isEmpty;
 
   void _emit(EvidenceKind kind, bool? correct) {
+    // ⭐⭐ WAL-189 — tra cứu sinh TRACE, không sinh EVIDENCE (WAL-175/178),
+    // dù trẻ đã chọn/trả lời gì. Cửa DUY NHẤT của màn này — 4 chỗ gọi _emit
+    // đều qua đây, không hở chỗ nào.
+    if (widget.learningContext.intent == LearningIntent.lookup) return;
     _events.add(LearningEvent(
       eventId: '${a.activityId}#${_seq++}',
       skillCaseId: a.skillCaseId ?? a.conceptId,

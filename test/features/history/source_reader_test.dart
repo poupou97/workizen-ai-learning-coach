@@ -5,9 +5,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/core/context/learning_context.dart';
+import 'package:learning_coach/core/intent/learning_intent.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/features/history/source_reader.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
+
+const _ctx = LearningContext(learnerId: 'na', grade: 5);
 
 const _gloss = 'Nguồn này cho thấy vua Lý Thái Tổ chọn thành Đại La vì thế '
     'đất rộng, cao, ở giữa bốn phương — việc dời đô có tính toán.';
@@ -25,11 +29,13 @@ const _src = SuSource(
 );
 
 Future<void> _pump(WidgetTester t, SuSource s,
-    {void Function(List<LearningEvent>)? onFinished}) async {
+    {void Function(List<LearningEvent>)? onFinished,
+    LearningContext context = _ctx}) async {
   await t.pumpWidget(MaterialApp(
       home: SourceReaderScreen(
     key: ValueKey('${s.book}:${s.page}'),
     source: s,
+    learningContext: context,
     now: () => DateTime(2026, 9, 2, 19),
     onFinished: onFinished,
   )));
@@ -94,6 +100,27 @@ void main() {
         reason: 'kết luận CỦA EM hiện lại dưới đúng nhãn của em');
     expect(find.textContaining('NHIỀU nguồn'), findsOneWidget,
         reason: 'dạy đúng phương pháp sử: một nguồn chưa đủ');
+  });
+
+  // ⭐⭐ WAL-189 — cùng luật WAL-175/178: tra cứu sinh TRACE, không sinh
+  // EVIDENCE. Trước WAL-189, SourceReader không nhận learningContext nên kết
+  // luận qua ý định "Xem trong sách" vẫn ghi evidence như một lần học thật.
+  testWidgets('⭐⭐ ý định lookup ⇒ KHÔNG sinh evidence dù trẻ kết luận',
+      (t) async {
+    List<LearningEvent>? out;
+    await _pump(t, _src,
+        context: const LearningContext(
+            learnerId: 'na', grade: 5, intent: LearningIntent.lookup),
+        onFinished: (e) => out = e);
+    await t.tap(find.text('Con đọc nguồn xong 📜'));
+    await t.pumpAndSettle();
+    await t.scrollUntilVisible(find.text(kConclusionStances[1]), 120,
+        scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text(kConclusionStances[1]));
+    await t.pumpAndSettle();
+    expect(out, isEmpty,
+        reason: '⭐⭐ đột biến bỏ gate lookup ⇒ đỏ — tra cứu không phải bằng '
+            'chứng, dù trẻ có kết luận gì');
   });
 
   testWidgets('⭐ fail-closed: thiếu attribution ⇒ KHÔNG render như nguồn',

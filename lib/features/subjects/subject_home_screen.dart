@@ -635,10 +635,11 @@ class SubjectHomeScreen extends StatelessWidget {
   /// Nhãn + hành động của một hoạt động. Vét cạn trên `sealed` — thêm loại việc
   /// mới mà quên nối UI thì không biên dịch được.
   ///
-  /// ⭐⭐ WAL-178/182 — [ctx] đã mang sẵn sách/bài/ý định lúc gọi hàm này;
-  /// hầu hết hoạt động chưa dùng tới (chỉ Experiment dùng, hôm nay), nhưng
-  /// CHẢY QUA đây để mọi hoạt động sau này nối vào cùng một đường, không tạo
-  /// đường context riêng cho từng loại việc.
+  /// ⭐⭐ WAL-178/182/189 — [ctx] mang sẵn sách/bài/ý định lúc gọi hàm này,
+  /// và CHẢY QUA tới mọi loại hoạt động (Experiment từ đầu; Reading/Writing/
+  /// Source từ WAL-189) — cùng một đường, không tạo đường context riêng cho
+  /// từng loại việc. `ctx.intent == lookup` ⇒ màn con phát TRACE, không phát
+  /// EVIDENCE (WAL-175: tra cứu không phải bằng chứng, dù trẻ có viết gì).
   (String, VoidCallback) _activityAction(BuildContext context, LessonRef l,
           LessonActivity a, LearningContext ctx) =>
       switch (a) {
@@ -648,15 +649,15 @@ class SubjectHomeScreen extends StatelessWidget {
           ),
         ReadingActivity(:final reading) => (
             '📖 Đọc bài',
-            () => _openReading(context, reading)
+            () => _openReading(context, reading, ctx)
           ),
         WritingActivity(:final writing) => (
             '✍️ Luyện viết',
-            () => _openWriting(context, writing)
+            () => _openWriting(context, writing, ctx)
           ),
         SourceActivity(:final source) => (
             '📜 Đọc tư liệu gốc',
-            () => _openSource(context, source)
+            () => _openSource(context, source, ctx)
           ),
         ExperimentActivity(:final experiment) => (
             '🔬 Làm thí nghiệm',
@@ -782,7 +783,7 @@ class SubjectHomeScreen extends StatelessWidget {
 
   /// WAL-144 — TV: đề VIẾT thật → Compose (dàn ý → nháp → góp ý → sửa;
   /// SAM KHÔNG viết hộ — không tồn tại chỗ chứa bài mẫu). Evidence một chỗ ghi.
-  void _openWriting(BuildContext context, TvWriting w) {
+  void _openWriting(BuildContext context, TvWriting w, LearningContext ctx) {
     final activity = LearningActivity(
       activityId: '${w.book}:l${w.lesson}:viet',
       prompt: w.prompt,
@@ -794,6 +795,7 @@ class SubjectHomeScreen extends StatelessWidget {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => ComposeLiteScreen(
               activity: activity,
+              learningContext: ctx,
               onFinished: (events) => recordSession(
                   store: store,
                   learnerId: profile.learnerId,
@@ -806,7 +808,7 @@ class SubjectHomeScreen extends StatelessWidget {
   /// WAL-113 B1 — TV: đoạn văn + câu hỏi NGUYÊN VĂN từ units (textbookVerbatim).
   /// SGK không in đáp án ⇒ activity KHÔNG có options — Reader chạy chế độ câu
   /// hỏi mở, KHÔNG chấm (UNKNOWN ≠ SAI). Evidence ghi MỘT LẦN qua recordSession.
-  void _openReading(BuildContext context, TvReading r) {
+  void _openReading(BuildContext context, TvReading r, LearningContext ctx) {
     final q = r.questions.first;
     final activity = LearningActivity(
       activityId: '${r.book}:l${r.lesson}:doc-hieu',
@@ -820,6 +822,7 @@ class SubjectHomeScreen extends StatelessWidget {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => ReaderScreen(
               activity: activity,
+              learningContext: ctx,
               onFinished: (events) => recordSession(
                   store: store,
                   learnerId: profile.learnerId,
@@ -830,10 +833,11 @@ class SubjectHomeScreen extends StatelessWidget {
   }
 
   /// WAL-113 B2 — Sử: TƯ LIỆU gốc → SourceReader (NGUỒN ≠ SAM ≠ EM).
-  void _openSource(BuildContext context, SuSource src) {
+  void _openSource(BuildContext context, SuSource src, LearningContext ctx) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => SourceReaderScreen(
               source: src,
+              learningContext: ctx,
               onFinished: (events) => recordSession(
                   store: store,
                   learnerId: profile.learnerId,
