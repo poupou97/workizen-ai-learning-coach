@@ -697,28 +697,38 @@ class SubjectHomeScreen extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: WalColors.surface,
+      showDragHandle: true,
+      // ⭐⭐ WAL-187 — cùng lỗi WAL-145 đã bắt ở sheet ý định phía trên: thiếu
+      // isScrollControlled + bọc cuộn ⇒ trên máy thật, ListTile tràn khỏi
+      // vùng hit-test của sheet — VẼ RA (thấy được) nhưng KHÔNG BẤM ĐƯỢC dù
+      // toạ độ đúng ngay trên chữ. Phát hiện khi đi Golden Journey thật trên
+      // Nokia (Tiếng Việt Bài 2 — 2 lựa chọn Đọc bài/Luyện viết đều không
+      // phản hồi chạm cho tới khi thêm dòng này).
+      isScrollControlled: true,
       builder: (sheet) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Padding(
-            padding: EdgeInsets.all(WalSpacing.md),
-            child: Text('Con muốn làm phần nào trước?',
-                style: TextStyle(
-                    fontSize: WalType.body,
-                    fontWeight: FontWeight.w600,
-                    color: WalColors.ink)),
-          ),
-          for (final a in actions)
-            ListTile(
-              title: Text(a.$1,
-                  style: const TextStyle(
-                      fontSize: WalType.body, color: WalColors.ink)),
-              onTap: () {
-                Navigator.of(sheet).pop();
-                a.$2();
-              },
+        child: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Padding(
+              padding: EdgeInsets.all(WalSpacing.md),
+              child: Text('Con muốn làm phần nào trước?',
+                  style: TextStyle(
+                      fontSize: WalType.body,
+                      fontWeight: FontWeight.w600,
+                      color: WalColors.ink)),
             ),
-          const SizedBox(height: WalSpacing.sm),
-        ]),
+            for (final a in actions)
+              ListTile(
+                title: Text(a.$1,
+                    style: const TextStyle(
+                        fontSize: WalType.body, color: WalColors.ink)),
+                onTap: () {
+                  Navigator.of(sheet).pop();
+                  a.$2();
+                },
+              ),
+            const SizedBox(height: WalSpacing.sm),
+          ]),
+        ),
       ),
     );
   }
