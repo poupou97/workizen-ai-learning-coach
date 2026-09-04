@@ -52,6 +52,48 @@ still stands as directionally reasonable given the marker now confirmed across
 "medium cost" — the passage/question splitter is real, un-started work,
 comparable in scope to what `extract_units_tv.py` already required for TV5.
 
+## Ngữ văn — kết luận sau gold-set 5 lớp (Founder Delta 2026-09-04): FALSIFIED
+
+Xây `tool/ui/extract_ngu_van_readings.py` (deterministic, zero LLM) và chạy
+trên gold-set cố ý chọn ca khó, trải 5 cuốn (lớp 6, 7, 8, 9, 10), 5 tiêu chí
+đo riêng như Founder yêu cầu:
+
+| Tiêu chí | Kết quả đo |
+|---|---|
+| **Passage precision** | Tốt trên phần lớn (Cô bé bán diêm, Bắt nạt, Hoàng tử bé, Mây và sóng, Chuyện cơm hến, Lợn cưới áo mới — sạch, đúng, đủ) — nhưng KHÔNG đồng đều: một thiểu số đáng kể lẫn nội dung sidebar box (xem dưới), và một ca (lớp 7 "Bầy chim chia vôi") khớp nhầm một VỊ TRÍ THỨ HAI của cùng mốc "ĐỌC VĂN BẢN" (một đoạn giới thiệu/preview trước bài thật) — kết quả tại vị trí đó garbled tới mức không đọc được (word-salad), dù vị trí đúng (sau đó vài trang) lại sạch. |
+| **Passage recall** | Tốt — mốc "ĐỌC VĂN BẢN" generalize qua cả 5 lớp (không chỉ 1 lớp như ước lượng ban đầu), tìm được nhiều đoạn văn thật mỗi cuốn. |
+| **Question boundary accuracy** | Cải thiện sau 1 vòng sửa (loại được nhãn mục giả-câu-hỏi kiểu "1. ĐỌC"/"2. VIẾT"/"3. NÓI VÀ NGHE" bằng ngưỡng độ dài) nhưng KHÔNG hết: một vài cặp đoạn văn khác nhau vẫn nhận đúng một khối câu hỏi giống hệt (lớp 10, "tuồng Sơn Hậu" và bài phê bình "Thiên Trường vãn vọng của Trần Nhân Tông" — chưa xác minh được đây là lỗi hay hai văn bản thật SỰ dùng chung câu hỏi). |
+| **Source/page provenance** | Phần lớn tốt (trang in bắt được từ chân trang); một số trang thiếu số chân trang rõ ⇒ `printed=None` — đúng kiểu fail-closed (thiếu, không đoán), không phải sai. |
+| **False content inclusion** ⭐ (tiêu chí Founder nhấn mạnh quan trọng nhất) | **THẤT BẠI, có bằng chứng cụ thể.** Xác nhận trực tiếp trên OCR gốc (Truyện Kiều, lớp 9, trang 66-67): nhãn hộp chiến-lược-đọc ("Theo dõi") lọc được, nhưng NỘI DUNG bên trong hộp ("Sự xuất hiện của nhân vật Kim Trọng.") thì KHÔNG — vì nó là văn Việt tự do, đọc y hệt một câu trần thuật thật, không phân biệt được bằng từ khoá tĩnh. Danh sách từ khoá đã phải mở rộng một lần (từ khớp-nguyên-dòng sang khớp-tiền-tố) và VẪN sót — mỗi cuốn/mỗi lớp có thể mang một cụm sidebar mới. |
+
+### Quyết định: STOP — không wire vào build_lesson_index.py
+
+Đúng tiêu chí Founder đặt ra: *"Nếu phải tích lũy nhiều heuristic riêng từng
+sách: STOP. Không biến thành maintenance trap."* Cơ chế mốc bắt-đầu/kết-thúc
+đoạn văn (generic, generalize tốt qua 5 lớp) không phải vấn đề — vấn đề là
+tầng LOẠI NHIỄU sidebar-box cần một danh sách từ khoá không có điểm dừng tự
+nhiên, mỗi ca mới lại lộ thêm một cụm chưa biết. Đây chính xác là dấu hiệu
+"per-book heuristic accumulation", không phải "one shared reusable capability"
+— khác hẳn WAL-190 (mốc "Chuẩn bị/Tiến hành" đóng, hữu hạn, không mở rộng vô
+hạn theo từng cuốn).
+
+**Không xoá công cụ đã xây** — giữ `tool/ui/extract_ngu_van_readings.py` làm
+hồ sơ POC âm tính có bằng chứng (đầu file đã ghi rõ FALSIFIED, không phải
+production tool). Founder learning: falsification có bằng chứng cụ thể (5 ca
+gold-set, đo 5 chiều, một phát hiện then chốt trên OCR gốc) có giá trị ngang
+một P0 ship được — đây là "tìm chỗ mô hình vỡ", không phải thất bại.
+
+**Ngữ văn quay lại Opportunity Map ở trạng thái "researched, deterministic
+approach insufficient"** — không xoá khỏi backlog, nhưng không còn là P0 sẵn
+sàng implement. Hướng khả dĩ cho tương lai (không làm ngay): (a) nếu có dữ
+liệu layout/bbox theo cột thay vì chỉ dòng-theo-dòng OCR phẳng, có thể phân
+biệt được cột chính văn với cột sidebar bằng vị trí, không cần từ khoá; (b)
+human/gold-curated cho một tập nhỏ cố định (chấp nhận chi phí người, đúng
+tinh thần "Human/Gold review is allowed" — Founder §14 của order trước) thay
+vì cố tự động hoá 100%.
+
+**Tin học giữ làm candidate tiếp theo, không mất** — theo đúng chỉ đạo.
+
 **Noise patterns identified for whoever builds the dedicated extractor next**
 (raw OCR of grade 6, "Dế Mèn phiêu lưu kí" excerpt, pages 16-18): footnote
 definitions interleaved at page bottoms (`(1) Chết ngay đuôi: chết ngay lập
@@ -214,7 +256,7 @@ overstates the real ceiling.
 | Pattern | Lessons (measured/estimated) | Grades | Source quality | Pedagogy signal | Existing Surface? | Existing Evidence contract? | Missing capability | Potential unlocked | Confidence | Cost/Risk |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Science experiment (extend further) | ~10-15 more (title-quality edge cases, deferred 3rd bug) | 4,6,7,8,9 | High | Encoded in marker | Yes (`ExperimentScreen`) | Yes | Fix the interrupted-multi-line-step case | +10-15 | High | Low |
-| **Ngữ văn reading** | ~55-60 (measured: family has 62 total lessons, sample quality excellent) | 6-12 | High (sampled) | Encoded (comprehension Qs already in text) | Yes (`ReaderScreen`, same as TV5) | Yes | Extend `tv_readings`-style extraction to Ngữ văn book-name pattern; validate on more samples | +50-60 | **High** | **Low-Medium** |
+| **Ngữ văn reading** | ~55-60 IF a working extractor existed | 6-12 | High (sampled) | Encoded (comprehension Qs already in text) | Yes (`ReaderScreen`, same as TV5) | Yes | ⚠️ **FALSIFIED for deterministic extraction** (gold-set 5-grade test, see dedicated section below) — sidebar-box content indistinguishable from narrative text without column/layout data. Needs either bbox-layout data or human/gold curation, not a bigger keyword list. | 0 (blocked) | **Superseded — was High, now Low pending a different approach** | **Medium-High (was Low-Medium)** |
 | **Tin học exercises** | ~100-150 (10 books, 2,749 units, 0% unattached) | 6-12 | High (sampled) | Real MCQ/open-response Qs | Partial — needs a "closed/open question" Surface (`ReaderScreen`'s open-question mode may already fit) | Yes, if mapped to `ReaderScreen`-shape | Role→Surface mapping + gold-set validation across more books | +100-150 | Medium-High | Low-Medium |
 | SGV objectives (Toán 6-12, KHTN 6-9) | N/A directly to Learnable — grows SAM_SUPPORTABLE | 6-12 | High (proven pattern) | Explicit, source-stated | New (objective-display, not built) | N/A (not evidence-producing) | New lightweight "why this lesson" Surface/UI element | Improves SAM explanation quality for ~100+ lessons | High | Low |
 | Toán 6-12 exercises | Unknown, gated by math-OCR quality (34% unattached, notation corruption) | 6-12 | Medium-Low | Present but noisy | Yes (`toanExercises`/existing Toán flow) | Yes | Math-notation-aware OCR/text cleanup; lesson-attachment fix | +50-150 (wide range) | Low-Medium | Medium |
@@ -376,11 +418,12 @@ content as solvable, which it structurally isn't with this corpus and medium.**
 Ranking formula: potential valid Learnable coverage × pedagogical value × reuse
 × source confidence ÷ cost ÷ risk.
 
-**#1 — Ngữ văn reading extraction (Option A).** If we build this, a Grade 6-12
-student gets real literature comprehension activities — the exact same trusted
-`ReaderScreen` experience TV5 students already have — sourced from clean,
-hand-verified real text. Highest score: proven Surface, proven pattern, clean
-sample, zero new architecture, ~55-60 lessons for days of work.
+**#1 — Ngữ văn reading extraction — ⚠️ FALSIFIED, no longer #1.** Attempted
+with a proper 5-grade gold set; deterministic extraction cannot reliably
+exclude sidebar-box content from narrative passages (see dedicated section
+below). Superseded by Tin học below as the next candidate. Kept here,
+struck through in spirit rather than deleted, so the ranking's own history
+stays honest — this was the top-ranked candidate until it was tested.
 
 **#2 — Tin học exercise extraction (Option A/B boundary).** If we build this,
 every grade 6-12 student gets real digital-citizenship and CS comprehension
