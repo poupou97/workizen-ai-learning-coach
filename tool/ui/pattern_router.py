@@ -29,6 +29,7 @@ import glob
 import json
 import os
 import re
+import statistics
 import sys
 from collections import Counter, defaultdict
 
@@ -146,11 +147,18 @@ def toc_ranges(doc, offset):
     ls = sorted((l for l in doc.get('lessons', [])
                  if l.get('number') is not None and l.get('pageStart') is not None),
                 key=lambda l: l['pageStart'])
+    # WAL-206 device walk: KHTN 7's TOC stops at Bài 18 (the book has ~40 lessons), so an
+    # open-ended last range attributed pages 87…172 — twenty-odd later lessons — to "Bài 18".
+    # A lesson range is capped at 2.5× the book's median lesson length (min 8 pages); pages
+    # beyond the cap belong to NO lesson (fail closed) rather than to the wrong one.
+    starts = [l['pageStart'] + offset for l in ls]
+    lens = [b - a for a, b in zip(starts, starts[1:])]
+    cap = max(8, round(2.5 * statistics.median(lens))) if lens else 8
     out = []
     for i, l in enumerate(ls):
-        lo = l['pageStart'] + offset
-        hi = (ls[i + 1]['pageStart'] + offset) if i + 1 < len(ls) else 10 ** 6
-        out.append((l['number'], lo, hi))
+        lo = starts[i]
+        hi = starts[i + 1] if i + 1 < len(ls) else lo + cap
+        out.append((l['number'], lo, min(hi, lo + cap)))
     return out
 
 

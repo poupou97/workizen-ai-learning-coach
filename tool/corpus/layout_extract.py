@@ -114,64 +114,63 @@ BAND_ROWS = 3      # a side box must span ≥ this many text rows to be split of
 def _rows(boxes, med_h):
     """Group boxes into text rows by y (a new row starts when a box begins below
     the current row's bottom minus a third of a line)."""
-    rows, cur, cur_end = [], [], None
+    rows, cur, anchor = [], [], None
     for b in sorted(boxes, key=lambda b: b['y']):
-        if cur and b['y'] > cur_end - 0.3 * med_h:
-            rows.append(cur); cur, cur_end = [], None
-        cur.append(b); cur_end = b['y'] + b['h'] if cur_end is None else max(cur_end, b['y'] + b['h'])
+        if cur and b['y'] - anchor > 0.6 * med_h:      # anchored to the row's first line: a slightly
+            rows.append(cur); cur = []                   # offset column line must not chain rows together
+        if not cur: anchor = b['y']
+        cur.append(b)
     if cur: rows.append(cur)
     return rows
 
 
 def _side_band(boxes, med_h):
-    """Partial-height side box (KHTN 6 p.21: a unit-conversion box beside body
-    text, with full-width lines above and below): no whole-region x-gap exists,
-    but ≥ BAND_ROWS consecutive rows each contain the SAME x-gap. Returns
-    (top, left, right, bottom) box lists or None. Rows above/below stay intact."""
-    rows = _rows(boxes, med_h)
-    if len(rows) < BAND_ROWS:
-        return None
-    gaps = []   # per row: (lo, hi) of its widest x-gap, or None
-    for r in rows:
-        g = _gaps_x(r) if len(r) > 1 else []
-        if g:
-            best = max(g, key=lambda x: x[0])
-            gaps.append((best[1] - best[0] / 2, best[1] + best[0] / 2))
-        else:
-            gaps.append(None)
-    best_run = None
-    i = 0
-    while i < len(rows):
-        if gaps[i] is None:
-            i += 1; continue
-        lo, hi = gaps[i]; j = i
-        while j + 1 < len(rows) and gaps[j + 1] and max(lo, gaps[j + 1][0]) < min(hi, gaps[j + 1][1]) - TX:
-            lo, hi = max(lo, gaps[j + 1][0]), min(hi, gaps[j + 1][1]); j += 1
-        if j - i + 1 >= BAND_ROWS and (best_run is None or j - i > best_run[1] - best_run[0]):
-            best_run = (i, j, (lo + hi) / 2)
-        i = j + 1
-    if not best_run:
-        return None
-    i, j, cut = best_run
-    band = [b for r in rows[i:j + 1] for b in r]
-    left = [b for b in band if b['x'] + b['w'] / 2 < cut]
-    right = [b for b in band if b['x'] + b['w'] / 2 >= cut]
-    if not left or not right:
-        return None
-    # Only a genuine ALIGNED BOX qualifies: right lines narrow with a common left edge, left lines
-    # starting at the column edge, and a clear gutter. (Without this, KHTN 7 p.20 — the WAL-204 gold
-    # page — lost its sidebar/caption roles: fidelity 1.0 → 0.0.)
-    gap_lo = max(b['x'] + b['w'] for b in left); gap_hi = min(b['x'] for b in right)
-    if gap_hi - gap_lo < 2 * TX:
-        return None
-    if max(b['w'] for b in right) > 0.30 or (max(b['x'] for b in right) - min(b['x'] for b in right)) > 0.03:
-        return None
-    lx = min(b['x'] for b in left)
-    if any(b['x'] > lx + 0.05 for b in left):
-        return None
-    top = [b for r in rows[:i] for b in r]
-    bot = [b for r in rows[j + 1:] for b in r]
-    return top, left, right, bot
+    """Partial-height gutter: a vertical strip of ≥ BAND_ROWS lines on EACH side that no line
+    crosses, inside a region that has no whole-region x-gap (a full-width line above/below
+    spans both sides). Two shapes, both seen on the device walk:
+      box     — KHTN 6 p.21: unit-conversion box (narrow lines) beside body text;
+      columns — KHTN 6 p.58 / Tin học 9 p.20: a two-column run under a full-width lead-in.
+    Lines are swept in y order (not grouped into rows: box and body lines have different
+    pitch, so row grouping is unreliable). Returns (top, left, right, bottom, kind) or
+    (None, flagged): flagged=True means a gutter run exists but the alignment guards failed —
+    the caller marks the region untrusted (fail closed) instead of splicing the sides."""
+    ys = sorted(boxes, key=lambda b: b['y'])
+    if len(ys) < 2 * BAND_ROWS:
+        return None, False
+    cands = sorted({round(b['x'], 3) for b in ys if b['x'] > 0.3})
+    best = None
+    flagged = False
+    for c in cands:
+        run_start = None; runs = []
+        for i, b in enumerate(ys):
+            on_left = b['x'] + b['w'] <= c - 0.6 * TX     # real gutters are ≈ TX wide; a justified column line may end 0.01 short of it
+            on_right = b['x'] >= c
+            if on_left or on_right:
+                if run_start is None: run_start = i
+            else:
+                if run_start is not None: runs.append((run_start, i - 1)); run_start = None
+        if run_start is not None: runs.append((run_start, len(ys) - 1))
+        for i, j in runs:
+            seg = ys[i:j + 1]
+            left = [b for b in seg if b['x'] + b['w'] <= c - 0.6 * TX]
+            right = [b for b in seg if b['x'] >= c]
+            if len(left) < BAND_ROWS or len(right) < BAND_ROWS:
+                continue
+            # alignment guards: right lines share a left edge (box or column); left lines start at
+            # one edge (a paragraph column) — pie-chart labels / scattered figure text never do
+            r_aligned = (max(b['x'] for b in right) - min(b['x'] for b in right)) <= 0.031
+            l_aligned = (max(b['x'] for b in left) - min(b['x'] for b in left)) <= 0.061
+            if not (r_aligned and l_aligned) or max(b['w'] for b in right) > 0.45:
+                flagged = True
+                continue
+            if best is None or len(seg) > best[0]:
+                best = (len(seg), i, j, c, left, right)
+    if best is None:
+        return None, flagged
+    n, i, j, c, left, right = best
+    lw = statistics.median(b['w'] for b in left); rw = statistics.median(b['w'] for b in right)
+    kind = 'box' if rw < 0.6 * lw else 'columns'
+    return (ys[:i], left, right, ys[j + 1:], kind), False
 
 
 def xy_cut(boxes, med_h, path, marginal, body_x0=0.1):
@@ -185,13 +184,16 @@ def xy_cut(boxes, med_h, path, marginal, body_x0=0.1):
     ny = (best_y[0] / (TY * med_h)) if best_y else 0
     nx = (best_x[0] / TX) if best_x else 0
     if not best_y and not best_x:
-        band = _side_band(boxes, med_h)
+        band, flagged = _side_band(boxes, med_h)
         if band:
-            top, left, right, bot = band
+            top, left, right, bot, kind = band
+            l_tag, r_tag = ('ML', 'MR') if kind == 'box' else ('CL', 'CR')   # CR: a column, never a sidebar
             out = xy_cut(top, med_h, path + 'T', marginal, body_x0) if top else []
-            out += xy_cut(left, med_h, path + 'ML', marginal, body_x0) + xy_cut(right, med_h, path + 'MR', marginal, body_x0)
+            out += xy_cut(left, med_h, path + l_tag, marginal, body_x0) + xy_cut(right, med_h, path + r_tag, marginal, body_x0)
             out += xy_cut(bot, med_h, path + 'B', marginal, body_x0) if bot else []
             return out
+        if flagged:
+            marginal.append(('band', 0.0, path))   # a gutter run we could not split safely ⇒ untrusted region
         return [(path, boxes)]
     if ny >= nx:
         if ny < MARGINAL: marginal.append(('y', round(ny, 2), path))
@@ -262,7 +264,7 @@ def extract_page(book, path):
         rx0 = min(b['x'] for b in rboxes); rx1 = max(b['x'] + b['w'] for b in rboxes)
         region_w = rx1 - rx0
         centered = abs((rx0 + rx1) / 2 - 0.5) < 0.08
-        narrow_side = region_w < 0.45 and rx0 > body_x0 + 0.15 and not centered
+        narrow_side = region_w < 0.45 and rx0 > body_x0 + 0.15 and not centered and 'CR' not in (rpath or '')
         # Floating diagram labels (KHTN 6 p.35: "Hơi nước", "Nước lỏng", "a) Sự bay hơi" beside a
         # paragraph, 0.02 page-widths from the text — below the x-gap threshold, so no cut isolates
         # them): a very short, narrow line starting well to the right of the region's text edge is a
