@@ -49,7 +49,10 @@ HEAD_PATTERNS = [
     ('CLASSIFY_SORT',    r'^(phân loại|sắp xếp|xếp (các|những|vào|theo|lại)|nhóm (các|những|thành)|chia (các|những) .{0,30}(thành|theo) nhóm)'),
     ('MATCH',            r'^(nối|ghép)'),
     ('FILL_BLANK',       r'^(điền|hoàn thành câu|chọn từ (ngữ )?(thích hợp|phù hợp)|tìm từ)'),
-    ('SELECT_MCQ',       r'^(chọn|khoanh|đánh dấu|câu nào|phương án nào|ý nào|đáp án nào)'),
+    # "chọn" alone is an ordinary verb ("Chọn dụng cụ đo", "Chọn hai chậu cây") —
+    # found as a false positive in the WAL-204 P0 experiment. Require an
+    # option-selection object or the structural A/B/C detector below.
+    ('SELECT_MCQ',       r'^(chọn (phương án|đáp án|câu trả lời|ý|từ ngữ|đáp số|câu)|khoanh|đánh dấu|câu nào|phương án nào|ý nào|đáp án nào|nhận định nào)'),
     ('TRUE_FALSE',       r'^(đúng hay sai|đúng, sai|em (có )?đồng tình|nhận định nào đúng|đồng tình hay)'),
     ('EXPLAIN_SHORT',    r'^(nêu|cho biết|giải thích|vì sao|tại sao|trình bày (những|các|đặc điểm|vai trò|nguyên nhân|ý nghĩa)|nhận xét|phân tích|đánh giá|kể tên|liệt kê|mô tả|xác định|dự đoán|em có (biết|nghĩ)|theo em|thế nào là|là gì)'),
     ('ORAL_SHARE',       r'^(kể(?! tên)|nói|chia sẻ|trao đổi|thảo luận|giới thiệu|thuyết trình|trình bày (trước|với|cho|ý kiến)|hỏi|đóng góp ý kiến|phát biểu|nói và nghe)'),

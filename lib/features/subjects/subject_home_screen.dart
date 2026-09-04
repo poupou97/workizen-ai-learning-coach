@@ -818,11 +818,15 @@ class SubjectHomeScreen extends StatelessWidget {
   void _openReading(BuildContext context, TvReading r, LearningContext ctx) {
     final subjId = subjectIdOf(subject);
     final q = r.questions.first;
+    // WAL-204 — câu hỏi CHỌN từ pattern router mang options nhưng KHÔNG có
+    // đáp án (không tra SGV) ⇒ correctOption null ⇒ gradable=false ⇒ Reader
+    // ghi correct=null. Không bao giờ chấm một lựa chọn không có chìa khoá.
     final activity = LearningActivity(
       activityId: '${r.book}:l${r.lesson}:doc-hieu',
       prompt: q.prompt,
       response: ResponseKind.readRespond,
       conceptId: '$subjId-doc-hieu',
+      options: q.options,
       passage: r.passage,
       sourceBook: r.book,
       sourcePage: q.page ?? r.page,

@@ -60,9 +60,14 @@ class CorpusExercise {
 /// ⭐ SGK KHÔNG in đáp án ⇒ cố ý KHÔNG có trường đáp án/option nào — tầng UI
 /// không thể chấm dù muốn (UNKNOWN ≠ SAI đúng theo CẤU TRÚC dữ liệu).
 class TvQuestion {
-  const TvQuestion({required this.prompt, this.page});
+  const TvQuestion({required this.prompt, this.page, this.options = const []});
   final String prompt;
   final int? page;
+
+  /// WAL-204 — lựa chọn A/B/C/D do pattern router tách từ SGK. Cố ý KHÔNG có
+  /// trường đáp án: có options mà không có chìa khoá ⇒ Reader chạy chế độ chọn
+  /// KHÔNG chấm (correct=null). Chấm chỉ khi một bước sau nối được SGV.
+  final List<String> options;
 }
 
 class TvReading {
@@ -449,7 +454,11 @@ class LessonIndex {
                 if (q['prompt'] is String)
                   TvQuestion(
                       prompt: q['prompt'] as String,
-                      page: (q['page'] as num?)?.toInt()),
+                      page: (q['page'] as num?)?.toInt(),
+                      options: [
+                        for (final o in (q['options'] as List? ?? const []))
+                          if (o is String && o.trim().isNotEmpty) o,
+                      ]),
             ]));
       }
     }

@@ -321,6 +321,29 @@ for a in _reg.values():
         printedCaption=a.get('printedCaption'), samGloss=a.get('samGloss'),
         lesson=a.get('lesson')))
 
+# ---- WAL-204 pattern router (P0 falsification): Khoa học/KHTN 4-9 only ------
+# Source → LearningActivity generically (TOC-range attach → directive pattern →
+# route into EXISTING Surface shapes). Appends to tvReadings/tvWritings; never
+# touches khoaExperiments (the 37-lesson regression oracle).
+PATTERN_BOOKS = {
+    4: [('Khoa học', '04-sgk-khoa-hoc-4')],
+    5: [('Khoa học', '05-sgk-khoa-hoc-5')],
+    6: [('KHTN', '06-sgk-khoa-hoc-tu-nhien-6')],
+    7: [('KHTN', '07-sgk-khoa-hoc-tu-nhien-7')],
+    8: [('KHTN', '08-sgk-khoa-hoc-tu-nhien-8')],
+    9: [('KHTN', '09-sgk-khoa-hoc-tu-nhien-9')],
+}
+# Gated OFF by default after the WAL-204 device check: routed READ_TEXT passages
+# from the generic extractor are column-scrambled on multi-column pages
+# (unreadable). Enable only for experiments: PATTERN_ROUTER=1.
+if PATTERN_BOOKS.get(GRADE) and os.environ.get('PATTERN_ROUTER') == '1':
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from pattern_router import route as _route_patterns
+    _pr, _pw, _ps = _route_patterns(GRADE, PATTERN_BOOKS[GRADE], docs)
+    tv_readings += _pr
+    tv_writings += _pw
+    print(f'  pattern-router: +{len(_pr)} readings, +{len(_pw)} writings — {dict(_ps)}')
+
 for v in subjects.values():
     v.sort(key=lambda b: (b['volume'] or '9', b['sourceDocumentId']))
 out = dict(grade=GRADE, version='lesson-index-v2',
