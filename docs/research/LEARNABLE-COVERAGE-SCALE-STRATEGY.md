@@ -318,6 +318,41 @@ ANSWER về gần 0 như Founder yêu cầu, vì mới xác minh tay 2/26 cặp)
 hình chung; đúng theo chỉ đạo Founder, việc đặt tên trừu tượng chờ tới khi có
 thêm một họ môn học thứ hai chứng minh cùng pattern tái dùng được.
 
+### Gate tự động (script, không phải tay) — kết quả cuối và quyết định
+
+Viết `tool/corpus/tinhoc_sgk_sgv_link_verify.py`: định vị phạm vi trang mỗi
+bài trong CẢ HAI sách bằng số in thật (SGK: từ mục lục "Bài N. Tên bài
+<trang>"; SGV: từ nhãn "BÀI N. TÊN BÀI" trong thân sách) — **không** dùng bộ
+đếm `lesson` nội bộ của `units-k12`, vì kiểm tra chéo phát hiện chính bộ đếm
+đó LỆCH giữa hai sách (cùng một bài thật, SGK gọi là "lesson 4", SGV gọi là
+"lesson 3" — một nhãn "BÀI" bị OCR bỏ sót ở đâu đó khiến toàn bộ số đếm phía
+sau lệch vĩnh viễn). Trong phạm vi trang mỗi bài, gom các khối MCQ đánh số ở
+SGK, so khớp SỐ LƯỢNG với số dòng "Đáp án" ở đúng khối "Câu hỏi (hoạt động
+củng cố kiến thức)" bên SGV — khớp đúng số lượng thì tin, lệch số/nhiều khối
+mơ hồ/đa-lựa-chọn thì để UNKNOWN, không đoán.
+
+**Kết quả chạy trên 4 lớp**: 2/9 bài đạt HIGH_CONFIDENCE_MATCH (lớp 6, bài 6
+và bài 7 — cả hai lớp 9/11/12 đều fail closed vì mục lục thiếu số một bài
+["Bài Tìm hiểu phần mềm mô phỏng" — OCR làm rớt mất số "5"] khiến phạm vi
+trang bị lệch, hoặc đáp án đa-lựa-chọn, hoặc SGK có nhiều khối đánh số mơ hồ
+không tách được). Xác minh tay CẢ HAI ca khớp: đúng nội dung logic, không chỉ
+đúng vị trí (bài 6: "B" đúng là định nghĩa siêu văn bản/trang có liên kết,
+không phải A/C phủ nhận liên kết; bài 7: "A" đúng là kết quả máy tìm kiếm trả
+về — danh sách liên kết theo từ khoá — không phải B/C/D là phương án gây
+nhiễu hợp lý). **0/2 FALSE TRUSTED ANSWER trên script tự động.**
+
+**Quyết định: KHÔNG implement Surface/Evidence mới ở vòng này — hoãn có ghi
+nhận, không phải FALSIFIED.** Lý do: cơ chế đã CHỨNG MINH an toàn (0 sai trên
+mẫu tự động) nhưng sản lượng quá nhỏ (2 bài) để biện minh chi phí kỹ thuật
+(Surface mới, Evidence Validator, test, Nokia-verify) ở quy mô này — đúng
+tinh thần "đo lợi ích/chi phí, không optimize cho con số" Founder đặt ra
+xuyên suốt. Khác Ngữ văn (heuristic tăng vô hạn, phải STOP hẳn), ở đây rào
+cản là DỮ LIỆU cụ thể, có thể sửa được bằng công sức hữu hạn (vá lỗ hổng mục
+lục thiếu số, xử lý nhiều-khối-mơ-hồ) — nếu tương lai có người đầu tư thêm
+vào matcher này, sản lượng nhiều khả năng tăng vượt 2. Ghi vào Opportunity
+Map ở trạng thái "validated capability, low yield this pass, deferred" —
+không xoá, không coi là đã xong.
+
 **Noise patterns identified for whoever builds the dedicated extractor next**
 (raw OCR of grade 6, "Dế Mèn phiêu lưu kí" excerpt, pages 16-18): footnote
 definitions interleaved at page bottoms (`(1) Chết ngay đuôi: chết ngay lập
