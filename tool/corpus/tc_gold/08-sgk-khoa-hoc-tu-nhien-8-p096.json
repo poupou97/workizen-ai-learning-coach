@@ -1,0 +1,297 @@
+{
+ "book": "08-sgk-khoa-hoc-tu-nhien-8",
+ "page": 96,
+ "printed_page": 95,
+ "grade": 8,
+ "subject": "KHTN",
+ "docType": "SGK",
+ "gold_set": "tc-v2",
+ "gold_purpose": "cross_page_lesson_boundary+toc_repair+instruction_role",
+ "held_out": true,
+ "why": "TC-v2 held-out: first page of Bài 23 — absent from the parsed TOC (KHTN 8 TOC stops at Bài 22); MỤC TIÊU box, lead-in question box, an experiment box (Chuẩn bị / Tiến hành steps = INSTRUCTION role) with a labelled circuit diagram and caption, a question box, then section II starts",
+ "features": [
+  "colored_box",
+  "objective_box",
+  "question_block",
+  "activity_box",
+  "instruction_steps",
+  "diagram",
+  "lesson_start"
+ ],
+ "lesson": {
+  "number": 23,
+  "title": "Tác dụng của dòng điện",
+  "note": "page is the lesson start (Bài 23 banner); Bài 23 is absent from curriculum-structure (TOC stops at Bài 22 pageStart 91) → TOC-range attachment gives Bài 22 = WRONG"
+ },
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02; written before any tc-v2 gate was scored on this page",
+ "blocks": [
+  {
+   "id": "b01",
+   "order": 1,
+   "role": "heading",
+   "bbox": [
+    0.07,
+    0.05,
+    0.13,
+    0.06
+   ],
+   "text": "Bài 23",
+   "anchor": "Bài 23"
+  },
+  {
+   "id": "b02",
+   "order": 2,
+   "role": "heading",
+   "bbox": [
+    0.24,
+    0.06,
+    0.48,
+    0.04
+   ],
+   "text": "TÁC DỤNG CỦA DÒNG ĐIỆN",
+   "anchor": "TÁC DỤNG CỦA DÒNG ĐIỆN"
+  },
+  {
+   "id": "b03",
+   "order": 3,
+   "role": "heading",
+   "bbox": [
+    0.27,
+    0.15,
+    0.08,
+    0.015
+   ],
+   "text": "MỤC TIÊU",
+   "anchor": "MỤC TIÊU"
+  },
+  {
+   "id": "b04",
+   "order": 4,
+   "role": "objective",
+   "bbox": [
+    0.25,
+    0.17,
+    0.66,
+    0.04
+   ],
+   "text": "Thực hiện thí nghiệm để minh hoạ được các tác dụng cơ bản của dòng điện: nhiệt, phát sáng, hoá học, sinh lí.",
+   "anchor": "Thực hiện thí nghiệm để minh hoạ được",
+   "contiguous": true,
+   "notes": "objective — NOT an instruction, NOT a question"
+  },
+  {
+   "id": "b05",
+   "order": 5,
+   "role": "question",
+   "bbox": [
+    0.12,
+    0.25,
+    0.77,
+    0.06
+   ],
+   "text": "Khi có dòng điện trong mạch, ta không nhìn thấy các hạt mang điện dịch chuyển, nhưng ta có thể nhận biết sự tồn tại của dòng điện qua các tác dụng của nó. Em có thể kể ra dòng điện có những tác dụng gì?",
+   "anchor": "Khi có dòng điện trong mạch, ta không",
+   "contiguous": true,
+   "notes": "lead-in box: self-contained opening question"
+  },
+  {
+   "id": "b06",
+   "order": 6,
+   "role": "heading",
+   "bbox": [
+    0.1,
+    0.35,
+    0.22,
+    0.02
+   ],
+   "text": "I – Tác dụng nhiệt",
+   "anchor": "I – Tác dụng nhiệt"
+  },
+  {
+   "id": "b07",
+   "order": 7,
+   "role": "body",
+   "bbox": [
+    0.13,
+    0.385,
+    0.78,
+    0.02
+   ],
+   "text": "Vật dẫn nóng lên khi có dòng điện chạy qua, người ta nói đó là tác dụng nhiệt của dòng điện.",
+   "anchor": "Vật dẫn nóng lên khi có dòng điện",
+   "contiguous": true
+  },
+  {
+   "id": "b08",
+   "order": 8,
+   "role": "heading",
+   "bbox": [
+    0.13,
+    0.44,
+    0.1,
+    0.015
+   ],
+   "text": "Thí nghiệm",
+   "anchor": "Thí nghiệm",
+   "notes": "label of the hands-on activity box (hand icon)"
+  },
+  {
+   "id": "b09",
+   "order": 9,
+   "role": "instruction",
+   "bbox": [
+    0.13,
+    0.455,
+    0.76,
+    0.04
+   ],
+   "text": "Chuẩn bị: nguồn điện 9 V, dây nối, công tắc K, sợi dây hợp kim Nicrom (Ni-Cr) AB, vài mảnh giấy, điện trở R có giá trị nhỏ.",
+   "anchor": "Chuẩn bị: nguồn điện 9 V",
+   "contiguous": true
+  },
+  {
+   "id": "b10",
+   "order": 10,
+   "role": "instruction",
+   "bbox": [
+    0.13,
+    0.495,
+    0.1,
+    0.015
+   ],
+   "text": "Tiến hành:",
+   "anchor": "Tiến hành:"
+  },
+  {
+   "id": "b11",
+   "order": 11,
+   "role": "instruction",
+   "bbox": [
+    0.13,
+    0.515,
+    0.3,
+    0.02
+   ],
+   "text": "– Lắp mạch điện như Hình 23.1.",
+   "anchor": "Lắp mạch điện như Hình 23.1",
+   "rel": {
+    "refers_figure": "b13"
+   }
+  },
+  {
+   "id": "b12",
+   "order": 12,
+   "role": "instruction",
+   "bbox": [
+    0.13,
+    0.54,
+    0.76,
+    0.04
+   ],
+   "text": "– Đóng công tắc K. Quan sát hiện tượng xảy ra với các mảnh giấy. Hiện tượng đó chứng tỏ điều gì?",
+   "anchor": "Đóng công tắc K. Quan sát hiện tượng",
+   "contiguous": true,
+   "notes": "procedure step that ends with a question — an activity step, not a standalone learner question (needs the experiment)"
+  },
+  {
+   "id": "b13",
+   "order": 13,
+   "role": "diagram",
+   "bbox": [
+    0.3,
+    0.585,
+    0.36,
+    0.15
+   ],
+   "text": null,
+   "anchor": null,
+   "notes": "circuit diagram with labels: Dây hợp kim Nicrom, Mảnh giấy, A, B, R, K, E, + −"
+  },
+  {
+   "id": "b14",
+   "order": 14,
+   "role": "caption",
+   "bbox": [
+    0.22,
+    0.74,
+    0.56,
+    0.02
+   ],
+   "text": "Hình 23.1 Sơ đồ mạch điện tìm hiểu về tác dụng nhiệt của dòng điện",
+   "anchor": "Hình 23.1 Sơ đồ mạch điện tìm hiểu",
+   "rel": {
+    "caption_of": "b13"
+   }
+  },
+  {
+   "id": "b15",
+   "order": 15,
+   "role": "question",
+   "bbox": [
+    0.13,
+    0.815,
+    0.65,
+    0.02
+   ],
+   "text": "Nêu một số ví dụ trong đời sống ứng dụng tác dụng nhiệt của dòng điện.",
+   "anchor": "Nêu một số ví dụ trong đời sống"
+  },
+  {
+   "id": "b16",
+   "order": 16,
+   "role": "heading",
+   "bbox": [
+    0.1,
+    0.875,
+    0.28,
+    0.025
+   ],
+   "text": "II – Tác dụng phát sáng",
+   "anchor": "II – Tác dụng phát sáng"
+  },
+  {
+   "id": "b17",
+   "order": 17,
+   "role": "body",
+   "bbox": [
+    0.13,
+    0.905,
+    0.78,
+    0.045
+   ],
+   "text": "Dòng điện không chỉ có tác dụng nhiệt mà còn có tác dụng phát sáng. Để kiểm chứng tác dụng phát sáng của dòng điện, ta làm thí nghiệm sau.",
+   "anchor": "Dòng điện không chỉ có tác dụng nhiệt",
+   "contiguous": true
+  },
+  {
+   "id": "b18",
+   "order": 18,
+   "role": "page_number",
+   "bbox": [
+    0.91,
+    0.955,
+    0.03,
+    0.015
+   ],
+   "text": "95",
+   "anchor": "95"
+  }
+ ],
+ "flex_groups": [
+  [
+   "b03",
+   "b04"
+  ],
+  [
+   "b13",
+   "b14"
+  ]
+ ],
+ "critical": [
+  "b04 objective emitted as a learner question or instruction",
+  "b12 step emitted as a standalone learner question (it needs the experiment)",
+  "b13 diagram labels (Mảnh giấy, Dây hợp kim Nicrom, A, B, R, K, E) emitted as prose or spliced into b12",
+  "page attached to Bài 22 by the truncated TOC range — wrong lesson"
+ ],
+ "gold_revision": "r2 2026-09-05: flex_groups aligned with the TC-v1 convention (captions / floating objective boxes are flex) after the first held-out scoring showed order-only false trusts caused by the annotation, not the pipeline; roles/text/bbox/lesson unchanged; previous flex_groups=[[\"b13\", \"b14\"]]"
+}

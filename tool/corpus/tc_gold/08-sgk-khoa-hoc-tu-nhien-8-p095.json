@@ -1,0 +1,223 @@
+{
+ "book": "08-sgk-khoa-hoc-tu-nhien-8",
+ "page": 95,
+ "printed_page": 94,
+ "grade": 8,
+ "subject": "KHTN",
+ "docType": "SGK",
+ "gold_set": "tc-v2",
+ "gold_purpose": "cross_page_lesson_boundary",
+ "held_out": true,
+ "why": "TC-v2 held-out: LAST page of Bài 22 (no header — continuation); two '?' question boxes, a body paragraph beside a photo with caption, EM ĐÃ HỌC (3 bullets) and EM CÓ THỂ (3 bullets) boxes; the next page is the Bài 23 banner (absent from the TOC)",
+ "features": [
+  "colored_box",
+  "question_block",
+  "figure",
+  "side_by_side",
+  "sidebar",
+  "continuation",
+  "lesson_end"
+ ],
+ "lesson": {
+  "number": 22,
+  "title": "Mạch điện đơn giản (title inferred from the EM ĐÃ HỌC content; curriculum-structure has no title)",
+  "note": "no lesson header — continuation of Bài 22 (Hình 22.7); TOC Bài 22 pageStart 91 is the LAST parsed lesson, so its open-ended range also swallows Bài 23+ unless capped — this page attaches correctly by TOC only by luck"
+ },
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02; written before any tc-v2 gate was scored on this page",
+ "blocks": [
+  {
+   "id": "b01",
+   "order": 1,
+   "role": "question",
+   "bbox": [
+    0.12,
+    0.09,
+    0.77,
+    0.04
+   ],
+   "text": "Trong gia đình em có thiết bị điện nào dùng rơle? Rơle trong các thiết bị đó có công dụng gì?",
+   "anchor": "Trong gia đình em có thiết bị điện",
+   "contiguous": true
+  },
+  {
+   "id": "b02",
+   "order": 2,
+   "role": "body",
+   "bbox": [
+    0.12,
+    0.16,
+    0.5,
+    0.06
+   ],
+   "text": "Chuông điện là thiết bị điện ứng dụng hoạt động của nam châm điện (Hình 22.7). Chuông điện phát ra âm thanh khi có dòng điện chạy qua.",
+   "anchor": "Chuông điện là thiết bị điện ứng dụng",
+   "contiguous": true,
+   "column": 1
+  },
+  {
+   "id": "b03",
+   "order": 3,
+   "role": "caption",
+   "bbox": [
+    0.67,
+    0.24,
+    0.2,
+    0.02
+   ],
+   "text": "Hình 22.7 Chuông điện",
+   "anchor": "Hình 22.7 Chuông điện",
+   "column": 2,
+   "rel": {
+    "caption_of": "photo"
+   }
+  },
+  {
+   "id": "b04",
+   "order": 4,
+   "role": "question",
+   "bbox": [
+    0.12,
+    0.3,
+    0.77,
+    0.045
+   ],
+   "text": "Nhà em có lắp chuông điện không? Chuông điện thường được đặt ở vị trí nào trong nhà? Nó có công dụng gì?",
+   "anchor": "Nhà em có lắp chuông điện không",
+   "contiguous": true
+  },
+  {
+   "id": "b05",
+   "order": 5,
+   "role": "heading",
+   "bbox": [
+    0.4,
+    0.385,
+    0.2,
+    0.025
+   ],
+   "text": "EM ĐÃ HỌC",
+   "anchor": "EM ĐÃ HỌC"
+  },
+  {
+   "id": "b06",
+   "order": 6,
+   "role": "sidebar",
+   "bbox": [
+    0.14,
+    0.425,
+    0.74,
+    0.04
+   ],
+   "text": "Mạch điện đơn giản gồm có nguồn điện, dây nối, công tắc và các thiết bị điện tiêu thụ năng lượng điện.",
+   "anchor": "Mạch điện đơn giản gồm có nguồn điện",
+   "contiguous": true
+  },
+  {
+   "id": "b07",
+   "order": 7,
+   "role": "sidebar",
+   "bbox": [
+    0.14,
+    0.47,
+    0.74,
+    0.04
+   ],
+   "text": "Quy ước chiều dòng điện trong mạch điện là chiều từ cực dương của nguồn điện qua dây nối và các dụng cụ điện tới cực âm của nguồn điện.",
+   "anchor": "Quy ước chiều dòng điện trong mạch điện",
+   "contiguous": true
+  },
+  {
+   "id": "b08",
+   "order": 8,
+   "role": "sidebar",
+   "bbox": [
+    0.14,
+    0.515,
+    0.74,
+    0.04
+   ],
+   "text": "Cầu chì, cầu dao tự động, rơle có tác dụng bảo vệ mạch điện, chuông điện có tác dụng phát tín hiệu bằng âm thanh.",
+   "anchor": "Cầu chì, cầu dao tự động, rơle có tác dụng",
+   "contiguous": true
+  },
+  {
+   "id": "b09",
+   "order": 9,
+   "role": "heading",
+   "bbox": [
+    0.41,
+    0.61,
+    0.17,
+    0.025
+   ],
+   "text": "EM CÓ THỂ",
+   "anchor": "EM CÓ THỂ"
+  },
+  {
+   "id": "b10",
+   "order": 10,
+   "role": "sidebar",
+   "bbox": [
+    0.14,
+    0.655,
+    0.6,
+    0.02
+   ],
+   "text": "Nhận biết được các thiết bị bảo vệ mạng điện trong gia đình.",
+   "anchor": "Nhận biết được các thiết bị bảo vệ",
+   "notes": "EM CÓ THỂ item (verb + 'được') — NOT a learner question"
+  },
+  {
+   "id": "b11",
+   "order": 11,
+   "role": "sidebar",
+   "bbox": [
+    0.14,
+    0.68,
+    0.74,
+    0.04
+   ],
+   "text": "Tìm hiểu cấu tạo và hoạt động của chiếc đèn pin thường dùng, vẽ sơ đồ mạch điện của đèn pin.",
+   "anchor": "Tìm hiểu cấu tạo và hoạt động của chiếc",
+   "contiguous": true,
+   "notes": "EM CÓ THỂ item — reads like a directive but is a capability statement"
+  },
+  {
+   "id": "b12",
+   "order": 12,
+   "role": "sidebar",
+   "bbox": [
+    0.14,
+    0.725,
+    0.72,
+    0.02
+   ],
+   "text": "Mắc được mạch điện đơn giản để trang trí, gồm pin, dây nối, bóng đèn, công tắc.",
+   "anchor": "Mắc được mạch điện đơn giản để trang trí"
+  },
+  {
+   "id": "b13",
+   "order": 13,
+   "role": "page_number",
+   "bbox": [
+    0.06,
+    0.955,
+    0.03,
+    0.015
+   ],
+   "text": "94",
+   "anchor": "94"
+  }
+ ],
+ "flex_groups": [
+  [
+   "b03"
+  ]
+ ],
+ "critical": [
+  "b10–b12 EM CÓ THỂ items emitted as learner questions",
+  "b03 caption spliced into b02",
+  "EM ĐÃ HỌC bullets delivered as lesson body prose"
+ ],
+ "gold_revision": "r2 2026-09-05: flex_groups aligned with the TC-v1 convention (captions / floating objective boxes are flex) after the first held-out scoring showed order-only false trusts caused by the annotation, not the pipeline; roles/text/bbox/lesson unchanged; previous flex_groups=[[\"b03\"]]"
+}

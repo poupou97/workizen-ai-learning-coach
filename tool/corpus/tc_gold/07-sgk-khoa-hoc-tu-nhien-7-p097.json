@@ -1,0 +1,265 @@
+{
+ "book": "07-sgk-khoa-hoc-tu-nhien-7",
+ "page": 97,
+ "printed_page": 96,
+ "grade": 7,
+ "subject": "KHTN",
+ "docType": "SGK",
+ "gold_set": "tc-v2",
+ "gold_purpose": "cross_page_lesson_boundary+toc_repair",
+ "held_out": true,
+ "why": "TC-v2 held-out: first page of Bài 20 — a lesson ABSENT from the parsed TOC (KHTN 7 TOC stops at Bài 18); lesson banner (small 'Bài' + big '20' + title), MỤC TIÊU box beside a photo, lead-in question box, body wrapping beside a labelled circuit diagram with caption, question box at the bottom",
+ "features": [
+  "colored_box",
+  "objective_box",
+  "question_block",
+  "figure",
+  "diagram",
+  "side_by_side",
+  "lesson_start"
+ ],
+ "lesson": {
+  "number": 20,
+  "title": "Chế tạo nam châm điện đơn giản",
+  "note": "page is the lesson start (Bài 20 banner); Bài 20 is absent from curriculum-structure (TOC PARTIAL, stops at Bài 18) — TOC-range attachment must NOT attach this page to Bài 18"
+ },
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02; written before any tc-v2 gate was scored on this page",
+ "blocks": [
+  {
+   "id": "b01",
+   "order": 1,
+   "role": "heading",
+   "bbox": [
+    0.06,
+    0.05,
+    0.12,
+    0.06
+   ],
+   "text": "Bài 20",
+   "anchor": "Bài 20",
+   "notes": "lesson banner: small 'Bài' + large '20'"
+  },
+  {
+   "id": "b02",
+   "order": 2,
+   "role": "heading",
+   "bbox": [
+    0.24,
+    0.06,
+    0.62,
+    0.04
+   ],
+   "text": "CHẾ TẠO NAM CHÂM ĐIỆN ĐƠN GIẢN",
+   "anchor": "CHẾ TẠO NAM CHÂM ĐIỆN ĐƠN GIẢN"
+  },
+  {
+   "id": "b03",
+   "order": 3,
+   "role": "heading",
+   "bbox": [
+    0.39,
+    0.15,
+    0.08,
+    0.015
+   ],
+   "text": "MỤC TIÊU",
+   "anchor": "MỤC TIÊU",
+   "notes": "stage label of the objectives box"
+  },
+  {
+   "id": "b04",
+   "order": 4,
+   "role": "objective",
+   "bbox": [
+    0.37,
+    0.17,
+    0.53,
+    0.04
+   ],
+   "text": "Chế tạo được nam châm điện đơn giản và làm thay đổi được từ trường của nó bằng thay đổi dòng điện.",
+   "anchor": "Chế tạo được nam châm điện",
+   "contiguous": true,
+   "notes": "objective (verb + 'được') — NOT a learner question"
+  },
+  {
+   "id": "b05",
+   "order": 5,
+   "role": "question",
+   "bbox": [
+    0.12,
+    0.33,
+    0.77,
+    0.08
+   ],
+   "text": "Hình trên là nam châm của cần cẩu dọn rác kim loại. Nhờ nam châm này cần cẩu có thể lấy rác kim loại là hợp kim của sắt ở đống rác và di chuyển đến các thùng xe chở rác rồi thả xuống. Nhiều khi rác là những tấm kim loại lớn, nặng hàng trăm kilôgam. Nam châm ở cần cẩu có phải là loại nam châm vĩnh cửu mà ta đã học không? Tại sao?",
+   "anchor": "Hình trên là nam châm của cần cẩu",
+   "contiguous": true,
+   "rel": {
+    "refers_figure": "photo"
+   },
+   "notes": "lead-in box (KHỞI ĐỘNG): figure-dependent question — refers to the photo above"
+  },
+  {
+   "id": "b06",
+   "order": 6,
+   "role": "heading",
+   "bbox": [
+    0.09,
+    0.44,
+    0.22,
+    0.02
+   ],
+   "text": "I – Nam châm điện",
+   "anchor": "I – Nam châm điện"
+  },
+  {
+   "id": "b07",
+   "order": 7,
+   "role": "body",
+   "bbox": [
+    0.12,
+    0.47,
+    0.78,
+    0.05
+   ],
+   "text": "Các thí nghiệm cho thấy, dòng điện chạy trong dây dẫn thẳng hay trong cuộn dây đều sinh ra từ trường, người ta ứng dụng tính chất này để chế tạo ra nam châm, gọi là nam châm điện.",
+   "anchor": "Các thí nghiệm cho thấy, dòng điện chạy",
+   "contiguous": true
+  },
+  {
+   "id": "b08",
+   "order": 8,
+   "role": "heading",
+   "bbox": [
+    0.12,
+    0.535,
+    0.22,
+    0.02
+   ],
+   "text": "Cấu tạo nam châm điện",
+   "anchor": "Cấu tạo nam châm điện",
+   "notes": "italic sub-heading"
+  },
+  {
+   "id": "b09",
+   "order": 9,
+   "role": "body",
+   "bbox": [
+    0.12,
+    0.56,
+    0.37,
+    0.04
+   ],
+   "text": "Hình 20.1 mô tả cấu tạo của một nam châm điện:",
+   "anchor": "Hình 20.1 mô tả cấu tạo",
+   "column": 1,
+   "notes": "body sentence that REFERS to the figure (starts with 'Hình 20.1' but is not a caption)"
+  },
+  {
+   "id": "b10",
+   "order": 10,
+   "role": "body",
+   "bbox": [
+    0.12,
+    0.61,
+    0.37,
+    0.08
+   ],
+   "text": "A là ống dây dẫn, B là một thỏi sắt non được lồng vào trong lòng ống dây. Hai đầu cuộn dây được nối với hai cực nguồn điện E thông qua khoá K.",
+   "anchor": "A là ống dây dẫn, B là một thỏi",
+   "contiguous": true,
+   "column": 1
+  },
+  {
+   "id": "b11",
+   "order": 11,
+   "role": "body",
+   "bbox": [
+    0.12,
+    0.7,
+    0.37,
+    0.06
+   ],
+   "text": "Cho dòng điện chạy vào ống dây bằng cách đóng khoá K, ống dây trở thành một nam châm điện.",
+   "anchor": "Cho dòng điện chạy vào ống dây",
+   "contiguous": true,
+   "column": 1
+  },
+  {
+   "id": "b12",
+   "order": 12,
+   "role": "diagram",
+   "bbox": [
+    0.57,
+    0.53,
+    0.31,
+    0.17
+   ],
+   "text": null,
+   "anchor": null,
+   "column": 2,
+   "notes": "circuit diagram: coil with labels A, B, switch K, battery E (+/−) — labels are figure text, never prose"
+  },
+  {
+   "id": "b13",
+   "order": 13,
+   "role": "caption",
+   "bbox": [
+    0.54,
+    0.72,
+    0.32,
+    0.02
+   ],
+   "text": "Hình 20.1 Cấu tạo của nam châm điện",
+   "anchor": "Hình 20.1 Cấu tạo của nam châm điện",
+   "column": 2,
+   "rel": {
+    "caption_of": "b12"
+   }
+  },
+  {
+   "id": "b14",
+   "order": 14,
+   "role": "question",
+   "bbox": [
+    0.12,
+    0.8,
+    0.52,
+    0.02
+   ],
+   "text": "Làm cách nào biết ống dây đã trở thành nam châm điện?",
+   "anchor": "Làm cách nào biết ống dây",
+   "notes": "question box with '?' icon"
+  },
+  {
+   "id": "b15",
+   "order": 15,
+   "role": "page_number",
+   "bbox": [
+    0.06,
+    0.955,
+    0.03,
+    0.015
+   ],
+   "text": "96",
+   "anchor": "96"
+  }
+ ],
+ "flex_groups": [
+  [
+   "b03",
+   "b04"
+  ],
+  [
+   "b12",
+   "b13"
+  ]
+ ],
+ "critical": [
+  "b04 objective emitted as a learner question (objective-as-question)",
+  "b05 lead-in shown as a text prompt without the photo (figure-dependent)",
+  "page attached to Bài 18 by the truncated TOC range (wrong lesson) — must attach to Bài 20 by its header",
+  "b12 labels A/B/K/E emitted as prose"
+ ],
+ "gold_revision": "r2 2026-09-05: flex_groups aligned with the TC-v1 convention (captions / floating objective boxes are flex) after the first held-out scoring showed order-only false trusts caused by the annotation, not the pipeline; roles/text/bbox/lesson unchanged; previous flex_groups=[[\"b12\", \"b13\"]]"
+}

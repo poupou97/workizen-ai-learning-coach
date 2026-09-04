@@ -1,0 +1,16 @@
+{
+ "book": "09-sgk-khoa-hoc-tu-nhien-9", "page": 13, "printed_page": 12, "grade": 9, "subject": "KHTN", "docType": "SGK",
+ "gold_set": "tc-v2", "gold_purpose": "picture_page+figure_text_guard", "held_out": true,
+ "why": "TC-v2 held-out: a page that is one big figure (Hình 1.12 — eight slide mock-ups of a science presentation, each full of text: titles, bullet lists, a numbered list '1. Phân tích kết quả thu được…', references) with one body line above and a caption below; the census flags it diagram + colour-heavy. Every slide text is figure text and must never become prose, a heading, an objective box or a question",
+ "features": ["diagram", "color_heavy", "figure_text", "caption"],
+ "lesson": {"number": 1, "title": "Nhận biết một số dụng cụ, hóa chất. Thuyết trình một vấn đề khoa học", "note": "no header; inside Bài 1 (TOC printed 6–14: OK by TOC)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02; written before any tc-v2 gate was scored on this page",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "body", "bbox": [0.08, 0.06, 0.72, 0.02], "text": "Ví dụ bài thuyết trình một vấn đề khoa học trên phần mềm trình chiếu (Hình 1.12):", "anchor": "Ví dụ bài thuyết trình một vấn đề khoa học", "rel": {"refers_figure": "b02"}},
+  {"id": "b02", "order": 2, "role": "diagram", "bbox": [0.07, 0.10, 0.86, 0.78], "text": null, "anchor": null, "notes": "Hình 1.12: 8 slide thumbnails labelled Trang 1–8 — slide texts (BÁO CÁO KẾT QUẢ KHẢO SÁT THỰC TẾ…, GIỚI THIỆU, MỤC TIÊU KHẢO SÁT, PHƯƠNG PHÁP, KẾT QUẢ (1/2/3 items), THẢO LUẬN ('1. Phân tích kết quả thu được…', '2. So sánh với các nghiên cứu khác…'), KẾT LUẬN ('1. Kết luận', '2. Kiến nghị'), TÀI LIỆU THAM KHẢO ([1]…[2]…), TRÂN TRỌNG CẢM ƠN!) are all figure text"},
+  {"id": "b03", "order": 3, "role": "caption", "bbox": [0.11, 0.905, 0.75, 0.02], "text": "Hình 1.12 Ví dụ các trang của bài thuyết trình một vấn đề khoa học trên phần mềm trình chiếu", "anchor": "Hình 1.12 Ví dụ các trang của bài thuyết trình", "rel": {"caption_of": "b02"}},
+  {"id": "b04", "order": 4, "role": "page_number", "bbox": [0.06, 0.955, 0.03, 0.015], "text": "12", "anchor": "12"}
+ ],
+ "flex_groups": [],
+ "critical": ["slide text '1. Phân tích kết quả thu được' / '2. So sánh với các nghiên cứu khác' emitted as learner questions", "'MỤC TIÊU KHẢO SÁT' + 'Điều tra được thực trạng…' emitted as the lesson's objective box", "'KẾT LUẬN' / 'THẢO LUẬN' slide titles emitted as lesson headings", "'Trang 1' … 'Trang 8' emitted as page numbers or body"]
+}

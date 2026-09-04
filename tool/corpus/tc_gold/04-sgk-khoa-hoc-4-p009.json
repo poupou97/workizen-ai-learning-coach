@@ -1,0 +1,249 @@
+{
+ "book": "04-sgk-khoa-hoc-4",
+ "page": 9,
+ "printed_page": 8,
+ "grade": 4,
+ "subject": "Khoa học",
+ "docType": "SGK",
+ "gold_set": "tc-v2",
+ "gold_purpose": "cross_page_lesson_boundary",
+ "held_out": true,
+ "why": "TC-v2 held-out: LAST page of Bài 1 (no header — continuation); a figure-dependent activity question over a 4-photo grid, two '?' questions, then three side-by-side boxes: Em đã học (left, 3 bullets) ∥ Em có biết? (right, contains the fraction 2/3) ∥ Em có thể (right, bottom); the next page is the Bài 2 banner the TOC lacks",
+ "features": [
+  "colored_box",
+  "side_by_side",
+  "sidebar",
+  "figure",
+  "formula",
+  "question_block",
+  "continuation",
+  "lesson_end"
+ ],
+ "lesson": {
+  "number": 1,
+  "title": "Tính chất của nước",
+  "note": "no lesson header — continuation of Bài 1 (TOC pageStart 5 → printed 8 in range: correct by TOC); the next page p010 starts Bài 2, which has no pageStart in the TOC"
+ },
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02; written before any tc-v2 gate was scored on this page",
+ "blocks": [
+  {
+   "id": "b01",
+   "order": 1,
+   "role": "activity",
+   "bbox": [
+    0.15,
+    0.06,
+    0.78,
+    0.045
+   ],
+   "text": "2. Quan sát hình 7 và cho biết nước được sử dụng vào các hoạt động gì và tác dụng của các hoạt động đó.",
+   "anchor": "2. Quan sát hình 7 và cho biết",
+   "contiguous": true,
+   "rel": {
+    "refers_figure": "b02"
+   },
+   "notes": "KNTT elementary convention: hand icon (on the previous page) = Hoạt động; figure-dependent (the 4 photos)"
+  },
+  {
+   "id": "b02",
+   "order": 2,
+   "role": "caption",
+   "bbox": [
+    0.5,
+    0.455,
+    0.06,
+    0.015
+   ],
+   "text": "Hình 7",
+   "anchor": "Hình 7",
+   "notes": "caption of the 4-photo grid (a, b, c, d)"
+  },
+  {
+   "id": "b03",
+   "order": 3,
+   "role": "question",
+   "bbox": [
+    0.15,
+    0.485,
+    0.78,
+    0.045
+   ],
+   "text": "1. Hãy cho biết con người, động vật và thực vật sẽ như thế nào nếu thiếu nước hoặc không có nước.",
+   "anchor": "1. Hãy cho biết con người, động vật",
+   "contiguous": true,
+   "notes": "'?' icon = Câu hỏi"
+  },
+  {
+   "id": "b04",
+   "order": 4,
+   "role": "question",
+   "bbox": [
+    0.15,
+    0.53,
+    0.78,
+    0.045
+   ],
+   "text": "2. Hãy kể các hoạt động khác trong đời sống, sản xuất và sinh hoạt cần đến nước ở gia đình và địa phương em.",
+   "anchor": "2. Hãy kể các hoạt động khác",
+   "contiguous": true
+  },
+  {
+   "id": "b05",
+   "order": 5,
+   "role": "heading",
+   "bbox": [
+    0.11,
+    0.6,
+    0.13,
+    0.02
+   ],
+   "text": "Em đã học",
+   "anchor": "Em đã học",
+   "column": 1
+  },
+  {
+   "id": "b06",
+   "order": 6,
+   "role": "sidebar",
+   "bbox": [
+    0.15,
+    0.635,
+    0.42,
+    0.09
+   ],
+   "text": "Nước có tính chất không màu, không mùi, không vị, không có hình dạng nhất định. Nước chảy từ cao xuống thấp, chảy lan ra khắp mọi phía. Nước thấm qua một số vật và hoà tan một số chất.",
+   "anchor": "Nước có tính chất không màu, không mùi",
+   "contiguous": true,
+   "column": 1
+  },
+  {
+   "id": "b07",
+   "order": 7,
+   "role": "sidebar",
+   "bbox": [
+    0.15,
+    0.73,
+    0.42,
+    0.06
+   ],
+   "text": "Nhờ hiểu biết tính chất của nước, con người đã vận dụng những tính chất đó vào trong đời sống và sản xuất.",
+   "anchor": "Nhờ hiểu biết tính chất của nước",
+   "contiguous": true,
+   "column": 1
+  },
+  {
+   "id": "b08",
+   "order": 8,
+   "role": "sidebar",
+   "bbox": [
+    0.15,
+    0.795,
+    0.42,
+    0.09
+   ],
+   "text": "Con người, động vật và thực vật sẽ chết nếu không có nước. Nước không thể thiếu trong đời sống, sản xuất và sinh hoạt của chúng ta.",
+   "anchor": "Con người, động vật và thực vật sẽ chết",
+   "contiguous": true,
+   "column": 1
+  },
+  {
+   "id": "b09",
+   "order": 9,
+   "role": "heading",
+   "bbox": [
+    0.63,
+    0.6,
+    0.11,
+    0.02
+   ],
+   "text": "Em có biết?",
+   "anchor": "Em có biết",
+   "column": 2
+  },
+  {
+   "id": "b10",
+   "order": 10,
+   "role": "sidebar",
+   "bbox": [
+    0.64,
+    0.635,
+    0.28,
+    0.09
+   ],
+   "text": "Ở nước ta, ngành Nông nghiệp sử dụng nhiều nước nhất, chiếm khoảng 2/3 nhu cầu sử dụng trên phạm vi cả nước.",
+   "anchor": "Ở nước ta, ngành Nông nghiệp sử dụng",
+   "contiguous": true,
+   "column": 2,
+   "notes": "contains a stacked fraction 2/3 — every text-line OCR flattens it ('2 3')"
+  },
+  {
+   "id": "b11",
+   "order": 11,
+   "role": "heading",
+   "bbox": [
+    0.63,
+    0.8,
+    0.1,
+    0.02
+   ],
+   "text": "Em có thể",
+   "anchor": "Em có thể",
+   "column": 2
+  },
+  {
+   "id": "b12",
+   "order": 12,
+   "role": "sidebar",
+   "bbox": [
+    0.65,
+    0.835,
+    0.27,
+    0.06
+   ],
+   "text": "Giải thích được việc làm khơi thông miệng hố ga góp phần chống ngập nước.",
+   "anchor": "Giải thích được việc làm khơi thông",
+   "contiguous": true,
+   "column": 2,
+   "notes": "Em có thể item (verb + 'được') — NOT a learner question"
+  },
+  {
+   "id": "b13",
+   "order": 13,
+   "role": "page_number",
+   "bbox": [
+    0.12,
+    0.94,
+    0.02,
+    0.015
+   ],
+   "text": "8",
+   "anchor": "8"
+  }
+ ],
+ "flex_groups": [
+  [
+   "b02"
+  ],
+  [
+   "b05",
+   "b06",
+   "b07",
+   "b08"
+  ],
+  [
+   "b09",
+   "b10"
+  ],
+  [
+   "b11",
+   "b12"
+  ]
+ ],
+ "critical": [
+  "b06–b08 interleaved with b10/b12 (side-by-side boxes)",
+  "b12 emitted as a learner question (objective-as-question)",
+  "b10 fraction 2/3 flattened to '2 3' and trusted",
+  "b01 shown as a text prompt without the photos"
+ ],
+ "gold_revision": "r2 2026-09-05: flex_groups aligned with the TC-v1 convention (captions / floating objective boxes are flex) after the first held-out scoring showed order-only false trusts caused by the annotation, not the pipeline; roles/text/bbox/lesson unchanged; previous flex_groups=[[\"b05\", \"b06\", \"b07\", \"b08\"], [\"b09\", \"b10\"], [\"b11\", \"b12\"]]"
+}
