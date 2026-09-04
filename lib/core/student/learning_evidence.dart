@@ -19,6 +19,7 @@
 /// biệt đó, và không có tham số `slip`/`guess` nào khôi phục lại được.
 library;
 
+import '../pedagogy/pedagogy_model.dart' show TeachingAct;
 import 'mastery.dart';
 
 /// ⭐ Bảy loại sự kiện Founder liệt kê. Cố ý **không** gộp.
@@ -84,6 +85,10 @@ class LearningEvent {
     this.priorEventId,
     this.interventionId,
     this.knowledgeVersion,
+    this.sourceDocumentId,
+    this.lessonNo,
+    this.act,
+    this.learnerText,
   });
 
   final String eventId;
@@ -142,6 +147,24 @@ class LearningEvent {
   /// SILENTLY REINTERPRET: đổi model tri thức không được lặng lẽ đổi nghĩa
   /// evidence cũ. `null` = dữ liệu trước WAL-114.
   final String? knowledgeVersion;
+
+  /// ⭐⭐ WAL-179/WAL-182 LINEAGE — sách + số bài IN mà sự kiện này thuộc về.
+  /// `null` = chưa biết (dữ liệu cũ, hoặc sự kiện không gắn với một bài cụ
+  /// thể) — KHÔNG suy đoán để lấp. Đây là trường "Event/Evidence này thuộc
+  /// learning context nào" mà Learning Map/Parent View/Citation dùng chung —
+  /// không phải field riêng chỉ phục vụ một tính năng.
+  final String? sourceDocumentId;
+  final int? lessonNo;
+
+  /// Nước đi sư phạm (`TeachingAct`) đã tạo ra sự kiện này — "WHO speaks as
+  /// SAM" truy được ngược về đúng act, không chỉ về policyId dạng chuỗi.
+  /// `null` = sự kiện không gắn với một act cụ thể (hoặc dữ liệu cũ).
+  final TeachingAct? act;
+
+  /// Chữ trẻ viết nguyên văn (dự đoán/quan sát/giải thích/nháp…) — trước đây
+  /// bị bỏ khi màn pop (vd `experiment_screen.dart`). `null` = act này không
+  /// có/không cần chữ trẻ viết.
+  final String? learnerText;
 
   /// Sự kiện này có phải một lần **trả lời** không (khác với một lần can thiệp).
   bool get isAttempt => switch (kind) {

@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import '../../core/context/learning_context.dart';
 import '../../core/curriculum/canonical_problem.dart';
 import '../../core/curriculum/subject_id.dart';
 import '../../core/intent/learning_intent.dart';
@@ -257,7 +258,18 @@ class SubjectHomeScreen extends StatelessWidget {
                             color: WalColors.inkSoft)),
                     onTap: () {
                       Navigator.of(sheet).pop();
-                      _openExperiment(context, ex);
+                      // ⭐ Duyệt thẳng từ danh sách thí nghiệm (không qua bộ
+                      // chọn ý định) — ý định CHƯA BIẾT, giữ null thật lòng
+                      // thay vì suy đoán để lấp field (WAL-182).
+                      _openExperiment(
+                          context,
+                          ex,
+                          LearningContext(
+                              learnerId: profile.learnerId,
+                              grade: profile.grade,
+                              subject: subject,
+                              sourceDocumentId: ex.book,
+                              lessonNo: ex.lesson));
                     },
                   ),
               ]),
@@ -328,10 +340,12 @@ class SubjectHomeScreen extends StatelessWidget {
     );
   }
 
-  void _openExperiment(BuildContext context, KhoaExperiment ex) {
+  void _openExperiment(
+      BuildContext context, KhoaExperiment ex, LearningContext ctx) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => ExperimentScreen(
               experiment: ex,
+              learningContext: ctx,
               onFinished: (events) => recordSession(
                   store: store,
                   learnerId: profile.learnerId,
@@ -580,8 +594,13 @@ class SubjectHomeScreen extends StatelessWidget {
 
   /// Nhãn + hành động của một hoạt động. Vét cạn trên `sealed` — thêm loại việc
   /// mới mà quên nối UI thì không biên dịch được.
-  (String, VoidCallback) _activityAction(
-          BuildContext context, LessonRef l, LessonActivity a) =>
+  ///
+  /// ⭐⭐ WAL-178/182 — [ctx] đã mang sẵn sách/bài/ý định lúc gọi hàm này;
+  /// hầu hết hoạt động chưa dùng tới (chỉ Experiment dùng, hôm nay), nhưng
+  /// CHẢY QUA đây để mọi hoạt động sau này nối vào cùng một đường, không tạo
+  /// đường context riêng cho từng loại việc.
+  (String, VoidCallback) _activityAction(BuildContext context, LessonRef l,
+          LessonActivity a, LearningContext ctx) =>
       switch (a) {
         ExerciseActivity(:final items) => (
             '🧮 Làm bài tập',
@@ -601,13 +620,23 @@ class SubjectHomeScreen extends StatelessWidget {
           ),
         ExperimentActivity(:final experiment) => (
             '🔬 Làm thí nghiệm',
-            () => _openExperiment(context, experiment)
+            () => _openExperiment(context, experiment, ctx)
           ),
       };
 
   void _startIntent(BuildContext context, BookLessons b, LessonRef l,
       List<LessonActivity> acts, LearningIntent intent, SliceCurriculum? c) {
     final ordered = activitiesForIntent(intent, acts);
+    // ⭐⭐ WAL-182 — "SAM đang đứng ở đâu" TỪ ĐÂY: sách + bài + ý định đã biết
+    // thật (không đoán) ngay tại điểm sắp mở Tool. Dùng chung cho mọi nhánh
+    // dưới, không xây context riêng cho từng activity type.
+    final ctx = LearningContext(
+        learnerId: profile.learnerId,
+        grade: profile.grade,
+        subject: subject,
+        sourceDocumentId: b.sourceDocumentId,
+        lessonNo: l.no,
+        intent: intent);
 
     // Tra cứu mà bài không có nguồn nào ⇒ «Nguồn bài học» của chương trình.
     if (intent == LearningIntent.lookup && ordered.isEmpty) {
@@ -616,12 +645,12 @@ class SubjectHomeScreen extends StatelessWidget {
     }
     if (ordered.isEmpty) return;
     if (ordered.length == 1) {
-      _activityAction(context, l, ordered.single).$2();
+      _activityAction(context, l, ordered.single, ctx).$2();
       return;
     }
     // Nhiều việc trong cùng một ý định ⇒ để trẻ chọn việc, KHÔNG tự chọn hộ.
     final actions = [
-      for (final a in ordered) _activityAction(context, l, a),
+      for (final a in ordered) _activityAction(context, l, a, ctx),
       if (intent == LearningIntent.lookup && c != null)
         ('📖 Nguồn bài học', () => _openSourceInfo(context, c)),
     ];
