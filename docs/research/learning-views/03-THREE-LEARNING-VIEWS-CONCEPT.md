@@ -1,5 +1,7 @@
 # 03 — The Three Learning Views Concept (restated, situated, and challenged)
 
+> **Reconciled with TC-v1 (2026-09-05).** `TC-nn` = `docs/research/trusted-corpus/nn-….md`. Changes: F1, F2, F9 and the net paragraph in §5.
+
 ## 1. The Founder's concept board — what it shows (described, not copied)
 
 `concept/concept-ai-first/learning-view.png` — "CONCEPT: 1 BÀI HỌC – 3 CÁCH HỌC – 1 NGƯỜI BẠN ĐỒNG
@@ -40,11 +42,11 @@ hypothesis, not an existing capability.
 
 | Term | Definition | Relation to existing terms |
 |---|---|---|
-| **Trusted Learning Source** | SGK/SGV pages as scanned + OCR + layout, with per-block trust and provenance. | `Provenance`, layout blocks, `SourceAsset` |
-| **Trusted Structured Lesson** *(HYPOTHESIS name)* | One lesson-scoped document assembled at build time from trusted blocks, activity objects and optional semantic bindings. | proposed in `12`; not a new source of truth — a *projection* of the corpus keyed by `LessonKey` |
+| **Trusted Learning Source** | SGK/SGV pages as scanned + OCR + layout, with per-block trust and provenance. | `Provenance`, layout blocks, `SourceAsset`; **TC-11 names the same thing `TrustedLearningSource` = SDM blocks with `trust.status == TRUSTED`** |
+| **Trusted Structured Lesson** *(HYPOTHESIS name)* | One lesson-scoped document assembled at build time from trusted blocks, activity objects and optional semantic bindings. | proposed in `12`; not a new source of truth — a *projection* of the SDM keyed by `LessonKey` (TC-11 §2: "Markdown, units, packs … are projections") |
 | **Learning View** | A *representation + interaction style* for the same Trusted Structured Lesson: Đọc (Smart Book) · Trực quan (Visual Learning) · Học với SAM (SAM Tutor). | **new** product-level term; sits *inside* a `LearningContext`, chosen after intent |
 | **Learning Surface** | An interaction primitive (Reader, ComposeLite, Experiment, SourceReader, MapReader, QuizSelect, future ShortAnswer). | existing ADR-009 / Convergence "SURFACE" |
-| **Activity Pattern** | A corpus-derived learner action type (EXPLAIN_SHORT, OBSERVE, …, 27). | `K12-ACTIVITY-PATTERN-REGISTRY.md` — capabilities used *inside* a View (`14`) |
+| **Activity Pattern** | A corpus-derived learner action type (EXPLAIN_SHORT, OBSERVE, …, 27). | `K12-ACTIVITY-PATTERN-REGISTRY.md` — capabilities used *inside* a View (`14`); counts are old-extractor artefacts (TC-15) |
 | **LEARNING INTENT** | prepare · review · practice · lookup — belongs to the learner. | `learning_intent.dart`; **not** a View |
 
 Invariant: **Learning View ≠ Learning Source ≠ Learning Intent ≠ Learning Surface.**
@@ -103,19 +105,22 @@ The Founder asked to try to break `SGK/SGV → Trusted Corpus Pipeline → TRUST
 
 | # | Attack | Result | Evidence |
 |---|---|---|---|
-| F1 | "One canonical lesson document cannot exist because the corpus lesson boundary is unreliable." | **PARTLY HOLDS.** 8/30 Khoa học 5 lessons lack `pageStart`; KHTN 7/8 TOC truncated; ranges capped at 2.5× median. A lesson document must carry a *boundary confidence* and fail closed. | MEASURED (`curriculum-structure.json`), WAL-206 §4 |
-| F2 | "Native block reconstruction is impossible on scanned PDFs." | **HOLDS TODAY for image/table/formula; NOT for text.** Reading order 0.99 on gold set, but no non-text roles; tableLike ⇒ untrusted. | WAL-206 §2, `layout_extract.py` |
-| F3 | "Typed relationships for visuals will require LLM inference, breaking §12." | **HOLDS for History/Concept map today; FALSE for Process/Spatial.** `KhoaExperiment.tienHanh[]` and `DiaMap` are typed, verbatim, provenance-bearing. Sử units are raw `SECTION_TEXT` with no event fields. | `lesson_index.dart:104-156`; VISUALIZER §4 |
+| F1 | "One canonical lesson document cannot exist because the corpus lesson boundary is unreliable." | **PARTLY HOLDS.** 8/30 Khoa học 5 lessons lack `pageStart`; KHTN 7/8 TOC truncated; ranges capped at 2.5× median. **TC-v1:** 3,381 of 3,679 lessons have a page range (TC-03 §5); TOC-range attachment is wrong on 10/38 hard gold pages and header-based attachment fixes 6 of them (TC-02 §5, TC-14 §2); 25.8 % of pages continue from the previous page (TC-03 §2). A lesson document must carry per-block `lesson{attach_method, confidence}` + `continues` (TC-11 §2) and fail closed. | MEASURED (`curriculum-structure.json`), WAL-206 §4, TC-02/03/11/14 |
+| F2 | "Native block reconstruction is impossible on scanned PDFs." | **HOLDS TODAY for image/table/formula; NOT for text.** Reading order "0.99" on the WAL-206 gold set is **superseded** on the 38-page hard set: XY-cut 0.976 with 34 meaning-changing inversions; layout-model parsers 0.987–0.991 (TC-05, TC-06). Non-text after TC-v1: figures feasible as image regions with captions (TC-11, TC-07); tables as objects only on the GPU path (TC-07); formulas flattened by every stack → image-first (TC-09, TC-19 #7). | WAL-206 §2, `layout_extract.py`, TC-05/06/07/09 |
+| F3 | "Typed relationships for visuals will require LLM inference, breaking §12." | **HOLDS for History/Concept map today; FALSE for Process/Spatial.** `KhoaExperiment.tienHanh[]` and `DiaMap` are typed, verbatim, provenance-bearing. Sử units are raw `SECTION_TEXT` with no event fields. TC-v1: timeline order fails in every parser (TC-06) — History stays blocked. | `lesson_index.dart:104-156`; VISUALIZER §4; TC-06 |
 | F4 | "Three Views duplicate content and will drift (Mode 1 says X, Mode 3 teaches Y)." | **AVOIDABLE by construction**: if all three render the same lesson document and Mode 3's realizations pass `validateRealization` with `DerivedFacts` from that document, drift is a build-time diff, not a runtime risk. It is a *real* risk if Mode 2/3 use any content not in the document. | `realization_contract.dart:88-102` |
 | F5 | "The concept re-introduces LEARNING MODE." | **HOLDS unless Views are defined inside LearningContext** (§3). | Convergence §1 |
 | F6 | "Evidence cannot move between Views." | **FALSE**: evidence is keyed by `skillCaseId`/`conceptId` + `sourceDocumentId`/`lessonNo`, not by Surface (`LearningEvent` fields via validator). Views are irrelevant to the evidence log; only Surfaces mint. | `evidence_validator.dart:67-82` |
 | F7 | "A View recommendation needs a new recommender / an LLM." | **FALSE**: `proposeIntent` + `LearningAgenda` already produce a reasoned proposal; mapping intent→View is a small deterministic table. Whether the recommendation *helps* is untested. | `learning_intent.dart:85-123` |
 | F8 | "This complicates the Learning OS (anti-principle #5)." | **DOES NOT HOLD if** no new planes are added: Views are a presentation policy over the existing seven planes (`SAM-EDUCATION-DATA-ARCHITECTURE-PROPOSAL.md` §2). It **would** hold if a generic layout engine, a graph DB, or a second resolver were built (`SAM-LEARNING-VISUALIZER-RESEARCH.md` §5 warns precisely against a parallel resolver). | Proposal §2, §3 |
-| F9 | "Trusted Corpus findings may invalidate the block model." | **OPEN** — PENDING TRUSTED-CORPUS FINDINGS. | — |
+| F9 | "Trusted Corpus findings may invalidate the block model." | **CLOSED (2026-09-05).** TC-v1 did not invalidate the block model; it *replaced* it with a superset — the Structured Document Model (20 roles, relations, tri-state trust, TC-11) — and moved the trust unit from page to block (TC-10). `12` §3 is now mapped onto it; the classes that changed are listed in `18` §3a. | TC-10, TC-11 |
 
 Net: the architecture survives as a *direction* with two hard preconditions (block-level
 extraction for non-text; typed relationship extraction for visuals) and one definitional guard
-(Views inside LearningContext).
+(Views inside LearningContext). **After TC-v1 the two preconditions are measured, not assumed:** a
+block-level fail-closed source is feasible for prose / questions / sidebars / boxes (≈ 68 % of
+non-sparse pages, TC-18 Q5) and not for math / diagrams / elementary pictures; typed relationships
+beyond captions and option order need a role layer that does not exist (TC-07).
 
 ## 6. What "close enough to the book" must mean (Mode 1 principle)
 
@@ -124,3 +129,5 @@ native, responsive and AI-ready"* — is operationalised in `04` as: **preserve 
 figures with captions, tables, formulas, questions and activities**; allow reflow, font size,
 zoom, highlight, bookmark, annotation, "Hỏi SAM về đoạn này", source reference; and **never
 present an untrusted block as text** — show the source page region image instead, labelled.
+After TC-v1 "tables, formulas" in that list means *as image regions* (TC-19 #7), and "questions"
+means *as reading text without a prompt affordance* until the role layer is measured (TC-07).

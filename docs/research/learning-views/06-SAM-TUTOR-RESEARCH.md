@@ -1,5 +1,7 @@
 # 06 — Mode 3 · SAM Tutor / Học với SAM — Research
 
+> **Reconciled with TC-v1 (2026-09-05).** `TC-nn` = `docs/research/trusted-corpus/nn-….md`. Change: new §8 (role layer before auto-labelled probes; SGV pairing via `answer_of`; old-extractor counts). Verdict B unchanged.
+
 **Founder principle (§5):** not "Chat" — chat is one interaction mechanism. SAM actively organises
 a learning session; Student Action → Evidence → Pedagogy Runtime → Student State → Next Teaching
 Action. **The LLM does not decide pedagogy**; the Pedagogy Runtime decides what SAM may teach/ask
@@ -22,7 +24,7 @@ So "SAM Tutor" is a **product name for the Deep path reaching a lesson**, plus t
 runtime needs. What is *not* there: (a) reach — 1 lesson registered (`slice_curriculum.dart:114-118`);
 (b) a Surface for short free-text answers (`shortText → unsupported`, `learning_activity.dart:96`)
 which WAL-206 §6 measured as the next bottleneck (166/185 recovered Science lessons carry only
-EXPLAIN/OBSERVE questions); (c) a misconception model; (d) any wired LLM (shadow).
+EXPLAIN/OBSERVE questions — an old-extractor count, see §8); (c) a misconception model; (d) any wired LLM (shadow).
 
 ## 2. Chat vs Tutor (Q2) — answer with evidence
 
@@ -56,7 +58,7 @@ Frame 6 shows: pre-question → A–D options → "Chính xác! 🎉" → "Thử
 
 | Board element | Rule it touches | Honest version |
 |---|---|---|
-| Pre-question A–D graded "Chính xác!" | No grading without an SGV key (`TvQuestion` has *no* answer field by design; WAL-204: options without key ⇒ `gradable=false` ⇒ `correct=null`; MEASURED: SGV answer keys exist for 309 lessons in the registry, deterministic SGK↔SGV linkage proven for 2 Tin học lessons only) | The pre-question is a **`diagnosticProbe`** (SupportLevel.none): SAM records the answer as `independentAttempt correct=null` and says what it *can* say — «SAM ghi nhận câu trả lời của con — mình cùng xem trong bài nhé» — unless a key exists, in which case `QuizSelect` grading applies with `feedbackFor` (4-axis, no ability praise). "🎉" only on evidence-backed events (Convergence §6 test 1: *can the praise be wrong?*). |
+| Pre-question A–D graded "Chính xác!" | No grading without an SGV key (`TvQuestion` has *no* answer field by design; WAL-204: options without key ⇒ `gradable=false` ⇒ `correct=null`; MEASURED: SGV answer keys exist for 309 lessons in the registry (a marker count — §8), deterministic SGK↔SGV linkage proven for 2 Tin học lessons only) | The pre-question is a **`diagnosticProbe`** (SupportLevel.none): SAM records the answer as `independentAttempt correct=null` and says what it *can* say — «SAM ghi nhận câu trả lời của con — mình cùng xem trong bài nhé» — unless a key exists, in which case `QuizSelect` grading applies with `feedbackFor` (4-axis, no ability praise). "🎉" only on evidence-backed events (Convergence §6 test 1: *can the praise be wrong?*). |
 | "Thử thách tiếp theo" free-text | `shortText → unsupported` today | This **is** the Short-Answer Surface (WAL-206 §6 P0-NEXT): passage/context + question, learner answers by text/voice, SAM gives *ungraded* guidance (pumpRecall/smallHint, generative-guarded), evidence `correct: null`, act `askExplanation`. |
 | Mascot "SAM sẽ dạy, hỏi, gợi ý và luyện tập cùng con" | Blueprint sequence + `learnerFirst` | Correct as a promise only where a blueprint or a routed activity exists; otherwise the fail-closed line «SAM chưa dạy được bài này» (`PEDAGOGICAL-PROVENANCE-UX.md`) |
 | SAM chat-bubble layout | Convergence §7 "presence inversely proportional to the child's momentary capability" | Keep bubbles for SAM's moves; **SAM disappears while the child is answering**; no free-form input except where a Surface asks for it |
@@ -100,3 +102,29 @@ Frame 6 shows: pre-question → A–D options → "Chính xác! 🎉" → "Thử
 4. A `PlannedAct` sequence with cap and required evidence (blueprint) or the Scale path's
    per-Surface policy (`reader-v1`, `experiment-v1`).
 5. An SGV key if anything is to be marked correct; otherwise `correct: null` and SAM says so.
+6. *(added by TC-v1)* If the prompt comes from an extracted `question` block, a role layer measured
+   at ≥ 0.95 question precision on gold (TC-07) — otherwise the block is reading text, not a probe.
+
+## 8. Reconciled with TC-v1 (2026-09-05)
+
+- **Auto-labelled questions as probes.** The board's pre-question and any `diagnosticProbe` built
+  from an extracted `question` block depend on a role layer that does not exist: the only labeller
+  has precision 0.69 (11 headings + 23 objectives/instructions/answers emitted as questions on 38
+  hard pages) and no layout parser has a QUESTION concept (TC-07). Rule adopted from TC-07
+  §Consequence: **no automatically labelled question is shown to a child as a graded prompt until
+  question precision ≥ 0.95 is measured on gold** — stricter than, and consistent with, "no key ⇒
+  no grade" in §3.
+- **SGV keys.** "309 lessons with an SGV key" (§3) is a *marker* count (MỤC TIÊU/ĐÁP ÁN present),
+  not a pairing count. TC-14 moves pairing from page ranges to `answer_of` relations keyed by
+  printed enumerators and table cells, requires enumerator-preserving blocks (Docling drops 65 on
+  gold, TC-09) and an **answer-leak guard** before any SGV block reaches a Surface (TC-17 #14). The
+  share of SGV lessons whose format is enumerated is STILL UNMEASURED after TC-v1 (needs an SGV
+  format census, TC-14).
+- **Bottleneck numbers.** "166/185 Science lessons carry only EXPLAIN/OBSERVE" (§1) and "+76
+  lessons" for the Short-Answer Surface (`18` §2) are WAL-206 measurements of the old extractor;
+  TC-15 shows directive units change 4× (49 → 199) on identical pages and that 23 of the XY-cut's
+  100 "questions" were non-questions. The Surface gap is real; its size must be recomputed on a
+  role-labelled SDM.
+- **Teacher text.** SGV teacher prompts and model answers are indistinguishable from learner
+  content without an SGV lexicon (TEACHER_GUIDANCE / TEACHER_PROMPT / ANSWER roles, TC-14 §3) — a
+  Mode 3 realisation must never quote an SGV block that lacks those roles (TC-09 #8).
