@@ -87,6 +87,13 @@ def passage_has_spliced_box(passage):
     return len(EQ_FRAG_RE.findall(passage)) >= 3
 
 
+def passage_starts_midsentence(passage):
+    """KHTN 9 Bài 26: 'nước, hòa tan được nhiều chất…' — the passage unit began on a continuation
+    line (its first line is on the previous page/region). A learner passage must start a sentence."""
+    t = passage.lstrip('••-–— "“(\'')
+    return bool(t) and t[0].islower()
+
+
 def passage_is_objectives(passage):
     parts = [s.strip() for s in re.split(r'\s*[•]\s*|(?<=[.!?])\s+', passage) if s.strip()]
     obj = sum(1 for s in parts if OBJ_SENT_RE.match(s))
@@ -111,6 +118,8 @@ def reading_ok(prompt, passage):
         return 'passage_is_objectives'
     if passage_has_spliced_box(passage):
         return 'passage_spliced_box'
+    if passage_starts_midsentence(passage):
+        return 'passage_fragment_start'
     if LEADIN_RE.search(prompt):
         return 'leadin_not_question'
     if DEICTIC_RE.search(prompt) or prompt_points_offpage(prompt):

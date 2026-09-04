@@ -26,7 +26,7 @@ import sys
 from collections import Counter
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ui'))
-from pattern_router import passage_is_objectives, passage_has_spliced_box, prompt_points_offpage, LEADIN_RE, DEICTIC_RE, PRONOUNCE_RE, OBSERVE_FIG_RE  # noqa: E402  (shared with the router's gate-at-source)
+from pattern_router import passage_is_objectives, passage_has_spliced_box, passage_starts_midsentence, prompt_points_offpage, LEADIN_RE, DEICTIC_RE, PRONOUNCE_RE, OBSERVE_FIG_RE  # noqa: E402  (shared with the router's gate-at-source)
 
 OBJECTIVE = re.compile(r'^\s*(\d{1,2}[\.\)]\s*)?(Giải thích|Nêu|Trình bày|Mô tả|Xác định|Phân biệt|Vận dụng|Nhận biết|Kể tên|So sánh|Phát biểu|Viết|Đọc|Tính|Thực hiện|Sử dụng|Vẽ)\s+được\b', re.IGNORECASE)
 FIGURE_DEP = re.compile(r'\b(Hình|Bảng|Sơ đồ|Biểu đồ|Lược đồ)\s*\d', re.IGNORECASE)
@@ -61,6 +61,7 @@ def check_reading(r, ranges, layout_units):
     if FIGURE_DEP.search(q['prompt']) and not FIGURE_DEP.search(r['passage']): fails.append('Q8_figure_dependent_question')  # asks about a figure/table the Surface cannot show
     if passage_is_objectives(r['passage']): fails.append('Q1_passage_is_objectives')   # device walk KHTN 6 Bài 2: MỤC TIÊU bullets shown as passage
     if passage_has_spliced_box(r['passage']): fails.append('Q1_passage_spliced_box')   # device walk KHTN 6 Bài 6: unit-conversion side box spliced into body
+    if passage_starts_midsentence(r['passage']): fails.append('Q1_passage_fragment_start')   # KHTN 9 Bài 26: passage begins on a continuation line
     if LEADIN_RE.search(q['prompt']): fails.append('Q3_leadin_not_question')            # "…trả lời các câu hỏi sau:"
     if DEICTIC_RE.search(q['prompt']) or prompt_points_offpage(q['prompt']): fails.append('Q8_deictic_prompt')   # "ý kiến trên", "hình bên", "các vật sau đây" (no inline list) — Surface cannot show it
     if PRONOUNCE_RE.match(q['prompt']): fails.append('Q3_pronunciation_not_question')  # "Đọc là: iron tác dụng với…" (KHTN 8 Bài 2)
