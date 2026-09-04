@@ -14,8 +14,19 @@
 ///
 /// Không thay `reviewStateOf` (lịch giãn cách) mà PHỦ LÊN nó: lịch trả lời
 /// «tới hạn chưa», resolver trả lời «có gì đáng đưa lên trước không».
+///
+/// ⭐⭐ WAL-184 (Founder Decision 2026-09-04) — REVIEW_DUE ≠ CURRENTLY_STRUGGLING.
+/// Lịch ôn (`priority`/`dueBy`) giữ NGUYÊN dù evidence hiện tại đã mạnh — D2 cố
+/// ý không quên một lần sai độc lập trong quá khứ. Nhưng CÂU CHỮ (`reason`) là
+/// một phép chiếu KHÁC: nó phải đọc đúng NGAY BÂY GIỜ. Khi `challengeSignalFor`
+/// (WAL-183, cùng nguồn `CaseMastery`) đang là `stretch`, trẻ VỪA chứng minh
+/// làm được — nói «còn vướng» mâu thuẫn với chính màn Sổ học vừa cho trẻ xem.
+/// CAPABILITY (làm được gì NGAY BÂY GIỜ) và REVIEW URGENCY (khi nào nên gặp
+/// lại để củng cố trí nhớ) là hai câu hỏi khác nhau — resolver này chỉ được
+/// đổi CÁCH NÓI, không được đổi QUYẾT ĐỊNH lịch ôn.
 library;
 
+import 'challenge_policy.dart';
 import '../student/mastery.dart';
 import '../student/review_schedule.dart';
 import 'error_hypothesis.dart';
@@ -135,7 +146,15 @@ List<ReviewCandidate> resolveReviewCandidates({
 
     // ③ TIỀN ĐỀ YẾU mà BÀI ĐANG HỌC cần tới ⇒ được phép lên Hôm nay. Đây là
     // mức duy nhất chiếm chỗ ở Hôm nay, và nó cần HAI điều kiện cùng lúc.
-    final weak = c.independentIncorrect > 0 || !c.hasEvidence;
+    //
+    // ⭐⭐ WAL-184: «chưa chắc» là phát biểu về HIỆN TẠI, không phải lịch sử —
+    // một lần sai độc lập không còn giữ tiền đề là «yếu» nếu bằng chứng gần
+    // đây đã đủ mạnh (challengeSignalFor == stretch). Không như luật ④ (lịch
+    // ôn cố ý không quên), luật này quyết định CÓ CHẶN bài hôm nay hay không
+    // — chặn dựa trên một trạng thái đã qua là sai, không phải cố ý.
+    final weak = !c.hasEvidence ||
+        (c.independentIncorrect > 0 &&
+            challengeSignalFor(c) != ChallengeSignal.stretch);
     if (prerequisiteCaseIds.contains(id) && weak && c.evidenceCount + c.supportedCount > 0) {
       out.add(ReviewCandidate(
         skillCaseId: id,
@@ -150,16 +169,26 @@ List<ReviewCandidate> resolveReviewCandidates({
 
     // ④ TỰ LÀM SAI. Sai LẺ giữa nhiều lần đúng = sơ suất ⇒ giữ nhịp bình
     // thường. Còn lại ⇒ gặp lại gần (dải 1–3 ngày).
+    //
+    // ⭐⭐ WAL-184: lịch (`priority`/`dueBy`) giữ NGUYÊN — D2 cố ý không quên
+    // một lần sai. Nhưng nếu bằng chứng GẦN ĐÂY đã đủ mạnh để tự làm được
+    // (challengeSignalFor == stretch), câu chữ phải nói ĐÚNG NGAY BÂY GIỜ:
+    // đây là hẹn ôn để CỦNG CỐ TRÍ NHỚ, không phải cảnh báo «còn vướng».
     if (c.independentIncorrect > 0) {
       final slip = c.independentIncorrect == 1 &&
           c.independentCorrect >= policy.slipCorrectTolerance;
+      final currentlyStrong = challengeSignalFor(c) == ChallengeSignal.stretch;
       out.add(ReviewCandidate(
         skillCaseId: id,
         priority: slip ? ReviewPriority.normal : ReviewPriority.nearTerm,
         becauseOfError: true,
         reason: slip
             ? 'Một câu lỡ tay giữa nhiều câu đúng — chưa cần làm gì thêm.'
-            : 'Con còn vướng dạng này — mình gặp lại trong ít ngày tới nhé.',
+            : currentlyStrong
+                ? 'Con đã tự làm được dạng này. SAM sẽ nhắc con ôn lại sau '
+                    'vài ngày để nhớ lâu hơn.'
+                : 'Con còn vướng dạng này — mình gặp lại trong ít ngày tới '
+                    'nhé.',
         dueBy: slip ? state.nextReviewAt : now.add(policy.nearTermWindow),
       ));
       continue;

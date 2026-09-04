@@ -13,10 +13,11 @@ CaseMastery _case({
   int incorrect = 0,
   int supported = 0,
   DateTime? last,
+  double pMastery = 0.5,
 }) =>
     CaseMastery(
       skillCaseId: 'k',
-      pMastery: 0.5,
+      pMastery: pMastery,
       evidenceCount: correct + incorrect,
       supportedCount: supported,
       independentCorrect: correct,
@@ -195,5 +196,69 @@ void main() {
             reason: 'câu «${c.reason}» chứa «$bad»');
       }
     }
+  });
+
+  group('⭐⭐ WAL-184 (Founder Decision 2026-09-04) — REVIEW_DUE ≠ '
+      'CURRENTLY_STRUGGLING', () {
+    test(
+        'từng sai → giờ tự làm ĐÚNG liên tục (pMastery ≥ stretch): lịch ôn '
+        'VẪN giữ nguyên (D2 không đổi), nhưng câu chữ nói củng cố trí nhớ, '
+        'KHÔNG nói "còn vướng"', () {
+      final before = resolveReviewCandidates(
+          mastery: _m({'k': _case(correct: 0, incorrect: 2, pMastery: 0.3)}),
+          now: _now);
+      final beforeCand = _one(before, 'k')!;
+      expect(beforeCand.reason, contains('còn vướng'),
+          reason: 'bằng chứng hiện tại CŨNG yếu ⇒ "còn vướng" là đúng thật');
+
+      // Cùng ca, nhưng giờ đã có đủ evidence tự làm đúng gần đây để
+      // challengeSignalFor lên stretch — evidence KHÔNG xoá đi lần sai cũ
+      // (independentIncorrect vẫn > 0), chỉ pMastery hồi phục.
+      final after = resolveReviewCandidates(
+          mastery: _m({
+            'k': _case(correct: 6, incorrect: 2, pMastery: 0.9),
+          }),
+          now: _now);
+      final afterCand = _one(after, 'k')!;
+
+      // Lịch ôn (priority + dueBy) KHÔNG đổi — D2 vẫn không quên lần sai.
+      expect(afterCand.priority, ReviewPriority.nearTerm,
+          reason: '⭐⭐ đột biến bỏ lịch ôn chỉ vì thành công gần đây ⇒ đỏ — '
+              'Founder cấm suppress review chỉ vì same-day success');
+      final days = afterCand.dueBy!.difference(_now).inDays;
+      expect(days, inInclusiveRange(1, 3));
+
+      // Nhưng CÂU CHỮ phải đọc đúng NGAY BÂY GIỜ — capability projection
+      // (WAL-183) và review projection (WAL-164) không được collapse làm một.
+      expect(afterCand.reason, isNot(contains('còn vướng')),
+          reason: '⭐⭐ đột biến giữ nguyên câu "còn vướng" dù trẻ vừa tự làm '
+              'được ⇒ đỏ — đúng bug Founder phát hiện khi đi Golden Journey');
+      expect(afterCand.reason, contains('tự làm được'));
+      expect(afterCand.reason, contains('ôn lại'),
+          reason: 'câu chữ phải khung theo CỦNG CỐ TRÍ NHỚ, không phải cảnh '
+              'báo khó khăn');
+    });
+
+    test('tiền đề bài hôm nay: từng sai nhưng giờ vững (stretch) ⇒ KHÔNG còn '
+        'bị coi là "chưa chắc", không chặn bài hôm nay', () {
+      final r = resolveReviewCandidates(
+          mastery: _m({'k': _case(correct: 6, incorrect: 1, pMastery: 0.9)}),
+          now: _now,
+          prerequisiteCaseIds: {'k'});
+      expect(todayCandidates(r), isEmpty,
+          reason: '⭐⭐ đột biến vẫn chặn bài hôm nay dù tiền đề đã vững lại '
+              '⇒ đỏ — cùng collapse REVIEW_DUE=WEAK như luật ④');
+    });
+
+    test('tiền đề bài hôm nay: từng sai và VẪN còn yếu (chưa vững lại) ⇒ vẫn '
+        'chặn như cũ — không suppress chỉ vì có MỘT câu đúng', () {
+      final r = resolveReviewCandidates(
+          mastery: _m({'k': _case(correct: 1, incorrect: 2, pMastery: 0.5)}),
+          now: _now,
+          prerequisiteCaseIds: {'k'});
+      expect(todayCandidates(r), hasLength(1),
+          reason: 'bằng chứng hiện tại CHƯA đủ mạnh ⇒ vẫn là tiền đề yếu '
+              'thật, không phải collapse — giữ nguyên hành vi cũ');
+    });
   });
 }
