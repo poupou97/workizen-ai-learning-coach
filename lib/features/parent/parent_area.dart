@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/adaptive/adaptive_engine.dart';
 import '../../core/coach/parent_explanation.dart';
+import '../../core/coach/parent_session_summary.dart';
 import '../../core/knowledge/slice_curriculum.dart';
 import '../../core/store/learner_profile.dart';
 import '../../core/store/learner_store.dart';
@@ -335,7 +336,55 @@ class _ChildCard extends StatelessWidget {
                   ),
                 ),
               ],
+              // ⭐⭐ WAL-180 — "Gần đây" trong ĐÚNG thẻ đã có (Founder UX
+              // Constraint 2026-09-04: không dashboard riêng). Đọc CÙNG
+              // Learning Map state trẻ đang thấy (WAL-181), không hệ tính
+              // riêng — không giới hạn ở Toán như `parentTonightFor` phía
+              // trên, vì lineage không phân biệt môn.
+              _RecentTouches(profile: profile, store: store),
             ]),
+          );
+        },
+      );
+}
+
+class _RecentTouches extends StatelessWidget {
+  const _RecentTouches({required this.profile, required this.store});
+
+  final LearnerProfile profile;
+  final LearnerStore store;
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder(
+        future: store.sessions(learnerId: profile.learnerId),
+        builder: (context, snap) {
+          final sessions = snap.data;
+          if (sessions == null) return const SizedBox.shrink();
+          final touches = recentLessonTouches(sessions);
+          if (touches.isEmpty) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.only(top: WalSpacing.sm),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('GẦN ĐÂY',
+                    style: TextStyle(
+                        fontSize: WalType.secondary,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.6,
+                        color: WalColors.inkSoft)),
+                const SizedBox(height: 4),
+                for (final t in touches)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text('· ${parentLineFor(t)}',
+                        style: const TextStyle(
+                            fontSize: WalType.secondary,
+                            color: WalColors.inkSoft,
+                            height: 1.4)),
+                  ),
+              ],
+            ),
           );
         },
       );
