@@ -333,7 +333,10 @@ PATTERN_BOOKS = {
     8: [('KHTN', '08-sgk-khoa-hoc-tu-nhien-8')],
     9: [('KHTN', '09-sgk-khoa-hoc-tu-nhien-9')],
 }
-if PATTERN_BOOKS.get(GRADE):
+# Gated OFF by default after the WAL-204 device check: routed READ_TEXT passages
+# from the generic extractor are column-scrambled on multi-column pages
+# (unreadable). Enable only for experiments: PATTERN_ROUTER=1.
+if PATTERN_BOOKS.get(GRADE) and os.environ.get('PATTERN_ROUTER') == '1':
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from pattern_router import route as _route_patterns
     _pr, _pw, _ps = _route_patterns(GRADE, PATTERN_BOOKS[GRADE], docs)
