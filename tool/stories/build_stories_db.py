@@ -2,7 +2,7 @@
 """WAL-151 KS-D — stories.db: SQLite + FTS5 local-first theo pack
 architecture (WAL-83). CHỈ nạp VERIFIED (cổng §28); title derive tất định
 từ chính item — KHÔNG LLM, KHÔNG thêm claim."""
-import json, os, sqlite3, time
+import json, os, re, sqlite3, time
 
 VER = 'stories-db-v1'
 
@@ -10,6 +10,16 @@ def title_of(i):
     t = i['type']
     if t == 'PERSON':
         y = f" ({i['birthYear']}–{i['deathYear']})" if i.get('birthYear') else ''
+        if not y:
+            # Không có năm sinh-mất để đứng riêng làm ngữ cảnh (VD tên phiên
+            # âm nước ngoài "Hen Krit-chừn Gioa-chim G-ram" đọc vô nghĩa nếu
+            # đứng một mình) — SGK tự in "<tên phiên âm> (<tên gốc/biệt danh>)"
+            # ngay trong câu nguồn; lấy lại NGUYÊN VĂN phần trong ngoặc đó
+            # (không suy luận, không LLM) làm ngữ cảnh thay thế.
+            m = re.search(re.escape(i['name']) + r'\s*\(([^)]+)\)',
+                           i['source']['textEvidence'])
+            if m:
+                y = f" ({m.group(1)})"
         return i['name'] + y
     if t == 'QUOTE':
         return '«' + i['quote'][:80] + ('…' if len(i['quote']) > 80 else '') + '»'
