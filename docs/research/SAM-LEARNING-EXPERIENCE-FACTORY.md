@@ -545,6 +545,62 @@ Khung: `GATE2-n01`…`GATE2-n06`.
 
 ---
 
+### C-013 · ✅ P0 K–12 — mở rộng giá sách 2 lớp → 12 lớp, ZERO trích xuất mới
+
+**Bối cảnh (Master Order K–12, 2026-09-04)**: `coverage_report.py` chạy lại cho thấy OCR đã phủ
+531/531 sách (100%, từ 8 sách baseline 2026-09-02) và Structure đã phủ 531/531 sách / 7.199 bài
+— nhưng `assets/pack/` (pack runtime đọc) chỉ có `lesson-index-g5.json` và `lesson-index-g10.json`.
+10 lớp còn lại (1,2,3,4,6,7,8,9,11,12) **không có bìa sách nào lên giá** (`book_shelf_screen.dart`
+đọc `index.books`, WAL-167: sách không có bìa trên máy thì không lên giá) — dù dữ liệu cấu trúc
+đã có sẵn cho toàn bộ 531 sách.
+
+**Giả thuyết**: hai công cụ đã có sẵn (`tool/ui/extract_covers.py` — WAL-167, tự động 100% từ
+trang 1 PDF, không cần người chấm; `tool/ui/build_lesson_index.py` — WAL-113/136, đọc thẳng
+`curriculum-structure.json`) đều **grade-parameterized và generic** — chưa từng chạy cho 10 lớp
+kia không phải vì thiếu khả năng, mà đơn giản là chưa ai chạy.
+
+**Kiểm chứng**: registry xác nhận cả 306 PDF SGK (lớp 1-12) đều có `path` hợp lệ trên máy này.
+Chạy `extract_covers.py <lớp>` + `build_lesson_index.py <lớp>` cho cả 10 lớp còn lại:
+
+| Lớp | Bìa trích | Bài (subjects) | Sách lên giá | Hoạt động đã nối |
+|---|---|---|---|---|
+| 1 | 11 | 181 | 7 | 0 |
+| 2 | 11 | 209 | 8 | 0 |
+| 3 | 23 | 298 | 14 | 0 |
+| 4 | 27 | 302 | 14 | 28 (26 bài Toán + 2 tư liệu Sử — ăn theo `poc-out/units` Toán-4 đã có sẵn) |
+| 6 | 17 | 195 | 13 | 0 |
+| 7 | 17 | 171 | 13 | 0 |
+| 8 | 17 | 200 | 14 | 0 |
+| 9 | 20 | 208 | 16 | 0 |
+| 11 | 46 | 557 | 42 | 0 |
+| 12 | 46 | 515 | 41 | 0 |
+
+Zero bìa bị bỏ (skip) trên cả 10 lớp. Tổng: giá sách 12 lớp cộng lại từ **56 → 258 cuốn**, tổng
+bài browsable từ **843 → 3.679**. Zero dòng Dart, zero LLM, zero trích xuất mới — thuần tuý chạy
+lại 2 script đã có trên dữ liệu structure đã có.
+
+**Xác minh Nokia thật** (không chỉ đếm số): tạo người học Lớp 3 mới trên máy → giá sách hiện
+đúng 9 bìa thật (Âm nhạc 3, Công nghệ 3, Đạo đức 3, GDTC 3, HĐTN 3, Tiếng Anh 3, Tiếng Hàn 3 ×2,
+Tiếng Việt 3) → mở Tiếng Việt 3 → danh sách bài hiện **tên bài thật mined từ mục lục SGK**
+(vd «Bài 3 · Nói và nghe: kể chuyện sự tích loài hoa của mùa hạ»), không phải placeholder →
+mỗi bài (chưa nối hoạt động) xuống đúng trạng thái honest fallback **đã có sẵn từ trước**
+(`_lessonTile`, `openable = acts.isNotEmpty` ⇒ tile mờ, "SAM đang học bài này — con chụp bài
+tập để học cùng nhé") — không crash, không bịa nội dung, không tap-target hỏng.
+
+**Không phải SCALABILITY FAILURE — là bằng chứng "shared pipeline" đúng nghĩa**: runtime
+(`LessonIndex.loadForGrade`, `main.dart:_loadLessonIndex`) đã 100% grade-agnostic từ trước (đọc
+`assets/pack/lesson-index-g$grade.json` theo `profile.grade`, fail-closed về `null` nếu thiếu
+file) — cổng nghẽn K–12 nằm hoàn toàn ở dữ liệu ĐÃ COMPILE, không ở kiến trúc app. Đây chính
+là ví dụ "FIX THE SHARED PIPELINE, NOT 8.000 LESSONS ONE BY ONE" — không phải vá runtime, chỉ
+chạy lại một compiler generic trên dữ liệu structure đã sẵn có.
+
+**Việc KHÔNG làm** (đúng ranh giới P0): không trích thêm content unit / semantic (Semantic vẫn
+kẹt ở 6/531 sách — Toán 4-5 + TV5 — không đổi qua case này); không tự chế hoạt động cho 10 lớp
+mới; không viết Dart mới. `assets/pack/*.json` + `covers/*.webp` là build artifact cục bộ
+(gitignored, `.gitignore` dòng `lesson-index-*.json`/`covers/*` — WAL-43/WAL-167), nên P0 này
+không có diff code để PR — bằng chứng ghi lại ở đây, script nguồn (`extract_covers.py`,
+`build_lesson_index.py`) không đổi dòng nào.
+
 ---
 
 ## 6. Trôi kiến trúc đang mở
