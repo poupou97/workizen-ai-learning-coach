@@ -1,0 +1,28 @@
+{
+ "book": "09-sgk-ngu-van-9-tap-mot", "page": 83, "printed_page": 82, "grade": 9, "subject": "Ngữ văn", "docType": "SGK",
+ "why": "Nói và nghe page: title, task heading, intro paragraph, section 1 whose body wraps beside a yellow box (Mục đích nói / Người nghe) — text lines shorten next to the box, '+' sub-questions, section 2 with '–' and '+' items",
+ "features": ["sidebar", "side_by_side", "colored_box", "text_wrap", "question_block"],
+ "lesson": {"number": 3, "title": "Bài 3 — Nói và nghe: Trình bày ý kiến về một vấn đề có tính thời sự trong đời sống của lứa tuổi học sinh hiện nay", "note": "Nói và nghe section of Bài 3"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.36, 0.09, 0.32, 0.05], "text": "Nói và nghe", "anchor": "Nói và nghe"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.11, 0.175, 0.81, 0.045], "text": "Trình bày ý kiến về một vấn đề có tính thời sự trong đời sống của lứa tuổi học sinh hiện nay", "anchor": "Trình bày ý kiến về một vấn đề"},
+  {"id": "b03", "order": 3, "role": "body", "bbox": [0.13, 0.23, 0.79, 0.08], "text": "Trong phần Viết, em đã được hướng dẫn và thực hành viết bài nghị luận về một vấn đề cần giải quyết của lứa tuổi học sinh trong cuộc sống hiện đại. Ở phần Nói và nghe, em hãy trình bày ý kiến về một vấn đề có tính thời sự trong đời sống của lứa tuổi học sinh hiện nay.", "anchor": "Trong phần Viết, em đã được", "contiguous": true},
+  {"id": "b04", "order": 4, "role": "heading", "bbox": [0.11, 0.325, 0.25, 0.025], "text": "1 TRƯỚC KHI NÓI", "anchor": "TRƯỚC KHI NÓI"},
+  {"id": "b05", "order": 5, "role": "body", "bbox": [0.13, 0.365, 0.44, 0.115], "text": "– Em có thể tìm đề tài từ thực tế đời sống của lứa tuổi học sinh, từ trải nghiệm cá nhân hoặc tham khảo một số vấn đề sau: sự xung đột giữa các thế hệ trong gia đình, bạo lực học đường, “ném đá” tập thể trên mạng xã hội, sử dụng ngôn ngữ dung tục trong giao tiếp với bạn bè,…", "anchor": "Em có thể tìm đề tài từ", "contiguous": true, "column": 1},
+  {"id": "b06", "order": 6, "role": "body", "bbox": [0.13, 0.49, 0.44, 0.04], "text": "– Em chuẩn bị nội dung bài nói bằng cách trả lời một số câu hỏi như:", "anchor": "Em chuẩn bị nội dung bài nói", "column": 1},
+  {"id": "b07", "order": 7, "role": "question", "bbox": [0.16, 0.54, 0.40, 0.02], "text": "+ Lí do lựa chọn vấn đề để trình bày là gì?", "anchor": "Lí do lựa chọn vấn đề"},
+  {"id": "b08", "order": 8, "role": "question", "bbox": [0.13, 0.565, 0.44, 0.06], "text": "+ Có thể dùng những lí lẽ, bằng chứng nào để thuyết phục người nghe đồng tình với ý kiến của mình về vấn đề được bàn luận?", "anchor": "Có thể dùng những lí lẽ", "contiguous": true},
+  {"id": "b09", "order": 9, "role": "question", "bbox": [0.16, 0.635, 0.52, 0.02], "text": "+ Cần đưa ra những hướng giải quyết nào cho vấn đề?", "anchor": "Cần đưa ra những hướng giải quyết"},
+  {"id": "b10", "order": 10, "role": "question", "bbox": [0.16, 0.66, 0.50, 0.02], "text": "+ Việc bàn luận về vấn đề có ý nghĩa như thế nào?", "anchor": "Việc bàn luận về vấn đề"},
+  {"id": "b11", "order": 11, "role": "sidebar", "bbox": [0.60, 0.365, 0.31, 0.20], "text": "Mục đích nói\nThuyết phục người nghe đồng tình với ý kiến của mình về cách giải quyết vấn đề; từ đó tác động đến nhận thức và hành động của người nghe.\nNgười nghe\nNhững người quan tâm đến các vấn đề có tính thời sự trong đời sống của lứa tuổi học sinh hiện nay.", "anchor": "Mục đích nói", "contiguous": true, "column": 2},
+  {"id": "b12", "order": 12, "role": "heading", "bbox": [0.11, 0.70, 0.27, 0.025], "text": "2 TRÌNH BÀY BÀI NÓI", "anchor": "TRÌNH BÀY BÀI NÓI"},
+  {"id": "b13", "order": 13, "role": "body", "bbox": [0.13, 0.74, 0.79, 0.045], "text": "– Mở đầu: giới thiệu vấn đề, có thể giới thiệu trực tiếp hoặc gián tiếp bằng cách chia sẻ một trải nghiệm cá nhân hay kể một câu chuyện.", "anchor": "Mở đầu: giới thiệu vấn đề", "contiguous": true},
+  {"id": "b14", "order": 14, "role": "body", "bbox": [0.13, 0.79, 0.15, 0.02], "text": "– Triển khai:", "anchor": "Triển khai"},
+  {"id": "b15", "order": 15, "role": "body", "bbox": [0.16, 0.815, 0.40, 0.02], "text": "+ Nêu ngắn gọn lí do lựa chọn vấn đề.", "anchor": "Nêu ngắn gọn lí do"},
+  {"id": "b16", "order": 16, "role": "body", "bbox": [0.13, 0.84, 0.79, 0.065], "text": "+ Trình bày ý kiến về vấn đề. Chú ý sử dụng các lí lẽ và bằng chứng làm cơ sở cho ý kiến của mình, ưu tiên những trải nghiệm cá nhân và những sự thật mà người nghe có thể kiểm chứng được.", "anchor": "Trình bày ý kiến về vấn đề. Chú ý", "contiguous": true},
+  {"id": "b17", "order": 17, "role": "page_number", "bbox": [0.11, 0.945, 0.03, 0.015], "text": "82", "anchor": "82"}
+ ],
+ "flex_groups": [["b11"]],
+ "critical": ["b11 box lines interleaved with b05–b08 = cross-column contamination (the original Ngữ văn class)", "b15/b16 (procedure) emitted as learner questions = instruction-as-question", "b02 heading emitted as the learner prompt = heading-as-question"]
+}

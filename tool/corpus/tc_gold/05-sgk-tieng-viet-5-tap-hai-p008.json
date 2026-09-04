@@ -1,0 +1,13 @@
+{
+ "book": "05-sgk-tieng-viet-5-tap-hai", "page": 8, "printed_page": 7, "grade": 5, "subject": "Tiếng Việt", "docType": "SGK",
+ "why": "WAL-206 gold: image-only chapter opener — a full-page illustration with one title in a cloud; a parser must emit exactly one heading and no body",
+ "features": ["sparse", "image_only", "color_heavy", "chapter_opener"],
+ "lesson": {"number": null, "title": "Chủ điểm: Vẻ đẹp cuộc sống", "note": "theme opener, not a lesson — any lesson attachment is wrong; safe outcome = no learning unit"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.20, 0.13, 0.60, 0.15], "text": "VẺ ĐẸP CUỘC SỐNG", "anchor": "VẺ ĐẸP CUỘC SỐNG"},
+  {"id": "b02", "order": 2, "role": "page_number", "bbox": [0.87, 0.925, 0.05, 0.03], "text": "7", "anchor": "7"}
+ ],
+ "flex_groups": [],
+ "critical": ["any body/question block invented on this page = fabricated content", "attaching this page to a numbered lesson = wrong lesson"]
+}

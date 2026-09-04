@@ -1,0 +1,26 @@
+{
+ "book": "03-sgk-toan-3-tap-mot", "page": 32, "printed_page": 31, "grade": 3, "subject": "Toán", "docType": "SGK",
+ "why": "grade-3 math lesson opener: picture situation with a speech-bubble question, chained formula boxes, two side-by-side tables (Bảng nhân 7 | Bảng chia 7) with '?' cells, a robot speech bubble beside the tables, exercise 1 as arrow diagrams (a/b rows × 3)",
+ "features": ["three_col", "table", "formula", "diagram", "speech_bubble", "colored_box", "lesson_start", "answer_slots"],
+ "lesson": {"number": 10, "title": "Bảng nhân 7, bảng chia 7", "note": "page is the lesson start (Bài 10)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.07, 0.06, 0.14, 0.05], "text": "Bài 10", "anchor": "Bài 10"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.28, 0.09, 0.55, 0.04], "text": "BẢNG NHÂN 7, BẢNG CHIA 7", "anchor": "BẢNG NHÂN 7, BẢNG CHIA 7"},
+  {"id": "b03", "order": 3, "role": "heading", "bbox": [0.16, 0.20, 0.14, 0.03], "text": "Khám phá", "anchor": "Khám phá"},
+  {"id": "b04", "order": 4, "role": "heading", "bbox": [0.14, 0.235, 0.03, 0.02], "text": "a)", "anchor": "a)"},
+  {"id": "b05", "order": 5, "role": "speech_bubble", "bbox": [0.70, 0.23, 0.20, 0.07], "text": "Mỗi đội chơi kéo co có 7 bạn. Hỏi 2 đội chơi kéo co có bao nhiêu bạn?", "anchor": "Mỗi đội chơi kéo co có 7 bạn", "contiguous": true, "notes": "the situation question (the learner's problem)"},
+  {"id": "b06", "order": 6, "role": "formula", "bbox": [0.22, 0.355, 0.35, 0.09], "text": "7 × 2 = ?\n7 + 7 = 14\n7 × 2 = 14 → 14 : 7 = 2", "anchor": "7 × 2 = ?", "formula": true},
+  {"id": "b07", "order": 7, "role": "heading", "bbox": [0.14, 0.455, 0.45, 0.02], "text": "b) Hoàn thành bảng nhân 7, bảng chia 7.", "anchor": "b) Hoàn thành bảng nhân 7", "notes": "instruction for the tables"},
+  {"id": "b08", "order": 8, "role": "table", "bbox": [0.38, 0.48, 0.16, 0.24], "text": null, "anchor": "Bảng nhân 7", "notes": "10 rows: 7 × 1 = 7; 7 × 2 = 14; 7 × 3 = ?; … 7 × 9 = ?; 7 × 10 = 70"},
+  {"id": "b09", "order": 9, "role": "table", "bbox": [0.62, 0.48, 0.16, 0.24], "text": null, "anchor": "Bảng chia 7", "notes": "10 rows: 7 : 7 = 1; 14 : 7 = 2; 21 : 7 = ?; … 63 : 7 = ?; 70 : 7 = 10"},
+  {"id": "b10", "order": 10, "role": "speech_bubble", "bbox": [0.15, 0.525, 0.20, 0.07], "text": "Thêm 7 vào kết quả của 7 × 2 ta được kết quả của 7 × 3.", "anchor": "Thêm 7 vào kết quả của", "contiguous": true, "notes": "robot hint beside the tables"},
+  {"id": "b11", "order": 11, "role": "heading", "bbox": [0.16, 0.755, 0.14, 0.03], "text": "hoạt động", "anchor": "hoạt động"},
+  {"id": "b12", "order": 12, "role": "question", "bbox": [0.11, 0.79, 0.12, 0.025], "text": "1. Số ?", "anchor": "Số ?", "notes": "exercise 1 stem: fill the number"},
+  {"id": "b13", "order": 13, "role": "diagram", "bbox": [0.14, 0.82, 0.72, 0.05], "text": null, "anchor": "a)", "notes": "row a): 7 ×5→ ? ; 7 ×6→ ? ; 7 ×9→ ?"},
+  {"id": "b14", "order": 14, "role": "diagram", "bbox": [0.14, 0.875, 0.72, 0.05], "text": null, "anchor": "b)", "notes": "row b): 35 :7→ ? ; 42 :7→ ? ; 63 :7→ ?"},
+  {"id": "b15", "order": 15, "role": "page_number", "bbox": [0.88, 0.945, 0.03, 0.015], "text": "31", "anchor": "31"}
+ ],
+ "flex_groups": [["b08", "b09", "b10"]],
+ "critical": ["the two tables interleaved row by row (7 × 1 = 7 7 : 7 = 1 …) = cross-column contamination of math facts", "'?' cells emitted as learner questions = answer-slot confusion", "× / : operators dropped or digits altered = corrupted math", "b10 hint spliced into a table = contamination"]
+}

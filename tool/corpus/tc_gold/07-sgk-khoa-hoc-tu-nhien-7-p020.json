@@ -1,0 +1,28 @@
+{
+ "book": "07-sgk-khoa-hoc-tu-nhien-7", "page": 20, "printed_page": 19, "grade": 7, "subject": "KHTN", "docType": "SGK",
+ "why": "WAL-206 gold: lesson opener, objectives box, pie-chart figure with labels, speech-bubble lead-in question, body, two photos with captions, sidebar box beside photos",
+ "features": ["sidebar", "figure", "diagram", "colored_box", "caption", "speech_bubble", "lesson_start"],
+ "lesson": {"number": 3, "title": "Nguyên tố hoá học", "note": "page is the lesson start (Bài 3 header)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.08, 0.06, 0.10, 0.04], "text": "Bài 3", "anchor": "Bài 3"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.25, 0.07, 0.40, 0.03], "text": "NGUYÊN TỐ HOÁ HỌC", "anchor": "NGUYÊN TỐ HOÁ HỌC"},
+  {"id": "b03", "order": 3, "role": "heading", "bbox": [0.30, 0.15, 0.07, 0.015], "text": "MỤC TIÊU", "anchor": "MỤC TIÊU"},
+  {"id": "b04", "order": 4, "role": "objective", "bbox": [0.27, 0.17, 0.55, 0.02], "text": "Phát biểu được khái niệm về nguyên tố hoá học và kí hiệu nguyên tố hoá học.", "anchor": "Phát biểu được khái niệm về"},
+  {"id": "b05", "order": 5, "role": "objective", "bbox": [0.27, 0.20, 0.48, 0.02], "text": "Viết được kí hiệu hoá học và đọc được tên của 20 nguyên tố đầu tiên.", "anchor": "Viết được kí hiệu hoá học"},
+  {"id": "b06", "order": 6, "role": "figure_label", "bbox": [0.10, 0.23, 0.24, 0.14], "text": null, "anchor": "Hydrogen 9,5%", "notes": "pie-chart labels: Hydrogen 9,5% · Nitrogen 3% · Các nguyên tố khác 4% · Carbon 18,5% · Oxygen 65% — must NOT become body text"},
+  {"id": "b07", "order": 7, "role": "caption", "bbox": [0.14, 0.37, 0.21, 0.015], "text": "Các nguyên tố tạo nên cơ thể người", "anchor": "Các nguyên tố tạo nên", "rel": {"caption_of": "b06"}},
+  {"id": "b08", "order": 8, "role": "question", "bbox": [0.50, 0.30, 0.38, 0.06], "text": "Oxygen, carbon, hydrogen, nitrogen,… là các nguyên tố hoá học tạo nên cơ thể người. Vậy nguyên tố hoá học là gì?", "anchor": "Oxygen, carbon, hydrogen, nitrogen", "notes": "speech-bubble lead-in (KHỞI ĐỘNG) — a learner question, not body"},
+  {"id": "b09", "order": 9, "role": "heading", "bbox": [0.10, 0.415, 0.27, 0.02], "text": "I – Nguyên tố hoá học", "anchor": "I – Nguyên tố hoá học"},
+  {"id": "b10", "order": 10, "role": "body", "bbox": [0.12, 0.44, 0.79, 0.095], "text": "Đến nay, người ta đã tìm ra 118 nguyên tố hoá học. Mỗi nguyên tố hoá học có tính chất riêng biệt do được tạo thành từ các nguyên tử có số proton xác định. Ví dụ: Một mẩu chì nguyên chất chỉ chứa các nguyên tử chì, mỗi nguyên tử chì có 82 proton trong hạt nhân. Một mẩu vàng nguyên chất chỉ chứa các nguyên tử vàng, mỗi nguyên tử vàng có 79 proton trong hạt nhân.", "anchor": "Đến nay, người ta đã tìm ra 118", "contiguous": true},
+  {"id": "b11", "order": 11, "role": "caption", "bbox": [0.21, 0.70, 0.06, 0.015], "text": "a) Vàng", "anchor": "a) Vàng"},
+  {"id": "b12", "order": 12, "role": "caption", "bbox": [0.46, 0.70, 0.05, 0.015], "text": "b) Chì", "anchor": "b) Chì"},
+  {"id": "b13", "order": 13, "role": "caption", "bbox": [0.21, 0.735, 0.32, 0.02], "text": "Hình 3.1 Một số mẫu chất nguyên chất", "anchor": "Hình 3.1 Một số mẫu"},
+  {"id": "b14", "order": 14, "role": "sidebar", "bbox": [0.64, 0.56, 0.25, 0.19], "text": "Ở Hy Lạp cổ đại, người ta tin rằng mọi thứ đều được tạo ra từ một hoặc nhiều “nguyên tố” là lửa, không khí, nước và đất. Còn ở Trung Hoa cổ đại, họ sử dụng năm “nguyên tố” đó là kim, mộc, thuỷ, hoả và thổ để giải thích các hiện tượng của thế giới tự nhiên.", "anchor": "Ở Hy Lạp cổ đại", "contiguous": true, "notes": "blue box with binoculars icon beside the photos — must never be spliced into b10/b15"},
+  {"id": "b15", "order": 15, "role": "body", "bbox": [0.12, 0.77, 0.79, 0.06], "text": "Các nguyên tử có cùng số proton trong hạt nhân đều thuộc cùng một nguyên tố hoá học. Số proton trong hạt nhân chính là số hiệu nguyên tử. Mỗi nguyên tố hoá học chỉ có duy nhất một số hiệu nguyên tử.", "anchor": "Các nguyên tử có cùng số proton", "contiguous": true},
+  {"id": "b16", "order": 16, "role": "body", "bbox": [0.12, 0.845, 0.79, 0.06], "text": "Các nguyên tử thuộc cùng một nguyên tố hoá học có thể có số neutron khác nhau. Ví dụ: Oxygen trong tự nhiên chứa các nguyên tử oxygen cùng có 8 proton trong hạt nhân nhưng có số neutron khác nhau (8 neutron, 9 neutron hoặc 10 neutron).", "anchor": "Các nguyên tử thuộc cùng một", "contiguous": true},
+  {"id": "b17", "order": 17, "role": "page_number", "bbox": [0.90, 0.955, 0.03, 0.015], "text": "19", "anchor": "19"}
+ ],
+ "flex_groups": [["b06", "b07", "b08"], ["b11", "b12", "b13"], ["b14"]],
+ "critical": ["b14 spliced into b10/b15 = cross-column contamination", "b06 labels emitted as body = corrupted science content", "b03/b09 emitted as learner question = heading-as-question"]
+}

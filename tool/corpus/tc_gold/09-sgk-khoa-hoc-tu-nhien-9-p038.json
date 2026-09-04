@@ -1,0 +1,30 @@
+{
+ "book": "09-sgk-khoa-hoc-tu-nhien-9", "page": 38, "printed_page": 37, "grade": 9, "subject": "KHTN", "docType": "SGK",
+ "why": "physics page: activity box (3 questions with figure references), question box whose item 1 wraps beside a 4-prism figure (Hình 7.7) and item 2 contains n = 1,41 and i₁ = 45°, section IV with 3 activity questions, body paragraphs, and a wide diagram (Hình 7.8) with in-figure labels + caption",
+ "features": ["diagram", "figure", "caption", "side_by_side", "colored_box", "question_block", "formula"],
+ "lesson": {"number": 7, "title": "Lăng kính (Bài 7)", "note": "figures 7.6–7.8 → Bài 7"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "activity", "bbox": [0.13, 0.08, 0.30, 0.02], "text": "Quan sát Hình 7.6 và cho biết:", "anchor": "Quan sát Hình 7.6 và cho biết"},
+  {"id": "b02", "order": 2, "role": "question", "bbox": [0.13, 0.10, 0.75, 0.045], "text": "1. Khi ánh sáng truyền từ không khí vào lăng kính, tại sao tia khúc xạ IJ lệch gần pháp tuyến hơn so với tia tới SI?", "anchor": "1. Khi ánh sáng truyền từ không khí vào", "contiguous": true},
+  {"id": "b03", "order": 3, "role": "question", "bbox": [0.13, 0.145, 0.75, 0.045], "text": "2. Khi ánh sáng truyền từ lăng kính ra không khí, tại sao tia khúc xạ JR lệch xa pháp tuyến hơn so với tia tới IJ?", "anchor": "2. Khi ánh sáng truyền từ lăng kính", "contiguous": true},
+  {"id": "b04", "order": 4, "role": "question", "bbox": [0.13, 0.185, 0.75, 0.065], "text": "3. Dựa vào sự truyền sáng qua lăng kính, hãy giải thích hiện tượng tán sắc ánh sáng. Biết rằng chiết suất của lăng kính đối với các ánh sáng đơn sắc khác nhau là khác nhau, chiết suất lớn nhất với tia tím, chiết suất nhỏ nhất với tia đỏ.", "anchor": "3. Dựa vào sự truyền sáng qua", "contiguous": true},
+  {"id": "b05", "order": 5, "role": "question", "bbox": [0.13, 0.27, 0.28, 0.07], "text": "1. Hình vẽ nào trong Hình 7.7 chỉ đúng đường đi của tia sáng qua lăng kính khi lăng kính đặt trong không khí?", "anchor": "1. Hình vẽ nào trong Hình 7.7", "contiguous": true, "rel": {"refers_figure": "b06"}, "notes": "narrow column beside the figure"},
+  {"id": "b06", "order": 6, "role": "figure_label", "bbox": [0.43, 0.265, 0.45, 0.08], "text": null, "anchor": "A", "notes": "four prisms labelled A B C D with ray paths — the answer is visual"},
+  {"id": "b07", "order": 7, "role": "caption", "bbox": [0.60, 0.35, 0.09, 0.02], "text": "Hình 7.7", "anchor": "Hình 7.7", "rel": {"caption_of": "b06"}},
+  {"id": "b08", "order": 8, "role": "question", "bbox": [0.13, 0.38, 0.75, 0.07], "text": null, "anchor": "2. Một lăng kính thuỷ tinh có chiết suất", "formula": true, "contiguous": true, "notes": "2. Một lăng kính thuỷ tinh có chiết suất n = 1,41. Mặt phẳng tiết diện chính của lăng kính là tam giác đều ABC. Chiếu một tia sáng nằm trong mặt phẳng tiết diện chính tới mặt bên AB của lăng kính với góc tới i₁ = 45°. Vẽ đường truyền của tia sáng qua lăng kính."},
+  {"id": "b09", "order": 9, "role": "heading", "bbox": [0.10, 0.475, 0.25, 0.02], "text": "IV – Màu sắc của vật", "anchor": "IV – Màu sắc của vật"},
+  {"id": "b10", "order": 10, "role": "question", "bbox": [0.13, 0.53, 0.60, 0.02], "text": "1. Nhớ lại kiến thức đã học, khi nào mắt ta nhìn thấy một vật?", "anchor": "1. Nhớ lại kiến thức đã học"},
+  {"id": "b11", "order": 11, "role": "question", "bbox": [0.13, 0.55, 0.75, 0.045], "text": "2. Khi chúng ta thấy các vật màu xanh, đỏ, trắng thì có ánh sáng màu nào truyền từ vật tới mắt ta?", "anchor": "2. Khi chúng ta thấy các vật màu", "contiguous": true},
+  {"id": "b12", "order": 12, "role": "question", "bbox": [0.13, 0.595, 0.65, 0.02], "text": "3. Ban đêm, khi không có nguồn sáng, ta nhìn thấy các vật có màu gì?", "anchor": "3. Ban đêm, khi không có nguồn sáng"},
+  {"id": "b13", "order": 13, "role": "body", "bbox": [0.13, 0.63, 0.78, 0.04], "text": "Màu sắc của một vật được nhìn thấy phụ thuộc vào màu sắc của ánh sáng bị vật đó hấp thụ và phản xạ.", "anchor": "Màu sắc của một vật được nhìn thấy", "contiguous": true},
+  {"id": "b14", "order": 14, "role": "body", "bbox": [0.13, 0.67, 0.78, 0.04], "text": "Dưới ánh sáng trắng, vật có màu nào là do nó phản xạ ánh sáng màu đó vào mắt ta và hấp thụ những màu còn lại.", "anchor": "Dưới ánh sáng trắng, vật có màu nào", "contiguous": true},
+  {"id": "b15", "order": 15, "role": "body", "bbox": [0.13, 0.71, 0.78, 0.04], "text": "Vật màu đen hấp thụ tất cả các ánh sáng màu và không có ánh sáng phản xạ. Ta nhận ra vật có màu đen vì nó được đặt bên cạnh những vật có màu sắc khác.", "anchor": "Vật màu đen hấp thụ tất cả", "contiguous": true},
+  {"id": "b16", "order": 16, "role": "body", "bbox": [0.13, 0.75, 0.70, 0.02], "text": "Sự nhìn thấy màu sắc của vật dưới ánh sáng trắng được minh hoạ ở Hình 7.8.", "anchor": "Sự nhìn thấy màu sắc của vật"},
+  {"id": "b17", "order": 17, "role": "figure_label", "bbox": [0.13, 0.775, 0.78, 0.13], "text": null, "anchor": "Ánh sáng trắng", "notes": "diagram labels: Ánh sáng trắng · Ánh sáng vàng · Bề mặt màu vàng · Ánh sáng trắng · Không có ánh sáng phản xạ · Bề mặt màu đen"},
+  {"id": "b18", "order": 18, "role": "caption", "bbox": [0.30, 0.915, 0.45, 0.02], "text": "Hình 7.8 Minh hoạ sự nhìn thấy màu sắc của các bề mặt", "anchor": "Hình 7.8 Minh hoạ sự nhìn thấy", "rel": {"caption_of": "b17"}},
+  {"id": "b19", "order": 19, "role": "page_number", "bbox": [0.88, 0.945, 0.03, 0.015], "text": "37", "anchor": "37"}
+ ],
+ "flex_groups": [["b06", "b07"]],
+ "critical": ["b05 lines interleaved with the prism labels A B C D = contamination", "figure labels (b17) emitted as body sentences = fabricated physics statements", "'n = 1,41', 'i₁ = 45°' altered = corrupted physics data", "b05/b06 question asked without the figure = figure-dependent question presented as text-only"]
+}

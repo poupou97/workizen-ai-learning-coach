@@ -1,0 +1,28 @@
+{
+ "book": "02-sgk-tieng-viet-2-tap-mot", "page": 103, "printed_page": 102, "grade": 2, "subject": "Tiếng Việt", "docType": "SGK",
+ "why": "grade-2 literacy page: reading text CONTINUED from the previous page, first paragraph wraps beside an illustration, attribution, glossary, 4 comprehension questions, a sentence-completion exercise with a/b/c/d blanks '(…)', a model answer 'M:', VIẾT section with a handwriting model (letter M in a grid) and an application sentence in blue script",
+ "features": ["continuation", "figure", "text_wrap", "question_block", "answer_model", "handwriting_model"],
+ "lesson": {"number": 23, "title": "Bài 23 — Rồng rắn lên mây", "note": "reading 'Rồng rắn lên mây' = Bài 23 (Tuần 12) of tập một; page continues the lesson"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "body", "bbox": [0.14, 0.06, 0.30, 0.115], "text": "Nếu thầy nói “không” thì rồng rắn đi tiếp. Nếu thầy nói “có” thì rồng rắn hỏi xin thuốc cho con và đồng ý cho thầy bắt khúc đuôi.", "anchor": "Nếu thầy nói “không” thì", "contiguous": true, "notes": "continuation of the reading; narrow lines beside the picture"},
+  {"id": "b02", "order": 2, "role": "body", "bbox": [0.14, 0.19, 0.76, 0.09], "text": "Thầy thuốc tìm cách bắt khúc đuôi. Bạn làm đầu dang tay cản thầy thuốc, bạn làm đuôi tìm cách tránh thầy. Nếu bạn khúc đuôi để thầy bắt được thì đổi vai làm thầy thuốc. Nếu bạn khúc giữa để đứt thì đổi vai làm đuôi. Trò chơi cứ thế tiếp tục.", "anchor": "Thầy thuốc tìm cách bắt khúc đuôi", "contiguous": true},
+  {"id": "b03", "order": 3, "role": "attribution", "bbox": [0.70, 0.285, 0.20, 0.02], "text": "(Vũ Thanh tổng hợp)", "anchor": "(Vũ Thanh tổng hợp)"},
+  {"id": "b04", "order": 4, "role": "heading", "bbox": [0.14, 0.315, 0.09, 0.02], "text": "Từ ngữ", "anchor": "Từ ngữ"},
+  {"id": "b05", "order": 5, "role": "footnote", "bbox": [0.14, 0.34, 0.72, 0.05], "text": "– Cây núc nác: một loại cây to, quả dài, vỏ và hạt dùng làm thuốc.\n– Cản: ngăn lại, giữ lại.", "anchor": "Cây núc nác: một loại cây to", "contiguous": true},
+  {"id": "b06", "order": 6, "role": "question", "bbox": [0.14, 0.42, 0.62, 0.02], "text": "1. Những người chơi làm thành rồng rắn bằng cách nào?", "anchor": "1. Những người chơi làm thành"},
+  {"id": "b07", "order": 7, "role": "question", "bbox": [0.14, 0.45, 0.50, 0.02], "text": "2. Rồng rắn đến gặp thầy thuốc để làm gì?", "anchor": "2. Rồng rắn đến gặp thầy thuốc"},
+  {"id": "b08", "order": 8, "role": "question", "bbox": [0.14, 0.48, 0.50, 0.02], "text": "3. Chuyện gì xảy ra nếu khúc đuôi bị thầy bắt?", "anchor": "3. Chuyện gì xảy ra nếu"},
+  {"id": "b09", "order": 9, "role": "question", "bbox": [0.14, 0.51, 0.56, 0.02], "text": "4. Nếu bạn khúc giữa bị đứt thì bạn đó phải làm gì?", "anchor": "4. Nếu bạn khúc giữa bị đứt"},
+  {"id": "b10", "order": 10, "role": "question", "bbox": [0.14, 0.56, 0.60, 0.13], "text": "1. Nói tiếp để hoàn thành câu:\na. Nếu thầy nói “không” thì (…).\nb. Nếu thầy nói “có” thì (…).\nc. Nếu bạn khúc đuôi để thầy bắt được thì (…).\nd. Nếu bạn khúc giữa để đứt thì (…).", "anchor": "1. Nói tiếp để hoàn thành câu", "contiguous": true, "notes": "'(…)' are blanks — must not be dropped or filled"},
+  {"id": "b11", "order": 11, "role": "question", "bbox": [0.14, 0.715, 0.45, 0.02], "text": "2. Đặt một câu nói về trò chơi em thích.", "anchor": "2. Đặt một câu nói về trò chơi"},
+  {"id": "b12", "order": 12, "role": "answer", "bbox": [0.16, 0.745, 0.50, 0.02], "text": "M: Rồng rắn lên mây là một trò chơi vui nhộn.", "anchor": "M: Rồng rắn lên mây là", "rel": {"answer_of": "b11"}, "notes": "model answer (M = mẫu)"},
+  {"id": "b13", "order": 13, "role": "heading", "bbox": [0.08, 0.79, 0.11, 0.04], "text": "VIẾT", "anchor": "VIẾT"},
+  {"id": "b14", "order": 14, "role": "question", "bbox": [0.11, 0.86, 0.20, 0.02], "text": "1. Viết chữ hoa:", "anchor": "1. Viết chữ hoa", "notes": "followed by the letter M handwriting model (image with stroke numbers 1–4)"},
+  {"id": "b15", "order": 15, "role": "figure_label", "bbox": [0.31, 0.815, 0.18, 0.075], "text": null, "anchor": "M", "notes": "handwriting grid: cursive M with stroke order numbers — must not become text '2 4 1 3'"},
+  {"id": "b16", "order": 16, "role": "question", "bbox": [0.11, 0.895, 0.55, 0.025], "text": "2. Viết ứng dụng: Một con ngựa đau cả tàu bỏ cỏ.", "anchor": "2. Viết ứng dụng: Một con ngựa", "notes": "the sentence in blue script is the dictation/copy target"},
+  {"id": "b17", "order": 17, "role": "page_number", "bbox": [0.08, 0.93, 0.05, 0.02], "text": "102", "anchor": "102"}
+ ],
+ "flex_groups": [],
+ "critical": ["b12 model answer emitted as a learner question = answer-as-question", "b01 presented as the start of the reading = cross-page fragment presented as whole", "stroke numbers (b15) emitted as text = fabricated content", "'(…)' blanks dropped = exercise destroyed"]
+}

@@ -1,0 +1,16 @@
+{
+ "book": "07-sgv-toan-7", "page": 43, "printed_page": 42, "grade": 7, "subject": "Toán", "docType": "SGV",
+ "why": "SGV (teacher guide) page: two 3-column tables (CẤU PHẦN | MỤC ĐÍCH, YÊU CẦU | GỢI Ý THỰC HIỆN, ĐÁP ÁN) under numbered section headings with durations — the SGV structure that SGK↔SGV pairing depends on (section names Tìm tòi – Khám phá / Ví dụ 3 / Luyện tập 3 / Ví dụ 4 map to SGK activity labels)",
+ "features": ["two_col", "table", "sgv", "teacher_guide"],
+ "lesson": {"number": 6, "title": "Bài 6. Luỹ thừa với số mũ tự nhiên của một số hữu tỉ (SGV plan)", "note": "SGV lesson plan for SGK Toán 7 Bài 6 (sections 2 'Nhân và chia hai luỹ thừa cùng cơ số' and 3 'Luỹ thừa của luỹ thừa'); the SGV TOC is not mapped in curriculum-structure — lesson association must come from the printed heading"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.13, 0.075, 0.62, 0.02], "text": "2. NHÂN VÀ CHIA HAI LUỸ THỪA CÙNG CƠ SỐ (30 PHÚT)", "anchor": "2. NHÂN VÀ CHIA HAI LUỸ THỪA"},
+  {"id": "b02", "order": 2, "role": "table", "bbox": [0.08, 0.105, 0.85, 0.42], "text": null, "anchor": "CẤU PHẦN", "notes": "3 columns × 3 rows. Row 1: Tìm tòi – Khám phá / Cách tính nhân và chia hai luỹ thừa cùng cơ số | Hình thành cách tính nhân, chia hai luỹ thừa cùng cơ số. | – GV tổ chức cho HS thực hiện HĐ4. – GV có thể cho thêm một số ví dụ khác nhằm mục đích giúp HS nhận ra quy tắc tính. – GV trình bày nội dung kiến thức trong hộp kiến thức. Row 2: Ví dụ 3 | Củng cố, cung cấp lời giải mẫu cho HS về bài toán nhân và chia của hai luỹ thừa cùng cơ số. | – GV trình bày mẫu cho HS. – GV có thể cho thêm các ví dụ về phép nhân, chia hai luỹ thừa cùng cơ số với số thập phân. Row 3: Luyện tập 3 | Củng cố phép tính nhân và chia hai luỹ thừa cùng cơ số. | – HS tự làm và GV yêu cầu hai HS lên bảng trình bày. – GV có thể cho thêm ví dụ giống Ví dụ 3 liên quan đến luỹ thừa với số mũ 0 và các ví dụ liên quan đến phân số."},
+  {"id": "b03", "order": 3, "role": "heading", "bbox": [0.13, 0.545, 0.42, 0.02], "text": "3. LUỸ THỪA CỦA LUỸ THỪA (30 PHÚT)", "anchor": "3. LUỸ THỪA CỦA LUỸ THỪA"},
+  {"id": "b04", "order": 4, "role": "table", "bbox": [0.08, 0.57, 0.85, 0.30], "text": null, "anchor": "CẤU PHẦN", "notes": "3 columns × 2 rows. Row 1: Tìm tòi – Khám phá / Tính luỹ thừa của luỹ thừa | Hình thành công thức tính luỹ thừa của luỹ thừa. | – GV cho HS thực hiện HĐ5. – GV có thể cho thêm vài ví dụ tương tự với số thập phân; phân số. – GV dẫn dắt HS nhận ra công thức tính luỹ thừa của luỹ thừa. Yêu cầu HS đọc công thức trong hộp kiến thức. – GV nhấn mạnh công thức trong hộp kiến thức. Row 2: Ví dụ 4 | Củng cố, cung cấp lời giải mẫu cho HS về việc tính luỹ thừa của luỹ thừa. | GV hướng dẫn HS tự đọc."},
+  {"id": "b05", "order": 5, "role": "page_number", "bbox": [0.10, 0.935, 0.04, 0.02], "text": "42", "anchor": "42"}
+ ],
+ "flex_groups": [],
+ "critical": ["table cells read column-wise or row cells interleaved = teacher guidance attached to the wrong activity (wrong SGV pairing)", "SGV guidance ('GV tổ chức cho HS…') emitted as learner content = teacher text leaked to the child", "column 3 (ĐÁP ÁN) merged with column 2 = answer/objective confusion"]
+}

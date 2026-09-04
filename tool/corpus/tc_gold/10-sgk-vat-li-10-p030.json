@@ -1,0 +1,32 @@
+{
+ "book": "10-sgk-vat-li-10", "page": 30, "printed_page": 29, "grade": 10, "subject": "Vật lí", "docType": "SGK",
+ "why": "WAL-206 gold: worked example with vector formulas beside a figure, question box, two side-by-side summary boxes (EM ĐÃ HỌC | EM CÓ THỂ)",
+ "features": ["formula", "figure", "caption", "side_by_side", "colored_box", "question_block"],
+ "lesson": {"number": 5, "title": "Tốc độ và vận tốc", "note": "figure Hình 5.4 and running head CHƯƠNG II; page is inside lesson 5 (lesson end)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "running_head", "bbox": [0.72, 0.05, 0.19, 0.015], "text": "CHƯƠNG II – ĐỘNG HỌC", "anchor": "CHƯƠNG II – ĐỘNG HỌC"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.10, 0.09, 0.42, 0.02], "text": "b) Tổng hợp hai vận tốc vuông góc với nhau", "anchor": "b) Tổng hợp hai vận tốc"},
+  {"id": "b03", "order": 3, "role": "body", "bbox": [0.13, 0.11, 0.53, 0.09], "text": "Bài tập ví dụ: Một ca nô chạy trong hồ nước yên lặng có vận tốc tối đa 18 km/h. Nếu ca nô chạy ngang một con sông có dòng chảy theo hướng bắc – nam với vận tốc lên tới 5 m/s thì vận tốc tối đa nó có thể đạt được so với bờ sông là bao nhiêu và theo hướng nào?", "anchor": "Bài tập ví dụ: Một ca nô", "contiguous": true},
+  {"id": "b04", "order": 4, "role": "heading", "bbox": [0.36, 0.21, 0.04, 0.015], "text": "Giải", "anchor": "Giải"},
+  {"id": "b05", "order": 5, "role": "body", "bbox": [0.13, 0.23, 0.53, 0.07], "text": null, "anchor": "Gọi vận tốc của ca nô", "formula": true, "notes": "prose + vector formulas: v⃗1,3 = v⃗1,2 + v⃗2,3; v1,3 = √(v1,2² + v2,3²) = √(5² + 5²) = 7,07 m/s — a parser that drops the subscripts/√ corrupts physics content"},
+  {"id": "b06", "order": 6, "role": "figure_label", "bbox": [0.69, 0.09, 0.22, 0.19], "text": null, "anchor": "v1,2", "notes": "vector diagram labels A, B, C, v⃗1,2, v⃗2,3, v⃗1,3 and compass T/Đ/B/N"},
+  {"id": "b07", "order": 7, "role": "caption", "bbox": [0.74, 0.28, 0.06, 0.015], "text": "Hình 5.4", "anchor": "Hình 5.4", "rel": {"caption_of": "b06"}},
+  {"id": "b08", "order": 8, "role": "body", "bbox": [0.13, 0.31, 0.78, 0.04], "text": "Vì AB = BC nên ΔABC là tam giác vuông cân và BAC = 45°. Hướng của vận tốc nghiêng 45° theo hướng đông – nam (Hình 5.4).", "anchor": "Vì AB = BC nên", "formula": true},
+  {"id": "b09", "order": 9, "role": "question", "bbox": [0.14, 0.375, 0.76, 0.04], "text": "1. Một máy bay đang bay theo hướng bắc với vận tốc 200 m/s thì bị gió từ hướng tây thổi vào với vận tốc 20 m/s. Xác định vận tốc tổng hợp của máy bay lúc này.", "anchor": "1. Một máy bay đang bay", "contiguous": true},
+  {"id": "b10", "order": 10, "role": "question", "bbox": [0.14, 0.41, 0.76, 0.09], "text": "2. Một người lái máy bay thể thao đang tập bay ngang. Khi bay từ A đến B thì vận tốc tổng hợp của máy bay là 15 m/s theo hướng đông – bắc và vận tốc của gió là 7,5 m/s theo hướng bắc. Hãy chứng minh rằng khi bay từ A đến B thì người lái phải luôn hướng máy bay về hướng đông.", "anchor": "2. Một người lái máy bay", "contiguous": true},
+  {"id": "b11", "order": 11, "role": "heading", "bbox": [0.15, 0.535, 0.13, 0.02], "text": "EM ĐÃ HỌC", "anchor": "EM ĐÃ HỌC"},
+  {"id": "b12", "order": 12, "role": "body", "bbox": [0.15, 0.555, 0.50, 0.05], "text": null, "anchor": "Tốc độ trung bình", "formula": true},
+  {"id": "b13", "order": 13, "role": "body", "bbox": [0.15, 0.61, 0.50, 0.05], "text": null, "anchor": "Tốc độ tức thời là tốc độ", "formula": true},
+  {"id": "b14", "order": 14, "role": "body", "bbox": [0.15, 0.665, 0.50, 0.07], "text": null, "anchor": "Vận tốc trung bình trên một", "formula": true},
+  {"id": "b15", "order": 15, "role": "body", "bbox": [0.15, 0.74, 0.50, 0.06], "text": null, "anchor": "Vận tốc tức thời là vận tốc", "formula": true},
+  {"id": "b16", "order": 16, "role": "body", "bbox": [0.15, 0.80, 0.50, 0.04], "text": "Khi vật chuyển động thẳng theo một hướng thì tốc độ và vận tốc có độ lớn bằng nhau: v = v.", "anchor": "Khi vật chuyển động thẳng"},
+  {"id": "b17", "order": 17, "role": "body", "bbox": [0.15, 0.835, 0.50, 0.075], "text": null, "anchor": "Công thức cộng vận tốc", "formula": true, "notes": "Trong đó v⃗1,2 là vận tốc của vật (1) đối với vật (2); v⃗2,3 là vận tốc của vật (2) so với vật (3) đứng yên; v⃗1,3 (vận tốc tổng hợp của vật) là vận tốc của vật (1) đối với vật (3)."},
+  {"id": "b18", "order": 18, "role": "heading", "bbox": [0.69, 0.535, 0.12, 0.02], "text": "EM CÓ THỂ", "anchor": "EM CÓ THỂ"},
+  {"id": "b19", "order": 19, "role": "sidebar", "bbox": [0.69, 0.56, 0.22, 0.06], "text": "1. Tự xác định được tốc độ chuyển động của mình trong một số trường hợp đơn giản.", "anchor": "1. Tự xác định được tốc độ", "contiguous": true},
+  {"id": "b20", "order": 20, "role": "sidebar", "bbox": [0.69, 0.63, 0.22, 0.07], "text": "2. Sử dụng đúng các thuật ngữ tốc độ và vận tốc trong các tình huống khác nhau.", "anchor": "2. Sử dụng đúng các thuật ngữ", "contiguous": true},
+  {"id": "b21", "order": 21, "role": "page_number", "bbox": [0.90, 0.94, 0.03, 0.015], "text": "29", "anchor": "29"}
+ ],
+ "flex_groups": [["b11", "b12", "b13", "b14", "b15", "b16", "b17"], ["b18", "b19", "b20"]],
+ "critical": ["EM ĐÃ HỌC bullets interleaved line-by-line with EM CÓ THỂ items = cross-column contamination (the WAL-204 failure class)", "b19/b20 (what the learner CAN do) emitted as learner questions = answer/objective-as-question", "formula subscripts/√ dropped in b05/b12–b17 = corrupted physics content"]
+}

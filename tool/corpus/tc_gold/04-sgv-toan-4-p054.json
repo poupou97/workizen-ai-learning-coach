@@ -1,0 +1,27 @@
+{
+ "book": "04-sgv-toan-4", "page": 54, "printed_page": 53, "grade": 4, "subject": "Toán", "docType": "SGV",
+ "why": "SGV page: teacher plan with two flow diagrams (3 boxes + arrows), dash bullets containing quoted teacher questions, per-exercise guidance (Bài 1/2/3 with model answers in quotes), a Lưu ý, then 'Tiết 2' heading starting a new period — teacher text that must never be shown to a child as content",
+ "features": ["diagram", "sgv", "teacher_guide", "answer_key", "continuation"],
+ "lesson": {"number": 11, "title": "Bài 11. Hàng và lớp (SGV plan, Tiết 1 → Tiết 2 Triệu và lớp triệu)", "note": "SGV for SGK Toán 4 Bài 11; page spans the end of Tiết 1 and the start of Tiết 2"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.10, 0.065, 0.14, 0.02], "text": "1. Khám phá", "anchor": "1. Khám phá"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.13, 0.095, 0.13, 0.02], "text": "Cách tiếp cận:", "anchor": "Cách tiếp cận"},
+  {"id": "b03", "order": 3, "role": "diagram", "bbox": [0.13, 0.115, 0.78, 0.065], "text": "Tình huống thực tế → Hình thành ý niệm về lớp nghìn, lớp đơn vị và các hàng tương ứng → Vận dụng, thực hành", "anchor": "Tình huống thực tế", "notes": "3-box flow diagram"},
+  {"id": "b04", "order": 4, "role": "body", "bbox": [0.13, 0.19, 0.78, 0.09], "text": "– Đầu tiên, GV vẽ lên bảng một mô hình đơn giản như trong phần khám phá. GV đặt câu hỏi: “Số đã cho gồm mấy trăm nghìn?”, “Chữ số 4 trong số đã cho có giá trị bằng bao nhiêu đơn vị?”,… Sau đó, GV giới thiệu tên gọi của các hàng đơn vị, hàng chục, hàng trăm, hàng nghìn,… Cuối cùng kết luận về lớp đơn vị và lớp nghìn.", "anchor": "Đầu tiên, GV vẽ lên bảng", "contiguous": true, "notes": "teacher guidance containing QUOTED questions — the quotes are teacher prompts, not SGK learner questions"},
+  {"id": "b05", "order": 5, "role": "body", "bbox": [0.13, 0.285, 0.78, 0.02], "text": "– GV có thể vẽ lên bảng một mô hình mới và yêu cầu HS trả lời các câu hỏi tương tự.", "anchor": "GV có thể vẽ lên bảng"},
+  {"id": "b06", "order": 6, "role": "heading", "bbox": [0.10, 0.32, 0.14, 0.02], "text": "2. Hoạt động", "anchor": "2. Hoạt động"},
+  {"id": "b07", "order": 7, "role": "answer", "bbox": [0.13, 0.35, 0.78, 0.10], "text": "Bài 1: Bài tập này giúp HS củng cố kiến thức mới về hàng, lớp.\nGV có thể in bảng ra một phiếu để HS điền số vào trong bảng, hoàn thành bài tập. Hoặc GV có thể đặt câu hỏi để HS nêu câu trả lời như: “Số 377 931 có chữ số hàng chục nghìn là chữ số nào?”, “Số gồm 9 chục nghìn, 2 nghìn, 3 trăm, 4 chục và 0 đơn vị là số nào?”,…", "anchor": "Bài 1: Bài tập này giúp HS", "contiguous": true, "rel": {"answer_of": "SGK Bài 11 exercise 1"}, "notes": "SGV guidance for SGK exercise 1 (pairing key = 'Bài 1' inside Bài 11)"},
+  {"id": "b08", "order": 8, "role": "answer", "bbox": [0.13, 0.465, 0.78, 0.09], "text": "Bài 2: Bài tập giúp HS củng cố cách đọc số, hàng và lớp.\nGV yêu cầu HS viết cách đọc của mỗi số tương ứng vào vở và ghi hàng, lớp tương ứng của chữ số 3. Ví dụ: “Một trăm bảy mươi hai nghìn chín trăm ba mươi tám. Chữ số 3 thuộc hàng chục, lớp đơn vị.”.", "anchor": "Bài 2: Bài tập giúp HS củng cố", "contiguous": true, "rel": {"answer_of": "SGK Bài 11 exercise 2"}, "notes": "contains a MODEL ANSWER (reading of 172 938)"},
+  {"id": "b09", "order": 9, "role": "answer", "bbox": [0.13, 0.565, 0.78, 0.07], "text": "Bài 3: Bài tập giúp HS củng cố kiến thức về cấu tạo số.\nGV yêu cầu HS tự hoàn thành vào vở bằng cách viết đáp án tương ứng với mỗi số đã cho.", "anchor": "Bài 3: Bài tập giúp HS củng cố", "contiguous": true, "rel": {"answer_of": "SGK Bài 11 exercise 3"}},
+  {"id": "b10", "order": 10, "role": "sidebar", "bbox": [0.13, 0.645, 0.72, 0.02], "text": "Lưu ý: Cuối tiết học, GV cho HS củng cố (như yêu cầu đã nêu ở đầu tiết học).", "anchor": "Lưu ý: Cuối tiết học"},
+  {"id": "b11", "order": 11, "role": "heading", "bbox": [0.10, 0.685, 0.30, 0.025], "text": "Tiết 2. Triệu và lớp triệu", "anchor": "Tiết 2. Triệu và lớp triệu"},
+  {"id": "b12", "order": 12, "role": "objective", "bbox": [0.13, 0.72, 0.78, 0.045], "text": "Yêu cầu chủ yếu của tiết học: HS nhận biết, đọc và viết số tròn chục triệu, trăm triệu. HS nhận biết được lớp triệu và các hàng tương ứng.", "anchor": "Yêu cầu chủ yếu của tiết học", "contiguous": true},
+  {"id": "b13", "order": 13, "role": "heading", "bbox": [0.10, 0.775, 0.14, 0.02], "text": "1. Khám phá", "anchor": "1. Khám phá"},
+  {"id": "b14", "order": 14, "role": "heading", "bbox": [0.13, 0.805, 0.13, 0.02], "text": "Cách tiếp cận:", "anchor": "Cách tiếp cận"},
+  {"id": "b15", "order": 15, "role": "diagram", "bbox": [0.12, 0.825, 0.78, 0.065], "text": "Tình huống thực tế → Hình thành ý niệm về lớp triệu, số tròn triệu, chục triệu và trăm triệu → Vận dụng, thực hành", "anchor": "Tình huống thực tế", "notes": "second 3-box flow diagram"},
+  {"id": "b16", "order": 16, "role": "page_number", "bbox": [0.88, 0.935, 0.04, 0.02], "text": "53", "anchor": "53"}
+ ],
+ "flex_groups": [],
+ "critical": ["quoted teacher questions in b04/b07 extracted as SGK learner questions = teacher-prompt-as-question (wrong source attribution SGV→SGK)", "b08 model answer shown to the learner before answering = answer leaked", "Tiết 2 content (b11–b15) attached to Tiết 1 / Bài 1 exercises = wrong pairing", "flow-diagram boxes read as a sentence without arrows = meaning-changing reading order"]
+}

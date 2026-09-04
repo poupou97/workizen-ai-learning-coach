@@ -1,0 +1,31 @@
+{
+ "book": "10-sgv-tin-hoc-10", "page": 39, "printed_page": 38, "grade": 10, "subject": "Tin học", "docType": "SGV",
+ "why": "SGV page where one lesson ENDS mid-page (Bài 4 answer explanation with a binary-addition table) and the next lesson STARTS (Bài 5. DỮ LIỆU LÔGIC: objectives in three groups, Khởi động) — the lesson boundary is inside the page",
+ "features": ["table", "formula", "sgv", "lesson_boundary_midpage", "objective"],
+ "lesson": {"number": null, "title": "top: Bài 4 (mã bù 2) · bottom: Bài 5. Dữ liệu lôgic", "note": "two lessons on one page; blocks b01–b09 belong to Bài 4, b10–b19 to Bài 5 — a page-level lesson attachment is WRONG for one half"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.13, 0.075, 0.20, 0.02], "text": "2. Tìm hiểu mã bù 2.", "anchor": "2. Tìm hiểu mã bù 2", "lesson": 4},
+  {"id": "b02", "order": 2, "role": "body", "bbox": [0.09, 0.10, 0.83, 0.045], "text": "Việc sử dụng mã bù 1 hay bù 2 cho phép quy phép cộng các số có dấu (phép cộng đại số, bao hàm cả phép trừ) về phép cộng các số nguyên dương.", "anchor": "Việc sử dụng mã bù 1 hay bù 2", "contiguous": true, "lesson": 4},
+  {"id": "b03", "order": 3, "role": "body", "bbox": [0.13, 0.145, 0.50, 0.02], "text": "Phép cộng hai mã bù 2 được tiến hành như sau:", "anchor": "Phép cộng hai mã bù 2 được", "lesson": 4},
+  {"id": "b04", "order": 4, "role": "body", "bbox": [0.09, 0.17, 0.83, 0.045], "text": "Ta coi mã bù 2 của một số kể cả dấu như một số nguyên và cộng bình thường. Nếu kết quả có nhớ ở hàng tận cùng bên phải (hàng dấu) thì bỏ số nhớ đi.", "anchor": "Ta coi mã bù 2 của một số", "contiguous": true, "lesson": 4},
+  {"id": "b05", "order": 5, "role": "body", "bbox": [0.13, 0.215, 0.78, 0.02], "text": "Ta có tính chất sau: tổng của phép cộng mã bù 2 của hai số chính là mã bù 2 của tổng.", "anchor": "Ta có tính chất sau", "lesson": 4},
+  {"id": "b06", "order": 6, "role": "formula", "bbox": [0.13, 0.24, 0.35, 0.02], "text": "Ví dụ: 5 – 7 = 5 + (–7) = –2.", "anchor": "Ví dụ: 5 – 7 =", "formula": true, "lesson": 4},
+  {"id": "b07", "order": 7, "role": "body", "bbox": [0.09, 0.265, 0.83, 0.045], "text": "Nếu biểu diễn số trong 1 byte với 1 bit dấu và 7 bit cho giá trị của số, mã bù 2 của 5 là 00000101, mã bù 2 của – 7 là 11111001.", "anchor": "Nếu biểu diễn số trong 1 byte", "contiguous": true, "lesson": 4},
+  {"id": "b08", "order": 8, "role": "table", "bbox": [0.14, 0.31, 0.52, 0.08], "text": "+ | 0 0 0 0 0 1 0 1\n  | 1 1 1 1 1 0 0 1\n  = 1 1 1 1 1 1 1 0", "anchor": "0 0 0 0 0 1 0 1", "formula": true, "lesson": 4, "notes": "binary addition laid out as an 8-column grid; row order is meaning-bearing"},
+  {"id": "b09", "order": 9, "role": "body", "bbox": [0.13, 0.405, 0.83, 0.065], "text": "11111110 chính là mã bù 2 của –2.\nVì vậy để cộng đại số, ta chỉ cần trên mã bù 2 giống như cộng 2 số nguyên dương, chỉ khác một điều rằng nếu xuất hiện số nhớ ở hàng dấu thì bỏ đi.", "anchor": "11111110 chính là mã bù 2", "contiguous": true, "lesson": 4},
+  {"id": "b10", "order": 10, "role": "heading", "bbox": [0.09, 0.535, 0.30, 0.025], "text": "Bài 5. DỮ LIỆU LÔGIC", "anchor": "Bài 5. DỮ LIỆU LÔGIC", "lesson": 5},
+  {"id": "b11", "order": 11, "role": "heading", "bbox": [0.13, 0.59, 0.45, 0.02], "text": "MỤC TIÊU CẦN ĐẠT ĐƯỢC ĐỐI VỚI HỌC SINH", "anchor": "MỤC TIÊU CẦN ĐẠT ĐƯỢC", "lesson": 5},
+  {"id": "b12", "order": 12, "role": "heading", "bbox": [0.13, 0.62, 0.15, 0.02], "text": "1. KIẾN THỨC", "anchor": "1. KIẾN THỨC", "lesson": 5},
+  {"id": "b13", "order": 13, "role": "objective", "bbox": [0.13, 0.645, 0.70, 0.04], "text": "– Biết được giá trị chân lí và các phép toán lôgic AND, OR, XOR, NOT.\n– Biết được biểu diễn dữ liệu lôgic.", "anchor": "Biết được giá trị chân lí", "lesson": 5},
+  {"id": "b14", "order": 14, "role": "heading", "bbox": [0.13, 0.695, 0.12, 0.02], "text": "2. KĨ NĂNG", "anchor": "2. KĨ NĂNG", "lesson": 5},
+  {"id": "b15", "order": 15, "role": "objective", "bbox": [0.13, 0.72, 0.50, 0.02], "text": "– Thực hiện được một số phép toán lôgic đơn giản.", "anchor": "Thực hiện được một số phép toán", "lesson": 5},
+  {"id": "b16", "order": 16, "role": "heading", "bbox": [0.13, 0.75, 0.16, 0.02], "text": "3. PHẨM CHẤT", "anchor": "3. PHẨM CHẤT", "lesson": 5},
+  {"id": "b17", "order": 17, "role": "objective", "bbox": [0.13, 0.775, 0.40, 0.04], "text": "– Nâng cao khả năng tư duy lôgic.\n– Tự giải quyết vấn đề có sáng tạo.", "anchor": "Nâng cao khả năng tư duy lôgic", "lesson": 5},
+  {"id": "b18", "order": 18, "role": "heading", "bbox": [0.13, 0.835, 0.22, 0.02], "text": "KHỞI ĐỘNG BÀI HỌC", "anchor": "KHỞI ĐỘNG BÀI HỌC", "lesson": 5},
+  {"id": "b19", "order": 19, "role": "body", "bbox": [0.09, 0.86, 0.83, 0.07], "text": "Trong phần khởi động, GV gây chú ý bằng vai trò của lôgic toán đối với việc thiết kế máy tính điện tử với một giải thích sơ bộ rằng: Lôgic toán có liên quan đến các yếu tố “đúng”, “sai”. Từ đó dẫn đến các phép toán lôgic.", "anchor": "Trong phần khởi động, GV gây chú ý", "contiguous": true, "lesson": 5},
+  {"id": "b20", "order": 20, "role": "page_number", "bbox": [0.10, 0.94, 0.04, 0.02], "text": "38", "anchor": "38"}
+ ],
+ "flex_groups": [],
+ "critical": ["b01–b09 (Bài 4) attached to Bài 5 or vice versa = wrong lesson (page-level attachment fails)", "binary table rows scrambled = corrupted informatics content ('11111110' must survive exactly)", "b13/b15/b17 objectives emitted as learner questions = objective-as-question", "SGV teacher text (b19) shown to learner = source-role confusion"]
+}

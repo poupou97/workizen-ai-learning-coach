@@ -1,0 +1,27 @@
+{
+ "book": "05-sgk-toan-5-tap-mot", "page": 21, "printed_page": 20, "grade": 5, "subject": "Toán", "docType": "SGK",
+ "why": "WAL-206 gold: elementary math lesson opener — full-page illustration with speech bubbles (fractions inside), dashed formula box, worked steps with fractions, robot speech bubble beside the steps",
+ "features": ["figure", "speech_bubble", "formula", "color_heavy", "side_by_side", "lesson_start"],
+ "lesson": {"number": 6, "title": "Cộng, trừ hai phân số khác mẫu số", "note": "page is the lesson start (Bài 6 header)"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.08, 0.05, 0.12, 0.05], "text": "Bài 6", "anchor": "Bài 6"},
+  {"id": "b02", "order": 2, "role": "heading", "bbox": [0.28, 0.07, 0.50, 0.08], "text": "CỘNG, TRỪ HAI PHÂN SỐ KHÁC MẪU SỐ", "anchor": "CỘNG, TRỪ HAI PHÂN SỐ", "notes": "two printed lines of one title"},
+  {"id": "b03", "order": 3, "role": "heading", "bbox": [0.14, 0.245, 0.15, 0.03], "text": "Khám phá", "anchor": "Khám phá", "notes": "stage label (decorative font)"},
+  {"id": "b04", "order": 4, "role": "heading", "bbox": [0.13, 0.29, 0.03, 0.02], "text": "a)", "anchor": "a)"},
+  {"id": "b05", "order": 5, "role": "speech_bubble", "bbox": [0.32, 0.265, 0.19, 0.045], "text": "Tớ đã đổ 1/5 l nước vào bình.", "anchor": "Tớ đã đổ", "formula": true, "notes": "fraction 1/5 printed vertically"},
+  {"id": "b06", "order": 6, "role": "speech_bubble", "bbox": [0.54, 0.25, 0.20, 0.045], "text": "Tớ đã đổ 1/2 l nước vào bình.", "anchor": "Tớ đã đổ", "formula": true},
+  {"id": "b07", "order": 7, "role": "speech_bubble", "bbox": [0.58, 0.53, 0.26, 0.045], "text": "Cả hai bạn đã đổ bao nhiêu phần lít nước vào bình?", "anchor": "Cả hai bạn đã đổ bao nhiêu", "notes": "the lead-in question of the situation"},
+  {"id": "b08", "order": 8, "role": "formula", "bbox": [0.17, 0.605, 0.19, 0.06], "text": "1/5 + 1/2 = ? (l)", "anchor": "1/5 + 1/2", "formula": true},
+  {"id": "b09", "order": 9, "role": "body", "bbox": [0.13, 0.675, 0.20, 0.02], "text": "Quy đồng mẫu số:", "anchor": "Quy đồng mẫu số"},
+  {"id": "b10", "order": 10, "role": "body", "bbox": [0.16, 0.70, 0.46, 0.02], "text": "Hai mẫu số 5 và 2 không chia hết cho nhau.", "anchor": "Hai mẫu số 5 và 2", "contiguous": true},
+  {"id": "b11", "order": 11, "role": "body", "bbox": [0.16, 0.725, 0.56, 0.02], "text": "Lấy mẫu số chung là tích của hai mẫu số (5 × 2 = 10).", "anchor": "Lấy mẫu số chung là tích", "formula": true},
+  {"id": "b12", "order": 12, "role": "formula", "bbox": [0.16, 0.755, 0.34, 0.045], "text": "1/5 = (1 × 2)/(5 × 2) = 2/10; 1/2 = (1 × 5)/(2 × 5) = 5/10.", "anchor": "1/5 =", "formula": true},
+  {"id": "b13", "order": 13, "role": "body", "bbox": [0.13, 0.815, 0.25, 0.02], "text": "Thực hiện phép cộng:", "anchor": "Thực hiện phép cộng"},
+  {"id": "b14", "order": 14, "role": "formula", "bbox": [0.16, 0.84, 0.28, 0.045], "text": "1/5 + 1/2 = 2/10 + 5/10 = 7/10 (l).", "anchor": "1/5 + 1/2 = 2/10", "formula": true},
+  {"id": "b15", "order": 15, "role": "speech_bubble", "bbox": [0.72, 0.755, 0.20, 0.05], "text": "Việt và Mai đã đổ 7/10 l nước vào bình.", "anchor": "Việt và Mai đã đổ", "formula": true},
+  {"id": "b16", "order": 16, "role": "page_number", "bbox": [0.09, 0.945, 0.03, 0.015], "text": "20", "anchor": "20"}
+ ],
+ "flex_groups": [["b05", "b06"], ["b15"]],
+ "critical": ["fractions flattened to digit soup (1 5 1 2) = corrupted math content", "speech bubbles spliced into the worked steps = contamination", "b07 (situation question) treated as body = missing learner prompt"]
+}

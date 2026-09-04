@@ -1,0 +1,23 @@
+{
+ "book": "09-sgk-khoa-hoc-tu-nhien-9", "page": 46, "printed_page": 45, "grade": 9, "subject": "KHTN", "docType": "SGK",
+ "why": "physics page: activity box with 2 tasks, each followed by a 2-level-header TABLE whose body cells are '?' (Bảng 8.1, 8.2), then an experiment section with an equipment list beside a labelled apparatus photo + caption, and a procedure list",
+ "features": ["table", "sidebar", "side_by_side", "figure", "caption", "colored_box", "answer_slots", "experiment"],
+ "lesson": {"number": 8, "title": "Thấu kính (Bài 8)", "note": "tables 8.1/8.2 and figure 8.12 → Bài 8"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image; bbox by eye ±0.02",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "question", "bbox": [0.13, 0.085, 0.75, 0.08], "text": "1. Vật AB được đặt vuông góc với trục chính của thấu kính hội tụ có tiêu cự f, điểm A nằm trên trục chính. Gọi d là khoảng cách từ vật đến quang tâm thấu kính. Hãy dựng ảnh A'B' của AB ứng với các trường hợp: d > f và d < f.\nNhận xét đặc điểm ảnh của vật trong các trường hợp trên theo mẫu Bảng 8.1.", "anchor": "1. Vật AB được đặt vuông góc", "contiguous": true, "formula": true},
+  {"id": "b02", "order": 2, "role": "caption", "bbox": [0.48, 0.17, 0.08, 0.02], "text": "Bảng 8.1", "anchor": "Bảng 8.1", "rel": {"caption_of": "b03"}},
+  {"id": "b03", "order": 3, "role": "table", "bbox": [0.16, 0.19, 0.72, 0.11], "text": null, "anchor": "Khoảng cách từ vật đến thấu kính", "notes": "header: Khoảng cách từ vật đến thấu kính | Đặc điểm ảnh của vật (Ảnh thật hay ảnh ảo | Cùng chiều hay ngược chiều với vật | Lớn hơn hay nhỏ hơn vật); rows d > f: ? ? ?; d < f: ? ? ?"},
+  {"id": "b04", "order": 4, "role": "question", "bbox": [0.13, 0.31, 0.75, 0.045], "text": "2. Vẽ ảnh của một vật AB đặt vuông góc với trục chính của thấu kính phân kì có tiêu cự f trong các trường hợp: d > f và d < f. Nhận xét đặc điểm ảnh của vật theo mẫu Bảng 8.2.", "anchor": "2. Vẽ ảnh của một vật AB", "contiguous": true},
+  {"id": "b05", "order": 5, "role": "caption", "bbox": [0.48, 0.355, 0.08, 0.02], "text": "Bảng 8.2", "anchor": "Bảng 8.2", "rel": {"caption_of": "b06"}},
+  {"id": "b06", "order": 6, "role": "table", "bbox": [0.16, 0.375, 0.72, 0.11], "text": null, "anchor": "Khoảng cách từ vật đến thấu kính", "notes": "same structure as Bảng 8.1, all body cells '?'"},
+  {"id": "b07", "order": 7, "role": "heading", "bbox": [0.10, 0.515, 0.55, 0.02], "text": "3. Thí nghiệm kiểm tra đặc điểm ảnh của vật qua thấu kính", "anchor": "3. Thí nghiệm kiểm tra đặc điểm", "notes": "numbered heading — not a question"},
+  {"id": "b08", "order": 8, "role": "activity", "bbox": [0.13, 0.57, 0.36, 0.17], "text": "Chuẩn bị: Bộ thí nghiệm như Hình 8.12:\n– Đèn chiếu sáng (1);\n– Vật sáng bằng kính mờ hình chữ F (2);\n– Thấu kính hội tụ hoặc thấu kính phân kì (3);\n– Màn chắn (4);\n– Giá quang học (5);\n– Nguồn điện và dây nối (6).", "anchor": "Chuẩn bị: Bộ thí nghiệm như", "contiguous": true, "column": 1},
+  {"id": "b09", "order": 9, "role": "figure_label", "bbox": [0.50, 0.57, 0.40, 0.17], "text": null, "anchor": "(6)", "notes": "apparatus photo with labels (1)–(6)"},
+  {"id": "b10", "order": 10, "role": "caption", "bbox": [0.52, 0.745, 0.36, 0.045], "text": "Hình 8.12 Thí nghiệm kiểm tra đặc điểm ảnh của vật qua thấu kính hội tụ", "anchor": "Hình 8.12 Thí nghiệm kiểm tra", "rel": {"caption_of": "b09"}},
+  {"id": "b11", "order": 11, "role": "activity", "bbox": [0.13, 0.745, 0.76, 0.16], "text": "Tiến hành:\nThí nghiệm 1.\n– Bố trí thí nghiệm như Hình 8.12.\n– Đặt vật ở vị trí d > f.\n– Từ từ dịch chuyển màn chắn cho đến khi thu được ảnh của vật rõ nét trên màn chắn.\n– Nhận xét đặc điểm ảnh của vật.\n– Lặp lại thí nghiệm trong trường hợp d < f và rút ra nhận xét đặc điểm ảnh của vật trong trường hợp đó.", "anchor": "Tiến hành", "contiguous": true},
+  {"id": "b12", "order": 12, "role": "page_number", "bbox": [0.87, 0.945, 0.03, 0.015], "text": "45", "anchor": "45"}
+ ],
+ "flex_groups": [["b08"], ["b09", "b10"]],
+ "critical": ["'?' table cells emitted as questions or the table header emitted as passage = fabricated content", "photo labels (1)–(6) spliced into the equipment list = contamination", "b07 heading or b11 procedure emitted as learner question = heading/instruction-as-question", "'d > f' / 'd < f' symbols flipped = corrupted physics"]
+}
