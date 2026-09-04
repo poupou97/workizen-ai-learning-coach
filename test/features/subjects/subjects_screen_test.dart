@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
+import 'package:learning_coach/core/store/learning_session.dart';
+import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
 import 'package:learning_coach/features/subjects/subject_home_screen.dart';
 import 'package:learning_coach/features/subjects/subjects_screen.dart';
@@ -78,5 +80,58 @@ void main() {
         reason: 'bài THẬT từ SGK (cur: origin), không placeholder');
     expect(find.textContaining('SAM làm theo ví dụ trong SGK Toán 5'),
         findsOneWidget, reason: 'provenance hiện TRƯỚC khi học');
+  });
+
+  // ⭐⭐ WAL-181 — badge Learning Map trong ĐÚNG tile đã có (không dashboard
+  // riêng, đúng Founder UX Constraint 2026-09-04).
+  group('Learning Map badge', () {
+    testWidgets('⭐ chưa có event nào khớp lineage ⇒ không hiện badge nào',
+        (t) async {
+      await t.pumpWidget(MaterialApp(
+          home: SubjectHomeScreen(
+              profile: _p,
+              store: JsonlLearnerStore(),
+              index: idx(),
+              subject: 'Toán')));
+      await t.pumpAndSettle();
+      expect(find.textContaining('Tự làm được'), findsNothing);
+      expect(find.textContaining('Đã học cùng SAM'), findsNothing);
+    });
+
+    testWidgets(
+        '⭐⭐ có independentAttempt khớp đúng bài ⇒ badge "Tự làm được" hiện '
+        'ĐÚNG tile, không lan sang bài khác', (t) async {
+      final store = JsonlLearnerStore();
+      await store.appendSession(LearningSession(
+        sessionId: 's1',
+        learnerId: 'l',
+        subjectId: 'toan',
+        startedAt: DateTime(2026, 9, 4),
+        trigger: SessionTrigger.manual,
+        events: [
+          LearningEvent(
+            eventId: 'e1',
+            skillCaseId: 'denominator-non-divisible',
+            kind: EvidenceKind.independentAttempt,
+            at: DateTime(2026, 9, 4),
+            sourceDocumentId: '05-sgk-toan-5-tap-mot',
+            lessonNo: 6,
+          ),
+        ],
+      ));
+      await t.pumpWidget(MaterialApp(
+          home: SubjectHomeScreen(
+              profile: _p, store: store, index: idx(), subject: 'Toán')));
+      await t.pumpAndSettle();
+      expect(find.textContaining('Tự làm được'), findsOneWidget,
+          reason: '⭐⭐ đột biến không đọc lineage thật ⇒ đỏ');
+      // Bài 9 (Thể tích) không có event nào khớp — không được lây badge.
+      expect(
+          find.descendant(
+              of: find.widgetWithText(ListTile, 'Bài 9 · Thể tích'),
+              matching: find.textContaining('Tự làm được')),
+          findsNothing,
+          reason: 'badge không được lan sang bài chưa có bằng chứng');
+    });
   });
 }
