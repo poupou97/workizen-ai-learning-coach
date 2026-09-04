@@ -5,11 +5,15 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/core/context/learning_context.dart';
+import 'package:learning_coach/core/intent/learning_intent.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
 import 'package:learning_coach/core/tutor/learning_activity.dart';
 import 'package:learning_coach/core/tutor/tutor_feedback.dart';
 import 'package:learning_coach/features/shell/compose_lite_screen.dart';
+
+const _ctx = LearningContext(learnerId: 'na', grade: 5);
 
 /// Bài THẬT: viết đoạn có liên kết câu (case «dùng-khi-viết» của concept #3).
 const _compose = LearningActivity(
@@ -27,10 +31,12 @@ const _compose = LearningActivity(
 );
 
 Future<void> _pump(WidgetTester tester,
-    {void Function(List<LearningEvent>)? onFinished}) async {
+    {void Function(List<LearningEvent>)? onFinished,
+    LearningContext context = _ctx}) async {
   await tester.pumpWidget(MaterialApp(
       home: ComposeLiteScreen(
     activity: _compose,
+    learningContext: context,
     now: () => DateTime(2026, 9, 1, 19),
     onFinished: onFinished,
   )));
@@ -148,6 +154,24 @@ void main() {
     expect(out.any((e) => e.kind == EvidenceKind.hintRequested), isFalse,
         reason: 'không nhờ góp ý ⇒ không có hintRequested');
     expect(out.every((e) => e.correct == null), isTrue);
+  });
+
+  // ⭐⭐ WAL-189 — cùng luật WAL-175/178: tra cứu sinh TRACE, không sinh
+  // EVIDENCE. Trước WAL-189, Compose không nhận learningContext nên nộp nháp
+  // qua ý định "Xem trong sách" vẫn ghi evidence như một lần viết bài thật.
+  testWidgets('⭐⭐ ý định lookup ⇒ KHÔNG sinh evidence dù trẻ nộp nháp',
+      (tester) async {
+    List<LearningEvent>? out;
+    await _pump(tester,
+        context: const LearningContext(
+            learnerId: 'na', grade: 5, intent: LearningIntent.lookup),
+        onFinished: (e) => out = e);
+    await _toAfterDraft(tester, 'Trời đổ mưa rào.');
+    await tester.tap(find.text('Mình xong rồi'));
+    await tester.pumpAndSettle();
+    expect(out, isEmpty,
+        reason: '⭐⭐ đột biến bỏ gate lookup ⇒ đỏ — tra cứu không phải bằng '
+            'chứng, dù trẻ có viết gì');
   });
 
   testWidgets('không %, không điểm, không khen TƯ CHẤT ở mọi trạng thái',

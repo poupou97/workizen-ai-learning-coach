@@ -21,6 +21,8 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
+import '../../core/context/learning_context.dart';
+import '../../core/intent/learning_intent.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../../core/tutor/learning_activity.dart';
@@ -38,12 +40,17 @@ class ComposeLiteScreen extends StatefulWidget {
   const ComposeLiteScreen({
     super.key,
     required this.activity,
+    required this.learningContext,
     this.provenance,
     this.onFinished,
     this.now,
   });
 
   final LearningActivity activity;
+
+  /// ⭐⭐ WAL-189 — cùng luật WAL-175/178 đã có ở Experiment: `lookup` sinh
+  /// TRACE, không sinh EVIDENCE. `_emit` đọc field này trước khi ghi.
+  final LearningContext learningContext;
   final TeachingProvenance? provenance;
   final void Function(List<LearningEvent> events)? onFinished;
   final DateTime Function()? now;
@@ -78,6 +85,9 @@ class _ComposeLiteScreenState extends State<ComposeLiteScreen> {
   }
 
   void _emit(EvidenceKind kind) {
+    // ⭐⭐ WAL-189 — tra cứu sinh TRACE, không sinh EVIDENCE (WAL-175/178).
+    // Cửa DUY NHẤT của màn này — mọi chỗ gọi _emit đều qua đây.
+    if (widget.learningContext.intent == LearningIntent.lookup) return;
     _events.add(LearningEvent(
       eventId: '${a.activityId}#${_seq++}',
       skillCaseId: a.skillCaseId ?? a.conceptId,

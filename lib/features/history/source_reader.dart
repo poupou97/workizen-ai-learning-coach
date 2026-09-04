@@ -18,6 +18,8 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
+import '../../core/context/learning_context.dart';
+import '../../core/intent/learning_intent.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
@@ -53,9 +55,17 @@ const kConclusionStances = [
 
 class SourceReaderScreen extends StatefulWidget {
   const SourceReaderScreen(
-      {super.key, required this.source, this.onFinished, this.now});
+      {super.key,
+      required this.source,
+      required this.learningContext,
+      this.onFinished,
+      this.now});
 
   final SuSource source;
+
+  /// ⭐⭐ WAL-189 — cùng luật WAL-175/178 đã có ở Experiment: `lookup` sinh
+  /// TRACE, không sinh EVIDENCE. `_conclude` đọc field này trước khi ghi.
+  final LearningContext learningContext;
 
   /// Trả về sự kiện đã phát — NƠI GỌI ghi kho qua recordSession (một chỗ ghi).
   final void Function(List<LearningEvent> events)? onFinished;
@@ -91,18 +101,22 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
 
   void _conclude(int i) {
     if (_done) return;
-    _events.add(LearningEvent(
-      eventId: '${s.book}:p${s.page}#${_seq++}',
-      skillCaseId: 'su-doc-tu-lieu',
-      kind: EvidenceKind.independentAttempt,
-      correct: null, // ⭐ UNKNOWN ≠ SAI: kết luận sử không có một đáp án duy nhất
-      exerciseId: '${s.book}:p${s.page}',
-      conceptIds: const ['su-tu-lieu'],
-      at: _at(),
-      support: SupportLevel.none,
-      policyId: 'source-reader-v1',
-      knowledgeVersion: knowledgeModelVersion, // WAL-114
-    ));
+    // ⭐⭐ WAL-189 — tra cứu sinh TRACE, không sinh EVIDENCE (WAL-175/178):
+    // trẻ vẫn thấy đúng luồng kết luận, chỉ không ghi thành bằng chứng.
+    if (widget.learningContext.intent != LearningIntent.lookup) {
+      _events.add(LearningEvent(
+        eventId: '${s.book}:p${s.page}#${_seq++}',
+        skillCaseId: 'su-doc-tu-lieu',
+        kind: EvidenceKind.independentAttempt,
+        correct: null, // ⭐ UNKNOWN ≠ SAI: kết luận sử không có một đáp án duy nhất
+        exerciseId: '${s.book}:p${s.page}',
+        conceptIds: const ['su-tu-lieu'],
+        at: _at(),
+        support: SupportLevel.none,
+        policyId: 'source-reader-v1',
+        knowledgeVersion: knowledgeModelVersion, // WAL-114
+      ));
+    }
     setState(() {
       _stance = i;
       _done = true;

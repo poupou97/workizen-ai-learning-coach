@@ -5,10 +5,14 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/core/context/learning_context.dart';
+import 'package:learning_coach/core/intent/learning_intent.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
 import 'package:learning_coach/core/tutor/learning_activity.dart';
 import 'package:learning_coach/features/shell/reader_screen.dart';
+
+const _ctx = LearningContext(learnerId: 'na', grade: 5);
 
 /// Bài THẬT: đọc đoạn về Thạch Sanh rồi tìm từ chỉ nhân vật ở câu sau
 /// (liên-kết-câu bằng đại từ — chuỗi b9→b13 GĐ2 batch ③).
@@ -46,11 +50,13 @@ const _noPassage = LearningActivity(
 );
 
 Future<void> _pump(WidgetTester tester, LearningActivity a,
-    {void Function(List<LearningEvent>)? onFinished}) async {
+    {void Function(List<LearningEvent>)? onFinished,
+    LearningContext context = _ctx}) async {
   await tester.pumpWidget(MaterialApp(
       home: ReaderScreen(
     key: ValueKey(a.activityId),
     activity: a,
+    learningContext: context,
     now: () => DateTime(2026, 9, 1, 19),
     onFinished: onFinished,
   )));
@@ -195,6 +201,27 @@ void main() {
         reason: 'không chấm ⇒ không có finalCorrectness');
     expect(find.textContaining('chưa có đáp án'), findsOneWidget,
         reason: 'nói thật với trẻ: SAM không biết đúng/sai');
+  });
+
+  // ⭐⭐ WAL-189 — cùng luật WAL-175/178 đã kiểm ở Experiment: tra cứu sinh
+  // TRACE, không sinh EVIDENCE, dù trẻ có trả lời gì. Trước WAL-189, Reader
+  // không nhận learningContext nên KHÔNG THỂ áp luật này — bài đọc mở qua ý
+  // định "Xem trong sách" vẫn ghi evidence đầy đủ như một lần làm bài thật.
+
+  testWidgets('⭐⭐ ý định lookup ⇒ KHÔNG sinh evidence dù trẻ trả lời',
+      (tester) async {
+    List<LearningEvent>? out;
+    await _pump(tester, _reading,
+        context: const LearningContext(
+            learnerId: 'na', grade: 5, intent: LearningIntent.lookup),
+        onFinished: (e) => out = e);
+    await tester.tap(find.text('Con đọc xong rồi 📖'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Chàng'));
+    await tester.pumpAndSettle();
+    expect(out, isEmpty,
+        reason: '⭐⭐ đột biến bỏ gate lookup ⇒ đỏ — WAL-175: tra cứu sinh '
+            'Trace, không sinh Evidence, bất kể trẻ chọn gì');
   });
 
   testWidgets('không %, không điểm trên mọi trạng thái Reader', (tester) async {
