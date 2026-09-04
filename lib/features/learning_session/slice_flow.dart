@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/adaptive/adaptive_engine.dart';
+import '../../core/adaptive/challenge_policy.dart';
 import '../../core/curriculum/canonical_problem.dart';
 import '../../core/knowledge/slice_curriculum.dart';
 import '../../core/store/learner_profile.dart';
@@ -448,12 +449,17 @@ class KnowledgeStateScreen extends StatelessWidget {
       );
 
   /// Chữ trạng thái theo BẰNG CHỨNG — không %, UNKNOWN nói thẳng là chưa thử.
+  ///
+  /// ⭐⭐ WAL-183 — icon 🌱/🎯/🚀 gắn thêm từ [challengeSignalFor], tái dùng
+  /// ĐÚNG `CaseMastery` đã có, không hệ tính riêng. `null` (chưa có bằng
+  /// chứng) ⇒ không icon nào — UNKNOWN không mặc định 🎯.
   Widget _caseTile(String name, CaseMastery? m) {
     final line = m == null || !m.hasEvidence
         ? 'chưa thử dạng này'
         : m.pMastery >= 0.85
             ? 'con tự làm được rồi'
             : 'đang luyện (${m.evidenceCount} lần có bằng chứng)';
+    final signal = m == null ? null : challengeSignalFor(m);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -463,6 +469,7 @@ class KnowledgeStateScreen extends StatelessWidget {
               style: const TextStyle(
                   fontSize: WalType.body, color: WalColors.ink, height: 1.4)),
         ),
+        if (signal != null) Text(challengeLabelFor(signal).$1),
       ]),
     );
   }
