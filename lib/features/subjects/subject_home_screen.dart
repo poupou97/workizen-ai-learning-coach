@@ -17,6 +17,8 @@ import '../../core/tutor/teaching_provenance.dart' show sourceLineForChildOf;
 import '../../core/store/learner_profile.dart';
 import '../../core/store/learner_store.dart';
 import '../../core/store/learning_session.dart';
+import '../../core/student/learning_evidence.dart';
+import '../../core/student/learning_map_state.dart';
 import '../../core/tutor/learning_activity.dart';
 import '../history/source_reader.dart';
 import '../learning_session/slice_flow.dart';
@@ -59,6 +61,14 @@ class SubjectHomeScreen extends StatelessWidget {
 
   List<KhoaExperiment> get _experiments =>
       index.experimentsForSubject(subject);
+
+  /// ⭐⭐ WAL-181 — toàn bộ event của NGƯỜI HỌC NÀY, một lần, để suy trạng
+  /// thái Learning Map cho mọi bài đang hiện. Không lọc theo môn trước —
+  /// lineage tự lọc đúng sách+bài (WAL-178/179).
+  Future<List<LearningEvent>> _allEvents() async =>
+      (await store.sessions(learnerId: profile.learnerId))
+          .expand((s) => s.events)
+          .toList();
 
   /// ⭐⭐ WAL-176 (Missing #1) — Home ĐÃ đề nghị đúng bài + đúng ý định (lý do
   /// thật, không đoán); màn này KHÔNG được hỏi lại. Đi thẳng qua `_startIntent`
@@ -104,64 +114,78 @@ class SubjectHomeScreen extends StatelessWidget {
             : '${book!.title} · ${book!.volumeLabel}');
     return Scaffold(
       backgroundColor: WalColors.surface,
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(WalSpacing.lg),
-          children: [
-            Text(title,
-                style: const TextStyle(
-                    fontSize: WalType.display,
-                    fontWeight: FontWeight.w700,
-                    color: WalColors.ink)),
-            const SizedBox(height: WalSpacing.sm),
-            // WAL-144 #KHTN: mục lục Khoa học 5 chưa map bài↔trang tin cậy
-            // (số bài trùng/thiếu pageStart) — thí nghiệm hiện thành mục RIÊNG,
-            // KHÔNG gán bừa vào bài (nói thật hơn là đoán).
-            if (_experiments.isNotEmpty) _experimentsTile(context),
-            if (index.mapsForSubject(subject).isNotEmpty)
-              _mapsTile(context),
-            // WAL-133: hình SGK đã crop của MÔN NÀY — chỉ hiện khi có asset
-            // thật kèm đủ provenance (tầng parse đã loại thứ không chứng minh
-            // được), nên tile này không bao giờ mở ra một màn rỗng.
-            if (index.sourceAssetsFor(subject).isNotEmpty)
-              _sourceAssetsTile(context),
-            for (final b in books) ...[
-              if (book == null && (b.volume != null || books.length > 1))
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: WalSpacing.sm),
-                  child: Text(
-                      b.volume == null ? 'Sách' : 'Tập ${b.volume}',
-                      style: const TextStyle(
-                          fontSize: WalType.secondary,
-                          fontWeight: FontWeight.w700,
-                          color: WalColors.inkSoft)),
+      // ⭐⭐ WAL-181 — nạp event MỘT LẦN cho cả màn, không phải một truy vấn
+      // riêng cho từng bài. Đang tải ⇒ danh sách hiện trước, badge tới sau
+      // (progressive, không chặn màn) — rỗng khi lỗi/chưa xong cũng hợp lệ,
+      // KHÔNG phải lỗi (bài chỉ tạm chưa có badge, không phải "chưa học").
+      body: FutureBuilder<List<LearningEvent>>(
+        future: _allEvents(),
+        builder: (context, snap) {
+          final allEvents = snap.data ?? const <LearningEvent>[];
+          return SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.all(WalSpacing.lg),
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: WalType.display,
+                        fontWeight: FontWeight.w700,
+                        color: WalColors.ink)),
+                const SizedBox(height: WalSpacing.sm),
+                // WAL-144 #KHTN: mục lục Khoa học 5 chưa map bài↔trang tin cậy
+                // (số bài trùng/thiếu pageStart) — thí nghiệm hiện thành mục
+                // RIÊNG, KHÔNG gán bừa vào bài (nói thật hơn là đoán).
+                if (_experiments.isNotEmpty) _experimentsTile(context),
+                if (index.mapsForSubject(subject).isNotEmpty)
+                  _mapsTile(context),
+                // WAL-133: hình SGK đã crop của MÔN NÀY — chỉ hiện khi có
+                // asset thật kèm đủ provenance (tầng parse đã loại thứ không
+                // chứng minh được), nên tile này không bao giờ mở ra màn rỗng.
+                if (index.sourceAssetsFor(subject).isNotEmpty)
+                  _sourceAssetsTile(context),
+                for (final b in books) ...[
+                  if (book == null && (b.volume != null || books.length > 1))
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: WalSpacing.sm),
+                      child: Text(
+                          b.volume == null ? 'Sách' : 'Tập ${b.volume}',
+                          style: const TextStyle(
+                              fontSize: WalType.secondary,
+                              fontWeight: FontWeight.w700,
+                              color: WalColors.inkSoft)),
+                    ),
+                  for (final l in b.lessons)
+                    _lessonTile(context, b, l, allEvents),
+                ],
+                if (books.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(top: WalSpacing.xl),
+                    child: Text(
+                      'SAM chưa có mục lục môn này trên máy.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: WalType.body, color: WalColors.inkSoft),
+                    ),
+                  ),
+                const SizedBox(height: WalSpacing.md),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('◂ Môn học',
+                      style: TextStyle(
+                          fontSize: WalType.body,
+                          color: WalColors.primaryText)),
                 ),
-              for (final l in b.lessons) _lessonTile(context, b, l),
-            ],
-            if (books.isEmpty)
-              const Padding(
-                padding: EdgeInsets.only(top: WalSpacing.xl),
-                child: Text(
-                  'SAM chưa có mục lục môn này trên máy.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: WalType.body, color: WalColors.inkSoft),
-                ),
-              ),
-            const SizedBox(height: WalSpacing.md),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('◂ Môn học',
-                  style: TextStyle(
-                      fontSize: WalType.body, color: WalColors.primaryText)),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _lessonTile(BuildContext context, BookLessons b, LessonRef l) {
+  Widget _lessonTile(BuildContext context, BookLessons b, LessonRef l,
+      List<LearningEvent> allEvents) {
     // ⭐ WAL-166: hỏi DỮ LIỆU «bài này có việc gì», không hỏi «môn tên gì».
     // Luật cũ «chỉ mở khi có dữ liệu thật» giữ nguyên — chỉ bỏ ba nhánh cứng
     // theo tên môn, thứ đang khoá Khoa học và Tiếng Anh ở ngoài.
@@ -171,6 +195,13 @@ class SubjectHomeScreen extends StatelessWidget {
     final subtitle = parts.isNotEmpty
         ? '${parts.join(' · ')} từ SGK — vào học ngay'
         : 'SAM đang học bài này — con chụp bài tập để học cùng nhé';
+    // ⭐⭐ WAL-181 — badge NHỎ trong đúng tile đã có (Founder UX Constraint
+    // 2026-09-04: reuse UI, không dashboard riêng). Chữ/icon, không số/%.
+    final mapState = learningMapStateFor(
+        sourceDocumentId: b.sourceDocumentId,
+        lessonNo: l.no,
+        allEvents: allEvents);
+    final (badgeIcon, badgeLabel) = childLabelFor(mapState);
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),
       // Material bọc ListTile — nền + ink vẽ đúng chỗ (assertion framework).
@@ -178,15 +209,24 @@ class SubjectHomeScreen extends StatelessWidget {
         color: openable ? Colors.white : WalColors.surfaceLavender,
         borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
         child: ListTile(
-        title: Text(
-          _lessonLabel(b, l),
-          style: const TextStyle(
-              fontSize: WalType.body,
-              fontWeight: FontWeight.w600,
-              color: WalColors.ink),
-        ),
+        title: Row(children: [
+          Expanded(
+              child: Text(
+            _lessonLabel(b, l),
+            style: const TextStyle(
+                fontSize: WalType.body,
+                fontWeight: FontWeight.w600,
+                color: WalColors.ink),
+          )),
+          if (mapState != LearningMapState.unseen) ...[
+            const SizedBox(width: WalSpacing.sm),
+            Text(badgeIcon, style: const TextStyle(fontSize: WalType.body)),
+          ],
+        ]),
         subtitle: Text(
-          subtitle,
+          mapState == LearningMapState.unseen
+              ? subtitle
+              : '$badgeLabel · $subtitle',
           style: const TextStyle(
               fontSize: WalType.secondary, color: WalColors.inkSoft),
         ),
