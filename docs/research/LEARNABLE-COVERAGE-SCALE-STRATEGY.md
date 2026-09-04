@@ -52,6 +52,21 @@ still stands as directionally reasonable given the marker now confirmed across
 "medium cost" — the passage/question splitter is real, un-started work,
 comparable in scope to what `extract_units_tv.py` already required for TV5.
 
+**Noise patterns identified for whoever builds the dedicated extractor next**
+(raw OCR of grade 6, "Dế Mèn phiêu lưu kí" excerpt, pages 16-18): footnote
+definitions interleaved at page bottoms (`(1) Chết ngay đuôi: chết ngay lập
+tức...` — a numbered-parenthetical followed by a colon-definition, distinct
+in shape from real narrative sentences); orphaned footnote-marker lines
+(`(2)`, `(4)` alone with no adjacent text, where OCR separated the marker
+from its definition); sidebar reading-strategy boxes in ALL CAPS (`THEO DÕI`,
+matching the `DỰ ĐOÁN` pattern seen elsewhere in the same book) that interrupt
+the narrative mid-flow; standalone page-number lines (bare digits). None of
+these are exotic — each has a mechanically checkable shape (regex for the
+footnote-definition pattern, a small fixed set of ALL-CAPS sidebar labels to
+skip, `^\d+$` for page numbers) — but building and gold-set-validating the
+combination is real work, not a five-minute regex tweak, which is exactly why
+this was not rushed into this checkpoint.
+
 ---
 
 ## 1. Challenge the number: is 113 correct?
