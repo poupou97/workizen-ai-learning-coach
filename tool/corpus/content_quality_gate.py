@@ -20,11 +20,17 @@ emitted reading/writing must pass, deterministically:
 Prints per-pack pass/fail counts and writes poc-out/p0-experiment/quality-<grade>.json.
 """
 import json
+import os
 import re
 import sys
 from collections import Counter
 
-LABELS = re.compile(r'\b(Em có biết|Lưu ý|Ghi nhớ|Chú ý|Theo dõi|Hình \d|Bảng \d|Sơ đồ \d)\b')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ui'))
+from pattern_router import passage_is_objectives, passage_has_spliced_box, prompt_points_offpage, LEADIN_RE, DEICTIC_RE, PRONOUNCE_RE, OBSERVE_FIG_RE  # noqa: E402  (shared with the router's gate-at-source)
+
+OBJECTIVE = re.compile(r'^\s*(\d{1,2}[\.\)]\s*)?(Giải thích|Nêu|Trình bày|Mô tả|Xác định|Phân biệt|Vận dụng|Nhận biết|Kể tên|So sánh|Phát biểu|Viết|Đọc|Tính|Thực hiện|Sử dụng|Vẽ)\s+được\b', re.IGNORECASE)
+FIGURE_DEP = re.compile(r'\b(Hình|Bảng|Sơ đồ|Biểu đồ|Lược đồ)\s*\d', re.IGNORECASE)
+LABELS = re.compile(r'\b(Em có biết|Lưu ý|Ghi nhớ|Chú ý|Theo dõi)\b')
 
 
 def upper_ratio(t):
@@ -46,8 +52,19 @@ def check_reading(r, ranges, layout_units):
     q = r['questions'][0]
     if len(r['passage']) < 120: fails.append('Q8_passage_short')
     if len(q['prompt']) < 12: fails.append('Q8_prompt_short')
-    if LABELS.search(r['passage']): fails.append('Q1_label_in_passage')
+    if LABELS.search(r['passage']) or FIGURE_DEP.search(r['passage'][:40]): fails.append('Q1_label_in_passage')
     if upper_ratio(q['prompt']) > 0.6: fails.append('Q3_heading_as_question')
+    words = q['prompt'].split()
+    if len(words) < 5: fails.append('Q3_question_fragment')
+    if OBJECTIVE.match(q['prompt']): fails.append('Q3_objective_not_question')      # "Giải thích được…" = MỤC TIÊU line
+    if len(words) >= 8 and len(set(w.lower() for w in words)) < 0.6 * len(words): fails.append('Q1_garbled_repetition')
+    if FIGURE_DEP.search(q['prompt']) and not FIGURE_DEP.search(r['passage']): fails.append('Q8_figure_dependent_question')  # asks about a figure/table the Surface cannot show
+    if passage_is_objectives(r['passage']): fails.append('Q1_passage_is_objectives')   # device walk KHTN 6 Bài 2: MỤC TIÊU bullets shown as passage
+    if passage_has_spliced_box(r['passage']): fails.append('Q1_passage_spliced_box')   # device walk KHTN 6 Bài 6: unit-conversion side box spliced into body
+    if LEADIN_RE.search(q['prompt']): fails.append('Q3_leadin_not_question')            # "…trả lời các câu hỏi sau:"
+    if DEICTIC_RE.search(q['prompt']) or prompt_points_offpage(q['prompt']): fails.append('Q8_deictic_prompt')   # "ý kiến trên", "hình bên", "các vật sau đây" (no inline list) — Surface cannot show it
+    if PRONOUNCE_RE.match(q['prompt']): fails.append('Q3_pronunciation_not_question')  # "Đọc là: iron tác dụng với…" (KHTN 8 Bài 2)
+    if OBSERVE_FIG_RE.search(q['prompt']): fails.append('Q8_observe_figure')            # "quan sát Hình 47.2" (KHTN 9 Bài 47)
     if r.get('pattern') == 'SELECT_MCQ':
         if len(q.get('options', [])) < 2: fails.append('Q8_mcq_options')
         if q.get('correctOption') is not None: fails.append('Q8_mcq_graded_without_key')

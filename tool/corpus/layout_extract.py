@@ -108,6 +108,72 @@ def _gaps_x(boxes):
     return out
 
 
+BAND_ROWS = 3      # a side box must span ≥ this many text rows to be split off
+
+
+def _rows(boxes, med_h):
+    """Group boxes into text rows by y (a new row starts when a box begins below
+    the current row's bottom minus a third of a line)."""
+    rows, cur, cur_end = [], [], None
+    for b in sorted(boxes, key=lambda b: b['y']):
+        if cur and b['y'] > cur_end - 0.3 * med_h:
+            rows.append(cur); cur, cur_end = [], None
+        cur.append(b); cur_end = b['y'] + b['h'] if cur_end is None else max(cur_end, b['y'] + b['h'])
+    if cur: rows.append(cur)
+    return rows
+
+
+def _side_band(boxes, med_h):
+    """Partial-height side box (KHTN 6 p.21: a unit-conversion box beside body
+    text, with full-width lines above and below): no whole-region x-gap exists,
+    but ≥ BAND_ROWS consecutive rows each contain the SAME x-gap. Returns
+    (top, left, right, bottom) box lists or None. Rows above/below stay intact."""
+    rows = _rows(boxes, med_h)
+    if len(rows) < BAND_ROWS:
+        return None
+    gaps = []   # per row: (lo, hi) of its widest x-gap, or None
+    for r in rows:
+        g = _gaps_x(r) if len(r) > 1 else []
+        if g:
+            best = max(g, key=lambda x: x[0])
+            gaps.append((best[1] - best[0] / 2, best[1] + best[0] / 2))
+        else:
+            gaps.append(None)
+    best_run = None
+    i = 0
+    while i < len(rows):
+        if gaps[i] is None:
+            i += 1; continue
+        lo, hi = gaps[i]; j = i
+        while j + 1 < len(rows) and gaps[j + 1] and max(lo, gaps[j + 1][0]) < min(hi, gaps[j + 1][1]) - TX:
+            lo, hi = max(lo, gaps[j + 1][0]), min(hi, gaps[j + 1][1]); j += 1
+        if j - i + 1 >= BAND_ROWS and (best_run is None or j - i > best_run[1] - best_run[0]):
+            best_run = (i, j, (lo + hi) / 2)
+        i = j + 1
+    if not best_run:
+        return None
+    i, j, cut = best_run
+    band = [b for r in rows[i:j + 1] for b in r]
+    left = [b for b in band if b['x'] + b['w'] / 2 < cut]
+    right = [b for b in band if b['x'] + b['w'] / 2 >= cut]
+    if not left or not right:
+        return None
+    # Only a genuine ALIGNED BOX qualifies: right lines narrow with a common left edge, left lines
+    # starting at the column edge, and a clear gutter. (Without this, KHTN 7 p.20 — the WAL-204 gold
+    # page — lost its sidebar/caption roles: fidelity 1.0 → 0.0.)
+    gap_lo = max(b['x'] + b['w'] for b in left); gap_hi = min(b['x'] for b in right)
+    if gap_hi - gap_lo < 2 * TX:
+        return None
+    if max(b['w'] for b in right) > 0.30 or (max(b['x'] for b in right) - min(b['x'] for b in right)) > 0.03:
+        return None
+    lx = min(b['x'] for b in left)
+    if any(b['x'] > lx + 0.05 for b in left):
+        return None
+    top = [b for r in rows[:i] for b in r]
+    bot = [b for r in rows[j + 1:] for b in r]
+    return top, left, right, bot
+
+
 def xy_cut(boxes, med_h, path, marginal, body_x0=0.1):
     """Return list of (path, boxes) leaves in reading order."""
     if len(boxes) <= MIN_REGION_LINES:
@@ -119,6 +185,13 @@ def xy_cut(boxes, med_h, path, marginal, body_x0=0.1):
     ny = (best_y[0] / (TY * med_h)) if best_y else 0
     nx = (best_x[0] / TX) if best_x else 0
     if not best_y and not best_x:
+        band = _side_band(boxes, med_h)
+        if band:
+            top, left, right, bot = band
+            out = xy_cut(top, med_h, path + 'T', marginal, body_x0) if top else []
+            out += xy_cut(left, med_h, path + 'ML', marginal, body_x0) + xy_cut(right, med_h, path + 'MR', marginal, body_x0)
+            out += xy_cut(bot, med_h, path + 'B', marginal, body_x0) if bot else []
+            return out
         return [(path, boxes)]
     if ny >= nx:
         if ny < MARGINAL: marginal.append(('y', round(ny, 2), path))
@@ -190,12 +263,24 @@ def extract_page(book, path):
         region_w = rx1 - rx0
         centered = abs((rx0 + rx1) / 2 - 0.5) < 0.08
         narrow_side = region_w < 0.45 and rx0 > body_x0 + 0.15 and not centered
+        # Floating diagram labels (KHTN 6 p.35: "Hơi nước", "Nước lỏng", "a) Sự bay hơi" beside a
+        # paragraph, 0.02 page-widths from the text — below the x-gap threshold, so no cut isolates
+        # them): a very short, narrow line starting well to the right of the region's text edge is a
+        # label, never body text.
+        wide_x = [b['x'] for b in rboxes if b['w'] >= 0.2]
+        dom_x0 = statistics.median(wide_x) if wide_x else None
         cur = None
+        floating = []
         for l in rboxes:
             t = l['text'].strip()
             role = role_of(t, l, med_h, region_w, rx0, body_x0)
             if role == 'body' and narrow_side:
                 role = 'sidebar'
+            if role == 'body' and dom_x0 is not None and l['w'] < 0.12 and len(t.split()) <= 4 \
+                    and l['x'] > dom_x0 + 0.25 and not re.search(r'[\.\?!:;,]\s*$', t):
+                # keep the paragraph running: the label becomes its own caption block AFTER the region's text
+                floating.append(dict(regionPath=rpath or 'ROOT', role='caption', texts=[t], x0=l['x'], y0=l['y'], x1=l['x'] + l['w'], y1=l['y'] + l['h'], confs=[l.get('conf', 1)], _lasty=l['y']))
+                continue
             continuation = cur is not None and (l['y'] - cur['_lasty']) <= 1.5 * med_h and cur['role'] not in ('heading', 'caption', 'pageNumber') and (
                 t[:1].islower() or (role == 'question' and cur['role'] == 'body' and NUMBERED.match(cur['texts'][0]) is not None and not NUMBERED.match(t)))
             new = (not continuation) and (cur is None or role != cur['role'] or role in ('heading', 'caption', 'pageNumber')
@@ -207,6 +292,7 @@ def extract_page(book, path):
                 cur['texts'].append(t); cur['x0'] = min(cur['x0'], l['x']); cur['y0'] = min(cur['y0'], l['y'])
                 cur['x1'] = max(cur['x1'], l['x'] + l['w']); cur['y1'] = max(cur['y1'], l['y'] + l['h']); cur['confs'].append(l.get('conf', 1)); cur['_lasty'] = l['y']
         if cur: blocks.append(cur)
+        blocks.extend(floating)
     for l in sorted(pagenums, key=lambda b: b['y']):
         blocks.append(dict(regionPath='PAGENUM', role='pageNumber', texts=[l['text'].strip()], x0=l['x'], y0=l['y'], x1=l['x'] + l['w'], y1=l['y'] + l['h'], confs=[l.get('conf', 1)]))
     out_blocks = []
