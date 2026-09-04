@@ -784,11 +784,15 @@ class SubjectHomeScreen extends StatelessWidget {
   /// WAL-144 — TV: đề VIẾT thật → Compose (dàn ý → nháp → góp ý → sửa;
   /// SAM KHÔNG viết hộ — không tồn tại chỗ chứa bài mẫu). Evidence một chỗ ghi.
   void _openWriting(BuildContext context, TvWriting w, LearningContext ctx) {
+    // ⭐⭐ WAL-191 — subjectId/conceptId suy từ MÔN ĐANG MỞ (WAL-173 adapter),
+    // không hoá cứng 'tieng-viet': cùng field tvWritings nay còn phục vụ Ngữ
+    // văn (lớp 6-12) — hoá cứng sẽ ghi evidence SAI MÔN cho trẻ học Ngữ văn.
+    final subjId = subjectIdOf(subject);
     final activity = LearningActivity(
       activityId: '${w.book}:l${w.lesson}:viet',
       prompt: w.prompt,
       response: ResponseKind.compose,
-      conceptId: 'tv-viet',
+      conceptId: '$subjId-viet',
       sourceBook: w.book,
       sourcePage: w.page,
     );
@@ -799,7 +803,7 @@ class SubjectHomeScreen extends StatelessWidget {
               onFinished: (events) => recordSession(
                   store: store,
                   learnerId: profile.learnerId,
-                  subjectId: 'tieng-viet',
+                  subjectId: subjId,
                   events: events,
                   trigger: SessionTrigger.manual),
             )));
@@ -808,13 +812,17 @@ class SubjectHomeScreen extends StatelessWidget {
   /// WAL-113 B1 — TV: đoạn văn + câu hỏi NGUYÊN VĂN từ units (textbookVerbatim).
   /// SGK không in đáp án ⇒ activity KHÔNG có options — Reader chạy chế độ câu
   /// hỏi mở, KHÔNG chấm (UNKNOWN ≠ SAI). Evidence ghi MỘT LẦN qua recordSession.
+  ///
+  /// ⭐⭐ WAL-191 — cùng lý do trên: subjectId/conceptId suy từ môn đang mở,
+  /// không hoá cứng — field tvReadings nay còn phục vụ Ngữ văn (lớp 6-9).
   void _openReading(BuildContext context, TvReading r, LearningContext ctx) {
+    final subjId = subjectIdOf(subject);
     final q = r.questions.first;
     final activity = LearningActivity(
       activityId: '${r.book}:l${r.lesson}:doc-hieu',
       prompt: q.prompt,
       response: ResponseKind.readRespond,
-      conceptId: 'tv-doc-hieu',
+      conceptId: '$subjId-doc-hieu',
       passage: r.passage,
       sourceBook: r.book,
       sourcePage: q.page ?? r.page,
@@ -826,7 +834,7 @@ class SubjectHomeScreen extends StatelessWidget {
               onFinished: (events) => recordSession(
                   store: store,
                   learnerId: profile.learnerId,
-                  subjectId: 'tieng-viet',
+                  subjectId: subjId,
                   events: events,
                   trigger: SessionTrigger.manual),
             )));
