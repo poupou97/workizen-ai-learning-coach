@@ -10,6 +10,7 @@
 /// (xem `assertNoTutoringDuringExam`).
 library;
 
+import '../pedagogy/pedagogy_model.dart' show TeachingAct;
 import '../student/learning_evidence.dart';
 import '../student/mastery.dart';
 
@@ -82,6 +83,15 @@ class LearningSession {
         if (e.interventionId != null) 'interventionId': e.interventionId,
         // WAL-114: version tri thức sống qua lưu-đọc như policyId.
         if (e.knowledgeVersion != null) 'knowledgeVersion': e.knowledgeVersion,
+        // ⭐⭐ WAL-178/179/182 LINEAGE — thiếu 4 dòng này thì "context sống
+        // qua lưu-đọc" chỉ đúng trong bộ nhớ (`onFinished` callback), SAI
+        // ngay khi app khởi động lại và đọc evidence từ đĩa. Phát hiện khi
+        // audit lại chính vé này trước khi merge — chưa từng có event thật
+        // nào mang 4 field mới để lộ ra qua lưu-đọc.
+        if (e.sourceDocumentId != null) 'sourceDocumentId': e.sourceDocumentId,
+        if (e.lessonNo != null) 'lessonNo': e.lessonNo,
+        if (e.act != null) 'act': e.act!.name,
+        if (e.learnerText != null) 'learnerText': e.learnerText,
       };
 
   static LearningEvent? _eventFrom(Map<String, Object?> j) {
@@ -111,6 +121,17 @@ class LearningSession {
       priorEventId: j['priorEventId'] as String?,
       interventionId: j['interventionId'] as String?,
       knowledgeVersion: j['knowledgeVersion'] as String?,
+      sourceDocumentId: j['sourceDocumentId'] as String?,
+      lessonNo: (j['lessonNo'] as num?)?.toInt(),
+      // act khuyết ⇒ null (dữ liệu cũ hoặc sự kiện không gắn act cụ thể) —
+      // cùng luật với `support` phía trên: UNKNOWN không mặc định một giá
+      // trị cụ thể nào.
+      act: switch (j['act']) {
+        final String name =>
+          TeachingAct.values.where((v) => v.name == name).firstOrNull,
+        _ => null,
+      },
+      learnerText: j['learnerText'] as String?,
     );
   }
 

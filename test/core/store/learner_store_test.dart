@@ -3,6 +3,8 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/core/pedagogy/pedagogy_model.dart'
+    show TeachingAct;
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
@@ -167,6 +169,52 @@ void main() {
       expect(m.independentCorrect, 0,
           reason: 'đúng-sau-gợi-ý không bao giờ thành bằng chứng tự làm');
       expect(m.supportedCount, greaterThan(0));
+    });
+
+    test('⭐⭐ WAL-178/182 — sourceDocumentId/lessonNo/act/learnerText sống '
+        'qua JSONL round-trip (không phải chỉ đúng trong RAM)', () async {
+      final store = JsonlLearnerStore();
+      await store.appendSession(LearningSession(
+        sessionId: 's1', learnerId: 'l1', subjectId: 'khoa-hoc',
+        startedAt: DateTime(2026, 9, 4, 10),
+        trigger: SessionTrigger.manual,
+        events: [
+          LearningEvent(
+            eventId: 'e1',
+            skillCaseId: 'khtn-thi-nghiem',
+            kind: EvidenceKind.independentAttempt,
+            at: DateTime(2026, 9, 4, 10),
+            sourceDocumentId: '05-sgk-khoa-hoc-5',
+            lessonNo: 1,
+            act: TeachingAct.askExplanation,
+            learnerText: 'Đất tan ra trong nước, có bọt khí',
+          ),
+        ],
+      ));
+      final reloaded = JsonlLearnerStore.fromJsonl(store.toJsonl());
+      final e = (await reloaded.sessions(learnerId: 'l1')).single.events.single;
+      expect(e.sourceDocumentId, '05-sgk-khoa-hoc-5',
+          reason: '⭐⭐ đột biến bỏ lineage khi lưu ⇒ đỏ — Learning Map/Parent '
+              'View/Citation đọc field này SAU KHI app khởi động lại, không '
+              'chỉ trong phiên đang chạy');
+      expect(e.lessonNo, 1);
+      expect(e.act, TeachingAct.askExplanation);
+      expect(e.learnerText, 'Đất tan ra trong nước, có bọt khí',
+          reason: 'chữ trẻ viết phải sống qua lưu-đọc, không chỉ callback');
+    });
+
+    test('lineage khuyết trong dữ liệu cũ ⇒ null, KHÔNG suy đoán', () async {
+      final store = JsonlLearnerStore.fromJsonl(
+          '{"type":"session","sessionId":"old","learnerId":"l1",'
+          '"subjectId":"toan","startedAt":"2026-01-01T08:00:00.000",'
+          '"trigger":"manual","events":[{"eventId":"e1",'
+          '"skillCaseId":"c","kind":"independentAttempt",'
+          '"at":"2026-01-01T08:00:00.000","correct":true}]}');
+      final e = (await store.sessions(learnerId: 'l1')).single.events.single;
+      expect(e.sourceDocumentId, isNull);
+      expect(e.lessonNo, isNull);
+      expect(e.act, isNull);
+      expect(e.learnerText, isNull);
     });
 
     test('support khuyết trong dữ liệu cũ ⇒ null, KHÔNG mặc định none', () async {
