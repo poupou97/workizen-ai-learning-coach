@@ -102,4 +102,24 @@ void main() {
     expect(LessonIndex.fromJsonString('{hỏng'), isNull);
     expect(LessonIndex.fromJsonString('{"subjects":{}}'), isNull);
   });
+
+  test('⭐ WAL-204: câu hỏi CHỌN từ pattern router — có options, KHÔNG có đáp án '
+      '⇒ parse giữ options; không có trường nào cho phép chấm', () {
+    const j = '{"grade":6,"version":"lesson-index-v2","subjects":{},'
+        '"tvReadings":[{"book":"06-sgk-khoa-hoc-tu-nhien-6","lesson":11,"page":40,'
+        '"passage":"Oxygen là chất khí không màu, không mùi, ít tan trong nước.",'
+        '"questions":[{"prompt":"Tính chất nào sau đây là của oxygen?","page":41,'
+        '"options":["Không màu","Có mùi hắc","","Tan nhiều trong nước"]}]}]}';
+    final idx = LessonIndex.fromJsonString(j)!;
+    final q = idx.tvReadings.single.questions.single;
+    expect(q.options, ['Không màu', 'Có mùi hắc', 'Tan nhiều trong nước'],
+        reason: 'options rỗng bị bỏ; thứ tự giữ nguyên');
+    // Không tồn tại trường đáp án trên TvQuestion — tầng UI không thể chấm.
+    expect(q.prompt, contains('oxygen'));
+  });
+
+  test('câu hỏi KHÔNG có options (TV5 mined) ⇒ options rỗng, không bịa', () {
+    final idx = LessonIndex.fromJsonString(_sample)!;
+    expect(idx.tvReadings.single.questions.single.options, isEmpty);
+  });
 }

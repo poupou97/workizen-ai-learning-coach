@@ -1,0 +1,28 @@
+pattern,unique_lessons,pct_of_3679,n_grades,grades,n_subjects,top_subjects,existing_surface,modality,tier
+EXPLAIN_SHORT,874,23.8,12,1;2;3;4;5;6;7;8;9;10;11;12,21,Công nghệ:173; KHTN:111; Chuyên đề:91; Tiếng Việt:77; Tin học:75,—,Text/tap,NEW_TEXT_SURFACE
+ORAL_SHARE,375,10.2,12,1;2;3;4;5;6;7;8;9;10;11;12,19,Tiếng Việt:89; TN&XH:37; Ngữ văn:30; Tin học:30; HĐTN-HN:28,—,Voice (text fallback possible),MULTIMODAL
+OBSERVE,352,9.6,12,1;2;3;4;5;6;7;8;9;10;11;12,13,Công nghệ:125; KHTN:68; Tiếng Việt:38; TN&XH:28; Khoa học:26,—,Text/tap,NEW_TEXT_SURFACE
+RESEARCH_PROJECT,288,7.8,11,2;3;4;5;6;7;8;9;10;11;12,21,Công nghệ:41; LS&ĐL:40; Tin học:35; Chuyên đề:28; HĐTN-HN:24,—,Out-of-app research + text report,MULTIMODAL
+SELECT_MCQ,287,7.8,12,1;2;3;4;5;6;7;8;9;10;11;12,13,Tiếng Anh:75; Tin học:73; Toán:54; Tiếng Việt:31; Chuyên đề:12,QuizSelect,Text/tap,SURFACE_EXISTS
+DRAW_CREATE,260,7.1,12,1;2;3;4;5;6;7;8;9;10;11;12,17,Tin học:48; Chuyên đề:35; Công nghệ:26; Mĩ thuật:26; Âm nhạc:24,—,Drawing/Camera,MULTIMODAL
+READ_TEXT,253,6.9,12,1;2;3;4;5;6;7;8;9;10;11;12,14,Tiếng Việt:94; Ngữ văn:44; Công nghệ:26; GDKT&PL:25; LS&ĐL:20,ReaderScreen,Text/tap,SURFACE_EXISTS
+FILL_BLANK,150,4.1,11,2;3;4;5;6;7;8;9;10;11;12,19,Tiếng Việt:44; Công nghệ:19; Âm nhạc:13; KHTN:11; Chuyên đề:9,—,Text/tap,NEW_TEXT_SURFACE
+WRITE_TEXT,149,4.1,12,1;2;3;4;5;6;7;8;9;10;11;12,15,Tiếng Việt:49; Ngữ văn:29; GDKT&PL:20; Chuyên đề:11; LS&ĐL:7,ComposeLiteScreen,Text/tap,SURFACE_EXISTS
+AUDIO_PERFORM,143,3.9,11,2;3;4;5;6;7;8;9;10;11;12,14,Tiếng Việt:80; Âm nhạc:30; Đạo đức:9; Chuyên đề:7; Tin học:5,—,Audio/Voice,MULTIMODAL
+COMPUTE_SOLVE,124,3.4,11,1;2;3;4;6;7;8;9;10;11;12,14,Toán:40; Chuyên đề:19; Công nghệ:13; Vật lí:11; KHTN:11,TutorScreen (Toán fractions only today),Text/tap,SURFACE_EXISTS_NARROW
+COMPARE,123,3.3,10,3;4;5;6;7;8;9;10;11;12,16,Công nghệ:32; KHTN:22; Ngữ văn:17; Chuyên đề:15; Khoa học:7,—,Text/tap,NEW_TEXT_SURFACE
+DIAGRAM_COMPLETE,120,3.3,12,1;2;3;4;5;6;7;8;9;10;11;12,16,LS&ĐL:31; Ngữ văn:14; Lịch sử:13; TN&XH:12; KHTN:8,—,Text/tap,NEW_TEXT_SURFACE
+CLASSIFY_SORT,110,3.0,12,1;2;3;4;5;6;7;8;9;10;11;12,17,Tiếng Việt:40; Tin học:16; Công nghệ:12; Chuyên đề:8; KHTN:7,—,Text/tap,NEW_TEXT_SURFACE
+ROLEPLAY_GAME,102,2.8,12,1;2;3;4;5;6;7;8;9;10;11;12,15,Tiếng Việt:32; GDTC:20; Tin học:10; TN&XH:7; HĐTN:6,—,Group/Voice,MULTIMODAL
+EXPERIMENT,65,1.8,10,2;3;4;5;6;7;8;9;10;11,5,KHTN:46; Khoa học:9; Vật lí:6; Chuyên đề:2; TN&XH:2,ExperimentScreen,Text/tap,SURFACE_EXISTS
+DICTATION,63,1.7,4,1;2;3;4,1,Tiếng Việt:63,—,Audio,MULTIMODAL
+PLAN_REFLECT,62,1.7,10,2;4;5;6;7;8;9;10;11;12,12,HĐTN-HN:26; Chuyên đề:10; Công nghệ:8; HĐTN:4; KHTN:2,—,Text/tap,NEW_TEXT_SURFACE
+HANDS_ON_TOOL,59,1.6,10,3;4;5;6;7;8;9;10;11;12,7,Tin học:38; Toán:6; Chuyên đề:6; Khoa học:4; Công nghệ:3,—,External software/equipment,MULTIMODAL
+CODE,50,1.4,7,4;5;6;8;10;11;12,4,Tin học:24; Chuyên đề:20; Khoa học:5; Công nghệ:1,—,Text/tap,NEW_TEXT_SURFACE
+MATCH,48,1.3,12,1;2;3;4;5;6;7;8;9;10;11;12,11,Tin học:19; Tiếng Việt:13; Mĩ thuật:4; Công nghệ:3; Âm nhạc:2,—,Text/tap,NEW_TEXT_SURFACE
+SOURCE_REASONING,42,1.1,10,2;4;5;6;7;8;9;10;11;12,9,LS&ĐL:17; Lịch sử:8; Tiếng Việt:5; KHTN:4; Chuyên đề:3,SourceReaderScreen,Text/tap,SURFACE_EXISTS
+PHYSICAL,33,0.9,11,1;2;3;4;5;6;8;9;10;11;12,8,GDTC:14; Tin học:7; Chuyên đề:5; KHTN:2; Vật lí:2,—,Movement,MULTIMODAL
+DATA_CHART,23,0.6,8,4;5;6;7;8;9;10;12,7,LS&ĐL:7; Địa lí:5; Toán:4; Công nghệ:2; KHTN:2,—,Text/tap,NEW_TEXT_SURFACE
+PROVE,20,0.5,7,6;7;8;9;10;11;12,4,KHTN:7; Vật lí:6; Chuyên đề:4; LS&ĐL:3,—,Text/tap,NEW_TEXT_SURFACE
+TRUE_FALSE,17,0.5,4,3;9;10;11,4,GDKT&PL:12; KHTN:3; Tin học:1; TN&XH:1,QuizSelect (2-option),Text/tap,SURFACE_EXISTS
+MAP_SPATIAL,15,0.4,6,3;4;5;6;7;8,2,LS&ĐL:14; TN&XH:1,MapReaderScreen,Text/tap,SURFACE_EXISTS
