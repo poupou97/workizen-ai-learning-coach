@@ -61,16 +61,27 @@ void main() {
   testWidgets('⭐ PREDICT GATE: sách in «Dự đoán» ⇒ bước Tiến hành KHOÁ '
       'tới khi trẻ ghi dự đoán', (t) async {
     await _pump(t, _muoi);
+    // ⭐⭐ WAL-185 — SAM không chỉ CHỌN đúng hình thức (từng bước, không phải
+    // đoạn văn) mà còn NÓI RA lý do trước khi trẻ chạm vào các bước.
+    expect(find.textContaining('nhiều bước làm'), findsOneWidget,
+        reason: '⭐⭐ đột biến bỏ câu dẫn của SAM ⇒ đỏ — representation phải '
+            'có chủ đích, không chỉ là màn hình mặc định');
     expect(find.text('CHUẨN BỊ'), findsOneWidget);
     expect(find.text('DỰ ĐOÁN CỦA EM'), findsOneWidget);
     expect(find.text('TIẾN HÀNH'), findsNothing,
         reason: '⭐ đột biến mở bước trước dự đoán ⇒ test này đỏ — khoa học '
             'bắt đầu bằng giả thuyết, không bằng xem trước kết quả');
+    await t.scrollUntilVisible(
+        find.text('Chốt dự đoán — xem các bước 🔬'), 150,
+        scrollable: find.byType(Scrollable).first);
     await t.tap(find.text('Chốt dự đoán — xem các bước 🔬'));
     await t.pump();
     expect(find.text('TIẾN HÀNH'), findsNothing,
         reason: 'dự đoán rỗng không phải dự đoán');
     await t.enterText(find.byType(TextField).first, 'Nước cạn, còn lại muối');
+    await t.scrollUntilVisible(
+        find.text('Chốt dự đoán — xem các bước 🔬'), 150,
+        scrollable: find.byType(Scrollable).first);
     await t.tap(find.text('Chốt dự đoán — xem các bước 🔬'));
     await t.pumpAndSettle();
     expect(find.text('TIẾN HÀNH'), findsOneWidget);
@@ -123,6 +134,8 @@ void main() {
       (t) async {
     await _pump(t, _muoi);
     await t.enterText(find.byType(TextField).first, 'Nước cạn, còn lại muối');
+    await t.ensureVisible(find.text('Chốt dự đoán — xem các bước 🔬'));
+    await t.pumpAndSettle();
     await t.tap(find.text('Chốt dự đoán — xem các bước 🔬'));
     await t.pumpAndSettle();
     expect(find.text('TIẾN HÀNH'), findsOneWidget);
@@ -131,8 +144,8 @@ void main() {
     await t.scrollUntilVisible(find.text('EM QUAN SÁT ĐƯỢC'), 150,
         scrollable: find.byType(Scrollable).first);
     await t.enterText(find.byType(TextField), 'Đúng như con đoán');
-    await t.scrollUntilVisible(find.text('Em làm xong thí nghiệm ✅'), 150,
-        scrollable: find.byType(Scrollable).first);
+    await t.ensureVisible(find.text('Em làm xong thí nghiệm ✅'));
+    await t.pumpAndSettle();
     await t.tap(find.text('Em làm xong thí nghiệm ✅'));
     await t.pumpAndSettle();
     expect(find.textContaining('So sánh dự đoán'), findsOneWidget,
@@ -150,6 +163,9 @@ void main() {
 
     scan();
     await t.enterText(find.byType(TextField).first, 'muối kết tinh');
+    await t.scrollUntilVisible(
+        find.text('Chốt dự đoán — xem các bước 🔬'), 150,
+        scrollable: find.byType(Scrollable).first);
     await t.tap(find.text('Chốt dự đoán — xem các bước 🔬'));
     await t.pumpAndSettle();
     scan();

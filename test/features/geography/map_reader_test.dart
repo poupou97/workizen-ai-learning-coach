@@ -38,6 +38,11 @@ void main() {
   testWidgets('bản đồ + caption + câu hỏi VERBATIM hiện; nguồn có trang', (t) async {
     await t.pumpWidget(packHost(const MapReaderScreen(map: _map)));
     await t.pump();
+    // ⭐⭐ WAL-185 — SAM không chỉ CHỌN đúng hình thức (bản đồ thật) mà còn
+    // NÓI RA lý do trước khi trẻ chạm vào bản đồ.
+    expect(find.textContaining('vị trí trên bản đồ'), findsOneWidget,
+        reason: '⭐⭐ đột biến bỏ câu dẫn của SAM ⇒ đỏ — representation phải '
+            'có chủ đích, không chỉ là màn hình mặc định');
     expect(find.text('BẢN ĐỒ TRONG SÁCH'), findsOneWidget);
     expect(find.text('Hình 1. Bản đồ tự nhiên Việt Nam'), findsOneWidget);
     // dòng nguồn nằm dưới fold — ListView lười: cuộn tới rồi mới assert.
@@ -80,6 +85,9 @@ void main() {
     // WAL-133: câu này nay do MÔ HÌNH TÀI SẢN sở hữu (missingNoticeOf), một
     // chỗ cho mọi ảnh nguồn — không phải mỗi màn tự chế một câu.
     expect(find.textContaining('chưa có ảnh của bài'), findsOneWidget);
+    await t.scrollUntilVisible(
+        find.textContaining('Kể tên và xác định trên bản đồ'), 150,
+        scrollable: find.byType(Scrollable).first);
     expect(find.textContaining('Kể tên và xác định trên bản đồ'), findsOneWidget,
         reason: 'thiếu ảnh KHÔNG được cắt mất phần học được');
   });

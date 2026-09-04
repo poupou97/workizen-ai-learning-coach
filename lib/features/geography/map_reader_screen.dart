@@ -83,6 +83,11 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
                       () => Navigator.of(context).maybePop()),
                 ]
               : [
+                  _samRow(
+                      'sam-think.png',
+                      'Bài này có vị trí trên bản đồ, SAM cho con xem đúng '
+                      'bản đồ trong sách để con tự chỉ ra nhé.'),
+                  const SizedBox(height: WalSpacing.md),
                   _card(Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -170,6 +175,20 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
           child: Text(label, style: const TextStyle(fontSize: WalType.body)),
         ),
       );
+
+  /// ⭐⭐ WAL-185 — SAM không chỉ chọn ĐÚNG hình thức trình bày (bản đồ thật
+  /// thay vì đoạn văn) mà còn NÓI RA lý do — order Founder §18: "SAM should
+  /// not merely decorate visualization. SAM can use it intentionally."
+  Widget _samRow(String asset, String text) => Row(children: [
+        Image.asset('assets/mascot/$asset',
+            width: densityOf(context).mascotChip,
+            height: densityOf(context).mascotChip),
+        const SizedBox(width: WalSpacing.md),
+        Expanded(
+            child: Text(text,
+                style: const TextStyle(
+                    fontSize: WalType.body, color: WalColors.ink))),
+      ]);
 
   Widget _card(Widget child) => Container(
         width: double.infinity,
