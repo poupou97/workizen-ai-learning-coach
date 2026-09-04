@@ -29,6 +29,7 @@ import 'features/settings/settings_screen.dart';
 import 'core/curriculum/canonical_problem.dart';
 import 'core/knowledge/provenance.dart';
 import 'core/knowledge/slice_curriculum.dart' show curriculaForLearner;
+import 'core/store/timetable.dart';
 import 'features/learning_session/slice_flow.dart';
 import 'features/assessment/assessment_screen.dart';
 import 'features/assessment/learner_confirm.dart';
@@ -89,6 +90,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   LearnerProfile? _profile;
   bool _loading = true;
   Future<MissionData>? _mission;
+  List<TimetableEntry> _timetable = const [];
   LessonIndex? _lessonIndex; // WAL-136 — null = chưa build asset, nói thật
   StoriesStore _stories = StoriesStore.open('/khong-co'); // rỗng tới khi nạp
   StoryItem? _splashQuote;
@@ -161,7 +163,21 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     _mission = p == null
         ? null
         : buildMissionFromStore(profile: p, store: widget.store);
+    if (p != null) {
+      widget.store.timetable(p.learnerId).then((t) {
+        if (mounted) setState(() => _timetable = t);
+      });
+    } else {
+      _timetable = const [];
+    }
   }
+
+  /// Môn đang có chỗ vướng / đến hạn ôn — suy từ CHÍNH danh sách ôn đã tính,
+  /// không tính lại bằng luật thứ hai. Một luật, một chỗ.
+  Set<String> _reviewDueSubjects(MissionData data) => {
+        for (final r in data.reviews)
+          if (r.subjectId != null) r.subjectId!,
+      };
 
   Future<void> _onboarded(LearnerProfile p) async {
     await widget.store.saveProfile(p);
@@ -429,6 +445,12 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                                                     index: idx,
                                                     subject: b.subject,
                                                     book: b,
+                                                    // ⭐ WAL-175 — hai tín hiệu
+                                                    // để SAM ĐỀ NGHỊ ý định.
+                                                    // Rỗng ⇒ SAM hỏi thẳng.
+                                                    timetable: _timetable,
+                                                    reviewDueSubjects:
+                                                        _reviewDueSubjects(data),
                                                   ))))
                                   : SubjectsScreen(
                                       profile: _profile!,

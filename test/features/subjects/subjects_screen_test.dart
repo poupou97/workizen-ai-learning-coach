@@ -50,12 +50,18 @@ void main() {
     expect(find.textContaining('SAM đang học bài này'), findsOneWidget,
         reason: 'bài 9 chưa có exercises — nói thật');
 
-    // Toán B6 giờ có 2 hoạt động (làm bài + nguồn) ⇒ sheet chọn (WAL-141 #17).
+    // ⭐ WAL-175 — bấm bài ra bộ chọn Ý ĐỊNH, không phải danh sách việc.
     await t.tap(find.textContaining('Cộng, trừ hai phân số'));
     await t.pumpAndSettle();
-    expect(find.text('📖 Nguồn bài học'), findsOneWidget);
-    // Nguồn bài học: cả 2 cách với sourceLine ĐÚNG LUẬT (demonstrated ≠ sách nói)
-    await t.tap(find.text('📖 Nguồn bài học'));
+    expect(find.text('Con muốn bắt đầu thế nào?'), findsOneWidget,
+        reason: 'không có thời khoá biểu, không có bằng chứng ⇒ SAM HỎI, '
+            'không bịa lý do');
+    expect(find.text('Con có bài tập'), findsOneWidget);
+    expect(find.text('Xem trong sách'), findsOneWidget);
+
+    // «Xem trong sách» dẫn tới NGUỒN, và nguồn phải đúng luật
+    // (demonstrated ≠ «sách nói rằng»).
+    await t.tap(find.text('Xem trong sách'));
     await t.pumpAndSettle();
     expect(find.textContaining('làm theo ví dụ trong SGK Toán 5, trang 21'),
         findsOneWidget);
@@ -66,7 +72,7 @@ void main() {
     await t.pumpAndSettle();
     await t.tap(find.textContaining('Cộng, trừ hai phân số'));
     await t.pumpAndSettle();
-    await t.tap(find.text('🧮 Làm bài tập'));
+    await t.tap(find.text('Con có bài tập'));
     await t.pumpAndSettle();
     expect(find.text('1/2 - 1/5'), findsOneWidget,
         reason: 'bài THẬT từ SGK (cur: origin), không placeholder');
