@@ -91,6 +91,31 @@ void main() {
     expect(find.text('EM QUAN SÁT ĐƯỢC'), findsOneWidget);
     expect(find.textContaining('không chấm'), findsOneWidget,
         reason: 'nói thật với trẻ về việc không chấm');
+    // ⭐⭐ WAL-176 — bài KHÔNG có bước dự đoán (nến) thì câu chốt KHÔNG được
+    // nhắc «dự đoán»: trẻ chưa từng được hỏi dự đoán ở bài này.
+    expect(find.textContaining('So sánh dự đoán'), findsNothing,
+        reason: '⭐⭐ đột biến câu chốt luôn nhắc dự đoán ⇒ đỏ — nói một việc '
+            'trẻ chưa từng làm là câu không thật');
+  });
+
+  testWidgets('⭐ bài CÓ dự đoán ⇒ câu chốt mời SO SÁNH dự đoán với quan sát',
+      (t) async {
+    await _pump(t, _muoi);
+    await t.enterText(find.byType(TextField).first, 'Nước cạn, còn lại muối');
+    await t.tap(find.text('Chốt dự đoán — xem các bước 🔬'));
+    await t.pumpAndSettle();
+    expect(find.text('TIẾN HÀNH'), findsOneWidget);
+    // Ô quan sát nằm dưới cuối ListView — cùng lý do các test khác phải
+    // scroll trước khi chạm nút hoàn tất.
+    await t.scrollUntilVisible(find.text('EM QUAN SÁT ĐƯỢC'), 150,
+        scrollable: find.byType(Scrollable).first);
+    await t.enterText(find.byType(TextField), 'Đúng như con đoán');
+    await t.scrollUntilVisible(find.text('Em làm xong thí nghiệm ✅'), 150,
+        scrollable: find.byType(Scrollable).first);
+    await t.tap(find.text('Em làm xong thí nghiệm ✅'));
+    await t.pumpAndSettle();
+    expect(find.textContaining('So sánh dự đoán'), findsOneWidget,
+        reason: 'bài CÓ dự đoán ⇒ câu chốt phải nhắc lại đúng việc trẻ vừa làm');
   });
 
   testWidgets('không % trên mọi trạng thái', (t) async {

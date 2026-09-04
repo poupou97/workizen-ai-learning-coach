@@ -27,6 +27,7 @@ import 'features/discovery/story_detail_screen.dart';
 import 'features/parent/parent_area.dart';
 import 'features/settings/settings_screen.dart';
 import 'core/curriculum/canonical_problem.dart';
+import 'core/intent/next_lesson.dart';
 import 'core/knowledge/provenance.dart';
 import 'core/knowledge/slice_curriculum.dart' show curriculaForLearner;
 import 'core/store/timetable.dart';
@@ -178,6 +179,50 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
         for (final r in data.reviews)
           if (r.subjectId != null) r.subjectId!,
       };
+
+  /// ⭐⭐ WAL-176 (Missing #1) — gợi ý CẤP SÁCH từ TKB, môn BẤT KỲ có bìa +
+  /// hoạt động thật (không riêng Toán — `LearningAgenda`/WAL-102 chỉ phủ dòng
+  /// `SliceCurriculum` DUY NHẤT hiện có). Tính lại mỗi build từ state đã nạp
+  /// — cùng cách `_reviewDueSubjects` đang làm, không thêm luồng async mới.
+  HomeRecommendation? _bookRecommendation() {
+    final idx = _lessonIndex;
+    if (idx == null) return null;
+    return nextBookRecommendation(
+        index: idx, now: DateTime.now(), timetable: _timetable);
+  }
+
+  /// Bấm «Bắt đầu» trên thẻ gợi ý sách: mở ĐÚNG Book Home rồi tự vào thẳng
+  /// bài/ý định đã đề nghị — trẻ không bị hỏi lại (SAM đã hỏi xong ở Home).
+  Future<void> _startRecommendation(
+      BuildContext context, MissionData data, HomeRecommendation rec) async {
+    final idx = _lessonIndex;
+    if (idx == null) return;
+    final book =
+        idx.books.where((b) => b.sourceDocumentId == rec.sourceDocumentId).firstOrNull;
+    if (book == null) return;
+    await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+      final screen = SubjectHomeScreen(
+        profile: _profile!,
+        store: widget.store,
+        index: idx,
+        subject: rec.subject,
+        book: book,
+        timetable: _timetable,
+        reviewDueSubjects: _reviewDueSubjects(data),
+      );
+      // ⭐ Book Home vào ĐÚNG stack (back trả về đây, không rơi thẳng về
+      // Home) — rồi mới tự mở tiếp bài/ý định, không cần trẻ chạm lần hai.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!ctx.mounted) return;
+        screen.openLessonWithIntent(ctx,
+            sourceDocumentId: rec.sourceDocumentId,
+            lessonNo: rec.lessonNo,
+            intent: rec.intent);
+      });
+      return screen;
+    }));
+    if (mounted) setState(_refreshMission);
+  }
 
   Future<void> _onboarded(LearnerProfile p) async {
     await widget.store.saveProfile(p);
@@ -398,6 +443,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                       final ocr = widget.ocr;
                       return MissionCenterScreen(
                         data: data,
+                        bookRecommendation: _bookRecommendation(),
+                        onStartRecommendation: (rec) =>
+                            _startRecommendation(context, data, rec),
                         learnerName: _profile!.displayName,
                         profiles: _profiles,
                         activeLearnerId: _profile!.learnerId,
@@ -409,16 +457,22 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                             saveExport: _saveExport),
                         onReview: () => _openReview(context),
                         onAssess: () => _openAssessment(context),
-                        onOpenSettings: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) =>
-                                    SettingsScreen(
+                        onOpenSettings: () async {
+                          await Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => SettingsScreen(
                                   stories: _stories,
                                   profile: _profile,
                                   store: widget.store,
                                   index: _lessonIndex,
                                   profiles: _profiles,
-                                  onProfileChanged: _onProfileEdited))),
+                                  onProfileChanged: _onProfileEdited)));
+                          // ⭐⭐ WAL-176 — Thời khoá biểu sửa được TỪ Thêm →
+                          // Cài đặt; Home đọc `_timetable` từ STATE trong bộ
+                          // nhớ, không phải kho mỗi lần build. Thiếu dòng này
+                          // thì gợi ý sách qua TKB đứng yên tới lần mở app
+                          // sau — TKB tưởng đã lưu nhưng Home chưa "thấy".
+                          if (mounted) setState(_refreshMission);
+                        },
                         todayStory: _stories
                             .todayEvents(DateTime.now())
                             .firstOrNull,
