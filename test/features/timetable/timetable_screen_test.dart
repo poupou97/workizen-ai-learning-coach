@@ -34,7 +34,9 @@ void main() {
     await t.pumpAndSettle();
     var saved = await store.timetable('na');
     expect(saved, hasLength(1));
-    expect(saved.single.subjectId, 'Toán');
+    // ⭐⭐ WAL-176 — lưu MÃ môn (WAL-173 subjectIdOf), không phải tên hiển thị:
+    // đột biến quay lại lưu tên ⇒ mọi nơi so khớp TKB theo mã đỏ ngay.
+    expect(saved.single.subjectId, 'toan');
     expect(saved.single.weekday, DateTime.monday);
     expect(saved.single.period, 1);
 

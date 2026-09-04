@@ -13,6 +13,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import '../../core/curriculum/subject_id.dart';
 import '../../core/store/learner_profile.dart';
 import '../../core/store/learner_store.dart';
 import '../../core/store/timetable.dart';
@@ -83,9 +84,19 @@ class _TimetableScreenState extends State<TimetableScreen> {
           learnerId: widget.profile.learnerId,
           weekday: _day,
           period: next,
-          subjectId: subject),
+          // ⭐ WAL-176 — ghi MÃ môn (WAL-173 `subjectIdOf`), không phải tên
+          // hiển thị: mọi nơi so khớp TKB (`proposeIntent`, gợi ý Home) đọc
+          // `subjectId` theo mã. Ghi tên thẳng ⇒ so khớp không bao giờ khớp
+          // — bài trước nay chưa lộ ra vì chưa có ai thật sự SO KHỚP nó.
+          subjectId: subjectIdOf(subject)),
     ]);
   }
+
+  /// Tên hiển thị từ MÃ đã lưu — tra ngược trong danh sách môn có thật của
+  /// máy này. Không thấy môn nào khớp (mục lục đã đổi) ⇒ hiện mã trần, không
+  /// bịa tên.
+  String _displayName(String subjectId) => widget.subjects
+      .firstWhere((s) => subjectIdOf(s) == subjectId, orElse: () => subjectId);
 
   Future<void> _remove(TimetableEntry e) async => _persist([
         for (final x in _entries)
@@ -159,7 +170,8 @@ class _TimetableScreenState extends State<TimetableScreen> {
                     borderRadius:
                         BorderRadius.circular(WalSpacing.radiusChip),
                     child: ListTile(
-                      title: Text('Tiết ${e.period} · ${e.subjectId}',
+                      title: Text(
+                          'Tiết ${e.period} · ${_displayName(e.subjectId)}',
                           style: const TextStyle(
                               fontSize: WalType.body, color: WalColors.ink)),
                       trailing: IconButton(
