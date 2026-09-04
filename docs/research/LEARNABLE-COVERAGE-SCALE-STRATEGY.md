@@ -6,6 +6,54 @@ memory. Where a number is a range, the assumption behind the range is stated.
 
 ---
 
+## UPDATE (same-day, post-Founder-approval) — Ngữ văn POC attempted, correctly
+not shipped this round
+
+Following Founder's approval of this strategy, began the recommended #1 POC
+(Ngữ văn reading extraction). Findings, more detailed than the original entry
+in §5's Opportunity Map:
+
+**The passage-boundary marker generalizes further than first measured.**
+Grade 6 raw OCR shows an explicit, consistent `Trước khi đọc` / `Đọc văn bản`
+marker pair (11-15 occurrences/book). Testing marker-*containment* (not
+line-start matching) against the already-computed `poc-out/units-k12/` output
+confirms real, correctly lesson-attached passages — including recognizable,
+real literary content (Andersen's "Cô bé bán diêm"/The Little Match Girl at
+grade 6; "Thần Trụ Trời" and other creation myths at grade 10; "Chuyện người
+con gái Nam Xương" at grade 9) — for **grades 6, 7, 8, 9, and 10** (15, 24, 25,
+25, and 8 candidate passage-units respectively). This is better-generalizing
+evidence than the original entry assumed.
+
+**What's still missing, and why this was not rushed to ship**: `units-k12`'s
+generic extractor does not cleanly separate the passage from its paired
+comprehension question the way the dedicated `extract_units_tv.py` does for
+Tiếng Việt (`SECTION_TEXT >= 400 chars` + adjacent `EXERCISE` role, computed
+independently) — Ngữ văn's units mix passage and trailing question text into
+one greedy block. A naive length+lesson-attachment filter also picks up
+front-matter and table-of-contents blocks as false positives (both filtered
+out here, but only after being caught by hand-inspection, not automatically).
+Building a clean passage/question splitter requires the same kind of
+dedicated, raw-OCR-based, grade-specific investigation WAL-190's science
+extractor needed — not a quick reuse of already-computed data. Attempting it
+under time pressure would have violated this project's own gold-set-first
+discipline, so it was deliberately stopped short of implementation.
+
+**What did ship this round instead**: WAL-191 — while investigating this,
+found and fixed a real latent bug: `_openReading`/`_openWriting` hardcoded
+`subjectId: 'tieng-viet'`, the same class of bug WAL-173 already fixed for
+Experiment. Not yet active (both fields currently hold only real Tiếng Việt
+data), but would have silently mis-tagged evidence the moment Ngữ văn data
+was ever added — exactly the kind of thing this fix needed to happen *before*
+that data lands, not after.
+
+**Revised confidence for §5's Ngữ văn row**: lesson-count estimate (50-60)
+still stands as directionally reasonable given the marker now confirmed across
+5 grades, not 1; cost/confidence should move from "low-medium cost" to
+"medium cost" — the passage/question splitter is real, un-started work,
+comparable in scope to what `extract_units_tv.py` already required for TV5.
+
+---
+
 ## 1. Challenge the number: is 113 correct?
 
 **113 measures exactly one thing**: distinct `(sourceDocumentId, lessonNo)` pairs
