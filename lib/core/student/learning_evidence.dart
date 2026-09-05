@@ -17,11 +17,59 @@
 /// chỉ chặn được nếu ta còn phân biệt được *"đúng"* nào là do đứa trẻ và
 /// *"đúng"* nào là do hệ thống. Một cờ boolean `correct` **không mang** phân
 /// biệt đó, và không có tham số `slip`/`guess` nào khôi phục lại được.
+///
+/// ⭐⭐ ROUND 4 (A-runtime, Founder §4 STRICT EVIDENCE): luật ĐỌC mặc định là
+/// SIẾT — chỉ sự kiện mang dấu validator ĐÃ ĐĂNG KÝ cấp năng lực mới là
+/// «tự làm được» / đẩy mastery. Sự kiện CÓ CHẤM nhưng KHÔNG DẤU (trước hợp
+/// đồng A3, hoặc emitter chưa đóng dấu) được đọc là [EvidenceReadClass
+/// .historicalUnvalidated] — vẫn nằm trong lịch sử với nhãn thật
+/// («ghi nhận trước hợp đồng mới»), KHÔNG viết lại, KHÔNG xoá, và KHÔNG BAO
+/// GIỜ thành «Tự làm được». Không có migration dữ liệu: đây là phân loại
+/// PHÍA ĐỌC, log trên đĩa nguyên trạng.
 library;
 
 import '../pedagogy/pedagogy_model.dart' show TeachingAct;
 import 'evidence_validation.dart';
 import 'mastery.dart';
+
+/// ⭐⭐ ROUND 4 — PHÂN LOẠI PHÍA ĐỌC của một sự kiện (không ghi vào log).
+///
+/// Mọi hàm trạng thái (Learning Map, Parent, BKT, Next Action) đọc sự kiện
+/// qua lớp này. Thứ tự liệt kê KHÔNG phải thứ tự ưu tiên — mỗi sự kiện rơi
+/// vào ĐÚNG MỘT lớp.
+enum EvidenceReadClass {
+  /// Có chấm + dấu validator ĐÃ ĐĂNG KÝ cấp năng lực (`fraction-check-v1`).
+  /// Lớp DUY NHẤT được phép thành «Tự làm được» / đẩy mastery.
+  validatedCompetence,
+
+  /// Tự báo / hoàn thành (kể cả dấu `candidate-gate-v1`, và dữ liệu cũ
+  /// `independentAttempt` + `correct == null`). Chỉ chứng minh THAM GIA.
+  participation,
+
+  /// ⭐ Có chấm nhưng KHÔNG dấu — dữ liệu TRƯỚC hợp đồng A3 hoặc emitter chưa
+  /// đóng dấu. Giữ nguyên trong lịch sử với nhãn thật; không phải năng lực.
+  historicalUnvalidated,
+
+  /// Có dấu nhưng validator KHÔNG đăng ký / không cấp năng lực (vd một
+  /// «llm-judge»). Từ chối ở mọi hàm trạng thái (RETRIEVED ≠ PERMITTED).
+  rejectedValidation,
+
+  /// Không phải câu trả lời (xin gợi ý, hệ thống hiện gợi ý) — không chấm.
+  unscored;
+
+  /// Nhãn trung thực cho lịch sử / phiên học (Lane B hiển thị NGUYÊN VĂN).
+  String get historyLabel => switch (this) {
+        validatedCompetence => 'đã kiểm (validator)',
+        participation => 'tự báo — không chấm',
+        historicalUnvalidated => historicalUnvalidatedLabel,
+        rejectedValidation => 'dấu kiểm không được duyệt',
+        unscored => 'không chấm',
+      };
+}
+
+/// ⭐ Nhãn cố định cho dữ liệu cũ có chấm nhưng không dấu — dùng chung ở
+/// Sessions / Progress / Parent. Không nói «đúng», không nói «tự làm được».
+const String historicalUnvalidatedLabel = 'ghi nhận trước hợp đồng mới';
 
 /// ⭐ Bảy loại sự kiện Founder liệt kê. Cố ý **không** gộp.
 ///
@@ -193,9 +241,24 @@ class LearningEvent {
 
   /// ⭐ Sự kiện CÓ CHẤM nhưng KHÔNG mang dấu — dữ liệu trước hợp đồng A3
   /// (hoặc emitter chưa đóng dấu, xem danh sách trong
-  /// `validated_evidence_doctrine_test`). Đọc THEO LUẬT CŨ (đếm) cho tới khi
-  /// Founder quyết luật đọc dữ liệu cũ — PROPOSED, không phải mặc định êm.
+  /// `validated_evidence_doctrine_test`). ROUND 4: đọc là
+  /// [EvidenceReadClass.historicalUnvalidated] — KHÔNG đếm là năng lực ở
+  /// chế độ mặc định; chỉ luật đọc-cũ tường minh (`requireValidation:
+  /// false`, `ConservativeBktPolicy`) mới đếm, và chỉ để đối chiếu/audit.
   bool get isLegacyUnstampedGrade => correct != null && validation == null;
+
+  /// Tên theo lệnh Founder §4 — cùng nghĩa với [isLegacyUnstampedGrade].
+  bool get isHistoricalUnvalidated => isLegacyUnstampedGrade;
+
+  /// ⭐⭐ ROUND 4 — lớp đọc của sự kiện (đúng một lớp, fail closed).
+  EvidenceReadClass get readClass {
+    if (isParticipation) return EvidenceReadClass.participation;
+    if (correct == null) return EvidenceReadClass.unscored;
+    if (validation == null) return EvidenceReadClass.historicalUnvalidated;
+    return validation!.grantsCompetence
+        ? EvidenceReadClass.validatedCompetence
+        : EvidenceReadClass.rejectedValidation;
+  }
 
   /// ⭐ Sự kiện mang dấu của validator KHÔNG được đăng ký / không được cấp
   /// năng lực ⇒ bị TỪ CHỐI ở mọi hàm trạng thái (RETRIEVED ≠ PERMITTED áp cho
@@ -230,15 +293,23 @@ class LearningEvent {
   /// trên Learning Map / câu kể cho phụ huynh (cùng ngưỡng với
   /// `feedbackFor` — "SAM ghi lại: con TỰ làm được").
   ///
-  /// ⭐⭐ Round 3 (A3): dấu kiểm chứng LẠ ⇒ không bao giờ là tự-làm-được.
-  /// Không dấu (dữ liệu cũ / emitter chưa đóng dấu) đọc theo luật cũ — xem
-  /// [isLegacyUnstampedGrade]; siết «chỉ có dấu mới đếm» qua
-  /// `learningMapStateFor(requireValidation: true)`.
+  /// ⭐⭐ ROUND 4 (Founder §4): «tự làm được» = tự làm / tự sửa, `correct ==
+  /// true`, VÀ mang dấu validator ĐÃ ĐĂNG KÝ cấp năng lực. Dấu lạ ⇒ không;
+  /// KHÔNG dấu (dữ liệu cũ) ⇒ không — xem [isLegacyUnstampedSuccess] cho
+  /// luật đọc-cũ tường minh (audit), không phải mặc định.
   bool get isValidatedIndependentSuccess =>
+      _isIndependentSuccessShape && hasApprovedValidation;
+
+  /// Dạng «tự làm đúng» nhưng KHÔNG có dấu — dữ liệu trước hợp đồng. Chỉ
+  /// `learningMapStateFor(requireValidation: false)` đọc nó là tự-làm-được,
+  /// và chỉ để đối chiếu. Mặc định: [EvidenceReadClass.historicalUnvalidated].
+  bool get isLegacyUnstampedSuccess =>
+      _isIndependentSuccessShape && validation == null;
+
+  bool get _isIndependentSuccessShape =>
       (kind == EvidenceKind.independentAttempt ||
           kind == EvidenceKind.selfCorrection) &&
-      correct == true &&
-      !hasRejectedValidation;
+      correct == true;
 
   /// ⭐⭐ Câu trả lời này có bị **chính can thiệp của hệ thống** quyết định không.
   ///
