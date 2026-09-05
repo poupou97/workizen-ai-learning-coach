@@ -608,10 +608,57 @@ COLOUR_HEAVY_EXEMPT = ('heading', 'stage_label', 'page_number', 'running_head', 
 # re-derivation, so the two cannot drift.
 ROLE_DERIVED_GUARDS = frozenset({'empty_block', 'furniture', 'figure_text', 'math_guard', 'unit_guard', 'chem_guard',
                                  'figure_dependent', 'answer_leak', 'teacher_text',
-                                 'page_feature:color_heavy', 'page_feature:diagram'})
+                                 'page_feature:color_heavy', 'page_feature:diagram', 'line_structure'})
+# Round 4, R7c (found by Lane D's measured re-run of legacy batch 1, newly reachable because the block-level
+# colour fix serves these regions again): a block's text is ONE string, so a poem's verse lines arrive joined
+# into prose — «Tôi đạp vỡ màu nâu Bầu trời trong quả trứng Bỗng thấy nhiều gió lộng …». Roles whose line
+# breaks are typography, not meaning, are exempt; for the rest the block is WITHHELD, never reflowed and
+# never repaired. A withheld region still carries its crop, so the printed verse survives as an image.
+VERSE_EXEMPT = ('heading', 'stage_label', 'page_number', 'running_head', 'figure_text', 'figure', 'empty', 'table')
+VERSE_MIN_LINES = 3
+VERSE_MIN_CAPS = 0.8          # share of lines that begin with a capital — the printed convention for verse
+VERSE_MAX_WIDTH = 0.95        # of the page's own text width: prose is justified to the column, verse is not
+#   calibrated, not guessed: over 14 546 measurable text blocks the prose that reaches VERSE_MIN_CAPS by
+#   coincidence sits at 1.00–1.06 of the column width, and the whole 0.85–0.97 band holds exactly two
+#   blocks, both genuinely line-structured (a verse stanza and a structural chemical formula).
+VERSE_MAX_ENDS = 1.0 / 3      # share of non-final lines ending in sentence punctuation (prose sentences do)
 
 
-def role_guards(role, text, refers_figure, colour, features, inside_picture=False):
+def page_text_width(lines):
+    """The page's own text-column width: the 90th percentile of the widths of its substantial OCR lines.
+    None when the page has none (the verse test then fails OPEN — unknown geometry must not withhold)."""
+    ws = sorted(l['w'] for l in (lines or []) if len(l.get('text', '').strip()) > 20)
+    return ws[int(0.9 * (len(ws) - 1))] if ws else None
+
+
+def verse_layout(under_lines, page_width):
+    """Are these OCR lines laid out as VERSE (or another line-break-significant block)?
+
+    Deterministic geometry + the printed convention, calibrated on real pages (TV5 «Hạt gạo làng ta»,
+    «Mầm non», «Tiếng đàn ba-la-lai-ca», LS&ĐL 5's ca dao) against the prose of the same books:
+      · at least VERSE_MIN_LINES lines;
+      · at least VERSE_MIN_CAPS of them begin with a capital (a poet capitalises every line; prose only
+        reaches this by coincidence, and rarely);
+      · the longest line stays under VERSE_MAX_WIDTH of the page's text width — prose fills its column;
+      · at most VERSE_MAX_ENDS of the non-final lines end in sentence punctuation (three sentences on three
+        short lines are maths prose, not verse).
+    Fails OPEN (False) when the geometry is unknown: this guard withholds, so a false positive costs a
+    trusted block.
+    """
+    lines = [l for l in (under_lines or []) if (l.get('text') or '').strip()]
+    if len(lines) < VERSE_MIN_LINES or not page_width:
+        return False
+    texts = [l['text'].strip() for l in lines]
+    caps = sum(1 for t in texts if t[:1].isupper()) / len(texts)
+    if caps < VERSE_MIN_CAPS:
+        return False
+    if max(l['w'] for l in lines) > VERSE_MAX_WIDTH * page_width:
+        return False
+    ends = sum(1 for t in texts[:-1] if re.search(r'[.!?:;]\s*$', t)) / max(1, len(texts) - 1)
+    return ends <= VERSE_MAX_ENDS
+
+
+def role_guards(role, text, refers_figure, colour, features, inside_picture=False, verse=False):
     """The guard reasons that depend on the block's role. Deterministic; withholds only, never repairs.
 
     `features` is the page census row (`color_heavy`, `diagram`); `colour` the block's own measured colour.
@@ -641,6 +688,8 @@ def role_guards(role, text, refers_figure, colour, features, inside_picture=Fals
     if (features or {}).get('diagram') and role in ('body', 'sidebar', 'question', 'activity', 'instruction', 'objective') \
             and (inside_picture or (len(t) < 30 and not ends_sentence(t))):
         g.append('page_feature:diagram')
+    if verse and role not in VERSE_EXEMPT:
+        g.append('line_structure')
     return g
 
 
@@ -652,7 +701,7 @@ def trust_status(role, withhold):
     return 'CONFLICT' if any(x in ('role_conflict', 'agree_order') for x in withhold) and 'agree_text' not in withhold else 'WITHHELD'
 
 
-def rederive_trust(out_blocks, features, inside_pic_by_id=None):
+def rederive_trust(out_blocks, features, inside_pic_by_id=None, verse_by_id=None):
     """Recompute every role-dependent guard after the post-passes changed roles (round 4 review, F3).
 
     Guards that do NOT depend on the role — the agreement guards (`agree_text`/`agree_order`/
@@ -662,11 +711,12 @@ def rederive_trust(out_blocks, features, inside_pic_by_id=None):
     known asymmetry, recorded rather than quietly changed.
     """
     inside_pic_by_id = inside_pic_by_id or {}
+    verse_by_id = verse_by_id or {}
     for ob in out_blocks:
         r = ob['role']['value']
         keep = [x for x in ob['guards'] if x not in ROLE_DERIVED_GUARDS]
         g = role_guards(r, ob.get('text') or '', ob.get('refers_figure'), ob.get('colour'), features,
-                        inside_pic_by_id.get(ob.get('id'), False)) + keep
+                        inside_pic_by_id.get(ob.get('id'), False), verse_by_id.get(ob.get('id'), False)) + keep
         ob['guards'] = g
         withhold = [x for x in g if x != 'enumerator_restored']
         ob['trust']['reasons'] = withhold
@@ -999,6 +1049,8 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
     prev_role = None; prev_text = None; box = None; heading_path = []; answer_section = False
     out_blocks = []
     inside_pic_by_id = {}          # block id → was it inside a Docling picture box (needed to re-derive the diagram guard)
+    verse_by_id = {}               # block id → are its OCR lines laid out as verse (R7c)
+    ptw = page_text_width(lines)   # the page's own text-column width, for the verse test
     for rank, pi in enumerate(order_map):
         b, a = blocks[pi], agree[pi]
         bb = b['bbox']
@@ -1055,7 +1107,8 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
         # re-derivation also uses, round 4 correctness review F3); the rest depend on the agreement, the
         # verifier or the OCR and are not affected by a later role change.
         refers_fig = bool(FIG_REF.search(t))
-        guards = role_guards(role, t, refers_fig, col, cen, inside_pic)
+        verse = verse_layout(under, ptw)
+        guards = role_guards(role, t, refers_fig, col, cen, inside_pic, verse)
         learning = role not in NON_LEARNING
         if not a['ok'] and role not in ('figure', 'empty', 'page_number', 'running_head'):
             if a['reason'] == 'agree_order' and role in FLEX_ROLES:
@@ -1079,6 +1132,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
         status = trust_status(role, withhold)
         sdm_id = f'{book}:p{page:03d}:{pipeline}:{b["order"]:03d}'   # id = the primary's native block index (stable across re-sequencing)
         inside_pic_by_id[sdm_id] = inside_pic
+        verse_by_id[sdm_id] = verse
         ob = dict(id=sdm_id, order=rank, native_order=b['order'], native_label=b.get('native_label'), text=b['text'], text_docling=b.get('text_docling'), enumerator_restored=bool(b.get('enumerator_restored')),
                   bbox=bb, column=(1 if bb and bb[0] + bb[2] / 2 < 0.5 else 2) if bb else None, ocr_conf=b['ocr_conf'], colour=col, extraction=b.get('extraction'),
                   agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok'], verifier_pos=a.get('vpos'), moved=a.get('moved', False), tone_disagreements=tones[:6]),
@@ -1099,7 +1153,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
         role_signal_pass(book, page, out_blocks, role_signal)
     # re-derive trust for blocks whose role changed in the post-passes: EVERY guard that depends on the
     # role, not only the three that used to be recomputed (round 4 correctness review, F3)
-    rederive_trust(out_blocks, cen, inside_pic_by_id)
+    rederive_trust(out_blocks, cen, inside_pic_by_id, verse_by_id)
     # figures: pictures + their labels + captions
     figures = []
     for k, p in enumerate(pics):

@@ -313,5 +313,72 @@ class F10SharedCaptionTests(unittest.TestCase):
         self.assertEqual(caption['relations']['captionOf'], kept['id'])
 
 
+def ocr_line(text, y, x=0.15, w=0.30, h=0.015):
+    return dict(text=text, x=x, y=y, w=w, h=h)
+
+
+class R7cVerseLayoutTests(unittest.TestCase):
+    """R7c (Lane D, measured on their legacy batch-1 re-run) — the block-level colour fix served a poem
+    again, and the poem's verse lines arrive JOINED into one prose paragraph, because a block's text is one
+    string. Line-break-significant text is withheld rather than delivered mangled (fail closed): the
+    withheld region still carries its crop, so the printed verse survives as an image."""
+
+    COL = 0.62      # the page's text width
+
+    def page(self, widths):
+        return [ocr_line('x' * 40, 0.2, w=self.COL) for _ in range(6)] + \
+               [ocr_line('y' * 40, 0.5, w=w) for w in widths]
+
+    def verse(self):
+        return [ocr_line('Tôi đạp vỡ màu nâu', 0.50, w=0.22),
+                ocr_line('Bầu trời trong quả trứng', 0.53, w=0.26),
+                ocr_line('Bỗng thấy nhiều gió lộng', 0.56, w=0.27),
+                ocr_line('Bỗng thấy nhiều nắng reo', 0.59, w=0.27)]
+
+    def prose(self):
+        return [ocr_line('Công cuộc đấu tranh chống ngoại xâm của Nhà nước mẫu và Nhà', 0.50, w=self.COL),
+                ocr_line('Âu Lạc còn được phản ánh sinh động qua một số truyền thuyết', 0.53, w=self.COL),
+                ocr_line('Thánh Gióng, Sự tích nỏ thần,...', 0.56, w=0.31)]
+
+    def test_verse_lines_are_recognised(self):
+        self.assertTrue(tc2_sdm.verse_layout(self.verse(), self.COL))
+
+    def test_justified_prose_is_not_verse(self):
+        self.assertFalse(tc2_sdm.verse_layout(self.prose(), self.COL))
+
+    def test_sentences_on_their_own_lines_are_not_verse(self):
+        # «AH vuông góc với DC. / AH là đường cao. / Độ dài AH là chiều cao.» — maths prose, not verse
+        lines = [ocr_line('Đoạn AB vuông góc với CD.', 0.50, w=0.22),
+                 ocr_line('Đoạn AB là đường cao.', 0.53, w=0.20),
+                 ocr_line('Độ dài AB là chiều cao mẫu.', 0.56, w=0.24)]
+        self.assertFalse(tc2_sdm.verse_layout(lines, self.COL))
+
+    def test_two_lines_or_lowercase_starts_are_not_verse(self):
+        self.assertFalse(tc2_sdm.verse_layout(self.verse()[:2], self.COL))
+        low = [dict(l, text=l['text'].lower()) for l in self.verse()]
+        self.assertFalse(tc2_sdm.verse_layout(low, self.COL))
+
+    def test_no_page_width_fails_open_not_closed(self):
+        # unknown geometry must not withhold everything
+        self.assertFalse(tc2_sdm.verse_layout(self.verse(), None))
+
+    def test_the_guard_withholds_prose_roles_and_spares_typographic_ones(self):
+        self.assertIn('line_structure', tc2_sdm.role_guards('body', 'Một dòng mẫu', False, None, {}, verse=True))
+        self.assertIn('line_structure', tc2_sdm.role_guards('sidebar', 'Một dòng mẫu', False, None, {}, verse=True))
+        for role in ('heading', 'stage_label', 'page_number', 'figure_text'):
+            self.assertNotIn('line_structure', tc2_sdm.role_guards(role, 'Một dòng mẫu', False, None, {}, verse=True), role)
+        self.assertNotIn('line_structure', tc2_sdm.role_guards('body', 'Một dòng mẫu', False, None, {}, verse=False))
+
+    def test_the_guard_survives_a_role_change_and_nothing_is_rewritten(self):
+        o = dict(id='b:001', text='Tôi đạp vỡ màu nâu Bầu trời trong quả trứng', colour=None, refers_figure=False,
+                 role=dict(value='body', coarse='BODY', method='x', confidence=0.7, evidence=[]),
+                 guards=['line_structure'], trust=dict(status='WITHHELD', reasons=['line_structure']), learning=True)
+        before = o['text']
+        tc2_sdm.rederive_trust([o], {}, verse_by_id={'b:001': True})
+        self.assertEqual(o['trust']['status'], 'WITHHELD')
+        self.assertEqual(o['guards'], ['line_structure'])
+        self.assertEqual(o['text'], before)        # withheld, never reflowed and never repaired
+
+
 if __name__ == '__main__':
     unittest.main()
