@@ -35,15 +35,32 @@ class Disposition:
     LEGACY = 'LEGACY'                               # produced by a superseded pipeline, kept for comparison
     SUPERSEDED = 'SUPERSEDED'                       # replaced by a later disposition; kept, never deleted
 
-    ALL = (ORIGINAL_OBSERVATION, REPAIRED_CANDIDATE, VALIDATED_REPAIR, TRUSTED, WITHHELD, LEGACY, SUPERSEDED)
+    # Founder addendum (ACCURACY RECOVERY ARCHITECTURE), added because the existing set had no equivalent:
+    SUSPECT = 'SUSPECT'                             # a failure was DETECTED and no repair was confirmed
+    HUMAN_VERIFIED = 'HUMAN_VERIFIED'               # a person ruled on it - evidence with provenance, not an override
+    CONFLICT = 'CONFLICT'                           # signals contradict each other and neither side is decisive
+
+    ALL = (ORIGINAL_OBSERVATION, REPAIRED_CANDIDATE, VALIDATED_REPAIR, TRUSTED, WITHHELD, LEGACY, SUPERSEDED,
+           SUSPECT, HUMAN_VERIFIED, CONFLICT)
+
+    #: The Founder's addendum names, mapped onto what this model already expressed. «Map rather than
+    #: duplicate»: RAW and CORRECTION_PROPOSED are the same states under different names, so they are
+    #: aliases, not new members - a ledger reader written against either vocabulary works.
+    ALIASES = {'RAW': ORIGINAL_OBSERVATION, 'CORRECTION_PROPOSED': REPAIRED_CANDIDATE}
+
+    @classmethod
+    def canonical(cls, value):
+        return cls.ALIASES.get(value, value)
 
     #: a disposition a projection layer (pack / bridge / app) may serialise for a child to read.
     SERVABLE = frozenset({TRUSTED})
 
     @classmethod
     def check(cls, value):
+        value = cls.canonical(value)
         if value not in cls.ALL:
-            raise ValueError(f'unknown disposition {value!r}; allowed: {cls.ALL}')
+            raise ValueError(f'unknown disposition {value!r}; allowed: {cls.ALL} '
+                             f'(aliases: {sorted(cls.ALIASES)})')
         return value
 
 
@@ -205,7 +222,20 @@ class RepairCandidate:
         return sorted({s.layer for s in self.supporting_signals if s.supports and s.layer not in skip})
 
     def objections(self):
+        return self.contradicting()
+
+    def supporting(self):
+        """Signals that are evidence FOR the proposal."""
+        return [s for s in self.supporting_signals if s.supports]
+
+    def contradicting(self):
+        """Signals that are evidence AGAINST it. The model holds contradicting evidence as a first-class
+        citizen (Founder addendum): a candidate is not a bag of reasons to say yes, and a reader of the
+        ledger sees the case against as plainly as the case for."""
         return [s for s in self.supporting_signals if s.objects]
+
+    def abstaining(self):
+        return [s for s in self.supporting_signals if s.verdict == SignalVerdict.ABSTAINS]
 
     def to_json(self):
         return dict(candidate_id=self.candidate_id, block_id=self.block_id, failure_class=self.failure_class,
@@ -213,6 +243,8 @@ class RepairCandidate:
                     confidence=round(self.confidence, 4), detected=dict(self.detected),
                     original_observations=[o.to_json() for o in self.original_observations],
                     supporting_signals=[s.to_json() for s in self.supporting_signals],
+                    supporting_evidence=[s.to_json() for s in self.supporting()],
+                    contradictory_evidence=[s.to_json() for s in self.contradicting()],
                     provenance=dict(self.provenance))
 
 
