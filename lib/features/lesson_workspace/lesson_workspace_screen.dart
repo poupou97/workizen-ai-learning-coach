@@ -33,6 +33,7 @@ import 'widgets/fixture_chip.dart';
 import 'widgets/mode_picker.dart';
 import 'widgets/trust_sheet.dart';
 import 'workspace_trace.dart';
+import 'widgets/runtime_plan.dart';
 
 class LessonWorkspaceScreen extends StatefulWidget {
   const LessonWorkspaceScreen({
@@ -41,6 +42,7 @@ class LessonWorkspaceScreen extends StatefulWidget {
     required this.trace,
     this.initialView,
     this.breadcrumb,
+    this.learnerId,
   });
 
   final LessonDocument doc;
@@ -53,6 +55,10 @@ class LessonWorkspaceScreen extends StatefulWidget {
   /// Đường đã đi tới đây («Giá sách › KHTN 6 › Chương IV»). `null` ⇒ dựng từ
   /// chính tài liệu (sách + chương).
   final List<String>? breadcrumb;
+
+  /// Học sinh đang mở — chỉ để runtime giải `LearningContext`; workspace vẫn
+  /// không có kho, không phát sự kiện. `null` ⇒ hằng `noLearnerId`.
+  final String? learnerId;
 
   static Key tabKey(WorkspaceView v) => Key('workspace-tab-${v.name}');
   static const nextActionKey = Key('workspace-next-action');
@@ -80,7 +86,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     if (initial != null) {
       _view = initial;
     } else if (_seen.isNotEmpty) {
-      _view = nextActionFor(doc: doc, seen: _seen).view ?? WorkspaceView.read;
+      _view = _proposal().view ?? WorkspaceView.read;
     } else {
       _view = null; // lần đầu ⇒ chọn cách học
     }
@@ -97,6 +103,13 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     widget.trace.markView(doc.slotKey, v);
   }
 
+  /// «SAM đề xuất» theo thứ tự Founder A8 (Đọc → Trực quan → Học với SAM),
+  /// từ `NextBestLearningAction` (Lane A-runtime, PR #69) — luật prototype
+  /// «có sơ đồ ⇒ Trực quan trước» của `nextActionFor` không còn dùng ở UI.
+  /// Xung đột thứ tự này được TRẢ VỀ Founder trong PR, không tự quyết ở đây.
+  NextAction _proposal() =>
+      founderNextAction(doc, seen: _seen, learnerId: widget.learnerId);
+
   List<String> get _crumbs =>
       widget.breadcrumb ??
       [
@@ -107,7 +120,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final next = nextActionFor(doc: doc, seen: _seen);
+    final next = _proposal();
     // Nokia xoay ngang (n2 D3): khung cố định (tiêu đề + chip + tab + đề
     // xuất) chiếm ~2/3 chiều cao, thân View còn ~225 px. Chế độ GỌN khi màn
     // ngang: tiêu đề 1 dòng, lý do đề xuất 1 dòng, bỏ mascot nhỏ — không bỏ
@@ -368,6 +381,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     ),
     WorkspaceView.tutor => TutorView(
       doc: doc,
+      learnerId: widget.learnerId,
       anchorBlockId: _tutorAnchor,
       onShowInRead: (id) => _switch(WorkspaceView.read, readAnchor: id),
       onNext: (target, anchor) => switch (target) {

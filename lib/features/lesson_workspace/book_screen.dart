@@ -26,9 +26,13 @@ class BookScreen extends StatelessWidget {
     required this.docs,
     required this.trace,
     required this.onOpenLegacy,
+    this.learnerId,
   });
 
   final BookRef book;
+
+  /// Học sinh đang mở — chuyển xuống Workspace cho runtime (round 3).
+  final String? learnerId;
 
   /// Mục lục thật của cuốn (từ pack) — thứ tự mục lục, không sắp lại.
   final List<LessonRef> lessons;
@@ -287,6 +291,7 @@ class BookScreen extends StatelessWidget {
                 docs: docs,
                 trace: trace,
                 onOpenLegacy: onOpenLegacy,
+                learnerId: learnerId,
               ),
             ),
           ),

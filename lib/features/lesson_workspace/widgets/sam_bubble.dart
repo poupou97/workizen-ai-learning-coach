@@ -19,6 +19,7 @@ class SamBubble extends StatelessWidget {
     this.child,
     this.background = Colors.white,
     this.caption,
+    this.label,
   });
 
   /// Tên state mascot (`sam-explain`…), không có đuôi.
@@ -32,6 +33,11 @@ class SamBubble extends StatelessWidget {
 
   /// ROUND 3 B4: chữ nhỏ cạnh nhãn («Câu 1/3») — vị trí trong vòng lặp.
   final String? caption;
+
+  /// ROUND 3 (A7.2): nhãn THEO BƯỚC — «SAM (runtime có kiểm)» khi runtime
+  /// chứng minh được bước, còn lại «SAM (kịch bản thử nghiệm)». `null` ⇒
+  /// nhãn kịch bản (mặc định an toàn). Không có tham số BỎ nhãn.
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -56,11 +62,14 @@ class SamBubble extends StatelessWidget {
                   child: Row(
                     children: [
                       Text(
-                        SamMode.prototypeScripted.childLabel,
-                        style: const TextStyle(
+                        label ?? SamMode.prototypeScripted.childLabel,
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: WalColors.primaryText,
+                          color: label != null &&
+                                  label != SamMode.prototypeScripted.childLabel
+                              ? WalColors.mintText
+                              : WalColors.primaryText,
                         ),
                       ),
                       if (caption != null) ...[

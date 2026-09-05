@@ -106,16 +106,24 @@ void main() {
       expect(p.prototypeCount, 8, reason: '2×(2 hint + feedback + scaffold)');
     });
 
-    test('⭐ guard LỘ RA rò đáp án trong gợi ý prototype (tìm thấy thật): '
-        'hint chứa «cô cạn»/«nặng» ⇒ GUARD:REVEAL', () {
+    // Lịch sử: guard từng LỘ RA ba chỗ rò đáp án trong gợi ý prototype của
+    // fixture mẫu (q1#1 nêu «Cô cạn»; q2#0/#1 nêu «nặng»). Lane B đã viết
+    // lại ba gợi ý đó (round 3, tool/fixtures/make_synthetic_fixture.py) —
+    // test này nay GHIM rằng không gợi ý nào còn rò; rò trở lại ⇒ đỏ.
+    test('⭐ guard: KHÔNG gợi ý prototype nào còn rò đáp án (GUARD:REVEAL)',
+        () {
       final p = _plan(doc);
       final leaks = p.steps
           .where((s) => s.phase == PlannedStepPhase.hint)
           .where((s) => s.refusals.any((r) => r.startsWith('GUARD:REVEAL')))
           .map((s) => '${s.stepId}#${s.hintIndex}')
           .toList();
-      expect(leaks, containsAll(['q1#1', 'q2#0', 'q2#1']),
-          reason: 'gợi ý 2 của q1 nêu «Cô cạn»; cả hai gợi ý q2 nêu «nặng»');
+      expect(leaks, isEmpty,
+          reason: 'gợi ý phải scaffold mà không nêu dạng đáp án: $leaks');
+      // …và vẫn là prototype (HINT_UNSOURCED), không giả năng lực.
+      for (final h in p.steps.where((s) => s.phase == PlannedStepPhase.hint)) {
+        expect(h.mode, PlannedStepMode.prototypeScripted);
+      }
     });
 
     test('⭐⭐ không bước nào có validator ⇒ participation-only; runtime không '

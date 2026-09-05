@@ -513,7 +513,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         onOpenWorkspaceLesson: (doc) async {
                           await Navigator.of(context).push(MaterialPageRoute(
                               builder: (_) => LessonWorkspaceScreen(
-                                  doc: doc, trace: WorkspaceTrace.session)));
+                                  doc: doc,
+                                  trace: WorkspaceTrace.session,
+                                  learnerId: _profile!.learnerId)));
                           if (mounted) setState(() {});
                         },
                         learnerName: _profile!.displayName,

@@ -12,6 +12,7 @@ import 'package:learning_coach/core/lesson_model/next_action.dart';
 import 'package:learning_coach/features/lesson_workspace/lesson_workspace_screen.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/mode_picker.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/runtime_plan.dart';
 import 'package:learning_coach/features/lesson_workspace/workspace_trace.dart';
 
 import 'support.dart';
@@ -44,7 +45,8 @@ void main() {
   });
 
   testWidgets('⭐ lần đầu mở ⇒ màn «Vào bài học»: 3 thẻ đếm từ dữ liệu, thẻ '
-      'Trực quan được đề xuất kèm lý do; chưa View nào bị đánh dấu', (
+      'Đọc được đề xuất (thứ tự Founder A8) kèm lý do; chưa View nào bị đánh '
+      'dấu', (
     t,
   ) async {
     final trace = WorkspaceTrace();
@@ -60,7 +62,7 @@ void main() {
       expect(find.text(ModePicker.describe(doc, v)), findsOneWidget);
     }
     expect(find.textContaining('SAM đề xuất cách này'), findsOneWidget);
-    expect(find.textContaining('sơ đồ quy trình'), findsWidgets);
+    expect(find.textContaining('đọc bài trong sách trước'), findsOneWidget);
     expect(
       find.byKey(LessonWorkspaceScreen.nextActionKey),
       findsNothing,
@@ -84,21 +86,57 @@ void main() {
     expect(tutor, contains('${doc.tutorScript!.asks.length} câu'));
   });
 
-  testWidgets('chạm thẻ đề xuất ⇒ vào Trực quan, trace đánh dấu, thẻ đề xuất '
-      'đổi sang Đọc', (t) async {
+  testWidgets('chạm thẻ đề xuất ⇒ vào Đọc, trace đánh dấu, thẻ đề xuất đổi '
+      'sang Trực quan (A8: Đọc → Trực quan → SAM)', (t) async {
     final trace = WorkspaceTrace();
     final doc = loadSyntheticDoc();
     await t.pumpWidget(
       fixtureHost(LessonWorkspaceScreen(doc: doc, trace: trace)),
     );
     await t.pumpAndSettle();
-    await t.tap(find.byKey(ModePicker.cardKey(WorkspaceView.visual)));
+    await t.tap(find.byKey(ModePicker.cardKey(WorkspaceView.read)));
     await t.pumpAndSettle();
-    expect(trace.viewsFor(doc.slotKey), {WorkspaceView.visual});
-    expect(find.textContaining('Sơ đồ quy trình'), findsWidgets);
+    expect(trace.viewsFor(doc.slotKey), {WorkspaceView.read});
+    expect(find.text('Cỡ chữ'), findsOneWidget);
     expect(find.byKey(LessonWorkspaceScreen.nextActionKey), findsOneWidget);
     expect(find.text('SAM đề xuất'), findsOneWidget);
-    expect(find.textContaining('đọc bài trong sách'), findsOneWidget);
+    expect(find.textContaining('xem sơ đồ / bảng'), findsOneWidget);
+  });
+
+  test('⭐ «SAM đề xuất» đi theo thứ tự Founder A8 qua NextBestLearningAction: '
+      'Đọc → Trực quan → Học với SAM → về mục lục; không phút/%', () {
+    final doc = loadSyntheticDoc();
+    NextAction at(Set<WorkspaceView> seen) =>
+        founderNextAction(doc, seen: seen, learnerId: 'na');
+    expect(at({}).view, WorkspaceView.read);
+    expect(at({}).basis, startsWith('R2'));
+    expect(at({WorkspaceView.read}).view, WorkspaceView.visual);
+    expect(
+      at({WorkspaceView.read, WorkspaceView.visual}).view,
+      WorkspaceView.tutor,
+    );
+    expect(
+      at({WorkspaceView.read, WorkspaceView.visual}).reason,
+      contains('«'),
+      reason: 'R4 nêu câu hỏi đầu của sách',
+    );
+    final done = at(WorkspaceView.values.toSet());
+    expect(done.view, isNull);
+    expect(done.label, 'Về mục lục');
+    expect(done.reason, isNot(contains('hiểu')));
+    for (final s in [
+      <WorkspaceView>{},
+      {WorkspaceView.read},
+      {WorkspaceView.read, WorkspaceView.visual},
+      WorkspaceView.values.toSet(),
+    ]) {
+      final r = at(s).reason;
+      expect(r, isNot(matches(RegExp(r'\d+\s*phút'))), reason: r);
+      expect(r, isNot(contains('%')), reason: r);
+    }
+    // luật prototype cũ (Trực quan trước) KHÔNG còn là điều UI dùng
+    expect(nextActionFor(doc: doc, seen: {}).view, WorkspaceView.visual);
+    expect(at({}).view, isNot(WorkspaceView.visual));
   });
 
   testWidgets('mở lại bài đã xem trong phiên ⇒ KHÔNG hỏi lại, vào thẳng View '

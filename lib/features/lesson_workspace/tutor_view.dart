@@ -22,6 +22,8 @@ import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/tutor_script.dart';
 import 'widgets/sam_bubble.dart';
 import 'widgets/source_sheet.dart';
+import '../../core/pedagogy/pedagogy_runtime.dart';
+import 'widgets/runtime_plan.dart';
 
 class TutorView extends StatefulWidget {
   const TutorView({
@@ -30,9 +32,14 @@ class TutorView extends StatefulWidget {
     required this.onNext,
     this.anchorBlockId,
     this.onShowInRead,
+    this.learnerId,
   });
 
   final LessonDocument doc;
+
+  /// Học sinh đang mở (cho `LearningContext` của runtime). `null` ⇒ hằng
+  /// [noLearnerId]; không có sự kiện nào được phát dù giá trị là gì.
+  final String? learnerId;
 
   /// Từ «Hỏi SAM về đoạn này» — block trẻ đang chạm.
   final String? anchorBlockId;
@@ -89,12 +96,62 @@ class TutorView extends StatefulWidget {
       if (t.kind == TurnKind.learner && t.stepId != null) t.stepId!,
   }.length;
 
+  /// ROUND 3 (A7.2) — bước runtime ứng với lượt thứ [i] của transcript:
+  /// cùng `stepId`, cùng pha; gợi ý thứ k của một bước ⇒ `hintIndex == k`.
+  /// Không tìm thấy ⇒ `null` ⇒ nhãn kịch bản (an toàn).
+  static PlannedStep? stepForTurn(
+    RuntimePlan? plan,
+    List<TutorTurn> ts,
+    int i,
+  ) {
+    if (plan == null) return null;
+    final t = ts[i];
+    final phase = switch (t.kind) {
+      TurnKind.explain => PlannedStepPhase.explain,
+      TurnKind.ask => PlannedStepPhase.ask,
+      TurnKind.hint => PlannedStepPhase.hint,
+      TurnKind.matched => PlannedStepPhase.feedbackMatched,
+      TurnKind.scaffold => PlannedStepPhase.scaffold,
+      TurnKind.next => PlannedStepPhase.next,
+      TurnKind.learner => null,
+    };
+    if (phase == null) return null;
+    var hintIndex = 0;
+    if (t.kind == TurnKind.hint) {
+      for (var k = 0; k < i; k++) {
+        if (ts[k].kind == TurnKind.hint && ts[k].stepId == t.stepId) {
+          hintIndex++;
+        }
+      }
+    }
+    for (final s in plan.steps) {
+      if (s.stepId != t.stepId || s.phase != phase) continue;
+      if (phase == PlannedStepPhase.hint && s.hintIndex != hintIndex) continue;
+      return s;
+    }
+    return null;
+  }
+
+  /// Dòng runtime cho phần đầu Tutor và sheet «Nguồn & độ tin».
+  static String runtimeLine(RuntimePlan? plan) {
+    if (plan == null) return 'Bài này không có kịch bản.';
+    if (!plan.isBound) {
+      return 'Runtime chưa ràng buộc được bài này (${plan.planRefusals.join(', ')}) '
+          '— mọi bước là kịch bản thử nghiệm.';
+    }
+    return 'Runtime kiểm được ${plan.runtimeGuidedCount}/${plan.steps.length} '
+        'bước (giải thích, câu hỏi nguyên văn sách, bước tiếp); '
+        '${plan.prototypeCount} bước còn lại là kịch bản thử nghiệm '
+        '(gợi ý, phản hồi, chỉ chỗ trong sách).';
+  }
+
   @override
   State<TutorView> createState() => _TutorViewState();
 }
 
 class _TutorViewState extends State<TutorView> {
   TutorRunner? _runner;
+  RuntimePlan? _plan;
   final _input = TextEditingController();
   final _scroll = ScrollController();
 
@@ -118,6 +175,8 @@ class _TutorViewState extends State<TutorView> {
     _runner = s == null
         ? null
         : TutorRunner(s, startAtBlockId: widget.anchorBlockId);
+    // A7: kế hoạch runtime — nhãn theo bước; không phát sự kiện nào.
+    _plan = planForDoc(widget.doc, learnerId: widget.learnerId);
   }
 
   @override
@@ -215,6 +274,16 @@ class _TutorViewState extends State<TutorView> {
                           color: WalColors.inkSoft,
                         ),
                       ),
+                      // A7.2 — PEDAGOGY REALITY nhìn thấy được: bao nhiêu
+                      // bước runtime kiểm được, bao nhiêu bước còn là kịch bản.
+                      Text(
+                        TutorView.runtimeLine(_plan),
+                        key: const Key('tutor-runtime-line'),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: WalColors.mintText,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -264,7 +333,10 @@ class _TutorViewState extends State<TutorView> {
                 for (var i = 0; i < r.transcript.length; i++) ...[
                   KeyedSubtree(
                     key: i == _latestSamIndex(r) ? _latestSamKey : null,
-                    child: _turn(r.transcript[i]),
+                    child: _turn(
+                      r.transcript[i],
+                      TutorView.stepForTurn(_plan, r.transcript, i),
+                    ),
                   ),
                   const SizedBox(height: WalSpacing.sm),
                 ],
@@ -317,7 +389,7 @@ class _TutorViewState extends State<TutorView> {
     return t.length > 70 ? '${t.substring(0, 70)}…' : t;
   }
 
-  Widget _turn(TutorTurn t) {
+  Widget _turn(TutorTurn t, PlannedStep? step) {
     if (!t.isSam) {
       return Align(
         alignment: Alignment.centerRight,
@@ -351,6 +423,8 @@ class _TutorViewState extends State<TutorView> {
     return SamBubble(
       mascot: t.mascot,
       text: t.text,
+      // Nhãn THEO BƯỚC (A7.2): runtime chứng minh được ⇒ «runtime có kiểm».
+      label: step?.mode.childLabel,
       caption: t.kind == TurnKind.ask
           ? TutorView.askCaption(widget.doc.tutorScript!, t.stepId)
           : null,

@@ -13,6 +13,8 @@ import '../../../app/theme/wal_tokens.dart';
 import '../../../core/lesson_model/content_trust.dart';
 import '../../../core/lesson_model/lesson_document.dart';
 import '../../../core/lesson_model/semantic_data.dart';
+import 'runtime_plan.dart';
+import '../tutor_view.dart' show TutorView;
 
 /// Chữ trẻ/phụ huynh đọc cho từng mức tin — không dịch «đẹp» hơn sự thật.
 String trustChildDescription(ContentTrust t, LessonDocument doc) => switch (t) {
@@ -31,8 +33,13 @@ String trustChildDescription(ContentTrust t, LessonDocument doc) => switch (t) {
         'sách giáo viên.',
 };
 
-Future<void> showTrustSheet(BuildContext context, {required LessonDocument doc}) {
+Future<void> showTrustSheet(
+  BuildContext context, {
+  required LessonDocument doc,
+  String? learnerId,
+}) {
   final script = doc.tutorScript;
+  final plan = planForDoc(doc, learnerId: learnerId);
   final withheld = doc.blocks.whereType<WithheldBlock>().length;
   final images = doc.blocks.whereType<ImageBlock>().length;
   return showModalBottomSheet<void>(
@@ -99,7 +106,10 @@ Future<void> showTrustSheet(BuildContext context, {required LessonDocument doc})
                         '${script.asks.length} câu nguyên văn trong sách. Khoá '
                         'đáp án là bản nháp của người viết — KHÔNG phải sách '
                         'giáo viên. Khớp/không khớp chỉ so với bản nháp đó.',
-              detail: script?.asks.firstOrNull?.keySource,
+              detail: script == null
+                  ? null
+                  : '${TutorView.runtimeLine(plan)}\n'
+                        '${script.asks.firstOrNull?.keySource ?? ''}',
             ),
             _section(
               '📝 Bằng chứng học',

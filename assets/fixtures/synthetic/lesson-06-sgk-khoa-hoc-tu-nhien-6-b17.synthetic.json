@@ -777,7 +777,7 @@
     ],
     "hints": [
      "[MẪU] Gợi ý 1: muối không bay hơi, nước thì có.",
-     "[MẪU] Gợi ý 2: xem dòng «Cô cạn» trong bảng."
+     "[MẪU] Gợi ý 2: tìm trong bảng cách tách chất KHÓ bay hơi khỏi chất DỄ bay hơi."
     ],
     "feedbackMatched": "[MẪU] Khớp với bảng mẫu: đó là cô cạn.",
     "scaffold": "[MẪU] Chưa khớp, không sao — bảng mẫu gọi cách này là cô cạn. Mình đi tiếp nhé.",
@@ -794,8 +794,8 @@
      "nặng hơn"
     ],
     "hints": [
-     "[MẪU] Gợi ý 1: so cân nặng của hạt cát và nước.",
-     "[MẪU] Gợi ý 2: hạt nặng hơn thì đi về đâu?"
+     "[MẪU] Gợi ý 1: để yên một lúc, hạt cát và nước — thứ nào chìm xuống dưới?",
+     "[MẪU] Gợi ý 2: thứ chìm xuống dưới thì đi về đâu khi ta gạn?"
     ],
     "feedbackMatched": "[MẪU] SAM thấy câu trả lời có ý «nặng hơn» — khớp ý mẫu.",
     "scaffold": "[MẪU] Ý mẫu: hạt cát nặng hơn nước nên lắng xuống. Mình đi tiếp nhé.",

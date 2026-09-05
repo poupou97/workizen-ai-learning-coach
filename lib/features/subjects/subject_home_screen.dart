@@ -328,16 +328,16 @@ class SubjectHomeScreen extends StatelessWidget {
   }
 
   /// ROUND 3 B5 (audit 05 §1: Toán 6 «Hình trong sách» từng hiện hình của
-  /// Toán 5): chỉ hình thuộc SÁCH CÓ TRONG MỤC LỤC LỚP NÀY — và khi đang mở
-  /// một cuốn thì chỉ hình của cuốn đó. Lọc ở tầng UI (tầng lõi là của lane
-  /// khác); rỗng ⇒ tile không hiện, không mở ra màn sai lớp.
+  /// Toán 5): tầng lõi (`LessonIndex.sourceAssetsFor`, PR #69 mục #7) đã bỏ
+  /// hình không thuộc lớp; UI chỉ còn thu hẹp về CUỐN đang mở. Rỗng ⇒ tile
+  /// không hiện, không mở ra màn sai lớp.
   List<IndexedSourceAsset> get _sourceAssets {
-    final ids = book == null
-        ? {for (final b in index.books) b.sourceDocumentId}
-        : {book!.sourceDocumentId};
+    final all = index.sourceAssetsFor(subject);
+    final b = book;
+    if (b == null) return all;
     return [
-      for (final a in index.sourceAssetsFor(subject))
-        if (ids.contains(a.sourceDocumentId)) a,
+      for (final a in all)
+        if (a.sourceDocumentId == b.sourceDocumentId) a,
     ];
   }
 
