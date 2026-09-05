@@ -121,9 +121,11 @@ class _SmartBookViewState extends State<SmartBookView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = _keys[id]?.currentContext;
       if (ctx != null && mounted) {
+        // Round 3 n1 D-R3-10: 0.08 để nhãn «Em đã học» bị cắt sát mép trên
+        // thân View trên Nokia — neo thấp hơn một chút cho block đứng trọn.
         Scrollable.ensureVisible(
           ctx,
-          alignment: 0.08,
+          alignment: 0.14,
           duration: WalMotion.stage,
           curve: Curves.easeOut,
         );
