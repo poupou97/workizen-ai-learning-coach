@@ -48,7 +48,7 @@ ROOT = tc_sdm.ROOT
 PDF = f'{ROOT}/poc-out/pdf'
 OCR = f'{ROOT}/poc-out/graph/ocr-body'
 PIPELINE_ID = 'tc2-p1'
-SDM_VERSION = 'sdm-v2'
+SDM_VERSION = 'sdm-v3'   # round 4: LIS order agreement + verifier-aligned re-sequencing (see agreement())
 TEXT_SIM = tc_cascade.TEXT_SIM
 
 try:
@@ -361,38 +361,194 @@ COARSE = {'question': 'QUESTION', 'option': 'OPTION', 'answer_slot': 'OPTION', '
 NON_LEARNING = {'page_number', 'running_head', 'figure', 'figure_text', 'empty'}
 
 
-# ---------------------------------------------------------------- agreement (per block, same rule as tc_cascade.verify)
+# ---------------------------------------------------------------- agreement (per block: text as tc_cascade.verify; order by LIS)
+def longest_nondecreasing(seq):
+    """Indices of one longest non-decreasing subsequence of `seq` (O(n log n); ties keep the earlier element,
+    so a stable primary order is preferred). Deterministic."""
+    import bisect
+    if not seq:
+        return set()
+    tails, tails_idx, prev = [], [], [-1] * len(seq)
+    for i, v in enumerate(seq):
+        k = bisect.bisect_right(tails, v)
+        if k == len(tails):
+            tails.append(v); tails_idx.append(i)
+        else:
+            tails[k] = v; tails_idx[k] = i
+        prev[i] = tails_idx[k - 1] if k > 0 else -1
+    out, i = set(), tails_idx[-1]
+    while i != -1:
+        out.add(i); i = prev[i]
+    return out
+
+
+def _earliest_acceptable(pk, st, base=0):
+    """Earliest window of `st` (a stream suffix starting at absolute offset `base`) that aligns with `pk` at
+    ≥ TEXT_SIM: the best alignment is found, then the text BEFORE it is searched again for an earlier one, until
+    none qualifies. → (score, start, end) with absolute offsets, or (best_score, -1, -1)."""
+    best = None
+    lo, hi = 0, len(st)
+    while hi - lo >= 4:
+        al = fuzz.partial_ratio_alignment(pk, st[lo:hi])
+        if al is None or al.score < TEXT_SIM:
+            if best is None:
+                best = (al.score if al else 0.0, -1, -1)
+            break
+        best = (al.score, base + lo + al.dest_start, base + lo + al.dest_end)
+        hi = lo + al.dest_start          # look for an even earlier acceptable window
+    return best or (0.0, -1, -1)
+
+
+def align_in_stream(pk, st, last_pos):
+    """Where does primary text `pk` sit in the verifier stream `st`?
+    Round 4: (1) prefer the earliest acceptable match AT OR AFTER the previous aligned block (`last_pos`) — a page
+    that repeats a label («Cách tiếp cận:» twice on SGV Toán 4 p54, «Tiến hành:» in every experiment box) must
+    not send the second occurrence to the first one; (2) only when nothing after `last_pos` reaches TEXT_SIM is
+    the whole stream searched (a block Docling displaced to the end of the page really is earlier in the
+    verifier — that is the order disagreement the LIS then reports). Short texts (< 12 chars) are located
+    verbatim on word boundaries the same way."""
+    if len(pk) >= 12:
+        if last_pos > 0 and len(st) - last_pos >= 4:
+            score, start, end = _earliest_acceptable(pk, st[last_pos:], last_pos)
+            if start >= 0:
+                return score, start, end
+        return _earliest_acceptable(pk, st, 0)
+    padded = ' ' + st + ' '
+    idx = padded.find(' ' + pk + ' ', max(0, last_pos))
+    if idx < 0:
+        idx = padded.find(' ' + pk + ' ')
+    return (100.0, idx, idx + len(pk)) if idx >= 0 else (0.0, -1, -1)
+
+
 def agreement(primary_blocks, verifier):
+    """Per primary block: text agreement (partial-ratio alignment inside the verifier's reading-order stream,
+    ≥ TEXT_SIM) and ORDER agreement.
+
+    Round 4 (failure class: two-column / displaced-box reading order). The tc2-p1 rule compared each block's
+    alignment offset with the minimum of the two previous offsets («one-block tolerance»), which (a) never
+    flags an adjacent swap and (b) withholds only the FIRST block of a displaced group — Docling moves a whole
+    MỤC TIÊU box or a title to the end of the page (KHTN 8 p96, Toán 12 p20) and the gate let the rest of the
+    group through, so every block between the group's true and displaced positions was delivered inverted.
+    Now the blocks that agree on text are the sequence of their verifier offsets; the longest non-decreasing
+    subsequence is the order both stacks share, every block outside it is an order disagreement
+    (`agree_order`, fail closed), and `vpos` lets build_page RE-SEQUENCE the page by the verifier's offsets so
+    a displaced (withheld) box is at least placed where the geometry saw it instead of dragging its neighbours
+    into inversions. Short blocks (< 12 chars) are located at their first occurrence at or after the previous
+    aligned block, not the first on the page (repeated labels such as «Tiến hành:»)."""
     st, roles = tc_cascade._stream(verifier)
     vblocks = [v for v in verifier['blocks'] if tc_score.norm_key(v['text'])]
-    last2 = [-1, -1]
     out = []
+    last_pos = 0
     for p in primary_blocks:
         pk = tc_score.norm_key(p['text'])
-        a = dict(text_sim=None, verifier_id=None, verifier_role=None, order_ok=None, ok=False, reason=None)
+        a = dict(text_sim=None, verifier_id=None, verifier_role=None, order_ok=None, ok=False, reason=None, vpos=None, vend=None)
         if not pk or p['role'] == 'FIGURE':
             a['reason'] = None if p['role'] == 'FIGURE' else 'empty'; out.append(a); continue
         if fuzz is None or not st:
             a['reason'] = 'agree_text'; out.append(a); continue
-        if len(pk) >= 12:
-            al = fuzz.partial_ratio_alignment(pk, st)
-            score, start = (al.score, al.dest_start) if al else (0.0, -1)
-        else:
-            idx = (' ' + st + ' ').find(' ' + pk + ' ')
-            score, start = (100.0, idx) if idx >= 0 else (0.0, -1)
+        score, start, end = align_in_stream(pk, st, last_pos)
         a['text_sim'] = round(float(score), 1)
         if score < TEXT_SIM:
             a['reason'] = 'agree_text'; out.append(a); continue
         vi = next((k for k, (s0, s1, r) in enumerate(roles) if s0 <= start < s1), None)
         a['verifier_role'] = roles[vi][2] if vi is not None else None
         a['verifier_id'] = vblocks[vi]['id'] if vi is not None and vi < len(vblocks) else None
-        if start < min(last2):
-            a['order_ok'] = False; a['reason'] = 'agree_order'; last2 = [last2[1], start]; out.append(a); continue
-        a['order_ok'] = True
-        last2 = [last2[1], start]
-        a['ok'] = True
+        a['vpos'] = start; a['vend'] = end
+        last_pos = max(last_pos, end)
         out.append(a)
+    aligned = [i for i, a in enumerate(out) if a['vpos'] is not None]
+    keep = longest_nondecreasing([out[i]['vpos'] for i in aligned])
+    for k, i in enumerate(aligned):
+        if k in keep:
+            out[i]['order_ok'] = True; out[i]['ok'] = True
+        else:
+            out[i]['order_ok'] = False; out[i]['reason'] = 'agree_order'
     return out
+
+
+def _x_overlap(a, b):
+    if not a or not b:
+        return 0.0
+    return max(0.0, min(a[0] + a[2], b[0] + b[2]) - max(a[0], b[0])) / max(1e-6, min(a[2], b[2]))
+
+
+def _y_overlap(a, b):
+    if not a or not b:
+        return 0.0
+    return max(0.0, min(a[1] + a[3], b[1] + b[3]) - max(a[1], b[1])) / max(1e-6, min(a[3], b[3]))
+
+
+def _move_is_geometric(i, seq, agree, bboxes):
+    """The verifier's slot for block i is accepted only when it agrees with the page geometry, judged against
+    the agreed blocks (LIS) around it in `seq`: (1) column band — a block that x-overlaps i (≥ 0.3 of the
+    narrower) and precedes i must lie above i's centre, one that follows must lie below (tolerance half the
+    block height); (2) row band — a block that y-overlaps i (≥ 0.5 of the shorter) and precedes i must lie to
+    its LEFT, one that follows to its RIGHT (two side-by-side captions read right-to-left by the verifier stay
+    where the primary put them). A block with no such neighbour keeps its primary position."""
+    bi = bboxes[i]
+    if not bi:
+        return False
+    yc = bi[1] + bi[3] / 2; xc = bi[0] + bi[2] / 2
+    tol = max(0.004, bi[3] / 2)
+    pos = seq.index(i)
+    seen = False
+    for k, j in enumerate(seq):
+        if j == i or not (agree[j].get('vpos') is not None and agree[j].get('order_ok')):
+            continue
+        bj = bboxes[j]
+        if not bj:
+            continue
+        if _y_overlap(bi, bj) >= 0.5 and _x_overlap(bi, bj) < 0.3:
+            seen = True
+            xj = bj[0] + bj[2] / 2
+            if (k < pos and xj > xc) or (k > pos and xj < xc):
+                return False
+            continue
+        if _x_overlap(bi, bj) < 0.3:
+            continue
+        seen = True
+        yj = bj[1] + bj[3] / 2
+        if k < pos and yj > yc + tol:
+            return False
+        if k > pos and yj < yc - tol:
+            return False
+    return seen
+
+
+def resequence(agree, bboxes=None):
+    """Reading order for the page. Everything the two stacks agree on (the LIS) and everything without verifier
+    evidence (figures, empty, text disagreements) keeps the primary (Docling) order; ONLY a block whose position
+    the verifier contradicts (`agree_order`, i.e. outside the LIS) is moved — to just after the last agreed
+    block whose verifier offset is ≤ its own (to the front when none) — and only when that slot agrees with the
+    page geometry (`_move_is_geometric`: vertical order inside the block's own column band). So a MỤC TIÊU box
+    Docling appended to the page goes back under the title (geometry confirms: it sits between the title and
+    the first paragraph), while a verifier that read two side-by-side captions right-to-left, or two columns as
+    one block, cannot drag blocks around. The block stays withheld (`agree_order`) either way — the move only
+    decides where its card is shown. Returns the primary indices in reading order (deterministic)."""
+    bboxes = bboxes or [None] * len(agree)
+    moved = [i for i, a in enumerate(agree) if a.get('vpos') is not None and a.get('order_ok') is False]
+    kept = [i for i in range(len(agree)) if i not in set(moved)]
+    for i in moved:
+        v = agree[i]['vpos']
+        anchor = None
+        for j in kept:
+            if agree[j].get('vpos') is not None and agree[j].get('order_ok') and agree[j]['vpos'] <= v:
+                anchor = j
+        trial = list(kept)
+        at = 0 if anchor is None else trial.index(anchor) + 1
+        # a displaced GROUP (title + MỤC TIÊU box …) shares one anchor: keep the group's own verifier order
+        while at < len(trial) and agree[trial[at]].get('moved') and agree[trial[at]].get('vpos') is not None and agree[trial[at]]['vpos'] <= v:
+            at += 1
+        trial.insert(at, i)
+        if _move_is_geometric(i, trial, agree, bboxes):
+            kept = trial
+            agree[i]['moved'] = True
+        else:
+            # keep the primary slot: insert after the nearest preceding primary index already placed
+            prev = [j for j in kept if j < i]
+            kept.insert((kept.index(max(prev)) + 1) if prev else 0, i)
+            agree[i]['moved'] = False
+    return kept
 
 
 # ---------------------------------------------------------------- census + OCR helpers
@@ -438,6 +594,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
     med_h = statistics.median([l['h'] for l in lines]) if lines else 0.01
     mask = colour_mask(book, page)
     agree = agreement(blocks, verifier)
+    order_map = resequence(agree, [b['bbox'] for b in blocks])   # reading order → primary (Docling) index
     xy_by_id = {b['id']: b for b in X}
     # printed page from footer digits
     printed = None
@@ -449,7 +606,8 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
     # per block
     prev_role = None; prev_text = None; box = None; heading_path = []; answer_section = False
     out_blocks = []
-    for b, a in zip(blocks, agree):
+    for rank, pi in enumerate(order_map):
+        b, a = blocks[pi], agree[pi]
         bb = b['bbox']
         col = colour_of(mask, bb)
         b['colour'] = col
@@ -539,10 +697,10 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
         status = 'TRUSTED' if not withhold else ('CONFLICT' if any(g in ('role_conflict', 'agree_order') for g in withhold) and 'agree_text' not in withhold else 'WITHHELD')
         if role in ('figure', 'empty'):
             status = 'WITHHELD'
-        sdm_id = f'{book}:p{page:03d}:{pipeline}:{b["order"]:03d}'
-        ob = dict(id=sdm_id, order=b['order'], native_label=b.get('native_label'), text=b['text'], text_docling=b.get('text_docling'), enumerator_restored=bool(b.get('enumerator_restored')),
+        sdm_id = f'{book}:p{page:03d}:{pipeline}:{b["order"]:03d}'   # id = the primary's native block index (stable across re-sequencing)
+        ob = dict(id=sdm_id, order=rank, native_order=b['order'], native_label=b.get('native_label'), text=b['text'], text_docling=b.get('text_docling'), enumerator_restored=bool(b.get('enumerator_restored')),
                   bbox=bb, column=(1 if bb and bb[0] + bb[2] / 2 < 0.5 else 2) if bb else None, ocr_conf=b['ocr_conf'], colour=col, extraction=b.get('extraction'),
-                  agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok']),
+                  agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok'], verifier_pos=a.get('vpos'), moved=a.get('moved', False)),
                   role=dict(value=role, coarse=COARSE.get(role, 'UNKNOWN'), method=method, confidence=round(rconf, 2), evidence=ev, verifier_hint=xy_hint, conflict=conflict),
                   guards=guards, trust=dict(status=status, reasons=withhold), learning=learning, refers_figure=refers_fig, heading_path=list(heading_path),
                   lesson=None, cells=b.get('cells'))
@@ -573,9 +731,11 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
         ob['learning'] = r not in NON_LEARNING
     # figures: pictures + their labels + captions
     figures = []
+    rank_of_native = {ob['native_order']: ob['order'] for ob in out_blocks}
     for k, p in enumerate(pics):
+        p_rank = rank_of_native.get(p['order'], p['order'])
         labels = [ob['id'] for ob in out_blocks if ob['role']['value'] == 'figure_text' and inside(ob['bbox'], p['bbox'], 0.6)]
-        cap = next((ob['id'] for ob in out_blocks if ob['role']['value'] == 'caption' and abs(ob['order'] - p['order']) <= 2), None)
+        cap = next((ob['id'] for ob in out_blocks if ob['role']['value'] == 'caption' and abs(ob['order'] - p_rank) <= 2), None)
         figures.append(dict(id=f'{book}:p{page:03d}:fig{k:02d}', bbox=p['bbox'], labels=labels, caption=cap))
     stats = Counter(ob['trust']['status'] for ob in out_blocks if ob['learning'])
     reasons = Counter(r for ob in out_blocks if ob['learning'] for r in ob['trust']['reasons'])
@@ -603,7 +763,10 @@ def to_v1_sdm(sdm):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--pipeline', default=PIPELINE_ID); ap.add_argument('--pages', action='append', default=[])
     ap.add_argument('--gold', action='store_true'); ap.add_argument('--page', nargs=2, default=None); ap.add_argument('--force', action='store_true')
+    ap.add_argument('--out', default=None, help='pipeline output root (default poc-out/trusted-corpus/tc-v2/<pipeline>; env TC2_OUT_ROOT)')
     a = ap.parse_args()
+    if a.out:
+        tc2_paths.set_out_root(a.out)
     if a.page:
         s = build_page(a.page[0], int(a.page[1]), a.pipeline)
         if not s:

@@ -320,12 +320,19 @@ def score(gold, sdm):
     # fidelity / splice
     anchor_keys = {g['id']: ' '.join(norm_key((g.get('text') or g['anchor']).split('\n')[0]).split()[:6]) for g in gold['blocks'] if g.get('anchor')}
     anchor_keys = {k: v for k, v in anchor_keys.items() if len(v.split()) >= 5}  # short keys ("Bảng nhân 7") occur inside other blocks legitimately
+    self_keys = {g['id']: norm_key(g.get('text') or g.get('anchor') or '') for g in gold['blocks']}
+
     def foreign_in(cblock, gself):
         t = norm_key(cblock['text'])
         out = []
         for gidd, k in anchor_keys.items():
             if gidd == gself['id']: continue
             og = gb[gidd]
+            # Round 4 scorer correction: a "foreign" anchor that also occurs inside THIS block's own gold text is not
+            # contamination — two sidebar bullets that open with the same six words (Tin học 9 p20), three definitions
+            # that share a prefix (Toán 5 p92), a caption quoted in the prose («… (Hình 22.7). Chuông điện …», KHTN 8
+            # p95). These counted as splices in tc2-p1 (8 of its 50 false-trusted blocks).
+            if _contains(self_keys.get(gself['id'], ''), k): continue
             if _contains(t, k) and (og.get('column') != gself.get('column') or gid.get(gidd) != gid.get(gself['id']) or og['role'] in ('sidebar', 'caption', 'footnote', 'figure_label', 'speech_bubble')):
                 out.append(gidd)
         return out
@@ -343,6 +350,8 @@ def score(gold, sdm):
         if c['order'] in seen or not c['text']: continue
         t = norm_key(c['text'])
         ins = [gidd for gidd, k in anchor_keys.items() if _contains(t, k)]
+        # same correction as foreign_in: anchors that are substrings of one another's gold text are one block, not two
+        ins = [x for x in ins if not any(y != x and _contains(self_keys.get(y, ''), anchor_keys[x]) for y in ins)]
         cols = {(gb[x].get('column'), gid.get(x), gb[x]['role'] in ('sidebar', 'caption', 'footnote', 'figure_label', 'speech_bubble')) for x in ins}
         if len(ins) >= 2 and len(cols) >= 2:
             splices += 1; seen.add(c['order'])
