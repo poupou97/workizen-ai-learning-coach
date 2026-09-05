@@ -129,4 +129,78 @@ void main() {
     expect(find.textContaining('Con hỏi về đoạn:'), findsOneWidget);
     expect(find.text('Cô cạn'), findsOneWidget, reason: 'vào thẳng câu hỏi');
   });
+
+  testWidgets('ROUND 3 B4: dải pha sáng đúng pha — giải thích → hỏi/con trả '
+      'lời → gợi ý → phản hồi → tiếp; «Câu n/N»; chữ cái A/B/C/D', (t) async {
+    final d = loadSyntheticDoc();
+    await t.pumpWidget(
+      fixtureHost(Scaffold(body: TutorView(doc: d, onNext: (_, _) {}))),
+    );
+    await t.pumpAndSettle();
+    expect(find.byKey(TutorView.phaseStripKey), findsOneWidget);
+    Text chip(String label) => t.widget<Text>(find.text(label));
+    expect(chip('Giải thích').style?.fontWeight, FontWeight.w700);
+    await t.tap(find.text('Tiếp ▸'));
+    await t.pumpAndSettle();
+    expect(chip('Con trả lời').style?.fontWeight, FontWeight.w700);
+    expect(chip('Giải thích').style?.fontWeight, FontWeight.w500);
+    expect(find.text('Câu 1/${d.tutorScript!.asks.length}'), findsOneWidget);
+    // chữ cái lựa chọn — nhãn, không đổi chuỗi khớp
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Cô cạn'), findsOneWidget);
+    await t.tap(find.textContaining('Gợi ý cho tớ'));
+    await t.pumpAndSettle();
+    expect(chip('Gợi ý').style?.fontWeight, FontWeight.w700);
+    await t.tap(find.widgetWithText(FilledButton, 'Cô cạn'));
+    await t.pumpAndSettle();
+    expect(chip('Phản hồi').style?.fontWeight, FontWeight.w700);
+    expect(find.text('Câu 2/${d.tutorScript!.asks.length}'), findsOneWidget);
+  });
+
+  test('ROUND 3 B4: phaseOf / askedCount tất định từ runner', () {
+    final d = loadSyntheticDoc();
+    final r = TutorRunner(d.tutorScript!);
+    expect(TutorView.phaseOf(r), 0);
+    r.advance();
+    expect(TutorView.phaseOf(r), 2, reason: 'SAM vừa hỏi ⇒ lượt con');
+    expect(TutorView.askedCount(r), 0);
+    r.requestHint();
+    expect(TutorView.phaseOf(r), 3);
+    r.submit('Cô cạn');
+    expect(TutorView.phaseOf(r), 4, reason: 'phản hồi khớp + câu mới');
+    expect(TutorView.askedCount(r), 1);
+    expect(TutorView.askCaption(d.tutorScript!, d.tutorScript!.asks.first.id),
+        'Câu 1/${d.tutorScript!.asks.length}');
+    expect(TutorView.askCaption(d.tutorScript!, 'e1'), isNull);
+  });
+
+  testWidgets('ROUND 3 B4: thẻ kết đếm câu đã ĐI QUA (tham gia), không điểm', (
+    t,
+  ) async {
+    await t.pumpWidget(
+      fixtureHost(
+        Scaffold(body: TutorView(doc: loadSyntheticDoc(), onNext: (_, _) {})),
+      ),
+    );
+    await t.pumpAndSettle();
+    await t.tap(find.text('Tiếp ▸'));
+    await t.pumpAndSettle();
+    await t.tap(find.widgetWithText(FilledButton, 'Cô cạn'));
+    await t.pumpAndSettle();
+    await t.enterText(
+      find.byKey(const Key('tutor-answer-field')),
+      'vì cát nặng hơn nước',
+    );
+    await t.tap(find.byKey(const Key('tutor-send')));
+    await t.pumpAndSettle();
+    expect(find.byKey(TutorView.endCardKey), findsOneWidget);
+    expect(find.textContaining('Con đã đi qua 2/2 câu hỏi'), findsOneWidget);
+    for (final w in t.widgetList<Text>(find.byType(Text))) {
+      final s = (w.data ?? '').toLowerCase();
+      expect(s, isNot(contains('điểm')));
+      expect(s, isNot(contains('%')));
+      expect(s, isNot(contains('chính xác')));
+    }
+  });
 }

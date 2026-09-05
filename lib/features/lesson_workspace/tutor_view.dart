@@ -4,6 +4,13 @@
 ///
 /// Không có `LearnerStore`, không có `LearningEvent`: view này KHÔNG THỂ ghi
 /// bằng chứng — không phải vì nó nhớ không ghi, mà vì nó không có kiểu để ghi.
+///
+/// ROUND 3 B4 (concept khung 6 «Học cùng SAM»): vòng lặp NHÌN THẤY ĐƯỢC —
+/// dải pha «Giải thích › Hỏi › Con trả lời › Gợi ý › Phản hồi › Tiếp» sáng ở
+/// pha hiện tại (suy tất định từ trạng thái runner); mỗi câu hỏi mang «Câu
+/// n/N»; lựa chọn có chữ cái A/B/C/D; thẻ kết đếm số câu con ĐÃ ĐI QUA (tham
+/// gia, không chấm). Không có bước nào là runtime sư phạm: PEDAGOGY REALITY
+/// của view này = 0 bước runtimeGuided / N bước prototypeScripted.
 library;
 
 import 'package:flutter/material.dart';
@@ -33,6 +40,54 @@ class TutorView extends StatefulWidget {
   final void Function(String blockId)? onShowInRead;
 
   static const endCardKey = Key('tutor-end-card');
+  static const phaseStripKey = Key('tutor-phase-strip');
+
+  /// Sáu pha của vòng lặp — thứ tự cố định, chữ trẻ đọc.
+  static const phases = [
+    'Giải thích',
+    'Hỏi',
+    'Con trả lời',
+    'Gợi ý',
+    'Phản hồi',
+    'Tiếp',
+  ];
+
+  /// Pha hiện tại, TẤT ĐỊNH từ runner: bước hiện tại + lượt cuối transcript.
+  static int phaseOf(TutorRunner r) {
+    if (r.finished || r.current is NextStep) return 5;
+    if (r.current is ExplainStep) return 0;
+    final last = r.transcript.isEmpty ? null : r.transcript.last;
+    return switch (last?.kind) {
+      null || TurnKind.explain => 1,
+      TurnKind.ask => _hasFeedbackBefore(r) ? 4 : 2,
+      TurnKind.hint => 3,
+      TurnKind.matched || TurnKind.scaffold => 4,
+      TurnKind.learner || TurnKind.next => 2,
+    };
+  }
+
+  /// Lượt ngay trước câu hỏi hiện tại là phản hồi (khớp/scaffold) ⇒ trẻ đang
+  /// đọc phản hồi + câu mới: pha «Phản hồi».
+  static bool _hasFeedbackBefore(TutorRunner r) {
+    final n = r.transcript.length;
+    if (n < 2) return false;
+    final k = r.transcript[n - 2].kind;
+    return k == TurnKind.matched || k == TurnKind.scaffold;
+  }
+
+  /// «Câu n/N» của một bước hỏi; không phải bước hỏi ⇒ `null`.
+  static String? askCaption(TutorScript script, String? stepId) {
+    if (stepId == null) return null;
+    final asks = script.asks.toList();
+    final i = asks.indexWhere((a) => a.id == stepId);
+    return i < 0 ? null : 'Câu ${i + 1}/${asks.length}';
+  }
+
+  /// Số câu hỏi con ĐÃ ĐI QUA (có lượt trả lời) — đếm THAM GIA, không chấm.
+  static int askedCount(TutorRunner r) => {
+    for (final t in r.transcript)
+      if (t.kind == TurnKind.learner && t.stepId != null) t.stepId!,
+  }.length;
 
   @override
   State<TutorView> createState() => _TutorViewState();
@@ -166,6 +221,15 @@ class _TutorViewState extends State<TutorView> {
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              WalSpacing.md,
+              WalSpacing.sm,
+              WalSpacing.md,
+              0,
+            ),
+            child: _phaseStrip(TutorView.phaseOf(r)),
+          ),
           if (anchor != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -214,6 +278,37 @@ class _TutorViewState extends State<TutorView> {
     );
   }
 
+  /// Dải pha: chip nhỏ, pha hiện tại tô đậm — trẻ và Founder thấy SAM đang ở
+  /// đâu trong vòng lặp. Không có pha nào là «chấm điểm».
+  Widget _phaseStrip(int current) => SizedBox(
+    key: TutorView.phaseStripKey,
+    height: 28,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: TutorView.phases.length,
+      separatorBuilder: (_, _) => const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 2),
+        child: Icon(Icons.chevron_right, size: 14, color: WalColors.inkSoft),
+      ),
+      itemBuilder: (_, i) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: WalSpacing.sm),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: i == current ? WalColors.primary500 : Colors.white,
+          borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+        ),
+        child: Text(
+          TutorView.phases[i],
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: i == current ? FontWeight.w700 : FontWeight.w500,
+            color: i == current ? Colors.white : WalColors.inkSoft,
+          ),
+        ),
+      ),
+    ),
+  );
+
   String _snippet(LessonBlock b) {
     final t = LessonDocument.textOf(b) ?? 'hình / vùng trong sách';
     return t.length > 70 ? '${t.substring(0, 70)}…' : t;
@@ -253,6 +348,9 @@ class _TutorViewState extends State<TutorView> {
     return SamBubble(
       mascot: t.mascot,
       text: t.text,
+      caption: t.kind == TurnKind.ask
+          ? TutorView.askCaption(widget.doc.tutorScript!, t.stepId)
+          : null,
       background: switch (t.kind) {
         TurnKind.hint => WalColors.surfaceLavender,
         TurnKind.scaffold => LearningStateToken.needsWork.bg,
@@ -286,7 +384,7 @@ class _TutorViewState extends State<TutorView> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (isChoice)
-              for (final o in options) ...[
+              for (var i = 0; i < options.length; i++) ...[
                 SizedBox(
                   height: WalSpacing.minTouch + 4,
                   child: FilledButton(
@@ -294,16 +392,45 @@ class _TutorViewState extends State<TutorView> {
                       backgroundColor: Colors.white,
                       foregroundColor: WalColors.ink,
                       alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: WalSpacing.sm,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           WalSpacing.radiusButton,
                         ),
                       ),
                     ),
-                    onPressed: () => _submit(o),
-                    child: Text(
-                      o,
-                      style: const TextStyle(fontSize: WalType.body),
+                    onPressed: () => _submit(options[i]),
+                    child: Row(
+                      children: [
+                        // Chữ cái A/B/C/D (concept khung 6) — chỉ là nhãn,
+                        // chuỗi đem đi khớp vẫn là lời lựa chọn.
+                        Container(
+                          width: 28,
+                          height: 28,
+                          alignment: Alignment.center,
+                          decoration: const BoxDecoration(
+                            color: WalColors.surfaceLavender,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            String.fromCharCode(65 + i),
+                            style: const TextStyle(
+                              fontSize: WalType.secondary,
+                              fontWeight: FontWeight.w700,
+                              color: WalColors.primaryText,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: WalSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            options[i],
+                            style: const TextStyle(fontSize: WalType.body),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -421,6 +548,20 @@ class _TutorViewState extends State<TutorView> {
             ),
           ),
           const SizedBox(height: 4),
+          if (TutorView.askedCount(r) > 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                'Con đã đi qua ${TutorView.askedCount(r)}/'
+                '${r.script.asks.length} câu hỏi của sách cùng SAM.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: WalType.secondary,
+                  fontWeight: FontWeight.w600,
+                  color: WalColors.primaryText,
+                ),
+              ),
+            ),
           const Text(
             'Đây là kịch bản thử nghiệm — SAM ghi nhận con đã THAM GIA, chưa '
             'phải bằng chứng con đã hiểu. Thầy cô mới là người xác nhận.',

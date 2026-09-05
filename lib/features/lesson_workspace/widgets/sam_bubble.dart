@@ -18,6 +18,7 @@ class SamBubble extends StatelessWidget {
     this.showLabel = true,
     this.child,
     this.background = Colors.white,
+    this.caption,
   });
 
   /// Tên state mascot (`sam-explain`…), không có đuôi.
@@ -28,6 +29,9 @@ class SamBubble extends StatelessWidget {
   /// Thẻ phụ dưới lời (vd «Sách viết…»).
   final Widget? child;
   final Color background;
+
+  /// ROUND 3 B4: chữ nhỏ cạnh nhãn («Câu 1/3») — vị trí trong vòng lặp.
+  final String? caption;
 
   @override
   Widget build(BuildContext context) {
@@ -49,13 +53,28 @@ class SamBubble extends StatelessWidget {
               if (showLabel)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 2),
-                  child: Text(
-                    SamMode.prototypeScripted.childLabel,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: WalColors.primaryText,
-                    ),
+                  child: Row(
+                    children: [
+                      Text(
+                        SamMode.prototypeScripted.childLabel,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: WalColors.primaryText,
+                        ),
+                      ),
+                      if (caption != null) ...[
+                        const SizedBox(width: WalSpacing.sm),
+                        Text(
+                          caption!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: WalColors.inkSoft,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               Container(
