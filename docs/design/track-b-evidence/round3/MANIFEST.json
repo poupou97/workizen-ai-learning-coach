@@ -1,0 +1,754 @@
+{
+  "schema": "wal-evidence-manifest-v1",
+  "round": "round3",
+  "generatedAt": "2026-09-05T08:50:34.497042+00:00",
+  "git": {
+    "sha": "f31b617fb4ff48b3918622e4c33b3f8b9bbe0b3a",
+    "branch": "lane-b/round3-experience",
+    "dirty": false
+  },
+  "apk": {
+    "file": "build/app/outputs/flutter-apk/app-debug.apk",
+    "sha256": "c27e8dff0a25f447be6e6efcc60d2b3aae2c70b2a1175622581995fd2d3f18d7",
+    "bytes": 230775340
+  },
+  "packs": [
+    {
+      "file": "lesson-index-g1.json",
+      "sha256": "7fbf8523beadca7f76a9a52130886e19b37006ba106f0a223f187954b06b8fb8",
+      "packVersion": "g1-20260905T0437Z-07a24504",
+      "contentHash": "d17e5771cd4c414f55130e42cb84ef531d1676446e75176cbbdc29b4224464bc",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g10.json",
+      "sha256": "ebc710ddf63196f3b2fc9b7164ed0f8cb9b0ae3c616fed64a67076f4bcda4df9",
+      "packVersion": "g10-20260905T0437Z-07a24504",
+      "contentHash": "463a97fa9a8b19d3675eaf50ff2091232a16c12ca96edc56840dc0907688e321",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g11.json",
+      "sha256": "05ded31ee311242987c74326478b4f6f09e85f039533cbea08ed16211fd43bfa",
+      "packVersion": "g11-20260905T0437Z-07a24504",
+      "contentHash": "44d3e5bdf9a2a5288720fb67d026541d413a4ab70be8b646d11868898efca075",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g12.json",
+      "sha256": "eac127a867f25f95461ceb068533c0f1030b9012eed245529a035435d730a03b",
+      "packVersion": "g12-20260905T0437Z-07a24504",
+      "contentHash": "53d72fed07e092ef385fc9b378d4eddf2535d880d1b0b298eae8c780cfcc6c40",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g2.json",
+      "sha256": "960bdd44a232a1dc90c8fca16446f997329e71da2888880890aa72b4af6476cc",
+      "packVersion": "g2-20260905T0437Z-07a24504",
+      "contentHash": "d2ec6283ac45383de7cb8dc1e6a4859e8cf232ba195a36550d9d78a8eb3d9659",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g3.json",
+      "sha256": "e41e43195b2d8cfa101e98a20bdb1577326bfac07e3b7b7cb7182ddc9288e0de",
+      "packVersion": "g3-20260905T0437Z-07a24504",
+      "contentHash": "ed7882ab5def086cc2467b5fae4cca948796c343541157885ec9d861d27bac80",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g4.json",
+      "sha256": "21afc9d177f97885f3b4bcbe1f5c503106c3f3885c2e2ba2bd6b6223c2e06c75",
+      "packVersion": "g4-20260905T0437Z-07a24504",
+      "contentHash": "dd96716ce0537e366a788630c05c78b1a005eedcf9fbe0427d05e7751cc6652b",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g5.json",
+      "sha256": "b01467a96d504e691822c75930936bca77708612815973ec5f96651e32ab1212",
+      "packVersion": "g5-20260905T0437Z-07a24504",
+      "contentHash": "a3244d3cfe4138342235c98e60f5159e4b92c5f34e84f54cf4ce90f9c9d174a6",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g6.json",
+      "sha256": "eeb9422c2489790440b7570784439539d8ab48fd885ce6c9a6001e56356a2929",
+      "packVersion": "g6-20260905T0437Z-07a24504",
+      "contentHash": "846ccc69fa88a319197e08d8c0d84d5ea02b8f3f68798bbe48ddeabe6e4e5772",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g7.json",
+      "sha256": "afb72e42061150bcec64e2085f9acf2f484ede2905cbc37b6080f25847717b5e",
+      "packVersion": "g7-20260905T0437Z-07a24504",
+      "contentHash": "d4a11e89297a08779702805ba1d7e7b7c9dfda12b2fc8b1eb9189c71f5c96e98",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g8.json",
+      "sha256": "d389198f32782a5b931c680b7355c0d1336ed4886875154664b33d7d0d82f968",
+      "packVersion": "g8-20260905T0437Z-07a24504",
+      "contentHash": "d5843ed818ae78518c4b211500c370024867fde11a57fa991c2b20f3624f3b14",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g9.json",
+      "sha256": "cf7cc454c9b720c9f7b472fa1643df529602dc0736e358cd92775722fa78a622",
+      "packVersion": "g9-20260905T0437Z-07a24504",
+      "contentHash": "d5ddc1e7569b000b450442e69a7d0dd5212d1f24d718a3589ca7ae957ba4d2a8",
+      "experimental": false,
+      "provenance": true
+    }
+  ],
+  "fixture": {
+    "file": "lesson-06-sgk-khoa-hoc-tu-nhien-6-b17.json",
+    "sha256": "f706bcee29446a59066d2fc98bdbaf1965f7cd49af1ad663826c9041ff381d4f",
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "lesson": 17,
+    "trust": "fixtureFromTrustedCorpus",
+    "sourcePipeline": "tc2-p1",
+    "generator": "tool/fixtures/make_lesson_fixture.py@v1",
+    "blocks": 73,
+    "semantic": 3,
+    "tutorSteps": 5
+  },
+  "device": {
+    "serial": "192.168.1.3:5555",
+    "model": "Nokia 6.1",
+    "androidRelease": "10",
+    "sdk": "29",
+    "reachable": true
+  },
+  "declaredDevice": "Nokia 6.1 (192.168.1.3:5555, WiFi adb) · learner «Na · Lớp 6» · portrait · package ai.workizen.learningcoach",
+  "frames": [
+    {
+      "file": "round3-1-01-home.png",
+      "sha256": "601f0277274d88b692dce392cea577cba554477c334bd53332e5743519292d19",
+      "bytes": 214088,
+      "mtime": "2026-09-05T08:23:30.403568+00:00"
+    },
+    {
+      "file": "round3-1-02-home-card.png",
+      "sha256": "c1faf82f1abec423162444b696e3bc5e553b25206e0adc247be28bbf09534531",
+      "bytes": 190047,
+      "mtime": "2026-09-05T08:23:47.026786+00:00"
+    },
+    {
+      "file": "round3-1-03-workspace-picker.png",
+      "sha256": "fa7f817ae7c77a05c96544d41b02d19eb9cc2652fbd68a983af34f5e4e1644ff",
+      "bytes": 294147,
+      "mtime": "2026-09-05T08:24:05.468033+00:00"
+    },
+    {
+      "file": "round3-1-04-trust-sheet.png",
+      "sha256": "8aefad5f368842215b0a240d1c8e7688616b089d5fd83c38b6008449124b32e9",
+      "bytes": 340869,
+      "mtime": "2026-09-05T08:24:32.810691+00:00"
+    },
+    {
+      "file": "round3-1-05-visual-process.png",
+      "sha256": "401a2828244eab06d529fcc4a5e0278c2ac8d968b90c3e002bd3dbe0c222e8f3",
+      "bytes": 263676,
+      "mtime": "2026-09-05T08:24:53.799133+00:00"
+    },
+    {
+      "file": "round3-1-06-visual-withheld-step.png",
+      "sha256": "809b7d30a62f59552a350113ffc748d19d4b2266688cebd4ea6e0b71209ae3a4",
+      "bytes": 330285,
+      "mtime": "2026-09-05T08:25:35.296774+00:00"
+    },
+    {
+      "file": "round3-1-07-visual-comparison.png",
+      "sha256": "e1047cdae1836d45e6c8277b5c64c8db91e9b577a4079b9c2198fd6dda6062a5",
+      "bytes": 265319,
+      "mtime": "2026-09-05T08:26:07.370181+00:00"
+    },
+    {
+      "file": "round3-1-08-read-top.png",
+      "sha256": "a2df82dd6ea540acfb411d5efb3ca5cc31aa3df0ab6d6fa5aceca1dff9cd8834",
+      "bytes": 242730,
+      "mtime": "2026-09-05T08:26:17.751135+00:00"
+    },
+    {
+      "file": "round3-1-09-read-figure-row.png",
+      "sha256": "757da919a2e9eb6970864acd6e33a150062d01d2c5c08b1bb4ea1dd583f8f1ae",
+      "bytes": 829235,
+      "mtime": "2026-09-05T08:26:54.537104+00:00"
+    },
+    {
+      "file": "round3-1-10-read-captions-page61.png",
+      "sha256": "12679c856af8a11601deabd4c04cc2280271141f85468e6fe69ab2ef711acdc3",
+      "bytes": 315698,
+      "mtime": "2026-09-05T08:27:11.880587+00:00"
+    },
+    {
+      "file": "round3-1-11-read-page61-withheld.png",
+      "sha256": "94e68adf101522aa9d0863c3c7c80127bc72984dac30de56866bc0021bb8e295",
+      "bytes": 368497,
+      "mtime": "2026-09-05T08:27:38.557986+00:00"
+    },
+    {
+      "file": "round3-1-12-tutor-explain.png",
+      "sha256": "9bb1240c58d148c14cf7c5fc25127de5bc017a6d8bc54901e236041e306c158f",
+      "bytes": 364921,
+      "mtime": "2026-09-05T08:27:58.625927+00:00"
+    },
+    {
+      "file": "round3-1-13-tutor-tiep.png",
+      "sha256": "c5a26c77d1a0c37727a3ba45968a56699f10b6340a7f67b477456d3ca88e8bef",
+      "bytes": 271255,
+      "mtime": "2026-09-05T08:28:25.351351+00:00"
+    },
+    {
+      "file": "round3-1-14-tutor-q1.png",
+      "sha256": "e7464090585ecbde2dc37157b0718a355097d45bd18c444fc135837a312c01fb",
+      "bytes": 261466,
+      "mtime": "2026-09-05T08:29:13.598523+00:00"
+    },
+    {
+      "file": "round3-1-15-tutor-matched-q2.png",
+      "sha256": "ee0546aa76561ac852680e61f51963567ccd5b0829e517e7ebe8af1981710a51",
+      "bytes": 280311,
+      "mtime": "2026-09-05T08:30:41.514097+00:00"
+    },
+    {
+      "file": "round3-1-16-tutor-free-text-hint.png",
+      "sha256": "b9cf1b00801e4d1e5b50ee25ae87297acc28b9ad51c8b550c4147abb91e796d0",
+      "bytes": 219195,
+      "mtime": "2026-09-05T08:34:05.935574+00:00"
+    },
+    {
+      "file": "round3-1-17-tutor-hint1.png",
+      "sha256": "9690617a5b1a18278d8394ca93bd4bce806f3f138dd283226f288aaab61c7724",
+      "bytes": 268574,
+      "mtime": "2026-09-05T08:35:38.769090+00:00"
+    },
+    {
+      "file": "round3-1-18-tutor-hint2.png",
+      "sha256": "06b9f00729413674e784bf2c30feb14ee46aa2050ad7e4cb929c9b621df63983",
+      "bytes": 321798,
+      "mtime": "2026-09-05T08:36:33.896474+00:00"
+    },
+    {
+      "file": "round3-1-19-tutor-scaffold-q3.png",
+      "sha256": "4a178bdc0bb63cbc3c2d5e761a88210d3e00fbaff66c3662000cd675da5eed49",
+      "bytes": 192133,
+      "mtime": "2026-09-05T08:36:56.679698+00:00"
+    },
+    {
+      "file": "round3-1-20-tutor-scaffold-q3.png",
+      "sha256": "3ca52778f656afce200f4ba3c43c7da45950af92f904307ba90179ed3b6b3856",
+      "bytes": 288601,
+      "mtime": "2026-09-05T08:37:16.840507+00:00"
+    },
+    {
+      "file": "round3-1-21-tutor-end-card.png",
+      "sha256": "b6707793d6944698ba9488cc86039b31513ab4af9e5b1dabdd4f9d1ace3291f5",
+      "bytes": 359296,
+      "mtime": "2026-09-05T08:37:37.184489+00:00"
+    },
+    {
+      "file": "round3-1-22-tutor-end-card-full.png",
+      "sha256": "b9e28d05021982b0f5ead1352fc942cb9ef41322359171dac6ce12c77a8d1f8a",
+      "bytes": 325293,
+      "mtime": "2026-09-05T08:37:51.776647+00:00"
+    },
+    {
+      "file": "round3-1-23-read-anchored-em-da-hoc.png",
+      "sha256": "5e5f194f87e06d0f8ec2c238ec7c0809e645130bb92284bbbc6f3d1b697df466",
+      "bytes": 260815,
+      "mtime": "2026-09-05T08:38:09.250207+00:00"
+    },
+    {
+      "file": "round3-1-24-back-home.png",
+      "sha256": "9e181efbcd4a2c6577d2f3d4a636893f81b45812813553e05ef238b7263c168a",
+      "bytes": 190275,
+      "mtime": "2026-09-05T08:38:29.419935+00:00"
+    },
+    {
+      "file": "round3-1-25-home-more-menu.png",
+      "sha256": "2aacc76b974cf11c1efff9862f047af841b0f5a61666046a242b67e939ce2416",
+      "bytes": 256614,
+      "mtime": "2026-09-05T08:38:50.319863+00:00"
+    },
+    {
+      "file": "round3-1-26-sessions-unchanged.png",
+      "sha256": "024540df8a98ea4d2a5ee82c361b99108bd219d05fd1632b45bb1160673f2615",
+      "bytes": 52597,
+      "mtime": "2026-09-05T08:39:09.253306+00:00"
+    },
+    {
+      "file": "round3-2-01-home.png",
+      "sha256": "ac3dfbc59a9cd6526731ad674cb0268dc27f9a631bf1d601ea3dda95c9c3dc1a",
+      "bytes": 21404,
+      "mtime": "2026-09-05T08:41:32.512171+00:00"
+    },
+    {
+      "file": "round3-2-02-home-loaded.png",
+      "sha256": "31c6e62d79e6e59e153be5d8c6d2d260e49a884ee348e8a1a71644d4ef94a078",
+      "bytes": 213447,
+      "mtime": "2026-09-05T08:41:46.847389+00:00"
+    },
+    {
+      "file": "round3-2-03-workspace-picker-founder-order.png",
+      "sha256": "799ccc6652f5df9fddb49c0bd79f304f95f01433cc84ba232bccf11133892d84",
+      "bytes": 295232,
+      "mtime": "2026-09-05T08:42:36.389100+00:00"
+    },
+    {
+      "file": "round3-2-04-read-next-visual.png",
+      "sha256": "ec3067d6986159cd8bfcd5ccaf6e467b1641a0c3498e66d3caf290c0863c60db",
+      "bytes": 238093,
+      "mtime": "2026-09-05T08:43:11.138720+00:00"
+    },
+    {
+      "file": "round3-2-05-visual-next-tutor.png",
+      "sha256": "2af7355eed3783a2abe1b7eaaa40c89a0d8290c86df8f701c4bf0cf23126c477",
+      "bytes": 263746,
+      "mtime": "2026-09-05T08:43:40.217725+00:00"
+    },
+    {
+      "file": "round3-2-05b-visual-recheck.png",
+      "sha256": "80de7c91a451c6b9c0326ce941c42fb4148d0bd56f09eb107a19782870405f30",
+      "bytes": 276372,
+      "mtime": "2026-09-05T08:44:29.535813+00:00"
+    },
+    {
+      "file": "round3-2-05c-visual-after-scroll-up.png",
+      "sha256": "1a6a08d774085cfb5494b8c58e5a6fa4bacdbdc9658344cf2776faaca2e42daa",
+      "bytes": 332557,
+      "mtime": "2026-09-05T08:44:32.915920+00:00"
+    }
+  ],
+  "iterations": [
+    {
+      "iter": 1,
+      "build": {
+        "gitSha": "3409527",
+        "apkSha256": "c1091bc0d22135d8c83cfe13477d435abc6ac2d666830bebf877609034bbf8db",
+        "note": "B1–B5 stages 1–5 before the Lane A-runtime merge; prototype next-action rule (visual-first)"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "Launch → Home «Chào Na!»; boot screen instead of a blank frame",
+          "result": "PASS",
+          "note": "first capture was the Founder's notification shade (deleted); shade collapsed via cmd statusbar collapse, app already in front",
+          "frames": [
+            "round3-1-01-home.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "02",
+          "expect": "Home card «BÀI HỌC SAM · BẢN THỬ NGHIỆM» — Bài 17, Chương IV, trang 60–63, three ways, «Mở bài học»",
+          "result": "PASS",
+          "defects": [
+            "D-R3-01 «Bạn có biết?» prints raw id 06-sgk-ngu-van-6-tap-mot · trang 26"
+          ],
+          "frames": [
+            "round3-1-02-home-card.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "03",
+          "expect": "«Mở bài học» → Workspace first open = «Vào bài học» picker: breadcrumb, compact chip ⓘ, three tabs, SAM question, three cards with counts, proposed card with reason",
+          "result": "PASS",
+          "note": "build 1 proposes Trực quan (prototype rule); build 2 proposes Đọc (Founder A8)",
+          "frames": [
+            "round3-1-03-workspace-picker.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "04",
+          "expect": "Tap chip → «Nguồn & độ tin» sheet: trust level, semantic rules, scripted SAM, no evidence, six boundary claims",
+          "result": "PASS",
+          "frames": [
+            "round3-1-04-trust-sheet.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "05",
+          "expect": "Pick proposed card → Trực quan: shape tabs, instance chooser 1·/2·, overview strip 1→2→3, subtitle «3 bước · SGK KHTN 6 · trang 61 · chữ sách, SAM chỉ xếp lại»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-05-visual-process.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "06",
+          "expect": "Instance 2 → step 1 withheld placeholder (grey, page 62), step 2 verbatim",
+          "result": "PASS",
+          "frames": [
+            "round3-1-06-visual-withheld-step.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "07",
+          "expect": "⚖️ Bảng so sánh → 4 rows Lọc/Lắng/Cô cạn/Chiết × Dùng để tách, subtitle «4 cách · trang 63»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-07-visual-comparison.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "08",
+          "expect": "📖 Đọc top: page chips 60·61·62·63, font control, «trang 60» divider, 🎯 MỤC TIÊU",
+          "result": "PASS",
+          "defects": [
+            "D-R3-03 proposal reason clipped at 3 lines mid-quote (fixed 297687e)"
+          ],
+          "frames": [
+            "round3-1-08-read-top.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "09",
+          "expect": "Hình 17.1: two crops in one row as on the page",
+          "result": "PASS",
+          "defects": [
+            "D-R3-05 left crop bleeds a text line (TSL figure bbox; pipeline, not UI)"
+          ],
+          "frames": [
+            "round3-1-09-read-figure-row.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "10",
+          "expect": "Caption group under the row («Hình 17.1» bold), reading order continues",
+          "result": "PASS",
+          "frames": [
+            "round3-1-10-read-captions-page61.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "11",
+          "expect": "Page 61: Hình 17.2 + source line, withheld card, question box",
+          "result": "PASS",
+          "defects": [
+            "D-R3-07 withheld card shows machine code (page_feature:diagram) (fixed 297687e)"
+          ],
+          "frames": [
+            "round3-1-11-read-page61-withheld.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "12",
+          "expect": "🦉 Học với SAM: header label, phase strip «Giải thích» active, explain bubble + SÁCH VIẾT",
+          "result": "PASS",
+          "defects": [
+            "D-R3-08 sixth phase «Tiếp» off-screen on 360dp (fixed 297687e)"
+          ],
+          "frames": [
+            "round3-1-12-tutor-explain.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "13",
+          "expect": "«Tiếp ▸» reachable under the SÁCH VIẾT card",
+          "result": "PASS",
+          "frames": [
+            "round3-1-13-tutor-tiep.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "14",
+          "expect": "Q1 verbatim + «Câu 1/3» + options A/B/C/D + «Gợi ý cho tớ (1/2)»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-14-tutor-q1.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "15",
+          "expect": "Tap B «Cô cạn» → matched feedback + SÁCH VIẾT trang 62 → Q2 «Câu 2/3» free text",
+          "result": "PASS",
+          "frames": [
+            "round3-1-15-tutor-matched-q2.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "16",
+          "expect": "Type ASCII (unmatched) → keyboard does not hide field/Gửi; next-action card hidden while keyboard up",
+          "result": "PASS",
+          "note": "adb input text cannot carry diacritics ⇒ deliberately unmatched path",
+          "frames": [
+            "round3-1-16-tutor-free-text-hint.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "17",
+          "expect": "Gửi → hint 1 (lavender, no shame) «Gợi ý cho tớ (2/2)»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-17-tutor-hint1.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "18",
+          "expect": "Hint 2 → «SAM đã gợi ý hết rồi — con cứ trả lời thử nhé»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-18-tutor-hint2.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "19",
+          "expect": "Second unmatched answer → scaffold, then Q3 «Câu 3/3» A/B/C",
+          "result": "PASS",
+          "note": "keyevent ENTER inserts a newline in the 3-line field (send via Gửi)",
+          "frames": [
+            "round3-1-19-tutor-scaffold-q3.png",
+            "round3-1-20-tutor-scaffold-q3.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "20",
+          "expect": "Q3 option A → matched feedback + SÁCH VIẾT",
+          "result": "PASS",
+          "frames": [
+            "round3-1-21-tutor-end-card.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "21",
+          "expect": "End card: «Con đã đi qua 3/3 câu hỏi của sách cùng SAM» + participation wording + «Đọc lại phần Em đã học» + Về mục lục",
+          "result": "PASS",
+          "frames": [
+            "round3-1-22-tutor-end-card-full.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "22",
+          "expect": "«Đọc lại…» → Smart Book anchored on 📌 Em đã học",
+          "result": "PASS",
+          "defects": [
+            "D-R3-10 badge clipped at the top edge (fixed 08af1bf)"
+          ],
+          "frames": [
+            "round3-1-23-read-anchored-em-da-hoc.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "23",
+          "expect": "Header ← → Home (opened from the Home card)",
+          "result": "PASS",
+          "frames": [
+            "round3-1-24-back-home.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "24",
+          "expect": "Home «…» → Thêm menu",
+          "result": "PASS",
+          "frames": [
+            "round3-1-25-home-more-menu.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "25",
+          "expect": "Các phiên học: still exactly one session (5/9 · Khoa học tự nhiên · học — the round-2 audit session) — nothing from the workspace journey; subject shown by name not id",
+          "result": "PASS",
+          "frames": [
+            "round3-1-26-sessions-unchanged.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        }
+      ]
+    },
+    {
+      "iter": 2,
+      "build": {
+        "gitSha": "08af1bf",
+        "apkSha256": "c27e8dff0a25f447be6e6efcc60d2b3aae2c70b2a1175622581995fd2d3f18d7",
+        "note": "with Lane A-runtime #69 merged: Founder A8 proposal order, per-step runtime labels, hint rewrite, n1 fixes D-R3-03/07/08/10"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "Launch → boot → Home",
+          "result": "PASS",
+          "note": "first frame (7 s after launch) is the WHITE native launch window, not the Flutter BootScreen ⇒ drawables branded in e3e9e9e (not yet installed on the Nokia)",
+          "frames": [
+            "round3-2-01-home.png",
+            "round3-2-02-home-loaded.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "03",
+          "expect": "«Mở bài học» → picker proposes Đọc (Founder A8, R2) with reason",
+          "result": "PASS",
+          "frames": [
+            "round3-2-03-workspace-picker-founder-order.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "05a",
+          "expect": "Đọc card → Smart Book; proposal card = Trực quan (R3), full reason (D-R3-03 verified)",
+          "result": "PASS",
+          "frames": [
+            "round3-2-04-read-next-visual.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "05b",
+          "expect": "«Trực quan» button → Visual; proposal card = Học với SAM quoting Q1 (R4)",
+          "result": "PASS",
+          "note": "view already scrolled ~600 px — the Founder had picked up the phone",
+          "frames": [
+            "round3-2-05-visual-next-tutor.png",
+            "round3-2-05b-visual-recheck.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "13-15",
+          "expect": "tutor loop on build 2",
+          "result": "OBSERVED",
+          "note": "walked by the Founder by hand: «Lọc» → hint (label kịch bản thử nghiệm) → «Cô cạn» → matched; proposal R5 «Về mục lục»; all agent input stopped here",
+          "frames": [
+            "round3-2-05c-visual-after-scroll-up.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "11",
+          "expect": "withheld card without machine code (D-R3-07)",
+          "result": "SKIP",
+          "note": "not captured on device in iteration 2 (Founder holding the phone); widget-tested",
+          "frames": [],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "13",
+          "expect": "explain bubble labelled «SAM (runtime có kiểm)» + runtime line + six phases visible (D-R3-08)",
+          "result": "SKIP",
+          "note": "not captured on device; tutor_view_test covers label + phases",
+          "frames": [],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "20",
+          "expect": "anchor lands with the badge fully visible (D-R3-10)",
+          "result": "SKIP",
+          "note": "not captured on device; widget-tested",
+          "frames": [],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "22",
+          "expect": "Book screen: lesson ranges + TOC footnote",
+          "result": "SKIP",
+          "note": "not walked; book_and_chapter_test covers it (real fixture)",
+          "frames": [],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "23",
+          "expect": "Chapter row «Đã xem (phiên này)»",
+          "result": "SKIP",
+          "note": "not walked",
+          "frames": [],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "25",
+          "expect": "Sessions unchanged after build-2 journey",
+          "result": "SKIP",
+          "note": "not walked in iteration 2; iteration 1 frame stands",
+          "frames": [],
+          "missingFrames": [],
+          "downgraded": false
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "frames": 33,
+    "steps": {
+      "PASS": 29,
+      "FAIL": 0,
+      "SKIP": 6,
+      "UNVERIFIED": 0,
+      "OTHER": 1
+    },
+    "downgraded": 0
+  },
+  "retentionRules": [
+    "no lock-screen / personal-notification frames",
+    "no raw PDF pages; SGK crops inside frames are internal (Founder D4)",
+    "a PASS without an existing frame is downgraded to UNVERIFIED"
+  ],
+  "warnings": []
+}
