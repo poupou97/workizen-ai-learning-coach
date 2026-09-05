@@ -15,6 +15,7 @@ import '../curriculum/exercise_skill_map.dart';
 import '../curriculum/pedagogical_boundary.dart';
 import '../curriculum/skill_case.dart';
 import '../student/learning_evidence.dart';
+import '../student/evidence_validation.dart';
 import '../student/mastery.dart';
 import 'adaptive_engine.dart';
 
@@ -33,6 +34,11 @@ List<LearningEvent> attributeEvidence({
   required DateTime at,
   ResponseFormat format = ResponseFormat.freeResponse,
   Duration? timeSpent,
+
+  /// ⭐ Round 3 (A3): dấu validator của LẦN CHẤM gốc — hàm này chỉ FAN-OUT
+  /// một kết quả đã chấm sang từng thành phần, không tự chấm; dấu đi theo.
+  /// `null` = người gọi chưa đóng dấu ⇒ sự kiện đọc như dữ liệu cũ.
+  EvidenceValidation? validation,
 }) {
   final concepts = map.conceptIds;
   final kind = !correct
@@ -56,6 +62,7 @@ List<LearningEvent> attributeEvidence({
         at: at,
         format: format,
         timeSpent: timeSpent,
+        validation: validation,
       ),
   ];
 }

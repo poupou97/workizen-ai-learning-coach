@@ -14,9 +14,13 @@
 /// - Mọi action truy được về tín hiệu sinh ra nó ([NextBestLearningAction.signal]).
 library;
 
+import '../context/learning_context.dart';
+import '../lesson_model/next_action.dart' show WorkspaceView;
 import '../store/timetable.dart';
 import '../student/concept_summary.dart';
 import '../student/review_schedule.dart';
+import '../student/student_lesson_state.dart';
+import 'lesson_next_action.dart';
 
 /// 8 loại hành động của Founder Directive §F. Engine v1 phát 5 loại đầu;
 /// `explain`/`transfer`/`assess` chờ TransferProbe (WAL-103) và Assignment —
@@ -157,6 +161,19 @@ class NextBestLearningAction {
 
   /// Tín hiệu sinh ra action — audit trail. `null` CHỈ với REST.
   final AgendaSignal? signal;
+
+  /// ⭐ WAL-210 round 3 (Founder A8) — hành động tiếp theo CHO MỘT BÀI
+  /// (Đọc / Trực quan / Học với SAM / bài tiếp / mục lục) từ Student
+  /// Knowledge State + Learning Context + luật sư phạm. Uỷ quyền cho
+  /// [nextBestLessonAction]; tài liệu: ROUND3-RUNTIME-CONTRACTS.md §A8.
+  static LessonNextAction forLesson({
+    required StudentLessonState state,
+    required LearningContext context,
+    required LessonSummary lesson,
+    required Set<WorkspaceView> viewsSeen,
+  }) =>
+      nextBestLessonAction(
+          state: state, context: context, lesson: lesson, viewsSeen: viewsSeen);
 }
 
 /// Phát tín hiệu cho một khái niệm. Thuần — không đọc đồng hồ, không I/O.

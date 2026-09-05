@@ -29,8 +29,17 @@ class DerivedFacts {
     this.intermediateForms = const [],
   });
 
+  /// ⭐ Round 3 (A7): bài KHÔNG có mẫu số chung (KHTN, câu trả lời bằng chữ)
+  /// — chỉ có DẠNG ĐÁP ÁN để chặn rò. `commonDenominator == null` ⇒ không có
+  /// gì để chặn ở mức đó; các luật khác (đáp án, tên cấm, trích dẫn bịa,
+  /// khen tư chất) giữ nguyên.
+  const DerivedFacts.textOnly({required this.answerForms})
+      : commonDenominator = null,
+        intermediateForms = const [];
+
   /// vd 20 — CẤM xuất hiện khi mức ≤ hint (hint gợi hướng, không cho số).
-  final int commonDenominator;
+  /// `null` = bài không có mẫu số chung (xem [DerivedFacts.textOnly]).
+  final int? commonDenominator;
 
   /// vd ['19/20'] — CẤM khi chưa fullSolution.
   final List<String> answerForms;
@@ -93,9 +102,10 @@ GuardVerdict validateTutorOutput({
 
   // ── rò con số dẫn xuất theo mức cho phép (trừ thứ trẻ đã tự nêu) ──
   bool childSaid(String f) => childStatedFacts.contains(f);
-  final cd = facts.commonDenominator.toString();
+  final cd = facts.commonDenominator?.toString();
   if (maxAllowed.index <= SupportLevel.hint.index) {
-    if (!childSaid(cd) &&
+    if (cd != null &&
+        !childSaid(cd) &&
         RegExp('(^|[^0-9])$cd([^0-9]|\$)').hasMatch(squashed)) {
       reasons.add('ESCALATION:common-denominator-$cd-at-hint');
     }

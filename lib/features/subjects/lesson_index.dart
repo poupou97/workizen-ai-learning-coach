@@ -509,8 +509,22 @@ class LessonIndex {
     ];
   }
 
-  List<IndexedSourceAsset> sourceAssetsFor(String subject) =>
-      [for (final a in sourceAssets) if (a.subject == subject) a];
+  /// ⭐ WAL-210 round 3 (#7, Lane B yêu cầu): hình của MÔN này VÀ của SÁCH
+  /// THUỘC LỚP này. Trước đây chỉ lọc theo môn ⇒ Toán 6 trưng hình Toán 5.
+  /// Một hình thuộc lớp khi (a) sách của nó nằm trên giá của pack (`books`),
+  /// hoặc (b) định danh sách mang tiền tố lớp `NN-` khớp `grade`. Không
+  /// chứng minh được ⇒ bỏ (fail closed), không đoán.
+  List<IndexedSourceAsset> sourceAssetsFor(String subject) => [
+        for (final a in sourceAssets)
+          if (a.subject == subject && _belongsToThisGrade(a.sourceDocumentId))
+            a
+      ];
+
+  bool _belongsToThisGrade(String sourceDocumentId) {
+    if (books.any((b) => b.sourceDocumentId == sourceDocumentId)) return true;
+    final m = RegExp(r'^(\d{2})-').firstMatch(sourceDocumentId);
+    return m != null && int.parse(m.group(1)!) == grade;
+  }
 
   List<KhoaExperiment> experimentsForSubject(String subject) =>
       [for (final e in khoaExperiments) if (e.subject == subject) e];
