@@ -1,7 +1,58 @@
-[
- {"step":"01","name":"Home after launch (integrated build): honest card 'Có 4 bài để học ở Môn học' + BÀI HỌC SAM card","frame":"round3-3-01-home.png","result":"PASS"},
- {"step":"02","name":"Home card 'Bài 17' shows Chương IV · trang 60–63 · three ways; Bạn có biết? uses child-facing source name","frame":"round3-3-02-home-card.png","result":"PASS"},
- {"step":"03","name":"Lesson Workspace first-open picker: breadcrumb, trust chip with ⓘ, 3 cards with real counts, 'SAM đề xuất cách này — vì sao?' with state-based reason","frame":"round3-3-03-workspace-picker.png","result":"PASS"},
- {"step":"04","name":"Học với SAM: per-step labels — 'SAM (kịch bản thử nghiệm)' header states runtime checks 5/17 steps; first step 'SAM (runtime có kiểm)' with SÁCH VIẾT quote","frame":"round3-3-04-tutor-start.png","result":"PASS"},
- {"step":"05","name":"Trực quan tab opens from the segmented control","frame":"round3-3-05-visual.png","result":"OBSERVED"}
-]
+{
+ "round": "round3-iter3",
+ "device": "Nokia 6.1 · 192.168.1.3:5555 · learner «Na · Lớp 6»",
+ "protocol": "read-only focus/power check before input; no lock bypass; no profile/settings changes; coordinator (Claude Fable 5.1) walk on the integrated build a0f1da3",
+ "iterations": [
+  {
+   "iter": 3,
+   "build": "a0f1da3",
+   "steps": [
+    {
+     "step": "01",
+     "expect": "Launch integrated build → Home: honest card «Có 4 bài để học ở Môn học» + «BÀI HỌC SAM · BẢN THỬ NGHIỆM» card",
+     "result": "PASS",
+     "frames": [
+      "round3-3-01-home.png"
+     ],
+     "note": "coordinator walk 16:19; branded launch window seen, then Home"
+    },
+    {
+     "step": "02",
+     "expect": "Home card Bài 17 shows Chương IV · trang 60–63 · Đọc/Trực quan/Học với SAM; «Bạn có biết?» source uses child-facing name",
+     "result": "PASS",
+     "frames": [
+      "round3-3-02-home-card.png"
+     ],
+     "note": "tap on the title did nothing (not a target); «Mở bài học» button opens"
+    },
+    {
+     "step": "03",
+     "expect": "Lesson Workspace first-open picker: breadcrumb, trust chip with ⓘ, three cards with real counts, «SAM đề xuất cách này — vì sao?» with a state-based reason",
+     "result": "PASS",
+     "frames": [
+      "round3-3-03-workspace-picker.png"
+     ],
+     "note": ""
+    },
+    {
+     "step": "04",
+     "expect": "Học với SAM: header states runtime-checked steps (5/17) vs prototype; first step labelled «SAM (runtime có kiểm)» with a SÁCH VIẾT quote",
+     "result": "PASS",
+     "frames": [
+      "round3-3-04-tutor-start.png"
+     ],
+     "note": "5/17 on the bridge fixture (Lane B measured 5/12 on the pre-bridge fixture)"
+    },
+    {
+     "step": "05",
+     "expect": "Trực quan tab opens from the segmented control",
+     "result": "OBSERVED",
+     "frames": [
+      "round3-3-05-visual.png"
+     ],
+     "note": "frame captured, content not walked further"
+    }
+   ]
+  }
+ ]
+}
