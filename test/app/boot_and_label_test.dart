@@ -39,4 +39,28 @@ void main() {
     expect(xml, contains('android:label="Học cùng SAM"'));
     expect(xml, isNot(contains('android:label="learning_coach"')));
   });
+
+  test('ROUND 3 n2: cửa sổ khởi động native không còn trắng tinh — nền surface '
+      '+ mascot (khung đầu tiên trên máy thật là cửa sổ này, trước BootScreen)',
+      () {
+    for (final f in [
+      'android/app/src/main/res/drawable/launch_background.xml',
+      'android/app/src/main/res/drawable-v21/launch_background.xml',
+    ]) {
+      final xml = File(f).readAsStringSync();
+      expect(xml, isNot(contains('@android:color/white')), reason: f);
+      expect(xml, contains('@color/launch_background'), reason: f);
+      expect(xml, contains('@drawable/launch_mascot'), reason: f);
+    }
+    expect(
+      File('android/app/src/main/res/values/colors.xml').readAsStringSync(),
+      contains('#F7F7FC'),
+      reason: 'cùng màu WalColors.surface',
+    );
+    expect(
+      File('android/app/src/main/res/drawable-nodpi/launch_mascot.png')
+          .existsSync(),
+      isTrue,
+    );
+  });
 }
