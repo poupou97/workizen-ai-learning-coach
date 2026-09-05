@@ -40,7 +40,6 @@ import argparse
 import json
 import os
 import sys
-import unicodedata
 from collections import Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
