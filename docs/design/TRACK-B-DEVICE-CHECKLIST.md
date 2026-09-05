@@ -45,6 +45,36 @@ pass in both orientations — note which one was used.
 | 24 | Header ← ×3 | Chapter (Bài 17 now «Đã xem (phiên này)») → Book → Giá sách | `trackb-<i>-24-back-chapter-seen` | back-stack sane; no evidence recorded (Sessions unchanged) |
 | 25 | Home → «…» → Phiên học | no new session from the workspace | `trackb-<i>-25-sessions-unchanged` | MOCK ≠ EVIDENCE holds on device |
 
+## Result — 2026-09-05, Nokia, portrait, build 4 (`34672ad`) unless noted
+
+| # | Result | Frame |
+|---|---|---|
+| 01 | PASS (blank first frame on cold start — pre-existing O1) | `trackb-3-01-home`, `4-17-home-top` |
+| 02 | PASS | `trackb-3-02-home-bottom` |
+| 03 | PASS — only KHTN 6 carries «✨ SAM» | `trackb-3-03-bookshelf` |
+| 04 | PASS | `trackb-3-04-book-khtn6` |
+| 05 | PASS (D1 fixed; O4 OCR titles visible) | `trackb-3-05-book-chapters` |
+| 06 | PASS | `trackb-3-06-chapter-iv` |
+| 07 | PASS (D2 fixed) | `trackb-3-07-workspace-visual`, `4-01-workspace` |
+| 08 | PASS | `trackb-1-08-workspace-resumed` (landscape), `4-01` |
+| 09 | PASS | `trackb-1-09/1-10` (landscape) |
+| 10 | PASS | `trackb-1-11-visual-source-sheet` |
+| 11 | PASS | `trackb-2-06-visual-comparison` (landscape) |
+| 12 | PASS | `trackb-3-08-read-top` |
+| 13 | PASS (D5 fixed; D7 fixed in generator, not re-walked) | `trackb-3-09-read-figure-17-1` |
+| 14 | PASS | `trackb-3-12-read-withheld-card`, `3-13` (crop revealed) |
+| 15 | widget test only (`smart_book_view_test`) | — |
+| 16 | PASS | `trackb-3-15-read-question-sheet`, `3-16-tutor-anchored` |
+| 17 | PASS | `trackb-4-02-tutor-tiep` |
+| 18 | PASS (D6 fixed) | `trackb-4-03-tutor-q1` |
+| 19 | PASS | `trackb-3-19-tutor-hint1` |
+| 20 | PASS | `trackb-4-04-tutor-matched-q2` |
+| 21 | PASS (D8 fixed; ASCII input ⇒ unmatched path: hint 1 → hint 2 → scaffold) | `trackb-4-05`…`4-10` |
+| 22 | PASS (D9 fixed after the frame) | `trackb-4-11`, `4-12-tutor-end-card` |
+| 23 | PASS (D4 fixed) | `trackb-4-13-read-anchored-em-da-hoc` |
+| 24 | PASS | `trackb-4-14-chapter-da-xem`, `4-15`, `4-16` |
+| 25 | PASS — one audit session only, none from this branch | `trackb-4-19-sessions-unchanged` |
+
 ## The Founder's five questions (answer from screenshots)
 
 1. **Where is the child?** — header «Bài 17 · … / Chương IV · SGK KHTN 6 · trang 60–63» + back stack Giá sách → Sách → Chương (steps 04–07).
