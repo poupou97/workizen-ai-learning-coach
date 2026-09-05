@@ -437,4 +437,8 @@ guard*, and until this round they were counted as safe.
 - **Figure/caption is a quota sample of 20 blocks in four lessons**, and its headline (`figure_relation`
   0.526) depends on a rubric reading the annotator flagged. Both readings are in §2.4.
 - **12 lessons of 243 in scope, of 3,679 canonical.** Nothing here supports a claim about the corpus.
+- **Only 6 of the 12 are audited on the build that is now their latest.** Batch 1's six were audited
+  on `tc2-p1`; their re-run on `tc2-p2r` carries 53 *transferred* verdicts (identical text, same
+  region, origin stamped on every row) and 0 fresh ones. A transferred verdict is not an audit of the
+  build it is attached to, and the scoreboard now carries both counts rather than one.
 - **No teaching claim of any kind.** `eligible for teaching` is 0.

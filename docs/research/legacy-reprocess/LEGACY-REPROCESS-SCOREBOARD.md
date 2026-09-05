@@ -1,6 +1,6 @@
 # Legacy reprocess scoreboard — rounds 4 + 5 (Lane D)
 
-`legacy-scoreboard-v1` · generated 2026-09-05T16:39:05+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
+`legacy-scoreboard-v1` · generated 2026-09-05T16:44:36+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
 
 Legacy content is never a trusted teaching source. REPROCESSED ≠ TRUSTED: a reprocessed lesson is a *candidate* until it clears an independent audit against a threshold **the Founder sets**.
 
@@ -20,7 +20,8 @@ Legacy content is never a trusted teaching source. REPROCESSED ≠ TRUSTED: a re
 | total legacy lessons in scope | **243** | 113 baseline ∪ sam-units lessons; = 6.6% of the 3,679 canonical historical lessons |
 | pending | **231** | in scope, in no batch yet |
 | reprocessed (from original source) | **12** | of 243 in scope = 4.9% |
-| independently audited | **6** | of 12 reprocessed |
+| independently audited (any build) | **12** | of 12 reprocessed |
+| — of those, audited on the build that is now its latest | **6** | a lesson re-run on a newer build carries *transferred* verdicts, and a transferred verdict is not an audit of the build it is attached to |
 | trusted | **0** | no Founder threshold record at docs/research/legacy-reprocess/THRESHOLDS.json — `trusted` and `eligible for teaching` stay 0 by definition |
 | partial (some blocks served, some withheld) | **12** | of 12 reprocessed |
 | withheld (nothing servable) | **0** | of 12 reprocessed |

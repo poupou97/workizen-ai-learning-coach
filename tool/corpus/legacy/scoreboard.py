@@ -320,13 +320,19 @@ def build(registry_path, legacy_out, thresholds_path):
     in_scope = {lesson_key(l['book'], l['lesson']): l for l in reg['lessons']}
     batches = []
     lessons_by_key = {}
+    audited_ever = set()
     for bd in batch_dirs(legacy_out):
         spec, manifest, ls = batch_lessons(bd)
         rows = audit_rows(bd)
         audited_keys = {lesson_key(r['book'], r['lesson']) for r in rows['NEW']}
         for L in ls:
             k = lesson_key(L['book'], L['lesson'])
+            # Round 5: "has this LESSON been independently audited" and "has THIS BUILD of it been"
+            # are different questions, and a two-round scoreboard has to answer both. A lesson audited
+            # on tc2-p1 and re-run on a later build carries transferred verdicts, not fresh ones — and
+            # a transferred verdict is not an audit of the build it is attached to (round-4 report §12).
             L['audited'] = k in audited_keys
+            audited_ever.add(k) if k in audited_keys else None
             L['in_scope'] = k in in_scope
             mine = [r for r in rows['NEW'] if lesson_key(r['book'], r['lesson']) == k]
             if mine:
@@ -346,7 +352,8 @@ def build(registry_path, legacy_out, thresholds_path):
     all_lessons = list(lessons_by_key.values())
     counts = collections.Counter(L['state'] for L in all_lessons)
     reprocessed = sum(1 for L in all_lessons if L['state'] in ('FULL', 'PARTIAL', 'WITHHELD'))
-    audited = sum(1 for L in all_lessons if L.get('audited'))
+    audited_latest = sum(1 for L in all_lessons if L.get('audited'))
+    audited = len({k for k in audited_ever if k in lessons_by_key})
     trusted, eligible = trusted_count(all_lessons, thresholds)
     n_scope = len(in_scope)
     scoreboard = dict(
@@ -354,6 +361,7 @@ def build(registry_path, legacy_out, thresholds_path):
         pending=n_scope - len([k for k in lessons_by_key if k in in_scope]),
         reprocessed=reprocessed,
         independently_audited=audited,
+        independently_audited_on_the_latest_build=audited_latest,
         trusted=trusted,
         partial=counts['PARTIAL'],
         withheld=counts['WITHHELD'],
@@ -460,7 +468,8 @@ def render_md(sb):
           f"| total legacy lessons in scope | **{s['total_in_scope']}** | 113 baseline ∪ sam-units lessons; = {s['total_in_scope'] / d['canonical']['value']:.1%} of the {d['canonical']['value']:,} canonical historical lessons |",
           f"| pending | **{s['pending']}** | in scope, in no batch yet |",
           f"| reprocessed (from original source) | **{s['reprocessed']}** | of {s['total_in_scope']} in scope = {s['reprocessed'] / s['total_in_scope']:.1%} |",
-          f"| independently audited | **{s['independently_audited']}** | of {s['reprocessed']} reprocessed |",
+          f"| independently audited (any build) | **{s['independently_audited']}** | of {s['reprocessed']} reprocessed |",
+          f"| — of those, audited on the build that is now its latest | **{s['independently_audited_on_the_latest_build']}** | a lesson re-run on a newer build carries *transferred* verdicts, and a transferred verdict is not an audit of the build it is attached to |",
           f"| trusted | **{s['trusted']}** | {sb['thresholds']['note'] or 'against the Founder threshold record'} |",
           f"| partial (some blocks served, some withheld) | **{s['partial']}** | of {s['reprocessed']} reprocessed |",
           f"| withheld (nothing servable) | **{s['withheld']}** | of {s['reprocessed']} reprocessed |",
