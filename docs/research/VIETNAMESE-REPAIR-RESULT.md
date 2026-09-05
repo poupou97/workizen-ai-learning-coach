@@ -135,6 +135,35 @@ blocks released, nothing broken. Tests: `tool/tests/test_repair_vi_defects.py::C
 pattern at all (the comma branch needs a capital or a percentage after it), and was not matched before this
 change either. Widening it would fire on «HN,», «TP,» — reported for A2 rather than guessed at.
 
+## 4b. Audit defect 6 — the imprint page, reproduced at scale and fixed
+
+**Reproduced:** **26 of the 42 attached books** attach their **imprint page** (the colophon — «Chịu trách
+nhiệm xuất bản», «Số ĐKXB», «In xong và nộp lưu chiểu», ISBN) to the book's **last lesson**, by
+`continuation`. TN&XH 1 p125 → Bài 28, Toán 2 tập hai p141 → Bài 75, KHTN 6 p197 → Bài 55, and 23 more.
+
+**Why round 4's cover fix could not catch it, precisely.** The imprint page *is* in the tail and *does*
+carry a strong mark (ISBN) — but only **one**. `COVER_MIN_MARKS = 2` needs a second, and the three weak
+marks («Website:», «Giá:», «HUÂN CHƯƠNG») are *back-cover* furniture. An imprint page is not a back cover,
+so the rule refused it — correctly, for a cover.
+
+**The fix** is a mark family of its own in the same shape as the cover rule (≥ 2 marks · no lesson banner ·
+tail of the book), with the vocabulary an imprint page actually prints. In the first three pages the same
+evidence yields `front_matter`, which ends nothing — a false positive there would delete the book.
+
+**Measured over all 42 books:** every one of the 42 now detects its imprint page (30 that previously carried
+a lesson, 12 already `back_matter`), and **0 other pages lost a lesson**. Tests:
+`test_repair_vi_defects.py::ImprintPageIsEndMatter`.
+
+**A separate finding, reported rather than acted on.** Re-running `tc2_attach` over the 42 books reproduces
+the stored `tc2-p2/attach/*.json` on every page *except* 83, **with the imprint rule switched off** — the
+stored attach files were written by an earlier state of `tc2_attach.py` than the code round 4 finished with
+(Tin học 6 p051–057 read Bài 11–12 rather than Bài 14; TN&XH 1 p055 reads Bài 13 rather than 12). So the
+shipped attach verdicts are **stale relative to their own code**, exactly as the packs are stale relative to
+their provenance rule (round 4 §«a versioning defect»). With a fresh re-attach the gold-set header
+attachment moves **48/54 → 49/54**. Every number elsewhere in this document was measured against the
+**stored** tc2-p2 attach so the comparison stays like-for-like; re-attaching is a pack-rebuild decision for
+the coordinator and Lane D, not a change this lane makes silently.
+
 ## 5. What the held-out set changed, disclosed
 
 The held-out split exposed **one** defect and it was fixed: a *local* signal (the page's own spelling) was
@@ -186,7 +215,7 @@ resolves») keeps it withheld. It is row 1 of the human queue.
 | 3 | «bản sắc → bán sắc» | **repairable** — bản·sắc 301 pages vs bán·sắc 0, plus in-document evidence. Regression test present |
 | 4 | «Cộng hoà → Cộng hoa» | **NOT repairable by layer A, and the repairer abstains** — the corpus carries the same slip (268 vs 303). Asserted as a test, so a future change that «fixes» it by lowering the bar fails loudly |
 | 5 | «cây ổi → cây ỗi» | **repairable** — «ỗi» is attested on 0 of 62,729 pages; an unattested reading is treated like an illegal one |
-| 6 | imprint / back matter → lesson heading | **NOT DONE this round** — `tc2_attach`, not reached. Named, not silently dropped |
+| 6 | imprint / back matter → lesson heading | **DONE** — §4b |
 | 7 | `chem_guard` blocks a Physics heading | **DONE** — §4, guard precision 0/5 → the five gold-set false positives all cleared |
 | 8 | incomplete multiple choice because a sibling was withheld | **DONE** — §8 |
 

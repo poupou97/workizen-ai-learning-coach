@@ -71,6 +71,28 @@ COVER_MARKS = COVER_STRONG + COVER_WEAK
 COVER_MIN_MARKS = 2
 COVER_MIN_STRONG = 1
 
+# Round 5 (Founder 97-row audit, defect 6: «imprint / back matter → lesson heading» - end matter STILL leaking
+# into a lesson after round 4's cover fix). Reproduced at scale: **26 of the 42 attached books** attach their
+# IMPRINT page (the colophon: who published it, how many copies, the deposit date) to the book's last lesson,
+# by `continuation`. The round-4 rule could not catch it and it is worth saying exactly why rather than
+# widening a threshold: an imprint page IS in the tail and DOES carry a strong mark (ISBN), but it carries
+# only ONE - the three weak marks («Website:», «Giá:», «HUÂN CHƯƠNG») are *back-cover* furniture, and an
+# imprint page is not a back cover. `COVER_MIN_MARKS = 2` therefore refused it, correctly, for a cover.
+#
+# The fix is a mark family of its own, in the same shape as the cover rule (≥ 2 marks, no lesson banner,
+# tail of the book) and with the same fail-closed direction. This vocabulary is publishing boilerplate that
+# never appears in a lesson: «Chịu trách nhiệm xuất bản», «Số ĐKXB», «In xong và nộp lưu chiểu». Measured:
+# every one of the 26 pages carries ≥ 3 of these, and no page currently attached to a lesson body carries 2.
+IMPRINT_MARKS = (re.compile(r'Chịu trách nhiệm xuất bản', re.IGNORECASE),
+                 re.compile(r'Chịu trách nhiệm nội dung', re.IGNORECASE),
+                 re.compile(r'Biên tập viên|Biên tập nội dung', re.IGNORECASE),
+                 re.compile(r'Trình bày bìa|Thiết kế sách|Chế bản', re.IGNORECASE),
+                 re.compile(r'Số\s*Đ?KXB|Số\s*QĐXB', re.IGNORECASE),
+                 re.compile(r'In xong và nộp lưu chiểu', re.IGNORECASE),
+                 re.compile(r'Bản quyền thuộc', re.IGNORECASE),
+                 re.compile(r'\bIn\b[^.\n]{0,30}\bcuốn\b', re.IGNORECASE))
+IMPRINT_MIN_MARKS = 2
+
 
 def upper_ratio(t):
     letters = [c for c in t if c.isalpha()]
@@ -185,6 +207,15 @@ def page_info(book, page, n_pages=None, lines=None):
         info['kind'] = 'back_cover' if info['_tail'] else 'front_cover'
         info['cover_marks'] = strong + weak; info['cover_strong'] = strong
         return info
+    # Round 5 (audit defect 6): the imprint / colophon page. Same shape as the cover rule - two independent
+    # marks and no lesson banner - with the vocabulary an imprint page actually prints. In the tail it ends
+    # the book (it is the last content page); in the first three pages it is front matter and ends nothing,
+    # because a false positive there would delete the whole book.
+    imprint = sum(1 for pat in IMPRINT_MARKS if any(pat.search(l['text']) for l in lines))
+    if info['header'] is None and imprint >= IMPRINT_MIN_MARKS and (info['_tail'] or page <= 3):
+        info['kind'] = 'imprint' if info['_tail'] else 'front_matter'
+        info['imprint_marks'] = imprint
+        return info
     th = [l for l in lines if THEME.match(l['text'].strip()) and l['h'] >= 1.4 * med and l['y'] < 0.4]
     if th:
         info['theme'] = th[0]['text'].strip()[:60]
@@ -270,7 +301,7 @@ def attach_book(book, pipeline='tc2-p1', write=True):
             rec['resumed_after_end'] = True
         if info['kind'] in ('front_matter', 'toc', 'empty', 'front_cover'):
             out_pages.append(rec); continue
-        if info['kind'] in ('back_matter', 'back_cover'):
+        if info['kind'] in ('back_matter', 'back_cover', 'imprint'):
             ended = True; current = None; out_pages.append(rec); continue
         if ended:
             rec['kind'] = 'back_matter'; out_pages.append(rec); continue

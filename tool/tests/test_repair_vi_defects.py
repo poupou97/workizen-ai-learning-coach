@@ -198,6 +198,51 @@ class LineGeometrySurvives(unittest.TestCase):
         self.assertEqual([t['bbox'][0] for t in first_line], sorted(t['bbox'][0] for t in first_line))
 
 
+class ImprintPageIsEndMatter(unittest.TestCase):
+    """Defect 6: «imprint / back matter → lesson heading» - end matter still leaking into a lesson after
+    round 4's cover fix. Reproduced over the 42 attached books: **26 attach their imprint page to the
+    book's last lesson**. The round-4 cover rule could not catch it because an imprint page carries exactly
+    ONE cover mark (ISBN) and none of the three weak ones - «Website:», «Giá:», «HUÂN CHƯƠNG» are back-cover
+    furniture, not colophon furniture."""
+
+    IMPRINT = ['Chịu trách nhiệm xuất bản:', 'Tổng Giám đốc HOÀNG LÊ BÁCH',
+               'Chịu trách nhiệm nội dung:', 'Biên tập viên: NGUYỄN VĂN A',
+               'Trình bày bìa: TRẦN B', 'Chế bản: Công ty CP Dịch vụ xuất bản Giáo dục',
+               'In 100 000 cuốn, khổ 19 x 26,5 cm', 'Số ĐKXB: 01-2023/CXBIPH/12-345/GD',
+               'In xong và nộp lưu chiểu tháng 5 năm 2023', 'ISBN 978-604-0-12345-6']
+
+    def _lines(self, texts, y0=0.1):
+        return [dict(text=t, x=0.1, y=y0 + i * 0.03, w=0.6, h=0.02, conf=1.0)
+                for i, t in enumerate(texts)]
+
+    def test_an_imprint_page_in_the_tail_is_end_matter_not_a_lesson_page(self):
+        import tc2_attach
+        info = tc2_attach.page_info('bk', 125, n_pages=126, lines=self._lines(self.IMPRINT))
+        self.assertEqual(info['kind'], 'imprint')
+        self.assertGreaterEqual(info['imprint_marks'], 2)
+
+    def test_one_imprint_phrase_alone_is_not_enough(self):
+        import tc2_attach
+        info = tc2_attach.page_info('bk', 125, n_pages=126,
+                                    lines=self._lines(['Bản quyền thuộc về tác giả bài đọc',
+                                                       'Một đoạn văn bình thường của bài học.']))
+        self.assertNotEqual(info['kind'], 'imprint')
+
+    def test_a_page_that_prints_its_own_lesson_banner_is_never_end_matter(self):
+        import tc2_attach
+        lines = [dict(text='BÀI 28. ÔN TẬP', x=0.1, y=0.06, w=0.6, h=0.05, conf=1.0)] + \
+            self._lines(self.IMPRINT, y0=0.2)
+        info = tc2_attach.page_info('bk', 125, n_pages=126, lines=lines)
+        self.assertNotEqual(info['kind'], 'imprint')
+
+    def test_in_the_first_pages_it_is_front_matter_and_ends_nothing(self):
+        """A false positive at the front would delete the whole book, so the front case is front_matter -
+        which the attach loop skips without setting `ended`."""
+        import tc2_attach
+        info = tc2_attach.page_info('bk', 2, n_pages=126, lines=self._lines(self.IMPRINT))
+        self.assertEqual(info['kind'], 'front_matter')
+
+
 class StructuralGroupDisposition(unittest.TestCase):
     """Defect 8: withholding one option leaves the served question WRONG, not merely smaller."""
 
