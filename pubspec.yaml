@@ -66,6 +66,13 @@ flutter:
     # `assets/pack/covers/`. Thiếu dòng này, bìa nằm trên đĩa nhưng máy thật
     # dựng ra giá sách trắng chữ (đo trên Nokia, WAL-167 n89).
     - assets/pack/covers/
+    # TRACK B (WAL-210) — fixture bài học cho Lesson Workspace. `real/` gitignore
+    # (chữ SGK + crop trang, nội bộ D4); `synthetic/` commit (giả lập, cho CI).
+    # Cùng luật «khai báo không đệ quy» ⇒ khai cả thư mục crops.
+    - assets/fixtures/real/
+    - assets/fixtures/real/crops/
+    - assets/fixtures/synthetic/
+    - assets/fixtures/synthetic/crops/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
