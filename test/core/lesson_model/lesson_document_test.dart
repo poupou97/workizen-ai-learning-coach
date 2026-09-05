@@ -136,11 +136,15 @@ void main() {
   test('⭐ fixture THẬT (nếu máy có): 4 withheld, không chữ, trust nội bộ', () {
     final d = loadRealDocOrSkip();
     if (d == null) return;
-    expect(d.trust, ContentTrust.fixtureFromTrustedCorpus);
+    // Round 3 (A1): fixture thật nay do CẦU sinh — trust là
+    // `trustedStructuredLesson` (chưa kiểm định), vẫn bắt buộc chip.
+    expect(d.trust, ContentTrust.trustedStructuredLesson);
+    expect(d.trust.requiresFixtureChip, isTrue);
     expect(d.provenance.distribution, contains('D4'));
     expect(d.blocks.whereType<WithheldBlock>().length, 4);
     for (final w in d.blocks.whereType<WithheldBlock>()) {
       expect(LessonDocument.textOf(w), isNull);
+      expect(w.trust, ContentTrust.withheld);
     }
     expect(d.blocks.whereType<ImageBlock>().length, 8);
     expect(d.blocks.whereType<QuestionBlock>().length, 11);

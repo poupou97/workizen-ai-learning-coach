@@ -24,6 +24,18 @@ void main() {
         fixtureChipLabel(ContentTrust.fixtureFromTrustedCorpus),
         contains('nội bộ'),
       );
+      // Round 3 (A1): nguồn có cấu trúc vẫn phải nói «chưa kiểm định» —
+      // gỡ chữ này cần HAI quyết định Founder (ngưỡng audit + giấy phép).
+      expect(
+        fixtureChipLabel(ContentTrust.trustedStructuredLesson),
+        contains('chưa kiểm định'),
+      );
+      expect(
+        ContentTrust.trustedStructuredLesson.isProductionTruth,
+        isFalse,
+        reason: 'đột biến coi TSL là sự thật sản phẩm ⇒ đỏ',
+      );
+      expect(ContentTrust.withheld.mayCarryText, isFalse);
     },
   );
 
