@@ -186,8 +186,8 @@ consequence the code attaches does not match the definition this spec writes.
 - **Exclusion.** A rhetorical `…?` inside running prose (→ BODY). A question-form section title (→ HEADING).
   A worked example's lead-in (→ ANSWER). In an SGV, a quoted prompt addressed to the teacher
   (→ QUESTION with `docType = SGV`, emitted as `teacher_prompt`).
-- **Positive examples.** `05-sgk-tieng-viet-5-tap-hai` p11 b?? «4. Đặt 1 – 2 câu ghép nói về nhân vật Nai
-  Ngọc…» · `06-sgk-tin-hoc-6` p21 b08 «1. Em hiểu Internet là gì?» · `07-sgk-khoa-hoc-tu-nhien-7` p32 b07
+- **Positive examples.** `05-sgk-tieng-viet-5-tap-hai` p11, audit row `n20260906-0072` «4. Đặt 1 – 2 câu ghép nói về
+  nhân vật Nai Ngọc…» · `06-sgk-tin-hoc-6` p21 b08 «1. Em hiểu Internet là gì?» · `07-sgk-khoa-hoc-tu-nhien-7` p32 b07
   (stem + A–D options).
 - **Confusing counterexamples (measured).**
   - **QUESTION → BODY, 17** (above) — under-detection, and the expensive direction: a task served as prose.
@@ -735,7 +735,7 @@ procedure decide what they saw".
 | | agreement | **κ** | #1 WRONG | #2 WRONG |
 |---|---|---|---|---|
 | **before** (as judged in round 4, on these 26 rows) | 0.769 | **0.524** | 0.308 | 0.462 |
-| **after** (spec applied; the 3 rows it cannot decide left as disagreements) | 0.962 | **0.923** | 0.500 | 0.615 |
+| **after** (spec applied; the 3 rows it cannot decide left as disagreements) | 0.962 | **0.923** | 0.500 | 0.538 |
 | **after, on the 23 rows the spec decides** | 1.000 | **1.000** | — | — |
 
 κ on the whole round-3 second-annotation sample was 0.713 and on the batch-1 rows 0.423; **0.524 here is

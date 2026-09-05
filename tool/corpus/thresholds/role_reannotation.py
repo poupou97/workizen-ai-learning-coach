@@ -180,6 +180,8 @@ def main():
                     a1_wrong_rate=round(sum(1 for x in a1 if x == 'WRONG') / len(a1), 4),
                     a2_wrong_rate=round(sum(1 for x in a2 if x == 'WRONG') / len(a2), 4)),
         after_worst_case=dict(agreement=po_a, kappa=k_a,
+                              a1_wrong_rate=round(sum(1 for x in s1 if x == 'WRONG') / len(s1), 4),
+                              a2_wrong_rate=round(sum(1 for x in s2 if x == 'WRONG') / len(s2), 4),
                               note='the 3 convention-dependent rows are counted as disagreements'),
         after_on_decided_rows=dict(n=len(dec), agreement=po_d, kappa=k_d,
                                    note='κ = 1.000 here is a property of a deterministic spec, NOT '
