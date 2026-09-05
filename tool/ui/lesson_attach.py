@@ -65,7 +65,10 @@ HEADER_MIN_CONF = 0.8         # header starts at/above this confidence are accep
 # Such a header is accepted only when its page is bracketed by the known starts of the neighbouring
 # lesson numbers (deterministic plausibility check); below this it is never used.
 HEADER_MIN_CONF_BRACKETED = 0.6
-TC2_ATTACH_DIR = 'poc-out/trusted-corpus/tc-v2/tc2-p1/attach'
+# Round 4: the pipeline is versioned (tc2-p1, tc2-p2, …) but this path was pinned to tc2-p1, so a pack
+# built after a new pipeline run would silently read the OLD page verdicts — including the old
+# 'the back cover belongs to the last lesson'. `WAL_TC2_ATTACH_DIR` points it at the run in hand.
+TC2_ATTACH_DIR = os.environ.get('WAL_TC2_ATTACH_DIR') or 'poc-out/trusted-corpus/tc-v2/tc2-p1/attach'
 
 # reason codes — attached
 ATTACHED = 'attached'

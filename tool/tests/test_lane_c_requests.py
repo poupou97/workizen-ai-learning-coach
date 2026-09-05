@@ -171,6 +171,29 @@ class ChapterChuDeTests(unittest.TestCase):
         self.assertEqual(self.chapters('không có mục lục ở đây'), [])
 
 
+class PackAttachDirTests(unittest.TestCase):
+    """Round 4: the pack builder read a hard-coded `tc2-p1` attach directory, so a pack built after a new
+    pipeline run would have kept the OLD page verdicts (back cover inside the last lesson included)."""
+
+    def test_the_attach_directory_can_be_pointed_at_the_run_in_hand(self):
+        import importlib
+        sys.path.insert(0, os.path.join(HERE, '..', 'ui'))
+        old = os.environ.get('WAL_TC2_ATTACH_DIR')
+        try:
+            os.environ['WAL_TC2_ATTACH_DIR'] = '/tmp/does-not-exist/attach'
+            la = importlib.reload(importlib.import_module('lesson_attach'))
+            self.assertEqual(la.TC2_ATTACH_DIR, '/tmp/does-not-exist/attach')
+            del os.environ['WAL_TC2_ATTACH_DIR']
+            la = importlib.reload(importlib.import_module('lesson_attach'))
+            self.assertTrue(la.TC2_ATTACH_DIR.endswith('tc-v2/tc2-p1/attach'))   # unchanged default
+        finally:
+            if old is not None:
+                os.environ['WAL_TC2_ATTACH_DIR'] = old
+            else:
+                os.environ.pop('WAL_TC2_ATTACH_DIR', None)
+            importlib.reload(importlib.import_module('lesson_attach'))
+
+
 class GoldErrataTests(unittest.TestCase):
     """Request 1 — the gold's lesson numbers on LS&ĐL 5 p041 and p080 contradicted the printed banners.
 
