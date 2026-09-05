@@ -33,6 +33,7 @@ STRIP_H = 1.35           # how far above/below the bar to look, in median text h
 MIN_SIDE_COVER = 0.15    # share of the bar's columns that must carry ink on each side
 MIN_DETACH = 0.10        # blank gap between the bar and that ink, in median text heights
 SIDE_CENTRE_TOL = 0.45   # |centre(ink) − centre(bar)| may not exceed this share of the bar length
+SIDE_WINDOW = 0.25       # how far past the bar's ends to look when measuring how WIDE a half really is
 NEIGHBOUR_BAR_LEN_TOL = 0.35   # a neighbour whose length is this close is «another bar», i.e. an «=»
 TOKEN_OVERLAP = 0.35     # share of a token's width that must sit over the bar to be its half
 
@@ -46,6 +47,11 @@ class FractionRegion:
     denominator: Token = None
     ink_above: tuple = None      # (x0, x1) normalised extent of the ink above the bar
     ink_below: tuple = None
+    # The same two extents measured over a window WIDER than the bar. A printed vinculum is drawn at
+    # least as long as the half it separates, so ink that spills past the bar's ends means the
+    # «half» is not what sits under this bar — `validate.vinculum_raster` refuses it.
+    ink_above_wide: tuple = None
+    ink_below_wide: tuple = None
     extractable: bool = False
     reason: str = ''
 
@@ -80,7 +86,13 @@ def _strip_px(mask, tokens, bar):
 
 
 def _side(mask, bar, strip_h, detach_px, above):
-    """(ink_extent, ok) for the strip above/below a bar. `ok` is False when the side disqualifies it."""
+    """(ink_extent, wide_extent, ok) for the strip above/below a bar.
+
+    `ink_extent` is measured inside the bar's own x-range — that is what decides whether the bar
+    looks like a vinculum at all. `wide_extent` is measured over a window `SIDE_WINDOW` longer at
+    each end, and is what lets `validate` ask the typographic question: is the printed bar really
+    drawn longer than the half above it?
+    """
     if above:
         y1 = bar.py0 - detach_px
         y0 = y1 - strip_h
@@ -90,17 +102,19 @@ def _side(mask, bar, strip_h, detach_px, above):
         y1 = y0 + strip_h
         touch = (bar.py1, bar.py1 + detach_px)
     if mask.any_ink(bar.px0, touch[0], bar.px1, touch[1]):
-        return None, False                      # attached ink: a «+», a «±», a boxed rule
+        return None, None, False                # attached ink: a «+», a «±», a boxed rule
     cover = mask.column_coverage(bar.px0, y0, bar.px1, y1)
     if cover < MIN_SIDE_COVER:
-        return None, False
+        return None, None, False
     ext = mask.ink_extent(bar.px0, y0, bar.px1, y1)
     if ext is None:
-        return None, False
+        return None, None, False
     centre = (ext[0] + ext[1]) / 2.0
     if abs(centre - (bar.px0 + bar.px1) / 2.0) > SIDE_CENTRE_TOL * (bar.px1 - bar.px0):
-        return None, False
-    return ext, True
+        return None, None, False
+    pad = int(round(SIDE_WINDOW * (bar.px1 - bar.px0)))
+    wide = mask.ink_extent(bar.px0 - pad, y0, bar.px1 + pad, y1) or ext
+    return ext, wide, True
 
 
 def _neighbour_is_a_bar(bar, others, strip_h, detach_px):
@@ -149,8 +163,8 @@ def find_fraction_regions(mask, tokens, bar_params=None):
     regions = []
     for bar in found:
         strip_h, detach_px = _strip_px(mask, tokens, bar)
-        above, ok_a = _side(mask, bar, strip_h, detach_px, above=True)
-        below, ok_b = _side(mask, bar, strip_h, detach_px, above=False)
+        above, above_wide, ok_a = _side(mask, bar, strip_h, detach_px, above=True)
+        below, below_wide, ok_b = _side(mask, bar, strip_h, detach_px, above=False)
         if not (ok_a and ok_b):
             continue
         if _neighbour_is_a_bar(bar, found, strip_h, detach_px):
@@ -159,7 +173,9 @@ def find_fraction_regions(mask, tokens, bar_params=None):
         dens = _half_candidates(tokens, bar, bar.py1, bar.py1 + detach_px + strip_h, mask)
         r = FractionRegion(bar=bar, kind='bar_region_unreadable',
                            ink_above=(above[0] / mask.width, above[1] / mask.width),
-                           ink_below=(below[0] / mask.width, below[1] / mask.width))
+                           ink_below=(below[0] / mask.width, below[1] / mask.width),
+                           ink_above_wide=(above_wide[0] / mask.width, above_wide[1] / mask.width),
+                           ink_below_wide=(below_wide[0] / mask.width, below_wide[1] / mask.width))
         if nums or dens:
             r.kind = 'stacked_fraction'
         if len(nums) > 1:
