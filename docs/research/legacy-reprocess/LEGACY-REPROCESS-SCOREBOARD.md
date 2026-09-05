@@ -1,6 +1,6 @@
 # Legacy reprocess scoreboard — rounds 4 + 5 (Lane D)
 
-`legacy-scoreboard-v1` · generated 2026-09-05T16:35:05+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
+`legacy-scoreboard-v1` · generated 2026-09-05T16:39:05+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
 
 Legacy content is never a trusted teaching source. REPROCESSED ≠ TRUSTED: a reprocessed lesson is a *candidate* until it clears an independent audit against a threshold **the Founder sets**.
 
@@ -70,7 +70,7 @@ OLD = 55 served blocks of the old units + packs · NEW = 74 served blocks of the
 
 ### Restore — batch `round4/legacy/batch-1`
 
-**No restore stage ran.** no restore stage ran for this batch — no build change restored a reviewed withheld region, and no REPAIRED stage exists yet `restored`, `falsely-withheld recovered` and `RESTORE PRECISION` are **empty, not zero** — see «What this scoreboard does not say».
+**No restore stage ran** — no build change restored a reviewed withheld region here, and no REPAIRED stage exists yet. `restored`, `falsely-withheld recovered` and `RESTORE PRECISION` are **empty, not zero** — see «What this scoreboard does not say».
 
 
 ## Batch `round4/legacy/batch-1-rerun-tc2-p2-preview` (spec `batch-1`) — pipeline `tc2-p2` (37 pages, code origin/lane-a/round4-pipeline-failure-classes@206a103 (expor)
@@ -106,7 +106,7 @@ OLD = not re-sampled for this batch — the product side is unchanged, see the b
 
 ### Restore — batch `round4/legacy/batch-1-rerun-tc2-p2-preview`
 
-**No restore stage ran.** no restore stage ran for this batch — no build change restored a reviewed withheld region, and no REPAIRED stage exists yet `restored`, `falsely-withheld recovered` and `RESTORE PRECISION` are **empty, not zero** — see «What this scoreboard does not say».
+**No restore stage ran** — no build change restored a reviewed withheld region here, and no REPAIRED stage exists yet. `restored`, `falsely-withheld recovered` and `RESTORE PRECISION` are **empty, not zero** — see «What this scoreboard does not say».
 
 
 ## Batch `round4/legacy/batch-1-rerun-tc2-p2` (spec `batch-1`) — pipeline `tc2-p2` (37 pages, code af2245ab9c28990da92e56b295cbfd58b050bcd2)
@@ -142,7 +142,7 @@ OLD = not re-sampled for this batch — the product side is unchanged, see the b
 
 ### Restore — batch `round4/legacy/batch-1-rerun-tc2-p2`
 
-**No restore stage ran.** no restore stage ran for this batch — no build change restored a reviewed withheld region, and no REPAIRED stage exists yet `restored`, `falsely-withheld recovered` and `RESTORE PRECISION` are **empty, not zero** — see «What this scoreboard does not say».
+**No restore stage ran** — no build change restored a reviewed withheld region here, and no REPAIRED stage exists yet. `restored`, `falsely-withheld recovered` and `RESTORE PRECISION` are **empty, not zero** — see «What this scoreboard does not say».
 
 
 ## Batch `round5/legacy/batch-2` (spec `batch-2`) — pipeline `tc2-p2` (34 pages, code 90f75e0daffab2cc34b388df8ad4a6e8d0b599b2)
@@ -194,7 +194,7 @@ Withholding is not automatically safe. A withheld block that leaves a sibling st
 
 ### Restore — batch `round5/legacy/batch-2`
 
-**No restore stage ran.** no restore stage ran for this batch — no build change restored a reviewed withheld region, and no REPAIRED stage exists yet `restored`, `falsely-withheld recovered` and `RESTORE PRECISION` are **empty, not zero** — see «What this scoreboard does not say».
+**No restore stage ran** — no build change restored a reviewed withheld region here, and no REPAIRED stage exists yet. `restored`, `falsely-withheld recovered` and `RESTORE PRECISION` are **empty, not zero** — see «What this scoreboard does not say».
 
 
 ### Figure-caption RELATION — batch `round5/legacy/batch-2` (quota sample, within-class only)

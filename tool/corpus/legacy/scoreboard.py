@@ -121,8 +121,8 @@ def restore_record(batch_dir):
     rows = common.load_json(f'{batch_dir}/restore/restore-rows.json')
     prec = common.load_json(f'{batch_dir}/restore/restore-precision.json')
     if not rows:
-        return dict(ran=False, why='no restore stage ran for this batch — no build change restored a reviewed '
-                                   'withheld region, and no REPAIRED stage exists yet')
+        return dict(ran=False, why='no build change restored a reviewed withheld region here, and no REPAIRED '
+                                   'stage exists yet')
     out = dict(ran=True, mechanism=rows.get('restoreMechanism'),
                reviewedWithheldRegions=rows.get('reviewedWithheldRegions'),
                restored=rows.get('restored'),
@@ -410,8 +410,8 @@ def render_restore(b):
     r = b.get('restore') or {}
     o = [f"\n### Restore — batch `{b['dir']}`\n"]
     if not r.get('ran'):
-        o.append(f"**No restore stage ran.** {r.get('why', '')} `restored`, `falsely-withheld recovered` and "
-                 '`RESTORE PRECISION` are **empty, not zero** — see «What this scoreboard does not say».\n')
+        o.append(f"**No restore stage ran** — {r.get('why', '')}. `restored`, `falsely-withheld recovered` "
+                 'and `RESTORE PRECISION` are **empty, not zero** — see «What this scoreboard does not say».\n')
         return o
     o += [f"Restore mechanism: {r.get('mechanism')}\n",
           '| measure | value | of what |', '|---|---|---|',

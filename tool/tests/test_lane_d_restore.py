@@ -214,7 +214,9 @@ class ScoreboardRoundFiveTests(unittest.TestCase):
         os.makedirs(d)
         rec = scoreboard.restore_record(d)
         self.assertFalse(rec['ran'])
-        self.assertIn('no restore stage ran', rec['why'])
+        # The test pins the PROPERTY — a reason is given — not the exact prose, which is copy.
+        self.assertTrue(rec['why'].strip(), 'a false `ran` must be accompanied by a reason')
+        self.assertIn('REPAIRED', rec['why'], 'the reason must name the stage that did not run')
         md = '\n'.join(scoreboard.render_restore({'dir': 'batch-x', 'restore': rec}))
         self.assertIn('empty, not zero', md)
 

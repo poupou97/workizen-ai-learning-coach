@@ -1,7 +1,7 @@
 {
  "version": "legacy-scoreboard-v1",
  "generated_by": "tool/corpus/legacy/scoreboard.py",
- "generated": "2026-09-05T16:35:05+00:00",
+ "generated": "2026-09-05T16:39:05+00:00",
  "legacy_roots": [
   "/Users/alexnguyen/projects/workizen-ai-learning-coach/poc-out/round4/legacy",
   "/Users/alexnguyen/projects/workizen-ai-learning-coach/poc-out/round5/legacy"
@@ -62,7 +62,7 @@
    "pipeline": "legacy-b1",
    "restore": {
     "ran": false,
-    "why": "no restore stage ran for this batch — no build change restored a reviewed withheld region, and no REPAIRED stage exists yet"
+    "why": "no build change restored a reviewed withheld region here, and no REPAIRED stage exists yet"
    },
    "caption_relation": null,
    "orphan": null,
@@ -569,7 +569,7 @@
    "pipeline": "tc2-p2",
    "restore": {
     "ran": false,
-    "why": "no restore stage ran for this batch — no build change restored a reviewed withheld region, and no REPAIRED stage exists yet"
+    "why": "no build change restored a reviewed withheld region here, and no REPAIRED stage exists yet"
    },
    "caption_relation": null,
    "orphan": null,
@@ -1072,7 +1072,7 @@
    "pipeline": "tc2-p2",
    "restore": {
     "ran": false,
-    "why": "no restore stage ran for this batch — no build change restored a reviewed withheld region, and no REPAIRED stage exists yet"
+    "why": "no build change restored a reviewed withheld region here, and no REPAIRED stage exists yet"
    },
    "caption_relation": null,
    "orphan": null,
@@ -1575,7 +1575,7 @@
    "pipeline": "tc2-p2",
    "restore": {
     "ran": false,
-    "why": "no restore stage ran for this batch — no build change restored a reviewed withheld region, and no REPAIRED stage exists yet"
+    "why": "no build change restored a reviewed withheld region here, and no REPAIRED stage exists yet"
    },
    "caption_relation": {
     "file": "annotated-kind-caption-20260907.jsonl",
