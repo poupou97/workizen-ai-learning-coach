@@ -368,6 +368,25 @@ The `tc2-p2` column mixes 53 verdicts carried over under a strict rule (identica
 stamped on every row) with 11 freshly judged new claims. It is therefore a **conditional** rate over the rows
 that survived plus the rows that are new — not a fresh stratified sample of that build. Read it with §7.2.
 
+### 7.6 These numbers are not Lane A-pipeline's numbers — do not compare them
+
+Lane A-pipeline's own report measures `tc2-p1` → `tc2-p2` on **54 gold pages** with **their scorer against a
+corrected gold**: FTR 0.0957 → 0.0734, coverage 0.683 → 0.551. This report measures **six legacy lessons** with
+the **round-3 false-trust criteria on an audited sample of served blocks**: 0.365 → 0.297, coverage 0.79 →
+0.64. The two false-trust numbers differ by a factor of four and **neither is wrong**:
+
+- **Different populations.** Batch 1 was chosen adversarially — the two-column Toán, TV5 and KHTN pages the
+  round-3 audit found failing. The gold set is a broader, mostly cleaner sample. A higher rate here is what a
+  correctly chosen batch should produce.
+- **Different definitions.** Their FTR is false-trusted blocks over trusted blocks under their scorer against a
+  page-level gold; this is the derived five-criteria false trust of the round-3 protocol, judged by an
+  annotator from page renders on a stratified sample.
+- **What agrees is the direction and the trade.** Both measurements say the same two things: fewer wrong blocks
+  delivered, and fewer blocks delivered. Coverage 0.683 → 0.551 there, 0.79 → 0.64 here.
+
+Quoting one number in the other's place would be a denominator error (D5). They belong in the same report only
+as two independent readings of the same direction.
+
 **In blocks, with point estimates and wide intervals:** `tc2-p1` serves 287 blocks of which ≈ 105 are false
 trust and ≈ 182 are not; `tc2-p2` serves 221 of which ≈ 66 are false trust and ≈ 155 are not. The improved
 build delivers **≈ 39 fewer wrong blocks and ≈ 27 fewer right ones**. Against the OLD product — 131 served
