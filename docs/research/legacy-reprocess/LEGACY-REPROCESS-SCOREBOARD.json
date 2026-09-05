@@ -1,7 +1,7 @@
 {
  "version": "legacy-scoreboard-v1",
  "generated_by": "tool/corpus/legacy/scoreboard.py",
- "generated": "2026-09-05T14:11:47+00:00",
+ "generated": "2026-09-05T14:20:30+00:00",
  "registry": {
   "path": "registry.json",
   "version": "legacy-registry-v1",
@@ -1034,6 +1034,502 @@
    "audit_rows": {
     "OLD": 0,
     "NEW": 56
+   },
+   "transferred_verdicts": 53
+  },
+  {
+   "batch": "batch-1",
+   "dir": "batch-1-rerun-tc2-p2",
+   "pipeline": "tc2-p2",
+   "started": "2026-09-05T14:14:19+00:00",
+   "pipeline_code_sha": "af2245ab9c28990da92e56b295cbfd58b050bcd2",
+   "pages": 37,
+   "lessons": [
+    {
+     "book": "04-sgk-toan-4-tap-hai",
+     "lesson": 61,
+     "title": "Phép trừ phân số",
+     "risk": [
+      "toan",
+      "two_col",
+      "formula",
+      "order_suspect"
+     ],
+     "batch": "batch-1",
+     "pipeline": "tc2-p2",
+     "pages_pdf": [
+      80,
+      81,
+      82,
+      83
+     ],
+     "state": "PARTIAL",
+     "sourceability": "PARTIAL",
+     "learning_blocks": 19,
+     "trusted_blocks": 4,
+     "withheld_blocks": 15,
+     "withheld_by_reason": {
+      "agree_text": 7,
+      "agree_order": 5,
+      "agree_numbers": 3,
+      "math_guard": 1
+     },
+     "figures": 16,
+     "audit_status": "notAudited",
+     "licence": "internalResearchOnly",
+     "source_hash": "82bf2bfb1be8ef5982b9b3d268eaa3641beabd60cd480a4d4ffebec8dc049479",
+     "pipeline_version": "tc2-p2/sdm-v3",
+     "pages_pdf_new": [
+      81,
+      83
+     ],
+     "audited": true,
+     "in_scope": true,
+     "audit": {
+      "rows": 4,
+      "served": 4,
+      "withheld_reviewed": 0,
+      "false_trust_wrong": 0,
+      "false_trust_judged": 4,
+      "false_trust_rate": 0.0
+     }
+    },
+    {
+     "book": "04-sgk-toan-4-tap-hai",
+     "lesson": 73,
+     "title": "Ôn tập chung",
+     "risk": [
+      "toan",
+      "two_col",
+      "formula",
+      "attachment_suspect",
+      "geometry_rebuilt_expr"
+     ],
+     "batch": "batch-1",
+     "pipeline": "tc2-p2",
+     "pages_pdf": [
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122
+     ],
+     "state": "PARTIAL",
+     "sourceability": "PARTIAL",
+     "learning_blocks": 64,
+     "trusted_blocks": 39,
+     "withheld_blocks": 25,
+     "withheld_by_reason": {
+      "agree_text": 11,
+      "agree_order": 7,
+      "agree_tones": 5,
+      "agree_numbers": 2
+     },
+     "figures": 14,
+     "audit_status": "notAudited",
+     "licence": "internalResearchOnly",
+     "source_hash": "e67713cd48be665bbf0d7727f6c246427cf7fb8de538735b1aa9337870e05824",
+     "pipeline_version": "tc2-p2/sdm-v3",
+     "pages_pdf_new": [
+      117,
+      121
+     ],
+     "audited": true,
+     "in_scope": true,
+     "audit": {
+      "rows": 6,
+      "served": 6,
+      "withheld_reviewed": 0,
+      "false_trust_wrong": 3,
+      "false_trust_judged": 6,
+      "false_trust_rate": 0.5
+     }
+    },
+    {
+     "book": "05-sgk-toan-5-tap-mot",
+     "lesson": 6,
+     "title": "Cộng, trừ hai phân số khác mẫu số",
+     "risk": [
+      "toan",
+      "two_col",
+      "formula",
+      "geometry_rebuilt_expr"
+     ],
+     "batch": "batch-1",
+     "pipeline": "tc2-p2",
+     "pages_pdf": [
+      20,
+      21,
+      22,
+      23,
+      24
+     ],
+     "state": "PARTIAL",
+     "sourceability": "PARTIAL",
+     "learning_blocks": 25,
+     "trusted_blocks": 12,
+     "withheld_blocks": 13,
+     "withheld_by_reason": {
+      "math_guard": 3,
+      "agree_text": 10,
+      "low_ocr_conf": 1,
+      "agree_tones": 2,
+      "agree_numbers": 1
+     },
+     "figures": 6,
+     "audit_status": "notAudited",
+     "licence": "internalResearchOnly",
+     "source_hash": "c8f196b7d869b6670891671887a614e1dedc48163465c530ef1bdb0cac8dd09b",
+     "pipeline_version": "tc2-p2/sdm-v3",
+     "pages_pdf_new": [
+      21,
+      23
+     ],
+     "audited": true,
+     "in_scope": true,
+     "audit": {
+      "rows": 11,
+      "served": 11,
+      "withheld_reviewed": 0,
+      "false_trust_wrong": 3,
+      "false_trust_judged": 11,
+      "false_trust_rate": 0.2727
+     }
+    },
+    {
+     "book": "05-sgk-tieng-viet-5-tap-mot",
+     "lesson": 25,
+     "title": "Tiếng đàn ba-la-lai-ca trên sông Đà",
+     "risk": [
+      "tv5",
+      "two_col",
+      "order_suspect",
+      "attachment_suspect"
+     ],
+     "batch": "batch-1",
+     "pipeline": "tc2-p2",
+     "pages_pdf": [
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128
+     ],
+     "state": "PARTIAL",
+     "sourceability": "PARTIAL",
+     "learning_blocks": 85,
+     "trusted_blocks": 61,
+     "withheld_blocks": 24,
+     "withheld_by_reason": {
+      "agree_order": 6,
+      "agree_text": 5,
+      "page_feature:diagram": 8,
+      "page_feature:color_heavy": 1,
+      "agree_tones": 5
+     },
+     "figures": 16,
+     "audit_status": "notAudited",
+     "licence": "internalResearchOnly",
+     "source_hash": "1dbafae8f4a0b8a7c178fbe5d10fdc27c85f61b5e07e54a20410881e7593e21c",
+     "pipeline_version": "tc2-p2/sdm-v3",
+     "pages_pdf_new": [
+      123,
+      127
+     ],
+     "audited": true,
+     "in_scope": true,
+     "audit": {
+      "rows": 20,
+      "served": 20,
+      "withheld_reviewed": 0,
+      "false_trust_wrong": 3,
+      "false_trust_judged": 20,
+      "false_trust_rate": 0.15
+     }
+    },
+    {
+     "book": "05-sgk-tieng-viet-5-tap-hai",
+     "lesson": 1,
+     "title": "Tiếng hát của người đá",
+     "risk": [
+      "tv5",
+      "two_col",
+      "attachment_suspect",
+      "role_suspect"
+     ],
+     "batch": "batch-1",
+     "pipeline": "tc2-p2",
+     "pages_pdf": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+     ],
+     "state": "PARTIAL",
+     "sourceability": "PARTIAL",
+     "learning_blocks": 57,
+     "trusted_blocks": 40,
+     "withheld_blocks": 17,
+     "withheld_by_reason": {
+      "agree_text": 1,
+      "agree_order": 8,
+      "page_feature:color_heavy": 1,
+      "agree_tones": 7
+     },
+     "figures": 14,
+     "audit_status": "notAudited",
+     "licence": "internalResearchOnly",
+     "source_hash": "73d0d97dc45fb9f1c2bd0449f1fe8693636ef28595a47730b7401b5d14995f7a",
+     "pipeline_version": "tc2-p2/sdm-v3",
+     "pages_pdf_new": [
+      9,
+      13
+     ],
+     "audited": true,
+     "in_scope": true,
+     "audit": {
+      "rows": 11,
+      "served": 11,
+      "withheld_reviewed": 0,
+      "false_trust_wrong": 0,
+      "false_trust_judged": 11,
+      "false_trust_rate": 0.0
+     }
+    },
+    {
+     "book": "06-sgk-khoa-hoc-tu-nhien-6",
+     "lesson": 11,
+     "title": "Oxygen. Không khí",
+     "risk": [
+      "khtn",
+      "two_col",
+      "figure_caption",
+      "role_suspect"
+     ],
+     "batch": "batch-1",
+     "pipeline": "tc2-p2",
+     "pages_pdf": [
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42
+     ],
+     "state": "PARTIAL",
+     "sourceability": "PARTIAL",
+     "learning_blocks": 95,
+     "trusted_blocks": 65,
+     "withheld_blocks": 30,
+     "withheld_by_reason": {
+      "agree_order": 9,
+      "agree_numbers": 1,
+      "agree_tones": 12,
+      "agree_text": 7,
+      "figure_dependent": 1
+     },
+     "figures": 28,
+     "audit_status": "notAudited",
+     "licence": "internalResearchOnly",
+     "source_hash": "f7f20b68fa2f1484d2fc37feaf390fa2d3bdfbcfece760cef137508bcc351366",
+     "pipeline_version": "tc2-p2/sdm-v3",
+     "pages_pdf_new": [
+      37,
+      42
+     ],
+     "audited": true,
+     "in_scope": true,
+     "audit": {
+      "rows": 12,
+      "served": 12,
+      "withheld_reviewed": 0,
+      "false_trust_wrong": 0,
+      "false_trust_judged": 12,
+      "false_trust_rate": 0.0
+     }
+    }
+   ],
+   "old_vs_new": {
+    "OLD": {
+     "display": {
+      "basis": "verdict field",
+      "field": "display_fidelity",
+      "wrong": 0,
+      "judged": 0,
+      "na_or_unsure": 0,
+      "rate": null,
+      "lo": null,
+      "hi": null
+     },
+     "teaching_critical": {
+      "basis": "verdict field",
+      "field": "teaching_critical_fidelity",
+      "wrong": 0,
+      "judged": 0,
+      "na_or_unsure": 0,
+      "rate": null,
+      "lo": null,
+      "hi": null
+     },
+     "reading_order": {
+      "basis": "verdict field",
+      "field": "reading_order",
+      "wrong": 0,
+      "judged": 0,
+      "na_or_unsure": 0,
+      "rate": null,
+      "lo": null,
+      "hi": null
+     },
+     "role": {
+      "basis": "verdict field",
+      "field": "role_fidelity",
+      "wrong": 0,
+      "judged": 0,
+      "na_or_unsure": 0,
+      "rate": null,
+      "lo": null,
+      "hi": null
+     },
+     "attachment": {
+      "basis": "verdict field",
+      "field": "lesson_attachment",
+      "wrong": 0,
+      "judged": 0,
+      "na_or_unsure": 0,
+      "rate": null,
+      "lo": null,
+      "hi": null
+     },
+     "formula_number_unit": {
+      "basis": "annotator tag",
+      "wrong": 0,
+      "judged": 0,
+      "rate": null,
+      "lo": null,
+      "hi": null,
+      "applicable_wrong": 0,
+      "applicable": 0,
+      "applicable_rate": null,
+      "applicable_lo": null,
+      "applicable_hi": null
+     },
+     "figure_caption": {
+      "basis": "annotator tag",
+      "wrong": 0,
+      "judged": 0,
+      "rate": null,
+      "lo": null,
+      "hi": null,
+      "applicable_wrong": 0,
+      "applicable": 0,
+      "applicable_rate": null,
+      "applicable_lo": null,
+      "applicable_hi": null
+     },
+     "_meta": {
+      "rows": 0,
+      "served": 0,
+      "withheld_rows": 0,
+      "activities": 0
+     }
+    },
+    "NEW": {
+     "display": {
+      "basis": "verdict field",
+      "field": "display_fidelity",
+      "wrong": 13,
+      "judged": 64,
+      "na_or_unsure": 0,
+      "rate": 0.2031,
+      "lo": 0.1227,
+      "hi": 0.3171
+     },
+     "teaching_critical": {
+      "basis": "verdict field",
+      "field": "teaching_critical_fidelity",
+      "wrong": 3,
+      "judged": 17,
+      "na_or_unsure": 47,
+      "rate": 0.1765,
+      "lo": 0.0619,
+      "hi": 0.4103
+     },
+     "reading_order": {
+      "basis": "verdict field",
+      "field": "reading_order",
+      "wrong": 1,
+      "judged": 21,
+      "na_or_unsure": 43,
+      "rate": 0.0476,
+      "lo": 0.0085,
+      "hi": 0.2267
+     },
+     "role": {
+      "basis": "verdict field",
+      "field": "role_fidelity",
+      "wrong": 8,
+      "judged": 64,
+      "na_or_unsure": 0,
+      "rate": 0.125,
+      "lo": 0.0647,
+      "hi": 0.2277
+     },
+     "attachment": {
+      "basis": "verdict field",
+      "field": "lesson_attachment",
+      "wrong": 3,
+      "judged": 64,
+      "na_or_unsure": 0,
+      "rate": 0.0469,
+      "lo": 0.0161,
+      "hi": 0.129
+     },
+     "formula_number_unit": {
+      "basis": "annotator tag",
+      "wrong": 4,
+      "judged": 64,
+      "rate": 0.0625,
+      "lo": 0.0246,
+      "hi": 0.15,
+      "applicable_wrong": 2,
+      "applicable": 19,
+      "applicable_rate": 0.1053,
+      "applicable_lo": 0.0294,
+      "applicable_hi": 0.3139
+     },
+     "figure_caption": {
+      "basis": "annotator tag",
+      "wrong": 1,
+      "judged": 64,
+      "rate": 0.0156,
+      "lo": 0.0028,
+      "hi": 0.0833,
+      "applicable_wrong": 1,
+      "applicable": 2,
+      "applicable_rate": 0.5,
+      "applicable_lo": 0.0945,
+      "applicable_hi": 0.9055
+     },
+     "_meta": {
+      "rows": 64,
+      "served": 64,
+      "withheld_rows": 0,
+      "activities": 29
+     }
+    }
+   },
+   "audit_rows": {
+    "OLD": 0,
+    "NEW": 64
    },
    "transferred_verdicts": 53
   }

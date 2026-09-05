@@ -4,9 +4,24 @@ Round 4, batch 1. Every item below is a **failure mechanism observed on a real p
 reproduce it and the file Lane D suspects. Lane D does not edit pipeline code — these are requests, and each
 one is written so it can be turned into a test.
 
-Where a request has already been addressed on `lane-a/round4-pipeline-failure-classes` @ `206a103`, that is
-stated: batch 1 was re-run on that build (`tc2-p2`) and the result measured, so several of these are *closed
-by measurement* rather than by reading the diff.
+**Status as of Lane A-pipeline's shipped build (PR #77 @ `cb60cde`).** Batch 1 was re-run on that build and
+the result measured, so each item below is closed or left open **by measurement**, not by reading the diff.
+
+| # | request | status on PR #77 |
+|---|---|---|
+| R1 | back cover / imprint attached to the last lesson | **PARTLY FIXED** — back cover unattached; imprint page still served as Bài 73 body |
+| R2 | number guard misses fraction fragments | **OPEN** — `b) 10 +` still served |
+| R3 | tone guard misses all-caps headings | **OPEN** — the Toán 5 Bài 6 lesson title still served with its terms corrupted |
+| R4 | dropped circled numerals disable the role layer | **IMPROVED** — role 0.216 → 0.125; the specific rows are withheld rather than re-roled |
+| R5 | caption assembly (chip split, first-line cut) | **OPEN** — both blocks unchanged |
+| R6 | a block's bbox does not cover its own text | **not re-measured** — needs the invariant test, see below |
+| R7 | lines rotated within a Ghi nhớ block | **OPEN** — still served rotated |
+| **R7b** | `page_feature:color_heavy` is a page-level veto | **FIXED** — 4 of the 6 colour-vetoed regions are served again, including the Bài 25 poem and the Bài 1 passage |
+| **R7c** | verse lines joined into prose *(new — uncovered by the R7b fix)* | **OPEN** |
+| R8 | block ids carried the wrong pipeline label | **CLOSED** |
+
+Overall on batch 1: derived false trust 0.365 → 0.297, attachment 0.108 → 0.034, role 0.216 → 0.125, at a
+coverage cost of 287 → 221 served blocks. Numbers and denominators in `ROUND4-BATCH-1-REPORT.md` §7.
 
 Evidence: `poc-out/round4/legacy/batch-1/audit/` (annotated rows + contact sheets) and
 `poc-out/round4/legacy/batch-1-rerun-tc2-p2-preview/delta/delta.md` (row-level re-run outcome).
@@ -180,6 +195,29 @@ change weakens fail-closed: both replace a blanket refusal with a targeted one.
 
 **And a standing number to report:** per guard, the share of what it withholds that was actually fine. Batch 1
 gives a first reading — `page_feature:color_heavy` is the least precise guard measured so far.
+
+---
+
+## R7c — verse lines joined into a prose run · **NEW, uncovered by the R7b fix** · P1
+
+The block-level colour change did its job: the Bài 25 poem comes back. But it comes back as prose.
+
+| block | printed | served |
+|---|---|---|
+| `05-sgk-tieng-viet-5-tap-mot:p123:tc2-p2:*` (2 blocks) | five and four **verse lines**, one per printed line | all lines joined into a single run with no line breaks |
+
+Every character is right and every line is in printed order, so all six audit fidelity fields except display
+say OK — and the poem of a poetry lesson is served as a paragraph. On `tc2-p1` this was invisible because the
+colour veto withheld the whole stanza; **the fix is what made the defect observable**, which is the good case,
+not the bad one.
+
+**Request:** keep the line structure of a block whose lines are short, left-aligned and vertically regular
+(a stanza), or mark the block `verse` so a consumer can render its lines. Joining is the wrong default for any
+block inside a reading lesson's poem region. Blocks affected are listed in
+`poc-out/round4/legacy/batch-1-rerun-tc2-p2/audit/annotated-p2-new-claims.jsonl` (`p2new-0002`, `p2new-0003`).
+
+**Also seen on the same recovered content:** `p2new-0008`, a passage paragraph cut mid-sentence at
+«… kéo về phá», and `p2new-0000`, a warm-up task served as `body` rather than an instruction.
 
 ---
 

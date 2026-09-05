@@ -82,7 +82,10 @@ def load_registry(path):
 
 
 def batch_dirs(legacy_out):
-    return sorted(d for d in glob.glob(f'{legacy_out}/batch-*') if os.path.isdir(d) and os.path.exists(f'{d}/batch-spec.json'))
+    """Batch directories oldest run first, so a lesson's state comes from the LATEST run that touched it —
+    a re-run on an improved build supersedes the run it re-ran, whatever the directories are named."""
+    ds = [d for d in glob.glob(f'{legacy_out}/batch-*') if os.path.isdir(d) and os.path.exists(f'{d}/batch-spec.json')]
+    return sorted(ds, key=lambda d: ((common.load_json(f'{d}/run-manifest.json', {}) or {}).get('started') or '', d))
 
 
 def lesson_key(book, lesson):

@@ -268,34 +268,40 @@ is used to gate anything.
 
 ---
 
-## 7. Re-run on Lane A-pipeline's improved build (`tc2-p2`) — preview
+## 7. Re-run on Lane A-pipeline's shipped build (`tc2-p2`, PR #77 @ `cb60cde`)
 
-Batch 1 was re-run on the same spec and the same original source against Lane A-pipeline's branch
-(`origin/lane-a/round4-pipeline-failure-classes` @ `206a103`), exported as a tree and **called, not edited**
-(`run_batch.py --corpus … --corpus-ref …`; the manifest records both). That commit is an **unreviewed WIP
-snapshot**, and Lane A's PR was not open at the time — so this is a *preview*, to be repeated on their merged
-build. Every step ran `rc=0`; re-running the cheap steps a second time reproduced identical outputs
-(determinism check).
+Batch 1 was re-run on the same spec and the same original source against Lane A-pipeline's shipped, CI-green
+build — **called, never edited**. Their branch was merged into this one so the run records a real repository
+sha (`af2245a`, whose `tool/corpus` is their `cb60cde`); the identical run had first been made from an exported
+tree, and **all 62 outputs are byte-identical between the two**, which is also the determinism check.
 
-**Coverage — the price paid:**
+Every step ran `rc=0`. Lane D's orchestrator drives their CLI with `TC_ROOT` pointed at a shadow root rather
+than `--out`; both contain the run, and the shadow root additionally guarantees nothing outside the batch
+directory can be written even by a step that ignores `--out`.
 
-| lesson | trusted (p1 → p2) | withheld (p1 → p2) | served share | new withhold reasons |
-|---|---|---|---|---|
-| Toán 4 Bài 61 | 9 → 4 | 10 → 15 | 47 % → 21 % | `agree_numbers` |
-| Toán 4 Bài 73 | 67 → 39 | 16 → 25 | 81 % → 61 % | `agree_numbers`, `agree_tones` |
-| Toán 5 Bài 6 | 14 → 12 | 11 → 13 | 56 % → 48 % | `agree_numbers`, `agree_tones` |
-| TV5-1 Bài 25 | 62 → 55 | 23 → 30 | 73 % → 65 % | `agree_tones` |
-| TV5-2 Bài 1 | 50 → 38 | 7 → 19 | 88 % → 67 % | `agree_tones` |
-| KHTN 6 Bài 11 | 85 → 65 | 10 → 30 | 89 % → 68 % | `agree_numbers`, `agree_tones` |
-| **total** | **287 → 213** | **77 → 132** | **79 % → 62 %** | |
+### 7.1 Coverage — what the improved build stops serving
+
+| lesson | learning blocks | trusted (p1 → p2) | withheld (p1 → p2) | served share | new withhold reasons |
+|---|---|---|---|---|---|
+| Toán 4 Bài 61 | 19 → 19 | 9 → 4 | 10 → 15 | 47 % → **21 %** | `agree_numbers` |
+| Toán 4 Bài 73 | 83 → 64 | 67 → 39 | 16 → 25 | 81 % → 61 % | `agree_numbers`, `agree_tones` |
+| Toán 5 Bài 6 | 25 → 25 | 14 → 12 | 11 → 13 | 56 % → 48 % | `agree_numbers`, `agree_tones` |
+| TV5-1 Bài 25 | 85 → 85 | 62 → 61 | 23 → 24 | 73 % → 72 % | `agree_tones` |
+| TV5-2 Bài 1 | 57 → 57 | 50 → 40 | 7 → 17 | 88 % → 70 % | `agree_tones` |
+| KHTN 6 Bài 11 | 95 → 95 | 85 → 65 | 10 → 30 | 89 % → 68 % | `agree_numbers`, `agree_tones` |
+| **total** | 364 → 345 | **287 → 221** | **77 → 124** | **79 % → 64 %** | |
 
 Bài 73's page range shrank from 117–122 to 117–121: **the back cover is no longer attached.** The imprint page
-still is.
+still is. Toán 4 Bài 61 now serves 4 of 19 learning blocks — most of a Toán lesson is withheld. **That is a
+legitimate rescue outcome, not a failure**: the withheld blocks are the flattened fractions the round-3 audit
+caught the product teaching. Withholding beats guessing. It also means the lesson is further from usable, not
+closer.
 
-**Rescue — the 74 audited served rows of the base run, looked up in the re-run.** A row counts as *no longer
-served as before* only when the re-run withholds it, unattaches its page, or does not extract it. A row whose
-text merely changed would not count — and in fact **no row changed text**: `tc2-p2` on this batch is a pure
-withhold-more build, which is why the base verdicts transfer cleanly.
+### 7.2 Rescue — the 74 audited served rows of the base run, looked up in the re-run
+
+A row counts as *no longer served as before* only when the re-run withholds it, unattaches its page, or does
+not extract it. A row whose text merely changed would not count — and **no row changed text**: on these rows
+`tc2-p2` is a pure withhold-more build, which is why the base verdicts transfer cleanly.
 
 | failure class | base WRONG: n | of those, no longer served | base OK: n | of those, lost as collateral |
 |---|---|---|---|---|
@@ -304,63 +310,113 @@ withhold-more build, which is why the base verdicts transfer cleanly.
 | reading order | 0 | — | 26 | 10 / 26 = 0.385 [0.224, 0.575] |
 | role | 16 | 9 / 16 = 0.562 [0.332, 0.769] | 58 | 12 / 58 = 0.207 [0.122, 0.328] |
 | attachment | 8 | 5 / 8 = 0.625 [0.306, 0.863] | 66 | 16 / 66 = 0.242 [0.155, 0.358] |
-| false trust | 13 | 7 / 13 = 0.538 [0.291, 0.768] | 61 | 14 / 61 = 0.230 [0.142, 0.349] |
+| **false trust** | 13 | **7 / 13 = 0.538** [0.291, 0.768] | 61 | 14 / 61 = 0.230 [0.142, 0.349] |
 
-Row outcomes overall: 53 still trusted and identical · 17 now withheld · 4 now unattached · 0 changed.
+Row outcomes: 53 still trusted and identical · 17 now withheld · 4 now unattached · 0 changed.
 
-**Scoring `tc2-p2`.** Its trusted set is almost exactly a subset of `tc2-p1`'s: of 213 trusted blocks, **210
-carry text `tc2-p1` already served identically, and only 3 are new claims** — all 3 were judged fresh from
-page renders (2 OK, 1 WRONG: a Ghi nhớ rule served with its two lines rotated and a tone slip). Verdicts were
-therefore carried over only where the build serves identical text in the same region, and every carried row is
-stamped with where its verdict came from.
+### 7.3 Over-withholding — the other half of the ledger
 
-| measure (derived false trust, 5 criteria) | OLD | `tc2-p1` | `tc2-p2` |
+§5 found 12 of 30 reviewed withheld regions were over-withheld. The improved build **serves 7 of those 30
+regions again**, and the recovery lands where the diagnosis said it would:
+
+| base withhold reason | reviewed | served again |
+|---|---|---|
+| `page_feature:color_heavy` (the page-level veto) | 6 | **4** |
+| `agree_order` on short labels | 8 | **3** |
+| `agree_text` on plain prose | 15 | 0 |
+| `math_guard` · `low_ocr_conf` · `figure_dependent` · `page_feature:diagram` | 4 | 0 |
+
+The colour veto becoming block-level is what returns the Bài 25 poem and the Bài 1 reading passage. That is a
+real fix to a real over-withholding mechanism, measured rather than claimed.
+
+### 7.4 What the improved build newly claims — and one new defect
+
+`tc2-p2` serves **11 blocks that `tc2-p1` did not**; every other trusted block carries text `tc2-p1` already
+served identically. All 11 were judged fresh from page renders (they carry no transferred verdict):
+
+- **7 OK**: the reading passage's opening paragraph, three verse lines, `(Trích)` served with the new
+  `attribution` role, the section heading `CÂU ĐƠN VÀ CÂU GHÉP` (swallowed into a rule box on `tc2-p1`), and
+  the stage label `Tiến hành:`.
+- **1 role-WRONG**: a warm-up task served as `body`.
+- **3 display-WRONG, and two of them are a new failure**: two blocks carry five and four **verse lines joined
+  into a single prose run** — every character right, every line in order, no line breaks. *The poem of a poetry
+  lesson served as prose.* A third is the Ghi nhớ rule served with its two lines rotated; a fourth block is a
+  passage paragraph cut mid-sentence.
+
+The verse-flattening is **caused by the fix**: those lines were withheld by the colour veto on `tc2-p1`, so the
+defect could not be seen until the content came back. Filed as a pipeline request.
+
+### 7.5 The three-way comparison
+
+Rates are WRONG / (OK + WRONG) among **served** rows, Wilson 95 %, no threshold. Each column has its own
+denominator and its own block set — the comparable quantity is *the share of what that side served that is
+wrong*, always read beside *how much it served*.
+
+| failure class | OLD (units + packs) | NEW `tc2-p1` | NEW `tc2-p2` (PR #77) |
 |---|---|---|---|
-| false-trust rate among served rows | 0.727 [0.598, 0.827] · n = 55 | 0.365 [0.264, 0.479] · n = 74 | **0.268** [0.170, 0.396] · n = 56 |
-| annotator's own false-trust field | 0.527 · n = 55 | 0.176 · n = 74 | **0.125** · n = 56 |
-| display | 0.709 | 0.203 | **0.179** |
-| role | 0.164 | 0.216 | **0.125** |
-| attachment | 0.036 | 0.108 | **0.037** |
+| audited served rows | n = 55 | n = 74 | n = 64 |
+| display fidelity | 0.709 [0.579, 0.812] | **0.203** [0.127, 0.308] | **0.203** [0.123, 0.317] |
+| teaching-critical | 0.722 [0.560, 0.842] | 0.208 [0.092, 0.405] | **0.176** [0.062, 0.410] |
+| reading order | 0.424 [0.272, 0.592] | **0.000** [0.000, 0.129] | 0.048 [0.008, 0.227] |
+| role fidelity | 0.164 [0.089, 0.283] | 0.216 [0.138, 0.323] | **0.125** [0.065, 0.228] |
+| lesson attachment | 0.036 [0.010, 0.123] | 0.108 [0.056, 0.199] | **0.034** [0.006, 0.172] |
+| **false trust (derived, 5 criteria)** | **0.727** [0.598, 0.827] | **0.365** [0.264, 0.479] | **0.297** [0.199, 0.418] |
+| false trust (annotator's field) | 0.527 | 0.176 | **0.141** |
+| — and what each side served | 131 blocks, all of them | 287 of 364 = **79 %** | 221 of 345 = **64 %** |
 
-The `tc2-p2` column is a **conditional** rate over the rows that survived the base sample, not a fresh
-stratified sample of that build. Read it beside the rescue table, not instead of it.
+The `tc2-p2` column mixes 53 verdicts carried over under a strict rule (identical text, same region, origin
+stamped on every row) with 11 freshly judged new claims. It is therefore a **conditional** rate over the rows
+that survived plus the rows that are new — not a fresh stratified sample of that build. Read it with §7.2.
 
-**What the trade buys, in blocks (point estimates, small samples, wide CIs):** `tc2-p1` serves 287 blocks of
-which ≈ 105 are false trust and ≈ 182 are not; `tc2-p2` serves 213 of which ≈ 57 are false trust and ≈ 156 are
-not. So the re-run removes roughly **48 false-trust blocks at the cost of roughly 26 correct ones** — a good
-trade for legacy data under a fail-closed rule, and a bad one for coverage. Which side of that trade is right
-is a Founder decision, not a measurement.
+**In blocks, with point estimates and wide intervals:** `tc2-p1` serves 287 blocks of which ≈ 105 are false
+trust and ≈ 182 are not; `tc2-p2` serves 221 of which ≈ 66 are false trust and ≈ 155 are not. The improved
+build delivers **≈ 39 fewer wrong blocks and ≈ 27 fewer right ones**. Against the OLD product — 131 served
+blocks, ≈ 95 of them false trust, ≈ 36 not — `tc2-p2` delivers **roughly four times as much correct content
+and about two thirds as many wrong claims**, which is the only comparison that answers the Founder's question.
 
----
+## 8. Did the new pipeline rescue the legacy data? — **PARTIAL, and more than it was at the start of the day**
 
-## 8. Did the new pipeline rescue the legacy data? — **PARTIAL**
+**Yes, on the classes that made the old data dangerous.** Reading order 0.424 → 0.000 → 0.048; display 0.709 →
+0.203 → 0.203; teaching-critical 0.722 → 0.208 → 0.176; formula/number/unit 0.400 → 0.095; derived false trust
+**0.727 → 0.365 → 0.297**. Every one of the 16 geometry-rebuilt Toán expressions — arithmetic the product
+served that was never on the page — is withheld rather than reconstructed.
 
-**Yes, on the classes that made the old data dangerous.** Reading order goes 0.424 → 0.000; display 0.709 →
-0.203; teaching-critical 0.722 → 0.208; formula/number/unit 0.400 → 0.095; derived false trust 0.727 → 0.365
-→ 0.268 on the improved build. Every one of the 16 geometry-rebuilt Toán expressions — content the product
-served that was never on the page — is now withheld rather than reconstructed.
+**Yes on the two classes that were worse, once Lane A shipped.** On the first reprocess, attachment was *worse*
+than the old product (0.036 → 0.108: the new pipeline re-derived the back-cover mistake from headers rather
+than inheriting it) and role was not better (0.164 → 0.216). On PR #77 both come back: **attachment 0.034,
+role 0.125** — better than the old product on both. The back cover is unattached and the section headings,
+attributions and stage labels the role layer used to swallow are now their own blocks.
 
-**No, on attachment and role.** Attachment got *worse* than the old product (0.036 → 0.108) because the new
-pipeline re-derives the same back-cover mistake from headers; `tc2-p2` fixes the back cover (5 of 8 rows) but
-still serves a book's imprint page as Bài 73 body. Role is not better (0.164 → 0.216 on `legacy-b1`, 0.125 on
-`tc2-p2`, and the annotator known to be stricter on this class judged both sides).
+**No, not completely.** Three defects survive identically across both builds and are named with block ids in
+the pipeline requests: a book's **imprint page** is still served as Bài 73 body, the **lesson title** of Toán 5
+Bài 6 is still served with tone slips that turn its key terms into other words, and two **fraction fragments**
+(`b) 10 +` for `b) 3/10 + 5/21`) are still served as content. And the fix to the colour veto uncovered a defect
+underneath it: the Bài 25 poem now comes back, but **its verse lines are joined into a single prose run** — the
+poem of a poetry lesson served as prose.
 
-**And not enough to change anything about trust.** 0.268 false trust means roughly one served block in four is
-still wrong on the audited sample. No legacy lesson in this batch is trusted, none is eligible for teaching,
-and 79 % → 62 % of learning blocks served means the rescue is substantially *withholding*, not repair: of the
-131 OLD served blocks, 44 are now withheld and 20 are not extracted at all.
+**And not nearly enough to change anything about trust.** 0.297 false trust means roughly three served blocks
+in ten are still wrong on the audited sample. No legacy lesson in this batch is trusted, none is eligible for
+teaching, and **79 % → 64 % of learning blocks served** means the improvement is substantially *withholding*,
+not repair — Toán 4 Bài 61 now serves 4 of its 19 learning blocks. Withholding beats guessing, and the
+withheld blocks there are exactly the flattened fractions; but a lesson that shows a child four blocks is
+further from usable, not closer.
 
-**And the withholding is blunter than it looks.** 12 of the 30 reviewed withheld regions (0.400
-[0.245, 0.578]) are clean text refused for a reason that did not apply — including the poem of Bài 25 and a
-paragraph of the Bài 1 reading, both vetoed by a *page-level* colour flag. On `tc2-p2` the same pattern shows
-from the other side: 23 % of the rows previously judged OK are no longer served. So the honest summary is not
-“fewer errors” but **fewer errors and less content, with a measurable share of the loss being content that was
-fine**.
+**The trade, in blocks** (point estimates, small samples, wide intervals):
+
+| | blocks served | ≈ false trust | ≈ correct |
+|---|---|---|---|
+| OLD (units + packs) | 131 | 95 | 36 |
+| NEW `tc2-p1` | 287 | 105 | 182 |
+| NEW `tc2-p2` (PR #77) | 221 | 66 | 155 |
+
+Against the OLD product the reprocess delivers **roughly four times as much correct content and about two
+thirds as many wrong claims**. Against its own first attempt, the improved build delivers **≈ 39 fewer wrong
+blocks and ≈ 27 fewer right ones**. Whether that trade is the right one is a Founder decision, not a
+measurement.
 
 **Reprocessing made the legacy corpus safer and smaller. It did not make it teachable.**
 
 ---
-
 ## 9. Lessons learned
 
 1. **The old and new pipelines share defects, so "new" is not a synonym for "fixed".** The back-cover
@@ -439,7 +495,11 @@ and 0.268 (`tc2-p2`) with wide intervals, and **0 of 6 lessons reached full sour
   sample covers the batch's single figure-heavy lesson (8 blocks, KHTN 6 Bài 11) and no other book.
 - **The audit protocol has no figure–caption *relation* field**, so a caption detached from its figure scores
   as fully correct. Batch 1 found 5 such blocks; they are described in §5a and cannot be counted.
-- **`tc2-p2` was previewed on an unreviewed WIP snapshot.** The re-run must be repeated on Lane A-pipeline's
-  merged build before the delta is quoted anywhere outside this document.
+- **The `tc2-p2` column is conditional, not a fresh sample.** 53 of its 64 rows carry verdicts transferred from
+  the base run under a strict rule; 11 are freshly judged new claims. No fresh stratified sample of `tc2-p2`'s
+  221 trusted blocks has been drawn, so its rate is an estimate over the rows that survived plus the rows that
+  are new. §7.2 is the measurement that needs no such assumption.
+- **`tc2-p2` is measured on PR #77's head (`cb60cde`), which is not merged.** If that PR changes before the
+  Founder merges it, the delta must be recomputed.
 - **Six lessons out of 243 in scope, out of 3,679 canonical.** Nothing here supports a claim about the corpus.
 - **No teaching claim of any kind.** `eligible for teaching` is 0 and the pipeline cannot raise it.

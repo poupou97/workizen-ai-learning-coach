@@ -261,10 +261,10 @@ class ScoreboardTests(unittest.TestCase):
                               summary=dict(in_113=4, in_sam_units=0, both=0, non_canonical=0, unranged=0, by_subject={}, risk={}, old_pack_activities=0, old_units=0),
                               lessons=[dict(book='b', lesson=n) for n in (1, 2, 3, 4)]), self.registry_path)
 
-    def _batch(self, name='batch-1', lessons=(), docs=(), new_rows=(), old_rows=()):
+    def _batch(self, name='batch-1', lessons=(), docs=(), new_rows=(), old_rows=(), started='2026-09-05T09:00:00+00:00'):
         d = f'{self.legacy}/{name}'
         common.dump_json(dict(batch=name, pipeline='legacy-b1', lessons=list(lessons)), f'{d}/batch-spec.json')
-        common.dump_json(dict(pipeline='legacy-b1', pages=1, steps=[]), f'{d}/run-manifest.json')
+        common.dump_json(dict(pipeline='legacy-b1', pages=1, steps=[], started=started), f'{d}/run-manifest.json')
         for doc in docs:
             common.dump_json(doc, f'{d}/lesson-documents/{scoreboard.doc_filename(doc["book"], doc["lesson"])}')
         os.makedirs(f'{d}/audit', exist_ok=True)
@@ -376,11 +376,23 @@ class ScoreboardTests(unittest.TestCase):
     def test_multiple_batches_accumulate_without_double_counting_a_lesson(self):
         self._batch('batch-1', lessons=[dict(book='b', lesson=1, risk=[])], docs=[self._doc(1, 4, 2)])
         self._batch('batch-2', lessons=[dict(book='b', lesson=1, risk=[]), dict(book='b', lesson=2, risk=[])],
-                    docs=[self._doc(1, 6, 0), self._doc(2, 3, 1)])
+                    docs=[self._doc(1, 6, 0), self._doc(2, 3, 1)], started='2026-09-05T10:00:00+00:00')
         sb = scoreboard.build(self.registry_path, self.legacy, f'{self.root}/none.json')
         self.assertEqual(sb['scoreboard']['reprocessed'], 2)              # lesson 1 counted once, in its latest batch
         self.assertEqual(sb['scoreboard']['full_sourceability'], 1)
         self.assertEqual(sb['scoreboard']['pending'], 2)
+
+    def test_a_lessons_state_comes_from_the_latest_run_whatever_the_directory_is_called(self):
+        """A re-run supersedes the run it re-ran even when its name sorts first."""
+        self._batch('batch-1-zzz-first-run', lessons=[dict(book='b', lesson=1, risk=[])], docs=[self._doc(1, 4, 2)],
+                    started='2026-09-05T09:00:00+00:00')
+        self._batch('batch-1-aaa-rerun', lessons=[dict(book='b', lesson=1, risk=[])], docs=[self._doc(1, 6, 0)],
+                    started='2026-09-05T14:00:00+00:00')
+        sb = scoreboard.build(self.registry_path, self.legacy, f'{self.root}/none.json')
+        self.assertEqual([b['dir'] for b in sb['batches']], ['batch-1-zzz-first-run', 'batch-1-aaa-rerun'])
+        self.assertEqual(sb['scoreboard']['reprocessed'], 1)
+        self.assertEqual(sb['scoreboard']['full_sourceability'], 1)       # the later run's FULL, not the earlier PARTIAL
+        self.assertEqual(sb['scoreboard']['partial'], 0)
 
 
 class RerunDeltaTests(unittest.TestCase):

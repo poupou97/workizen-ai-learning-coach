@@ -1,6 +1,6 @@
 # Legacy reprocess scoreboard — round 4 (Lane D)
 
-`legacy-scoreboard-v1` · generated 2026-09-05T14:11:47+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
+`legacy-scoreboard-v1` · generated 2026-09-05T14:20:30+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
 
 Legacy content is never a trusted teaching source. REPROCESSED ≠ TRUSTED: a reprocessed lesson is a *candidate* until it clears an independent audit against a threshold **the Founder sets**.
 
@@ -87,6 +87,37 @@ OLD = not re-sampled for this batch — the product side is unchanged, see the b
 | formula_number_unit | annotator tag / all judged | — (n = 0) | 4 / 56 = 0.071 [0.028, 0.170] |
 | formula_number_unit (rows where the class applies) | annotator tag / applicable | — (n = 0) | 2 / 19 = 0.105 [0.029, 0.314] |
 | figure_caption | annotator tag / all judged | — (n = 0) | 1 / 56 = 0.018 [0.003, 0.095] |
+| figure_caption (rows where the class applies) | annotator tag / applicable | — (n = 0) | 1 / 2 = 0.500 [0.095, 0.905] |
+
+## Batch `batch-1-rerun-tc2-p2` (spec `batch-1`) — pipeline `tc2-p2` (37 pages, code af2245ab9c28990da92e56b295cbfd58b050bcd2)
+
+| lesson | risk | state | learning blocks | trusted | withheld | withheld reasons | audited rows |
+|---|---|---|---|---|---|---|---|
+| Toán 4 tập hai Bài 61 | toan, two_col, formula, order_suspect | **PARTIAL** | 19 | 4 | 15 | {'agree_text': 7, 'agree_order': 5, 'agree_numbers': 3, 'math_guard': 1} | 4 served + 0 withheld |
+| Toán 4 tập hai Bài 73 | toan, two_col, formula, attachment_suspect, geometry_rebuilt_expr | **PARTIAL** | 64 | 39 | 25 | {'agree_text': 11, 'agree_order': 7, 'agree_tones': 5, 'agree_numbers': 2} | 6 served + 0 withheld |
+| Toán 5 tập một Bài 6 | toan, two_col, formula, geometry_rebuilt_expr | **PARTIAL** | 25 | 12 | 13 | {'math_guard': 3, 'agree_text': 10, 'low_ocr_conf': 1, 'agree_tones': 2, 'agree_numbers': 1} | 11 served + 0 withheld |
+| Tiếng Việt 5 tập một Bài 25 | tv5, two_col, order_suspect, attachment_suspect | **PARTIAL** | 85 | 61 | 24 | {'agree_order': 6, 'agree_text': 5, 'page_feature:diagram': 8, 'page_feature:color_heavy': 1, 'agree_tones': 5} | 20 served + 0 withheld |
+| Tiếng Việt 5 tập hai Bài 1 | tv5, two_col, attachment_suspect, role_suspect | **PARTIAL** | 57 | 40 | 17 | {'agree_text': 1, 'agree_order': 8, 'page_feature:color_heavy': 1, 'agree_tones': 7} | 11 served + 0 withheld |
+| KHTN 6 Bài 11 | khtn, two_col, figure_caption, role_suspect | **PARTIAL** | 95 | 65 | 30 | {'agree_order': 9, 'agree_numbers': 1, 'agree_tones': 12, 'agree_text': 7, 'figure_dependent': 1} | 12 served + 0 withheld |
+
+### OLD vs NEW false trust per failure class — batch `batch-1-rerun-tc2-p2`
+
+rate = WRONG / (OK + WRONG) among **served** rows (what the side actually showed a child), Wilson 95 % · NA / UNSURE excluded and counted beside · no threshold applied.
+
+OLD = not re-sampled for this batch — the product side is unchanged, see the batch it re-runs · NEW = 64 served blocks of the new Trusted Structured Lessons (+ 0 withheld regions reviewed separately). The two sides are different block sets — the comparable quantity is *the share of what each side served that is wrong*.
+
+**53 of the NEW verdicts were carried over** from the batch this one re-runs, and only where this build serves the identical text in the same region (tool/corpus/legacy/rerun.py). That makes this a *conditional* rate over the rows that survived, not a fresh stratified sample of this build — read it beside the re-run delta, not as a replacement for it.
+
+| failure class | basis | OLD | NEW |
+|---|---|---|---|
+| display | verdict field | — (n = 0) | 13 / 64 = 0.203 [0.123, 0.317] |
+| teaching_critical | verdict field | — (n = 0) | 3 / 17 = 0.176 [0.062, 0.410] |
+| reading_order | verdict field | — (n = 0) | 1 / 21 = 0.048 [0.009, 0.227] |
+| role | verdict field | — (n = 0) | 8 / 64 = 0.125 [0.065, 0.228] |
+| attachment | verdict field | — (n = 0) | 3 / 64 = 0.047 [0.016, 0.129] |
+| formula_number_unit | annotator tag / all judged | — (n = 0) | 4 / 64 = 0.062 [0.025, 0.150] |
+| formula_number_unit (rows where the class applies) | annotator tag / applicable | — (n = 0) | 2 / 19 = 0.105 [0.029, 0.314] |
+| figure_caption | annotator tag / all judged | — (n = 0) | 1 / 64 = 0.016 [0.003, 0.083] |
 | figure_caption (rows where the class applies) | annotator tag / applicable | — (n = 0) | 1 / 2 = 0.500 [0.095, 0.905] |
 
 ## What this scoreboard does not say
