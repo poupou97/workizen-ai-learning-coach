@@ -15,6 +15,7 @@
 library;
 
 import 'lesson_document.dart';
+import 'timeline_verbatim.dart';
 
 class StoryAttribution {
   const StoryAttribution({
@@ -27,6 +28,7 @@ class StoryAttribution {
     this.title,
     this.publisher,
     this.year,
+    this.titleVerbatimWithheld = false,
   });
 
   static const derivation = 'story-attribution-v1';
@@ -53,7 +55,13 @@ class StoryAttribution {
   final String? publisher;
   final int? year;
 
-  bool get complete => titleBlockId != null && withheldPartIds.isEmpty;
+  /// Round 5: tiêu đề câu chuyện CÓ block nhưng KHÔNG được trích, vì chưa đối
+  /// chiếu được với bản in («LÝ BĨ …» thay vì «LÝ BÍ …»). [title] khi ấy là
+  /// `null` — không bao giờ đọc chữ sai cho trẻ nghe.
+  final bool titleVerbatimWithheld;
+
+  bool get complete =>
+      titleBlockId != null && !titleVerbatimWithheld && withheldPartIds.isEmpty;
 
   /// Câu kết (đoạn cuối trước dòng nguồn) — chỗ sách nêu Ý NGHĨA, dùng cho
   /// bước «nhân – quả» của kịch bản SAM.
@@ -75,7 +83,15 @@ final _publisher = RegExp(r'NXB\s+[^,)]+');
 final _yearEnd = RegExp(r'(\d{4})\s*\)\s*$');
 
 /// `story-attribution-v1` trên các block của [doc], theo thứ tự đọc.
-List<StoryAttribution> deriveStoryAttributions(LessonDocument doc) {
+///
+/// Round 5 — CỔNG NGUYÊN VĂN: khi [verbatim] đang bật, một dòng nguồn chỉ được
+/// trích nếu block của nó đã đối chiếu bản in; tiêu đề câu chuyện chưa đối
+/// chiếu thì KHÔNG hiện (câu chuyện thành «không trọn vẹn»), vì trích sai một
+/// dấu là đọc sai tên nhân vật. Số bị giữ lại nằm ở [storyAttributionsHeldBack].
+List<StoryAttribution> deriveStoryAttributions(
+  LessonDocument doc, {
+  VerbatimIndex verbatim = VerbatimIndex.off,
+}) {
   final out = <StoryAttribution>[];
   final blocks = doc.blocks;
   for (var i = 0; i < blocks.length; i++) {
@@ -93,6 +109,7 @@ List<StoryAttribution> deriveStoryAttributions(LessonDocument doc) {
         ? 'quote'
         : null;
     if (form == null) continue;
+    if (!verbatim.servable(b.id)) continue; // fail closed: chưa đối chiếu ⇒ không trích
     final story = <String>[];
     final withheld = <String>[];
     HeadingBlock? title;
@@ -115,13 +132,15 @@ List<StoryAttribution> deriveStoryAttributions(LessonDocument doc) {
     }
     final pub = _publisher.firstMatch(t)?.group(0)?.trim();
     final yr = _yearEnd.firstMatch(t)?.group(1);
+    final titleHeld = title != null && !verbatim.servable(title.id);
     out.add(
       StoryAttribution(
         attributionBlockId: b.id,
         text: t,
         form: form,
         titleBlockId: title?.id,
-        title: title?.text,
+        title: titleHeld ? null : title?.text,
+        titleVerbatimWithheld: titleHeld,
         storyBlockIds: story,
         withheldPartIds: withheld,
         publisher: pub,
@@ -130,4 +149,15 @@ List<StoryAttribution> deriveStoryAttributions(LessonDocument doc) {
     );
   }
   return out;
+}
+
+/// Số dòng nguồn cổng nguyên văn đã giữ lại cho [doc] — để giao diện nói thật
+/// «SAM giữ lại N phần» thay vì im lặng bớt thẻ.
+int storyAttributionsHeldBack(
+  LessonDocument doc, {
+  VerbatimIndex verbatim = VerbatimIndex.off,
+}) {
+  if (!verbatim.enabled) return 0;
+  return deriveStoryAttributions(doc).length -
+      deriveStoryAttributions(doc, verbatim: verbatim).length;
 }
