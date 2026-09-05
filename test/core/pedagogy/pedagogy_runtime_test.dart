@@ -343,7 +343,7 @@ void main() {
       const z = AskStep(
           id: 'qz',
           prompt: 'p',
-          acceptable: ['a'],
+          acceptable: [r'(x|y)+'], // regex phức ⇒ không có dạng đáp án để chặn
           hints: ['«Các chất trong một hỗn hợp… để tách chúng ra»'],
           feedbackMatched: 'ok',
           scaffold: 'x',

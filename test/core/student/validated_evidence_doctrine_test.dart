@@ -52,8 +52,11 @@ LearningEvent _ev(EvidenceKind k,
       validation: validation,
     );
 
-LearningMapState _state(List<LearningEvent> es, {bool strict = false}) =>
-    learningMapStateFor(
+/// `strict == null` ⇒ dùng MẶC ĐỊNH THẬT của hàm (ROUND 4: siết); truyền
+/// `false` chỉ để kiểm luật đọc-cũ tường minh.
+LearningMapState _state(List<LearningEvent> es, {bool? strict}) => strict == null
+    ? learningMapStateFor(sourceDocumentId: _book, lessonNo: 17, allEvents: es)
+    : learningMapStateFor(
         sourceDocumentId: _book,
         lessonNo: 17,
         allEvents: es,
