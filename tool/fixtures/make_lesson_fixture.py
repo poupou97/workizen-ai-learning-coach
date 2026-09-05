@@ -34,7 +34,8 @@ LUẬT SUY DỮ LIỆU NGỮ NGHĨA (tất định, kiểm lại được, ghi v
   giữ NGUYÊN OCR (có thể mang lỗi OCR — đó là phát hiện, không sửa tay).
 - Hình: figure của TSL có diện tích ≥ 3 % trang, hoặc ≥ 1 % và có caption
   liên kết. Chèn vào thứ tự đọc TRƯỚC block đầu tiên cùng trang có y > tâm y
-  của hình (cùng vị trí thì theo x). Caption vẫn là block riêng.
+  của hình; cùng hàng (tâm y lệch < 2 % trang) thì trái trước phải. Caption
+  vẫn là block riêng.
 """
 import argparse
 import datetime as _dt
@@ -408,7 +409,10 @@ def build(tsl_path, out_dir, dpi=150, crops=True):
     seq.sort(key=lambda t: (t[0], t[3]))
     # 3. hình — chèn trước block đầu tiên cùng trang có y > tâm y hình
     figs = [f for f in tsl.get('figures') or [] if figure_kept(f)]
-    figs.sort(key=lambda f: (f['page'], f['bbox'][1] + f['bbox'][3] / 2, f['bbox'][0]))
+    # Cùng hàng (tâm y lệch < 2 % trang) thì xếp theo x: hai ảnh Hình 17.1 lệch
+    # tâm 0,0004 nên ảnh phải từng đứng trước ảnh trái, ngược với caption
+    # (Nokia n3 D7).
+    figs.sort(key=lambda f: (f['page'], round((f['bbox'][1] + f['bbox'][3] / 2) / 0.02), f['bbox'][0]))
     for f in figs:
         rel = f'crops/{book}-p{f["page"]:03d}-{f["id"].split(":")[-1]}.png'
         aspect = None
@@ -416,9 +420,11 @@ def build(tsl_path, out_dir, dpi=150, crops=True):
             w, h = crop_png(pdf, f['page'], f['bbox'], os.path.join(out_dir, rel), dpi)
             aspect = round(w / h, 4)
         yc = f['bbox'][1] + f['bbox'][3] / 2
-        idx = next((i for i, t in enumerate(seq) if t[0] == f['page'] and t[1] > yc), None)
+        idx = next((i for i, t in enumerate(seq) if t[0] == f['page'] and t[1] > yc and t[3] != -1), None)
         if idx is None:
             idx = next((i for i, t in enumerate(seq) if t[0] > f['page']), len(seq))
+        # `t[3] != -1`: bỏ qua hình đã chèn ⇒ hình sau đứng SAU hình trước
+        # (giữ thứ tự sort trái→phải; trước đây insert cùng index làm đảo).
         seq.insert(idx, (f['page'], yc, f['bbox'][0], -1, image_block(book, f, rel, aspect)))
     blocks = [t[4] for t in seq]
     # 4. dòng nguồn cuối bài
