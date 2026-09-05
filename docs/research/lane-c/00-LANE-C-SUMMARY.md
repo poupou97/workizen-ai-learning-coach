@@ -1,0 +1,31 @@
+# LANE C — DISCOVER / K-12 research (round 3, WAL-210) · READY FOR FOUNDER REVIEW — nothing merged
+
+**Goal (Founder):** not coverage — find which architecture/capability unlocks the next K-12 step; propose a second golden lesson that is deliberately different from KHTN 6 Bài 17 so it *falsifies* the architecture. **Method:** read-only scripts over the data already on disk (`tool/research/lane_c/`, outputs `poc-out/round3/lane-c/`, copies in `data/`); page dumps read internally (D4); no pack, no fixture, no Dart, no reprocess. Labels: MEASURED · DOC-CLAIM · ESTIMATED · HYPOTHESIS; denominators per D5 (238 TSL slice; 3,679 canonical; per-family `lessonCount` sums).
+
+## 1. Generalisation verdict per family (one line each; evidence in 01)
+
+- **Science (238 TSLs, MEASURED with the generator's own rules):** document layer 238 / 238; semantic layer 68 / 238 (Process) and 6 / 238 (Comparison, KHTN 6 only); tutor layer 1 / 238. Fails closed: tables (0 / 20 with cells), 28 % of question regions (561 figure-dependent), 118 `activity/footnote/option` blocks dropped silently, and 2,160 withheld regions of which only 45 % are the diagram/math the honest card names.
+- **History/Geography:** Science's page furniture (stage labels, objectives, «Em có biết?», «BÀI N» headers 9 / 9 found) plus two missing shapes — dated events in prose (34 % of units) and story/«TƯ LIỆU» boxes with attribution — and timeline-completion tables; best non-Science trust (gold p041 FTR 0) but 18 / 28 LS&ĐL 5 lessons lack a TOC `pageStart` and the gold's lesson numbers are wrong on both History pages.
+- **Math:** fails closed at the source (56 % formula pages; gold FTR 0.125–0.9; Toán 9 p029 question precision 0.0) and the role vocabulary is wrong for it (HĐ, Ví dụ/Giải, RULE boxes, «2.10.», «BAI» header without a number; units-k12 counter off by 2).
+- **Vietnamese/Literature:** cleanest pages (86 % with no unhandled feature), weakest lesson identity (TV5 sub-lesson TOC entries two pages late, re-measured; Ngữ văn 3–8 entries per book); needs glossary and poem-aware order; the Đọc View is ReaderScreen's kin.
+- **Informatics:** strongest SGV signal (re-verified 2 / 9 HIGH_CONFIDENCE, Tin học 6 Bài 6, 7) and the first real data table a Surface would draw; blocked on table cells and a MATCH answer type; lesson counters drift in SGK and SGV.
+- **English:** outside the architecture (85 % side-by-side, 72 % diagram pages, no Vietnamese directives) — image-first only.
+- **Primary 1–3:** image-first by construction (16 NO_TOC books, 21 % colour-heavy pages, oral/audio patterns; Toán 2/3 gold pages trust 1 block each).
+
+## 2. Assumption ledger (02): **PROVEN 5 · FALSIFIED 14 · UNTESTED 4** (22 rows)
+
+Holds: per-element trust and the fixture chip (by type), printed-page offsets, header-based boundaries on Science, 2–5-page lessons, Process-as-enumerated-steps (narrow). Fails as a K-12 rule: «question = numbered directive», «Comparison = parenthesised summary», «figures have captions», «lesson = TOC range», «chapters = CHƯƠNG», «withheld = diagram/math», «every role maps to a block kind», «tables carry cells», «tutor check = regex», «a tutor script exists», «the role lexicon transfers», «gold lesson numbers are right», «trusted questions = the lesson's questions», «every lesson has Em đã học». Untested: SGV pairing by section context (H6), Next-Action rule 1 as pedagogy, the journey beyond KHTN 6, page-crop delivery (J.1).
+
+## 3. Second golden lesson — recommendation (03)
+
+**LS&ĐL 5 · Bài 8 «Đấu tranh giành độc lập thời kì Bắc thuộc» (printed 36–39, PDF 38–41).** Why it is a strong falsifier: it attacks 12 of the 22 assumptions — the whole semantic layer (needs `TimelineSemantic` from *prose* dated events + a source/attribution block kind, not Process/Comparison), the tutor layer (a deterministic `TimelineValidator` on event ↔ year pairs from the lesson's own prose, list-membership checks, participation-only retelling — not regex), lesson identity (TOC gaps; 4 pages by printed header), the Science furniture strings («Chủ đề», no «Em đã học»), and the gold itself. Why the evidence is sufficient: it is the only non-Science candidate with a measured trust number inside its pages (gold p041: TLSR 1.0, FTR 0, 3 / 3 questions), a found printed header, a clean printed→PDF offset, an SGV lesson entry with section-context keys, and an existing Surface family (SourceReader) for its sibling. Alternatives ranked: Toán 6 Bài 9 «Dấu hiệu chia hết» (same persona; RULE/EXAMPLE/EXERCISE + typed validator + method gating; weakest measured trust, split header, no gold) → TV5 Bài 3 «Hạt gạo làng ta» (identity + glossary; Views already ReaderScreen-shaped) → Tin học 6 Bài 1 (table + MATCH + SGV key).
+
+**What must be true first (Founder gate, 03 §4):** a bounded tc-v2 run on LS&ĐL 5 (≈ 3–4 min) with Bài 8 attached by header at ≥ 0.85 and the 7 dated events trusted on p39; a second human read of gold p041/p080; three written rules (`prose-dated-events-v1`, `story-attribution-v1`, `TimelineValidator`) filed as PROPOSED; boundary unchanged (`fixtureFromTrustedCorpus`, `EvidencePolicy.none`, `prototypeScripted`); D4/J.1 unchanged; a grade-5 profile or an explicit cross-grade decision.
+
+## 4. Contradictions reported, not resolved (04 §5)
+
+1. Gold lesson numbers on LS&ĐL 5 p041 (gold 9, printed BÀI 8) and p080 (gold 17, printed BÀI 18) — the TC-v2 attachment score is inverted on History. 2. The activity classifier files the timeline-completion task as DRAW_CREATE (camera) instead of DIAGRAM_COMPLETE (text-checkable). 3. units-k12 lesson counters drift on Toán 6 and Tin học 6 (SGK and SGV).
+
+## 5. Deliverables
+
+`docs/research/lane-c/00…04` (+ `data/` copies of the three measured tables); `tool/research/lane_c/{common,tsl_generalisation_audit,subject_family_census,second_lesson_candidates}.py` (read-only; `--root` defaults to the main checkout; outputs only under `poc-out/round3/lane-c/`). Run: `python3 tool/research/lane_c/<script>.py`. Not touched: `lib/`, `tool/ui`, `tool/corpus`, `assets/`, `docs/design/**`, `docs/architecture/**`, older `poc-out/` outputs.
