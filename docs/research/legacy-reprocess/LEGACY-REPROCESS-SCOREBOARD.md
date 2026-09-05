@@ -1,6 +1,6 @@
 # Legacy reprocess scoreboard — round 4 (Lane D)
 
-`legacy-scoreboard-v1` · generated 2026-09-05T13:53:31+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
+`legacy-scoreboard-v1` · generated 2026-09-05T14:11:47+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
 
 Legacy content is never a trusted teaching source. REPROCESSED ≠ TRUSTED: a reprocessed lesson is a *candidate* until it clears an independent audit against a threshold **the Founder sets**.
 

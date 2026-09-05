@@ -384,7 +384,26 @@ the trusted set is a subset.
 
 ---
 
-## 11. What is still not measured
+## 11. The one thing only the Founder can change
+
+`trusted` and `eligible for teaching` are 0 not because the numbers came out badly but because **there is no
+rule to compare them to.** `tool/corpus/legacy/scoreboard.py` reads
+`docs/research/legacy-reprocess/THRESHOLDS.json`; the file does not exist, so both counts are 0 and the
+scoreboard says why. `THRESHOLDS.example.json` in the same directory is a **template, not a decision** — it
+documents exactly what setting the record would do and what it would not:
+
+- With a record, a lesson counts as `trusted` when it is fully sourceable **and** independently audited **and**
+  its audited false-trust rate is at or below `max_false_trust_rate`.
+- `eligible_for_teaching` moves only if `teachingAuthorised` is also true — trust and permission to teach are
+  two separate Founder acts.
+- Setting it changes **no measurement**: every rate, sample and κ in this report is computed identically with
+  or without the file.
+
+For calibration, and not as a recommendation: on batch 1 the audited false-trust rate is 0.365 (`legacy-b1`)
+and 0.268 (`tc2-p2`) with wide intervals, and **0 of 6 lessons reached full sourceability** — so any
+`max_false_trust_rate` below ≈ 0.27 leaves the count at 0 whatever the audit sample had done.
+
+## 12. What is still not measured
 
 - **The second annotation of the batch-1 rows covers 16 of 74 NEW rows (21.6 %) and no OLD rows.** The OLD-side
   rates in §5 still rest on a single annotator.

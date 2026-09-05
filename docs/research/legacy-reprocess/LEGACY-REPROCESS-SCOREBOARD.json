@@ -1,7 +1,7 @@
 {
  "version": "legacy-scoreboard-v1",
  "generated_by": "tool/corpus/legacy/scoreboard.py",
- "generated": "2026-09-05T13:53:31+00:00",
+ "generated": "2026-09-05T14:11:47+00:00",
  "registry": {
   "path": "registry.json",
   "version": "legacy-registry-v1",
