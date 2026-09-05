@@ -262,14 +262,16 @@ def attach_book(book, pipeline='tc2-p1', write=True):
         # starts here or started on a previous page that carried no detectable header (Tin học 6 p21, Toán 9 p29,
         # Toán 12 p20, Vật lí 11 p105, SGV Toán 4 p54 on the gold set): switch to that lesson at 0.6 confidence,
         # method `toc_range`, never backwards, never across a lesson the headers already passed.
-        if printed is not None and toc_start:
-            due = [n for n, s in toc_start.items() if s <= printed and (current is None or n > current) and n not in {hh['number'] for hh in headers}]
-            if due and (current is None or max(due) <= current + 4):
+        # Fail closed on both ends (round 4, measured): the fallback NEVER runs before the book's first header
+        # — before it, `max(due)` is an unbounded jump into the middle of the book (it put KHTN 9's second TOC
+        # page, and the eight lesson pages after it, into Bài 26) — and it never skips more than 4 lessons.
+        if printed is not None and toc_start and seen_first and current is not None:
+            due = [n for n, s in toc_start.items() if s <= printed and n > current and n not in {hh['number'] for hh in headers}]
+            if due and max(due) <= current + 4:
                 n = max(due)
-                if current is None or n > current:
-                    current, conf, seen_first = n, 0.6, True
-                    headers.append(dict(number=n, title=toc[n].get('title'), page_pdf=p, page_printed=printed, source='toc_range', confidence=0.6, form=None))
-                    rec.update(lesson=n, method='toc_range', confidence=0.6); out_pages.append(rec); continue
+                current, conf = n, 0.6
+                headers.append(dict(number=n, title=toc[n].get('title'), page_pdf=p, page_printed=printed, source='toc_range', confidence=0.6, form=None))
+                rec.update(lesson=n, method='toc_range', confidence=0.6); out_pages.append(rec); continue
         if current is not None:
             rec.update(lesson=current, method='continuation', confidence=round(conf, 2))
         out_pages.append(rec)
