@@ -23,7 +23,10 @@ import '../context/learning_context.dart';
 import '../curriculum/semantic_binding.dart' show LessonRef;
 import '../lesson_model/lesson_document.dart';
 import '../lesson_model/next_action.dart' show WorkspaceView;
+import '../student/learning_map_state.dart' show LearningMapState;
 import '../student/student_lesson_state.dart';
+
+export '../student/student_lesson_state.dart' show LessonEvidenceStanding;
 
 enum LessonNextKind { read, visual, tutor, nextLesson, backToContents }
 
@@ -70,9 +73,19 @@ class LessonNextAction {
     required this.basis,
     this.view,
     this.nextLesson,
+    this.standing = LessonEvidenceStanding.none,
+    this.evidenceNote,
   });
 
   final LessonNextKind kind;
+
+  /// ⭐ ROUND 4 — vị thế bằng chứng của bài lúc đề xuất (luật siết).
+  final LessonEvidenceStanding standing;
+
+  /// ⭐ ROUND 4 — câu trung thực «đã tham gia nhưng chưa được kiểm» / «ghi
+  /// nhận trước hợp đồng mới» để Lane B hiện dưới đề xuất. `null` = không
+  /// có gì đáng nói (chưa học; hoặc đã kiểm — R1 tự nói).
+  final String? evidenceNote;
 
   /// View tương ứng (Lane B mở tab này); `null` cho bài tiếp / mục lục.
   final WorkspaceView? view;
@@ -96,8 +109,17 @@ class LessonNextAction {
       };
 }
 
-/// Luật A8 — thuần, tất định. [viewsSeen] là DẤU VẾT UI (trace) của phiên,
-/// không phải bằng chứng; [state] là bằng chứng có lineage.
+///
+/// ⭐⭐ ROUND 4 (Founder §4): [state] đọc dưới luật SIẾT mặc định. Các kết cục
+/// «đã tham gia nhưng chưa được kiểm» được nói ra qua
+/// [LessonNextAction.evidenceNote] / [LessonNextAction.standing] (mọi luật)
+/// và qua câu R5:
+///   - tự báo (participation)              ⇒ «đã tham gia, chưa chấm»;
+///   - dữ liệu cũ có chấm-không-dấu         ⇒ «ghi nhận trước hợp đồng mới,
+///     chưa kiểm lại nên chưa tính là tự làm được»;
+///   - học cùng SAM, chưa lần nào được kiểm ⇒ «chưa có lần tự làm được nào
+///     được kiểm».
+/// Không kết cục nào mở khoá bài tiếp; không con số nào được bịa.
 LessonNextAction nextBestLessonAction({
   required StudentLessonState state,
   required LearningContext context,
@@ -116,27 +138,36 @@ LessonNextAction nextBestLessonAction({
     );
   }
 
+  final standing = state.standing;
+  final note = state.evidenceNote;
+  final standingBasis = 'standing=${standing.name}'
+      '${state.hasHistoricalUnvalidated ? ' historicalUnvalidated=${state.historicalUnvalidatedCount}' : ''}'
+      '${state.hasParticipation ? ' participation=${state.participationCount}' : ''}';
+
   if (state.hasApprovedValidatedSuccess) {
     final next = lesson.nextLesson;
     return LessonNextAction(
       kind: next == null ? LessonNextKind.backToContents : LessonNextKind.nextLesson,
       nextLesson: next,
       rule: 'R1',
+      standing: standing,
       reason: next == null
           ? 'Con đã tự làm được bài này (SAM đã chấm) — con về mục lục chọn '
               'bài khác nhé.'
           : 'Con đã tự làm được bài này (SAM đã chấm) — mình sang Bài '
               '${next.lessonNo} nhé.',
-      basis: 'state.hasApprovedValidatedSuccess',
+      basis: 'state.hasApprovedValidatedSuccess $standingBasis',
     );
   }
 
   if (!lesson.hasReadableBlocks && !lesson.hasSemanticData && !lesson.hasTutorScript) {
-    return const LessonNextAction(
+    return LessonNextAction(
       kind: LessonNextKind.backToContents,
       rule: 'R5',
+      standing: standing,
+      evidenceNote: note,
       reason: 'Bài này SAM chưa đọc được phần nào — con xem trong SGK nhé.',
-      basis: 'lesson.empty',
+      basis: 'lesson.empty $standingBasis',
     );
   }
 
@@ -145,21 +176,25 @@ LessonNextAction nextBestLessonAction({
       kind: LessonNextKind.read,
       view: WorkspaceView.read,
       rule: 'R2',
+      standing: standing,
+      evidenceNote: note,
       reason: state.hasAnyEvidence
           ? 'Con đọc lại bài trong sách trước nhé — đọc xong SAM sẽ hỏi con.'
           : 'Con đọc bài trong sách trước nhé — chưa có gì ghi lại ở bài này.',
-      basis: 'seen.missing:read state=${state.mapState.name}',
+      basis: 'seen.missing:read state=${state.mapState.name} $standingBasis',
     );
   }
 
   if (lesson.hasSemanticData && !viewsSeen.contains(WorkspaceView.visual)) {
-    return const LessonNextAction(
+    return LessonNextAction(
       kind: LessonNextKind.visual,
       view: WorkspaceView.visual,
       rule: 'R3',
+      standing: standing,
+      evidenceNote: note,
       reason: 'Con đã đọc — giờ xem sơ đồ / bảng của bài để thấy từng bước '
           'rõ hơn nhé.',
-      basis: 'seen.read && semantic && seen.missing:visual',
+      basis: 'seen.read && semantic && seen.missing:visual $standingBasis',
     );
   }
 
@@ -169,21 +204,38 @@ LessonNextAction nextBestLessonAction({
       kind: LessonNextKind.tutor,
       view: WorkspaceView.tutor,
       rule: 'R4',
+      standing: standing,
+      evidenceNote: note,
       reason: q == null
           ? 'Con đã đọc — giờ học cùng SAM phần này nhé.'
           : 'Con đã đọc — thử trả lời cùng SAM câu hỏi trong sách: «$q»',
-      basis: 'seen.read && tutorScript && seen.missing:tutor',
+      basis: 'seen.read && tutorScript && seen.missing:tutor $standingBasis',
     );
   }
 
+  // R5 — đi hết mọi cách học có sẵn. Ba kết cục «chưa được kiểm» nói ra
+  // đúng thứ đã ghi nhận; không kết cục nào nói «đã hiểu» / «tự làm được».
+  final String r5;
+  if (state.hasHistoricalUnvalidated) {
+    r5 = 'Con đã đi qua các cách học của bài này — có lần làm được ghi nhận '
+        'trước hợp đồng mới, SAM chưa kiểm lại nên chưa tính là tự làm được. '
+        'Con về mục lục chọn bài khác nhé.';
+  } else if (state.mapState == LearningMapState.participation) {
+    r5 = 'Con đã đi qua các cách học của bài này — SAM ghi nhận con đã tham '
+        'gia, chưa chấm phần nào. Con về mục lục chọn bài khác nhé.';
+  } else if (state.mapState == LearningMapState.engaged) {
+    r5 = 'Con đã đi qua các cách học của bài này cùng SAM — chưa có lần tự làm '
+        'được nào được kiểm. Con có thể xem lại, hoặc về mục lục chọn bài khác.';
+  } else {
+    r5 = 'Con đã đi qua các cách học của bài này. Con có thể xem lại, hoặc '
+        'về mục lục chọn bài khác.';
+  }
   return LessonNextAction(
     kind: LessonNextKind.backToContents,
     rule: 'R5',
-    reason: state.mapState.name == 'participation'
-        ? 'Con đã đi qua các cách học của bài này — SAM ghi nhận con đã tham '
-            'gia, chưa chấm phần nào. Con về mục lục chọn bài khác nhé.'
-        : 'Con đã đi qua các cách học của bài này. Con có thể xem lại, hoặc '
-            'về mục lục chọn bài khác.',
-    basis: 'seen.all state=${state.mapState.name}',
+    standing: standing,
+    evidenceNote: note,
+    reason: r5,
+    basis: 'seen.all state=${state.mapState.name} $standingBasis',
   );
 }
