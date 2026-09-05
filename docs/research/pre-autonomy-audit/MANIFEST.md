@@ -17,3 +17,6 @@
 | evidence/ | audit-*.png (34 Nokia screenshots; one frame with personal notifications was deleted) | audit D |
 
 Not included: raw PDFs, OCR pages, packs, learner data, secrets. Repo state audited: `main` @ e5155f4; PR #58 (research/tc-v2-science-slice) and knowledge-base PR #1 read but unmerged.
+
+
+Note: the two Dart check scripts are stored as `.dart.txt` so `flutter analyze` does not treat audit artefacts as app code; copy them to `scripts/*.dart` (or under test/) to re-run.
