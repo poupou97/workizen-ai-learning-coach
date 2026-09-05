@@ -12,6 +12,7 @@ import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/features/lesson_workspace/book_screen.dart';
 import 'package:learning_coach/features/lesson_workspace/chapter_screen.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/lesson_row.dart';
 import 'package:learning_coach/features/lesson_workspace/workspace_trace.dart';
 import 'package:learning_coach/features/subjects/book_shelf_screen.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
@@ -273,5 +274,76 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.textContaining('Từ tề bào đền cơ thể'), findsOneWidget);
+  });
+
+  // ── ROUND 5 B: hai tab «Chương | Bài học» (concept-chuong khung 3) ──
+
+  testWidgets('⭐ màn Sách có hai tab; «Bài học» liệt kê THẲNG mọi bài của '
+      'mục lục, cùng vốn từ với màn Chương', (t) async {
+    final catalog = WorkspaceCatalog.withDocs([loadSyntheticDoc()]);
+    final book = _idx().books.first;
+    final lessons = _idx().subjects['KHTN']!.first.lessons;
+    await t.pumpWidget(
+      fixtureHost(
+        BookScreen(
+          book: book,
+          lessons: lessons,
+          docs: catalog.docsForBook(book.sourceDocumentId),
+          trace: WorkspaceTrace(),
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(find.byKey(BookScreen.tocModeKey('chapters')), findsOneWidget);
+    expect(find.byKey(BookScreen.tocModeKey('lessons')), findsOneWidget);
+    // mặc định: theo chương
+    expect(find.textContaining('Chương IV'), findsOneWidget);
+    await t.tap(find.byKey(BookScreen.tocModeKey('lessons')));
+    await t.pumpAndSettle();
+    expect(find.textContaining('Chương IV'), findsNothing);
+    for (final no in [16, 17, 18, 99]) {
+      expect(
+        find.byKey(LessonRow.keyFor(no)),
+        findsOneWidget,
+        reason: 'tab «Bài học» phải liệt kê ĐỦ mục lục, kể cả bài 99 ngoài '
+            'chương — không giấu bài nào',
+      );
+    }
+    // cùng vốn từ với màn Chương
+    expect(find.textContaining('✨ Bài học SAM · 3 cách học'), findsOneWidget);
+    expect(
+      find.text('Chưa có Bài học SAM — mở trong Môn học'),
+      findsNWidgets(3),
+    );
+    // KHÔNG có sao / % / «đã học» (doctrine, giữ nguyên ở màn thứ hai)
+    for (final banned in ['⭐', '%', 'đã học']) {
+      for (final w in t.widgetList<Text>(find.byType(Text))) {
+        expect(w.data ?? '', isNot(contains(banned)));
+      }
+    }
+  });
+
+  testWidgets('tab «Bài học» mở đúng Workspace của bài đó', (t) async {
+    final catalog = WorkspaceCatalog.withDocs([loadSyntheticDoc()]);
+    final book = _idx().books.first;
+    await t.pumpWidget(
+      fixtureHost(
+        BookScreen(
+          book: book,
+          lessons: _idx().subjects['KHTN']!.first.lessons,
+          docs: catalog.docsForBook(book.sourceDocumentId),
+          trace: WorkspaceTrace(),
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(BookScreen.tocModeKey('lessons')));
+    await t.pumpAndSettle();
+    await t.ensureVisible(find.byKey(LessonRow.keyFor(17)));
+    await t.tap(find.byKey(LessonRow.keyFor(17)));
+    await t.pumpAndSettle();
+    expect(find.textContaining('Bài 17 · Tách chất'), findsWidgets);
   });
 }

@@ -190,4 +190,58 @@ void main() {
       expect(b.lessonCount, greaterThan(0));
     }
   });
+
+  // ── ROUND 5 B: ô tìm + chip lọc (khung concept 1) ──
+
+  test('bỏ dấu: gõ không dấu vẫn khớp tên sách có dấu', () {
+    expect(BookShelfScreen.fold('Toán 5'), 'toan 5');
+    expect(BookShelfScreen.fold('Tiếng Việt'), 'tieng viet');
+    expect(BookShelfScreen.fold('Lịch sử và Địa lí'), 'lich su va dia li');
+  });
+
+  testWidgets('⭐ ô tìm lọc theo TÊN SÁCH, không dấu cũng khớp', (t) async {
+    await t.pumpWidget(packHost(
+        BookShelfScreen(profile: _p, index: _idx(), onOpenBook: (_) {})));
+    await t.pumpAndSettle();
+    expect(find.byKey(BookShelfScreen.searchKey), findsOneWidget);
+    await t.enterText(find.byKey(BookShelfScreen.searchKey), 'toan');
+    await t.pumpAndSettle();
+    expect(find.text('Toán 5 · Tập 1'), findsOneWidget);
+    await t.enterText(find.byKey(BookShelfScreen.searchKey), 'tieng viet');
+    await t.pumpAndSettle();
+    expect(find.text('Toán 5 · Tập 1'), findsNothing);
+    expect(find.byKey(BookShelfScreen.emptyKey), findsOneWidget,
+        reason: 'không khớp gì thì NÓI THẬT, không hiện giá rỗng');
+  });
+
+  testWidgets('chip môn lọc đúng môn; «Tất cả» trả lại cả giá', (t) async {
+    await t.pumpWidget(packHost(
+        BookShelfScreen(profile: _p, index: _idx(), onOpenBook: (_) {})));
+    await t.pumpAndSettle();
+    expect(find.byKey(BookShelfScreen.filterKey('all')), findsOneWidget);
+    await t.tap(find.byKey(BookShelfScreen.filterKey('Toán')));
+    await t.pumpAndSettle();
+    expect(find.text('Toán 5 · Tập 1'), findsOneWidget);
+    expect(find.text('Toán 5 · Tập 2'), findsOneWidget);
+    await t.tap(find.byKey(BookShelfScreen.filterKey('all')));
+    await t.pumpAndSettle();
+    expect(find.text('Toán 5 · Tập 2'), findsOneWidget);
+  });
+
+  test('lọc là hàm THUẦN, kiểm được ngoài khung hình', () {
+    final books = _idx().books;
+    expect(BookShelfScreen.filtered(books).length, 2);
+    expect(BookShelfScreen.filtered(books, query: 'toan').length, 2);
+    expect(BookShelfScreen.filtered(books, query: 'khtn'), isEmpty);
+    expect(BookShelfScreen.filtered(books, subject: 'Toán').length, 2);
+    expect(BookShelfScreen.filtered(books, subject: 'Văn'), isEmpty);
+    expect(
+        BookShelfScreen.filtered(books,
+            samOnly: true, hasWorkspace: (b) => b.volumeLabel == 'Tập 1'),
+        hasLength(1));
+    expect(
+        BookShelfScreen.filtered(books, samOnly: true, hasWorkspace: null),
+        isEmpty,
+        reason: 'không biết cuốn nào có workspace ⇒ KHÔNG đoán, trả rỗng');
+  });
 }
