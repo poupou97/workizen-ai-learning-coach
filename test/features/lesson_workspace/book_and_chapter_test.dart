@@ -91,6 +91,11 @@ void main() {
     await t.pumpAndSettle();
     expect(find.textContaining('Chương IV · Hỗn hợp'), findsOneWidget);
     expect(find.textContaining('bài · ✨ 1 bài học SAM'), findsOneWidget);
+    // ROUND 3 B1/B5: dải số bài từ mục lục; tên chương OCR nói rõ nguồn.
+    expect(find.textContaining('Bài 16–17 · '), findsOneWidget);
+    // Fixture MẪU: chương không phải OCR ⇒ KHÔNG có chú thích (không nói
+    // thừa); fixture THẬT (nếu có, ở test dưới) mới có.
+    expect(find.textContaining('mục lục in của sách'), findsNothing);
     expect(find.textContaining('Bài khác'), findsOneWidget);
     expect(find.textContaining('✨ 1 bài học SAM: Bài 17'), findsOneWidget);
     await t.ensureVisible(find.text('Mục lục & hoạt động (bản hiện tại)'));
@@ -136,7 +141,9 @@ void main() {
 
     await t.tap(find.textContaining('Bài 17 · Tách chất'));
     await t.pumpAndSettle();
-    expect(find.text('SAM đề xuất'), findsOneWidget);
+    // ROUND 3 B1: lần đầu ⇒ màn «Vào bài học», thẻ đề xuất mang lý do.
+    expect(find.byKey(const Key('mode-picker')), findsOneWidget);
+    expect(find.textContaining('SAM đề xuất cách này'), findsOneWidget);
     await t.tap(find.byTooltip('Về mục lục'));
     await t.pumpAndSettle();
     expect(find.textContaining('Đã xem (phiên này)'), findsOneWidget);
@@ -166,5 +173,34 @@ void main() {
       expect(s, isNot(contains('★')));
       expect(s.toLowerCase(), isNot(contains('đã học')));
     }
+  });
+
+  testWidgets('ROUND 3 B5 (O4): fixture THẬT — tên chương OCR có chú thích '
+      '«mục lục in của sách (máy đọc, chưa soát)», chữ giữ nguyên văn', (
+    t,
+  ) async {
+    final doc = loadRealDocOrSkip();
+    if (doc == null) return;
+    final idx = _idx();
+    await t.pumpWidget(
+      fixtureHost(
+        BookScreen(
+          book: idx.bookById('06-sgk-khoa-hoc-tu-nhien-6')!,
+          lessons: idx.subjects['KHTN']!.first.lessons,
+          docs: [doc],
+          trace: WorkspaceTrace(),
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(find.textContaining('mục lục in của sách'), findsOneWidget);
+    // lỗi OCR của mục lục in KHÔNG bị sửa tay (chỉ đổi hoa/thường)
+    await t.scrollUntilVisible(
+      find.textContaining('Chương VI ·'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.textContaining('Từ tề bào đền cơ thể'), findsOneWidget);
   });
 }

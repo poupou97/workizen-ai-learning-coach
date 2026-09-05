@@ -78,8 +78,10 @@ class _WithheldCardState extends State<WithheldCard> {
             ],
           ),
           const SizedBox(height: 4),
+          // ROUND 3 B5 (n1 D-R3-07): mã lý do máy («page_feature:diagram»)
+          // rời dòng trẻ đọc — vẫn còn trong sheet «Sách viết» của block.
           Text(
-            'Lý do: ${withheldReasonForChild(b.reason)} (${b.reason})',
+            'Lý do: ${withheldReasonForChild(b.reason)}',
             style: const TextStyle(fontSize: 12, color: WalColors.inkSoft),
           ),
           if (b.crop != null) ...[

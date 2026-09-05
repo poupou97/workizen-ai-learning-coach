@@ -61,7 +61,7 @@ void main() {
     expect(find.text('❓'), findsWidgets);
     expect(find.textContaining('Câu hỏi trong sách'), findsWidgets);
     expect(
-      find.textContaining('Hình trong SGK · SGK KHTN 6 · trang 60'),
+      find.textContaining('Hình trong sách · SGK KHTN 6 · trang 60'),
       findsWidgets,
     );
     final cap = t.widget<Text>(find.textContaining('Hình 1.').first);
@@ -156,5 +156,65 @@ void main() {
       findsNothing,
       reason: '⭐⭐ chữ của vùng bị giữ lại KHÔNG được xuất hiện',
     );
+  });
+
+  testWidgets('ROUND 3 B2: chip trang từ trang IN của block; vạch «trang N» '
+      'theo thứ tự đọc; chạm chip ⇒ cuộn tới trang', (t) async {
+    final d = loadSyntheticDoc();
+    final pages = SmartBookView.pagesOf(d);
+    expect(pages.first, 60);
+    expect(pages, containsAllInOrder([60, 61]));
+    await t.pumpWidget(_host(d));
+    await t.pumpAndSettle();
+    for (final p in pages) {
+      expect(find.byKey(SmartBookView.pageChipKey(p)), findsOneWidget);
+      final size = t.getSize(find.byKey(SmartBookView.pageChipKey(p)));
+      expect(size.height, greaterThanOrEqualTo(48));
+    }
+    expect(find.text('trang 60'), findsOneWidget, reason: 'vạch trang đầu');
+    // trang thứ hai (còn nhiều nội dung phía dưới ⇒ cuộn lên được tận đầu)
+    final target = pages[1];
+    await t.tap(find.byKey(SmartBookView.pageChipKey(target)));
+    await t.pumpAndSettle();
+    final divider = find.text('trang $target');
+    expect(divider, findsOneWidget);
+    final y = t.getTopLeft(divider).dy;
+    expect(y, lessThan(120), reason: 'vạch trang $target phải lên gần đầu');
+  });
+
+  testWidgets('ROUND 3 B2: hình đứng cạnh nhau ⇒ một hàng; chú thích liên '
+      'tiếp gộp một cụm, KHÔNG gán chú thích cho hình theo liên kết máy', (
+    t,
+  ) async {
+    final d = loadRealDocOrSkip();
+    if (d == null) return;
+    await t.pumpWidget(_host(d));
+    await t.pumpAndSettle();
+    // Hình 17.1: hai ảnh cùng hàng trên trang 60 ⇒ hai Image trong một Row.
+    final imgs = find.byType(Image);
+    expect(imgs, findsWidgets);
+    final firstTwo = [imgs.at(0), imgs.at(1)];
+    final y0 = t.getTopLeft(firstTwo[0]).dy, y1 = t.getTopLeft(firstTwo[1]).dy;
+    expect((y0 - y1).abs(), lessThan(2), reason: 'cùng hàng như trên trang');
+    final x0 = t.getTopLeft(firstTwo[0]).dx, x1 = t.getTopLeft(firstTwo[1]).dx;
+    expect(x1, greaterThan(x0));
+    // Chú thích «Hình 17.1» in đậm nghiêng, nằm DƯỚI hàng hình.
+    final cap = find.text('Hình 17.1');
+    expect(cap, findsOneWidget);
+    expect(t.getTopLeft(cap).dy, greaterThan(y0));
+    expect(t.widget<Text>(cap).style?.fontWeight, FontWeight.w700);
+  });
+
+  testWidgets('ROUND 3 B2: nhãn mục của sách có biểu tượng, chữ giữ nguyên', (
+    t,
+  ) async {
+    expect(SmartBookView.stageIcon('MỤC TIÊU'), '🎯');
+    expect(SmartBookView.stageIcon('Em đã học'), '📌');
+    expect(SmartBookView.stageIcon('Em có biết?'), '💡');
+    expect(SmartBookView.stageIcon('Ghi nhớ'), '');
+    final d = loadSyntheticDoc();
+    await t.pumpWidget(_host(d));
+    await t.pumpAndSettle();
+    expect(find.textContaining('🎯 MỤC TIÊU'), findsOneWidget);
   });
 }

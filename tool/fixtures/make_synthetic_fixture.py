@@ -131,13 +131,15 @@ def build(out_dir):
                  'text': '[MẪU] Bài này nói về cách tách một chất ra khỏi hỗn hợp. Con đọc đoạn mẫu bên dưới rồi mình thử nhé.'},
                 {'type': 'ask', 'id': 'q1', 'prompt': '[MẪU] Làm muối từ nước biển dùng cách tách chất nào?', 'promptBlockId': q_salt,
                  'options': ['Lọc', 'Cô cạn', 'Chiết'], 'acceptable': [r'^cô cạn$'],
-                 'hints': ['[MẪU] Gợi ý 1: muối không bay hơi, nước thì có.', '[MẪU] Gợi ý 2: xem dòng «Cô cạn» trong bảng.'],
+                 # ROUND 3 (A7 guard): gợi ý KHÔNG được nêu dạng đáp án («cô cạn»).
+                 'hints': ['[MẪU] Gợi ý 1: muối không bay hơi, nước thì có.', '[MẪU] Gợi ý 2: tìm trong bảng cách tách chất KHÓ bay hơi khỏi chất DỄ bay hơi.'],
                  'feedbackMatched': '[MẪU] Khớp với bảng mẫu: đó là cô cạn.',
                  'scaffold': '[MẪU] Chưa khớp, không sao — bảng mẫu gọi cách này là cô cạn. Mình đi tiếp nhé.',
                  'keySource': 'synthetic prototype key — không phải SGV'},
                 {'type': 'ask', 'id': 'q2', 'prompt': '[MẪU] 1. Vì sao hạt cát lắng xuống đáy cốc?', 'promptBlockId': q_sand,
                  'options': [], 'acceptable': [r'nặng', r'nặng hơn'],
-                 'hints': ['[MẪU] Gợi ý 1: so cân nặng của hạt cát và nước.', '[MẪU] Gợi ý 2: hạt nặng hơn thì đi về đâu?'],
+                 # ROUND 3 (A7 guard): không nêu «nặng» (dạng đáp án).
+                 'hints': ['[MẪU] Gợi ý 1: để yên một lúc, hạt cát và nước — thứ nào chìm xuống dưới?', '[MẪU] Gợi ý 2: thứ chìm xuống dưới thì đi về đâu khi ta gạn?'],
                  'feedbackMatched': '[MẪU] SAM thấy câu trả lời có ý «nặng hơn» — khớp ý mẫu.',
                  'scaffold': '[MẪU] Ý mẫu: hạt cát nặng hơn nước nên lắng xuống. Mình đi tiếp nhé.',
                  'keySource': 'synthetic prototype key — không phải SGV'},

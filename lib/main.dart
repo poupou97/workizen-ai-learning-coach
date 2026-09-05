@@ -47,9 +47,15 @@ import 'app/theme/wal_tokens.dart' show WalBandDensity;
 import 'core/pedagogy/presentation_policy.dart' show bandForGrade;
 import 'features/subjects/book_shelf_screen.dart';
 import 'features/subjects/subjects_screen.dart';
+import 'features/subjects/subject_display.dart';
 import 'features/subjects/subject_home_screen.dart';
 import 'features/mission/mission_data.dart';
 import 'features/onboarding/onboarding_screen.dart';
+import 'app/boot_screen.dart';
+import 'core/lesson_model/lesson_document.dart';
+import 'core/lesson_model/workspace_catalog.dart';
+import 'features/lesson_workspace/lesson_workspace_screen.dart';
+import 'features/lesson_workspace/workspace_trace.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -104,11 +110,38 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     _load();
   }
 
+  /// ⭐ ROUND 3 B1 — bài có Lesson Workspace của ĐÚNG lớp đang học (từ
+  /// catalog fixture; nạp lười, không chặn Home). Lớp khác ⇒ `null`.
+  LessonDocument? _workspaceLessonFor(LearnerProfile p) {
+    final c = WorkspaceCatalog.shared;
+    if (!c.isLoaded) return null;
+    for (final book in c.booksWithWorkspace) {
+      for (final d in c.docsForBook(book)) {
+        if (d.grade == p.grade) return d;
+      }
+    }
+    return null;
+  }
+
   Future<void> _loadLessonIndex() async {
     final p = _profile;
     if (p == null) return;
+    if (!WorkspaceCatalog.shared.isLoaded) {
+      // Song song với pack; xong thì Home vẽ lại để thẻ «Bài học SAM» hiện.
+      WorkspaceCatalog.shared.load().then((_) {
+        if (mounted) setState(() {});
+      });
+    }
     final idx = await widget.indexLoader(p.grade);
     if (!mounted) return;
+    // ROUND 3 B5: tên sách cho dòng nguồn của Kho khám phá (mã sách → tên).
+    if (idx != null) {
+      knownBookTitles.addAll({
+        for (final b in idx.books)
+          b.sourceDocumentId:
+              b.volumeLabel == null ? b.title : '${b.title} · ${b.volumeLabel}',
+      });
+    }
     setState(() {
       _lessonIndex = idx;
       // ⭐ WAL-210 G2: thẻ Home của lớp chỉ-có-Scale cần con số bài từ pack
@@ -455,7 +488,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
 
   Widget _homeChild() => _loading
             ? (_splashQuote == null
-                ? const Scaffold(body: SizedBox.shrink())
+                // ROUND 3 B5 (audit O1): khung trắng lúc chờ hồ sơ ⇒ màn
+                // khởi động có nhãn hiệu, nói thật «đang mở».
+                ? const BootScreen(note: 'Đang mở hồ sơ của con…')
                 : SplashQuoteScreen(quote: _splashQuote!))
             : _profile == null
                 ? OnboardingScreen(onDone: _onboarded)
@@ -464,7 +499,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                     builder: (context, snap) {
                       final data = snap.data;
                       if (data == null) {
-                        return const Scaffold(body: SizedBox.shrink());
+                        // ROUND 3 B5 (audit O1): chờ mission tính từ kho —
+                        // vẫn là màn khởi động, không phải khung trắng.
+                        return const BootScreen(note: 'Đang xem hôm nay học gì…');
                       }
                       final ocr = widget.ocr;
                       return MissionCenterScreen(
@@ -472,6 +509,15 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         bookRecommendation: _bookRecommendation(),
                         onStartRecommendation: (rec) =>
                             _startRecommendation(context, data, rec),
+                        workspaceLesson: _workspaceLessonFor(_profile!),
+                        onOpenWorkspaceLesson: (doc) async {
+                          await Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => LessonWorkspaceScreen(
+                                  doc: doc,
+                                  trace: WorkspaceTrace.session,
+                                  learnerId: _profile!.learnerId)));
+                          if (mounted) setState(() {});
+                        },
                         learnerName: _profile!.displayName,
                         profiles: _profiles,
                         activeLearnerId: _profile!.learnerId,

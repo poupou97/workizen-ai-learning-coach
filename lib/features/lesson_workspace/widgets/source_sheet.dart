@@ -116,8 +116,14 @@ Future<void> showSourceSheet(
                 ),
               ),
               const SizedBox(height: WalSpacing.sm),
-              if (block is WithheldBlock)
-                WithheldCard(doc: doc, block: block)
+              if (block is WithheldBlock) ...[
+                WithheldCard(doc: doc, block: block),
+                const SizedBox(height: 4),
+                Text(
+                  'Mã lý do máy: ${block.reason}',
+                  style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
+                ),
+              ]
               else if (text != null)
                 Container(
                   width: double.infinity,

@@ -4,6 +4,13 @@
 ///
 /// Không có `LearnerStore`, không có `LearningEvent`: view này KHÔNG THỂ ghi
 /// bằng chứng — không phải vì nó nhớ không ghi, mà vì nó không có kiểu để ghi.
+///
+/// ROUND 3 B4 (concept khung 6 «Học cùng SAM»): vòng lặp NHÌN THẤY ĐƯỢC —
+/// dải pha «Giải thích › Hỏi › Con trả lời › Gợi ý › Phản hồi › Tiếp» sáng ở
+/// pha hiện tại (suy tất định từ trạng thái runner); mỗi câu hỏi mang «Câu
+/// n/N»; lựa chọn có chữ cái A/B/C/D; thẻ kết đếm số câu con ĐÃ ĐI QUA (tham
+/// gia, không chấm). Không có bước nào là runtime sư phạm: PEDAGOGY REALITY
+/// của view này = 0 bước runtimeGuided / N bước prototypeScripted.
 library;
 
 import 'package:flutter/material.dart';
@@ -15,6 +22,8 @@ import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/tutor_script.dart';
 import 'widgets/sam_bubble.dart';
 import 'widgets/source_sheet.dart';
+import '../../core/pedagogy/pedagogy_runtime.dart';
+import 'widgets/runtime_plan.dart';
 
 class TutorView extends StatefulWidget {
   const TutorView({
@@ -23,9 +32,14 @@ class TutorView extends StatefulWidget {
     required this.onNext,
     this.anchorBlockId,
     this.onShowInRead,
+    this.learnerId,
   });
 
   final LessonDocument doc;
+
+  /// Học sinh đang mở (cho `LearningContext` của runtime). `null` ⇒ hằng
+  /// [noLearnerId]; không có sự kiện nào được phát dù giá trị là gì.
+  final String? learnerId;
 
   /// Từ «Hỏi SAM về đoạn này» — block trẻ đang chạm.
   final String? anchorBlockId;
@@ -33,6 +47,103 @@ class TutorView extends StatefulWidget {
   final void Function(String blockId)? onShowInRead;
 
   static const endCardKey = Key('tutor-end-card');
+  static const phaseStripKey = Key('tutor-phase-strip');
+
+  /// Sáu pha của vòng lặp — thứ tự cố định, chữ trẻ đọc.
+  static const phases = [
+    'Giải thích',
+    'Hỏi',
+    'Con trả lời',
+    'Gợi ý',
+    'Phản hồi',
+    'Tiếp',
+  ];
+
+  /// Pha hiện tại, TẤT ĐỊNH từ runner: bước hiện tại + lượt cuối transcript.
+  static int phaseOf(TutorRunner r) {
+    if (r.finished || r.current is NextStep) return 5;
+    if (r.current is ExplainStep) return 0;
+    final last = r.transcript.isEmpty ? null : r.transcript.last;
+    return switch (last?.kind) {
+      null || TurnKind.explain => 1,
+      TurnKind.ask => _hasFeedbackBefore(r) ? 4 : 2,
+      TurnKind.hint => 3,
+      TurnKind.matched || TurnKind.scaffold => 4,
+      TurnKind.learner || TurnKind.next => 2,
+    };
+  }
+
+  /// Lượt ngay trước câu hỏi hiện tại là phản hồi (khớp/scaffold) ⇒ trẻ đang
+  /// đọc phản hồi + câu mới: pha «Phản hồi».
+  static bool _hasFeedbackBefore(TutorRunner r) {
+    final n = r.transcript.length;
+    if (n < 2) return false;
+    final k = r.transcript[n - 2].kind;
+    return k == TurnKind.matched || k == TurnKind.scaffold;
+  }
+
+  /// «Câu n/N» của một bước hỏi; không phải bước hỏi ⇒ `null`.
+  static String? askCaption(TutorScript script, String? stepId) {
+    if (stepId == null) return null;
+    final asks = script.asks.toList();
+    final i = asks.indexWhere((a) => a.id == stepId);
+    return i < 0 ? null : 'Câu ${i + 1}/${asks.length}';
+  }
+
+  /// Số câu hỏi con ĐÃ ĐI QUA (có lượt trả lời) — đếm THAM GIA, không chấm.
+  static int askedCount(TutorRunner r) => {
+    for (final t in r.transcript)
+      if (t.kind == TurnKind.learner && t.stepId != null) t.stepId!,
+  }.length;
+
+  /// ROUND 3 (A7.2) — bước runtime ứng với lượt thứ [i] của transcript:
+  /// cùng `stepId`, cùng pha; gợi ý thứ k của một bước ⇒ `hintIndex == k`.
+  /// Không tìm thấy ⇒ `null` ⇒ nhãn kịch bản (an toàn).
+  static PlannedStep? stepForTurn(
+    RuntimePlan? plan,
+    List<TutorTurn> ts,
+    int i,
+  ) {
+    if (plan == null) return null;
+    final t = ts[i];
+    final phase = switch (t.kind) {
+      TurnKind.explain => PlannedStepPhase.explain,
+      TurnKind.ask => PlannedStepPhase.ask,
+      TurnKind.hint => PlannedStepPhase.hint,
+      TurnKind.matched => PlannedStepPhase.feedbackMatched,
+      TurnKind.scaffold => PlannedStepPhase.scaffold,
+      TurnKind.next => PlannedStepPhase.next,
+      TurnKind.learner => null,
+    };
+    if (phase == null) return null;
+    var hintIndex = 0;
+    if (t.kind == TurnKind.hint) {
+      for (var k = 0; k < i; k++) {
+        if (ts[k].kind == TurnKind.hint && ts[k].stepId == t.stepId) {
+          hintIndex++;
+        }
+      }
+    }
+    for (final s in plan.steps) {
+      if (s.stepId != t.stepId || s.phase != phase) continue;
+      if (phase == PlannedStepPhase.hint && s.hintIndex != hintIndex) continue;
+      return s;
+    }
+    return null;
+  }
+
+  /// Dòng runtime cho phần đầu Tutor và sheet «Nguồn & độ tin».
+  static String runtimeLine(RuntimePlan? plan) {
+    if (plan == null) return 'Bài này không có kịch bản.';
+    if (!plan.isBound) {
+      return 'Runtime chưa ràng buộc được bài này (${plan.planRefusals.join(', ')}) '
+          '— mọi bước là kịch bản thử nghiệm.';
+    }
+    return 'Runtime kiểm được ${plan.runtimeGuidedCount}/${plan.steps.length} '
+        'bước (giải thích, câu hỏi nguyên văn sách, bước tiếp); '
+        '${plan.prototypeCount} bước còn lại là kịch bản thử nghiệm '
+        '(gợi ý, phản hồi, chỉ chỗ trong sách).';
+  }
 
   @override
   State<TutorView> createState() => _TutorViewState();
@@ -40,6 +151,7 @@ class TutorView extends StatefulWidget {
 
 class _TutorViewState extends State<TutorView> {
   TutorRunner? _runner;
+  RuntimePlan? _plan;
   final _input = TextEditingController();
   final _scroll = ScrollController();
 
@@ -63,6 +175,8 @@ class _TutorViewState extends State<TutorView> {
     _runner = s == null
         ? null
         : TutorRunner(s, startAtBlockId: widget.anchorBlockId);
+    // A7: kế hoạch runtime — nhãn theo bước; không phát sự kiện nào.
+    _plan = planForDoc(widget.doc, learnerId: widget.learnerId);
   }
 
   @override
@@ -160,11 +274,30 @@ class _TutorViewState extends State<TutorView> {
                           color: WalColors.inkSoft,
                         ),
                       ),
+                      // A7.2 — PEDAGOGY REALITY nhìn thấy được: bao nhiêu
+                      // bước runtime kiểm được, bao nhiêu bước còn là kịch bản.
+                      Text(
+                        TutorView.runtimeLine(_plan),
+                        key: const Key('tutor-runtime-line'),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: WalColors.mintText,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              WalSpacing.md,
+              WalSpacing.sm,
+              WalSpacing.md,
+              0,
+            ),
+            child: _phaseStrip(TutorView.phaseOf(r)),
           ),
           if (anchor != null)
             Padding(
@@ -200,7 +333,10 @@ class _TutorViewState extends State<TutorView> {
                 for (var i = 0; i < r.transcript.length; i++) ...[
                   KeyedSubtree(
                     key: i == _latestSamIndex(r) ? _latestSamKey : null,
-                    child: _turn(r.transcript[i]),
+                    child: _turn(
+                      r.transcript[i],
+                      TutorView.stepForTurn(_plan, r.transcript, i),
+                    ),
                   ),
                   const SizedBox(height: WalSpacing.sm),
                 ],
@@ -214,12 +350,46 @@ class _TutorViewState extends State<TutorView> {
     );
   }
 
+  /// Dải pha: chip nhỏ, pha hiện tại tô đậm — trẻ và Founder thấy SAM đang ở
+  /// đâu trong vòng lặp. Không có pha nào là «chấm điểm».
+  Widget _phaseStrip(int current) => SizedBox(
+    key: TutorView.phaseStripKey,
+    height: 28,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: TutorView.phases.length,
+      // Nokia 360dp (round 3 n1 D-R3-08): sáu pha phải vừa một hàng — đệm
+      // hẹp, mũi tên nhỏ; vẫn cuộn ngang được nếu chữ to hơn.
+      separatorBuilder: (_, _) => const Icon(
+        Icons.chevron_right,
+        size: 12,
+        color: WalColors.inkSoft,
+      ),
+      itemBuilder: (_, i) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: i == current ? WalColors.primary500 : Colors.white,
+          borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+        ),
+        child: Text(
+          TutorView.phases[i],
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: i == current ? FontWeight.w700 : FontWeight.w500,
+            color: i == current ? Colors.white : WalColors.inkSoft,
+          ),
+        ),
+      ),
+    ),
+  );
+
   String _snippet(LessonBlock b) {
     final t = LessonDocument.textOf(b) ?? 'hình / vùng trong sách';
     return t.length > 70 ? '${t.substring(0, 70)}…' : t;
   }
 
-  Widget _turn(TutorTurn t) {
+  Widget _turn(TutorTurn t, PlannedStep? step) {
     if (!t.isSam) {
       return Align(
         alignment: Alignment.centerRight,
@@ -253,6 +423,11 @@ class _TutorViewState extends State<TutorView> {
     return SamBubble(
       mascot: t.mascot,
       text: t.text,
+      // Nhãn THEO BƯỚC (A7.2): runtime chứng minh được ⇒ «runtime có kiểm».
+      label: step?.mode.childLabel,
+      caption: t.kind == TurnKind.ask
+          ? TutorView.askCaption(widget.doc.tutorScript!, t.stepId)
+          : null,
       background: switch (t.kind) {
         TurnKind.hint => WalColors.surfaceLavender,
         TurnKind.scaffold => LearningStateToken.needsWork.bg,
@@ -286,7 +461,7 @@ class _TutorViewState extends State<TutorView> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (isChoice)
-              for (final o in options) ...[
+              for (var i = 0; i < options.length; i++) ...[
                 SizedBox(
                   height: WalSpacing.minTouch + 4,
                   child: FilledButton(
@@ -294,16 +469,45 @@ class _TutorViewState extends State<TutorView> {
                       backgroundColor: Colors.white,
                       foregroundColor: WalColors.ink,
                       alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: WalSpacing.sm,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           WalSpacing.radiusButton,
                         ),
                       ),
                     ),
-                    onPressed: () => _submit(o),
-                    child: Text(
-                      o,
-                      style: const TextStyle(fontSize: WalType.body),
+                    onPressed: () => _submit(options[i]),
+                    child: Row(
+                      children: [
+                        // Chữ cái A/B/C/D (concept khung 6) — chỉ là nhãn,
+                        // chuỗi đem đi khớp vẫn là lời lựa chọn.
+                        Container(
+                          width: 28,
+                          height: 28,
+                          alignment: Alignment.center,
+                          decoration: const BoxDecoration(
+                            color: WalColors.surfaceLavender,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            String.fromCharCode(65 + i),
+                            style: const TextStyle(
+                              fontSize: WalType.secondary,
+                              fontWeight: FontWeight.w700,
+                              color: WalColors.primaryText,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: WalSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            options[i],
+                            style: const TextStyle(fontSize: WalType.body),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -421,6 +625,20 @@ class _TutorViewState extends State<TutorView> {
             ),
           ),
           const SizedBox(height: 4),
+          if (TutorView.askedCount(r) > 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                'Con đã đi qua ${TutorView.askedCount(r)}/'
+                '${r.script.asks.length} câu hỏi của sách cùng SAM.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: WalType.secondary,
+                  fontWeight: FontWeight.w600,
+                  color: WalColors.primaryText,
+                ),
+              ),
+            ),
           const Text(
             'Đây là kịch bản thử nghiệm — SAM ghi nhận con đã THAM GIA, chưa '
             'phải bằng chứng con đã hiểu. Thầy cô mới là người xác nhận.',

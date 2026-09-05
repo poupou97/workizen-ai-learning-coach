@@ -24,10 +24,12 @@ class ChapterScreen extends StatefulWidget {
     required this.docs,
     required this.trace,
     required this.onOpenLegacy,
+    this.learnerId,
   });
 
   final BookRef book;
   final ChapterRef chapter;
+  final String? learnerId;
 
   /// Bài của chương này (đã lọc theo `chapter.lessonNos`), thứ tự mục lục.
   final List<LessonRef> lessons;
@@ -185,8 +187,11 @@ class _ChapterScreenState extends State<ChapterScreen> {
             }
             await Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) =>
-                    LessonWorkspaceScreen(doc: doc, trace: widget.trace),
+                builder: (_) => LessonWorkspaceScreen(
+                  doc: doc,
+                  trace: widget.trace,
+                  learnerId: widget.learnerId,
+                ),
               ),
             );
           },
