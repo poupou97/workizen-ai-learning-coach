@@ -51,6 +51,7 @@ class BookScreen extends StatelessWidget {
   final VoidCallback onOpenLegacy;
 
   static Key tocModeKey(String mode) => Key('book-toc-$mode');
+  static Key lessonFilterKey(String id) => Key('book-lesson-filter-$id');
 
   /// Chương của cuốn: từ fixture đầu tiên có `chapters`; bài không thuộc
   /// chương nào ⇒ nhóm «Bài khác» (nói thật là mục lục chưa xếp được).
@@ -158,12 +159,17 @@ class BookScreen extends StatelessWidget {
                   chapters: [for (final c in chapters) _chapterRow(context, c)],
                   lessons: [
                     for (final l in lessons)
-                      LessonRow(
-                        lesson: l,
-                        doc: docs.where((d) => d.lessonNo == l.no).firstOrNull,
-                        trace: trace,
-                        onOpenLegacy: onOpenLegacy,
-                        learnerId: learnerId,
+                      (
+                        hasSam: docs.any((d) => d.lessonNo == l.no),
+                        row: LessonRow(
+                          lesson: l,
+                          doc: docs
+                              .where((d) => d.lessonNo == l.no)
+                              .firstOrNull,
+                          trace: trace,
+                          onOpenLegacy: onOpenLegacy,
+                          learnerId: learnerId,
+                        ),
                       ),
                   ],
                 ),
@@ -388,10 +394,16 @@ class _TraceRebuilderState extends State<_TraceRebuilder> {
 }
 
 /// Hai tab «Chương | Bài học» — chỉ đổi CÁCH XẾP cùng một mục lục.
+///
+/// ROUND 5 D3 (Nokia, lượt 2): KHTN 6 có 55 bài và ĐÚNG MỘT bài có Bài học
+/// SAM. Danh sách thẳng thành ra 54 hàng «Chưa có Bài học SAM» che mất hàng
+/// duy nhất đáng mở — chính điều màn Sách vừa hứa ở đầu trang («✨ 1 bài học
+/// SAM: Bài 17»). Thêm chip lọc CÙNG VỐN TỪ với giá sách. KHÔNG sắp xếp lại
+/// mục lục: lọc chỉ ẩn hàng, thứ tự vẫn là thứ tự sách.
 class _TocTabs extends StatefulWidget {
   const _TocTabs({required this.chapters, required this.lessons});
   final List<Widget> chapters;
-  final List<Widget> lessons;
+  final List<({bool hasSam, Widget row})> lessons;
 
   @override
   State<_TocTabs> createState() => _TocTabsState();
@@ -399,23 +411,67 @@ class _TocTabs extends StatefulWidget {
 
 class _TocTabsState extends State<_TocTabs> {
   bool _byLesson = false;
+  bool _samOnly = false;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      if (widget.lessons.isNotEmpty) ...[
-        Row(
-          children: [
-            _tab('Chương', 'chapters', !_byLesson),
-            const SizedBox(width: WalSpacing.sm),
-            _tab('Bài học', 'lessons', _byLesson),
-          ],
-        ),
-        const SizedBox(height: WalSpacing.sm),
+  Widget build(BuildContext context) {
+    final sam = widget.lessons.where((e) => e.hasSam).length;
+    final rows = [
+      for (final e in widget.lessons)
+        if (!_samOnly || e.hasSam) e.row,
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (widget.lessons.isNotEmpty) ...[
+          Row(
+            children: [
+              _tab('Chương', 'chapters', !_byLesson),
+              const SizedBox(width: WalSpacing.sm),
+              _tab('Bài học', 'lessons', _byLesson),
+            ],
+          ),
+          const SizedBox(height: WalSpacing.sm),
+        ],
+        if (_byLesson && sam > 0 && sam < widget.lessons.length) ...[
+          SizedBox(
+            height: WalSpacing.minTouch,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _filter('Tất cả (${widget.lessons.length})', 'all', !_samOnly),
+                _filter('✨ Bài học SAM ($sam)', 'sam', _samOnly),
+              ],
+            ),
+          ),
+          const SizedBox(height: WalSpacing.sm),
+        ],
+        ...(_byLesson ? rows : widget.chapters),
       ],
-      ...(_byLesson ? widget.lessons : widget.chapters),
-    ],
+    );
+  }
+
+  Widget _filter(String label, String id, bool selected) => Padding(
+    padding: const EdgeInsets.only(right: WalSpacing.sm),
+    child: ChoiceChip(
+      key: BookScreen.lessonFilterKey(id),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: WalType.secondary,
+          fontWeight: FontWeight.w600,
+          color: selected ? Colors.white : WalColors.ink,
+        ),
+      ),
+      selected: selected,
+      selectedColor: WalColors.primary500,
+      backgroundColor: Colors.white,
+      showCheckmark: false,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+      ),
+      onSelected: (_) => setState(() => _samOnly = id == 'sam'),
+    ),
   );
 
   Widget _tab(String label, String id, bool selected) => Expanded(

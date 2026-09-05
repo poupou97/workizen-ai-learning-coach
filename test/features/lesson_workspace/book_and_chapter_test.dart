@@ -346,4 +346,43 @@ void main() {
     await t.pumpAndSettle();
     expect(find.textContaining('Bài 17 · Tách chất'), findsWidgets);
   });
+
+  testWidgets('⭐ D3 (máy thật, lượt 2): tab «Bài học» có chip lọc CÙNG VỐN TỪ '
+      'với giá sách — 54 hàng «chưa có» không được che hàng duy nhất đáng mở; '
+      'lọc chỉ ẩn hàng, KHÔNG sắp lại mục lục', (t) async {
+    final catalog = WorkspaceCatalog.withDocs([loadSyntheticDoc()]);
+    final book = _idx().books.first;
+    await t.pumpWidget(
+      fixtureHost(
+        BookScreen(
+          book: book,
+          lessons: _idx().subjects['KHTN']!.first.lessons,
+          docs: catalog.docsForBook(book.sourceDocumentId),
+          trace: WorkspaceTrace(),
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(BookScreen.tocModeKey('lessons')));
+    await t.pumpAndSettle();
+    expect(find.byKey(BookScreen.lessonFilterKey('all')), findsOneWidget);
+    expect(find.text('Tất cả (4)'), findsOneWidget);
+    expect(find.text('✨ Bài học SAM (1)'), findsOneWidget);
+    await t.tap(find.byKey(BookScreen.lessonFilterKey('sam')));
+    await t.pumpAndSettle();
+    expect(find.byKey(LessonRow.keyFor(17)), findsOneWidget);
+    for (final no in [16, 18, 99]) {
+      expect(find.byKey(LessonRow.keyFor(no)), findsNothing);
+    }
+    await t.tap(find.byKey(BookScreen.lessonFilterKey('all')));
+    await t.pumpAndSettle();
+    // thứ tự mục lục giữ nguyên sau khi bỏ lọc
+    var last = -1.0;
+    for (final no in [16, 17, 18, 99]) {
+      final y = t.getTopLeft(find.byKey(LessonRow.keyFor(no))).dy;
+      expect(y, greaterThan(last));
+      last = y;
+    }
+  });
 }
