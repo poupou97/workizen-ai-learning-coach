@@ -43,6 +43,36 @@ class NumberAgreementTests(unittest.TestCase):
         self.assertTrue(tc2_sdm.numbers_disagree('khối lượng riêng 0,9 g/mL', 'khoi luong rieng 9 g ml'))
 
 
+class ToneAgreementTests(unittest.TestCase):
+    """The text-agreement gate compares diacritic-stripped strings; these tests pin the tone-aware token check
+    (cross-lane finding: «vặn khoa lại» served trusted for «vặn khóa lại»)."""
+
+    def test_same_word_different_tone_is_a_disagreement(self):
+        d = tc2_sdm.tone_disagreements('Khi dầu chạm khoá thì vặn khoa lại.', ['Khi dầu chạm khoá thì vặn khóa lại.'])
+        self.assertEqual(d, [('khoa', 'khóa')])
+
+    def test_identical_text_and_tone_placement_variants_agree(self):
+        self.assertEqual(tc2_sdm.tone_disagreements('nguyên tố hoá học', ['nguyên tố hóa học']), [])
+        self.assertEqual(tc2_sdm.tone_disagreements('Trong không khí thường có bụi.', ['Trong không khí thường có bụi.']), [])
+
+    def test_extra_neighbour_text_in_the_verifier_is_skipped(self):
+        d = tc2_sdm.tone_disagreements('Khi lặng gió, hạt bụi lắng xuống.', ['Tiêu đề khác', 'Khi lặng gió, hạt bụi lắng xuống. Câu tiếp theo.'])
+        self.assertEqual(d, [])
+        d = tc2_sdm.tone_disagreements('Khi lăng gió, hạt bụi lắng xuống.', ['Tiêu đề khác', 'Khi lặng gió, hạt bụi lắng xuống. Câu tiếp theo.'])
+        self.assertEqual(d, [('lăng', 'lặng')])
+
+    def test_a_different_word_is_not_a_tone_disagreement(self):
+        # «lọc»→«lộc» is a tone slip (same stripped key); «phễu»→«phẫu» too; but a substituted word with another key is a text
+        # disagreement for the text gate, not a tone one
+        self.assertEqual(tc2_sdm.tone_disagreements('giấy lọc và phễu', ['giấy lộc và phẫu']), [('lọc', 'lộc'), ('phễu', 'phẫu')])
+        self.assertEqual(tc2_sdm.tone_disagreements('giấy lọc', ['giấy bọc']), [])
+
+    def test_nothing_is_repaired(self):
+        import inspect
+        src = inspect.getsource(tc2_sdm.tone_disagreements)
+        self.assertNotIn("['text'] =", src)
+
+
 class UnitAndChemistryGuardTests(unittest.TestCase):
     def test_flattened_unit_exponent_is_caught(self):
         for t in ('diện tích 1 360 m2', 'thể tích 25 cm3', 'đơn vị dm2 và km2'):

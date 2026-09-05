@@ -17,7 +17,7 @@ SDM block (superset of TC-11 §2):
   reasons[]}, learning (bool), refers_figure, heading_path[], lesson (filled by tc2_attach).
 
 Reason codes (guards): agree_text · agree_order · agree_numbers (round 4: the two OCR stacks read different
-digits for the same text) · role_conflict · math_guard · unit_guard · chem_guard (round 4: flattened unit
+digits for the same text) · agree_tones (round 4: same word, different tone marks between the stacks) · role_conflict · math_guard · unit_guard · chem_guard (round 4: flattened unit
 exponents / chemical subscripts) · empty_block · furniture (page number / running head) · box_boundary ·
 figure_dependent · answer_leak · teacher_text · page_feature:color_heavy · page_feature:diagram ·
 figure_text · low_ocr_conf.
@@ -29,6 +29,7 @@ Usage (bake-off venv python — rapidfuzz + numpy + pymupdf):
   tc2_sdm.py --pipeline tc2-p1 --page <book> <pdfPage>   # print one page
 """
 import argparse
+import difflib
 import glob
 import json
 import os
@@ -531,6 +532,7 @@ def agreement(primary_blocks, verifier):
         a['verifier_role'] = roles[vi][2] if vi is not None else None
         a['verifier_id'] = vblocks[vi]['id'] if vi is not None and vi < len(vblocks) else None
         a['vpos'] = start; a['vend'] = end; a['vtext'] = st[start:end]
+        a['vraw'] = [vblocks[k]['text'] for k, (s0, s1, r) in enumerate(roles) if s0 < end and s1 > start and k < len(vblocks)]
         last_pos = max(last_pos, end)
         out.append(a)
     aligned = [i for i, a in enumerate(out) if a['vpos'] is not None]
@@ -590,6 +592,38 @@ def _move_is_geometric(i, seq, agree, bboxes):
         if k > pos and yj < yc - tol:
             return False
     return seen
+
+
+TOKEN = re.compile(r'[0-9A-Za-zÀ-ỹĂăÂâĐđÊêÔôƠơƯư]+')
+
+
+def tone_tokens(text):
+    """[(diacritic-stripped key, tone-placement-normalised token)] for the Vietnamese word tokens of `text`."""
+    out = []
+    for tok in TOKEN.findall(tc_score.nfc(text or '').lower()):
+        out.append((tc_score.norm_key(tok), tc_score.norm_tone_placement(tok)))
+    return out
+
+
+def tone_disagreements(primary_text, verifier_texts):
+    """Round 4 (cross-lane finding from A-runtime: «vặn khoa lại» served trusted for «vặn khóa lại»). The text-agreement
+    gate compares diacritic-STRIPPED strings, so it is blind to tone marks by construction. This compares the two
+    stacks token by token WITH diacritics: tokens are matched on their stripped form (difflib, so extra neighbour
+    text in the verifier blocks is skipped); a matched token whose tone-placement-normalised forms differ («khoa» vs
+    «khóa», «lặng» vs «lăng») is a tone disagreement. → [(primary token, verifier token)] (nothing is repaired)."""
+    pt = tone_tokens(primary_text)
+    vt = tone_tokens(' '.join(verifier_texts or []))
+    if not pt or not vt:
+        return []
+    sm = difflib.SequenceMatcher(None, [k for k, _ in pt], [k for k, _ in vt], autojunk=False)
+    out = []
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag != 'equal':
+            continue
+        for k in range(i2 - i1):
+            if pt[i1 + k][1] != vt[j1 + k][1]:
+                out.append((pt[i1 + k][1], vt[j1 + k][1]))
+    return out
 
 
 def numbers_disagree(primary_text, verifier_window):
@@ -783,6 +817,9 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
             guards.append('chem_guard')
         if a.get('ok') and a.get('vtext') is not None and numbers_disagree(t, a['vtext']):
             guards.append('agree_numbers')
+        tones = tone_disagreements(t, a.get('vraw')) if a.get('ok') else []
+        if tones:
+            guards.append('agree_tones')
         if col and bb and bb[3] >= 1.8 * med_h and bb[2] >= 0.15:
             lr = (col['left'], col['right']); tb = (col['top'], col['bottom'])
             if (max(lr) >= 0.5 and min(lr) <= 0.08) or (max(tb) >= 0.5 and min(tb) <= 0.08):
@@ -807,7 +844,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
         sdm_id = f'{book}:p{page:03d}:{pipeline}:{b["order"]:03d}'   # id = the primary's native block index (stable across re-sequencing)
         ob = dict(id=sdm_id, order=rank, native_order=b['order'], native_label=b.get('native_label'), text=b['text'], text_docling=b.get('text_docling'), enumerator_restored=bool(b.get('enumerator_restored')),
                   bbox=bb, column=(1 if bb and bb[0] + bb[2] / 2 < 0.5 else 2) if bb else None, ocr_conf=b['ocr_conf'], colour=col, extraction=b.get('extraction'),
-                  agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok'], verifier_pos=a.get('vpos'), moved=a.get('moved', False)),
+                  agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok'], verifier_pos=a.get('vpos'), moved=a.get('moved', False), tone_disagreements=tones[:6]),
                   role=dict(value=role, coarse=COARSE.get(role, 'UNKNOWN'), method=method, confidence=round(rconf, 2), evidence=ev, verifier_hint=xy_hint, conflict=conflict),
                   guards=guards, trust=dict(status=status, reasons=withhold), learning=learning, refers_figure=refers_fig, heading_path=list(heading_path),
                   lesson=None, cells=b.get('cells'))
