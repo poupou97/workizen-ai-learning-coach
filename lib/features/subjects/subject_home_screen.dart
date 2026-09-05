@@ -141,8 +141,7 @@ class SubjectHomeScreen extends StatelessWidget {
                 // WAL-133: hình SGK đã crop của MÔN NÀY — chỉ hiện khi có
                 // asset thật kèm đủ provenance (tầng parse đã loại thứ không
                 // chứng minh được), nên tile này không bao giờ mở ra màn rỗng.
-                if (index.sourceAssetsFor(subject).isNotEmpty)
-                  _sourceAssetsTile(context),
+                if (_sourceAssets.isNotEmpty) _sourceAssetsTile(context),
                 for (final b in books) ...[
                   if (book == null && (b.volume != null || books.length > 1))
                     Padding(
@@ -328,8 +327,29 @@ class SubjectHomeScreen extends StatelessWidget {
     );
   }
 
+  /// ROUND 3 B5 (audit 05 §1: Toán 6 «Hình trong sách» từng hiện hình của
+  /// Toán 5): tầng lõi (`LessonIndex.sourceAssetsFor`, PR #69 mục #7) đã bỏ
+  /// hình không thuộc lớp; UI chỉ còn thu hẹp về CUỐN đang mở. Rỗng ⇒ tile
+  /// không hiện, không mở ra màn sai lớp.
+  List<IndexedSourceAsset> get _sourceAssets {
+    final all = index.sourceAssetsFor(subject);
+    final b = book;
+    if (b == null) return all;
+    return [
+      for (final a in all)
+        if (a.sourceDocumentId == b.sourceDocumentId) a,
+    ];
+  }
+
+  Map<String, String> get _bookTitles => {
+        for (final b in index.books)
+          b.sourceDocumentId: b.volumeLabel == null
+              ? b.title
+              : '${b.title} · ${b.volumeLabel}',
+      };
+
   Widget _sourceAssetsTile(BuildContext context) {
-    final assets = index.sourceAssetsFor(subject);
+    final assets = _sourceAssets;
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),
       child: Material(
@@ -347,8 +367,10 @@ class SubjectHomeScreen extends StatelessWidget {
           trailing:
               const Icon(Icons.chevron_right, color: WalColors.primaryText),
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) =>
-                  SourceGalleryScreen(subject: subject, assets: assets))),
+              builder: (_) => SourceGalleryScreen(
+                  subject: subject,
+                  assets: assets,
+                  bookTitles: _bookTitles))),
         ),
       ),
     );

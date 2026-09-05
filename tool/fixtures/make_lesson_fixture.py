@@ -300,7 +300,8 @@ def tutor_script_bai17(tsl, by_id):
                 'acceptable': [r'^cô cạn$', r'cô cạn'],
                 'hints': [
                     'Con nghĩ xem: muối ăn không bay hơi, còn nước thì bay hơi được. Cách nào dùng đúng điều đó?',
-                    'Sách viết ở mục «2. Cô cạn»: «Phương pháp cô cạn dùng để tách chất tan rắn ra khỏi dung dịch… bằng cách làm cho dung môi bay hơi».',
+                    # ROUND 3 (A7 guard): gợi ý chỉ chỗ trong sách, KHÔNG nêu tên phương pháp (dạng đáp án).
+                    'Ở trang 62 sách có một mục nói về cách «tách chất tan rắn ra khỏi dung dịch… bằng cách làm cho dung môi bay hơi» — con tìm tên mục đó nhé.',
                 ],
                 'feedbackMatched': 'Khớp với điều sách viết: làm nước biển bay hơi để thu muối là phương pháp cô cạn. '
                                    'Con đã tự nối được ví dụ với tên phương pháp.',

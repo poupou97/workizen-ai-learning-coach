@@ -18,6 +18,8 @@ class SamBubble extends StatelessWidget {
     this.showLabel = true,
     this.child,
     this.background = Colors.white,
+    this.caption,
+    this.label,
   });
 
   /// Tên state mascot (`sam-explain`…), không có đuôi.
@@ -28,6 +30,14 @@ class SamBubble extends StatelessWidget {
   /// Thẻ phụ dưới lời (vd «Sách viết…»).
   final Widget? child;
   final Color background;
+
+  /// ROUND 3 B4: chữ nhỏ cạnh nhãn («Câu 1/3») — vị trí trong vòng lặp.
+  final String? caption;
+
+  /// ROUND 3 (A7.2): nhãn THEO BƯỚC — «SAM (runtime có kiểm)» khi runtime
+  /// chứng minh được bước, còn lại «SAM (kịch bản thử nghiệm)». `null` ⇒
+  /// nhãn kịch bản (mặc định an toàn). Không có tham số BỎ nhãn.
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -49,13 +59,31 @@ class SamBubble extends StatelessWidget {
               if (showLabel)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 2),
-                  child: Text(
-                    SamMode.prototypeScripted.childLabel,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: WalColors.primaryText,
-                    ),
+                  child: Row(
+                    children: [
+                      Text(
+                        label ?? SamMode.prototypeScripted.childLabel,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: label != null &&
+                                  label != SamMode.prototypeScripted.childLabel
+                              ? WalColors.mintText
+                              : WalColors.primaryText,
+                        ),
+                      ),
+                      if (caption != null) ...[
+                        const SizedBox(width: WalSpacing.sm),
+                        Text(
+                          caption!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: WalColors.inkSoft,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               Container(

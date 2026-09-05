@@ -6,6 +6,16 @@
 /// định, rồi thân View. Nhảy giữa View mang theo block (Đọc → SAM; Trực quan
 /// → Đọc) — không hỏi lại gì.
 ///
+/// ROUND 3 (B1 — Founder cầm máy phải thấy ngay 6 điều):
+/// 1. Ở ĐÂU: dòng đường dẫn «Giá sách › KHTN 6 › Chương IV» trên tiêu đề.
+/// 2. BÀI NÀO: «Bài 17 · Tách chất khỏi hỗn hợp» + «SGK KHTN 6 · trang 60–63».
+/// 3. NHỮNG CÁCH NÀO: lần đầu mở ⇒ màn «Vào bài học» ba thẻ (concept khung 3),
+///    mỗi thẻ nói bài này có gì theo cách đó; ba tab vẫn luôn ở trên.
+/// 4./5. SAM ĐANG LÀM GÌ, VÌ SAO: thẻ được đề xuất mang lý do; sau khi vào
+///    View, thẻ «SAM đề xuất» giữ lý do + một nút.
+/// 6. LÀM GÌ TIẾP: nút trên thẻ đề xuất / thẻ kết của Tutor.
+/// Chip thử nghiệm gọn một dòng, chạm ⇒ sheet «Nguồn & độ tin».
+///
 /// Màn này KHÔNG nhận `LearnerStore` — theo cấu trúc, không ghi được gì.
 library;
 
@@ -20,7 +30,10 @@ import 'smart_book_view.dart';
 import 'tutor_view.dart';
 import 'visual_view.dart';
 import 'widgets/fixture_chip.dart';
+import 'widgets/mode_picker.dart';
+import 'widgets/trust_sheet.dart';
 import 'workspace_trace.dart';
+import 'widgets/runtime_plan.dart';
 
 class LessonWorkspaceScreen extends StatefulWidget {
   const LessonWorkspaceScreen({
@@ -28,23 +41,36 @@ class LessonWorkspaceScreen extends StatefulWidget {
     required this.doc,
     required this.trace,
     this.initialView,
+    this.breadcrumb,
+    this.learnerId,
   });
 
   final LessonDocument doc;
   final WorkspaceTrace trace;
 
-  /// `null` ⇒ mở ở View SAM đề xuất (tất định từ dữ liệu bài).
+  /// `null` ⇒ lần đầu trong phiên: màn «Vào bài học» (chọn cách học); đã
+  /// mở rồi ⇒ vào thẳng View SAM đề xuất (tất định từ dữ liệu bài).
   final WorkspaceView? initialView;
+
+  /// Đường đã đi tới đây («Giá sách › KHTN 6 › Chương IV»). `null` ⇒ dựng từ
+  /// chính tài liệu (sách + chương).
+  final List<String>? breadcrumb;
+
+  /// Học sinh đang mở — chỉ để runtime giải `LearningContext`; workspace vẫn
+  /// không có kho, không phát sự kiện. `null` ⇒ hằng `noLearnerId`.
+  final String? learnerId;
 
   static Key tabKey(WorkspaceView v) => Key('workspace-tab-${v.name}');
   static const nextActionKey = Key('workspace-next-action');
+  static const breadcrumbKey = Key('workspace-breadcrumb');
 
   @override
   State<LessonWorkspaceScreen> createState() => _LessonWorkspaceScreenState();
 }
 
 class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
-  late WorkspaceView _view;
+  /// `null` = đang ở màn «Vào bài học».
+  WorkspaceView? _view;
   String? _tutorAnchor;
   String? _readAnchor;
   int _fontStep = 0;
@@ -56,11 +82,16 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   void initState() {
     super.initState();
     widget.trace.markOpened(doc.slotKey);
-    _view =
-        widget.initialView ??
-        nextActionFor(doc: doc, seen: _seen).view ??
-        WorkspaceView.read;
-    widget.trace.markView(doc.slotKey, _view);
+    final initial = widget.initialView;
+    if (initial != null) {
+      _view = initial;
+    } else if (_seen.isNotEmpty) {
+      _view = _proposal().view ?? WorkspaceView.read;
+    } else {
+      _view = null; // lần đầu ⇒ chọn cách học
+    }
+    final v = _view;
+    if (v != null) widget.trace.markView(doc.slotKey, v);
   }
 
   void _switch(WorkspaceView v, {String? tutorAnchor, String? readAnchor}) {
@@ -72,15 +103,31 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     widget.trace.markView(doc.slotKey, v);
   }
 
+  /// «SAM đề xuất» theo thứ tự Founder A8 (Đọc → Trực quan → Học với SAM),
+  /// từ `NextBestLearningAction` (Lane A-runtime, PR #69) — luật prototype
+  /// «có sơ đồ ⇒ Trực quan trước» của `nextActionFor` không còn dùng ở UI.
+  /// Xung đột thứ tự này được TRẢ VỀ Founder trong PR, không tự quyết ở đây.
+  NextAction _proposal() =>
+      founderNextAction(doc, seen: _seen, learnerId: widget.learnerId);
+
+  List<String> get _crumbs =>
+      widget.breadcrumb ??
+      [
+        'Giá sách',
+        doc.bookTitle,
+        if (doc.chapter != null) doc.chapter!.label,
+      ];
+
   @override
   Widget build(BuildContext context) {
-    final next = nextActionFor(doc: doc, seen: _seen);
+    final next = _proposal();
     // Nokia xoay ngang (n2 D3): khung cố định (tiêu đề + chip + tab + đề
     // xuất) chiếm ~2/3 chiều cao, thân View còn ~225 px. Chế độ GỌN khi màn
     // ngang: tiêu đề 1 dòng, lý do đề xuất 1 dòng, bỏ mascot nhỏ — không bỏ
     // phần tử nào bắt buộc (chip, ba tab, đề xuất vẫn còn).
     final landscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
+    final picking = _view == null;
     return Scaffold(
       backgroundColor: WalColors.surface,
       body: SafeArea(
@@ -95,7 +142,11 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                   WalSpacing.md,
                   landscape ? WalSpacing.xs : WalSpacing.sm,
                 ),
-                child: FixtureChip(trust: doc.trust),
+                child: FixtureChip(
+                  trust: doc.trust,
+                  compact: true,
+                  onTap: () => showTrustSheet(context, doc: doc),
+                ),
               ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: WalSpacing.md),
@@ -103,7 +154,8 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
             ),
             // Bàn phím lên (trẻ đang gõ trả lời SAM) ⇒ tạm ẩn thẻ đề xuất để
             // thân View còn chỗ (Nokia n3 D8). Bàn phím xuống ⇒ thẻ trở lại.
-            if (MediaQuery.viewInsetsOf(context).bottom == 0)
+            // Ở màn «Vào bài học» lý do nằm trên thẻ được đề xuất ⇒ không lặp.
+            if (!picking && MediaQuery.viewInsetsOf(context).bottom == 0)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   WalSpacing.md,
@@ -113,7 +165,11 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                 ),
                 child: _nextActionCard(next, compact: landscape),
               ),
-            Expanded(child: _body()),
+            Expanded(
+              child: picking
+                  ? ModePicker(doc: doc, proposal: next, onPick: _switch)
+                  : _body(_view!),
+            ),
           ],
         ),
       ),
@@ -128,6 +184,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
       WalSpacing.xs,
     ),
     child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
           width: WalSpacing.minTouch,
@@ -142,6 +199,21 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Một dòng 12sp — đủ rẻ để giữ cả khi màn ngang (câu 1 «ở đâu»).
+              Padding(
+                padding: EdgeInsets.only(top: compact ? 2 : 6),
+                child: Text(
+                  _crumbs.join(' › '),
+                  key: LessonWorkspaceScreen.breadcrumbKey,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: WalColors.inkSoft,
+                  ),
+                ),
+              ),
               Text(
                 doc.lessonLabel,
                 maxLines: compact ? 1 : 2,
@@ -154,9 +226,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                 ),
               ),
               Text(
-                doc.chapter == null
-                    ? doc.pageRangeLine
-                    : '${doc.chapter!.label} · ${doc.pageRangeLine}',
+                doc.pageRangeLine,
                 style: const TextStyle(
                   fontSize: WalType.secondary,
                   color: WalColors.inkSoft,
@@ -249,6 +319,9 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                   color: WalColors.primaryText,
                 ),
               ),
+              // Lý do đọc trọn (câu hỏi trích nguyên văn) — chỉ cắt 1 dòng
+              // khi màn ngang (Nokia n2 D3); cắt 3 dòng giữa câu trích làm
+              // mất «vì sao» (round 3 n1 D-R3-03).
               Text(
                 next.reason,
                 maxLines: compact ? 1 : null,
@@ -294,7 +367,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     ),
   );
 
-  Widget _body() => switch (_view) {
+  Widget _body(WorkspaceView view) => switch (view) {
     WorkspaceView.read => SmartBookView(
       doc: doc,
       fontStep: _fontStep,
@@ -308,6 +381,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     ),
     WorkspaceView.tutor => TutorView(
       doc: doc,
+      learnerId: widget.learnerId,
       anchorBlockId: _tutorAnchor,
       onShowInRead: (id) => _switch(WorkspaceView.read, readAnchor: id),
       onNext: (target, anchor) => switch (target) {

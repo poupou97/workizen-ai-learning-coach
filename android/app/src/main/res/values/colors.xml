@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ROUND 3 B5 (audit O1): nền cửa sổ khởi động = WalColors.surface (#F7F7FC),
+         không còn trắng tinh — khung đầu tiên trên máy thật là cửa sổ native này,
+         trước khi Flutter vẽ BootScreen. -->
+    <color name="launch_background">#F7F7FC</color>
+</resources>

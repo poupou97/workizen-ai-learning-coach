@@ -124,6 +124,7 @@ class _BookShelfScreenState extends State<BookShelfScreen> {
           docs: docs,
           trace: widget.trace ?? WorkspaceTrace.session,
           onOpenLegacy: () => widget.onOpenBook(b),
+          learnerId: widget.profile.learnerId,
         ),
       ),
     );
