@@ -154,6 +154,35 @@ every character is right.
 
 ---
 
+## R7b — `page_feature:color_heavy` is a page-level veto that refuses the lesson's own reading · **OPEN** · P0
+
+All 30 withheld regions of the batch were reviewed. Every refusal is **safe** — but **12 of 30 = 0.400
+[0.245, 0.578] are OVER-withheld**: clean text refused for a reason that did not apply to it. The largest
+single mechanism is a page-level flag:
+
+| rows | reason | what it refused |
+|---|---|---|
+| 5 | `page_feature:color_heavy` | stanzas of the Bài 25 poem and a paragraph of the Bài 1 reading passage — **the text the lesson is about**, single-column, clean, on a page with a colourful banner |
+| 4 | `agree_order` on short labels | a section title (`CÂU ĐƠN VÀ CÂU GHÉP`), a rule box, plain instructions |
+| 3 | `agree_text` on plain prose | a `Chuẩn bị:` sentence, a sidebar paragraph, a plain question |
+
+Examples: `n20260906-0063`, `-0065` (Bài 25 poem stanzas), `-0081`, `-0082` (Bài 1 opening task and passage
+paragraph), `-0062` (plain instruction). Full notes in
+`poc-out/round4/legacy/batch-1/audit/annotated-new-20260906.jsonl` (rows with `servedAsTrusted = false`).
+
+This is also visible from the other side in the `tc2-p2` re-run: **23 % of the rows previously judged OK are no
+longer served.**
+
+**Request:** `color_heavy` and `diagram` are properties of a *region*, not of a page. A page-level flag should
+raise the bar for blocks that overlap the colourful or diagrammatic regions, not veto every block on the page.
+`agree_order` on a block of one or two lines has no order to disagree about and should not fire at all. Neither
+change weakens fail-closed: both replace a blanket refusal with a targeted one.
+
+**And a standing number to report:** per guard, the share of what it withholds that was actually fine. Batch 1
+gives a first reading — `page_feature:color_heavy` is the least precise guard measured so far.
+
+---
+
 ## R8 — block ids carried the wrong pipeline label · **CLOSED, confirmed by re-run**
 
 On the base build, `tc2_sdm.py` built ids from the module constant (`PIPELINE_ID = 'tc2-p1'`), so a run under

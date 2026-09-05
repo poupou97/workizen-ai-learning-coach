@@ -132,8 +132,26 @@ Denominators (D5): the two sides are **different block sets** — 55 OLD served 
 so what is comparable is the *share of served units that is wrong*, not a paired difference. Neither number
 divides by 3,679 or 3,381; those denominators describe the historical corpus, not this batch.
 
-The 30 NEW withheld regions were all reviewed: each carries a note on whether the refusal was safe. None was
-judged a wrong refusal of clean, simple text.
+### The other half of the ledger: what the withholding costs
+
+The 30 NEW withheld regions were all reviewed, and each carries a judgement on whether the refusal was
+*correct* as well as safe. Every one of the 30 is **safe** — no withheld region should have been served as it
+stood. But **12 of 30 = 0.400 [0.245, 0.578] were judged OVER-withheld**: clean, simple text refused for a
+reason that did not apply to it.
+
+| over-withholding mechanism | rows | what was lost |
+|---|---|---|
+| `page_feature:color_heavy` — a **page-level** veto | 5 | stanzas of the Bài 25 poem and a paragraph of the Bài 1 reading passage: *the lesson's actual reading* |
+| `agree_order` on short labels and titles | 4 | a section title, a rule box, plain instructions |
+| `agree_text` on plain prose | 3 | a “Chuẩn bị:” sentence, a sidebar paragraph, a plain question |
+
+The rest are correct refusals and several are exactly what the guard is for: flattened fraction items, a
+common-denominator derivation, a watermark, and one `figure_dependent` question that genuinely cannot be read
+without its figure.
+
+**This is the finding that keeps the rescue honest.** The improvement in §5 is bought with withholding, and
+two fifths of the sampled withholding is not damaged content being refused — it is a poem being refused
+because the page around it is colourful.
 
 ### 5a. Figure/caption: a targeted quota sample, because the stratified one could not see it
 
@@ -330,8 +348,16 @@ still serves a book's imprint page as Bài 73 body. Role is not better (0.164 �
 **And not enough to change anything about trust.** 0.268 false trust means roughly one served block in four is
 still wrong on the audited sample. No legacy lesson in this batch is trusted, none is eligible for teaching,
 and 79 % → 62 % of learning blocks served means the rescue is substantially *withholding*, not repair: of the
-131 OLD served blocks, 44 are now withheld and 20 are not extracted at all. **Reprocessing made the legacy
-corpus safer and smaller. It did not make it teachable.**
+131 OLD served blocks, 44 are now withheld and 20 are not extracted at all.
+
+**And the withholding is blunter than it looks.** 12 of the 30 reviewed withheld regions (0.400
+[0.245, 0.578]) are clean text refused for a reason that did not apply — including the poem of Bài 25 and a
+paragraph of the Bài 1 reading, both vetoed by a *page-level* colour flag. On `tc2-p2` the same pattern shows
+from the other side: 23 % of the rows previously judged OK are no longer served. So the honest summary is not
+“fewer errors” but **fewer errors and less content, with a measurable share of the loss being content that was
+fine**.
+
+**Reprocessing made the legacy corpus safer and smaller. It did not make it teachable.**
 
 ---
 
@@ -340,9 +366,11 @@ corpus safer and smaller. It did not make it teachable.**
 1. **The old and new pipelines share defects, so "new" is not a synonym for "fixed".** The back-cover
    attachment was not inherited from the packs — it was re-derived from headers. Rebuilding a component does
    not retire a failure class; only measuring it does.
-2. **Withholding is what did most of the work.** The class-level improvements come almost entirely from the
-   pipeline refusing regions, not from extracting them better — on `tc2-p2` not a single audited row changed
-   its text. Any report of "false trust down" must be read with "served share down" beside it.
+2. **Withholding is what did most of the work — and a page-level guard is a blunt instrument.** The class-level
+   improvements come almost entirely from the pipeline refusing regions, not from extracting them better — on
+   `tc2-p2` not a single audited row changed its text. Any report of “false trust down” must be read with
+   “served share down” beside it, and with the **over-withholding rate** (0.400 of reviewed withheld regions)
+   beside that. A guard that vetoes a whole page because it is colourful refuses the poem the lesson is about.
 3. **A row-level re-run delta beats re-annotating.** Because the improved build's trusted set was a near-subset
    of the base build's, 53 of 56 verdicts transferred exactly and only 3 rows needed fresh judgement. Checking
    subset-ness first turned a full re-annotation into three renders — but only because the transfer rule is
