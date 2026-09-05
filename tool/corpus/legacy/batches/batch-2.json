@@ -1,0 +1,66 @@
+{
+  "batch": "batch-2",
+  "pipeline": "tc2-p2",
+  "created": "2026-09-06",
+  "round": 5,
+  "purpose": "Round 5 Lane D — legacy batch 2, chosen by the FIVE failure classes the Founder named (§9): Math/high-formula · two-column · Vietnamese text · Science · History/Geography, plus the one class where round 4 measured the NEW pipeline as WORSE than the old product (lesson attachment at the tail of a book). History/Geography has never been measured on either side; Toán 4 tập một is the largest untouched book in scope; the TV5 lesson is a POEM, which is the direct regression on the verse-flattening defect the round-4 colour-veto fix uncovered.",
+  "rules": [
+    "reprocess from the ORIGINAL SOURCE (PDF page + Apple-Vision OCR lines), never from the old units or packs",
+    "REPROCESSED != TRUSTED and RESTORED != TRUSTED — the new output is a candidate until independently audited; eligible-for-teaching stays 0 until Founder thresholds",
+    "pages the pipeline cannot process are WITHHELD, never guessed",
+    "nothing in poc-out/ outside poc-out/round5/legacy/ is written; the round-4 batches and the old outputs stay side by side",
+    "no manual prettifying of any output on either side"
+  ],
+  "failure_class_coverage": {
+    "math_high_formula": ["04-sgk-toan-4-tap-mot:37", "09-sgk-khoa-hoc-tu-nhien-9:5"],
+    "two_column": ["04-sgk-lich-su-va-dia-li-4:12", "09-sgk-khoa-hoc-tu-nhien-9:5", "04-sgk-toan-4-tap-mot:37", "04-sgk-khoa-hoc-4:6"],
+    "vietnamese_text": ["05-sgk-tieng-viet-5-tap-mot:5"],
+    "science": ["04-sgk-khoa-hoc-4:6", "09-sgk-khoa-hoc-tu-nhien-9:5"],
+    "history_geography": ["04-sgk-lich-su-va-dia-li-4:12", "05-sgk-lich-su-va-dia-li-5:9"],
+    "attachment_tail_of_book": ["04-sgk-toan-4-tap-mot:37"]
+  },
+  "lessons": [
+    {
+      "book": "04-sgk-lich-su-va-dia-li-4", "lesson": 12, "title": "Thăng Long - Hà Nội",
+      "pages_pdf": [55, 56, 57, 58, 59],
+      "risk": ["lsdl", "two_col", "figure_caption", "order_suspect"],
+      "why": "HISTORY/GEOGRAPHY — the failure class round 4 never measured on either side. Four of five pages are two-column, with a table and two diagrams. The OLD product served exactly ONE block for this lesson (a suSources excerpt): the old surface is almost empty, so this batch measures what the pipeline PRODUCES where the product had nothing, not a rescue.",
+      "in_113": true, "in_sam_units": false
+    },
+    {
+      "book": "05-sgk-lich-su-va-dia-li-5", "lesson": 9, "title": "Triều Lý và việc định đô ở Thăng Long",
+      "pages_pdf": [41, 42, 43, 44, 45, 46, 47, 48, 49, 50],
+      "risk": ["lsdl", "prose_dated_events", "figure_caption", "order_suspect"],
+      "why": "HISTORY/GEOGRAPHY, prose-heavy (8 of 10 pages single-column) — the shape Lane C's `prose-dated-events-v1` hypothesis is about, measured here only as extraction fidelity, never as a timeline claim. Again ONE OLD served block (suSources).",
+      "in_113": true, "in_sam_units": false
+    },
+    {
+      "book": "04-sgk-khoa-hoc-4", "lesson": 6, "title": "Gió, bão và phòng chống bão",
+      "pages_pdf": [26, 27, 28, 29],
+      "risk": ["khoa", "two_col", "figure_caption", "order_suspect"],
+      "why": "SCIENCE / figure-caption — the class batch 1 could not measure (only 2 caption blocks fell in its stratified sample; §5a had to draw a quota sample inside a single lesson). Three of four pages carry diagrams. The OLD side is 2 khoaExperiments activities, the family round 3 found serving figure labels as experiment steps.",
+      "in_113": true, "in_sam_units": false
+    },
+    {
+      "book": "09-sgk-khoa-hoc-tu-nhien-9", "lesson": 5, "title": "Khúc xạ ánh sáng",
+      "pages_pdf": [26, 27, 28, 29, 30],
+      "risk": ["khtn", "two_col", "formula", "figure_caption", "order_suspect"],
+      "why": "SCIENCE at the high-formula end, and an untouched grade: 3 formula pages, 2 tables, 4 of 5 pages two-column. Physics notation (angles, indices, ratios) exercises the number/unit guards on text that is not arithmetic. OLD = 3 khoaExperiments activities.",
+      "in_113": true, "in_sam_units": false
+    },
+    {
+      "book": "04-sgk-toan-4-tap-mot", "lesson": 37, "title": "Ôn tập chung",
+      "pages_pdf": [128, 129, 130, 131, 132, 133, 134],
+      "risk": ["toan", "two_col", "formula", "attachment_suspect", "last_lesson_of_book"],
+      "why": "MATH/HIGH-FORMULA in the largest untouched book in scope (37 lessons, none reprocessed), AND the attachment class where round 4 measured the NEW pipeline as WORSE than the old product. This is the LAST lesson of the book and the run deliberately includes the book's tail (pdf 132-134, beyond the pages that carry units) so the imprint/back-cover attachment defect — which survived both round-4 builds on Toán 4 tập hai Bài 73 — is exercised on a different book. OLD = 29 units / 29 sam-units rows, no pack activity.",
+      "in_113": false, "in_sam_units": true
+    },
+    {
+      "book": "05-sgk-tieng-viet-5-tap-mot", "lesson": 5, "title": "Đọc: Tiếng hạt nảy mầm",
+      "pages_pdf": [29, 30, 31],
+      "risk": ["tv5", "poem", "two_col", "color_heavy", "order_suspect", "attachment_suspect"],
+      "why": "VIETNAMESE TEXT — and the regression on the defect the round-4 colour-veto fix uncovered: this is a POEM on a colour-heavy page, the exact shape where tc2-p2 served five verse lines joined into a single prose run (batch-1 report §7.4). OLD = 1 tvReadings activity + 18 units + 18 sam-units rows, so both sides have a real surface here.",
+      "in_113": true, "in_sam_units": true
+    }
+  ]
+}

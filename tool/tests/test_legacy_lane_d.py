@@ -8,15 +8,18 @@ Run:  python3 -m unittest discover -s tool/tests -v
 """
 import json
 import os
-import shutil
 import sys
 import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-_SANDBOX = tempfile.mkdtemp(prefix='lane-d-tests-')
-os.environ['TC_ROOT'] = _SANDBOX
-os.environ['LEGACY_OUT'] = os.path.join(_SANDBOX, 'legacy')
+sys.path.insert(0, HERE)
+# Round 5: the sandbox root is owned by _lane_d_sandbox, not by this file. It used to be
+# created here and to work only because this module happened to import `common` first;
+# a second Lane D test module that sorts earlier broke that silently. See _lane_d_sandbox.
+import _lane_d_sandbox  # noqa: E402
+
+_SANDBOX = _lane_d_sandbox.ROOT
 sys.path.insert(0, os.path.join(HERE, '..', 'corpus'))
 sys.path.insert(0, os.path.join(HERE, '..', 'corpus', 'legacy'))
 import audit  # noqa: E402
@@ -28,7 +31,8 @@ import scoreboard  # noqa: E402
 
 
 def tearDownModule():
-    shutil.rmtree(_SANDBOX, ignore_errors=True)
+    """The sandbox is shared and removed at interpreter exit (_lane_d_sandbox), so this
+    module must NOT delete it — another Lane D module may still be using it."""
 
 
 class SandboxTests(unittest.TestCase):
