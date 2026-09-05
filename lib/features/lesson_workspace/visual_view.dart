@@ -189,8 +189,11 @@ class _VisualViewState extends State<VisualView> {
                 const SizedBox(width: WalSpacing.sm),
                 const Expanded(
                   child: Text(
-                    'SAM chưa có sơ đồ cho bài này — con xem bảng tóm tắt, đọc '
-                    'sách hoặc học cùng SAM nhé.',
+                    // ROUND 4 §6.5 — fail closed nói VÌ SAO bằng lời trẻ.
+                    'SAM chưa có sơ đồ cho bài này. SAM chỉ vẽ sơ đồ khi sách '
+                    'viết rõ từng bước hoặc từng cách; bài này chưa có phần như '
+                    'vậy nên SAM không tự vẽ — con xem bảng tóm tắt, đọc sách '
+                    'hoặc học cùng SAM nhé.',
                     style: TextStyle(
                       fontSize: WalType.body,
                       color: WalColors.ink,
@@ -349,7 +352,7 @@ class _VisualViewState extends State<VisualView> {
                       onPressed: () =>
                           showTrustSheet(context, doc: widget.doc),
                       child: const Text(
-                        'ⓘ Nguồn & luật xếp',
+                        'ⓘ Nguồn & độ tin',
                         style: TextStyle(
                           fontSize: 13,
                           color: WalColors.primaryText,
@@ -386,6 +389,19 @@ class _VisualViewState extends State<VisualView> {
   Widget _process(ProcessSemantic s) => Column(
     children: [
       _processStrip(s),
+      // ROUND 4 §6.5 — chú giải + cách dùng, lời trẻ.
+      Padding(
+        padding: const EdgeInsets.only(top: WalSpacing.xs),
+        child: Text(
+          s.steps.any((st) => st.isWithheld)
+              ? 'Số tím = bước sách viết · số xám = bước SAM để trống (xem '
+                    'trong sách) · chạm một bước để tra cứu lời sách'
+              : 'Mỗi số là một bước sách viết · chạm một bước để tra cứu '
+                    'lời sách',
+          key: const Key('visual-legend'),
+          style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
+        ),
+      ),
       const SizedBox(height: WalSpacing.md),
       for (var i = 0; i < s.steps.length; i++) ...[
         _processNode(s.steps[i]),
@@ -482,16 +498,30 @@ class _VisualViewState extends State<VisualView> {
                   : null,
               borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
             ),
-            child: Text(
-              st.isWithheld
-                  ? 'Bước này SAM chưa đọc được — con xem trong sách '
-                        '(${_pageOf(st.sourceBlockId)}).'
-                  : st.text!,
-              style: TextStyle(
-                fontSize: WalType.body,
-                color: st.isWithheld ? WalColors.inkSoft : WalColors.ink,
-                height: 1.45,
-              ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    st.isWithheld
+                        ? 'Bước này SAM chưa đọc được — con xem trong sách '
+                              '(${_pageOf(st.sourceBlockId)}).'
+                        : st.text!,
+                    style: TextStyle(
+                      fontSize: WalType.body,
+                      color: st.isWithheld ? WalColors.inkSoft : WalColors.ink,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: WalSpacing.xs),
+                // dấu «chạm để tra cứu» — không phải nội dung
+                const Icon(
+                  Icons.menu_book_outlined,
+                  size: 18,
+                  color: WalColors.primaryText,
+                ),
+              ],
             ),
           ),
         ),
@@ -500,7 +530,21 @@ class _VisualViewState extends State<VisualView> {
   );
 
   // ── Comparison ──
-  Widget _comparison(ComparisonSemantic s) => Container(
+  Widget _comparison(ComparisonSemantic s) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      const Padding(
+        padding: EdgeInsets.only(bottom: WalSpacing.xs),
+        child: Text(
+          'Mỗi hàng là một cách sách nêu · chạm một hàng để tra cứu lời sách',
+          style: TextStyle(fontSize: 11, color: WalColors.inkSoft),
+        ),
+      ),
+      _comparisonTable(s),
+    ],
+  );
+
+  Widget _comparisonTable(ComparisonSemantic s) => Container(
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(WalSpacing.radiusButton),

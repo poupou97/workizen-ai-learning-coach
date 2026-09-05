@@ -132,17 +132,51 @@ class TutorView extends StatefulWidget {
     return null;
   }
 
-  /// Dòng runtime cho phần đầu Tutor và sheet «Nguồn & độ tin».
+  /// Dòng runtime cho phần đầu Tutor và sheet «Nguồn & độ tin» — LỜI TRẺ
+  /// (round 4 §6.6), con số giữ nguyên: PEDAGOGY REALITY vẫn đọc được trên
+  /// máy («kiểm 5/17 bước»). Mã máy nằm ở [runtimeLineTechnical].
   static String runtimeLine(RuntimePlan? plan) {
     if (plan == null) return 'Bài này không có kịch bản.';
     if (!plan.isBound) {
-      return 'Runtime chưa ràng buộc được bài này (${plan.planRefusals.join(', ')}) '
-          '— mọi bước là kịch bản thử nghiệm.';
+      return 'Máy chưa ràng buộc được bài này với sách — mọi bước là lời '
+          'viết sẵn để thử.';
     }
-    return 'Runtime kiểm được ${plan.runtimeGuidedCount}/${plan.steps.length} '
-        'bước (giải thích, câu hỏi nguyên văn sách, bước tiếp); '
-        '${plan.prototypeCount} bước còn lại là kịch bản thử nghiệm '
-        '(gợi ý, phản hồi, chỉ chỗ trong sách).';
+    return 'Máy đã kiểm ${plan.runtimeGuidedCount}/${plan.steps.length} bước '
+        'là lời lấy đúng trong sách (giải thích, câu hỏi, bước tiếp) · '
+        '${plan.prototypeCount} bước còn lại là lời viết sẵn để thử '
+        '(gợi ý, phản hồi).';
+  }
+
+  /// Dòng runtime KỸ THUẬT (mã từ chối) — chỉ trong nếp gấp «Chi tiết kỹ
+  /// thuật» của sheet «Nguồn & độ tin».
+  static String runtimeLineTechnical(RuntimePlan? plan) {
+    if (plan == null) return 'no tutor script';
+    if (!plan.isBound) {
+      return 'unbound (${plan.planRefusals.join(', ')}) — all steps '
+          'prototypeScripted';
+    }
+    final codes = {
+      for (final s in plan.steps)
+        for (final r in s.refusals) r.split(':').first,
+    }.toList()..sort();
+    return '${plan.runtimeGuidedCount}/${plan.steps.length} runtimeGuided · '
+        '${plan.prototypeCount} prototypeScripted · refusals '
+        '${codes.isEmpty ? '—' : codes.join(', ')} · validator null on every '
+        'step · ${plan.evidencePolicy}';
+  }
+
+  /// Chú giải nhãn theo bước — lời trẻ cho hai chuỗi nhãn của runtime.
+  static const labelLegend =
+      'Nhãn xanh «runtime có kiểm» = lời lấy đúng trong sách, máy đã kiểm · '
+      'nhãn tím «kịch bản thử nghiệm» = lời viết sẵn để thử.';
+
+  /// Số thứ tự gợi ý (1-based) của lượt gợi ý thứ [i] trong transcript.
+  static int hintNumber(List<TutorTurn> ts, int i) {
+    var n = 0;
+    for (var k = 0; k <= i; k++) {
+      if (ts[k].kind == TurnKind.hint && ts[k].stepId == ts[i].stepId) n++;
+    }
+    return n;
   }
 
   @override
@@ -284,6 +318,12 @@ class _TutorViewState extends State<TutorView> {
                           color: WalColors.mintText,
                         ),
                       ),
+                      // ROUND 4 §6.6 — chú giải nhãn theo bước bằng lời trẻ.
+                      const Text(
+                        TutorView.labelLegend,
+                        key: Key('tutor-label-legend'),
+                        style: TextStyle(fontSize: 11, color: WalColors.inkSoft),
+                      ),
                     ],
                   ),
                 ),
@@ -336,6 +376,10 @@ class _TutorViewState extends State<TutorView> {
                     child: _turn(
                       r.transcript[i],
                       TutorView.stepForTurn(_plan, r.transcript, i),
+                      hintCaption: r.transcript[i].kind == TurnKind.hint
+                          ? 'Gợi ý ${TutorView.hintNumber(r.transcript, i)}/'
+                                '${_hintsOf(r.transcript[i].stepId)}'
+                          : null,
                     ),
                   ),
                   const SizedBox(height: WalSpacing.sm),
@@ -389,7 +433,15 @@ class _TutorViewState extends State<TutorView> {
     return t.length > 70 ? '${t.substring(0, 70)}…' : t;
   }
 
-  Widget _turn(TutorTurn t, PlannedStep? step) {
+  /// Số bậc gợi ý của một bước hỏi (thang ≤ 2 bậc theo kịch bản).
+  int _hintsOf(String? stepId) {
+    for (final s in widget.doc.tutorScript?.asks ?? const <AskStep>[]) {
+      if (s.id == stepId) return s.hints.length;
+    }
+    return 0;
+  }
+
+  Widget _turn(TutorTurn t, PlannedStep? step, {String? hintCaption}) {
     if (!t.isSam) {
       return Align(
         alignment: Alignment.centerRight,
@@ -427,7 +479,7 @@ class _TutorViewState extends State<TutorView> {
       label: step?.mode.childLabel,
       caption: t.kind == TurnKind.ask
           ? TutorView.askCaption(widget.doc.tutorScript!, t.stepId)
-          : null,
+          : hintCaption,
       background: switch (t.kind) {
         TurnKind.hint => WalColors.surfaceLavender,
         TurnKind.scaffold => LearningStateToken.needsWork.bg,
@@ -565,19 +617,73 @@ class _TutorViewState extends State<TutorView> {
                   ),
                 ],
               ),
-            SizedBox(
-              height: WalSpacing.minTouch,
-              child: TextButton(
-                onPressed: r.canHint ? () => _after(r.requestHint) : null,
-                child: Text(
-                  r.canHint
-                      ? 'Gợi ý cho tớ ✋ (${r.hintLevel + 1}/${s.hints.length})'
-                      : 'SAM đã gợi ý hết rồi — con cứ trả lời thử nhé',
-                  style: const TextStyle(
-                    fontSize: WalType.secondary,
-                    color: WalColors.primaryText,
+            // ROUND 4 §6.6 — THANG gợi ý nhìn thấy: bậc đã dùng tô đậm; hết
+            // thang thì nói thật SAM sẽ chỉ chỗ trong sách (không chê, không
+            // kẹt). Không có bậc nào là «lộ đáp án» — thang ≤ 2 bậc theo kịch bản.
+            Padding(
+              padding: const EdgeInsets.only(top: WalSpacing.xs),
+              child: Row(
+                key: const Key('tutor-hint-ladder'),
+                children: [
+                  const Text(
+                    'Bậc gợi ý',
+                    style: TextStyle(fontSize: 12, color: WalColors.inkSoft),
                   ),
-                ),
+                  const SizedBox(width: WalSpacing.xs),
+                  for (var k = 0; k < s.hints.length; k++)
+                    Container(
+                      margin: const EdgeInsets.only(right: 4),
+                      width: 22,
+                      height: 22,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: k < r.hintLevel
+                            ? WalColors.primary500
+                            : Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: WalColors.primary500,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Text(
+                        '${k + 1}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: k < r.hintLevel
+                              ? Colors.white
+                              : WalColors.primaryText,
+                        ),
+                      ),
+                    ),
+                  Expanded(
+                    child: SizedBox(
+                      height: WalSpacing.minTouch,
+                      child: TextButton(
+                        onPressed: r.canHint
+                            ? () => _after(r.requestHint)
+                            : null,
+                        style: TextButton.styleFrom(
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: WalSpacing.sm,
+                          ),
+                        ),
+                        child: Text(
+                          r.canHint
+                              ? 'Gợi ý cho tớ ✋'
+                              : 'SAM đã gợi ý hết rồi — con cứ trả lời thử, '
+                                    'SAM sẽ chỉ chỗ trong sách',
+                          style: const TextStyle(
+                            fontSize: WalType.secondary,
+                            color: WalColors.primaryText,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

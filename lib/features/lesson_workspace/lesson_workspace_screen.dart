@@ -295,7 +295,34 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
       color: WalColors.surfaceLavender,
       borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
     ),
-    child: Row(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _nextActionRow(next, compact: compact),
+        // ROUND 4 §6.7 — luật A8 nhìn thấy được: ba cách học, cách nào con
+        // ĐÃ MỞ (trace của phiên, không phải bằng chứng) — trẻ hiểu vì sao
+        // SAM đề xuất cách tiếp theo. Một dòng, cả bề ngang thẻ.
+        if (!compact)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              [
+                'Đã mở:',
+                for (final v in WorkspaceView.values)
+                  '${_seen.contains(v) ? '●' : '○'} ${v.label}',
+              ].join(' '),
+              key: const Key('workspace-seen-row'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
+            ),
+          ),
+      ],
+    ),
+  );
+
+  Widget _nextActionRow(NextAction next, {required bool compact}) => Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         if (!compact) ...[
@@ -324,8 +351,10 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
               // mất «vì sao» (round 3 n1 D-R3-03).
               Text(
                 next.reason,
-                maxLines: compact ? 1 : null,
-                overflow: compact ? TextOverflow.ellipsis : null,
+                // 6 dòng là lưới an toàn cho khung cố định (lý do thật ≤ 3
+                // dòng trên Nokia — D-R3-03 vẫn được tôn trọng).
+                maxLines: compact ? 1 : 6,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 13,
                   color: WalColors.ink,
@@ -364,8 +393,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
           ),
         ),
       ],
-    ),
-  );
+    );
 
   Widget _body(WorkspaceView view) => switch (view) {
     WorkspaceView.read => SmartBookView(
