@@ -1,0 +1,228 @@
+{
+ "book": "04-sgk-khoa-hoc-4",
+ "page": 10,
+ "printed_page": 9,
+ "grade": 4,
+ "subject": "Khoa học",
+ "docType": "SGK",
+ "gold_set": "tc-v2",
+ "gold_purpose": "cross_page_lesson_boundary+toc_repair",
+ "held_out": true,
+ "why": "TC-v2 held-out: first page of Bài 2 in the KNTT elementary layout (small 'Bài' + large '2' + two-line uppercase title); objectives with a target icon (no MỤC TIÊU label), lead-in question beside a photo, a mini arrow diagram inside a paragraph, a 2-column table; Bài 2 has NO pageStart in curriculum-structure",
+ "features": [
+  "colored_box",
+  "objective_box",
+  "question_block",
+  "figure",
+  "diagram",
+  "table",
+  "side_by_side",
+  "lesson_start"
+ ],
+ "lesson": {
+  "number": 2,
+  "title": "Sự chuyển thể của nước và vòng tuần hoàn của nước trong tự nhiên",
+  "note": "page is the lesson start (elementary banner); Bài 2 pageStart is null in curriculum-structure (Khoa học 4 PARTIAL) → TOC-range attachment gives Bài 1 (pageStart 5) = WRONG"
+ },
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02; written before any tc-v2 gate was scored on this page",
+ "blocks": [
+  {
+   "id": "b01",
+   "order": 1,
+   "role": "heading",
+   "bbox": [
+    0.11,
+    0.08,
+    0.07,
+    0.06
+   ],
+   "text": "Bài 2",
+   "anchor": "Bài 2",
+   "notes": "elementary banner: small 'Bài' above a large '2'"
+  },
+  {
+   "id": "b02",
+   "order": 2,
+   "role": "heading",
+   "bbox": [
+    0.2,
+    0.09,
+    0.75,
+    0.06
+   ],
+   "text": "SỰ CHUYỂN THỂ CỦA NƯỚC VÀ VÒNG TUẦN HOÀN CỦA NƯỚC TRONG TỰ NHIÊN",
+   "anchor": "SỰ CHUYỂN THỂ CỦA NƯỚC",
+   "notes": "two-line title"
+  },
+  {
+   "id": "b03",
+   "order": 3,
+   "role": "objective",
+   "bbox": [
+    0.25,
+    0.17,
+    0.66,
+    0.04
+   ],
+   "text": "Quan sát và làm được thí nghiệm đơn giản để phát hiện ra sự chuyển thể của nước.",
+   "anchor": "Quan sát và làm được thí nghiệm",
+   "contiguous": true,
+   "notes": "objective (target icon; 'Quan sát' start must NOT make it a question)"
+  },
+  {
+   "id": "b04",
+   "order": 4,
+   "role": "objective",
+   "bbox": [
+    0.25,
+    0.215,
+    0.66,
+    0.04
+   ],
+   "text": "Vẽ sơ đồ và sử dụng được các thuật ngữ: bay hơi, ngưng tụ, đông đặc, nóng chảy để mô tả sự chuyển thể của nước.",
+   "anchor": "Vẽ sơ đồ và sử dụng được các thuật ngữ",
+   "contiguous": true
+  },
+  {
+   "id": "b05",
+   "order": 5,
+   "role": "objective",
+   "bbox": [
+    0.25,
+    0.26,
+    0.66,
+    0.02
+   ],
+   "text": "Vẽ được sơ đồ và ghi chú được \"vòng tuần hoàn của nước trong tự nhiên\".",
+   "anchor": "Vẽ được sơ đồ và ghi chú được"
+  },
+  {
+   "id": "b06",
+   "order": 6,
+   "role": "question",
+   "bbox": [
+    0.12,
+    0.32,
+    0.36,
+    0.06
+   ],
+   "text": "Khi lau bảng bằng khăn ẩm (hình 1), chỉ một lát sau bảng khô. Vậy nước ở bảng đã đi đâu?",
+   "anchor": "Khi lau bảng bằng khăn ẩm",
+   "contiguous": true,
+   "column": 1,
+   "rel": {
+    "refers_figure": "b07"
+   },
+   "notes": "lead-in question box beside the photo — figure-dependent"
+  },
+  {
+   "id": "b07",
+   "order": 7,
+   "role": "caption",
+   "bbox": [
+    0.68,
+    0.46,
+    0.06,
+    0.015
+   ],
+   "text": "Hình 1",
+   "anchor": "Hình 1",
+   "column": 2
+  },
+  {
+   "id": "b08",
+   "order": 8,
+   "role": "heading",
+   "bbox": [
+    0.08,
+    0.5,
+    0.3,
+    0.02
+   ],
+   "text": "1. Sự chuyển thể của nước",
+   "anchor": "1. Sự chuyển thể của nước",
+   "notes": "numbered section heading — NOT a question"
+  },
+  {
+   "id": "b09",
+   "order": 9,
+   "role": "body",
+   "bbox": [
+    0.1,
+    0.54,
+    0.82,
+    0.06
+   ],
+   "text": "Một que kem ở thể rắn, được lấy ra khỏi tủ đá, sau ít phút nó chuyển thành thể lỏng. Sự chuyển từ thể rắn sang thể lỏng này gọi là hiện tượng nóng chảy. Ta có thể diễn tả hiện tượng nóng chảy theo cách sau:",
+   "anchor": "Một que kem ở thể rắn, được lấy ra",
+   "contiguous": true
+  },
+  {
+   "id": "b10",
+   "order": 10,
+   "role": "diagram",
+   "bbox": [
+    0.32,
+    0.61,
+    0.37,
+    0.04
+   ],
+   "text": null,
+   "anchor": null,
+   "notes": "mini arrow diagram: 'Thể rắn' —(Nóng chảy)→ 'Thể lỏng' — the three labels are figure text, not prose"
+  },
+  {
+   "id": "b11",
+   "order": 11,
+   "role": "body",
+   "bbox": [
+    0.1,
+    0.665,
+    0.82,
+    0.04
+   ],
+   "text": "Sự chuyển từ thể này sang thể khác của nước được diễn tả bằng các hiện tượng tương ứng trong bảng sau:",
+   "anchor": "Sự chuyển từ thể này sang thể khác",
+   "contiguous": true
+  },
+  {
+   "id": "b12",
+   "order": 12,
+   "role": "table",
+   "bbox": [
+    0.2,
+    0.715,
+    0.62,
+    0.18
+   ],
+   "text": null,
+   "anchor": "Sự chuyển thể của nước Hiện tượng",
+   "notes": "2 columns × 5 rows: header (Sự chuyển thể của nước | Hiện tượng); Thể rắn → thể lỏng | Nóng chảy; Thể lỏng → thể rắn | Đông đặc; Thể lỏng → thể khí | Bay hơi; Thể khí → thể lỏng | Ngưng tụ"
+  },
+  {
+   "id": "b13",
+   "order": 13,
+   "role": "page_number",
+   "bbox": [
+    0.87,
+    0.955,
+    0.02,
+    0.015
+   ],
+   "text": "9",
+   "anchor": "9"
+  }
+ ],
+ "flex_groups": [
+  [
+   "b07"
+  ]
+ ],
+ "critical": [
+  "b03–b05 objectives emitted as learner questions ('Quan sát…', 'Vẽ…')",
+  "b10 arrow-diagram labels emitted as prose or spliced into b09/b11",
+  "b12 table cells linearised as prose",
+  "page attached to Bài 1 by TOC range (Bài 2 has no pageStart) — wrong lesson"
+ ],
+ "gold_revision": "r2 2026-09-05: flex_groups aligned with the TC-v1 convention (captions / floating objective boxes are flex) after the first held-out scoring showed order-only false trusts caused by the annotation, not the pipeline; roles/text/bbox/lesson unchanged; previous flex_groups=[[\"b07\"]]"
+}

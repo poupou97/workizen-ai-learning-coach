@@ -1,0 +1,255 @@
+{
+ "book": "04-sgk-khoa-hoc-4",
+ "page": 6,
+ "printed_page": 5,
+ "grade": 4,
+ "subject": "Khoa học",
+ "docType": "SGK",
+ "gold_set": "tc-v2",
+ "gold_purpose": "picture_page+theme_opener_with_lesson_start+instruction_role",
+ "held_out": true,
+ "why": "TC-v2 held-out: colour-heavy elementary page (census color_heavy) that is BOTH the theme opener (CHỦ ĐỀ 1 CHẤT with a water-drop photo banner) AND the Bài 1 banner; objectives with a target icon; lead-in question box; a hand-icon activity with Chuẩn bị / Tiến hành steps (INSTRUCTION role) over a 3-photo figure; a closing question. A 'theme opener → no lesson' rule must NOT fire here",
+ "features": [
+  "color_heavy",
+  "theme_opener",
+  "lesson_start",
+  "objective_box",
+  "question_block",
+  "instruction_steps",
+  "figure"
+ ],
+ "lesson": {
+  "number": 1,
+  "title": "Tính chất của nước và nước với cuộc sống",
+  "note": "theme opener and the Bài 1 banner on the same page → the page attaches to Bài 1 (TOC pageStart 5 = printed 5: OK); the census flags this page colour-heavy, so a strict page-feature guard withholds all of its text — that cost is what this page measures"
+ },
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02; written before any tc-v2 gate was scored on this page. KNTT elementary icons: target = objective, hand = activity (its Chuẩn bị/Tiến hành parts = instruction), '?' = question",
+ "blocks": [
+  {
+   "id": "b01",
+   "order": 1,
+   "role": "heading",
+   "bbox": [
+    0.08,
+    0.08,
+    0.16,
+    0.03
+   ],
+   "text": "CHỦ ĐỀ 1",
+   "anchor": "CHỦ ĐỀ 1",
+   "notes": "theme opener label"
+  },
+  {
+   "id": "b02",
+   "order": 2,
+   "role": "heading",
+   "bbox": [
+    0.32,
+    0.075,
+    0.12,
+    0.04
+   ],
+   "text": "CHẤT",
+   "anchor": "CHẤT",
+   "notes": "theme title on the photo banner"
+  },
+  {
+   "id": "b03",
+   "order": 3,
+   "role": "heading",
+   "bbox": [
+    0.11,
+    0.18,
+    0.07,
+    0.07
+   ],
+   "text": "Bài 1",
+   "anchor": "Bài 1",
+   "notes": "elementary lesson banner: small 'Bài' + large '1'"
+  },
+  {
+   "id": "b04",
+   "order": 4,
+   "role": "heading",
+   "bbox": [
+    0.21,
+    0.19,
+    0.45,
+    0.06
+   ],
+   "text": "TÍNH CHẤT CỦA NƯỚC VÀ NƯỚC VỚI CUỘC SỐNG",
+   "anchor": "TÍNH CHẤT CỦA NƯỚC",
+   "notes": "two-line title"
+  },
+  {
+   "id": "b05",
+   "order": 5,
+   "role": "objective",
+   "bbox": [
+    0.25,
+    0.28,
+    0.66,
+    0.04
+   ],
+   "text": "Quan sát và làm được thí nghiệm đơn giản để phát hiện ra một số tính chất của nước.",
+   "anchor": "Quan sát và làm được thí nghiệm đơn giản",
+   "contiguous": true
+  },
+  {
+   "id": "b06",
+   "order": 6,
+   "role": "objective",
+   "bbox": [
+    0.25,
+    0.32,
+    0.66,
+    0.06
+   ],
+   "text": "Nêu được một số tính chất của nước (không màu, không mùi, không vị, không có hình dạng nhất định; chảy từ cao xuống thấp, chảy lan ra khắp mọi phía; thấm qua một số vật và hoà tan một số chất).",
+   "anchor": "Nêu được một số tính chất của nước",
+   "contiguous": true
+  },
+  {
+   "id": "b07",
+   "order": 7,
+   "role": "objective",
+   "bbox": [
+    0.25,
+    0.38,
+    0.66,
+    0.04
+   ],
+   "text": "Vận dụng được tính chất của nước trong một số trường hợp đơn giản. Nêu được và liên hệ thực tế ở gia đình và địa phương về ứng dụng một số tính chất của nước.",
+   "anchor": "Vận dụng được tính chất của nước",
+   "contiguous": true
+  },
+  {
+   "id": "b08",
+   "order": 8,
+   "role": "objective",
+   "bbox": [
+    0.25,
+    0.42,
+    0.66,
+    0.04
+   ],
+   "text": "Nêu được và liên hệ thực tế ở gia đình và địa phương về vai trò của nước trong đời sống, sản xuất và sinh hoạt.",
+   "anchor": "Nêu được và liên hệ thực tế ở gia đình",
+   "contiguous": true
+  },
+  {
+   "id": "b09",
+   "order": 9,
+   "role": "question",
+   "bbox": [
+    0.12,
+    0.49,
+    0.78,
+    0.045
+   ],
+   "text": "Nước rất quen thuộc và gắn bó với đời sống con người. Em biết gì về tính chất của nước? Em hãy tưởng tượng cuộc sống sẽ như thế nào nếu không có nước?",
+   "anchor": "Nước rất quen thuộc và gắn bó",
+   "contiguous": true,
+   "notes": "lead-in question box"
+  },
+  {
+   "id": "b10",
+   "order": 10,
+   "role": "heading",
+   "bbox": [
+    0.08,
+    0.565,
+    0.25,
+    0.02
+   ],
+   "text": "1. Tính chất của nước",
+   "anchor": "1. Tính chất của nước",
+   "notes": "numbered section heading — NOT a question"
+  },
+  {
+   "id": "b11",
+   "order": 11,
+   "role": "instruction",
+   "bbox": [
+    0.13,
+    0.595,
+    0.78,
+    0.045
+   ],
+   "text": "1. Chuẩn bị: Đồ dùng thuỷ tinh không màu: 1 cốc, 1 bát, 1 chai; nước sạch có thể uống được.",
+   "anchor": "1. Chuẩn bị: Đồ dùng thuỷ tinh",
+   "contiguous": true,
+   "notes": "hand icon activity 1 — preparation step"
+  },
+  {
+   "id": "b12",
+   "order": 12,
+   "role": "instruction",
+   "bbox": [
+    0.15,
+    0.64,
+    0.76,
+    0.045
+   ],
+   "text": "Tiến hành: Rót cùng một lượng nước vào cốc, bát và chai như hình 1. Hãy ngửi, nếm và quan sát màu sắc, hình dạng của nước trong mỗi hình.",
+   "anchor": "Tiến hành: Rót cùng một lượng nước",
+   "contiguous": true,
+   "rel": {
+    "refers_figure": "b13"
+   },
+   "notes": "procedure step that contains a directive ('Hãy ngửi…') — still an instruction, not a standalone question"
+  },
+  {
+   "id": "b13",
+   "order": 13,
+   "role": "caption",
+   "bbox": [
+    0.5,
+    0.875,
+    0.06,
+    0.015
+   ],
+   "text": "Hình 1",
+   "anchor": "Hình 1",
+   "notes": "caption of the 3-photo row (a cốc, b bát, c chai)"
+  },
+  {
+   "id": "b14",
+   "order": 14,
+   "role": "question",
+   "bbox": [
+    0.15,
+    0.9,
+    0.55,
+    0.02
+   ],
+   "text": "Từ thí nghiệm rút ra nhận xét gì về tính chất của nước?",
+   "anchor": "Từ thí nghiệm rút ra nhận xét gì"
+  },
+  {
+   "id": "b15",
+   "order": 15,
+   "role": "page_number",
+   "bbox": [
+    0.87,
+    0.955,
+    0.02,
+    0.015
+   ],
+   "text": "5",
+   "anchor": "5"
+  }
+ ],
+ "flex_groups": [
+  [
+   "b13"
+  ]
+ ],
+ "critical": [
+  "page given NO lesson because it opens a theme (CHỦ ĐỀ 1) although Bài 1 starts here",
+  "b05–b08 objectives as learner questions",
+  "b12 'Hãy ngửi, nếm…' emitted as a standalone learner question without the experiment",
+  "colour-heavy page-feature guard withholding b09/b14 (the only two real questions) — a cost to measure"
+ ],
+ "gold_revision": "r2 2026-09-05: flex_groups aligned with the TC-v1 convention (captions / floating objective boxes are flex) after the first held-out scoring showed order-only false trusts caused by the annotation, not the pipeline; roles/text/bbox/lesson unchanged; previous flex_groups=[]"
+}

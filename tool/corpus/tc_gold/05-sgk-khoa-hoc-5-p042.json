@@ -1,0 +1,326 @@
+{
+ "book": "05-sgk-khoa-hoc-5",
+ "page": 42,
+ "printed_page": 41,
+ "grade": 5,
+ "subject": "Khoa học",
+ "docType": "SGK",
+ "gold_set": "tc-v2",
+ "gold_purpose": "cross_page_lesson_boundary+activity_role",
+ "held_out": true,
+ "why": "TC-v2 held-out: LAST page of Bài 10 (no header — continuation); activities 3–4 (hand icon continued from the previous page) over a 3-photo figure, '?' questions 1–4, Em đã học box, then Em có thể (narrow, left) ∥ Em có biết? (narrow column beside a photo) side by side; next page is the Bài 11 banner the TOC lacks",
+ "features": [
+  "colored_box",
+  "side_by_side",
+  "sidebar",
+  "figure",
+  "question_block",
+  "activity",
+  "continuation",
+  "lesson_end"
+ ],
+ "lesson": {
+  "number": 10,
+  "title": "Năng lượng chất đốt",
+  "note": "no lesson header — continuation of Bài 10 (TOC pageStart 38 → printed 41 in range: correct by TOC); the next page p043 starts Bài 11, which has no pageStart in the TOC"
+ },
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02; written before any tc-v2 gate was scored on this page. KNTT elementary icons: hand = activity, '?' = question",
+ "blocks": [
+  {
+   "id": "b01",
+   "order": 1,
+   "role": "activity",
+   "bbox": [
+    0.13,
+    0.06,
+    0.8,
+    0.045
+   ],
+   "text": "3. Quan sát hình 4 và cho biết trường hợp nào gây lãng phí chất đốt, trường hợp nào tránh được lãng phí chất đốt. Vì sao?",
+   "anchor": "3. Quan sát hình 4 và cho biết trường hợp",
+   "contiguous": true,
+   "rel": {
+    "refers_figure": "b02"
+   },
+   "notes": "activity item 3 (hand icon on the previous page) — figure-dependent"
+  },
+  {
+   "id": "b02",
+   "order": 2,
+   "role": "caption",
+   "bbox": [
+    0.49,
+    0.265,
+    0.06,
+    0.015
+   ],
+   "text": "Hình 4",
+   "anchor": "Hình 4",
+   "notes": "caption of the 3-photo row (a, b, c)"
+  },
+  {
+   "id": "b03",
+   "order": 3,
+   "role": "activity",
+   "bbox": [
+    0.13,
+    0.28,
+    0.25,
+    0.02
+   ],
+   "text": "4. Chia sẻ với bạn về:",
+   "anchor": "4. Chia sẻ với bạn về",
+   "notes": "activity stem; the two dash items below belong to it"
+  },
+  {
+   "id": "b04",
+   "order": 4,
+   "role": "activity",
+   "bbox": [
+    0.13,
+    0.305,
+    0.5,
+    0.02
+   ],
+   "text": "– Năng lượng chất đốt mà gia đình em sử dụng.",
+   "anchor": "Năng lượng chất đốt mà gia đình em",
+   "rel": {
+    "continues": "b03"
+   }
+  },
+  {
+   "id": "b05",
+   "order": 5,
+   "role": "activity",
+   "bbox": [
+    0.13,
+    0.33,
+    0.7,
+    0.02
+   ],
+   "text": "– Những việc em và gia đình đã làm để tiết kiệm năng lượng chất đốt.",
+   "anchor": "Những việc em và gia đình đã làm",
+   "rel": {
+    "continues": "b03"
+   }
+  },
+  {
+   "id": "b06",
+   "order": 6,
+   "role": "question",
+   "bbox": [
+    0.13,
+    0.365,
+    0.7,
+    0.02
+   ],
+   "text": "1. Vì sao không sử dụng bếp than, củi để sưởi ấm trong phòng kín?",
+   "anchor": "1. Vì sao không sử dụng bếp than",
+   "notes": "'?' icon = Câu hỏi"
+  },
+  {
+   "id": "b07",
+   "order": 7,
+   "role": "question",
+   "bbox": [
+    0.13,
+    0.39,
+    0.6,
+    0.02
+   ],
+   "text": "2. Điều chỉnh ngọn lửa ở bếp ga khi đun nấu có tác dụng gì?",
+   "anchor": "2. Điều chỉnh ngọn lửa ở bếp ga"
+  },
+  {
+   "id": "b08",
+   "order": 8,
+   "role": "question",
+   "bbox": [
+    0.13,
+    0.415,
+    0.8,
+    0.045
+   ],
+   "text": "3. Việc đi bộ, đi xe đạp hoặc đi phương tiện công cộng chạy bằng điện trong thành phố đã mang lại lợi ích gì?",
+   "anchor": "3. Việc đi bộ, đi xe đạp hoặc đi",
+   "contiguous": true
+  },
+  {
+   "id": "b09",
+   "order": 9,
+   "role": "question",
+   "bbox": [
+    0.13,
+    0.46,
+    0.8,
+    0.045
+   ],
+   "text": "4. Đề xuất thêm một số biện pháp phòng chống cháy, nổ, ô nhiễm môi trường khi sử dụng năng lượng chất đốt.",
+   "anchor": "4. Đề xuất thêm một số biện pháp",
+   "contiguous": true
+  },
+  {
+   "id": "b10",
+   "order": 10,
+   "role": "heading",
+   "bbox": [
+    0.09,
+    0.51,
+    0.14,
+    0.02
+   ],
+   "text": "Em đã học",
+   "anchor": "Em đã học"
+  },
+  {
+   "id": "b11",
+   "order": 11,
+   "role": "sidebar",
+   "bbox": [
+    0.13,
+    0.545,
+    0.78,
+    0.04
+   ],
+   "text": "Một số nguồn năng lượng chất đốt thường sử dụng: củi, than, xăng, dầu hoả, khí tự nhiên, khí sinh học,…",
+   "anchor": "Một số nguồn năng lượng chất đốt thường",
+   "contiguous": true
+  },
+  {
+   "id": "b12",
+   "order": 12,
+   "role": "sidebar",
+   "bbox": [
+    0.13,
+    0.59,
+    0.78,
+    0.04
+   ],
+   "text": "Năng lượng chất đốt được sử dụng để nấu thức ăn, đun nước uống, sưởi ấm, thắp sáng; vận hành một số máy móc, sản xuất điện,…",
+   "anchor": "Năng lượng chất đốt được sử dụng để nấu",
+   "contiguous": true
+  },
+  {
+   "id": "b13",
+   "order": 13,
+   "role": "sidebar",
+   "bbox": [
+    0.13,
+    0.635,
+    0.78,
+    0.04
+   ],
+   "text": "Cần tránh lãng phí, phòng chống ô nhiễm môi trường và đảm bảo an toàn khi sử dụng năng lượng chất đốt.",
+   "anchor": "Cần tránh lãng phí, phòng chống ô nhiễm",
+   "contiguous": true
+  },
+  {
+   "id": "b14",
+   "order": 14,
+   "role": "heading",
+   "bbox": [
+    0.09,
+    0.695,
+    0.13,
+    0.02
+   ],
+   "text": "Em có thể",
+   "anchor": "Em có thể",
+   "column": 1
+  },
+  {
+   "id": "b15",
+   "order": 15,
+   "role": "sidebar",
+   "bbox": [
+    0.12,
+    0.735,
+    0.2,
+    0.1
+   ],
+   "text": "Thực hiện được việc sử dụng an toàn và tiết kiệm năng lượng chất đốt ở gia đình em.",
+   "anchor": "Thực hiện được việc sử dụng an toàn",
+   "contiguous": true,
+   "column": 1,
+   "notes": "Em có thể item — NOT a learner question"
+  },
+  {
+   "id": "b16",
+   "order": 16,
+   "role": "heading",
+   "bbox": [
+    0.36,
+    0.695,
+    0.13,
+    0.02
+   ],
+   "text": "Em có biết?",
+   "anchor": "Em có biết",
+   "column": 2
+  },
+  {
+   "id": "b17",
+   "order": 17,
+   "role": "sidebar",
+   "bbox": [
+    0.36,
+    0.735,
+    0.26,
+    0.16
+   ],
+   "text": "Bếp Hoàng Cầm mang tên anh hùng nuôi quân Hoàng Cầm. Bếp ra đời từ chiến dịch Hoà Bình (1951 – 1952). Đây là một loại bếp dã chiến, có công dụng làm tan, loãng khói bếp toả ra khi nấu ăn (hình 5) nhằm tránh bị máy bay địch phát hiện.",
+   "anchor": "Bếp Hoàng Cầm mang tên anh hùng",
+   "contiguous": true,
+   "column": 2,
+   "notes": "narrow column beside a photo; contains a year range 1951 – 1952"
+  },
+  {
+   "id": "b18",
+   "order": 18,
+   "role": "caption",
+   "bbox": [
+    0.74,
+    0.9,
+    0.06,
+    0.015
+   ],
+   "text": "Hình 5",
+   "anchor": "Hình 5",
+   "column": 2
+  },
+  {
+   "id": "b19",
+   "order": 19,
+   "role": "page_number",
+   "bbox": [
+    0.86,
+    0.955,
+    0.03,
+    0.015
+   ],
+   "text": "41",
+   "anchor": "41"
+  }
+ ],
+ "flex_groups": [
+  [
+   "b02"
+  ],
+  [
+   "b14",
+   "b15"
+  ],
+  [
+   "b16",
+   "b17",
+   "b18"
+  ]
+ ],
+ "critical": [
+  "b15 emitted as a learner question",
+  "b15 and b17 interleaved (side-by-side narrow boxes)",
+  "b01 shown as a text prompt without the photos",
+  "activity items b03–b05 split from their stem or emitted as questions"
+ ],
+ "gold_revision": "r2 2026-09-05: flex_groups aligned with the TC-v1 convention (captions / floating objective boxes are flex) after the first held-out scoring showed order-only false trusts caused by the annotation, not the pipeline; roles/text/bbox/lesson unchanged; previous flex_groups=[[\"b14\", \"b15\"], [\"b16\", \"b17\", \"b18\"]]"
+}

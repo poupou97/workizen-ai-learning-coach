@@ -1,0 +1,18 @@
+{
+ "book": "07-sgk-khoa-hoc-tu-nhien-7", "page": 26, "printed_page": 25, "grade": 7, "subject": "KHTN", "docType": "SGK",
+ "gold_set": "tc-v2", "gold_purpose": "diagram_page+page_feature_guard", "held_out": true,
+ "why": "TC-v2 held-out: a full-page ROTATED periodic table (118 element cells with symbol, name, number, mass; group/period labels; legend Khí hiếm / Phi kim / Kim loại; a footnote and a source line) — 172 OCR lines, 124 short labels; the census flags it diagram. Nothing on this page is prose: every text block must be FIGURE-only (page-feature guard); the page sits inside Bài 4",
+ "features": ["diagram", "rotated", "table_like", "figure_only"],
+ "lesson": {"number": 4, "title": "Sơ lược về bảng tuần hoàn các nguyên tố hoá học", "note": "no header; inside Bài 4 (TOC printed 23–31: OK by TOC); the page is referenced from Bài 4 text ('xem Bảng tuần hoàn trang 25')"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02 (page content is rotated 90°); written before any tc-v2 gate was scored on this page",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.10, 0.30, 0.04, 0.38], "text": "BẢNG TUẦN HOÀN CÁC NGUYÊN TỐ HOÁ HỌC", "anchor": "BẢNG TUẦN HOÀN CÁC NGUYÊN TỐ", "notes": "rotated 90° (reads bottom-to-top)"},
+  {"id": "b02", "order": 2, "role": "diagram", "bbox": [0.15, 0.06, 0.72, 0.86], "text": null, "anchor": null, "notes": "the periodic table: 118 element cells (number, symbol, English name, rounded mass), group labels IA…VIIIA / IB…VIIIB, period labels 1–7, lanthanide/actinide rows, an annotated He cell (Số hiệu nguyên tử / Kí hiệu hoá học / Tên nguyên tố / Khối lượng nguyên tử). All of it is figure text — never prose"},
+  {"id": "b03", "order": 3, "role": "figure_label", "bbox": [0.81, 0.18, 0.03, 0.58], "text": null, "anchor": null, "notes": "legend: Khí hiếm (orange) / Phi kim (pink) / Kim loại (blue), rotated"},
+  {"id": "b04", "order": 4, "role": "footnote", "bbox": [0.88, 0.75, 0.02, 0.16], "text": "(1) Khối lượng nguyên tử được làm tròn.", "anchor": "Khối lượng nguyên tử được làm tròn", "notes": "rotated footnote"},
+  {"id": "b05", "order": 5, "role": "attribution", "bbox": [0.86, 0.19, 0.02, 0.25], "text": "(Nguồn: https://iupac.org/what-we-do/periodic-table-of-elements)", "anchor": "Nguồn: https://iupac.org", "notes": "rotated source line"},
+  {"id": "b06", "order": 6, "role": "page_number", "bbox": [0.90, 0.955, 0.03, 0.015], "text": "25", "anchor": "25"}
+ ],
+ "flex_groups": [["b01"], ["b03"], ["b04"], ["b05"]],
+ "critical": ["element cells (e.g. 'Fe iron 56', 'He helium 4') emitted as trusted BODY blocks — figure text as prose", "cells read row-wise across the rotated layout and trusted as a sequence (corrupted data)", "'Khí hiếm / Phi kim / Kim loại' legend emitted as headings or answers"]
+}

@@ -1,0 +1,200 @@
+{
+ "book": "05-sgk-khoa-hoc-5",
+ "page": 43,
+ "printed_page": 42,
+ "grade": 5,
+ "subject": "Khoa học",
+ "docType": "SGK",
+ "gold_set": "tc-v2",
+ "gold_purpose": "cross_page_lesson_boundary+toc_repair+activity_role",
+ "held_out": true,
+ "why": "TC-v2 held-out: first page of Bài 11 (elementary banner, two-line title); objectives with target icon; lead-in question box; body paragraph in a blue box beside a photo with caption; a hand-icon activity referencing a 4-photo figure; Bài 11 has NO pageStart in curriculum-structure",
+ "features": [
+  "colored_box",
+  "objective_box",
+  "question_block",
+  "figure",
+  "side_by_side",
+  "activity",
+  "lesson_start"
+ ],
+ "lesson": {
+  "number": 11,
+  "title": "Sử dụng năng lượng mặt trời, năng lượng gió, năng lượng nước chảy",
+  "note": "page is the lesson start (elementary banner); Bài 11 pageStart is null in curriculum-structure (Khoa học 5 PARTIAL) → TOC-range attachment gives Bài 10 (pageStart 38) = WRONG"
+ },
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02; written before any tc-v2 gate was scored on this page. Role convention for KNTT elementary icons: target = objective, hand = activity, '?' = question",
+ "blocks": [
+  {
+   "id": "b01",
+   "order": 1,
+   "role": "heading",
+   "bbox": [
+    0.12,
+    0.08,
+    0.08,
+    0.06
+   ],
+   "text": "Bài 11",
+   "anchor": "Bài 11"
+  },
+  {
+   "id": "b02",
+   "order": 2,
+   "role": "heading",
+   "bbox": [
+    0.24,
+    0.09,
+    0.68,
+    0.05
+   ],
+   "text": "SỬ DỤNG NĂNG LƯỢNG MẶT TRỜI, NĂNG LƯỢNG GIÓ, NĂNG LƯỢNG NƯỚC CHẢY",
+   "anchor": "SỬ DỤNG NĂNG LƯỢNG MẶT TRỜI"
+  },
+  {
+   "id": "b03",
+   "order": 3,
+   "role": "objective",
+   "bbox": [
+    0.27,
+    0.17,
+    0.65,
+    0.04
+   ],
+   "text": "Kể được tên một số phương tiện, máy móc và hoạt động của con người sử dụng năng lượng mặt trời, gió và nước chảy.",
+   "anchor": "Kể được tên một số phương tiện",
+   "contiguous": true
+  },
+  {
+   "id": "b04",
+   "order": 4,
+   "role": "objective",
+   "bbox": [
+    0.27,
+    0.215,
+    0.65,
+    0.04
+   ],
+   "text": "Thu thập, xử lí thông tin và trình bày được (bằng những hình thức khác nhau) về việc khai thác, sử dụng các dạng năng lượng nêu trên.",
+   "anchor": "Thu thập, xử lí thông tin và trình bày được",
+   "contiguous": true
+  },
+  {
+   "id": "b05",
+   "order": 5,
+   "role": "question",
+   "bbox": [
+    0.14,
+    0.29,
+    0.78,
+    0.04
+   ],
+   "text": "Năng lượng mặt trời cần cho sự sống của mọi sinh vật trên Trái Đất. Con người đã sử dụng năng lượng mặt trời như thế nào?",
+   "anchor": "Năng lượng mặt trời cần cho sự sống",
+   "contiguous": true,
+   "notes": "lead-in question box (hand-with-stop icon = Khởi động)"
+  },
+  {
+   "id": "b06",
+   "order": 6,
+   "role": "heading",
+   "bbox": [
+    0.09,
+    0.355,
+    0.36,
+    0.02
+   ],
+   "text": "1. Sử dụng năng lượng mặt trời",
+   "anchor": "1. Sử dụng năng lượng mặt trời"
+  },
+  {
+   "id": "b07",
+   "order": 7,
+   "role": "body",
+   "bbox": [
+    0.12,
+    0.39,
+    0.5,
+    0.12
+   ],
+   "text": "Năng lượng trong thức ăn, than đá, dầu mỏ, khí đốt tự nhiên đều bắt nguồn từ năng lượng mặt trời. Năng lượng mặt trời dùng để đun sôi nước cung cấp hơi nước chạy tua-bin của máy phát điện hoặc có thể biến đổi trực tiếp thành điện năng nhờ pin mặt trời (hình 1).",
+   "anchor": "Năng lượng trong thức ăn, than đá",
+   "contiguous": true,
+   "column": 1,
+   "notes": "body in a blue box beside the photo"
+  },
+  {
+   "id": "b08",
+   "order": 8,
+   "role": "caption",
+   "bbox": [
+    0.67,
+    0.49,
+    0.23,
+    0.02
+   ],
+   "text": "Hình 1. Các tấm pin mặt trời",
+   "anchor": "Hình 1. Các tấm pin mặt trời",
+   "column": 2
+  },
+  {
+   "id": "b09",
+   "order": 9,
+   "role": "activity",
+   "bbox": [
+    0.15,
+    0.54,
+    0.78,
+    0.045
+   ],
+   "text": "1. Quan sát hình 2 và cho biết con người sử dụng năng lượng mặt trời vào những việc gì trong cuộc sống.",
+   "anchor": "1. Quan sát hình 2 và cho biết",
+   "contiguous": true,
+   "rel": {
+    "refers_figure": "b10"
+   },
+   "notes": "hand icon = Hoạt động; figure-dependent (4 photos a–d)"
+  },
+  {
+   "id": "b10",
+   "order": 10,
+   "role": "caption",
+   "bbox": [
+    0.5,
+    0.905,
+    0.06,
+    0.015
+   ],
+   "text": "Hình 2",
+   "anchor": "Hình 2"
+  },
+  {
+   "id": "b11",
+   "order": 11,
+   "role": "page_number",
+   "bbox": [
+    0.11,
+    0.955,
+    0.03,
+    0.015
+   ],
+   "text": "42",
+   "anchor": "42"
+  }
+ ],
+ "flex_groups": [
+  [
+   "b08"
+  ],
+  [
+   "b10"
+  ]
+ ],
+ "critical": [
+  "b03/b04 objectives emitted as learner questions ('Kể được…', 'Thu thập…')",
+  "b08 caption spliced into b07 (side-by-side)",
+  "b09 shown as a text prompt without the photos",
+  "page attached to Bài 10 by TOC range (Bài 11 has no pageStart) — wrong lesson"
+ ],
+ "gold_revision": "r2 2026-09-05: flex_groups aligned with the TC-v1 convention (captions / floating objective boxes are flex) after the first held-out scoring showed order-only false trusts caused by the annotation, not the pipeline; roles/text/bbox/lesson unchanged; previous flex_groups=[[\"b08\"]]"
+}

@@ -1,0 +1,633 @@
+#!/usr/bin/env python3
+"""TC-v2 — SDM builder v2: Docling+Apple Vision (primary) ▸ WAL-206 XY-cut (verifier)
+→ agreement gate → deterministic guards (reason codes) → deterministic Role Layer → SDM page.
+
+Founder chain validated here: Source → SDM → block trust → Role Layer → guards. Lesson
+attachment (tc2_attach.py) and the Trusted Structured Lesson (tc2_tsl.py) read the SDM
+written here. Nothing here is an LLM/VLM: every rule is a regex, a geometry test or a
+colour measurement, and every withheld block keeps its bbox + reason codes so a Hybrid
+Smart Book can point at the source region (with or without a page image).
+
+SDM block (superset of TC-11 §2):
+  id, order, native_label, text (enumerator-preserved: Docling `orig`/`marker`, cross-checked
+  against the OCR line), text_docling, bbox [x,y,w,h] normalised, column, ocr_conf, colour
+  {share, left, right, top, bottom}, extraction, agreement {text_sim, verifier_id,
+  verifier_role, order_ok}, role {value, method, confidence, evidence[], verifier_hint,
+  conflict}, guards[] (reason codes that fired), trust {status TRUSTED|WITHHELD|CONFLICT,
+  reasons[]}, learning (bool), refers_figure, heading_path[], lesson (filled by tc2_attach).
+
+Reason codes (guards): agree_text · agree_order · role_conflict · math_guard · empty_block ·
+furniture (page number / running head) · box_boundary · figure_dependent · answer_leak ·
+teacher_text · page_feature:color_heavy · page_feature:diagram · figure_text · low_ocr_conf.
+Informational (never withhold): enumerator_restored · refers_figure.
+
+Usage (bake-off venv python — rapidfuzz + numpy + pymupdf):
+  tc2_sdm.py --pipeline tc2-p1 --pages P.json            # slice pages → sdm/<book>/pNNN.sdm.json
+  tc2_sdm.py --pipeline tc2-p1 --gold                    # every gold page → sdm-gold/ (raw from tc-v2 when present, else read-only tc-v1)
+  tc2_sdm.py --pipeline tc2-p1 --page <book> <pdfPage>   # print one page
+"""
+import argparse
+import glob
+import json
+import os
+import re
+import statistics
+import sys
+import unicodedata
+from collections import Counter
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import tc_sdm  # noqa: E402
+import tc_score  # noqa: E402
+import tc_cascade  # noqa: E402
+import layout_extract  # noqa: E402
+
+ROOT = tc_sdm.ROOT
+PDF = f'{ROOT}/poc-out/pdf'
+OCR = f'{ROOT}/poc-out/graph/ocr-body'
+PIPELINE_ID = 'tc2-p1'
+SDM_VERSION = 'sdm-v2'
+TEXT_SIM = tc_cascade.TEXT_SIM
+
+try:
+    from rapidfuzz import fuzz
+except Exception:  # pragma: no cover
+    fuzz = None
+try:
+    import numpy as np
+except Exception:  # pragma: no cover
+    np = None
+
+
+def out_root(pipeline):
+    return f'{ROOT}/poc-out/trusted-corpus/tc-v2/{pipeline}'
+
+
+# ---------------------------------------------------------------- raw loading
+def load_raw(cand, book, page, pipeline, allow_v1=True):
+    """tc-v2 raw first; fall back (read-only) to tc-v1 bake-off raw for gold pages outside the slice."""
+    p = f'{out_root(pipeline)}/bakeoff/raw/{cand}/{book}-p{page:03d}.json'
+    src = f'tc-v2/{pipeline}'
+    if not os.path.exists(p) and allow_v1:
+        p = f'{ROOT}/poc-out/trusted-corpus/tc-v1/bakeoff/raw/{cand}/{book}-p{page:03d}.json'; src = 'tc-v1'
+    if not os.path.exists(p):
+        return None, None
+    r = json.load(open(p))
+    if r.get('error') or r.get('result') is None:
+        return None, src
+    return r, src
+
+
+def adapt_docling_v2(res):
+    """Like tc_sdm.adapt_docling but ENUMERATOR-PRESERVING: Docling strips "1." / "A." from
+    list items into `marker`; the raw OCR text survives in `orig`. TC-09 counted 65
+    enumerator-dropped events for this; here the marker is restored deterministically."""
+    d = res['docling']
+    pg = list(d['pages'].values())[0]; W, H = pg['size']['width'], pg['size']['height']
+    out, pics, tables, i = [], [], [], 0
+
+    def bbox_of(item):
+        if not item.get('prov'):
+            return None
+        b = item['prov'][0]['bbox']
+        l, t, r, bt = b['l'], b['t'], b['r'], b['b']
+        if b.get('coord_origin', 'BOTTOMLEFT') == 'BOTTOMLEFT':
+            y0 = (H - t) / H; y1 = (H - bt) / H
+        else:
+            y0 = t / H; y1 = bt / H
+        return [round(l / W, 4), round(y0, 4), round((r - l) / W, 4), round(y1 - y0, 4)]
+
+    def rec(node):
+        nonlocal i
+        for ch in node.get('children', []):
+            ref = ch['$ref']; kind, idx = ref.split('/')[1], int(ref.split('/')[2])
+            item = d[kind][idx]
+            if kind == 'texts':
+                txt = item.get('text', '') or ''
+                orig = item.get('orig') or ''
+                marker = (item.get('marker') or '').strip()
+                restored = False
+                full = txt
+                if marker and not txt.lstrip().startswith(marker):
+                    if orig.lstrip().startswith(marker):
+                        full = orig; restored = True
+                    else:
+                        full = f'{marker} {txt}'; restored = True
+                b = tc_sdm._blk(i, tc_sdm.DOCLING_ROLE.get(item.get('label'), 'UNKNOWN'), full, bbox_of(item), None, item.get('label'), None, 'docling-2.126+ocrmac')
+                b['text_docling'] = txt; b['enumerator_restored'] = restored; b['marker'] = marker or None
+                out.append(b); i += 1
+            elif kind == 'tables':
+                cells = item.get('data', {}).get('table_cells', [])
+                txt = ' | '.join(c.get('text', '') for c in cells)
+                b = tc_sdm._blk(i, 'TABLE', txt, bbox_of(item), None, 'table', None, 'docling-2.126+ocrmac')
+                b['cells'] = [dict(r=c.get('start_row_offset_idx'), c=c.get('start_col_offset_idx'), text=c.get('text', ''), header=bool(c.get('column_header') or c.get('row_header'))) for c in cells]
+                out.append(b); tables.append(dict(order=i, bbox=b['bbox'], cells=len(cells))); i += 1
+            elif kind == 'pictures':
+                bb = bbox_of(item)
+                b = tc_sdm._blk(i, 'FIGURE', '', bb, None, 'picture', None, 'docling-2.126')
+                out.append(b); pics.append(dict(order=i, bbox=bb)); i += 1
+            rec(item)
+    rec(d['body'])
+    for k in ('furniture',):
+        if d.get(k):
+            rec(d[k])
+    return out, pics, tables
+
+
+# ---------------------------------------------------------------- page image colour
+_doc_cache = {}
+
+
+def _pdf(book):
+    if book not in _doc_cache:
+        import fitz
+        p = f'{PDF}/{book[:2]}/{book}.pdf'
+        if not os.path.exists(p):
+            p = f'{PDF}/{book}.pdf'
+        _doc_cache[book] = fitz.open(p) if os.path.exists(p) else None
+    return _doc_cache[book]
+
+
+def colour_mask(book, page, dpi=36):
+    """Boolean H×W mask of 'on colour' pixels from a low-dpi render — the same signal the TC-03
+    census used per line, here measured per block. Calibrated on the 38 TC-v1 gold pages (dev set):
+    a PALE threshold (saturation > 0.08, not dark) is what separates a tinted box from white paper
+    (EM ĐÃ HỌC box 0.97, blue sidebar 0.61, MỤC TIÊU tint 0.37, white body 0.00); a saturated
+    threshold (0.25) misses the tints and fires on coloured step chips."""
+    doc = _pdf(book)
+    if doc is None or np is None:
+        return None
+    import fitz
+    pm = doc[page - 1].get_pixmap(dpi=dpi, colorspace=fitz.csRGB, alpha=False)
+    arr = np.frombuffer(pm.samples, dtype=np.uint8).reshape(pm.height, pm.width, 3).astype(np.int16)
+    mx = arr.max(axis=2); mn = arr.min(axis=2)
+    sat = (mx - mn) / np.maximum(mx, 1)
+    return (sat > 0.08) & (mx > 120)
+
+
+def colour_of(mask, bbox):
+    if mask is None or not bbox:
+        return None
+    Hh, Ww = mask.shape
+    x, y, w, h = bbox
+    x0, y0 = max(0, int(x * Ww)), max(0, int(y * Hh)); x1, y1 = min(Ww, int((x + w) * Ww) + 1), min(Hh, int((y + h) * Hh) + 1)
+    if x1 <= x0 or y1 <= y0:
+        return None
+    sub = mask[y0:y1, x0:x1]
+    def share(s):
+        return round(float(s.mean()), 3) if s.size else 0.0
+    cw = max(1, (x1 - x0) // 3); ch = max(1, (y1 - y0) // 3)
+    return dict(share=share(sub), left=share(sub[:, :cw]), right=share(sub[:, -cw:]), top=share(sub[:ch, :]), bottom=share(sub[-ch:, :]))
+
+
+# ---------------------------------------------------------------- lexicon (deterministic Role Layer)
+STAGE = re.compile(r'^\s*(KHỞI ĐỘNG|KHÁM PHÁ|LUYỆN TẬP|VẬN DỤNG|THỰC HÀNH|MỤC TIÊU|EM ĐÃ HỌC|EM CÓ THỂ|EM CÓ BIẾT|GHI NHỚ|CÂU HỎI VÀ BÀI TẬP|Câu hỏi và bài tập|Khởi động|Khám phá|Luyện tập|Vận dụng|Thực hành|Hoạt động|HOẠT ĐỘNG|Em có biết|Em đã học|Em có thể|Ghi nhớ|Lưu ý|LƯU Ý|Chú ý|CHÚ Ý|Mở rộng|MỞ RỘNG|Kết nối|KẾT NỐI)\b\s*[\d.:]*\s*\??\s*$')
+SIDEBAR_LABEL = re.compile(r'^\s*(Em có bi[eê][tít]|EM CÓ BI[EÊ][TÍ]T?|Lưu ý|LƯU Ý|Ghi nhớ|GHI NHỚ|Chú ý|CHÚ Ý|Mở rộng|MỞ RỘNG|Kết nối|KẾT NỐI|Em đã học|EM ĐÃ HỌC|Em có th[eê]|EM CÓ TH[EÊ])\b')
+OBJ_BOX = re.compile(r'(MỤC TIÊU|Mục tiêu|Sau bài học này|Học xong bài học này|Học xong bài này|Sau bài này|Sau bài học|em sẽ:?|HS sẽ:?)', re.IGNORECASE)
+OBJ_SENT = re.compile(r'^\s*[•·\-–▪■]?\s*(?:\d{1,2}[.)]\s*)?(Nêu|Trình bày|Mô tả|Phân biệt|Đọc|Giải thích|Xác định|Vận dụng|Nhận biết|Kể tên|So sánh|Phát biểu|Viết|Tính|Thực hiện|Sử dụng|Vẽ|Nhận ra|Chỉ ra|Kể|Tìm hiểu|Thu thập|Quan sát|Biết|Liên hệ|Đề xuất|Thiết kế|Lập|Đo|Lấy|Làm|Dự đoán|Tiến hành|Có|Hiểu|Ứng dụng|Tóm tắt|Ghi chú|Nhận thức|Thảo luận|Trình diễn|Chứng minh|Phân tích|Đánh giá|Chọn|Chế tạo|Mắc|Tạo|Hình thành|Nhận xét|Xây dựng|Rèn luyện|Thu thập|Đề ra)\b[^.?!]{0,80}\bđược\b', re.IGNORECASE)
+# generic objective shape: "<Capitalised verb> được …" as the first two words (e.g. "Chọn được nấm…", "Mắc được mạch điện…")
+OBJ_GENERIC = re.compile(r'^\s*[•·\-–▪■]?\s*(?:\d{1,2}[.)]\s*)?[A-ZÀ-Ỹ][a-zà-ỹ]+\s+được\b')
+FLEX_ROLES = {'sidebar', 'caption', 'footnote', 'figure_text', 'stage_label'}
+ANSWER = re.compile(r'^\s*(Đáp án|ĐÁP ÁN|Lời giải|LỜI GIẢI|Gợi ý trả lời|Gợi ý|GỢI Ý|Trả lời|TRẢ LỜI|Hướng dẫn giải|Hướng dẫn trả lời|Kết luận:|M:)\b')
+ANSWER_INLINE = re.compile(r'\b(Đáp án|đáp án đúng|Lời giải|Gợi ý trả lời)\s*[:：]', re.IGNORECASE)
+TEACHER = re.compile(r'^\s*[-–•]?\s*(GV|HS|Giáo viên|Học sinh|GV:|HS:)\b')
+INSTRUCTION = re.compile(r'^\s*[•\-–]?\s*(Bước\s*\d|Chuẩn bị\b|Tiến hành\b|Cách tiến hành|Dụng cụ\b|Hoá chất|Hóa chất|Nguyên liệu|Vật liệu|Thí nghiệm\s*\d|Đọc là\b|Lưu ý an toàn|Yêu cầu\b)', re.IGNORECASE)
+ACTIVITY = re.compile(r'^\s*(Hoạt động\s*\d*[.:]?|HĐ\s*\d|Thực hành[:.]|Thí nghiệm[:.]|Trò chơi\b|Dự án\b|Thảo luận nhóm|Làm việc nhóm|Chơi trò chơi|Thực hiện thí nghiệm|Tiến hành thí nghiệm|Thiết kế\b|Chế tạo\b)', re.IGNORECASE)
+OPTION = re.compile(r'^\s*[A-D][.)]\s+\S')
+ENUM = re.compile(r'^\s*(?:(?:HĐ|Bài|Bước|Câu)\s*\d+[.:]?|\d{1,2}[.)]|[a-hA-H][.)])\s*')
+QHINT = layout_extract.QUESTION_HINT
+DIRECTIVE_ANY = layout_extract.DIRECTIVE_ANY
+CAPTION = re.compile(r'^\s*(Hình|Bảng|Sơ đồ|Biểu đồ|Lược đồ|Tranh|Ảnh)\s*\d', re.IGNORECASE)
+FOOTNOTE = layout_extract.FOOTNOTE
+LESSON_HDR = re.compile(r'^\s*(BÀI|Bài)\s+(\d{1,2})\b')
+THEME_HDR = re.compile(r'^\s*(CHỦ ĐỀ|Chủ đề|CHƯƠNG|Chương)\s+([IVX]+|\d+)\b')
+ROMAN_SEC = re.compile(r'^\s*(I|II|III|IV|V|VI|VII|VIII|IX|X)[.)]\s+\S')
+NUM_SEC = re.compile(r'^\s*\d{1,2}[.)]\s+\S')
+FIG_REF = re.compile(r'\b(hình|bảng|sơ đồ|biểu đồ|lược đồ|đồ thị)\s*\d|\b(hình|bảng|sơ đồ)\s+(bên|trên|dưới|sau|dưới đây|sau đây)\b|\btrong (các )?hình\b|\bở hình\b', re.IGNORECASE)
+FRONT_MATTER = re.compile(r'^\s*(MỤC LỤC|Mục lục|LỜI NÓI ĐẦU|Lời nói đầu|HƯỚNG DẪN SỬ DỤNG SÁCH|BẢNG TRA CỨU|Bảng tra cứu|GIẢI THÍCH THUẬT NGỮ|PHỤ LỤC|Phụ lục|BẢNG THUẬT NGỮ)')
+MATH = tc_cascade.MATH
+DIGITS = re.compile(r'^\d{1,3}$')
+LETTERS = re.compile(r'[A-Za-zÀ-ỹ]')
+
+
+def upper_ratio(t):
+    letters = [c for c in t if c.isalpha()]
+    return (sum(1 for c in letters if c.isupper()) / len(letters)) if letters else 0.0
+
+
+def ends_sentence(t):
+    return bool(re.search(r'[.!?:;…]\s*$', t))
+
+
+# ---------------------------------------------------------------- role assignment
+def assign_role(b, ctx):
+    """Deterministic role for one block. Returns (role, method, confidence, evidence[])."""
+    t = (b['text'] or '').strip()
+    lab = b.get('native_label')
+    col = b.get('colour') or {}
+    on_colour = (col.get('share') or 0) >= 0.30
+    bb = b.get('bbox') or [0, 0, 1, 1]
+    narrow_right = bb[2] < 0.45 and bb[0] > 0.45
+    prev = ctx.get('prev_role')
+    box_ctx = ctx.get('box')  # label of the coloured box this block sits in (objective / sidebar / activity / none)
+    sgv = ctx.get('docType') == 'SGV'
+    ev = []
+    if b['role'] == 'FIGURE':
+        return 'figure', 'native', 1.0, ['docling picture']
+    if not t or not LETTERS.search(t) and not DIGITS.match(t):
+        return 'empty', 'native', 1.0, ['no letters']
+    if DIGITS.match(t) and (bb[1] > 0.9 or bb[1] < 0.07) and not ctx.get('big_digit'):
+        return 'page_number', 'geometry', 0.95, ['digits in margin']
+    if LESSON_HDR.match(t) and len(t) <= 120:
+        return 'heading', 'lexicon', 0.97, ['lesson header "Bài N"']
+    if ctx.get('big_digit'):
+        return 'heading', 'geometry', 0.85, ['large standalone lesson number (elementary banner)']
+    if lab == 'page_footer' or (bb[1] > 0.93 and len(t) < 40):
+        return 'page_number' if DIGITS.match(t) else 'running_head', 'native', 0.9, ['footer band']
+    if lab == 'page_header' or (bb[1] < 0.045 and len(t) < 50):
+        return 'running_head', 'native', 0.85, ['header band']
+    if b['role'] == 'TABLE':
+        return 'table', 'native', 0.95, ['docling table']
+    if b['role'] == 'FORMULA':
+        return 'formula', 'native', 0.95, ['docling formula']
+    if lab == 'footnote' or FOOTNOTE.match(t):
+        return 'footnote', 'lexicon', 0.9, ['footnote mark']
+    if ctx.get('inside_picture') and not (THEME_HDR.match(t) or (STAGE.match(t) and len(t) <= 45) or SIDEBAR_LABEL.match(t)):
+        return 'figure_text', 'geometry', 0.85, ['inside docling picture bbox']
+    if THEME_HDR.match(t) and len(t) <= 120:
+        return 'heading', 'lexicon', 0.95, ['theme/chapter header']
+    if STAGE.match(t) and len(t) <= 45:
+        return 'stage_label', 'lexicon', 0.95, ['stage label']
+    if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 45 and not re.search(r'\?\s*$', t) and not DIGITS.match(t):
+        return 'heading', 'typography', 0.88, ['short uppercase label']
+    if ACTIVITY.match(t) and upper_ratio(ACTIVITY.sub('', t, count=1)) >= 0.7 and len(t) <= 120:
+        return 'heading', 'lexicon+typography', 0.9, ['Hoạt động N. + UPPERCASE title']
+    if CAPTION.match(t) or lab == 'caption':
+        return 'caption', 'lexicon' if CAPTION.match(t) else 'native', 0.92 if CAPTION.match(t) else 0.8, ['caption marker' if CAPTION.match(t) else 'docling caption']
+    if sgv and ANSWER.match(t):
+        return 'answer', 'lexicon', 0.95, ['answer marker (SGV)']
+    if ANSWER.match(t):
+        return 'model_answer', 'lexicon', 0.93, ['answer marker']
+    if sgv and ctx.get('answer_section'):
+        return 'answer', 'context', 0.85, ['inside an SGV Đáp án section']
+    if OPTION.match(t):
+        return 'option', 'lexicon', 0.95, ['option marker A–D']
+    if re.fullmatch(r'\s*\?\s*', t) or re.fullmatch(r'[\s?…._]+', t):
+        return 'answer_slot', 'lexicon', 0.9, ['? / blank slot']
+    if sgv and TEACHER.match(t):
+        return 'teacher_text', 'lexicon', 0.9, ['GV/HS marker']
+    if box_ctx == 'objective' and not re.search(r'\?\s*$', t):
+        return 'objective', 'context', 0.85 if (OBJ_SENT.match(t) or OBJ_GENERIC.match(t)) else 0.75, ['inside MỤC TIÊU / objectives box'] + (['verb + "được"'] if (OBJ_SENT.match(t) or OBJ_GENERIC.match(t)) else [])
+    if (OBJ_SENT.match(t) or OBJ_GENERIC.match(t)) and not re.search(r'\?\s*$', t):
+        return 'objective', 'lexicon', 0.85, ['verb + "được"']
+    if INSTRUCTION.match(t):
+        return 'instruction', 'lexicon', 0.9, ['procedure marker']
+    if ACTIVITY.match(t) and len(t) > 45:
+        return 'activity', 'lexicon', 0.88, ['activity marker']
+    if ACTIVITY.match(t):
+        return 'stage_label', 'lexicon', 0.85, ['short activity label']
+    if prev == 'instruction' and ENUM.match(t) and not re.search(r'\?\s*$', t) and not QHINT.search(t):
+        return 'instruction', 'context', 0.8, ['numbered step after procedure marker']
+    if box_ctx == 'activity' and (ENUM.match(t) or DIRECTIVE_ANY.search(t[:80])):
+        return 'activity', 'context', 0.8, ['inside activity box']
+    if SIDEBAR_LABEL.match(t):
+        return 'sidebar', 'lexicon', 0.93, ['sidebar label']
+    if box_ctx == 'sidebar':
+        return 'sidebar', 'context', 0.85, ['inside labelled side box']
+    # heading candidates
+    if lab in ('section_header', 'title') and len(t) <= 100 and not re.search(r'\?\s*$', t) and not (ENUM.match(t) and QHINT.search(t)):
+        return 'heading', 'native', 0.85, ['docling section_header']
+    if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 90 and not re.search(r'\?\s*$', t):
+        return 'heading', 'typography', 0.85, ['uppercase run']
+    if (ROMAN_SEC.match(t) or NUM_SEC.match(t)) and len(t) <= 70 and not ends_sentence(t) and not QHINT.search(ENUM.sub('', t)) and not DIRECTIVE_ANY.search(t) and t[len(ENUM.match(t).group(0)):][:1].isupper():
+        return 'heading', 'lexicon', 0.75, ['numbered title-case section']
+    # questions
+    core = ENUM.sub('', t, count=1)
+    is_q = re.search(r'\?\s*$', t) is not None
+    directive = QHINT.search(core) is not None and len(t) < 400
+    num_directive = ENUM.match(t) is not None and DIRECTIVE_ANY.search(core[:120]) is not None and len(t) < 400
+    stem = False  # an enumerated line ending with ":" is a question stem ONLY when options follow (post-pass); alone it is a worked-example lead-in (Toán 7 p41)
+    if is_q or directive or num_directive or stem:
+        if sgv:
+            return 'teacher_prompt', 'lexicon', 0.85, ['question form inside SGV → teacher prompt']
+        conf = 0.92 if is_q else (0.85 if directive else (0.78 if num_directive else 0.75))
+        ev = ['ends with ?'] if is_q else (['leading directive verb'] if directive else (['enumerator + directive verb'] if num_directive else ['enumerated stem ending with ":"']))
+        if prev in ('activity', 'instruction') and not is_q:
+            return 'activity', 'context', 0.7, ev + ['follows activity/instruction']
+        return 'question', 'lexicon', conf, ev
+    if sgv:
+        return 'teacher_text', 'default', 0.7, ['SGV prose']
+    if narrow_right and on_colour and len(t) >= 20:
+        return 'sidebar', 'geometry', 0.75, ['narrow right box on colour']
+    if ctx.get('xy_hint') == 'sidebar' and on_colour:
+        return 'sidebar', 'geometry+verifier', 0.8, ['XY-cut sidebar hint + colour']
+    if on_colour and prev == 'stage_label' and ctx.get('prev_text') and SIDEBAR_LABEL.match(ctx['prev_text']):
+        return 'sidebar', 'context', 0.85, ['after sidebar label, on colour']
+    return 'body', 'default', 0.6, ['prose']
+
+
+def box_pass(blocks, mask):
+    """Geometric box context for labels Docling orders AFTER their content (EM CÓ THỂ, Em có biết…):
+    every block on colour that sits in the same column band, from just above the label to 0.45 page
+    heights below it, becomes 'sidebar' (or 'objective' for MỤC TIÊU-type labels) unless it is a
+    heading/caption/table/figure. Deterministic; measured on the dev gold before use."""
+    labels = [b for b in blocks if b['role']['value'] in ('stage_label', 'heading') and (SIDEBAR_LABEL.match(b['text']) or re.match(r'^\s*(MỤC TIÊU|Mục tiêu)\s*$', b['text']))]
+    for L in labels:
+        kind = 'objective' if re.match(r'^\s*(MỤC TIÊU|Mục tiêu)', L['text']) else 'sidebar'
+        lb = L['bbox']
+        if not lb:
+            continue
+        for b in blocks:
+            bb = b['bbox']
+            if b is L or not bb or b['role']['value'] in ('heading', 'stage_label', 'caption', 'table', 'figure', 'figure_text', 'page_number', 'running_head', 'empty', 'footnote', 'option'):
+                continue
+            col = b.get('colour') or {}
+            if (col.get('share') or 0) < 0.30:
+                continue
+            x_overlap = min(bb[0] + bb[2], lb[0] + lb[2] + 0.35) - max(bb[0], lb[0] - 0.05)
+            if x_overlap <= 0.05:
+                continue
+            if lb[1] - 0.03 <= bb[1] <= lb[1] + 0.45:
+                if b['role']['value'] != kind:
+                    b['role']['value'] = kind; b['role']['coarse'] = COARSE[kind]; b['role']['method'] = 'geometry+label'
+                    b['role']['confidence'] = 0.8; b['role']['evidence'] = b['role'].get('evidence', []) + [f'on colour under label "{L["text"][:20]}"']
+    return blocks
+
+
+COARSE = {'question': 'QUESTION', 'option': 'OPTION', 'answer_slot': 'OPTION', 'heading': 'HEADING', 'stage_label': 'HEADING', 'running_head': 'HEADING',
+          'body': 'BODY', 'objective': 'BODY', 'activity': 'BODY', 'instruction': 'BODY', 'answer': 'BODY', 'model_answer': 'BODY', 'teacher_text': 'BODY', 'teacher_prompt': 'BODY', 'rule': 'BODY',
+          'caption': 'CAPTION', 'sidebar': 'SIDEBAR', 'table': 'TABLE', 'formula': 'FORMULA', 'figure_text': 'FIGURE_TEXT', 'figure': 'FIGURE', 'footnote': 'FOOTNOTE', 'page_number': 'PAGENUM', 'empty': 'UNKNOWN'}
+NON_LEARNING = {'page_number', 'running_head', 'figure', 'figure_text', 'empty'}
+
+
+# ---------------------------------------------------------------- agreement (per block, same rule as tc_cascade.verify)
+def agreement(primary_blocks, verifier):
+    st, roles = tc_cascade._stream(verifier)
+    vblocks = [v for v in verifier['blocks'] if tc_score.norm_key(v['text'])]
+    last2 = [-1, -1]
+    out = []
+    for p in primary_blocks:
+        pk = tc_score.norm_key(p['text'])
+        a = dict(text_sim=None, verifier_id=None, verifier_role=None, order_ok=None, ok=False, reason=None)
+        if not pk or p['role'] == 'FIGURE':
+            a['reason'] = None if p['role'] == 'FIGURE' else 'empty'; out.append(a); continue
+        if fuzz is None or not st:
+            a['reason'] = 'agree_text'; out.append(a); continue
+        if len(pk) >= 12:
+            al = fuzz.partial_ratio_alignment(pk, st)
+            score, start = (al.score, al.dest_start) if al else (0.0, -1)
+        else:
+            idx = (' ' + st + ' ').find(' ' + pk + ' ')
+            score, start = (100.0, idx) if idx >= 0 else (0.0, -1)
+        a['text_sim'] = round(float(score), 1)
+        if score < TEXT_SIM:
+            a['reason'] = 'agree_text'; out.append(a); continue
+        vi = next((k for k, (s0, s1, r) in enumerate(roles) if s0 <= start < s1), None)
+        a['verifier_role'] = roles[vi][2] if vi is not None else None
+        a['verifier_id'] = vblocks[vi]['id'] if vi is not None and vi < len(vblocks) else None
+        if start < min(last2):
+            a['order_ok'] = False; a['reason'] = 'agree_order'; last2 = [last2[1], start]; out.append(a); continue
+        a['order_ok'] = True
+        last2 = [last2[1], start]
+        a['ok'] = True
+        out.append(a)
+    return out
+
+
+# ---------------------------------------------------------------- census + OCR helpers
+_census = {}
+
+
+def census_row(book, page):
+    if not _census:
+        p = f'{ROOT}/poc-out/trusted-corpus/tc-v1/census/pages.jsonl'
+        if os.path.exists(p):
+            for line in open(p):
+                j = json.loads(line)
+                _census[(j['book'], j['page'])] = j
+        _census[('_', 0)] = True
+    return _census.get((book, page))
+
+
+def ocr_lines(book, page):
+    p = f'{OCR}/{book}/p{page:03d}.json'
+    return json.load(open(p))['lines'] if os.path.exists(p) else []
+
+
+def inside(bb, box, frac=0.6):
+    """share of bb's area inside box ≥ frac"""
+    if not bb or not box:
+        return False
+    ix = max(0, min(bb[0] + bb[2], box[0] + box[2]) - max(bb[0], box[0])); iy = max(0, min(bb[1] + bb[3], box[1] + box[3]) - max(bb[1], box[1]))
+    return (ix * iy) >= frac * max(1e-9, bb[2] * bb[3])
+
+
+# ---------------------------------------------------------------- build one page
+def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
+    rawD, srcD = load_raw('docling-ocrmac', book, page, pipeline)
+    rawX, srcX = load_raw('current-xycut', book, page, pipeline)
+    if rawD is None or rawX is None:
+        return None
+    blocks, pics, tables = adapt_docling_v2(rawD['result'])
+    X, xmeta = tc_sdm.adapt_current_xycut(rawX['result'])
+    verifier = dict(book=book, page=page, candidate='current-xycut', blocks=X, meta=xmeta)
+    docType = docType or ('SGV' if '-sgv-' in book else 'SGK')
+    cen = census_row(book, page) or {}
+    lines = ocr_lines(book, page)
+    med_h = statistics.median([l['h'] for l in lines]) if lines else 0.01
+    mask = colour_mask(book, page)
+    agree = agreement(blocks, verifier)
+    xy_by_id = {b['id']: b for b in X}
+    # printed page from footer digits
+    printed = None
+    for l in lines[-4:] + lines[:2]:
+        t = l['text'].strip()
+        if DIGITS.match(t) and (l['y'] > 0.88 or l['y'] < 0.08):
+            printed = int(t)
+    front_matter = any(FRONT_MATTER.match(l['text'].strip()) for l in lines[:6])
+    # per block
+    prev_role = None; prev_text = None; box = None; heading_path = []; answer_section = False
+    out_blocks = []
+    for b, a in zip(blocks, agree):
+        bb = b['bbox']
+        col = colour_of(mask, bb)
+        b['colour'] = col
+        # OCR conf + enumerator cross-check from the OCR lines under the bbox
+        under = [l for l in lines if bb and (bb[0] - 0.01 <= l['x'] + l['w'] / 2 <= bb[0] + bb[2] + 0.01) and (bb[1] - 0.005 <= l['y'] + l['h'] / 2 <= bb[1] + bb[3] + 0.005)]
+        b['ocr_conf'] = round(sum(l.get('conf', 1) for l in under) / len(under), 3) if under else None
+        if under and b['text']:
+            first = sorted(under, key=lambda l: (l['y'], l['x']))[0]['text'].strip()
+            me = ENUM.match(first); mb = ENUM.match(b['text'])
+            if me and not mb and tc_score.norm_key(first[len(me.group(0)):])[:12] and tc_score.norm_key(b['text']).startswith(tc_score.norm_key(first[len(me.group(0)):])[:12]):
+                b['text'] = me.group(0).strip() + ' ' + b['text']; b['enumerator_restored'] = True
+        inside_pic = any(inside(bb, p['bbox'], 0.6) for p in pics) if bb else False
+        xy_hint = xy_by_id.get(a.get('verifier_id'), {}).get('native_label') if a.get('verifier_id') else None
+        # elementary lesson banner: a standalone 1–2 digit number printed ≥ 1.4× the median line height near the top
+        big_digit = bool(DIGITS.match((b['text'] or '').strip())) and bb is not None and bb[1] < 0.3 and any(l['h'] >= 1.4 * med_h and DIGITS.match(l['text'].strip()) for l in under)
+        ctx = dict(prev_role=prev_role, prev_text=prev_text, box=box, docType=docType, inside_picture=inside_pic and b['role'] not in ('TABLE',), xy_hint=xy_hint, big_digit=big_digit, answer_section=answer_section)
+        role, method, rconf, ev = assign_role(b, ctx)
+        # coloured-box context: a stage label / sidebar label / objective marker opens a box until the colour ends
+        t = (b['text'] or '').strip()
+        if role == 'stage_label' or role == 'heading':
+            if re.match(r'^\s*(MỤC TIÊU|Mục tiêu)', t) or (OBJ_BOX.search(t) and len(t) < 80):
+                box = 'objective'
+            elif SIDEBAR_LABEL.match(t):
+                box = 'sidebar'
+            elif ACTIVITY.match(t) or re.match(r'^\s*(THỰC HÀNH|Thực hành|HOẠT ĐỘNG|Hoạt động)', t):
+                box = 'activity'
+            else:
+                box = None
+            answer_section = bool(re.search(r'(Đáp án|ĐÁP ÁN|Lời giải|LỜI GIẢI|Hướng dẫn giải|Gợi ý trả lời)', t)) if docType == 'SGV' else False
+        elif role in ('answer', 'model_answer') and re.match(r'^\s*(Đáp án|ĐÁP ÁN|Lời giải|Hướng dẫn giải)\s*:?\s*$', t):
+            answer_section = True
+        elif not (col and col.get('share', 0) >= 0.2):
+            box = None
+        if OBJ_BOX.search(t) and len(t) < 40 and role in ('body', 'teacher_text', 'objective'):
+            box = 'objective'  # "Sau bài học, HS sẽ:" / "Sau bài học này, em sẽ:" opens an objectives list
+        conflict = False
+        if role == 'question' and xy_hint == 'heading':
+            conflict = True
+        if role == 'sidebar' and xy_hint == 'sidebar':
+            rconf = min(0.98, rconf + 0.05); ev = ev + ['XY-cut agrees: sidebar']
+        # heading path
+        if role == 'heading':
+            if LESSON_HDR.match(t):
+                heading_path = [t[:80]]
+            elif THEME_HDR.match(t):
+                heading_path = [t[:80]]
+            elif ROMAN_SEC.match(t):
+                heading_path = heading_path[:1] + [t[:80]]
+            else:
+                heading_path = heading_path[:2] + [t[:80]]
+        # guards
+        guards = []
+        learning = role not in NON_LEARNING
+        if role == 'empty' or not t:
+            guards.append('empty_block')
+        if role in ('page_number', 'running_head'):
+            guards.append('furniture')
+        if role == 'figure_text':
+            guards.append('figure_text')
+        if not a['ok'] and role not in ('figure', 'empty', 'page_number', 'running_head'):
+            if a['reason'] == 'agree_order' and role in FLEX_ROLES:
+                ev = ev + ['order_flex: verifier places this flex block elsewhere (not withheld)']
+            else:
+                guards.append(a['reason'] or 'agree_text')
+        if conflict:
+            guards.append('role_conflict')
+        if role not in ('formula', 'table', 'figure', 'empty') and MATH.search(t):
+            guards.append('math_guard')
+        if col and bb and bb[3] >= 1.8 * med_h and bb[2] >= 0.15:
+            lr = (col['left'], col['right']); tb = (col['top'], col['bottom'])
+            if (max(lr) >= 0.5 and min(lr) <= 0.08) or (max(tb) >= 0.5 and min(tb) <= 0.08):
+                guards.append('box_boundary')
+        refers_fig = bool(FIG_REF.search(t))
+        if refers_fig and role in ('question', 'activity', 'instruction', 'teacher_prompt'):
+            guards.append('figure_dependent')
+        if role in ('answer', 'model_answer') or ANSWER_INLINE.search(t):
+            guards.append('answer_leak')
+        if role in ('teacher_text', 'teacher_prompt'):
+            guards.append('teacher_text')
+        if cen.get('color_heavy') and role not in ('heading', 'stage_label', 'page_number', 'running_head', 'caption', 'figure', 'empty'):
+            guards.append('page_feature:color_heavy')
+        if cen.get('diagram') and role in ('body', 'sidebar', 'question', 'activity', 'instruction', 'objective') and (inside_pic or (len(t) < 30 and not ends_sentence(t))):
+            guards.append('page_feature:diagram')
+        if b['ocr_conf'] is not None and b['ocr_conf'] < 0.6:
+            guards.append('low_ocr_conf')
+        withhold = [g for g in guards if g not in ('enumerator_restored',)]
+        status = 'TRUSTED' if not withhold else ('CONFLICT' if any(g in ('role_conflict', 'agree_order') for g in withhold) and 'agree_text' not in withhold else 'WITHHELD')
+        if role in ('figure', 'empty'):
+            status = 'WITHHELD'
+        sdm_id = f'{book}:p{page:03d}:{PIPELINE_ID}:{b["order"]:03d}'
+        ob = dict(id=sdm_id, order=b['order'], native_label=b.get('native_label'), text=b['text'], text_docling=b.get('text_docling'), enumerator_restored=bool(b.get('enumerator_restored')),
+                  bbox=bb, column=(1 if bb and bb[0] + bb[2] / 2 < 0.5 else 2) if bb else None, ocr_conf=b['ocr_conf'], colour=col, extraction=b.get('extraction'),
+                  agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok']),
+                  role=dict(value=role, coarse=COARSE.get(role, 'UNKNOWN'), method=method, confidence=round(rconf, 2), evidence=ev, verifier_hint=xy_hint, conflict=conflict),
+                  guards=guards, trust=dict(status=status, reasons=withhold), learning=learning, refers_figure=refers_fig, heading_path=list(heading_path),
+                  lesson=None, cells=b.get('cells'))
+        out_blocks.append(ob)
+        prev_role = role; prev_text = t
+    # post-passes: (1) box context for labels ordered after their content; (2) MCQ stem = enumerated body followed by an option
+    box_pass(out_blocks, mask)
+    for i, ob in enumerate(out_blocks):
+        nxt = next((o for o in out_blocks[i + 1:] if o['role']['value'] not in ('figure', 'empty', 'figure_text')), None)
+        if ob['role']['value'] == 'body' and ENUM.match(ob['text'] or '') and nxt is not None and nxt['role']['value'] == 'option' and docType != 'SGV':
+            ob['role'].update(value='question', coarse='QUESTION', method='context', confidence=0.8, evidence=ob['role']['evidence'] + ['enumerated stem followed by options'])
+    # re-derive trust for blocks whose role changed in the post-passes (guards that depend on the role)
+    for ob in out_blocks:
+        r = ob['role']['value']
+        g = [x for x in ob['guards'] if x not in ('figure_dependent', 'answer_leak', 'teacher_text')]
+        if ob['refers_figure'] and r in ('question', 'activity', 'instruction', 'teacher_prompt'):
+            g.append('figure_dependent')
+        if r in ('answer', 'model_answer') or ANSWER_INLINE.search(ob['text'] or ''):
+            g.append('answer_leak')
+        if r in ('teacher_text', 'teacher_prompt'):
+            g.append('teacher_text')
+        ob['guards'] = g
+        withhold = [x for x in g if x != 'enumerator_restored']
+        ob['trust']['reasons'] = withhold
+        ob['trust']['status'] = 'TRUSTED' if not withhold else ('CONFLICT' if any(x in ('role_conflict', 'agree_order') for x in withhold) and 'agree_text' not in withhold else 'WITHHELD')
+        if r in ('figure', 'empty'):
+            ob['trust']['status'] = 'WITHHELD'
+        ob['learning'] = r not in NON_LEARNING
+    # figures: pictures + their labels + captions
+    figures = []
+    for k, p in enumerate(pics):
+        labels = [ob['id'] for ob in out_blocks if ob['role']['value'] == 'figure_text' and inside(ob['bbox'], p['bbox'], 0.6)]
+        cap = next((ob['id'] for ob in out_blocks if ob['role']['value'] == 'caption' and abs(ob['order'] - p['order']) <= 2), None)
+        figures.append(dict(id=f'{book}:p{page:03d}:fig{k:02d}', bbox=p['bbox'], labels=labels, caption=cap))
+    stats = Counter(ob['trust']['status'] for ob in out_blocks if ob['learning'])
+    reasons = Counter(r for ob in out_blocks if ob['learning'] for r in ob['trust']['reasons'])
+    roles = Counter(ob['role']['value'] for ob in out_blocks)
+    return dict(book=book, page=page, printed_page=printed, docType=docType, pipeline=pipeline, sdm_version=SDM_VERSION,
+                source=dict(docling_raw=srcD, xycut_raw=srcX, docling_seconds=rawD.get('seconds'), xycut_page_trusted=xmeta.get('page_trusted') if xmeta else None),
+                page_size=list(rawD['result']['docling']['pages'].values())[0]['size'], features=dict(diagram=cen.get('diagram'), color_heavy=cen.get('color_heavy'), formula=cen.get('formula'), table=cen.get('table'), sidebar=cen.get('sidebar'), figure=cen.get('figure'), side_by_side=cen.get('side_by_side'), continuation=cen.get('continuation'), front_matter=front_matter),
+                blocks=out_blocks, figures=figures, tables=tables, stats=dict(learning=dict(stats), reasons=dict(reasons), roles=dict(roles), blocks=len(out_blocks)))
+
+
+def sdm_path(pipeline, book, page, gold=False):
+    return f'{out_root(pipeline)}/{"sdm-gold" if gold else "sdm"}/{book}/p{page:03d}.sdm.json'
+
+
+def to_v1_sdm(sdm):
+    """Project an SDM-v2 page to the tc-v1 SDM block shape so tc_score.score() measures it unchanged."""
+    blocks = []
+    for ob in sdm['blocks']:
+        blocks.append(dict(id=ob['id'], order=ob['order'], role=ob['role']['coarse'], text=ob['text'], bbox=ob['bbox'],
+                           trusted=(ob['trust']['status'] == 'TRUSTED') if ob['role']['value'] != 'figure' else None,
+                           native_label=ob['native_label'], column=ob['column'], extraction=ob['extraction'], confidence=ob['ocr_conf'], fine_role=ob['role']['value'], reasons=ob['trust']['reasons']))
+    return dict(book=sdm['book'], page=sdm['page'], candidate='tc2-sdm', seconds=sdm['source'].get('docling_seconds'), meta=dict(cascade=True), blocks=blocks)
+
+
+def main():
+    ap = argparse.ArgumentParser(); ap.add_argument('--pipeline', default=PIPELINE_ID); ap.add_argument('--pages', action='append', default=[])
+    ap.add_argument('--gold', action='store_true'); ap.add_argument('--page', nargs=2, default=None); ap.add_argument('--force', action='store_true')
+    a = ap.parse_args()
+    if a.page:
+        s = build_page(a.page[0], int(a.page[1]), a.pipeline)
+        if not s:
+            raise SystemExit('no raw for that page')
+        print(json.dumps({k: v for k, v in s.items() if k != 'blocks'}, ensure_ascii=False))
+        for ob in s['blocks']:
+            print(f"{ob['order']:>3} {ob['role']['value']:<13} {ob['trust']['status']:<8} {','.join(ob['trust']['reasons']):<28} {str([round(v, 2) for v in ob['bbox']]) if ob['bbox'] else '-':<26} {ob['text'][:80]!r}")
+        return
+    pages = [p for pf in a.pages for p in json.load(open(pf))]
+    if a.gold:
+        pages = [dict(book=g['book'], page=g['page']) for g in tc_sdm.all_gold()]
+    n = skipped = missing = 0
+    for p in pages:
+        out = sdm_path(a.pipeline, p['book'], int(p['page']), a.gold)
+        if os.path.exists(out) and not a.force:
+            skipped += 1; continue
+        s = build_page(p['book'], int(p['page']), a.pipeline)
+        if s is None:
+            missing += 1; continue
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        json.dump(s, open(out, 'w'), ensure_ascii=False)
+        n += 1
+    print(f'sdm built={n} skipped={skipped} missing_raw={missing}')
+
+
+if __name__ == '__main__':
+    main()

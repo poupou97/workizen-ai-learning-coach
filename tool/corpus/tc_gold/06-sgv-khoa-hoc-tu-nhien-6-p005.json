@@ -1,0 +1,16 @@
+{
+ "book": "06-sgv-khoa-hoc-tu-nhien-6", "page": 5, "printed_page": 4, "grade": 6, "subject": "KHTN", "docType": "SGV",
+ "gold_set": "tc-v2", "gold_purpose": "sgv+no_lesson_front_matter", "held_out": true,
+ "why": "TC-v2 held-out: SGV table of contents (MỤC LỤC) — 15 lines that LOOK like lesson headers ('Bài 1. Giới thiệu về Khoa học tự nhiên … 18') but are TOC entries; a header-based attacher must give this page NO lesson, and none of these lines may become a heading_path or a TOC-repair source",
+ "features": ["front_matter", "toc_page", "three_column_like"],
+ "lesson": {"number": null, "title": null, "note": "front matter (MỤC LỤC) — must attach to NO lesson; the SGV curriculum-structure has Bài 1 pageStart 26 (printed), so a TOC range also gives none here"},
+ "annotator": "VLM (Claude) reading tc_render 150 dpi grid image (poc-out/trusted-corpus/tc-v2/tc2-p1/renders); bbox by eye ±0.02; written before any tc-v2 gate was scored on this page",
+ "blocks": [
+  {"id": "b01", "order": 1, "role": "heading", "bbox": [0.18, 0.07, 0.2, 0.05], "text": "MỤC LỤC", "anchor": "MỤC LỤC"},
+  {"id": "b02", "order": 2, "role": "running_head", "bbox": [0.87, 0.14, 0.06, 0.015], "text": "Trang", "anchor": "Trang", "notes": "column label"},
+  {"id": "b03", "order": 3, "role": "table", "bbox": [0.09, 0.17, 0.84, 0.72], "text": null, "anchor": "Lời nói đầu", "notes": "TOC entries with dotted leaders and page numbers: Lời nói đầu 3 · PHẦN MỘT. HƯỚNG DẪN CHUNG 7 · I. Giới thiệu chương trình môn học 7 · II. Giới thiệu sách giáo khoa Khoa học tự nhiên 6 10 · PHẦN HAI. HƯỚNG DẪN DẠY HỌC CÁC BÀI CỤ THỂ 16 · Cấu trúc của một bài hướng dẫn 16 · Hướng dẫn dạy học các bài cụ thể 18 · Chương I. MỞ ĐẦU VỀ KHOA HỌC TỰ NHIÊN 18 · Bài 1. Giới thiệu về Khoa học tự nhiên 18 · Bài 2. An toàn trong phòng thực hành 22 · Bài 3. Sử dụng kính lúp 25 · Bài 4. Sử dụng kính hiển vi quang học 27 · Bài 5. Đo chiều dài 30 · Bài 6. Đo khối lượng 34 · Bài 7. Đo thời gian 37 · Bài 8. Đo nhiệt độ 40 · Chương II. CHẤT QUANH TA 44 · Bài 9. Sự đa dạng của chất 44 · Bài 10. Các thể của chất và sự chuyển thể 50 · Bài 11. Oxygen. Không khí 61 · Chương III. MỘT SỐ VẬT LIỆU, NGUYÊN LIỆU, NHIÊN LIỆU, LƯƠNG THỰC – THỰC PHẨM THÔNG DỤNG 71 · Bài 12. Một số vật liệu 71 · Bài 13. Một số nguyên liệu 77 · Bài 14. Một số nhiên liệu 81 · Bài 15. Một số lương thực, thực phẩm 85"},
+  {"id": "b04", "order": 4, "role": "page_number", "bbox": [0.10, 0.935, 0.03, 0.02], "text": "4", "anchor": "4"}
+ ],
+ "flex_groups": [],
+ "critical": ["a TOC line 'Bài 15. Một số lương thực, thực phẩm' read as a lesson header → the page (and the following pages) attach to Bài 15", "TOC entries delivered as lesson prose", "the printed page numbers in the leaders parsed as SGK↔SGV pairing keys"]
+}
