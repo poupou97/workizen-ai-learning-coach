@@ -37,6 +37,15 @@ class BaseVerdictTests(unittest.TestCase):
         self.assertEqual(restore._base_verdict('WITHHELD (agree_text) — safe rejection: fractions flattened'), 'SAFE')
         self.assertEqual(restore._base_verdict('WITHHELD (figure_dependent) — correct by design'), 'SAFE')
 
+    def test_the_round5_keyword_prefix_is_read_and_wins(self):
+        """Round 5 asks the annotator for a leading keyword; round 4 wrote the verdict inline.
+        Both conventions are in the corpus, and a prefix must beat a stray word in the prose."""
+        self.assertEqual(restore._base_verdict('OVER: clean section title refused on agree_order'), 'OVER')
+        self.assertEqual(restore._base_verdict('SAFE: figure-dependent question, unreadable alone'), 'SAFE')
+        self.assertEqual(restore._base_verdict('UNSURE: the crop is cut off'), 'UNSURE')
+        self.assertEqual(restore._base_verdict('OVER: a safe, clean paragraph'), 'OVER',
+                         'the prefix is the field the annotator filled; a stray «safe» must not win')
+
     def test_an_unclassifiable_note_is_UNSURE_not_SAFE(self):
         self.assertEqual(restore._base_verdict('WITHHELD (agree_text)'), 'UNSURE')
         self.assertEqual(restore._base_verdict(''), 'UNSURE')
@@ -85,6 +94,31 @@ class RestoreRowsTests(unittest.TestCase):
         self.assertEqual(d['falselyWithheldRecovered'], 1, 'only s1 came back')
         self.assertEqual(d['wronglyRestoredCandidates'], 1,
                          's2 was a SAFE refusal and is served again — the dangerous direction')
+
+    def test_a_string_new_block_resolves_to_its_text_and_role(self):
+        """rerun.recovered() writes `new_block` as the block ID STRING. Accepting only a dict made every
+        restored row resolve to None, and the audit sheets rendered «(no text recorded)» for all of them —
+        a blank sheet from which a precision would have been invented. Caught by the blind annotator."""
+        rows = [{'sampleId': 's1', 'book': 'b', 'lesson': 1, 'pagePdf': 9, 'base_reasons': ['agree_order'],
+                 'outcome': 'now_served', 'new_block': 'blk1'}]
+        a = self._fixture(rows, {'s1': 'OVER: a clean instruction'})
+        restore.cmd_rows(a)
+        d = json.load(open(self.out, encoding='utf-8'))
+        r = d['rows'][0]
+        self.assertEqual(r['newBlockId'], 'blk1')
+        self.assertEqual(r['newText'], 'Một câu văn.')
+        self.assertEqual(r['newRole'], 'body')
+        self.assertTrue(r['newBlockResolved'])
+        self.assertEqual(d['restoredWithUnresolvedBlock'], [])
+
+    def test_an_unresolvable_block_is_reported_not_silently_blank(self):
+        rows = [{'sampleId': 's1', 'book': 'b', 'lesson': 1, 'pagePdf': 9, 'base_reasons': ['agree_order'],
+                 'outcome': 'now_served', 'new_block': 'no-such-block'}]
+        a = self._fixture(rows, {'s1': 'OVER: a clean instruction'})
+        restore.cmd_rows(a)
+        d = json.load(open(self.out, encoding='utf-8'))
+        self.assertFalse(d['rows'][0]['newBlockResolved'])
+        self.assertEqual(d['restoredWithUnresolvedBlock'], ['s1'])
 
     def test_the_mechanism_is_recorded_so_a_guard_restore_is_never_read_as_a_repair(self):
         a = self._fixture([], {})

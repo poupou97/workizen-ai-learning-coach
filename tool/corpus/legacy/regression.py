@@ -12,6 +12,8 @@ never an annotation. A probe returns one of:
 
     PRESENT   the defect is reproduced exactly as described
     FIXED     the region is no longer served as trusted (withheld, unattached, or absent)
+    PARTIAL   the guard fires on some instances of the class and not on others — the defect is
+              reduced, not closed
     CHANGED   the region is still served but not with the recorded defect — the probe
               cannot call it fixed and says so rather than guessing
     ABSENT    the lesson/page is not in this batch at all (the probe did not run)
@@ -168,10 +170,19 @@ def probe_verse_flattened(tsl, d):
                  if b['role']['value'] in ('body', 'sidebar')
                  and len(_nfc(b.get('text', ''))) >= 120
                  and '\n' not in (b.get('text') or '')]
+    if verse_withheld and not long_body:
+        return 'FIXED', (f'{len(verse_withheld)} region(s) withheld with a verse / line-structure reason and no '
+                         f'long single-run body block served'), dict(
+            withheldVerseRegions=len(verse_withheld),
+            reasons=sorted({r for w in verse_withheld for r in (w.get('reasons') or [])}),
+            longBodyBlocks=0)
     if verse_withheld:
-        return 'FIXED', (f'{len(verse_withheld)} region(s) withheld with a verse / line-structure reason — the '
-                         f'pipeline refuses the verse rather than joining it; {len(long_body)} long single-run '
-                         f'body block(s) still served, which only an audit can judge'), dict(
+        # The blind restore audit judged `n20260906-0065` — a four-line stanza served as one prose run —
+        # WRONG on this very build. A probe that called the class FIXED because *some* verse is withheld
+        # would have laundered that away. Some verse withheld and some still joined is PARTIAL.
+        return 'PARTIAL', (f'{len(verse_withheld)} region(s) withheld with a verse / line-structure reason, but '
+                           f'{len(long_body)} long single-run body block(s) are still served — the guard fires on '
+                           f'some verse and not on all of it'), dict(
             withheldVerseRegions=len(verse_withheld),
             reasons=sorted({r for w in verse_withheld for r in (w.get('reasons') or [])}),
             longBodyBlocks=len(long_body))
@@ -254,6 +265,116 @@ def cmd_tail_scan(a):
     return 0
 
 
+def cmd_pack_scan(a):
+    """Defect 6 of the 97-row evaluation set, asked of the SHIPPED PACKS rather than of a TSL.
+
+    «imprint / back matter -> lesson heading» is an ATTACHMENT regression, and a pack rebuild is
+    exactly where a wrong lesson heading becomes shipped content. The TSL probes above look at the
+    research pipeline; this one looks at `assets/pack/lesson-index-g<N>.json`, which is what an APK
+    would carry. Two independent signals, both deterministic:
+
+      IMPRINT TEXT   any activity string containing a publishing-credit phrase or a product code
+      BEYOND RANGE   an activity whose printed page lies outside its lesson's TOC range for that
+                     book, i.e. the pages a header-based `continuation` rule can over-reach into
+
+    A pack is only as good as the last page it will hand a child.
+    """
+    import glob as _glob
+    sys.path.insert(0, os.path.join(common.REPO_ROOT, 'tool', 'corpus', 'legacy'))
+    sys.path.insert(0, os.path.join(common.REPO_ROOT, 'tool', 'ui'))
+    import packs as _packs
+    import lesson_attach as _attach
+
+    docs = (common.load_json(f'{common.MAIN_ROOT}/poc-out/graph/curriculum-structure.json') or {}).get('documents', [])
+    # The range half of the scan uses the BUILDER'S OWN attachment rule rather than a second
+    # implementation of it. Re-deriving "is this page inside the lesson" here produced 52 flags on the
+    # rebuilt packs, 41 of them the known TV5 tap hai TOC offset that `capped-toc-v2` exists to absorb —
+    # a defect count that was really a measurement of my own duplicate rule. One rule, one owner.
+    reg = _attach.AttachRegistry(docs)
+    last_start = {}
+    for d in docs:
+        starts = [l['pageStart'] for l in (d.get('lessons') or []) if l.get('pageStart') is not None]
+        last_start[d['sourceDocumentId']] = max(starts) if starts else None
+
+    TEXT_KEYS = ('expr', 'passage', 'prompt', 'excerpt', 'attribution', 'samGloss', 'title', 'caption',
+                 'chuanBi', 'printedCaption', 'lessonTitle')
+    IMPRINT_PACK = IMPRINT + ('ma so:', 'nha xuat ban giao duc', 'chiu trach nhiem noi dung', 'ban quyen')
+    rows, per_grade = [], {}
+    for path in sorted(_glob.glob(os.path.join(a.pack_dir, 'lesson-index-g*.json'))):
+        pack = common.load_json(path) or {}
+        g = pack.get('grade')
+        hits = []
+        for fam, spec in _packs.FAMILIES.items():
+            blob = pack.get(fam)
+            if not blob:
+                continue
+            items = ([(int(k), e) for k, arr in blob.items() for e in (arr or [])]
+                     if spec['shape'] == 'by_lesson' else [(e.get('lesson'), e) for e in blob])
+            for lesson, e in items:
+                e = e or {}
+                book = e.get('book') or e.get('sourceDocumentId') or ''
+                strings = []
+                for k in TEXT_KEYS:
+                    v = e.get(k)
+                    if isinstance(v, str):
+                        strings.append(v)
+                    elif isinstance(v, list):
+                        strings += [x for x in v if isinstance(x, str)]
+                for q in (e.get('questions') or []):
+                    if isinstance(q, dict) and isinstance(q.get('prompt'), str):
+                        strings.append(q['prompt'])
+                low = _nfc(' '.join(strings)).lower()
+                imprint = sorted({k for k in IMPRINT_PACK if k in low})
+                page = e.get('page') or e.get('pagePrinted')
+                # BACK MATTER: past the last lesson's own start is where a book's tail lives. This is the
+                # defect-6 shape, and it is deliberately narrower than "outside my lesson's TOC range".
+                ls = last_start.get(book)
+                past_last = bool(page is not None and ls is not None and lesson is not None
+                                 and page > ls and reg.book(book) and lesson != max(
+                                     [n for n in (reg.book(book).canonical or {None})] or [None], default=None))
+                reason = None
+                if lesson is not None and book:
+                    try:
+                        _keep, reason = reg.book(book).check_upstream(lesson, page)
+                    except Exception:  # noqa: BLE001 - a book with no ranges simply has no verdict
+                        reason = 'no_verdict'
+                if imprint or past_last:
+                    hits.append(dict(grade=g, family=fam, book=book, lesson=lesson, page=page,
+                                     attachReason=reason, imprintPhrases=imprint, pastLastLessonStart=past_last))
+        per_grade[str(g)] = dict(activities=_packs.pack_metrics(pack)['activitiesTotal'],
+                                 flagged=len(hits),
+                                 imprint=sum(1 for h in hits if h['imprintPhrases']),
+                                 pastLastLessonStart=sum(1 for h in hits if h['pastLastLessonStart']),
+                                 packVersion=(pack.get('buildProvenance') or {}).get('packVersion'))
+        rows += hits
+    total_acts = sum(v['activities'] for v in per_grade.values())
+    n_imp = sum(1 for r in rows if r['imprintPhrases'])
+    out = dict(schema=SCHEMA + '/pack-scan', packDir=os.path.abspath(a.pack_dir),
+               defect='evaluation-set defect 6 - imprint / back matter reaching a lesson, asked of the '
+                      'SHIPPED packs rather than of the research pipeline',
+               method='imprint phrases in any activity string; and any activity whose printed page lies past '
+                      'the LAST lesson start of its book (where a book tail lives). The per-lesson range check '
+                      'is delegated to tool/ui/lesson_attach - the builder\'s own rule - and reported as its '
+                      'reason code, never re-implemented here.',
+               activitiesScanned=total_acts, flagged=len(rows),
+               imprintActivities=n_imp,
+               pastLastLessonStartActivities=sum(1 for r in rows if r['pastLastLessonStart']),
+               verdict=('PRESENT - imprint text is in the shipped packs' if n_imp else
+                        'ABSENT - no imprint or back-matter text reaches the shipped packs'),
+               perGrade=per_grade, rows=rows)
+    if a.out:
+        common.dump_json(out, a.out)
+        print(f'-> {a.out}')
+    for g in sorted(per_grade, key=int):
+        v = per_grade[g]
+        mark = 'X' if v['imprint'] else ('?' if v['pastLastLessonStart'] else 'o')
+        print(f"{mark} g{g}: {v['activities']} activities, flagged {v['flagged']} "
+              f"(imprint {v['imprint']}, past last lesson start {v['pastLastLessonStart']})  {v['packVersion']}")
+    print(f"  {out['verdict']} - {n_imp} imprint activity(ies) and "
+          f"{out['pastLastLessonStartActivities']} past-last-lesson activity(ies) of {total_acts} scanned")
+    return 0
+
+
 def cmd_check(a):
     rows = check(a.batch_dir, a.pipeline)
     prev = common.load_json(a.compare_to) if a.compare_to else None
@@ -268,13 +389,13 @@ def cmd_check(a):
         comparedTo=os.path.abspath(a.compare_to) if a.compare_to else None,
         note='PRESENT / FIXED / CHANGED / ABSENT are probes over the pipeline output. CHANGED means the region '
              'is still served but not with the recorded defect — it is NOT a claim that the block is now correct.',
-        counts={v: sum(1 for r in rows if r['verdict'] == v) for v in ('PRESENT', 'FIXED', 'CHANGED', 'ABSENT')},
+        counts={v: sum(1 for r in rows if r['verdict'] == v) for v in ('PRESENT', 'PARTIAL', 'FIXED', 'CHANGED', 'ABSENT')},
         defects=rows)
     if a.out:
         common.dump_json(out, a.out)
         print(f'→ {a.out}')
     for r in rows:
-        mark = {'PRESENT': '✗', 'FIXED': '✓', 'CHANGED': '?', 'ABSENT': '–'}[r['verdict']]
+        mark = {'PRESENT': '✗', 'PARTIAL': '~', 'FIXED': '✓', 'CHANGED': '?', 'ABSENT': '–'}[r['verdict']]
         was = f"  (was {r['verdictBefore']})" if 'verdictBefore' in r else ''
         print(f"{mark} {r['request']:4s} {r['verdict']:8s} {r['defect']}{was}")
         print(f'       {r["evidence"]}')
@@ -304,6 +425,10 @@ def main(argv=None):
     s.add_argument('--pipeline', required=True)
     s.add_argument('--out', default='')
     s.set_defaults(fn=cmd_tail_scan)
+    s = sub.add_parser('pack-scan')
+    s.add_argument('--pack-dir', default=os.path.join(common.REPO_ROOT, 'assets', 'pack'))
+    s.add_argument('--out', default='')
+    s.set_defaults(fn=cmd_pack_scan)
     a = ap.parse_args(argv)
     return a.fn(a)
 

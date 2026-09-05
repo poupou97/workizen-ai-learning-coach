@@ -45,11 +45,21 @@ OVER = 'OVER-withheld'
 
 def _base_verdict(notes):
     """The earlier audit's judgement of the REFUSAL, read off its note. Never a judgement of
-    what is served now."""
-    n = notes or ''
-    if OVER.lower() in n.lower():
+    what is served now.
+
+    Two note conventions are in use and both must be read: round 4 wrote the verdict inline
+    ("WITHHELD (agree_text) — OVER-withheld: …" / "— safe rejection: …") and round 5 asks the
+    annotator for a leading keyword ("OVER: …" / "SAFE: …" / "UNSURE: …"). The prefix wins when
+    present, because it is the field the annotator was actually asked to fill.
+    """
+    n = (notes or '').strip()
+    head = n.split(':', 1)[0].strip().upper()
+    if head in ('OVER', 'SAFE', 'UNSURE'):
+        return head
+    low = n.lower()
+    if OVER.lower() in low:
         return 'OVER'          # the refusal was over-withholding — clean text wrongly refused
-    if 'safe' in n.lower() or 'correct by design' in n.lower():
+    if 'safe' in low or 'correct by design' in low:
         return 'SAFE'          # the refusal was right
     return 'UNSURE'
 
@@ -70,8 +80,14 @@ def cmd_rows(a):
         sid = r.get('sampleId')
         base = annot.get(sid) or {}
         blocks, tsl_path = load_tsl_blocks(a.rerun_dir, a.pipeline, r['book'], r['lesson'])
-        nb = r.get('new_block') or {}
-        blk = blocks.get(nb.get('id')) if isinstance(nb, dict) else None
+        # rerun.recovered() writes `new_block` as the block ID STRING. An earlier version of this
+        # code accepted only a dict and silently resolved every row to None, so the audit sheets
+        # rendered «(no text recorded)» for all six restored regions — the blind annotator caught it
+        # and refused to score a precision on blank panels. Accept both shapes, and let a missing
+        # block be visible rather than defended against.
+        nb = r.get('new_block')
+        nb_id = nb.get('id') if isinstance(nb, dict) else (nb if isinstance(nb, str) else None)
+        blk = blocks.get(nb_id) if nb_id else None
         rows.append(dict(
             id=sid, book=r['book'], lesson=r['lesson'], pagePdf=r.get('pagePdf'),
             baseReasons=r.get('base_reasons') or [],
@@ -79,7 +95,8 @@ def cmd_rows(a):
             baseNotes=(base.get('notes') or '')[:200],
             outcome=r.get('outcome'), coverage=r.get('coverage'),
             restored=(r.get('outcome') == 'now_served'),
-            newBlockId=(blk or {}).get('id') or (nb.get('id') if isinstance(nb, dict) else None),
+            newBlockId=(blk or {}).get('id') or nb_id,
+            newBlockResolved=bool(blk),
             newRole=((blk or {}).get('role') or {}).get('value'),
             newText=(blk or {}).get('text'),
             newBbox=(blk or {}).get('bbox') or base.get('bbox'),
@@ -87,6 +104,11 @@ def cmd_rows(a):
             tslPath=tsl_path,
         ))
     restored = [r for r in rows if r['restored']]
+    unresolved = [r['id'] for r in restored if not r['newBlockResolved']]
+    if unresolved:
+        print(f'  ⚠ {len(unresolved)} restored region(s) could not be resolved to a block in the re-run TSL '
+              f'— their sheets would render blank and no precision may be computed from them: {unresolved[:6]}',
+              file=sys.stderr)
     by_base = collections.Counter(r['baseRefusalVerdict'] for r in restored)
     over_total = sum(1 for r in rows if r['baseRefusalVerdict'] == 'OVER')
     out = dict(
@@ -102,6 +124,7 @@ def cmd_rows(a):
         falselyWithheldRecovered=by_base.get('OVER', 0),
         falselyWithheldRecoveryRate=common.fmt_rate(by_base.get('OVER', 0), over_total) if over_total else '— (n = 0)',
         wronglyRestoredCandidates=by_base.get('SAFE', 0),
+        restoredWithUnresolvedBlock=unresolved,
         note='restoredByBaseRefusalVerdict uses the EARLIER audit of the refusal. RESTORE PRECISION is a '
              'separate, fresh, blind judgement of what is now served — see `precision`.',
         rows=rows)
