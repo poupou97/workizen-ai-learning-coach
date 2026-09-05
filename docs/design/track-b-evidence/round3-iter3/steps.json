@@ -1,0 +1,7 @@
+[
+ {"step":"01","name":"Home after launch (integrated build): honest card 'Có 4 bài để học ở Môn học' + BÀI HỌC SAM card","frame":"round3-3-01-home.png","result":"PASS"},
+ {"step":"02","name":"Home card 'Bài 17' shows Chương IV · trang 60–63 · three ways; Bạn có biết? uses child-facing source name","frame":"round3-3-02-home-card.png","result":"PASS"},
+ {"step":"03","name":"Lesson Workspace first-open picker: breadcrumb, trust chip with ⓘ, 3 cards with real counts, 'SAM đề xuất cách này — vì sao?' with state-based reason","frame":"round3-3-03-workspace-picker.png","result":"PASS"},
+ {"step":"04","name":"Học với SAM: per-step labels — 'SAM (kịch bản thử nghiệm)' header states runtime checks 5/17 steps; first step 'SAM (runtime có kiểm)' with SÁCH VIẾT quote","frame":"round3-3-04-tutor-start.png","result":"PASS"},
+ {"step":"05","name":"Trực quan tab opens from the segmented control","frame":"round3-3-05-visual.png","result":"OBSERVED"}
+]
