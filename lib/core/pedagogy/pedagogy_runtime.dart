@@ -18,18 +18,31 @@
 /// (chỉ dùng chữ CÓ SẴN trong kịch bản/nguồn), không phát `LearningEvent`
 /// (không có validator đăng ký cho câu trả lời tự do ⇒ participation-only
 /// như Track B hôm nay), không import kho/mạng/LLM. SAM TUTOR ≠ CHAT.
+///
+/// ⭐⭐ ROUND 4 (Founder §5 — «real capability, not hard-coding»): thêm ĐÚNG MỘT
+/// năng lực tất định — [SourceQuoteIndex]: mọi đoạn «…» trong gợi ý / phản
+/// hồi / scaffold phải là NGUYÊN VĂN một block chữ của bài. Gợi ý có nguồn
+/// (mọi trích dẫn đều tìm thấy, guard sạch, có phương pháp) mới rời nhãn
+/// prototype. Phản hồi «khớp» và scaffold lộ đáp án vẫn phụ thuộc KHOÁ
+/// prototype ⇒ vẫn prototype (không có validator cho khoá — A3). Kết quả đo
+/// trên fixture thật Bài 17 nằm trong `pedagogy_runtime_test` (nhóm «fixture
+/// THẬT»): năng lực có thật; số bước đổi nhãn là số ĐO ĐƯỢC, không đặt tay.
 library;
 
 import '../context/learning_context.dart';
 import '../curriculum/semantic_binding.dart';
+import '../lesson_model/content_trust.dart' show SamMode;
 import '../lesson_model/tutor_script.dart';
 import '../student/evidence_validation.dart';
 import '../student/student_lesson_state.dart';
 import '../tutor/output_guard.dart';
 import 'pedagogy_model.dart';
 import 'realization_contract.dart';
+import 'source_quote_index.dart';
 
-const String pedagogyRuntimeVersion = 'pedagogy-runtime-v0';
+export 'source_quote_index.dart';
+
+const String pedagogyRuntimeVersion = 'pedagogy-runtime-v1';
 
 /// Chế độ TỪNG BƯỚC — UI bắt buộc hiện nhãn theo bước, không theo kịch bản.
 /// Tên trùng với `SamMode` của Track B để Lane A-data thêm
@@ -41,6 +54,12 @@ enum PlannedStepMode {
   const PlannedStepMode(this.samModeName, this.childLabel);
   final String samModeName;
   final String childLabel;
+
+  /// ⭐ ROUND 4 §5(d): cùng một enum với Lane B (`SamMode` nay có
+  /// `runtimeGuided`) — nhãn theo TỪNG BƯỚC vẫn bắt buộc hiện.
+  SamMode get samMode => this == runtimeGuided
+      ? SamMode.runtimeGuided
+      : SamMode.prototypeScripted;
 }
 
 enum PlannedStepPhase { explain, ask, hint, feedbackMatched, scaffold, next }
@@ -58,6 +77,7 @@ class PlannedStep {
     this.hintIndex,
     this.guard,
     this.validator,
+    this.quotes,
   });
 
   /// id bước trong kịch bản (`e1`, `q1`…); một bước `ask` sinh nhiều
@@ -75,10 +95,16 @@ class PlannedStep {
 
   /// Mã lý do cố định (test đọc): `PLAN:<mã>`, `NO_ALLOWED_METHOD`,
   /// `NO_SOURCE_BLOCK`, `SOURCE_BLOCK_UNRESOLVED`, `NO_PROMPT_BLOCK`,
-  /// `PROMPT_NOT_VERBATIM`, `HINT_UNSOURCED`, `KEY_NOT_VALIDATED`,
+  /// `PROMPT_NOT_VERBATIM`, `HINT_UNSOURCED`, `QUOTE_ELIDED:<đoạn>`,
+  /// `QUOTE_NOT_IN_SOURCE:<đoạn>`, `KEY_NOT_VALIDATED`,
   /// `OVER_CAP_WITHOUT_VALIDATOR`, `GUARD:<lý do guard>`.
   final List<String> refusals;
   final GuardVerdict? guard;
+
+  /// ⭐ ROUND 4: kết quả kiểm trích dẫn «…» của bước (gợi ý / phản hồi /
+  /// scaffold); `null` = bước không qua kiểm trích dẫn (explain/ask/next)
+  /// hoặc không có [SourceQuoteIndex].
+  final QuoteVerification? quotes;
 
   /// Validator ĐÃ ĐĂNG KÝ chấm câu trả lời của bước này. `null` = không có ⇒
   /// bước không được tạo bằng chứng năng lực (participation-only). Hôm nay
@@ -114,6 +140,11 @@ class RuntimePlan {
   bool get isBound => planRefusals.isEmpty;
   int get runtimeGuidedCount => steps.where((s) => s.isRuntimeGuided).length;
   int get prototypeCount => steps.length - runtimeGuidedCount;
+
+  /// Số bước runtime-guided theo pha — để báo cáo «năng lực nào làm bước
+  /// nào thành thật» không gộp.
+  int runtimeGuidedIn(PlannedStepPhase phase) =>
+      steps.where((s) => s.phase == phase && s.isRuntimeGuided).length;
 }
 
 class PedagogyRuntime {
@@ -133,12 +164,17 @@ class PedagogyRuntime {
   /// [blockText] tra chữ NGUYÊN VĂN của một block nguồn theo id (Lane B đưa
   /// `doc.blockById(id)?.text`); `null` = không tra được ⇒ bước không truy
   /// được về nguồn.
+  ///
+  /// ⭐ ROUND 4: [quoteIndex] = mọi block chữ của bài
+  /// (`SourceQuoteIndex.fromLessonDocument(doc)`); thiếu ⇒ gợi ý / phản hồi
+  /// / scaffold không kiểm được trích dẫn ⇒ giữ nguyên nhãn prototype.
   static RuntimePlan planForScript({
     required TutorScript script,
     required ResolvedBinding? binding,
     required StudentLessonState studentState,
     required LearningContext context,
     String? Function(String blockId)? blockText,
+    SourceQuoteIndex? quoteIndex,
   }) {
     final ctxRef = LessonRef.fromContext(context);
     final planRefusals = <String>[];
@@ -175,6 +211,7 @@ class PedagogyRuntime {
       String? sourceBlockId,
       int? hintIndex,
       List<String> stepRefusals = const [],
+      QuoteVerification? quotes,
     }) {
       final refusals = <String>[
         for (final r in planRefusals) 'PLAN:$r',
@@ -215,6 +252,7 @@ class PedagogyRuntime {
         refusals: refusals,
         guard: verdict,
         validator: null, // A3: không có validator đăng ký cho bước nào
+        quotes: quotes,
       );
     }
 
@@ -271,10 +309,19 @@ class PedagogyRuntime {
             sourceBlockId: promptBlockId,
             stepRefusals: askRefusals,
           ));
-          // HINT — mang nội dung ⇒ cần phương pháp; chữ gợi ý không truy
-          // được về block nguồn ⇒ chưa chứng minh được (guard vẫn chạy để
-          // lộ rò đáp án cho Founder thấy).
+          // ⭐ ROUND 4 §5(a): ưu tiên block CÙNG MỤC với câu hỏi.
+          final section = promptBlockId == null
+              ? const <String>[]
+              : (quoteIndex?.headingPathOf(promptBlockId) ?? const []);
+          QuoteVerification? check(String text) =>
+              quoteIndex?.verify(text, preferHeadingPath: section);
+
+          // HINT — mang nội dung ⇒ cần phương pháp; chữ gợi ý phải TRÍCH
+          // NGUYÊN VĂN một block của bài («…» tìm thấy) mới có nguồn; không
+          // trích / trích không thấy / trích lược ⇒ prototype, có mã lý do.
+          // Guard vẫn chạy để lộ rò đáp án cho Founder thấy.
           for (var i = 0; i < hints.length && i < 2; i++) {
+            final v = check(hints[i]) ?? QuoteVerification.noQuotes;
             steps.add(plan(
               stepId: id,
               phase: PlannedStepPhase.hint,
@@ -287,11 +334,15 @@ class PedagogyRuntime {
               answerForms: answers,
               keyDependent: true,
               hintIndex: i,
-              stepRefusals: const ['HINT_UNSOURCED'],
+              sourceBlockId: v.sourceBlockId,
+              stepRefusals: v.refusals,
+              quotes: v,
             ));
           }
           // FEEDBACK khi khớp — PHÁN «đúng» theo khoá prototype ⇒ không có
           // validator ⇒ prototype. Trẻ đã nêu đáp án ⇒ guard không phạt oan.
+          // Trích dẫn (nếu có) vẫn được kiểm và ghi block nguồn.
+          final fb = check(feedbackMatched);
           steps.add(plan(
             stepId: id,
             phase: PlannedStepPhase.feedbackMatched,
@@ -302,9 +353,15 @@ class PedagogyRuntime {
             answerForms: answers,
             keyDependent: true,
             childStated: answers,
-            stepRefusals: const ['KEY_NOT_VALIDATED'],
+            sourceBlockId: fb?.sourceBlockId,
+            stepRefusals: [
+              'KEY_NOT_VALIDATED',
+              if (fb != null && fb.hasQuotes) ...fb.refusals,
+            ],
+            quotes: fb,
           ));
           // SCAFFOLD — bottom-out lộ đáp án từ khoá prototype: quá trần.
+          final sc = check(scaffold);
           steps.add(plan(
             stepId: id,
             phase: PlannedStepPhase.scaffold,
@@ -314,7 +371,12 @@ class PedagogyRuntime {
             needsMethod: true,
             answerForms: answers,
             keyDependent: true,
-            stepRefusals: const ['KEY_NOT_VALIDATED'],
+            sourceBlockId: sc?.sourceBlockId,
+            stepRefusals: [
+              'KEY_NOT_VALIDATED',
+              if (sc != null && sc.hasQuotes) ...sc.refusals,
+            ],
+            quotes: sc,
           ));
 
         case NextStep(:final id, :final label, :final anchorBlockId):

@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/adaptive/challenge_policy.dart';
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/core/student/evidence_weighting.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
@@ -18,10 +19,20 @@ LearningEvent _attempt(
   EvidenceKind kind = EvidenceKind.independentAttempt,
 }) =>
     LearningEvent(
-        eventId: id, skillCaseId: _case, kind: kind, correct: correct, at: at);
+        eventId: id,
+        skillCaseId: _case,
+        kind: kind,
+        correct: correct,
+        at: at,
+        validation: _r4Stamp);
 
 CaseMastery _replay(List<LearningEvent> events) =>
     replayMastery(EvidenceLog(skillCaseId: _case, events: events), _p);
+
+/// ROUND 4 (strict default): sự kiện CÓ CHẤM trong test này mô phỏng đường
+/// Deep (TutorSession) — mang dấu `fraction-check-v1` như emitter thật.
+const _r4Stamp =
+    EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
 
 void main() {
   group('challengeSignalFor — ngưỡng cơ bản', () {

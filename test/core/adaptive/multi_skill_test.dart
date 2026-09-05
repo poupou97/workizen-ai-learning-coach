@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/adaptive/multi_skill_diagnosis.dart';
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/core/curriculum/exercise_skill_map.dart';
 import 'package:learning_coach/core/curriculum/pedagogical_boundary.dart';
 import 'package:learning_coach/core/curriculum/skill_case.dart';
@@ -10,6 +11,11 @@ import 'package:learning_coach/core/knowledge/provenance.dart';
 import 'package:learning_coach/core/student/evidence_weighting.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
+
+/// ROUND 4 (strict default): sự kiện CÓ CHẤM trong test này mô phỏng đường
+/// Deep (TutorSession) — mang dấu `fraction-check-v1` như emitter thật.
+const _r4Stamp =
+    EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
 
 void main() {
   const p = BktParams.freeResponse;
@@ -64,7 +70,7 @@ void main() {
     test('⭐ đúng tự làm ⇒ MỖI thành phần một sự kiện chấm được, mang cả nhóm concept',
         () {
       final events = attributeEvidence(
-          map: addUnlike, correct: true, independent: true, at: at);
+          map: addUnlike, correct: true, independent: true, validation: _r4Stamp, at: at);
       expect(events.length, 2);
       for (final e in events) {
         expect(e.kind, EvidenceKind.independentAttempt);

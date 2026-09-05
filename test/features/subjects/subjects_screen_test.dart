@@ -7,6 +7,7 @@ import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
 import 'package:learning_coach/features/subjects/subject_home_screen.dart';
 import 'package:learning_coach/features/subjects/subjects_screen.dart';
@@ -22,6 +23,14 @@ LessonIndex idx() => LessonIndex.fromJsonString('''
     "lessons":[{"no":1,"title":"ĐẤT VÀ NƯỚC","pageStart":6}]}]},
  "toanExercises":{"6":[{"expr":"1/2 - 1/5","page":21,"book":"05-sgk-toan-5-tap-mot"}]}}
 ''')!;
+
+/// ROUND 4 (A-runtime, Founder §4 — strict validation default): the graded
+/// events this test seeds simulate the Deep path (TutorSession), which has
+/// stamped `fraction-check-v1` since round 3; unstamped graded events now read
+/// as `historicalUnvalidated` and never as «Tự làm được». Fixture-only change,
+/// no assertion changed. — lane A-runtime touched this Lane B test file.
+const _r4Stamp =
+    EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
 
 void main() {
   testWidgets('grid môn sinh từ data; thiếu index ⇒ nói thật', (t) async {
@@ -114,7 +123,9 @@ void main() {
             skillCaseId: 'denominator-non-divisible',
             kind: EvidenceKind.independentAttempt,
             // WAL-210 D1: «Tự làm được» chỉ từ tự làm ĐÃ CHẤM đúng.
+            // ROUND 4: … và ĐÃ KIỂM (dấu validator được duyệt).
             correct: true,
+            validation: _r4Stamp,
             at: DateTime(2026, 9, 4),
             sourceDocumentId: '05-sgk-toan-5-tap-mot',
             lessonNo: 6,

@@ -97,8 +97,11 @@ void main() {
     expect(_act(state: participation).rule, isNot('R1'));
     final legacy = StudentLessonState.fromEvents(
         khtn6Bai17, [_ev(EvidenceKind.independentAttempt, correct: true)]);
-    expect(legacy.mapState, LearningMapState.independentEvidence,
-        reason: 'luật đọc dữ liệu cũ (#63) — nhưng KHÔNG đủ để sang bài');
+    expect(legacy.mapState, LearningMapState.engaged,
+        reason: 'ROUND 4: dữ liệu cũ không dấu = historicalUnvalidated');
+    expect(legacy.hasHistoricalUnvalidated, isTrue);
+    expect(legacy.historicalUnvalidatedCount, 1);
+    expect(legacy.standing, LessonEvidenceStanding.participatedUnverified);
     expect(legacy.hasApprovedValidatedSuccess, isFalse);
     expect(_act(state: legacy).rule, isNot('R1'));
     const rogue = EvidenceValidation(validatorId: 'llm-judge-v1', validatorVersion: '1');
@@ -154,6 +157,56 @@ void main() {
         state: StudentLessonState.fromEvents(khtn6Bai17, [_ev(EvidenceKind.participation)]));
     expect(p.reason, contains('chưa chấm'));
     expect(p.reason.contains('hiểu'), isFalse);
+  });
+
+  test('⭐⭐ ROUND 4 — kết cục «đã tham gia nhưng chưa được kiểm» (R5): ba dạng, '
+      'không dạng nào nói «đã hiểu»/«tự làm được»; evidenceNote đi kèm MỌI luật',
+      () {
+    final all = {WorkspaceView.read, WorkspaceView.visual, WorkspaceView.tutor};
+    // (a) dữ liệu cũ có chấm-không-dấu
+    final hist = StudentLessonState.fromEvents(
+        khtn6Bai17, [_ev(EvidenceKind.independentAttempt, correct: true)]);
+    final a = _act(seen: all, state: hist);
+    expect(a.rule, 'R5');
+    expect(a.kind, LessonNextKind.backToContents);
+    expect(a.standing, LessonEvidenceStanding.participatedUnverified);
+    expect(a.reason, contains('ghi nhận trước hợp đồng mới'));
+    expect(a.reason, contains('chưa tính là tự làm được'));
+    expect(a.evidenceNote, contains('ghi nhận trước hợp đồng mới'));
+    expect(a.basis, contains('historicalUnvalidated=1'));
+    // (b) tự báo
+    final part = StudentLessonState.fromEvents(
+        khtn6Bai17, [_ev(EvidenceKind.participation)]);
+    final b = _act(seen: all, state: part);
+    expect(b.reason, contains('chưa chấm'));
+    expect(b.evidenceNote, contains('đã tham gia'));
+    expect(b.basis, contains('participation=1'));
+    // (c) học cùng SAM (xin gợi ý) — chưa lần nào được kiểm
+    final eng = StudentLessonState.fromEvents(
+        khtn6Bai17, [_ev(EvidenceKind.hintRequested)]);
+    final c = _act(seen: all, state: eng);
+    expect(c.reason, contains('chưa có lần tự làm được nào được kiểm'));
+    expect(c.evidenceNote, contains('chưa có lần tự làm được'));
+    // (d) chưa học gì ⇒ không có note; (e) đã kiểm ⇒ R1, không note
+    expect(_act(seen: all).evidenceNote, isNull);
+    expect(_act(seen: all).standing, LessonEvidenceStanding.none);
+    const v = EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
+    final ok = _act(
+        seen: all,
+        state: StudentLessonState.fromEvents(
+            khtn6Bai17, [_ev(EvidenceKind.independentAttempt, correct: true, v: v)]));
+    expect(ok.rule, 'R1');
+    expect(ok.standing, LessonEvidenceStanding.validated);
+    expect(ok.evidenceNote, isNull);
+    // note cũng có ở R2 (chưa đọc) khi đã có gì ghi lại
+    final r2 = _act(state: hist);
+    expect(r2.rule, 'R2');
+    expect(r2.evidenceNote, contains('ghi nhận trước hợp đồng mới'));
+    for (final act in [a, b, c, r2]) {
+      expect(act.reason.contains('hiểu'), isFalse, reason: act.reason);
+      expect(act.reason.startsWith('Con đã tự làm được'), isFalse);
+      expect(RegExp(r'\d+\s*(phút|%)').hasMatch(act.evidenceNote ?? ''), isFalse);
+    }
   });
 
   test('R5 — bài rỗng (không đọc được gì) ⇒ về mục lục, nói thật', () {

@@ -209,7 +209,18 @@ void main() {
           reason: 'không viết lại id cũ — log là append-only');
       final log = await store.evidenceFor(
           learnerId: 'L1', skillCaseId: 'denominator-non-divisible');
-      expect(replayMastery(log, BktParams.freeResponse).independentCorrect, 1);
+      // ⭐⭐ ROUND 4: dòng cũ trên đĩa KHÔNG có dấu validator ⇒ đọc là
+      // historicalUnvalidated: mặc định (siết) không đếm; luật đọc-cũ tường
+      // minh vẫn tính lại được — log không viết lại, không xoá.
+      expect(log.events.first.readClass, EvidenceReadClass.historicalUnvalidated);
+      expect(replayMastery(log, BktParams.freeResponse).independentCorrect, 0,
+          reason: 'mặc định siết — không viết lại lịch sử để tạo sự thật mới');
+      expect(
+          replayMastery(log, BktParams.freeResponse,
+                  policy: const ConservativeBktPolicy())
+              .independentCorrect,
+          1,
+          reason: 'luật đọc-cũ tường minh (audit) vẫn thấy lần làm cũ');
     });
 
     test('phiên cũ ghi lại cùng sessionId ⇒ no-op (idempotent theo id phiên, '
