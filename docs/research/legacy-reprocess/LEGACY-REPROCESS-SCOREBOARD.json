@@ -1,7 +1,7 @@
 {
  "version": "legacy-scoreboard-v1",
  "generated_by": "tool/corpus/legacy/scoreboard.py",
- "generated": "2026-09-05T16:25:48+00:00",
+ "generated": "2026-09-05T16:35:05+00:00",
  "legacy_roots": [
   "/Users/alexnguyen/projects/workizen-ai-learning-coach/poc-out/round4/legacy",
   "/Users/alexnguyen/projects/workizen-ai-learning-coach/poc-out/round5/legacy"

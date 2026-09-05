@@ -20,6 +20,65 @@ the result measured, so each item below is closed or left open **by measurement*
 | **R7c** | verse lines joined into prose *(new — uncovered by the R7b fix)* | **OPEN** |
 | R8 | block ids carried the wrong pipeline label | **CLOSED** |
 
+## ROUND 5 UPDATE (2026-09-06) — re-measured on `tc2-p2r`, and four new requests
+
+Batch 1 was re-run from the original source on the **current** build — PR #77's *final* head including
+its 14 post-review fixes, which is **not** the `cb60cde` the table above measures — and batch 2 added six
+lessons in five new failure classes. Status below is by measurement, from
+`tool/corpus/legacy/regression.py` (deterministic probes) and blind page-render audits.
+
+| # | status on `tc2-p2r` | evidence |
+|---|---|---|
+| **R1** | **STILL OPEN, and it GENERALISES** | pdf p121 still attached to Bài 73 with 8 imprint blocks served. New: **Toán 4 tập một Bài 37** — a book never touched before — serves its colophon page (pdf p133, no printed page number) as trusted `body`/`heading`, including `Mã số: G1HH4T001h26` and the publisher's CEO. Round 4's back-cover fix moved one page of one book; the `continuation` mechanism is intact. `regression.py tail-scan` reproduces it on any batch. |
+| **R2** | **STILL OPEN** | `05-sgk-toan-5-tap-mot:p022:*:002` = `10`, `:016` = `b) 10 +`, unchanged |
+| **R3** | **STILL OPEN** | `…:p021:*:001` = `CỘNG, TRỪ HẠI PHẬN SỐ KHÁC MẪU SỐ`, role `heading`, confidence 0.88, unchanged |
+| **R5** | **OPEN, and now measurable** | a 20-block caption quota sample across four lessons: display 5/18 = 0.278, and **10 of 19 captions are DETACHED from their figure**. Seven of those are bare `Hình N` labels where **the page prints no caption text at all** — a text-only pipeline serving a figure number as content. Only one (`Hình 5.4`) is a proven chip/caption split. |
+| **R7c** | **PARTLY FIXED** | `1960d85` added a `line_structure` withhold and 7 regions now use it — but 3 long single-run body blocks are still served, and the blind restore audit judged one of them (a four-line stanza of the Bài 25 poem) served as **one prose run**. Withholding some verse is not withholding verse. |
+
+### R9 (new · P0) — `chem_guard` blocks a Physics section heading
+`09-sgk-khoa-hoc-tu-nhien-9` Bài 5: the section title `II – Định luật khúc xạ ánh sáng` is withheld by
+`chem_guard`. A chemistry guard firing on a physics heading is a pure over-withhold: the block carries no
+formula, no unit and no chemical name. **Request:** the chemistry guard should require a chemical token,
+not merely a science book; and a `heading`-role block with no numeric or symbolic content should not be
+reachable by a formula guard at all.
+
+### R10 (new · P0) — withholding one member of a structure serves a MUTILATED structure
+The Founder's evaluation-set defect 8, located exactly: **Toán 4 tập một Bài 37, pdf p130** serves options
+`A. 1 số chẵn`, `B. 2 số chẵn`, `C. 3 số chẵn` and withholds the fourth (`…:p130:*:014`, role `option`,
+reason `agree_order`). The served question is **wrong**, not smaller.
+
+Measured independently of the pipeline by `tool/corpus/legacy/orphan.py`:
+**9 mutilated structures in batch 2** (5 split enumerated runs, 3 split caption sets, 1 split option group)
+and **13 in the batch-1 holdout**; **12/139 = 0.086** of withheld regions orphan a sibling in batch 2,
+**12/126 = 0.095** in the holdout — the rate generalises.
+
+**Request:** a group-aware disposition — withhold the whole group or restore the whole group, never serve a
+partial one — for OPTION ⊂ QUESTION, caption ↔ figure, table rows and enumerated steps. Lane D's detector
+is deliberately independent, so it can keep scoring the fix from outside.
+
+*Note for whoever builds the grouping:* the TSL's `order` field is numbered **separately** for the served
+and withheld lists. On the page above the served options are `order` 11, 12, 13 and the withheld fourth is
+`order` 17. Group on the page-level index in the block id instead — Lane D's first implementation used
+`order` and walked straight past this defect.
+
+### R11 (new · P1) — over-withholding is now the larger pool, and its shape is «siblings»
+**19 of 30 reviewed withheld regions in batch 2 (0.633) are over-withheld**, up from 12/30 (0.400) in
+round 4. The pattern is consistently a sibling of a served block: an objective bullet refused while its
+sibling is served, a `Tiến hành` step refused while its `Chuẩn bị` is served, `26 000 + 9 015 × 6` refused
+while `78 060 : (10 − 7) + 300 045` is served. Several plain paragraphs and section titles are refused on
+`agree_tones` alone. **Request:** treat a guard that fires on one member of a homogeneous run and not on
+its neighbours as evidence about the guard, not about the block.
+
+### R12 (new · P1) — a restored region needs a fresh verdict, and the old one predicts it
+Of 6 regions this build serves again after `tc2-p1` withheld them, **RESTORE PRECISION is 3/6 = 0.500**.
+The split is not random: of the 4 the earlier audit had called **over-withheld**, 3 came back correct; of
+the 2 it had called **safe refusals, both came back wrong** (a stranded `G:` marker and the bare label
+`Tiến hành:` served as an `instruction` with its steps left outside the box). **Request:** when a guard is
+loosened, prefer the regions a review called over-withheld; a region a review called a safe refusal should
+need a positive signal before it is served again.
+
+---
+
 Overall on batch 1: derived false trust 0.365 → 0.297, attachment 0.108 → 0.034, role 0.216 → 0.125, at a
 coverage cost of 287 → 221 served blocks. Numbers and denominators in `ROUND4-BATCH-1-REPORT.md` §7.
 
