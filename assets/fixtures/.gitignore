@@ -1,0 +1,11 @@
+# TRACK B (WAL-210) — FIXTURE THẬT sinh từ SGK: KHÔNG COMMIT (cùng luật WAL-43
+# với assets/pack/). Chữ nguyên văn + crop trang là tác phẩm phái sinh của
+# nguồn có bản quyền; crop chỉ NỘI BỘ/NGHIÊN CỨU (Founder D4).
+#
+# Thư mục đã khai báo trong pubspec phải TỒN TẠI trên bản checkout sạch
+# (Flutter báo lỗi nếu không) ⇒ giữ .gitkeep, bỏ mọi thứ khác.
+real/*
+!real/.gitkeep
+!real/crops/
+real/crops/*
+!real/crops/.gitkeep

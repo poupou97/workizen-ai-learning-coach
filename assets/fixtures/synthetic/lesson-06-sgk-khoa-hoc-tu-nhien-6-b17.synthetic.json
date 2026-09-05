@@ -1,0 +1,813 @@
+{
+ "schema": "wal-lesson-fixture-v1",
+ "book": "06-sgk-khoa-hoc-tu-nhien-6",
+ "bookTitle": "KHTN 6",
+ "subject": "KHTN",
+ "grade": 6,
+ "lesson": 17,
+ "title": "TÁCH CHẤT KHỎI HỖN HỢP (BẢN MẪU)",
+ "chapter": {
+  "label": "Chương IV",
+  "title": "HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP (mẫu)",
+  "lessonNos": [
+   16,
+   17
+  ],
+  "trust": "fixtureSynthetic",
+  "derivation": "synthetic"
+ },
+ "chapters": [
+  {
+   "label": "Chương I",
+   "title": "MỞ ĐẦU (mẫu)",
+   "lessonNos": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "trust": "fixtureSynthetic",
+   "derivation": "synthetic"
+  },
+  {
+   "label": "Chương II",
+   "title": "CHẤT QUANH TA (mẫu)",
+   "lessonNos": [
+    9,
+    10,
+    11
+   ],
+   "trust": "fixtureSynthetic",
+   "derivation": "synthetic"
+  },
+  {
+   "label": "Chương III",
+   "title": "VẬT LIỆU, NHIÊN LIỆU, THỰC PHẨM (mẫu)",
+   "lessonNos": [
+    12,
+    13,
+    14,
+    15
+   ],
+   "trust": "fixtureSynthetic",
+   "derivation": "synthetic"
+  },
+  {
+   "label": "Chương IV",
+   "title": "HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP (mẫu)",
+   "lessonNos": [
+    16,
+    17
+   ],
+   "trust": "fixtureSynthetic",
+   "derivation": "synthetic"
+  },
+  {
+   "label": "Chương V",
+   "title": "TẾ BÀO (mẫu)",
+   "lessonNos": [
+    18,
+    19,
+    20,
+    21
+   ],
+   "trust": "fixtureSynthetic",
+   "derivation": "synthetic"
+  }
+ ],
+ "provenance": {
+  "trust": "fixtureSynthetic",
+  "book": "06-sgk-khoa-hoc-tu-nhien-6",
+  "pagePdfStart": 61,
+  "pagePdfEnd": 64,
+  "pagePrintedStart": 60,
+  "pagePrintedEnd": 63,
+  "generator": "tool/fixtures/make_synthetic_fixture.py@v1",
+  "sourcePipeline": "synthetic",
+  "sdmVersion": null,
+  "boundaryConfidence": null,
+  "tslPath": null,
+  "distribution": "synthetic — committed; contains no SGK text or images"
+ },
+ "evidencePolicy": "none",
+ "blocks": [
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:001",
+   "type": "heading",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0.1,
+     0.07,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:001",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "BÀI MẪU: TÁCH CHẤT KHỎI HỖN HỢP (GIẢ LẬP)",
+   "level": 1,
+   "roleConfidence": 0.9
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:002",
+   "type": "activity",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0.1,
+     0.15,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:002",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "kind": "stageLabel",
+   "text": "MỤC TIÊU",
+   "roleConfidence": 0.9
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:003",
+   "type": "activity",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0.1,
+     0.17,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:003",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "kind": "objective",
+   "text": "· [MẪU] Kể được vài cách đơn giản để tách chất ra khỏi hỗn hợp.",
+   "roleConfidence": 0.8
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:004",
+   "type": "question",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0.1,
+     0.28,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:004",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Người ta tách hạt cát ra khỏi nước như thế nào?",
+   "roleConfidence": 0.9
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:005",
+   "type": "heading",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0.1,
+     0.32,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:005",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "· Nguyên tắc (mẫu)",
+   "level": 2,
+   "roleConfidence": 0.85
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:006",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0.1,
+     0.35,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:006",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Các chất trong một hỗn hợp có tính chất khác nhau, nên có thể dựa vào chỗ khác nhau đó để tách chúng ra. Đây là văn bản giả lập để kiểm thử, không phải lời sách.",
+   "roleConfidence": 0.6
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:fig1",
+   "type": "image",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0.1,
+     0.4,
+     0.4,
+     0.3
+    ],
+    "blockId": null,
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "crop": "crops/synthetic-fig-1.png",
+   "captionBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:007",
+   "labels": 0,
+   "aspect": 1.875
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:007",
+   "type": "caption",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0.1,
+     0.7,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:007",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Hình 1. Nước đục để yên thì hạt nặng lắng xuống",
+   "refersFigure": true,
+   "roleConfidence": 0.9
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:008",
+   "type": "question",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0.1,
+     0.78,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:008",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] 1. Vì sao hạt cát lắng xuống đáy cốc?",
+   "roleConfidence": 0.9
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:009",
+   "type": "activity",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0.1,
+     0.86,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:009",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "kind": "sidebar",
+   "text": "[MẪU] 2. Kể một ví dụ tách chất mà em gặp ở nhà.",
+   "roleConfidence": 0.8
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:010",
+   "type": "heading",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.1,
+     0.07,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:010",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "I Một số cách tách chất (mẫu)",
+   "level": 1,
+   "roleConfidence": 0.85
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:011",
+   "type": "heading",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.1,
+     0.1,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:011",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "1. Lắng, gạn và lọc (mẫu)",
+   "level": 2,
+   "roleConfidence": 0.85
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:012",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.1,
+     0.12,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:012",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Khi hạt rắn không tan mà lơ lửng, ta lọc để giữ chúng lại trên giấy lọc. Văn bản giả lập.",
+   "roleConfidence": 0.6
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:013",
+   "type": "heading",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.1,
+     0.47,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:013",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "Lọc nước đục (thí nghiệm mẫu)",
+   "level": 3,
+   "roleConfidence": 0.85
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:014",
+   "type": "activity",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.1,
+     0.5,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:014",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "kind": "instruction",
+   "text": "[MẪU] Chuẩn bị: nước, cốc, đất, phễu, giấy lọc. Tiến hành:",
+   "roleConfidence": 0.9
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:015",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.1,
+     0.55,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:015",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "· [MẪU] Bước một: khuấy đất vào cốc nước rồi để yên.",
+   "roleConfidence": 0.6
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:016",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.1,
+     0.59,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:016",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "· [MẪU] Bước hai: gấp giấy lọc, đặt vào phễu.",
+   "roleConfidence": 0.6
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:017",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.1,
+     0.62,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:017",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "· [MẪU] Bước ba: rót từ từ phần nước phía trên vào phễu, hứng nước lọc.",
+   "roleConfidence": 0.6
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:fig2",
+   "type": "image",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.2,
+     0.68,
+     0.3,
+     0.17
+    ],
+    "blockId": null,
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "crop": "crops/synthetic-fig-2.png",
+   "captionBlockId": null,
+   "labels": 0,
+   "aspect": 1.875
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:018",
+   "type": "caption",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.1,
+     0.88,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:018",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Hình 2. Bộ lọc đơn giản",
+   "refersFigure": true,
+   "roleConfidence": 0.9
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:withheld1",
+   "type": "withheld",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 62,
+    "pagePrinted": 61,
+    "bbox": [
+     0.1,
+     0.9,
+     0.5,
+     0.03
+    ],
+    "blockId": null,
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "reason": "math_guard",
+   "crop": "crops/synthetic-withheld-1.png"
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p063:synthetic:019",
+   "type": "table",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 63,
+    "pagePrinted": 62,
+    "bbox": [
+     0.1,
+     0.2,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p063:synthetic:019",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "rows": [
+    [
+     "Cách",
+     "Dùng khi"
+    ],
+    [
+     "Lọc (mẫu)",
+     "hạt rắn không tan"
+    ],
+    [
+     "Cô cạn (mẫu)",
+     "chất rắn đã tan"
+    ]
+   ],
+   "safe": true,
+   "headerRows": 1,
+   "roleConfidence": 0.7
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p063:synthetic:020",
+   "type": "question",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 63,
+    "pagePrinted": 62,
+    "bbox": [
+     0.1,
+     0.33,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p063:synthetic:020",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Làm muối từ nước biển dùng cách tách chất nào?",
+   "roleConfidence": 0.9
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p064:synthetic:021",
+   "type": "activity",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 64,
+    "pagePrinted": 63,
+    "bbox": [
+     0.1,
+     0.17,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p064:synthetic:021",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "kind": "stageLabel",
+   "text": "Em đã học (mẫu)",
+   "roleConfidence": 0.9
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p064:synthetic:022",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 64,
+    "pagePrinted": 63,
+    "bbox": [
+     0.1,
+     0.24,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p064:synthetic:022",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "· [MẪU] Lọc (tách hạt rắn không tan ra khỏi chất lỏng).",
+   "roleConfidence": 0.6
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:p064:synthetic:023",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 64,
+    "pagePrinted": 63,
+    "bbox": [
+     0.1,
+     0.26,
+     0.8,
+     0.03
+    ],
+    "blockId": "06-sgk-khoa-hoc-tu-nhien-6:p064:synthetic:023",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "· [MẪU] Cô cạn (tách chất rắn đã tan bằng cách làm bay hơi chất lỏng).",
+   "roleConfidence": 0.6
+  },
+  {
+   "id": "06-sgk-khoa-hoc-tu-nhien-6:b17:sourceRef",
+   "type": "sourceRef",
+   "sourceRef": {
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "pagePdf": 61,
+    "pagePrinted": 60,
+    "bbox": [
+     0,
+     0,
+     1,
+     1
+    ],
+    "blockId": null,
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "SGK KHTN 6 · trang 60–63 · FIXTURE MẪU (giả lập) — không phải nội dung sách"
+  }
+ ],
+ "semantic": [
+  {
+   "type": "process",
+   "id": "process-1",
+   "title": "Lọc nước đục (thí nghiệm mẫu)",
+   "trust": "fixtureSynthetic",
+   "derivation": "synthetic",
+   "steps": [
+    {
+     "order": 1,
+     "text": "· [MẪU] Bước một: khuấy đất vào cốc nước rồi để yên.",
+     "sourceBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:015"
+    },
+    {
+     "order": 2,
+     "text": "· [MẪU] Bước hai: gấp giấy lọc, đặt vào phễu.",
+     "sourceBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:016"
+    },
+    {
+     "order": 3,
+     "withheldReason": "math_guard",
+     "sourceBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:withheld1"
+    },
+    {
+     "order": 4,
+     "text": "· [MẪU] Bước ba: rót từ từ phần nước phía trên vào phễu, hứng nước lọc.",
+     "sourceBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:017"
+    }
+   ]
+  },
+  {
+   "type": "comparison",
+   "id": "comparison-1",
+   "title": "Các cách tách chất (mẫu)",
+   "trust": "fixtureSynthetic",
+   "derivation": "synthetic",
+   "entities": [
+    {
+     "name": "Lọc (mẫu)",
+     "sourceBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p064:synthetic:022"
+    },
+    {
+     "name": "Cô cạn (mẫu)",
+     "sourceBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p064:synthetic:023"
+    }
+   ],
+   "dimensions": [
+    {
+     "name": "Dùng để tách",
+     "values": [
+      "tách hạt rắn không tan ra khỏi chất lỏng",
+      "tách chất rắn đã tan bằng cách làm bay hơi chất lỏng"
+     ]
+    }
+   ]
+  }
+ ],
+ "tutorScript": {
+  "samMode": "prototypeScripted",
+  "trust": "prototype",
+  "evidencePolicy": "none",
+  "steps": [
+   {
+    "type": "explain",
+    "id": "e1",
+    "mascot": "sam-explain",
+    "sourceBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:006",
+    "text": "[MẪU] Bài này nói về cách tách một chất ra khỏi hỗn hợp. Con đọc đoạn mẫu bên dưới rồi mình thử nhé."
+   },
+   {
+    "type": "ask",
+    "id": "q1",
+    "prompt": "[MẪU] Làm muối từ nước biển dùng cách tách chất nào?",
+    "promptBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p063:synthetic:020",
+    "options": [
+     "Lọc",
+     "Cô cạn",
+     "Chiết"
+    ],
+    "acceptable": [
+     "^cô cạn$"
+    ],
+    "hints": [
+     "[MẪU] Gợi ý 1: muối không bay hơi, nước thì có.",
+     "[MẪU] Gợi ý 2: xem dòng «Cô cạn» trong bảng."
+    ],
+    "feedbackMatched": "[MẪU] Khớp với bảng mẫu: đó là cô cạn.",
+    "scaffold": "[MẪU] Chưa khớp, không sao — bảng mẫu gọi cách này là cô cạn. Mình đi tiếp nhé.",
+    "keySource": "synthetic prototype key — không phải SGV"
+   },
+   {
+    "type": "ask",
+    "id": "q2",
+    "prompt": "[MẪU] 1. Vì sao hạt cát lắng xuống đáy cốc?",
+    "promptBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:008",
+    "options": [],
+    "acceptable": [
+     "nặng",
+     "nặng hơn"
+    ],
+    "hints": [
+     "[MẪU] Gợi ý 1: so cân nặng của hạt cát và nước.",
+     "[MẪU] Gợi ý 2: hạt nặng hơn thì đi về đâu?"
+    ],
+    "feedbackMatched": "[MẪU] SAM thấy câu trả lời có ý «nặng hơn» — khớp ý mẫu.",
+    "scaffold": "[MẪU] Ý mẫu: hạt cát nặng hơn nước nên lắng xuống. Mình đi tiếp nhé.",
+    "keySource": "synthetic prototype key — không phải SGV"
+   },
+   {
+    "type": "next",
+    "id": "n1",
+    "label": "[MẪU] Đọc lại phần «Em đã học»",
+    "target": "read",
+    "anchorBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p064:synthetic:022"
+   }
+  ]
+ }
+}
