@@ -378,18 +378,23 @@ void main() {
   });
 
   group('ROUND 4 — fixture THẬT Bài 17 (bỏ qua nếu thiếu): ĐO, không đặt tay', () {
-    test('⭐⭐ 17 bước: 5 runtimeGuided TRƯỚC = 5 SAU; 0 gợi ý đổi nhãn — và '
-        'từng mã lý do nói đúng chỗ hỏng của kịch bản/nguồn', () {
+    /// ⭐ ROUND 4 · Lane B đã SỬA kịch bản (không sửa luật): q1#1 bỏ trích dẫn
+    /// «trang 62» tự chế và trích liền một mạch; q3#1 trả lại hai chữ «các»
+    /// đúng như sách. Hai gợi ý đó nay QUA được luật ⇒ 5 → 7 / 17. Con số này
+    /// là ĐO SAU KHI SỬA NGUỒN CHỮ, không phải nới luật: q2#1 vẫn trượt vì
+    /// lỗi OCR nằm trong nguồn (A-pipeline), ba gợi ý #0 vẫn không trích gì.
+    test('⭐⭐ 17 bước: 5 runtimeGuided KHÔNG kiểm trích dẫn → 7 khi kiểm; '
+        'từng mã lý do nói đúng chỗ hỏng còn lại của kịch bản/nguồn', () {
       final d = _realDocOrSkip();
       if (d == null) return;
       final before = _plan(d, withQuoteIndex: false);
       final after = _plan(d);
       expect(before.steps.length, 17);
       expect(before.runtimeGuidedCount, 5, reason: 'e1 + q1 + q2 + q3 + n1');
-      expect(after.runtimeGuidedCount, 5,
-          reason: '⭐ năng lực có thật nhưng KHÔNG gợi ý nào của kịch bản qua được — '
-              'con số phải ĐO, không đặt tay');
-      expect(after.runtimeGuidedIn(PlannedStepPhase.hint), 0);
+      expect(after.runtimeGuidedCount, 7,
+          reason: '⭐ + q1/hint#1 + q3/hint#1 sau khi kịch bản trích ĐÚNG NGUYÊN '
+              'VĂN sách — con số phải ĐO, không đặt tay');
+      expect(after.runtimeGuidedIn(PlannedStepPhase.hint), 2);
       expect(after.runtimeGuidedIn(PlannedStepPhase.ask), 3);
       expect(after.runtimeGuidedIn(PlannedStepPhase.explain), 1);
       expect(after.runtimeGuidedIn(PlannedStepPhase.next), 1);
@@ -397,17 +402,19 @@ void main() {
           reason: 'không validator mới — Evidence Reality Bài 17 = 0, trung thực');
 
       final by = {for (final s in after.steps) _key(s): s};
-      // q1#1: trích LƯỢC («…») + tự chế trích dẫn «trang 62» — hai lỗi kịch bản.
-      expect(by['q1/hint#1']!.refusals.any((r) => r.startsWith('QUOTE_ELIDED:')), isTrue);
-      expect(by['q1/hint#1']!.refusals.any((r) => r.startsWith('GUARD:CITATION_FABRICATION:trang 62')),
-          isTrue);
+      // q1#1 (ĐÃ SỬA): trích liền một mạch từ block «Phương pháp cô cạn dùng
+      // để …», KHÔNG còn «…» và KHÔNG còn số trang tự chế ⇒ hết lý do từ chối.
+      expect(by['q1/hint#1']!.refusals, isEmpty);
+      expect(by['q1/hint#1']!.mode, PlannedStepMode.runtimeGuided);
+      expect(by['q1/hint#1']!.sourceBlockId,
+          '06-sgk-khoa-hoc-tu-nhien-6:p063:tc2-p1:005');
       // q2#1: kịch bản trích «khoá» đúng chính tả, nguồn OCR đọc «khóa … khoa»
       // ⇒ không nguyên văn — lỗi FIDELITY của nguồn (A-pipeline), runtime không sửa hộ.
       expect(by['q2/hint#1']!.refusals.single, startsWith('QUOTE_NOT_IN_SOURCE:Khi phần dầu ăn'));
-      // q3#1: trích 1 đúng (Lọc, block 4:004), trích 2 thiếu chữ «các» so với sách.
+      // q3#1 (ĐÃ SỬA): cả hai trích đều nguyên văn (Lọc 4:004, Cô cạn 4:006).
+      expect(by['q3/hint#1']!.refusals, isEmpty);
+      expect(by['q3/hint#1']!.mode, PlannedStepMode.runtimeGuided);
       expect(by['q3/hint#1']!.sourceBlockId, '06-sgk-khoa-hoc-tu-nhien-6:p064:tc2-p1:004');
-      expect(by['q3/hint#1']!.refusals,
-          ['QUOTE_NOT_IN_SOURCE:tách chất khó bay hơi ra khỏi chất dễ bay hơi']);
       // ba gợi ý còn lại không trích gì.
       for (final k in ['q1/hint#0', 'q2/hint#0', 'q3/hint#0']) {
         expect(by[k]!.refusals, ['HINT_UNSOURCED'], reason: k);

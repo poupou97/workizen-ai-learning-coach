@@ -7,6 +7,11 @@
 /// - Ôn tới hạn: sắc thái nhẹ, KHÔNG đỏ, không đếm ngược hối thúc.
 /// - Thử-thách-phủ: dạng CHƯA THỬ được nói thẳng tên.
 /// - Mascot HELLO thu nhỏ — SAM chào rồi lùi lại (STEP_BACK là feature).
+///
+/// ROUND 4 (Lane B §6 «Home»): thẻ «BÀI HỌC SAM» và thẻ Scale trung thực là
+/// MỘT vùng «Hôm nay» — một dòng SAM nói học gì tiếp và vì sao (lời trẻ), thẻ
+/// chính ở trên, thẻ «còn có thể mở» ở dưới; không còn ô mic «SAM đang học
+/// cách trò chuyện» (hứa chat mà không có chat — audit round 3).
 library;
 
 import 'package:flutter/material.dart';
@@ -22,6 +27,29 @@ import '../camera/camera_demo_flow.dart';
 import '../parent/parent_tonight_screen.dart';
 import 'mission_data.dart';
 import '../subjects/subject_display.dart';
+
+/// «Vì sao bài này?» trên thẻ Bài học SAM — chỉ nói điều có thật trong tài
+/// liệu: bài đã được xếp sẵn theo các cách học từ sách (đếm phần sách có).
+String workspaceWhyLine(LessonDocument doc) {
+  final ways = <String>[
+    'đọc như trong sách',
+    if (doc.semantic.isNotEmpty) 'xem sơ đồ / bảng',
+    if (doc.tutorScript != null)
+      'trả lời ${doc.tutorScript!.asks.length} câu hỏi trong sách cùng SAM',
+  ];
+  return 'Vì sao bài này? Đây là bài SAM đã xếp sẵn từ sách để con '
+      '${ways.join(', ')} — con thử trước nhé.';
+}
+
+/// ⭐ ROUND 4 (Lane C × Lane B) — dòng giới thiệu khu LÁT CẮT NGHIÊN CỨU.
+///
+/// Máy của Na là máy lớp 6; lát cắt của Lane C là sách LỚP 5. Nó có mặt ở đây
+/// để Founder đi tới được mà KHÔNG phải tạo hồ sơ mới — nên phải nói thật với
+/// trẻ rằng đây không phải bài của lớp mình, bằng lời trẻ, không hứa hẹn gì,
+/// và không đẩy trẻ vào đó (việc hôm nay vẫn ở phía trên).
+const String researchAreaLine =
+    'Đây không phải bài của lớp con — SAM đang tập đọc thử một cuốn sách khác. '
+    'Con xem cho biết cũng được. Bài hôm nay của con ở phía trên nhé.';
 
 class MissionCenterScreen extends StatelessWidget {
   const MissionCenterScreen({
@@ -109,8 +137,21 @@ class MissionCenterScreen extends StatelessWidget {
   final List<LessonDocument> researchLessons;
 
   static const workspaceCardKey = Key('home-workspace-card');
+  static const samLineKey = Key('home-sam-line');
+  static const secondaryCardKey = Key('home-secondary-card');
+
+  /// ROUND 4 (Lane C) — thẻ lát cắt NGHIÊN CỨU, một khoá cho mỗi bài.
   static Key researchCardKey(String slotKey) =>
       Key('home-research-card-$slotKey');
+  static const researchAreaLineKey = Key('home-research-area-line');
+
+  /// Bài học SAM là VIỆC CHÍNH của «Hôm nay» khi có bài cho lớp này và không
+  /// có việc Toán khẩn vì bằng chứng thật (review/retrieve thắng — Convergence
+  /// §10) và không có gợi ý sách theo TKB đang lên tiếng.
+  bool get _workspaceIsPrimary =>
+      workspaceLesson != null &&
+      !_agendaIsEvidenceUrgent &&
+      _effectiveRecommendation == null;
 
   @override
   Widget build(BuildContext context) {
@@ -121,19 +162,45 @@ class MissionCenterScreen extends StatelessWidget {
           padding: const EdgeInsets.all(WalSpacing.md),
           children: [
             _greeting(),
-            const SizedBox(height: WalSpacing.md),
-            _askSamBar(),
+            const SizedBox(height: WalSpacing.sm),
+            _samLine(),
             const SizedBox(height: WalSpacing.sm),
             _intentChips(),
             const SizedBox(height: WalSpacing.md),
-            _nextActionCard(),
-            if (workspaceLesson != null) ...[
+            _sectionLabel('HÔM NAY'),
+            // ROUND 4 — một vùng «Hôm nay»: bài học SAM là việc chính khi có
+            // (và Toán không khẩn vì bằng chứng); thẻ Scale/agenda đứng sau
+            // như «còn có thể mở». Không có bài học SAM ⇒ thẻ cũ giữ nguyên.
+            if (_workspaceIsPrimary) ...[
+              _workspaceCard(workspaceLesson!, primary: true),
               const SizedBox(height: WalSpacing.sm),
-              _workspaceCard(workspaceLesson!),
+              _nextActionCard(secondary: true),
+            ] else ...[
+              _nextActionCard(),
+              if (workspaceLesson != null) ...[
+                const SizedBox(height: WalSpacing.sm),
+                _workspaceCard(workspaceLesson!, primary: false),
+              ],
             ],
-            for (final d in researchLessons) ...[
-              const SizedBox(height: WalSpacing.sm),
-              _workspaceCard(d, research: true),
+            // ⭐ ROUND 4 (Lane C × Lane B) — lát cắt NGHIÊN CỨU đứng NGOÀI khu
+            // «Hôm nay», dưới nhãn riêng: một bài sách lớp khác không được
+            // trôi vào việc hôm nay của trẻ lớp 6 như nội dung bình thường.
+            if (researchLessons.isNotEmpty) ...[
+              const SizedBox(height: WalSpacing.lg),
+              _sectionLabel('SAM ĐANG TẬP ĐỌC SÁCH KHÁC'),
+              Padding(
+                padding: const EdgeInsets.only(bottom: WalSpacing.sm),
+                child: Text(researchAreaLine,
+                    key: MissionCenterScreen.researchAreaLineKey,
+                    style: const TextStyle(
+                        fontSize: WalType.secondary,
+                        color: WalColors.inkSoft,
+                        height: 1.4)),
+              ),
+              for (final d in researchLessons) ...[
+                _workspaceCard(d, research: true),
+                const SizedBox(height: WalSpacing.sm),
+              ],
             ],
             if (data.upcomingSubjects.isNotEmpty) ...[
               const SizedBox(height: WalSpacing.sm),
@@ -268,7 +335,7 @@ class MissionCenterScreen extends StatelessWidget {
   HomeRecommendation? get _effectiveRecommendation =>
       _agendaIsEvidenceUrgent ? null : bookRecommendation;
 
-  Widget _nextActionCard() {
+  Widget _nextActionCard({bool secondary = false}) {
     final rec = _effectiveRecommendation;
     final hasProposal = rec != null || data.agenda != null;
     final title = rec != null
@@ -279,10 +346,16 @@ class MissionCenterScreen extends StatelessWidget {
     // ⭐ reason đến từ resolver (agenda hoặc HomeRecommendation) — hiển thị
     // NGUYÊN VĂN, UI không suy diễn thêm. Lớp chỉ có đường Scale (WAL-210
     // G2): lý do do buildMissionFromStore viết từ con số thật của pack.
+    // ROUND 4: khi bài học SAM là việc chính, thẻ Scale KHÔNG nói «SAM chưa
+    // có bài dạy riêng cho lớp 6» nữa (mâu thuẫn với thẻ ngay trên) — chỉ nói
+    // điều còn đúng: ở Môn học con mở được N bài từ sách (N thật của pack).
     final reason = rec != null
         ? rec.reason
         : (data.agenda?.reason ??
-            data.nextActionReason ??
+            (secondary && data.scaleLessonCount > 0
+                ? 'Ở Môn học con mở được ${data.scaleLessonCount} bài từ '
+                    'sách giáo khoa — đọc, làm thí nghiệm, viết.'
+                : data.nextActionReason) ??
             data.decision.reason);
     final showButton =
         rec != null || data.agenda?.kind != AgendaActionKind.rest;
@@ -298,15 +371,16 @@ class MissionCenterScreen extends StatelessWidget {
             onStartHomework ??
             () {});
     return Container(
-      padding: const EdgeInsets.all(WalSpacing.lg),
+      key: secondary ? MissionCenterScreen.secondaryCardKey : null,
+      padding: EdgeInsets.all(secondary ? WalSpacing.md : WalSpacing.lg),
       decoration: BoxDecoration(
-        color: WalColors.surfaceLavender,
+        color: secondary ? Colors.white : WalColors.surfaceLavender,
         borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (hasProposal) ...[
-          const Text('VIỆC SAM ĐỀ XUẤT',
-              style: TextStyle(
+        if (hasProposal || secondary) ...[
+          Text(secondary ? 'CÒN CÓ THỂ MỞ' : 'VIỆC SAM ĐỀ XUẤT',
+              style: const TextStyle(
                   fontSize: WalType.secondary,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.1,
@@ -314,29 +388,46 @@ class MissionCenterScreen extends StatelessWidget {
           const SizedBox(height: 4),
         ],
         Text(title,
-            style: const TextStyle(
-                fontSize: WalType.title,
+            style: TextStyle(
+                fontSize: secondary ? WalType.body + 1 : WalType.title,
                 fontWeight: FontWeight.w700,
                 color: WalColors.primaryText)),
         const SizedBox(height: WalSpacing.sm),
         Text(reason,
-            style: const TextStyle(
-                fontSize: WalType.body, color: WalColors.ink, height: 1.45)),
+            style: TextStyle(
+                fontSize: secondary ? WalType.secondary : WalType.body,
+                color: WalColors.ink,
+                height: 1.45)),
         if (showButton) ...[
           const SizedBox(height: WalSpacing.md),
           SizedBox(
             height: WalSpacing.minTouch,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                  backgroundColor: WalColors.primary500,
-                  shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(WalSpacing.radiusButton))),
-              onPressed: onPressed,
-              child: const Text('Bắt đầu',
-                  style: TextStyle(
-                      fontSize: WalType.body, fontWeight: FontWeight.w700)),
-            ),
+            child: secondary
+                ? OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                        foregroundColor: WalColors.primaryText,
+                        side: const BorderSide(color: WalColors.primary500),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                WalSpacing.radiusButton))),
+                    onPressed: onPressed,
+                    child: const Text('Vào Môn học ▸',
+                        style: TextStyle(
+                            fontSize: WalType.body,
+                            fontWeight: FontWeight.w700)),
+                  )
+                : FilledButton(
+                    style: FilledButton.styleFrom(
+                        backgroundColor: WalColors.primary500,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                WalSpacing.radiusButton))),
+                    onPressed: onPressed,
+                    child: const Text('Bắt đầu',
+                        style: TextStyle(
+                            fontSize: WalType.body,
+                            fontWeight: FontWeight.w700)),
+                  ),
           ),
         ],
       ]),
@@ -346,7 +437,13 @@ class MissionCenterScreen extends StatelessWidget {
   /// ROUND 3 B1 — thẻ «Bài học SAM»: một bài, ba cách học, từ Home một chạm.
   /// Mọi chữ đọc từ tài liệu bài (tên, chương, trang); nhãn thử nghiệm bắt
   /// buộc vì `doc.isFixture`.
-  Widget _workspaceCard(LessonDocument doc, {bool research = false}) {
+  /// ROUND 4: [primary] ⇒ thẻ chính của «Hôm nay» (nền lavender, dòng «vì sao
+  /// bài này» bằng lời trẻ); không ⇒ thẻ trắng viền như round 3.
+  /// [research] (Lane C) ⇒ lát cắt NGHIÊN CỨU của lớp khác: KHÔNG BAO GIỜ là
+  /// thẻ chính, luôn nằm ngoài khu «Hôm nay», và nhãn nói rõ sách lớp mấy.
+  Widget _workspaceCard(LessonDocument doc,
+      {bool primary = false, bool research = false}) {
+    assert(!(primary && research), 'lát cắt nghiên cứu không được làm thẻ chính');
     final where = doc.chapter == null
         ? doc.pageRangeLine
         : '${doc.chapter!.label} · ${doc.pageRangeLine}';
@@ -356,9 +453,12 @@ class MissionCenterScreen extends StatelessWidget {
           : MissionCenterScreen.workspaceCardKey,
       padding: const EdgeInsets.all(WalSpacing.lg),
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: primary ? WalColors.surfaceLavender : Colors.white,
           borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
-          border: Border.all(color: WalColors.primary500.withValues(alpha: 0.35))),
+          border: primary
+              ? null
+              : Border.all(
+                  color: WalColors.primary500.withValues(alpha: 0.35))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
             research
@@ -387,6 +487,17 @@ class MissionCenterScreen extends StatelessWidget {
                 .join('  ·  '),
             style: const TextStyle(
                 fontSize: WalType.body, color: WalColors.ink, height: 1.4)),
+        if (primary) ...[
+          const SizedBox(height: WalSpacing.sm),
+          // «Vì sao bài này» — lời trẻ, không hứa gì ngoài điều có thật:
+          // bài đã được xếp sẵn các cách học từ sách.
+          Text(workspaceWhyLine(doc),
+              key: const Key('home-workspace-why'),
+              style: const TextStyle(
+                  fontSize: WalType.secondary,
+                  color: WalColors.inkSoft,
+                  height: 1.4)),
+        ],
         const SizedBox(height: WalSpacing.md),
         SizedBox(
           height: WalSpacing.minTouch,
@@ -429,25 +540,40 @@ class MissionCenterScreen extends StatelessWidget {
         AgendaActionKind.rest => 'Hôm nay nghỉ ngơi nhé',
       };
 
-  /// Ô hỏi SAM (home1) — TRẠNG THÁI TRUNG THỰC: voice/chat chưa mở (WAL-123),
-  /// không render một chat giả.
-  Widget _askSamBar() => Container(
+  /// ROUND 4 — dòng SAM nói «hôm nay học gì, vì sao» bằng lời trẻ. Thay ô mic
+  /// «SAM đang học cách trò chuyện» (round 3, WAL-123 trạng thái trung thực):
+  /// không mic, không hứa chat — SAM Tutor ≠ chat; Home chỉ có thẻ để bấm.
+  Widget _samLine() => Container(
+        key: MissionCenterScreen.samLineKey,
+        width: double.infinity,
         padding: const EdgeInsets.symmetric(
-            horizontal: WalSpacing.md, vertical: WalSpacing.sm),
+            horizontal: WalSpacing.md, vertical: WalSpacing.sm + 2),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
         ),
-        child: Row(children: [
-          const Icon(Icons.mic_none, color: WalColors.inkSoft, size: 20),
-          const SizedBox(width: WalSpacing.sm),
-          Expanded(
-            child: Text('SAM đang học cách trò chuyện — con bấm thẻ bên dưới nhé',
-                style: const TextStyle(
-                    fontSize: WalType.secondary, color: WalColors.inkSoft)),
-          ),
-        ]),
+        child: Text(samTodayLine(),
+            style: const TextStyle(
+                fontSize: WalType.secondary,
+                color: WalColors.ink,
+                height: 1.4)),
       );
+
+  /// Câu SAM nói ở đầu Home — TẤT ĐỊNH từ dữ liệu, không bịa phút/%.
+  String samTodayLine() {
+    if (_workspaceIsPrimary) {
+      return 'Hôm nay mình học ${workspaceLesson!.lessonLabel} nhé — bài này '
+          'SAM đã xếp sẵn ba cách học từ sách. Bấm «Mở bài học» là vào.';
+    }
+    if (_effectiveRecommendation != null || data.agenda != null) {
+      return data.agenda?.kind == AgendaActionKind.rest &&
+              _effectiveRecommendation == null
+          ? 'Hôm nay không có việc mới — nghỉ cũng là một phần của học. Con '
+              'xem thẻ bên dưới nhé.'
+          : 'Hôm nay SAM có một việc gợi ý cho con — xem thẻ bên dưới nhé.';
+    }
+    return 'Con chọn một thẻ bên dưới để bắt đầu nhé.';
+  }
 
   /// 5 Learning Intent chips (home1) — chip dẫn FLOW THẬT hoặc nói thật.
   Widget _intentChips() => Builder(

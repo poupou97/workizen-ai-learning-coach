@@ -127,7 +127,12 @@ class _TimelineViewState extends State<TimelineView> {
                         color: WalColors.ink,
                       ),
                     ),
-                    if (e.text != null)
+                    // ⭐ ROUND 4 (Lane B, lỗi đọc được trên Nokia): câu trích
+                    // của mốc thường CHỈ là «Tên (năm)» — trùng nguyên vẹn
+                    // hai dòng ngay trên nó, nên thẻ nói ba lần một điều.
+                    // Trùng ⇒ bỏ dòng thứ ba (không sửa dữ liệu, chỉ thôi
+                    // lặp lại). Câu dài hơn tên+năm thì vẫn hiện đủ.
+                    if (_addsSomething(e))
                       Text(
                         e.text!,
                         style: const TextStyle(
@@ -149,6 +154,24 @@ class _TimelineViewState extends State<TimelineView> {
         ),
       ),
     );
+  }
+
+  /// Câu trích của mốc có nói thêm gì ngoài «tên» và «năm» đã hiện không?
+  /// So sánh sau khi bỏ dấu câu/khoảng trắng thừa và hạ chữ thường — không
+  /// đổi dữ liệu, chỉ quyết định có VẼ dòng đó hay không.
+  static String _norm(String v) => v
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^\p{L}\p{N}]+', unicode: true), ' ')
+      .trim();
+
+  static bool _addsSomething(TimelineEvent e) {
+    final t = e.text;
+    if (t == null || t.trim().isEmpty) return false;
+    final body = _norm(t);
+    if (body.isEmpty) return false;
+    final shown = _norm('${e.title} ${e.when}');
+    // «Hai Bà Trưng (40 - 43)» vs tên «Hai Bà Trưng» + năm «40 - 43» ⇒ trùng.
+    return body != shown && body != _norm(e.title);
   }
 
   // ── nguồn kể chuyện ──
@@ -248,7 +271,14 @@ class _TimelineViewState extends State<TimelineView> {
             ],
           ),
           const SizedBox(height: WalSpacing.sm),
-          Row(
+          // ⭐ ROUND 4 (Lane B, lỗi tìm thấy trên fixture THẬT): hai nút này
+          // tràn 33 px trên bề ngang Nokia 6.1 khi chữ dài hơn bản MẪU. `Wrap`
+          // cho nút thứ hai xuống dòng thay vì bị cắt — mitigation phía hiển
+          // thị, không đổi chữ.
+          Wrap(
+            spacing: WalSpacing.sm,
+            runSpacing: WalSpacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               SizedBox(
                 height: WalSpacing.minTouch,
@@ -270,7 +300,6 @@ class _TimelineViewState extends State<TimelineView> {
                   child: const Text('Kiểm với sách'),
                 ),
               ),
-              const SizedBox(width: WalSpacing.sm),
               TextButton(
                 key: TimelineView.orderResetKey,
                 onPressed: _picked.isEmpty

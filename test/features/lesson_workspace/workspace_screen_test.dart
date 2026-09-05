@@ -13,6 +13,7 @@ import 'package:learning_coach/features/lesson_workspace/lesson_workspace_screen
 import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/mode_picker.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/runtime_plan.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/tech_details.dart';
 import 'package:learning_coach/features/lesson_workspace/workspace_trace.dart';
 
 import 'support.dart';
@@ -244,10 +245,18 @@ void main() {
     await t.pumpAndSettle();
     expect(find.byKey(const Key('trust-sheet')), findsOneWidget);
     expect(find.textContaining('MẪU GIẢ LẬP'), findsOneWidget);
+    // ROUND 4: mã luật chỉ trong nếp gấp «Chi tiết kỹ thuật» (đóng mặc định).
+    for (final s in doc.semantic) {
+      expect(find.textContaining('luật ${s.derivation}'), findsNothing);
+    }
+    await t.ensureVisible(find.byKey(TechDetails.foldKey));
+    await t.tap(find.byKey(TechDetails.foldKey));
+    await t.pumpAndSettle();
     for (final s in doc.semantic) {
       expect(find.textContaining('luật ${s.derivation}'), findsWidgets);
     }
     expect(find.textContaining('kịch bản viết sẵn'), findsOneWidget);
+    expect(find.textContaining('Dành cho bố mẹ'), findsOneWidget);
     expect(find.textContaining('KHÔNG ghi'), findsOneWidget);
     for (final s in [
       'MOCK ≠ EVIDENCE',

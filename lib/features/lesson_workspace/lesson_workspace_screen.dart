@@ -155,7 +155,12 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
             // Bàn phím lên (trẻ đang gõ trả lời SAM) ⇒ tạm ẩn thẻ đề xuất để
             // thân View còn chỗ (Nokia n3 D8). Bàn phím xuống ⇒ thẻ trở lại.
             // Ở màn «Vào bài học» lý do nằm trên thẻ được đề xuất ⇒ không lặp.
-            if (!picking && MediaQuery.viewInsetsOf(context).bottom == 0)
+            // ROUND 4 §6.3: ở màn ĐỌC thẻ đề xuất đi vào đầu vùng cuộn
+            // (`SmartBookView.header`) để trang sách được cả chiều cao — nên
+            // không ghim ở đây nữa. Các màn khác giữ nguyên.
+            if (!picking &&
+                _view != WorkspaceView.read &&
+                MediaQuery.viewInsetsOf(context).bottom == 0)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   WalSpacing.md,
@@ -295,7 +300,34 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
       color: WalColors.surfaceLavender,
       borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
     ),
-    child: Row(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _nextActionRow(next, compact: compact),
+        // ROUND 4 §6.7 — luật A8 nhìn thấy được: ba cách học, cách nào con
+        // ĐÃ MỞ (trace của phiên, không phải bằng chứng) — trẻ hiểu vì sao
+        // SAM đề xuất cách tiếp theo. Một dòng, cả bề ngang thẻ.
+        if (!compact)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              [
+                'Đã mở:',
+                for (final v in WorkspaceView.values)
+                  '${_seen.contains(v) ? '●' : '○'} ${v.label}',
+              ].join(' '),
+              key: const Key('workspace-seen-row'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
+            ),
+          ),
+      ],
+    ),
+  );
+
+  Widget _nextActionRow(NextAction next, {required bool compact}) => Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         if (!compact) ...[
@@ -324,8 +356,10 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
               // mất «vì sao» (round 3 n1 D-R3-03).
               Text(
                 next.reason,
-                maxLines: compact ? 1 : null,
-                overflow: compact ? TextOverflow.ellipsis : null,
+                // 6 dòng là lưới an toàn cho khung cố định (lý do thật ≤ 3
+                // dòng trên Nokia — D-R3-03 vẫn được tôn trọng).
+                maxLines: compact ? 1 : 6,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 13,
                   color: WalColors.ink,
@@ -364,8 +398,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
           ),
         ),
       ],
-    ),
-  );
+    );
 
   Widget _body(WorkspaceView view) => switch (view) {
     WorkspaceView.read => SmartBookView(
@@ -374,6 +407,15 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
       onFontStep: (s) => setState(() => _fontStep = s),
       onAskSam: (b) => _switch(WorkspaceView.tutor, tutorAnchor: b.id),
       scrollToBlockId: _readAnchor,
+      // Thẻ đề xuất cuộn cùng trang sách ở màn Đọc (xem chú thích ở build).
+      // Bàn phím lên ⇒ ẩn như các màn khác.
+      header: MediaQuery.viewInsetsOf(context).bottom == 0
+          ? _nextActionCard(
+              _proposal(),
+              compact:
+                  MediaQuery.orientationOf(context) == Orientation.landscape,
+            )
+          : null,
     ),
     WorkspaceView.visual => VisualView(
       doc: doc,

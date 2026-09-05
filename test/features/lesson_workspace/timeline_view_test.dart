@@ -33,6 +33,14 @@ void main() {
     final y0 = t.getTopLeft(find.text('101 - 103')).dy;
     final y1 = t.getTopLeft(find.text('205')).dy;
     expect(y1, greaterThan(y0));
+    // ⭐ ROUND 4 (Lane B, lỗi thấy trên máy thật): thẻ mốc KHÔNG lặp ba lần
+    // một điều. Câu trích chỉ là «Tên (năm)» ⇒ không vẽ dòng thứ ba; năm và
+    // tên vẫn hiện đủ.
+    expect(find.text('101 - 103'), findsOneWidget);
+    expect(find.text('Bà Mẫu B (205)'), findsNothing,
+        reason: 'câu trích trùng «tên + năm» đã hiện ⇒ không lặp lại');
+    expect(find.text('Chiến thắng mẫu của Ông Mẫu G (450)'), findsOneWidget,
+        reason: 'câu trích NÓI THÊM điều gì thì vẫn hiện đủ — không cắt dữ liệu');
     expect(find.text('NGUỒN KỂ CHUYỆN — sách ghi'), findsOneWidget);
     expect(find.text('Kể theo: NXB Mẫu, 2000'), findsOneWidget);
     // tên mốc xuất hiện hai lần (mốc trên trục + chip xếp thứ tự) — chạm mốc

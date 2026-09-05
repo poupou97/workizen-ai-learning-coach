@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart' show SchedulerBinding, SchedulerPhase;
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
@@ -138,14 +139,24 @@ class BookScreen extends StatelessWidget {
                 )
               else
                 const SizedBox(height: WalSpacing.sm - 2),
-              for (final c in chapters) _chapterRow(context, c),
+              // ROUND 4: hàng chương nghe trace ⇒ «Đã xem (phiên này)» hiện
+              // ngay khi quay lại từ Chương/Workspace (dấu vết mở, không
+              // phải trạng thái học).
+              _TraceRebuilder(
+                trace: trace,
+                builder: (context) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [for (final c in chapters) _chapterRow(context, c)],
+                ),
+              ),
               const SizedBox(height: WalSpacing.md),
               Material(
                 color: WalColors.surfaceLavender,
                 borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
                 child: ListTile(
+                  // ROUND 4: không nói «bản hiện tại» với trẻ — chỉ nói có gì.
                   title: const Text(
-                    'Mục lục & hoạt động (bản hiện tại)',
+                    'Các bài khác trong sách',
                     style: TextStyle(
                       fontSize: WalType.body,
                       fontWeight: FontWeight.w600,
@@ -153,7 +164,7 @@ class BookScreen extends StatelessWidget {
                     ),
                   ),
                   subtitle: const Text(
-                    'Danh sách bài + bài đọc / thí nghiệm như trước',
+                    'Danh sách bài + bài đọc / thí nghiệm — như trong Môn học',
                     style: TextStyle(
                       fontSize: WalType.secondary,
                       color: WalColors.inkSoft,
@@ -252,6 +263,9 @@ class BookScreen extends StatelessWidget {
   Widget _chapterRow(BuildContext context, ChapterRef c) {
     final ls = _lessonsOf(c);
     final withSam = docs.where((d) => c.contains(d.lessonNo)).length;
+    final opened = docs.any(
+      (d) => c.contains(d.lessonNo) && trace.opened(d.slotKey),
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),
       child: Material(
@@ -272,6 +286,7 @@ class BookScreen extends StatelessWidget {
             // đâu trong sách — từ mục lục, không suy thêm.
             withSam > 0
                 ? '${_range(c)}${ls.length} bài · ✨ $withSam bài học SAM'
+                      '${opened ? ' · Đã xem (phiên này)' : ''}'
                 : '${_range(c)}${ls.length} bài',
             style: TextStyle(
               fontSize: WalType.secondary,
@@ -299,4 +314,56 @@ class BookScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Dựng lại con khi trace đổi — HOÃN tới sau khung hình khi trace bắn giữa
+/// lúc build (Workspace mở trong pha build của route mới; cùng lý do
+/// `ChapterScreen._changed`). `ListenableBuilder` gọi setState ngay ⇒ lỗi
+/// «markNeedsBuild during build» (bắt được ở boundary_test).
+class _TraceRebuilder extends StatefulWidget {
+  const _TraceRebuilder({required this.trace, required this.builder});
+  final WorkspaceTrace trace;
+  final WidgetBuilder builder;
+
+  @override
+  State<_TraceRebuilder> createState() => _TraceRebuilderState();
+}
+
+class _TraceRebuilderState extends State<_TraceRebuilder> {
+  @override
+  void initState() {
+    super.initState();
+    widget.trace.addListener(_changed);
+  }
+
+  @override
+  void didUpdateWidget(_TraceRebuilder old) {
+    super.didUpdateWidget(old);
+    if (old.trace != widget.trace) {
+      old.trace.removeListener(_changed);
+      widget.trace.addListener(_changed);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.trace.removeListener(_changed);
+    super.dispose();
+  }
+
+  void _changed() {
+    if (!mounted) return;
+    final phase = SchedulerBinding.instance.schedulerPhase;
+    if (phase == SchedulerPhase.idle ||
+        phase == SchedulerPhase.postFrameCallbacks) {
+      setState(() {});
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context);
 }

@@ -66,6 +66,58 @@ void main() {
     expect(opened?.slotKey, b8.slotKey);
   });
 
+  /// ⭐⭐ LANE B (round 4) — MẠCH LẠC với khu «Hôm nay». Thẻ lát cắt là sách
+  /// LỚP 5 trên máy của học sinh lớp 6: nó KHÔNG được đứng lẫn trong việc hôm
+  /// nay như nội dung bình thường. Chốt: nhãn khu riêng, một dòng lời trẻ nói
+  /// thẳng «không phải bài của lớp con», và thẻ nằm DƯỚI thẻ Bài học SAM.
+  testWidgets('⭐⭐ lát cắt nghiên cứu có KHU RIÊNG dưới «Hôm nay», nói bằng '
+      'lời trẻ rằng đây không phải bài của lớp mình', (t) async {
+    final b17 = loadSyntheticDoc();
+    final b8 = _history();
+    await t.pumpWidget(
+      fixtureHost(
+        MissionCenterScreen(
+          data: await _data(),
+          onOpenSubjects: () {},
+          workspaceLesson: b17,
+          researchLessons: [b8],
+          onOpenWorkspaceLesson: (_) {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    double y(Finder f) => t.getTopLeft(f).dy;
+
+    // ① Ở đầu màn: nhãn HÔM NAY đứng trên thẻ Bài học SAM, và khu nghiên cứu
+    // CHƯA xuất hiện — nó không chen vào việc hôm nay.
+    expect(y(find.text('HÔM NAY')),
+        lessThan(y(find.byKey(MissionCenterScreen.workspaceCardKey))));
+    expect(find.text('SAM ĐANG TẬP ĐỌC SÁCH KHÁC'), findsNothing);
+
+    final card = find.byKey(MissionCenterScreen.researchCardKey(b8.slotKey));
+    await t.scrollUntilVisible(card, 120, scrollable: find.byType(Scrollable).first);
+    await t.pumpAndSettle();
+
+    // ② Cuộn xuống mới tới khu riêng của lát cắt.
+    expect(find.text('SAM ĐANG TẬP ĐỌC SÁCH KHÁC'), findsOneWidget);
+    final line = find.byKey(MissionCenterScreen.researchAreaLineKey);
+    expect(line, findsOneWidget);
+    final lineText = t.widget<Text>(line).data!;
+    expect(lineText, contains('không phải bài của lớp con'));
+    // Lời trẻ: không mã máy, không %, không hứa hẹn.
+    expect(lineText, isNot(contains('%')));
+    expect(lineText, isNot(matches(RegExp(r'[a-z]+-[a-z]+-v\d'))));
+
+    // ③ Nhãn khu đứng TRÊN thẻ — trẻ đọc lời cảnh báo trước khi thấy thẻ.
+    expect(y(find.text('SAM ĐANG TẬP ĐỌC SÁCH KHÁC')), lessThan(y(card)));
+    expect(y(line), lessThan(y(card)));
+
+    // Thẻ nghiên cứu KHÔNG BAO GIỜ mang nhãn bài học của lớp này.
+    expect(
+        find.descendant(of: card, matching: find.text('BÀI HỌC SAM · BẢN THỬ NGHIỆM')),
+        findsNothing);
+  });
+
   testWidgets('không có lát cắt nghiên cứu ⇒ không có thẻ thứ hai', (t) async {
     await t.pumpWidget(
       fixtureHost(

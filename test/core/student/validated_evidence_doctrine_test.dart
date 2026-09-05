@@ -209,15 +209,12 @@ void main() {
     /// Emitter CÓ CHẤM nhưng CHƯA đóng dấu — ngoài quyền sửa của lane
     /// A-runtime (Lane B / Founder). Danh sách chỉ được NGẮN ĐI.
     const unstampedAllowlist = {
-      // Deep (Toán 5) — chấm bằng FractionProblem.checkAnswer ⇒ cần
-      // `validation: fraction-check-v1` (một dòng, Lane B / coordinator).
-      'lib/features/assessment/assessment_screen.dart',
+      // ROUND 4 (Lane B): assessment_screen.dart đóng dấu `fraction-check-v1`
+      // và mission_data.dart (demo) đóng dấu — hai mục đã RÚT khỏi danh sách.
       // Scale — khoá `correctOption` của pack: KHÔNG bịa validator; Founder
       // quyết có đăng ký «pack-option-key» hay để participation.
       'lib/features/shell/reader_screen.dart',
       'lib/features/shell/quiz_select_screen.dart',
-      // Demo domain của Home (dữ liệu mẫu, không phải bằng chứng thật).
-      'lib/features/mission/mission_data.dart',
     };
 
     test('⭐⭐ LearningEvent( với correct ≠ null ⇒ có validation:, hoặc nằm '

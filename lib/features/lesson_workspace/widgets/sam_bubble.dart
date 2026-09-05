@@ -59,23 +59,31 @@ class SamBubble extends StatelessWidget {
               if (showLabel)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 2),
+                  // ROUND 4: nhãn + chú thích («Câu 1/3», «Gợi ý 1/2») co
+                  // được ở màn hẹp — không tràn (Nokia 360dp, test 392dp).
                   child: Row(
                     children: [
-                      Text(
-                        label ?? SamMode.prototypeScripted.childLabel,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: label != null &&
-                                  label != SamMode.prototypeScripted.childLabel
-                              ? WalColors.mintText
-                              : WalColors.primaryText,
+                      Flexible(
+                        child: Text(
+                          label ?? SamMode.prototypeScripted.childLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: label != null &&
+                                    label !=
+                                        SamMode.prototypeScripted.childLabel
+                                ? WalColors.mintText
+                                : WalColors.primaryText,
+                          ),
                         ),
                       ),
                       if (caption != null) ...[
                         const SizedBox(width: WalSpacing.sm),
                         Text(
                           caption!,
+                          maxLines: 1,
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,

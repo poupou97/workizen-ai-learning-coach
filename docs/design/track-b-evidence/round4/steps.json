@@ -1,0 +1,61 @@
+{
+ "round": "round4",
+ "device": "Nokia 6.1 (Android 10) · adb over WiFi 192.168.1.3:5555 · learner «Na · Lớp 6» · portrait 1080x1920 @ density 420 (411 logical px wide)",
+ "protocol": "Read-only `dumpsys window` (mCurrentFocus) + `dumpsys power` (mWakefulness / Display Power) before every input burst; two screencaps >= 20 s apart before the first input of each iteration — identical bytes means nobody is holding the phone (iter 1: 20:55:04 / 20:55:29 identical; iter 2: 21:25:20 / 21:25:52 identical). Never wake, unlock, swipe or draw a pattern on a locked or sleeping device. No profile created or deleted, no setting changed, no app data cleared; `install -r` keeps the learner's data. `com.workizen.tongtai` never touched. Every frame was read before the next tap. Two frames that caught the launcher (after a back-key overshoot) were deleted immediately and never left the scratchpad. Steps 20-24 of iteration 1 execute Lane C's queued checklist (docs/research/lane-c/evidence/round4-device/steps.json) instead of a new one.",
+ "note": "round4-1-01b-home.png, round4-1-02-home-today.png and round4-1-03-picker.png are leftovers from the predecessor agent's session; they belong to no build recorded here and no step claims them.",
+ "iterations": [
+  {
+   "iter": 1,
+   "build": {
+    "gitSha": "4d870e1c4012bb0d1505181d2197de99eb214949",
+    "apkSha256": "f0fd35534e32ec76fc6ec99f8e4597d98c5ae09634c47df578a8f354a33f9fc3",
+    "installedAt": "2026-09-05T20:55Z+07",
+    "contains": "Lane A-runtime merge, Lane C Golden Slice #2 merge, evidence stamps, SourceQuoteIndex wiring + the two script quote fixes, research Home area, timeline Wrap fix"
+   },
+   "steps": [
+    {"step": "01", "expect": "Home «Hôm nay»: «Chào Na!» + SAM line naming Bài 17 + label HÔM NAY + primary lavender «BÀI HỌC SAM · BẢN THỬ NGHIỆM» card with «Vì sao bài này?»; no mic placeholder, nothing promising chat", "result": "PASS", "frames": ["round4-1-01-home.png"], "note": "SAM line: «Hôm nay mình học Bài 17 · Tách chất khỏi hỗn hợp nhé — bài này SAM đã xếp sẵn ba cách học từ sách. Bấm «Mở bài học» là vào.»"},
+    {"step": "02", "expect": "below it, the secondary white «CÒN CÓ THỂ MỞ» card («Có 4 bài để học ở Môn học» + «Vào Môn học ▸»), then the new research section label", "result": "PASS", "frames": ["round4-1-02-home-secondary.png"]},
+    {"step": "03", "expect": "research area «SAM ĐANG TẬP ĐỌC SÁCH KHÁC» + child line «Đây không phải bài của lớp con …» + «LÁT CẮT NGHIÊN CỨU · SÁCH LỚP 5 · BẢN THỬ NGHIỆM» card (Bài 8, SGK LS&ĐL 5 · trang 36–39). Also Lane C step 01.", "result": "PASS", "frames": ["round4-1-03-home-research.png"], "note": "defect: lesson title renders «thời kì bắc thuộc» (lower-case proper noun) — LessonDocument.titleCase over the printed TOC title; returned, not fixed here"},
+    {"step": "04", "expect": "Giá sách «Sách của con · Lớp 6»: KHTN 6 tile «55 bài» + «✨ 1 bài học SAM»; the grade-5 research book is NOT on the grade-6 shelf", "result": "PASS", "frames": ["round4-1-04-bookshelf.png"]},
+    {"step": "05", "expect": "Book: «✨ 1 bài học SAM: Bài 17», trust chip, «Mục lục» with the child-language OCR caveat", "result": "PASS", "frames": ["round4-1-05-book.png"]},
+    {"step": "06", "expect": "Chapter IV: «Bài 16 · … Chưa có Bài học SAM — mở trong Môn học» and «Bài 17 · … ✨ Bài học SAM · 3 cách học · Chưa xem»", "result": "PASS", "frames": ["round4-1-06-chapter.png"], "note": "DEFECT: the lavender emphasis background sat on Bài 16 (no SAM lesson) and Bài 17 was white — inverted vs Home. Fixed in iteration 2."},
+    {"step": "07", "expect": "«Vào bài học» picker: breadcrumb «Giá sách › KHTN 6 › Chương IV», chip, three mode cards with counts, «SAM đề xuất cách này — vì sao?» carrying the runtime reason", "result": "PASS", "frames": ["round4-1-07-picker.png"]},
+    {"step": "08", "expect": "picker scrolled: the three cards and their counts read fully; reason not truncated", "result": "PASS", "frames": ["round4-1-08-next-action.png"]},
+    {"step": "09", "expect": "Đọc: «SAM đề xuất» card with the reason and the «Đã mở: ● Đọc ○ Trực quan ○ Học với SAM» trace row; page chips 60–63; font control; «— trang 60 —»", "result": "PASS", "frames": ["round4-1-09-read.png"]},
+    {"step": "10", "expect": "Đọc scrolled: continuous prose, in-book questions, figure block", "result": "PASS", "frames": ["round4-1-10-read-figure.png"], "note": "DEFECT measured here: fixed chrome = 820 of 1920 px (43 %), so the page had 57 % of the screen and text scrolled under the pinned card. Fixed in iteration 2."},
+    {"step": "11", "expect": "figure + caption «Hình 17.3» + source line as ONE block, crops free of the neighbouring text line (bleedScale)", "result": "PASS", "frames": ["round4-1-11-read-withheld.png"], "note": "source OCR defects visible in the prose: «Trong không khi», «lăng xuông» — A-pipeline fidelity class, reported not patched"},
+    {"step": "12", "expect": "Trực quan: shape chips, instance chips, process diagram, legend «Mỗi số là một bước sách viết · chạm một bước để tra cứu lời sách»; trace row now ● Đọc ● Trực quan", "result": "PASS", "frames": ["round4-1-12-visual.png"]},
+    {"step": "13", "expect": "process steps with a 📖 affordance on every node", "result": "PASS", "frames": ["round4-1-13-visual-steps.png"]},
+    {"step": "14", "expect": "tap a step ⇒ «Sách viết» sheet: «📖 Tra cứu · SGK KHTN 6 · Bài 17 · trang 61», «Trong mục: …», verbatim quote, «Xem trong Đọc», tech fold CLOSED and no machine id visible", "result": "PASS", "frames": ["round4-1-14-source-sheet.png"]},
+    {"step": "15", "expect": "open the fold ⇒ the machine ids are there (block id, role, pipeline, extraction, trust, heading path) — moved for adults, not deleted", "result": "PASS", "frames": ["round4-1-15-tech-fold.png"]},
+    {"step": "16", "expect": "Học với SAM: header runtime line in child words with the MEASURED count", "result": "PASS", "frames": ["round4-1-16-tutor.png"], "note": "reads «Máy đã kiểm 7/17 bước …» — 5/17 → 7/17 after the quote fixes, live on the device. DEFECT: the parenthetical «(giải thích, câu hỏi, bước tiếp)» was a hard-coded string and no longer matched (2 of the 7 are hints). Fixed in iteration 2."},
+    {"step": "17", "expect": "explain step + «SÁCH VIẾT» card quoting the source verbatim with «chạm để tra cứu»", "result": "PASS", "frames": ["round4-1-17-tutor-hint.png"]},
+    {"step": "18", "expect": "ask step: «SAM (runtime có kiểm)  Câu 1/3», the SGK question verbatim, four options, visible hint ladder «Bậc gợi ý ① ② · Gợi ý cho tớ ✋»", "result": "PASS", "frames": ["round4-1-18-tutor-ask.png"]},
+    {"step": "19", "expect": "hint 2/2 for q1 carries the GREEN «runtime có kiểm» label, quotes the book verbatim, has no fabricated page citation and does not name the method", "result": "PASS", "frames": ["round4-1-19-tutor-hints.png"], "note": "the step this lane fixed; it flipped from «kịch bản thử nghiệm» to «runtime có kiểm» on the device"},
+    {"step": "20", "expect": "LANE C 01+02 — research card → picker: breadcrumb «Giá sách › LS&ĐL 5», chip, three cards with counts (14 đoạn · 6 hình · 4 câu hỏi trong sách · 17 chỗ SAM để trống; Dòng thời gian · Bảng tóm tắt; hỏi 4 câu)", "result": "PASS", "frames": ["round4-1-20-history-picker.png"]},
+    {"step": "21", "expect": "LANE C 03 — Trực quan opens on «🕰️ Dòng thời gian»: «7 mốc · SGK LS&ĐL 5 · trang 37 · chữ sách, SAM chỉ xếp lại», mốc in book order (40 - 43 …)", "result": "PASS", "frames": ["round4-1-21-history-timeline.png"], "note": "DEFECT: every mốc card said the same thing three times («40 - 43» / «Hai Bà Trưng» / «Hai Bà Trưng (40 - 43)»). Fixed in iteration 2."},
+    {"step": "22", "expect": "LANE C 03 — «THỬ XẾP THỨ TỰ» chips + «Kiểm với sách» / «Làm lại» (disabled until two mốc picked), «Vì sao SAM chọn sơ đồ này» + «Nguồn & độ tin»; no praise, no score", "result": "PASS", "frames": ["round4-1-22-history-sources.png"]},
+    {"step": "23", "expect": "LANE C 03 — «NGUỒN KỂ CHUYỆN» cards with «Kể theo: NXB …, year» and the verbatim «(Theo …)» attribution; the 2005 one says «Câu chuyện này có phần SAM chưa đọc được»", "result": "PASS", "frames": ["round4-1-23-history-storysources.png"], "note": "visible source tone-mark defects: «Lý bĩ», «Ngô quyền đại phả quân nam hãn» — exactly the class tc2-p2 would withhold; returned to A-pipeline / Founder"},
+    {"step": "24", "expect": "LANE C 05 — Học với SAM on the research slice", "result": "PASS", "frames": ["round4-1-24-history-tutor.png"], "note": "honest fail-closed: «Máy chưa ràng buộc được bài này với sách — mọi bước là lời viết sẵn để thử» ⇒ Pedagogy Reality 0/7 for the slice (no SemanticBinding registered). Minor Lane C copy defect: the explain step says «mình thử ba câu» while the script has 4 asks."},
+    {"step": "25", "expect": "LANE C 04 — Đọc on the research slice (p38 withheld cards, story boxes, p41 timeline table)", "result": "NOT WALKED", "frames": [], "note": "iteration 1 ran out of session budget before this step; the slice's Đọc view is covered by no_machine_ids_test on the real fixture but has no device frame. Carried to the next round."},
+    {"step": "26", "expect": "LANE C 06 — Sessions / evidence unchanged after the walk (EvidencePolicy none)", "result": "PASS (by construction, not by frame)", "frames": [], "note": "the workspace emits no LearningEvent — held by boundary_test with a throwing store across the journey; no on-device store inspection was performed, so this is a code claim, not a device claim"}
+   ]
+  },
+  {
+   "iter": 2,
+   "build": {
+    "gitSha": "746627f624753ce2e43ac6dbb7068f23107689fb",
+    "apkSha256": "ca21ef1d48af854ad61531ba3bddd3f1223f5f0cd399a7ef40edec9bce44165d",
+    "installedAt": "2026-09-05T21:26Z+07",
+    "contains": "iteration 1 plus the four defect fixes: read-view headroom, chapter emphasis, measured runtime-line phase list, timeline card de-duplication"
+   },
+   "steps": [
+    {"step": "01", "expect": "Đọc at scroll 0 looks unchanged — the «SAM đề xuất» card is still the first thing the child sees", "result": "PASS", "frames": ["round4-2-01-read-headroom.png"]},
+    {"step": "02", "expect": "Đọc scrolled: the SAM card has scrolled away with the page; fixed chrome now ends at ~525 px instead of 820 px", "result": "PASS", "frames": ["round4-2-02-read-scrolled.png"], "note": "reading area 1100 px → 1395 px, i.e. 57 % → 73 % of the screen; iteration-1 defect closed"},
+    {"step": "03", "expect": "tutor runtime line lists the step kinds it actually measured", "result": "PASS", "frames": ["round4-2-03-tutor-line.png"], "note": "now «7/17 … (giải thích, câu hỏi, gợi ý, bước tiếp) · 10 … (gợi ý, phản hồi, chỉ từng bước)» — consistent with its own number"},
+    {"step": "04", "expect": "Chapter IV: the row WITH a Bài học SAM is the emphasised one; trace reads «Đã xem (phiên này): Đọc · Học với SAM»", "result": "PASS", "frames": ["round4-2-04-chapter-emphasis.png"], "note": "iteration-1 inversion closed; the session trace also propagated to the book's chapter row"},
+    {"step": "05", "expect": "History timeline: each mốc shows its year and its name once — no third repeating line", "result": "PASS", "frames": ["round4-2-05-timeline-no-repeat.png"], "note": "three mốc now fit where two did; a clause that adds something is still shown in full (pinned by timeline_view_test)"}
+   ]
+  }
+ ]
+}

@@ -230,19 +230,26 @@ class _BookShelfScreenState extends State<BookShelfScreen> {
               color: WalColors.ink,
             ),
           ),
-          // TRACK B: cuốn có Lesson Workspace được đánh dấu để Founder
-          // nhận ra ngay trên giá — nhãn nhỏ, không xếp hạng sách.
           Text(
-            _catalog.hasWorkspaceFor(b.sourceDocumentId)
-                ? '${b.lessonCount} bài · ✨ SAM'
-                : '${b.lessonCount} bài',
-            style: TextStyle(
+            '${b.lessonCount} bài',
+            style: const TextStyle(
               fontSize: WalType.secondary,
-              color: _catalog.hasWorkspaceFor(b.sourceDocumentId)
-                  ? WalColors.primaryText
-                  : WalColors.inkSoft,
+              color: WalColors.inkSoft,
             ),
           ),
+          // TRACK B: cuốn có Lesson Workspace được đánh dấu để Founder
+          // nhận ra ngay trên giá — nhãn nhỏ, không xếp hạng sách.
+          // ROUND 4: cùng một chữ «✨ N bài học SAM» từ giá → sách → chương
+          // (đếm từ catalog, không bịa).
+          if (_catalog.hasWorkspaceFor(b.sourceDocumentId))
+            Text(
+              '✨ ${_catalog.docsForBook(b.sourceDocumentId).length} bài học SAM',
+              style: const TextStyle(
+                fontSize: WalType.secondary,
+                fontWeight: FontWeight.w600,
+                color: WalColors.primaryText,
+              ),
+            ),
         ],
       ),
     ),
