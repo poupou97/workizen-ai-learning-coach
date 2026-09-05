@@ -145,6 +145,7 @@ sealed class LessonBlock {
           crop: crop,
           captionBlockId: j['captionBlockId'] as String?,
           labels: (j['labels'] as num?)?.toInt() ?? 0,
+          aspect: (j['aspect'] as num?)?.toDouble(),
         );
       case 'caption':
         final t = text();
@@ -260,10 +261,15 @@ final class ImageBlock extends LessonBlock {
     required this.crop,
     this.captionBlockId,
     this.labels = 0,
+    this.aspect,
   });
   final String crop;
   final String? captionBlockId;
   final int labels;
+
+  /// width/height của ảnh crop — để UI giữ CHỖ trước khi ảnh giải mã xong
+  /// (Nokia n1 D4: neo cuộn trượt vì ảnh nở ra sau). `null` ⇒ không giữ chỗ.
+  final double? aspect;
 
   @override
   Map<String, Object?> toJson() => {
@@ -271,6 +277,7 @@ final class ImageBlock extends LessonBlock {
     'crop': crop,
     if (captionBlockId != null) 'captionBlockId': captionBlockId,
     'labels': labels,
+    if (aspect != null) 'aspect': aspect,
   };
 }
 
@@ -571,18 +578,10 @@ class LessonDocument {
 
   /// «HỖN HỢP. TÁCH CHẤT…» → «Hỗn hợp. Tách chất…»: viết hoa đầu chuỗi và
   /// sau dấu kết câu (Nokia n1 D1: «Hỗn hợp. tách chất» — chữ thường sau «.»).
-  static String titleCase(String upper) {
-    final low = upper.toLowerCase();
-    if (low.isEmpty) return low;
-    final out = StringBuffer();
-    var capNext = true;
-    for (final ch in low.characters) {
-      out.write(capNext && ch.trim().isNotEmpty ? ch.toUpperCase() : ch);
-      if (ch.trim().isNotEmpty) capNext = false;
-      if (ch == '.' || ch == '!' || ch == '?') capNext = true;
-    }
-    return out.toString();
-  }
+  static String titleCase(String upper) => upper.toLowerCase().replaceAllMapped(
+    RegExp(r'(^\s*|[.!?]\s*)(\S)', unicode: true),
+    (m) => '${m[1]}${m[2]!.toUpperCase()}',
+  );
 
   String get lessonLabel => 'Bài $lessonNo · ${titleCase(title)}';
 

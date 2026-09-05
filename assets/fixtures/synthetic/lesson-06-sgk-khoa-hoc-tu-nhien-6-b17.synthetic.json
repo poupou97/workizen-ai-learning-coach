@@ -245,7 +245,8 @@
    "trust": "fixtureSynthetic",
    "crop": "crops/synthetic-fig-1.png",
    "captionBlockId": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:007",
-   "labels": 0
+   "labels": 0,
+   "aspect": 1.875
   },
   {
    "id": "06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:007",
@@ -504,7 +505,8 @@
    "trust": "fixtureSynthetic",
    "crop": "crops/synthetic-fig-2.png",
    "captionBlockId": null,
-   "labels": 0
+   "labels": 0,
+   "aspect": 1.875
   },
   {
    "id": "06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:018",

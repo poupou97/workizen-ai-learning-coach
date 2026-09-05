@@ -107,6 +107,16 @@ void main() {
     },
   );
 
+  test('titleCase: hoa đầu chuỗi và sau dấu kết câu (Nokia n1 D1)', () {
+    expect(
+      LessonDocument.titleCase('HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP'),
+      'Hỗn hợp. Tách chất ra khỏi hỗn hợp',
+    );
+    expect(LessonDocument.titleCase('TÁCH CHẤT KHỎI HỖN HỢP'),
+        'Tách chất khỏi hỗn hợp');
+    expect(LessonDocument.titleCase(''), '');
+  });
+
   test('bảng điều tra năng lực (census) đếm theo trust từng phần tử', () {
     final d = loadSyntheticDoc();
     final rows = d.capabilityCensus();

@@ -66,10 +66,7 @@ class _VisualViewState extends State<VisualView> {
             runSpacing: WalSpacing.sm,
             children: [
               for (var i = 0; i < n; i++)
-                _tabChip(
-                  i,
-                  '${_icon(doc.semantic[i])} ${doc.semantic[i].shapeLabel}',
-                ),
+                _tabChip(i, _tabLabel(doc, doc.semantic[i])),
               _tabChip(n, '📋 Bảng tóm tắt'),
             ],
           ),
@@ -103,7 +100,17 @@ class _VisualViewState extends State<VisualView> {
     );
   }
 
-  String _icon(SemanticData s) => switch (s) {
+  /// Nhãn tab: hai sơ đồ CÙNG hình dạng thì thêm tên (Nokia n1 D2: hai tab
+  /// «Sơ đồ quy trình» y hệt nhau, trẻ không biết tab nào là gì).
+  static String _tabLabel(LessonDocument doc, SemanticData s) {
+    final dup = doc.semantic.where((x) => x.shapeLabel == s.shapeLabel).length;
+    final base = '${_icon(s)} ${s.shapeLabel}';
+    if (dup <= 1) return base;
+    final t = s.title.length > 26 ? '${s.title.substring(0, 26)}…' : s.title;
+    return '$base: $t';
+  }
+
+  static String _icon(SemanticData s) => switch (s) {
     ProcessSemantic() => '🔁',
     ComparisonSemantic() => '⚖️',
     ConceptMapSemantic() => '🕸️',

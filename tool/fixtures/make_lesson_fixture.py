@@ -174,8 +174,9 @@ def figure_kept(f):
     return area >= 0.03 or (area >= 0.01 and f.get('caption'))
 
 
-def image_block(book, f, crop_rel):
+def image_block(book, f, crop_rel, aspect=None):
     return {
+        'aspect': aspect,
         'id': f['id'],
         'type': 'image',
         'sourceRef': {'book': book, 'pagePdf': f['page'], 'pagePrinted': None, 'bbox': f['bbox'], 'blockId': f['id']},
@@ -409,17 +410,16 @@ def build(tsl_path, out_dir, dpi=150, crops=True):
     figs = [f for f in tsl.get('figures') or [] if figure_kept(f)]
     figs.sort(key=lambda f: (f['page'], f['bbox'][1] + f['bbox'][3] / 2, f['bbox'][0]))
     for f in figs:
-        rel = None
+        rel = f'crops/{book}-p{f["page"]:03d}-{f["id"].split(":")[-1]}.png'
+        aspect = None
         if pdf:
-            rel = f'crops/{book}-p{f["page"]:03d}-{f["id"].split(":")[-1]}.png'
-            crop_png(pdf, f['page'], f['bbox'], os.path.join(out_dir, rel), dpi)
-        else:
-            rel = f'crops/{book}-p{f["page"]:03d}-{f["id"].split(":")[-1]}.png'
+            w, h = crop_png(pdf, f['page'], f['bbox'], os.path.join(out_dir, rel), dpi)
+            aspect = round(w / h, 4)
         yc = f['bbox'][1] + f['bbox'][3] / 2
         idx = next((i for i, t in enumerate(seq) if t[0] == f['page'] and t[1] > yc), None)
         if idx is None:
             idx = next((i for i, t in enumerate(seq) if t[0] > f['page']), len(seq))
-        seq.insert(idx, (f['page'], yc, f['bbox'][0], -1, image_block(book, f, rel)))
+        seq.insert(idx, (f['page'], yc, f['bbox'][0], -1, image_block(book, f, rel, aspect)))
     blocks = [t[4] for t in seq]
     # 4. dòng nguồn cuối bài
     if printed:

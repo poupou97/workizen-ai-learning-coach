@@ -258,23 +258,30 @@ class _SmartBookViewState extends State<SmartBookView> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-            child: Image.asset(
-              '${widget.doc.assetBase}${b.crop}',
-              fit: BoxFit.contain,
-              // Máy không có crop (bản clone sạch) ⇒ nói thật, không ô trắng.
-              errorBuilder: (_, _, _) => Container(
-                height: 96,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: WalColors.surfaceLavender,
-                  borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-                ),
-                child: Text(
-                  'Hình trong sách · $line\n(máy này chưa có ảnh)',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: WalType.secondary,
-                    color: WalColors.inkSoft,
+            // Giữ chỗ theo tỉ lệ ảnh: bố cục không nở ra sau khi ảnh giải mã,
+            // nên neo cuộn («Xem trong Đọc») đứng đúng chỗ (Nokia n1 D4).
+            child: _fixedAspect(
+              b.aspect,
+              Image.asset(
+                '${widget.doc.assetBase}${b.crop}',
+                fit: BoxFit.contain,
+                // Máy không có crop (bản clone sạch) ⇒ nói thật, không ô trắng.
+                errorBuilder: (_, _, _) => Container(
+                  height: 96,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: WalColors.surfaceLavender,
+                    borderRadius: BorderRadius.circular(
+                      WalSpacing.radiusButton,
+                    ),
+                  ),
+                  child: Text(
+                    'Hình trong sách · $line\n(máy này chưa có ảnh)',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: WalType.secondary,
+                      color: WalColors.inkSoft,
+                    ),
                   ),
                 ),
               ),
@@ -289,6 +296,9 @@ class _SmartBookViewState extends State<SmartBookView> {
       ),
     );
   }
+
+  static Widget _fixedAspect(double? aspect, Widget child) =>
+      aspect == null ? child : AspectRatio(aspectRatio: aspect, child: child);
 
   Widget _table(TableBlock b) {
     if (!b.safe) {
