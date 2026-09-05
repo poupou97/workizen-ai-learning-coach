@@ -138,14 +138,24 @@ class BookScreen extends StatelessWidget {
                 )
               else
                 const SizedBox(height: WalSpacing.sm - 2),
-              for (final c in chapters) _chapterRow(context, c),
+              // ROUND 4: hàng chương nghe trace ⇒ «Đã xem (phiên này)» hiện
+              // ngay khi quay lại từ Chương/Workspace (dấu vết mở, không
+              // phải trạng thái học).
+              ListenableBuilder(
+                listenable: trace,
+                builder: (context, _) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [for (final c in chapters) _chapterRow(context, c)],
+                ),
+              ),
               const SizedBox(height: WalSpacing.md),
               Material(
                 color: WalColors.surfaceLavender,
                 borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
                 child: ListTile(
+                  // ROUND 4: không nói «bản hiện tại» với trẻ — chỉ nói có gì.
                   title: const Text(
-                    'Mục lục & hoạt động (bản hiện tại)',
+                    'Các bài khác trong sách',
                     style: TextStyle(
                       fontSize: WalType.body,
                       fontWeight: FontWeight.w600,
@@ -153,7 +163,7 @@ class BookScreen extends StatelessWidget {
                     ),
                   ),
                   subtitle: const Text(
-                    'Danh sách bài + bài đọc / thí nghiệm như trước',
+                    'Danh sách bài + bài đọc / thí nghiệm — như trong Môn học',
                     style: TextStyle(
                       fontSize: WalType.secondary,
                       color: WalColors.inkSoft,
@@ -252,6 +262,9 @@ class BookScreen extends StatelessWidget {
   Widget _chapterRow(BuildContext context, ChapterRef c) {
     final ls = _lessonsOf(c);
     final withSam = docs.where((d) => c.contains(d.lessonNo)).length;
+    final opened = docs.any(
+      (d) => c.contains(d.lessonNo) && trace.opened(d.slotKey),
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),
       child: Material(
@@ -272,6 +285,7 @@ class BookScreen extends StatelessWidget {
             // đâu trong sách — từ mục lục, không suy thêm.
             withSam > 0
                 ? '${_range(c)}${ls.length} bài · ✨ $withSam bài học SAM'
+                      '${opened ? ' · Đã xem (phiên này)' : ''}'
                 : '${_range(c)}${ls.length} bài',
             style: TextStyle(
               fontSize: WalType.secondary,

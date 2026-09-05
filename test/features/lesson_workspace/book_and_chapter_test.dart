@@ -4,6 +4,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/core/lesson_model/next_action.dart'
+    show WorkspaceView;
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/features/lesson_workspace/book_screen.dart';
@@ -54,9 +56,9 @@ void main() {
       );
       await t.pumpAndSettle();
       expect(
-        find.textContaining('✨ SAM'),
+        find.text('✨ 1 bài học SAM'),
         findsOneWidget,
-        reason: 'chỉ cuốn có workspace được đánh dấu',
+        reason: 'chỉ cuốn có workspace được đánh dấu — cùng chữ ở giá/sách',
       );
       await t.tap(find.text('Toán 6 · Tập 1'));
       await t.pumpAndSettle();
@@ -98,8 +100,10 @@ void main() {
     expect(find.textContaining('mục lục in của sách'), findsNothing);
     expect(find.textContaining('Bài khác'), findsOneWidget);
     expect(find.textContaining('✨ 1 bài học SAM: Bài 17'), findsOneWidget);
-    await t.ensureVisible(find.text('Mục lục & hoạt động (bản hiện tại)'));
-    await t.tap(find.text('Mục lục & hoạt động (bản hiện tại)'));
+    // ROUND 4: không nói «bản hiện tại» với trẻ.
+    expect(find.textContaining('bản hiện tại'), findsNothing);
+    await t.ensureVisible(find.text('Các bài khác trong sách'));
+    await t.tap(find.text('Các bài khác trong sách'));
     expect(legacyTaps, 1);
   });
 
@@ -134,7 +138,10 @@ void main() {
       reason: 'chương chỉ hiện bài của chương',
     );
     expect(find.textContaining('Chưa xem'), findsOneWidget);
+    // ROUND 4: trạng thái bài = số cách học + dấu vết mở, lời trẻ
+    expect(find.textContaining('3 cách học · Chưa xem'), findsOneWidget);
     expect(find.textContaining('Chưa có Bài học SAM'), findsOneWidget);
+    expect(find.textContaining('mục lục hiện tại'), findsNothing);
 
     await t.tap(find.textContaining('Bài 16 · Hỗn hợp'));
     expect(legacyTaps, 1);
@@ -148,6 +155,53 @@ void main() {
     await t.pumpAndSettle();
     expect(find.textContaining('Đã xem (phiên này)'), findsOneWidget);
     expect(trace.opened(doc.slotKey), isTrue);
+  });
+
+  testWidgets('ROUND 4: đã mở View nào ⇒ hàng bài nói «Đã xem (phiên này): '
+      'Đọc · Trực quan» (trace, không phải trạng thái học); Sách cũng thấy', (
+    t,
+  ) async {
+    final doc = loadSyntheticDoc();
+    final idx = _idx();
+    final lessons = idx.subjects['KHTN']!.first.lessons;
+    final trace = WorkspaceTrace()
+      ..markView(doc.slotKey, WorkspaceView.read)
+      ..markView(doc.slotKey, WorkspaceView.visual);
+    await t.pumpWidget(
+      fixtureHost(
+        ChapterScreen(
+          book: idx.bookById('06-sgk-khoa-hoc-tu-nhien-6')!,
+          chapter: doc.chapter!,
+          lessons: lessons,
+          docs: [doc],
+          trace: trace,
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(
+      find.textContaining('Đã xem (phiên này): Đọc · Trực quan'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Học với SAM'), findsNothing,
+        reason: 'chỉ liệt kê cách ĐÃ mở');
+    await t.pumpWidget(
+      fixtureHost(
+        BookScreen(
+          book: idx.bookById('06-sgk-khoa-hoc-tu-nhien-6')!,
+          lessons: lessons,
+          docs: [doc],
+          trace: trace,
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(
+      find.textContaining('✨ 1 bài học SAM · Đã xem (phiên này)'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('trạng thái bài không dùng sao/%/«đã học»', (t) async {
