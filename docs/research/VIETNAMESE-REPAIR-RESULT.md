@@ -164,6 +164,29 @@ attachment moves **48/54 → 49/54**. Every number elsewhere in this document wa
 **stored** tc2-p2 attach so the comparison stays like-for-like; re-attaching is a pack-rebuild decision for
 the coordinator and Lane D, not a change this lane makes silently.
 
+## 4c. A cross-lane number that does NOT reconcile — reported, not fixed
+
+Three lanes measured the `agree_tones` pool this round and two of them disagree, which the founder doctrine
+says to report rather than quietly reconcile:
+
+| source | pool | called «clean» |
+|---|---|---|
+| Lane A3 | 60 sole `agree_tones` withholds | **58** (0.967) |
+| Lane C (LS&ĐL 5, Bài 8) | 15 withholds | 10 false (0.667) |
+| **this lane** (54 gold pages, blocks with gold text) | **59** sole `agree_tones` withholds | **22** (0.373) |
+
+The pool sizes agree almost exactly (59 vs 60) and the *clean* rates do not. The likely cause is the
+definition, not the data: this lane's `clean` is `measure.block_clean` — **zero diacritic error against the
+human-verified gold text over ≥ 80 % of the block**, which fails a block for *any* error anywhere in it,
+including ones outside the token that triggered the guard. A3's and Lane C's are judgements about the
+*flagged token* or the *served region*. Under this lane's stricter reading, restoring the whole
+`agree_tones` pool would serve 37 blocks that carry a diacritic error somewhere — which is exactly what
+§9.4 measures as the gap between repair precision (1.000) and restore precision (0.852).
+
+**Nobody should act on the difference until the three definitions are stated side by side.** This lane's is
+in `tool/corpus/repair/measure.py` and is reproducible; A3's and Lane C's should be named against it before
+a restore mandate is sized from any of the three.
+
 ## 5. What the held-out set changed, disclosed
 
 The held-out split exposed **one** defect and it was fixed: a *local* signal (the page's own spelling) was
