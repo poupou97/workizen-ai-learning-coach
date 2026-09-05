@@ -306,10 +306,13 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                   color: WalColors.primaryText,
                 ),
               ),
+              // Lý do đọc trọn (câu hỏi trích nguyên văn) — chỉ cắt 1 dòng
+              // khi màn ngang (Nokia n2 D3); cắt 3 dòng giữa câu trích làm
+              // mất «vì sao» (round 3 n1 D-R3-03).
               Text(
                 next.reason,
-                maxLines: compact ? 1 : 3,
-                overflow: TextOverflow.ellipsis,
+                maxLines: compact ? 1 : null,
+                overflow: compact ? TextOverflow.ellipsis : null,
                 style: const TextStyle(
                   fontSize: 13,
                   color: WalColors.ink,

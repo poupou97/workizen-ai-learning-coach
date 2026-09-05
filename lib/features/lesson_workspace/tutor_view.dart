@@ -286,12 +286,15 @@ class _TutorViewState extends State<TutorView> {
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       itemCount: TutorView.phases.length,
-      separatorBuilder: (_, _) => const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 2),
-        child: Icon(Icons.chevron_right, size: 14, color: WalColors.inkSoft),
+      // Nokia 360dp (round 3 n1 D-R3-08): sáu pha phải vừa một hàng — đệm
+      // hẹp, mũi tên nhỏ; vẫn cuộn ngang được nếu chữ to hơn.
+      separatorBuilder: (_, _) => const Icon(
+        Icons.chevron_right,
+        size: 12,
+        color: WalColors.inkSoft,
       ),
       itemBuilder: (_, i) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: WalSpacing.sm),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: i == current ? WalColors.primary500 : Colors.white,
