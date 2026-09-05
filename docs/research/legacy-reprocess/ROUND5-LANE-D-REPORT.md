@@ -65,8 +65,10 @@ verify result at snapshot time), `BASELINE-METRICS.json` (per grade, per activit
 lessons, catalogue lessons) and `PIPELINE-VERSION.json` (repo HEAD, builder commit, `lesson_attach`
 commit + rule, provenance schema, interpreter, platform), plus a README with the exact commands.
 
-**The OLD baseline is reproducible, and it was actually reproduced twice during this round** — once
-to re-observe the failure, once as the mutation check in §1.6. Both restores passed every sha256.
+**The OLD baseline is reproducible, and it was actually reproduced during this round** — twice by
+`restore` (to re-observe the failure, and as the mutation check in §1.6; both passed every sha256),
+and once by re-deriving the metrics straight from the snapshotted packs: `perGrade`, `totals` and
+`grades` come back **identical to the stored `BASELINE-METRICS.json`**, field for field.
 
 ```bash
 python3 tool/corpus/legacy/packs.py restore poc-out/round5/legacy/packs-before-round5
