@@ -208,10 +208,45 @@ pipeline is not better. **Teaching-critical carries 7 NA/UNSURE mismatches on 35
 annotators disagree about *when the class applies* more often than about the verdict, which is a definition
 gap in the protocol, not noise.
 
-**What this second annotation does not establish:** it validates the round-3 sample, not batch 1. The batch-1
-OLD/NEW rows in §5 were judged by a single annotator (the same one, as annotator #2). The Lane D successor
-independently re-checked 8 of those rows against their page renders and agreed with all 8 — that is a
-spot-check, not a second annotation. A blind second annotation of the batch-1 rows is listed as remaining work.
+**What this second annotation does not establish:** it validates the round-3 sample, not batch 1. That gap is
+addressed separately in §6a.
+
+### 6a. A blind second annotation of the batch-1 rows themselves — by a different model
+
+The §5 rates were produced by one annotator. A second annotation of **16 of the 74 NEW served rows (21.6 %)**
+was drawn from the annotated file with a third seed (20260908), the first annotator's verdicts, notes and error
+classes stripped, and judged from the page renders by a **different model** (Claude Fable 5.1 → Claude Opus 5),
+in a different session.
+
+| class | n both judged | agreement | **κ** | #1 WRONG | #2 WRONG | confusion (#1/#2) |
+|---|---|---|---|---|---|---|
+| display | 15 | 0.933 | **0.842** | 0.267 | 0.333 | OK/OK 10 · OK/WRONG 1 · WRONG/WRONG 4 |
+| teaching-critical | 6 | 1.000 | **1.000** | 0.333 | 0.333 | OK/OK 4 · WRONG/WRONG 2 |
+| reading order | 3 | 1.000 | — (κ undefined: no variance) | 0.000 | 0.000 | OK/OK 3 |
+| role | 15 | 0.867 | **0.423** | 0.133 | 0.133 | OK/OK 12 · OK/WRONG 1 · WRONG/OK 1 · WRONG/WRONG 1 |
+| attachment | 15 | 1.000 | **1.000** | 0.067 | 0.067 | OK/OK 14 · WRONG/WRONG 1 |
+| **false trust** | 15 | **1.000** | **1.000** | 0.200 | 0.200 | OK/OK 12 · WRONG/WRONG 3 |
+
+One sampled row (`n20260906-0089`) had already been judged by the second annotator in the caption quota sample
+of §5a, so for that row the second annotation was not blind to *its own* earlier verdict. **The table above
+excludes it.** Including it: display κ 0.714 (n = 16, agreement 0.875), role κ 0.429, false trust κ 1.000.
+
+**The headline measure is annotator-independent here: false trust agreed on 15 of 15 rows, κ = 1.000, both at
+0.200.** The disagreements are informative and all four are named:
+
+- display, `n20260906-0016`: `46 125 × 3` served as `46 125 x 3`. #2 called the multiplication-sign
+  substitution a display error; #1 did not. The numbers and the operation survive either way.
+- display, `n20260906-0089` (the excluded row): a figure-number chip served as a caption on its own.
+- role, `n20260906-0040`: a destroyed expression (`b) 10 +` for `b) 3/10 + 5/21`) served as `body`. #1 called
+  the role wrong; #2 called the role acceptable for a bare expression and put all the damage on display and
+  teaching-critical. Both marked it false trust.
+- role, `n20260906-0071`: `(Theo Văn Thành Lê)` — the passage's attribution — served as `sidebar`. #2 called
+  that a role error because the TSL vocabulary has an `attribution` role; #1 did not.
+
+**Role is the unstable class in every measurement made so far** — κ 0.713 on the round-3 sample, κ 0.423 here.
+Three of the four disagreements are about *what a role means*, not about what is on the page. Role rates in
+this report should be read as annotator-dependent, and the role protocol needs sharper definitions before role
+is used to gate anything.
 
 ---
 
@@ -317,7 +352,9 @@ corpus safer and smaller. It did not make it teachable.**
    role code.
 5. **Two annotators disagree about *applicability* more than about verdicts.** Teaching-critical had 7
    NA/UNSURE mismatches on 35 judged rows while κ was 0.826 — the protocol needs a sharper rule for when the
-   class applies, not a better annotator.
+   class applies, not a better annotator. And **role is unstable in both second annotations** (κ 0.713 and
+   0.423), always because the two annotators mean different things by a role — while false trust, the measure
+   the report leans on, reached κ 1.000 across two different models on the batch rows.
 6. **Role-proportional sampling cannot measure a rare role.** Only 2 of 74 NEW rows were caption-kind, so the
    figure/caption class was invisible until a **quota sample** was drawn for it (§5a) — which then found
    0.250 display-WRONG within the class and a defect the fidelity fields cannot express at all (a caption
@@ -349,7 +386,8 @@ the trusted set is a subset.
 
 ## 11. What is still not measured
 
-- **No second annotator on the batch-1 rows.** §5 rests on one annotator plus an 8-row successor spot-check.
+- **The second annotation of the batch-1 rows covers 16 of 74 NEW rows (21.6 %) and no OLD rows.** The OLD-side
+  rates in §5 still rest on a single annotator.
 - **Figure/caption is measured only within one lesson.** §5 has n = 2 per side and is unreadable; §5a's quota
   sample covers the batch's single figure-heavy lesson (8 blocks, KHTN 6 Bài 11) and no other book.
 - **The audit protocol has no figure–caption *relation* field**, so a caption detached from its figure scores
