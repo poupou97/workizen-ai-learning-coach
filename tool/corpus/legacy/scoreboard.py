@@ -141,6 +141,40 @@ def restore_record(batch_dir):
     return out
 
 
+def orphan_record(batch_dir):
+    """Withheld regions that ORPHANED a sibling — a teaching-critical failure caused by the safety
+    mechanism itself (Founder evaluation-set defect 8). A withheld block cannot be scored "safe" on
+    its own; the scoreboard has to say what it left behind."""
+    d = common.load_json(f'{batch_dir}/orphan/orphans.json')
+    if not d:
+        return None
+    return {k: d.get(k) for k in ('findings', 'kinds', 'teachingCriticalFindings',
+                                  'withheldRegionsThatOrphanASibling', 'withheldRegionsTotal',
+                                  'orphaningShareOfWithheld', 'orphaningShareFormatted', 'doctrine')}
+
+
+def over_withheld(batch_dir):
+    """FALSE WITHHELD, from the annotator's own review of the withheld regions.
+
+    Round 5 makes this a first-class metric, not a footnote: 19 of 30 on the evaluation set. The
+    annotator's note begins with OVER / SAFE / UNSURE (round 5) or carries «OVER-withheld» inline
+    (round 4); both conventions are read by the same parser Lane D uses for restore precision."""
+    sys.path.insert(0, HERE)
+    import restore as _restore
+    p = latest(glob.glob(f'{batch_dir}/audit/annotated-new-*.jsonl'))
+    if not p:
+        return None
+    rows = [r for r in read_jsonl(p) if not r.get('servedAsTrusted', True)]
+    if not rows:
+        return None
+    c = collections.Counter(_restore._base_verdict(r.get('notes')) for r in rows)
+    n = c['OVER'] + c['SAFE']
+    return dict(file=os.path.basename(p), reviewed=len(rows), counts=dict(c),
+                falseWithheld=c['OVER'], judged=n,
+                rate=(round(c['OVER'] / n, 4) if n else None),
+                formatted=common.fmt_rate(c['OVER'], n) if n else '— (n = 0)')
+
+
 def caption_relation(batch_dir):
     """The figure-caption RELATION, which round 4 could measure only in words (batch-1 report §5a).
     A caption can be character-perfect and still teach nothing when it is served with no tie to its figure."""
@@ -149,6 +183,8 @@ def caption_relation(batch_dir):
         return None
     rows = read_jsonl(p)
     c = collections.Counter((r.get('figure_relation') or '').strip().upper() or 'UNSET' for r in rows)
+    if not (c['OK'] + c['DETACHED'] + c['NA'] + c['UNSURE']):
+        return None      # a caption sample annotated before the field existed (round 4) has nothing to say
     n = c['OK'] + c['DETACHED']
     return dict(file=os.path.basename(p), rows=len(rows), counts=dict(c),
                 detached=c['DETACHED'], judged=n,
@@ -301,6 +337,7 @@ def build(registry_path, legacy_out, thresholds_path):
             lessons_by_key[k] = L
         batches.append(dict(batch=spec.get('batch'), dir=batch_label(bd, roots), pipeline=manifest.get('pipeline') or spec.get('pipeline'),
                             restore=restore_record(bd), caption_relation=caption_relation(bd),
+                            orphan=orphan_record(bd), over_withheld=over_withheld(bd),
                             started=manifest.get('started'), pipeline_code_sha=manifest.get('pipeline_code_sha'), pages=manifest.get('pages'),
                             lessons=ls, old_vs_new=dict(OLD=class_rates(rows['OLD']), NEW=class_rates(rows['NEW'])),
                             audit_rows=dict(OLD=len(rows['OLD']), NEW=len(rows['NEW'])),
@@ -342,6 +379,30 @@ def fmt(x, key='rate'):
     if key == 'rate':
         return f"{x['wrong']} / {x['judged']} = {x['rate']:.3f} [{x['lo']:.3f}, {x['hi']:.3f}]"
     return f"{x['applicable_wrong']} / {x['applicable']} = {x['applicable_rate']:.3f} [{x['applicable_lo']:.3f}, {x['applicable_hi']:.3f}]"
+
+
+def render_over_withheld(b):
+    """FALSE WITHHELD and the orphaned siblings — the half of the ledger that a falling false-trust
+    rate hides. Round 5 is judged on five directions at once, and two of them live here."""
+    w, orph = b.get('over_withheld'), b.get('orphan')
+    if not w and not orph:
+        return []
+    o = [f"\n### False withheld — batch `{b['dir']}`\n"]
+    if w:
+        o += ['| measure | value | of what |', '|---|---|---|',
+              f"| withheld regions reviewed | {w['reviewed']} | every withheld region in the audit sample |",
+              f"| **FALSE WITHHELD (over-withheld)** | **{w['formatted']}** | clean, legible text refused for a reason that did not apply to it |",
+              f"| safe refusals | {w['counts'].get('SAFE', 0)} | genuinely damaged, ambiguous or figure-dependent |",
+              f"| unclassifiable | {w['counts'].get('UNSURE', 0)} | excluded from the rate, counted here |", '']
+    if orph:
+        o += ['Withholding is not automatically safe. A withheld block that leaves a sibling stranded — one option '
+              'of a multiple-choice, a caption cut from its figure, a hole in an enumerated run — makes what IS '
+              'served wrong, not merely smaller, and is counted **teaching-critical** (`tool/corpus/legacy/orphan.py`).\n',
+              '| measure | value |', '|---|---|',
+              f"| structures mutilated by withholding | **{orph['teachingCriticalFindings']}** |",
+              f"| kinds | {orph['kinds']} |",
+              f"| **withheld regions that orphan a sibling** | **{orph['orphaningShareFormatted']}** |", '']
+    return o
 
 
 def render_restore(b):
@@ -431,6 +492,7 @@ def render_md(sb):
         for cls in DERIVED_CLASSES:
             o.append(f"| {cls} | annotator tag / all judged | {fmt(b['old_vs_new']['OLD'][cls])} | {fmt(b['old_vs_new']['NEW'][cls])} |")
             o.append(f"| {cls} (rows where the class applies) | annotator tag / applicable | {fmt(b['old_vs_new']['OLD'][cls], 'applicable')} | {fmt(b['old_vs_new']['NEW'][cls], 'applicable')} |")
+        o += render_over_withheld(b)
         o += render_restore(b)
         o += render_caption_relation(b)
         o.append('')

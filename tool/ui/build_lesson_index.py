@@ -49,11 +49,36 @@ for d in docs:
             lessons=sorted(lessons, key=lambda x: x['no'])))
 
 ex_by_lesson = collections.defaultdict(list)
+# ---- Founder §3 (2026-09-06): NON-VERBATIM UPSTREAM RECORDS FAIL CLOSED ---------------------
+# `poc-out/units/exercise-case-map.json` is written by tool/extract/rebuild_fractions.py, which
+# stamps every row `status: INFERRED`, `method: geometric-fraction-rebuild-v1` — «dựng từ hình học
+# ⇒ KHÔNG phải nguyên văn». All 41 rows carry it. This builder used to copy only
+# expr/skillCaseId/page/book into the pack, so the INFERRED marker and the method were DROPPED and
+# 41 expressions rebuilt from geometry shipped as if they were printed in the book — carrying a
+# skillCaseId, i.e. feeding the exercise path a child is taught from. It is the same family as the
+# `b) 3/10 + 5/21` → `b) 10 +` defect the legacy audit found.
+#
+# Founder: «Preserve status/provenance or fail closed. Do not silently construct mathematical truth
+# from geometry.» The pack schema has no provenance field for an activity and the app has no way to
+# show an INFERRED caveat, so FAIL CLOSED is the choice here: a non-verbatim upstream record is not
+# emitted at all. Every drop is counted and logged by reason — nothing is deleted upstream, and the
+# rows come back the moment provenance can travel with them.
+VERBATIM_STATUSES = ('', 'VERBATIM', 'PRINTED', 'ORIGINAL')
+_dropped_non_verbatim = []
 try:
     ec = json.load(open('poc-out/units/exercise-case-map.json'))
     items = ec if isinstance(ec, list) else ec.get('items', [])
     for e in items:
         if f'0{GRADE}-sgk-toan-{GRADE}' in e.get('book', '') and e.get('lesson') is not None:
+            status = (e.get('status') or '').strip().upper()
+            if status not in VERBATIM_STATUSES:
+                _dropped_non_verbatim.append(dict(
+                    book=e.get('book'), lesson=e.get('lesson'), page=e.get('printed'),
+                    skillCaseId=e.get('skillCaseId'), conceptId=e.get('conceptId'),
+                    status=status, method=e.get('method'),
+                    reason='upstream record is not verbatim and the pack carries no provenance field '
+                           'for it — fail closed (Founder §3)'))
+                continue
             # WAL-210 identity gate: số bài phải có trong mục lục canonical của cuốn đó.
             if not ATT.check_upstream('toanExercises', e['book'], e['lesson'], e.get('printed'), note=e.get('expr')):
                 continue
@@ -62,6 +87,11 @@ try:
                 page=e.get('printed'), book=e.get('book')))
 except FileNotFoundError:
     pass
+if _dropped_non_verbatim:
+    _by_lesson = collections.Counter((d['book'], d['lesson']) for d in _dropped_non_verbatim)
+    print(f'  ⛔ toanExercises: {len(_dropped_non_verbatim)} non-verbatim upstream record(s) NOT emitted '
+          f'(fail closed, Founder §3) across {len(_by_lesson)} lesson(s): '
+          + ', '.join(f'{b} B{l}×{n}' for (b, l), n in sorted(_by_lesson.items())))
 
 # ---- tvReadings (WAL-113 B1): đoạn văn + câu hỏi THẬT từ units TV ----------
 MIN_PASSAGE = 400          # SECTION_TEXT ngắn = tiêu đề/lệnh, không phải bài đọc
@@ -382,7 +412,8 @@ try:
     os.makedirs(ATTACH_LOG_DIR, exist_ok=True)
     json.dump(dict(grade=GRADE, packVersion=out['buildProvenance']['packVersion'],
                    contentHash=out['buildProvenance']['contentHash'], summary=_att,
-                   dropped=ATT.dropped, flagged=ATT.flagged),
+                   dropped=ATT.dropped, flagged=ATT.flagged,
+                   droppedNonVerbatim=_dropped_non_verbatim),
               open(f'{ATTACH_LOG_DIR}/lesson-index-g{GRADE}.attach-log.json', 'w'),
               ensure_ascii=False, indent=1)
 except OSError as e:
