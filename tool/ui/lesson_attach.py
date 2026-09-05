@@ -311,6 +311,17 @@ class AttachRegistry:
             self.flagged.append(row)
         return keep
 
+    def attach_items(self, family, items, page_key='page', pdf_key='pagePdf', note_key=None):
+        """Attach a list of page-keyed activity dicts (e.g. diaMaps): each kept item gets `lesson` and
+        `lessonTitle`; items the rule withholds are dropped (fail closed) and logged. Returns the kept list."""
+        kept = []
+        for it in items:
+            res = self.attach(family, it.get('book'), it.get(page_key), it.get(pdf_key), note=it.get(note_key) if note_key else None)
+            if res['lesson'] is None:
+                continue
+            kept.append(dict(it, lesson=res['lesson'], lessonTitle=res['title'] or None))
+        return kept
+
     def summary(self):
         by_family = {}
         for (fam, reason), n in sorted(self.counts.items()):

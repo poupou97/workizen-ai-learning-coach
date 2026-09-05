@@ -208,6 +208,18 @@ class RegistryTests(unittest.TestCase):
         self.assertFalse(s['books']['b1']['headerData'])
         self.assertEqual(reg.attach('suSources', 'unknown-book', 5)['reason'], la.NO_TOC_RANGES)
 
+    def test_attach_items_sets_lesson_on_page_keyed_activities_and_drops_withheld(self):
+        # diaMaps shape (Dart lane request): page = printed, pagePdf = pdf; LS&ĐL-5-like TOC Bài 1 p5, Bài 2 p9
+        docs = [dict(sourceDocumentId='05-sgk-lich-su-va-dia-li-5', lessons=[L(1, 5), L(2, 9), L(3, 16), L(7, 32)])]
+        reg = la.AttachRegistry(docs, attach_dir='/nonexistent')
+        maps = [dict(subject='LS&ĐL', book='05-sgk-lich-su-va-dia-li-5', page=10, pagePdf=12, asset='map-a.png', caption='Hình 1'),
+                dict(subject='LS&ĐL', book='05-sgk-lich-su-va-dia-li-5', page=3, pagePdf=5, asset='map-b.png', caption='Hình 0')]
+        kept = reg.attach_items('diaMaps', maps, page_key='page', pdf_key='pagePdf', note_key='asset')
+        self.assertEqual([(m['asset'], m['lesson'], m['lessonTitle']) for m in kept], [('map-a.png', 2, 'Bài 2')])
+        self.assertEqual(kept[0]['caption'], 'Hình 1')                      # other fields untouched
+        self.assertEqual(reg.summary()['counts']['diaMaps'], {la.ATTACHED: 1, la.BEFORE_FIRST: 1})
+        self.assertEqual(reg.dropped[0]['note'], 'map-b.png')
+
     def test_registry_reads_header_files_and_records_moves(self):
         import json, tempfile
         d = tempfile.mkdtemp()

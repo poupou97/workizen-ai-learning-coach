@@ -283,6 +283,10 @@ for m in DIA_MAPS:
     dia_maps.append(dict(m, pagePdf=r['pagePdf'], bboxFrac=r['bboxFrac'],
                          extractionVersion=r['extraction']))
 
+# WAL-210 (Dart lane request, PR #63/#64): mọi diaMaps[] mang `lesson` canonical, gắn bằng
+# cùng luật capped-toc-v1 + identity như các họ khác — không gắn được ⇒ không phát hành.
+dia_maps = ATT.attach_items('diaMaps', dia_maps, page_key='page', pdf_key='pagePdf', note_key='asset')
+
 # ---- books (WAL-167): manifest sách + bìa thật, để trẻ nhận ra cuốn sách ----
 # Chỉ nhận sách CÓ bìa trên máy này VÀ có bài trong mục lục — sách không mở ra
 # được cái gì thì không lên giá.
