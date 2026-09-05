@@ -451,3 +451,146 @@ false-trust audit is a different denominator — **60 TRUSTED blocks of `tc2-p1`
 `k / n` over the 484-row sample of seed 20260905 (attachment: 396 judged activities). LS&ĐL 5 figures are over that one book
 (123 pages / 23 TSL lessons / 390 picture regions). Caption and crop rates are over picture regions and crop regions, not blocks.
 Nothing here is divided by 3,679 or 3,381, and no rate on this page is a coverage claim.
+
+---
+
+## 13. Independent correctness review of this branch — findings, fixes, re-measurement
+
+An independent correctness review of the branch diff (posted in full as a comment on PR #77) reported
+**14 findings**; Lane D's measured re-run of legacy batch 1 added a fifteenth (**R7c**). Every finding was
+treated as a claim: reproduced with a failing test first, and only then fixed. This section records what
+each one turned out to be and what it moved. **No threshold was lowered and no guard was loosened.**
+
+Evidence (internal, gitignored): `poc-out/round4/pipeline/tc2-p2-review/` — a complete parallel run
+(attach · sdm · sdm-gold · lessons · lesson-document · metrics) built with the fixed code, and
+`poc-out/round4/pipeline/tc2-p2-before/` — the same 1 361 pages built from commit `cb60cde`, so every
+number below is a before/after on identical input. `tc2-p1` and `tc2-p2` were never written to.
+
+### 13.1 Headline numbers, restated
+
+| measure (54 gold pages · 643 learning blocks) | branch (§0) | after the review fixes |
+|---|---|---|
+| trusted blocks (coverage) | 354 (0.551) | **354 (0.551)** |
+| TLSR | 0.510 | **0.510** |
+| false-trusted blocks · FTR | 26 · 0.0734 | **26 · 0.0734** |
+| safe rejections | 273 | **273** |
+| CTE (pages) | 68 (21) | **68 (21)** |
+| trusted blocks whose digits differ from the gold | 6/89 | **6/89** |
+| meaning-changing inversions | 33 | **33** |
+| QUESTION precision / recall | 0.877 / 0.802 | **0.877 / 0.802** |
+| **lesson attachment (header) correct** | 48/54 | **49/54** |
+| attachment (TOC range) correct | 38/54 | **38/54** |
+
+Of the **192 numeric aggregate keys** the scorer emits for the gold set, exactly **one** moved:
+`attach_header_ok` 48 → 49 (dev 33 → 34). The page fixed is `11-sgk-vat-li-11` p105, which had **no lesson
+at all** and is now Bài 24, correct. **Zero pages regressed.**
+
+| other headline | branch | after |
+|---|---|---|
+| Bài 17 TSL: trusted / withheld | 51 / 13 | **52 / 12** |
+| Bài 17 LessonDocument: trusted / withheld / caption blocks | 60 / 13 / 9 | **61 / 12 / 10** |
+| Bài 17 gold stratum (4 pages, 53 blocks) | 44 (0.830) · FTR 0.0682 · CTE 4 | **identical** |
+| LS&ĐL 5 coverage (whole book, 1512 learning blocks) | 1041 = 0.6885 | **1040 = 0.6878** |
+| LS&ĐL 5 headers · chapters · pages with a lesson | 28/28 · 6 · 116 | **28/28 · 6 · 116** |
+| chapters over all 525 books with a units TOC | — | **0 books change** |
+| `flutter test` | 861 passed, 36 skipped | **861 passed, 36 skipped, exit 0** |
+
+**Effect on Lane C's Golden Slice #2, stated explicitly:** LS&ĐL 5's attachment file is unchanged (same 28
+headers, same 116 pages with a lesson, same single back cover), and its chapter list is unchanged (6
+«Chủ đề», same titles, same lessonNos). **One** learning block changes: the folk verse on p048 is now
+withheld as `line_structure` (§13.4), so whole-book coverage moves 0.6885 → 0.6878.
+
+**What got worse, stated:** six blocks move TRUSTED → WITHHELD across the 1 361 measured pages — five are
+line-break-significant text that was being served joined into prose (R7c), one is an SGV «(B)» fragment
+that was a `heading` and is now `teacher_text`. Eleven move the other way (F3). The Bài 17 tutor script is
+still absent for the same single reason as before (`p063:005`, `agree_order`); nothing here changes that.
+
+### 13.2 P0 — wrong data delivered or silently lost
+
+| # | verdict | mechanism → fix | measured |
+|---|---|---|---|
+| **F13** | REPRODUCED + FIXED | `back_cover` set `ended = True` for the rest of the book, so ONE false positive deleted the tail. Three of the seven marks are ordinary content («Giá:», «Website:», «HUÂN CHƯƠNG»). Marks split into strong/weak (a cover needs ≥ 1 strong AND ≥ 2 total); the cover verdict runs LAST, after front/back/TOC classification and header detection; **ending a book is now reversible** — a page printing a plausible lesson banner re-opens it (`resumed_after_end`) | 42 books / 6 573 pages: **page kinds unchanged everywhere**, 42/42 back covers kept (the 7 SGV covers print «BỘ SÁCH GIÁO VIÊN», now a strong mark), no page classified a cover carries a header, **0 resumes fire** — the guarantee is that one page can no longer delete a tail |
+| **F14** | REPRODUCED + FIXED | the «never skips more than 4 lessons» bound was applied to `max(due)`, so a legitimate `current+1` beside a far outlier vetoed the whole fallback and the page silently kept the wrong lesson. It is now a clamp on the candidates | see the row below — this fix could not land alone |
+| **(found while fixing F14)** | NEW | on **every** page where the clamp changed the verdict the OCR footer digit was a misread (104 on a 123-page book; 210; 303; 132), which makes every remaining TOC start «already due». A footer digit that disagrees with the book's own measured printed offset by more than a page is refused in favour of `pdf − offset` | **157 / 6 573 = 0.024** of pages carried such a digit. Without this, F14's clamp jumped LS&ĐL 5 four lessons forward and then rejected two real printed headers. With it: **83 pages change**, all improvements — Vật lí 11 pages-with-a-lesson **31 → 100** and headers **8 → 26** (headers after a theme opener are accepted again once `printed` is trustworthy), Tin học 6 11 pages off a single +7 jump onto Bài 11/12/13, TN&XH 1 3 pages. Gold attachment **48/54 → 49/54**, zero regressions |
+| **F7** | REPRODUCED + FIXED | `CHAPTER_HDR`'s numeral group had no trailing boundary: «PHẦN VĂN HỌC» → «Phần V» + «ĂN HỌC», «CHƯƠNG VIỆT NAM …» → «Chương VI», «HUÂN CHƯƠNG I» matched. Boundary required; the medal phrase excluded by name | real-corpus evidence: Khoa học 5's TOC prints «… THÀNH PHẦN VÀ VAI TRÒ …» and the old pattern read «PHẦN V» out of it. **0 of 525 books' chapter lists change** — the downstream `Bài N.` requirement was already suppressing the phantoms |
+| **F8** | REPRODUCED + FIXED | `clean_toc_title` let the separator run be EMPTY, so it ate the tail of a longer digit run: «… TỪ 1858 ĐẾN NĂM 1945» → «… ĐẾN NĂM 1». The separator is now required | **0** chapter titles in the corpus currently end in a year before a `Bài N.`, so nothing moves today. A latent child-facing wrong title removed |
+| **F2** | REPRODUCED + FIXED | the `attribution` role was unreachable for UPPERCASE — the two `upper_ratio >= 0.7` heading rules run earlier — and `heading` is COLOUR_HEAVY_EXEMPT and becomes the `heading_path` of every following block. The test moved before them; a `caption`-labelled line, a line ending in «?» and SGV prose are all left alone; and a line that opens with a bracket is never a section heading | 1 361 pages: **3 role changes**, all OCR fragments opening with a bracket that were poisoning `heading_path`; 1 trust change (an SGV «(B)» now correctly withheld). The 54 gold pages carry no uppercase attribution — which is why the branch's own numbers did not catch this |
+
+### 13.3 P1 — recall lost, or a guard reason that no longer applies
+
+Denominator for this table: **1 361 pages · 21 books · 34 822 blocks · 5 002 picture regions** — every page
+whose raw candidates already exist, rebuilt from `cb60cde` and from the fixed tree into two separate roots.
+
+| # | verdict | measured |
+|---|---|---|
+| **F1** | REPRODUCED + FIXED | the three branches tested different measurements, leaving a dead zone where a caption straddles the picture's edge (centre 0.545 → `None` while 0.540 and 0.550 linked). The side is now decided by the centre and the gap floored at 0. **Figures with a caption 1 362 → 1 380** (0.2723 → 0.2759); 6 change which caption. No distance limit relaxed |
+| **F3** | REPRODUCED + FIXED | the re-derivation recomputed only 3 of the 11 role-dependent guards. One authority now (`role_guards`), used by `build_page` and by `rederive_trust`. **11 blocks WITHHELD → TRUSTED**, every one a figure caption still citing `page_feature:diagram` after promotion («Sơ đồ lò nung vôi», «Cách gấp giấy lọc», «Hiện tượng nhật thực» …); `page_feature:diagram` withholds 324 → 301. **Deliberately not re-derived:** `agree_order` is waived for FLEX_ROLES in the first pass only — re-deriving it here would ADD trust to promoted blocks, so it stays fail-closed. Recorded, not quietly changed |
+| **F5** | REPRODUCED + FIXED | `num_directive` tested `ENUM.match` on the un-stripped text while `core` was dash-stripped. The bullet is now stepped over only when an enumerator follows it, so a bare dash line still needs a question lead and dialogue in a reading is untouched. **Exposure 0**: 0 of 29 505 measurable text blocks carry the shape — it lives in primary Toán/Tiếng Việt, of which only 96 pages have raw candidates |
+| **F4** | REPRODUCED IN PART + FIXED | «Đọc bảng chia 3 …» — an arithmetic table a child recites — matched the look-verb clause; excluded by naming the idiom (`bảng chia/nhân/cộng/trừ`), not by weakening the clause. **NOT reproduced as a defect:** «Xem bảng bên dưới» — there IS a table below it, so that match is correct and was left alone. **Exposure 0** in the measurable corpus |
+| **F10** | REPRODUCED + FIXED | `caption_of` is keyed by caption id, so the LAST figure overwrote the first. Every ImageBlock already carries its own `captionBlockId`, so the figure→caption direction was never lost; `captionOf` is a single id in `lib/core/lesson_model` (not this lane's to change), so it now names the FIRST figure deterministically, and a figure the document DROPS never wins over one it keeps |
+
+### 13.4 R7c — verse served as prose (Lane D, measured)
+
+The block-level colour fix (§8 request 3) serves four previously colour-vetoed regions again, and one of
+them is a poem: a block's text is ONE string, so its verse lines arrive joined —
+«Trên sông Đà Một đêm trăng chơi vơi Tôi đã nghe tiếng ba-la-lai-ca như thế …». Reproduced directly on
+Lane D's own SDM for TV5 tập một Bài 25.
+
+Preserving line breaks would change the LessonBlock shape, which belongs to `lib/core/lesson_model` and to
+Lane B, so the rule is the one used everywhere else here: **fail closed**. `tc2_sdm.verse_layout()` is
+deterministic geometry plus the printed convention — ≥ 3 OCR lines, ≥ 0.8 of them starting with a capital,
+the longest line ≤ 0.95 of the page's own text-column width, ≤ 1/3 of the non-final lines ending in
+sentence punctuation — and a block it recognises is **withheld with reason `line_structure`, never
+reflowed and never repaired.** The withheld region still carries its crop, so the printed verse survives
+as an image instead of arriving as mangled prose. Roles whose line breaks are typography (heading, stage
+label, running head, page number, figure text, table) are exempt; unknown page geometry fails OPEN.
+
+| | measured |
+|---|---|
+| blocks the guard fires on (1 361 pages, 14 546 non-typographic text blocks) | **25 = 0.0017** |
+| …that were already withheld for another reason | 20 |
+| …that move **TRUSTED → WITHHELD** | **5**, every one genuinely line-break-significant: LS&ĐL 5 p048 (a folk verse), TV5 p065 («Mầm non») and p123 («Tiếng đàn ba-la-lai-ca»), KHTN 9 p089 ×2 (a two-column comparison, nonsense once joined) |
+| prose blocks withheld anywhere in the set | **0** |
+| on Lane D's own Bài 25 pages | 7 blocks now carry `line_structure`, **2 of them were TRUSTED and served as joined prose** — exactly the two they reported |
+| 54 gold pages | unchanged in every figure |
+
+The 0.85–0.97 width band was inspected **before** the threshold was set: over the whole measurable corpus
+it holds exactly two blocks, both genuinely line-structured. The threshold follows that measurement, and
+it moves coverage down, never up.
+
+**Residual, stated:** one stanza of that poem (p123 block 016, «Cả công trường say ngủ cạnh dòng sông …»)
+has a longest line that reaches the full column width, so a width test cannot see it, and it is still
+served joined. Catching it needs a signal this lane does not have. Not tuned away — reported.
+
+**On Lane D's «12 of 30 reviewed withheld regions were clean text refused wrongly»:** nothing here loosens
+a guard to answer that. Two of the review's findings (F1, F3) give trust back where the *mechanism* was
+wrong — 11 captions un-withheld, 18 figures newly captioned — and R7c withholds 5 more where the delivered
+text was wrong. Over-withholding is measured against a mechanism, never against a target.
+
+### 13.5 P2 — comment / spec mismatches and dead code
+
+**F9** the chapter tone class did not match its own comment (`Ề` twice, four of six Ê-family forms missing,
+`Ù` missing from `CH`); it is now literally the lesson banner's class — **5 real «CHỦ ĐỂ N» banners in 3
+books are now read**, markers matched over the corpus 275 → 279, chapter lists unchanged. · **F12**
+`_systematic_toc_offset`'s docstring said «Median»; the code takes the mode and the `min_share` gate only
+makes sense for a mode — the comment was wrong, not the code. · **F6** `rank_of_native` / `p_rank` were
+assigned and never read: **removed**, and the re-sequenced figure ordering they hinted at is **not** wired
+— figures are placed by geometry (bbox centre y), which is what §7.1 measured. · **F11** `render_crops`
+built its neighbour set from blocks + withheld only, so two adjacent figure crops could still bleed by the
+full pad: **fixed** — `crop_neighbours()` includes figures, which can only reduce a crop's padding. ·
+**Doc strings** `build_lesson_index.py` (×4) and `lesson_attach.py` (×2) still said `capped-toc-v1`. ·
+**Import-time freeze** `lesson_attach.TC2_ATTACH_DIR` was frozen into default argument values at `def`
+time; `tc2_attach_dir()` now reads it at call time, so `WAL_TC2_ATTACH_DIR` works without
+`importlib.reload`.
+
+**Found, NOT fixed — outside this lane's ownership:** `tool/ui/pack_provenance.py` hard-codes
+`ATTACHMENT_RULE = 'capped-toc-v1'` and its verifier rejects any pack stamped otherwise, so **every pack
+built today records the wrong attachment rule in its provenance**, and `test_pack_provenance.py` pins it
+there. Reported for whoever owns the pack builder.
+
+### 13.6 Tests
+
+`tool/tests/test_round4_correctness_review.py` (new, one class per finding: F7, F9, F8, F2, F1, F5, F4,
+F3, F10, R7c, F11, the import-time freeze and the rule id) and `tool/tests/test_tc2_attach.py` (F13, F14 —
+beside the cover rule they are about, including a whole synthetic book run end to end through
+`attach_book`). **188 tests, green**; 54 of them are new and every one failed before its fix.
