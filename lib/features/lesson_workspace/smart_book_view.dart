@@ -297,8 +297,23 @@ class _SmartBookViewState extends State<SmartBookView> {
     );
   }
 
-  static Widget _fixedAspect(double? aspect, Widget child) =>
-      aspect == null ? child : AspectRatio(aspectRatio: aspect, child: child);
+  /// Hộp ảnh CỐ ĐỊNH theo tỉ lệ crop, nhưng KHÔNG cao quá ~45 % màn: ảnh
+  /// đứng (Hình 17.1) ở bề ngang máy xoay ngang từng cao ~2 600 px và nuốt
+  /// cả bài (Nokia n2 D5). Hộp giữ chỗ ⇒ neo cuộn không trượt (D4).
+  static Widget _fixedAspect(double? aspect, Widget child) {
+    if (aspect == null) return child;
+    return LayoutBuilder(
+      builder: (ctx, c) {
+        final maxH = MediaQuery.sizeOf(ctx).height * 0.45;
+        final w = c.maxWidth.isFinite ? c.maxWidth : 360.0;
+        var h = w / aspect;
+        if (h > maxH) h = maxH;
+        return Center(
+          child: SizedBox(width: h * aspect, height: h, child: child),
+        );
+      },
+    );
+  }
 
   Widget _table(TableBlock b) {
     if (!b.safe) {

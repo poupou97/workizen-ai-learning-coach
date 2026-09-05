@@ -75,6 +75,21 @@ void main() {
     expect(find.text('Cách'), findsOneWidget);
   });
 
+  testWidgets(
+    '⭐ ảnh không cao quá ~45 % màn (Nokia n2 D5), giữ chỗ theo tỉ lệ',
+    (t) async {
+      final d = loadSyntheticDoc();
+      await t.pumpWidget(_host(d));
+      await t.pumpAndSettle();
+      final screenH = t.view.physicalSize.height / t.view.devicePixelRatio;
+      for (final e in find.byType(Image).evaluate()) {
+        final size = e.size!;
+        expect(size.height, lessThanOrEqualTo(screenH * 0.45 + 1));
+        expect(size.height, greaterThan(0));
+      }
+    },
+  );
+
   testWidgets('nguồn cuối bài + «Hết bài» có trang in', (t) async {
     final d = loadSyntheticDoc();
     await t.pumpWidget(_host(d));
