@@ -148,15 +148,16 @@ def sample_new(batch_dir, seed, per_lesson, withheld_per_lesson):
             bs = sorted(by_role[r], key=lambda b: b['id']); rng.shuffle(bs)
             chosen.extend(bs[:alloc[r]])
         chosen = sorted(chosen, key=lambda b: (b['page'], b['order']))[:take + 3]
+        # attachment is judged once per activityId (ft_audit_score): for a TSL the unit of attachment is the PAGE
         for b in chosen:
-            rows.append(dict(family='legacyNew', side='NEW', grade=int(book[:2]), book=book, lesson=n, activityId=aid, kind=b['role']['value'], text=b['text'], pagePdf=b['page'], pagePrinted=b.get('page_printed'),
+            rows.append(dict(family='legacyNew', side='NEW', grade=int(book[:2]), book=book, lesson=n, activityId=f'{aid}:p{b["page"]:03d}', kind=b['role']['value'], text=b['text'], pagePdf=b['page'], pagePrinted=b.get('page_printed'),
                              bbox=b['bbox'], tslBlockId=b['id'], tslStatus='TRUSTED', roleConfidence=b['role'].get('confidence'), packVersion=P, servedAsTrusted=True,
                              source=dict(kind='tsl', tslBlockId=b['id'], bbox=b['bbox'], status='TRUSTED', reasons=[]), subject=common.subject_of(book),
                              precheck=dict(hasNumbers=bool(re.search(r'\d', b['text'] or '')), hasMath=bool(DIGIT_RUN.search(b['text'] or '') or re.search(r'[+\-×:=]\s*\d|\d\s*[+\-×:=]', b['text'] or '')), multiLine=(b['bbox'][3] > 0.03) if b.get('bbox') else False)))
         ws = sorted(tsl['withheld'], key=lambda w: (w['page'], w['order']))
         rng.shuffle(ws)
         for w in sorted(ws[:withheld_per_lesson], key=lambda w: (w['page'], w['order'])):
-            rows.append(dict(family='legacyNew', side='NEW', grade=int(book[:2]), book=book, lesson=n, activityId=aid, kind=w.get('role'), text=None, pagePdf=w['page'], pagePrinted=w.get('page_printed'),
+            rows.append(dict(family='legacyNew', side='NEW', grade=int(book[:2]), book=book, lesson=n, activityId=f'{aid}:p{w["page"]:03d}', kind=w.get('role'), text=None, pagePdf=w['page'], pagePrinted=w.get('page_printed'),
                              bbox=w['bbox'], tslBlockId=w['id'], tslStatus=w.get('status', 'WITHHELD'), withheldReasons=w.get('reasons', []), packVersion=P, servedAsTrusted=False,
                              source=dict(kind='tsl', tslBlockId=w['id'], bbox=w['bbox'], status=w.get('status', 'WITHHELD'), reasons=w.get('reasons', [])), subject=common.subject_of(book)))
     for i, r in enumerate(rows):
