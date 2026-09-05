@@ -44,9 +44,14 @@ CANDIDATES = [
 ]
 SGV_ANSWER = re.compile(r'(Đáp án|ĐÁP ÁN|Gợi ý trả lời|Gợi ý:|Trả lời:|Câu trả lời|Dự kiến|Kết quả:)')
 SGV_OBJECTIVE = re.compile(r'(MỤC TIÊU|Mục tiêu|Yêu cầu cần đạt|YÊU CẦU CẦN ĐẠT)')
-BAI_HEADER = re.compile(r'^\s*(?:BÀI|Bài)\s+(\d{1,2})\b')
+# The decorative lesson header OCRs as «BÀI N», «Bài N» or «BAI N» (tone mark lost);
+# KNTT Toán 6 prints the number in a circle → «BAI» on one line, the number (if OCR'd)
+# on a later line. A page that is the printed TOC («MỤC LỤC») is skipped.
+BAI_HEADER = re.compile(r'^\s*(?:BÀI|Bài|BAI)\s+(\d{1,2})\s*[\.:]?\s*(.{0,60})$')
+BAI_ALONE = re.compile(r'^\s*(?:BÀI|Bài|BAI)\s*$')
+BARE_NUMBER = re.compile(r'^\s*(\d{1,2})\s*$')
 FEATURES = ['formula', 'table', 'diagram', 'sidebar', 'side_by_side', 'color_heavy', 'figure', 'colored_box', 'two_col', 'continuation']
-YEAR = re.compile(r'\b(?:năm\s+)?(\d{3,4})\b')
+YEAR = re.compile(r'(?:năm|Năm)\s+(\d{2,4})\b|\b(\d{3,4})\b')
 
 
 def lesson_meta(docs, book, no):
@@ -61,19 +66,47 @@ def lesson_meta(docs, book, no):
 
 
 def printed_headers(book, pdf_pages, r):
-    """«Bài N» lines in the top 20 % of each page — the header signal tc2_attach uses."""
+    """Short «Bài N …» lines anywhere on the page (a lesson header line, not a
+    reference inside prose) — the header signal tc2_attach uses. Value =
+    (number, y of the line): a header near the top is the strongest form."""
     found = {}
     for p in pdf_pages:
         page = load_ocr_page(book, p, r)
         if not page:
             continue
-        for l in page['lines']:
-            if l.get('y', 1) < 0.2:
-                m = BAI_HEADER.match(l['text'])
-                if m:
-                    found[p] = int(m.group(1))
+        lines = page['lines']
+        if any('MỤC LỤC' in l['text'] for l in lines[:8]):
+            continue  # the printed TOC page lists every «Bài N.» — not a header
+        for i, l in enumerate(lines):
+            t = l['text'].strip()
+            m = BAI_HEADER.match(t)
+            if m and len(t) <= 70 and not re.search(r'\b(trang|tr\.|xem|ở|trong)\b', t.lower()):
+                found[p] = (int(m.group(1)), round(l.get('y', 1), 2), 'one-line')
+                break
+            if BAI_ALONE.match(t):
+                for nxt in lines[i + 1:i + 4]:
+                    mn = BARE_NUMBER.match(nxt['text'])
+                    if mn:
+                        found[p] = (int(mn.group(1)), round(l.get('y', 1), 2), 'split-lines')
+                        break
+                if p in found:
                     break
+                found[p] = (None, round(l.get('y', 1), 2), 'BAI-without-number')
+                break
     return found
+
+
+def load_units_any(book, r):
+    """units-k12 (generic extractor) first; else the older per-subject units
+    under poc-out/units/ (extract_units_tv / extract_units for TV5, Toán 4–5)."""
+    uj = load_units(book, r)
+    if uj:
+        return uj, 'units-k12'
+    for cand in (book, book.upper(), book.replace('-', '_')):
+        p = os.path.join(r, 'poc-out/units', cand + '.json')
+        if os.path.exists(p):
+            return json.load(open(p)), 'units'
+    return None, None
 
 
 def main():
@@ -87,7 +120,10 @@ def main():
         census[(row['book'], row['page'])] = row
     with_sgv = json.load(open(os.path.join(R, 'poc-out/k12-census-exports/sgk-lessons-with-sgv.json')))
     gold_pages = set()
-    for name in os.listdir(os.path.join(R, 'poc-out/trusted-corpus/tc-v2/tc2-p1/sdm-gold')):
+    gold_dir = os.path.join(R, 'poc-out/b-lane/tc-gold-branch/tool/corpus/tc_gold')  # 54 pages (38 dev + 16 held-out)
+    if not os.path.isdir(gold_dir):
+        gold_dir = os.path.join(HERE, '..', '..', 'corpus', 'tc_gold')  # 38 dev pages in this repo
+    for name in os.listdir(gold_dir):
         m = re.match(r'(.+)-p(\d{3})\.json$', name)
         if m:
             gold_pages.add((m.group(1), int(m.group(2))))
@@ -112,7 +148,16 @@ def main():
         probe = list(range((pdf_pages[0] - 2) if pdf_pages else 1, (pdf_pages[-1] + 3) if pdf_pages else 1))
         hdr = printed_headers(book, probe, R)
         rec['printed_bai_headers_near_range'] = {str(k): v for k, v in sorted(hdr.items())}
-        rec['toc_counter_matches_printed_header'] = any(v == no for v in hdr.values())
+        rec['toc_counter_matches_printed_header'] = any(v[0] == no for v in hdr.values())
+        # range by printed headers: header page of Bài N → page before the next header
+        # (a «BAI» line without an OCR'd number counts as a boundary but cannot confirm N)
+        hp = sorted(hdr.items())
+        start = next((p for p, v in hp if v[0] == no), None)
+        if start is None and pdf_pages:
+            start = next((p for p, v in hp if v[0] is None and p == pdf_pages[0]), None)
+        end = next((p for p, v in hp if start is not None and p > start), None)
+        rec['header_range_pdf'] = [start, (end - 1) if end else None] if start else None
+        rec['toc_range_vs_header_range_pages'] = [len(pdf_pages), (end - start) if (start and end) else None]
         # layout features
         feats = Counter()
         gate = Counter()
@@ -136,9 +181,15 @@ def main():
         rec['xycut_gate'] = dict(gate)
         rec['gold_pages_in_range'] = [f'p{p:03d}' for p in pdf_pages if (book, p) in gold_pages]
         # units (old extractor)
-        uj = load_units(book, R)
+        uj, units_src = load_units_any(book, R)
         units_by_lesson = [u for u in (uj or {}).get('units', []) if u.get('lesson') == no and u.get('role') != 'SECTION_TEXT']
         units_by_page = [u for u in (uj or {}).get('units', []) if u.get('pagePdf') in pdf_pages and u.get('role') != 'SECTION_TEXT']
+        if not units_by_lesson and units_by_page:
+            units_by_lesson = units_by_page  # attach by page range when the extractor carries no lesson counter
+            rec['units_attachment'] = 'by pdf range (no lesson field match)'
+        else:
+            rec['units_attachment'] = 'by lesson field'
+        rec['units_source'] = units_src
         labels = Counter()
         shapes = Counter()
         years = set()
@@ -152,9 +203,9 @@ def main():
                 labels[l] += 1
             for s in shape_hits(t):
                 shapes[s] += 1
-            for y in YEAR.findall(t):
-                yi = int(y)
-                if 40 <= yi <= 2030:
+            for m in YEAR.finditer(t):
+                yi = int(m.group(1) or m.group(2))
+                if (m.group(1) and 40 <= yi <= 2030) or (m.group(2) and 100 <= yi <= 2030):
                     years.add(yi)
         rec['units_extractor'] = (uj or {}).get('extractor')
         rec['units_attached_to_lesson'] = len(units_by_lesson)
@@ -213,7 +264,10 @@ def main():
         mk = r['sgv_markers_census(sgk-lessons-with-sgv)']
         mk = ', '.join(f'{k} {v}' for k, v in mk.items()) if mk else '—'
         wiring = ', '.join(f'{k} {v}' for k, v in r['pack_wiring'].items()) or '—'
-        md.append(f'| {i} | {r["book"]} · Bài {r["lesson"]} | {r["modality"]} | {r["title"]} | {r["toc_status"]} ({r["book_lessons_missing_pageStart"]}) | {rng}{" · OPEN-ENDED" if r["range_is_open_ended(next lesson has no pageStart)"] else ""} | {r["printed_bai_headers_near_range"]} | {r["toc_counter_matches_printed_header"]} | {feats} | {xy} | {", ".join(r["gold_pages_in_range"]) or "—"} | {r["units_attached_to_lesson"]} / {r["units_in_pdf_range"]} | {labs} | {shp} | {yrs} | {sgv} | {mk} | {wiring} |')
+        hdrs = ', '.join(f'p{k}→Bài {v[0] if v[0] is not None else "?"} (y {v[1]}, {v[2]})' for k, v in r['printed_bai_headers_near_range'].items()) or '—'
+        hr = r['header_range_pdf']
+        hr = f'PDF {hr[0]}–{hr[1]}' if hr and hr[1] else (f'PDF {hr[0]}–?' if hr else '—')
+        md.append(f'| {i} | {r["book"]} · Bài {r["lesson"]} | {r["modality"]} | {r["title"]} | {r["toc_status"]} ({r["book_lessons_missing_pageStart"]}) | {rng}{" · OPEN-ENDED" if r["range_is_open_ended(next lesson has no pageStart)"] else ""} · by header {hr} | {hdrs} | {r["toc_counter_matches_printed_header"]} | {feats} | {xy} | {", ".join(r["gold_pages_in_range"]) or "—"} | {r["units_attached_to_lesson"]} / {r["units_in_pdf_range"]} ({r.get("units_source") or "none"}) | {labs} | {shp} | {yrs} | {sgv} | {mk} | {wiring} |')
     md.append('')
     p = write_md('\n'.join(md), 'second-lesson-candidates.md', R)
     print(json.dumps(out, ensure_ascii=False, indent=1))
