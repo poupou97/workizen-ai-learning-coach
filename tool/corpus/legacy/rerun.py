@@ -144,7 +144,7 @@ def summarise(rows):
     for cls, _ in CLASS_FIELD:
         block = {}
         for verdict in ('WRONG', 'OK'):
-            sel = [r for r in rows if r['verdicts'][cls] == verdict]
+            sel = [r for r in rows if r['verdicts'].get(cls) == verdict]
             c = collections.Counter(r['outcome'] for r in sel)
             changed = sum(c[o] for o in NOT_SERVED_AS_BEFORE)
             k, n = changed, len(sel)

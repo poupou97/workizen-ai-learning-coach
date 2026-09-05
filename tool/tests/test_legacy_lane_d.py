@@ -23,6 +23,7 @@ import audit  # noqa: E402
 import common  # noqa: E402
 import compare  # noqa: E402
 import registry  # noqa: E402
+import rerun  # noqa: E402
 import scoreboard  # noqa: E402
 
 
@@ -363,6 +364,77 @@ class ScoreboardTests(unittest.TestCase):
         self.assertEqual(sb['scoreboard']['reprocessed'], 2)              # lesson 1 counted once, in its latest batch
         self.assertEqual(sb['scoreboard']['full_sourceability'], 1)
         self.assertEqual(sb['scoreboard']['pending'], 2)
+
+
+class RerunDeltaTests(unittest.TestCase):
+    """A re-run measures whether an improved build rescues the SAME lesson — never a fresh claim smuggled in."""
+
+    def _tsl(self, blocks, withheld=(), page=81):
+        return dict(boundary=dict(pages=[page]), blocks=list(blocks), withheld=list(withheld))
+
+    def _blk(self, i, bbox, text, role='body'):
+        return dict(id=i, page=81, bbox=bbox, text=text, role=dict(value=role, confidence=0.9), order=0)
+
+    def _row(self, sid='r1', bbox=(0.1, 0.1, 0.2, 0.1), text='Tính (theo mẫu).', page=81, **kw):
+        r = _row(sid, kind='body', **kw)
+        r.update(pagePdf=page, bbox=list(bbox), text=text, source=dict(kind='tsl', bbox=list(bbox)))
+        return r
+
+    def test_identical_text_in_the_same_region_is_the_only_transfer_licence(self):
+        row = self._row()
+        t = self._tsl([self._blk('n1', [0.1, 0.1, 0.2, 0.1], 'Tính (theo mẫu).')])
+        self.assertEqual(rerun.locate(row, t)[0], 'still_trusted_identical')
+        t2 = self._tsl([self._blk('n1', [0.1, 0.1, 0.2, 0.1], 'Tính (theo mấu) một cái gì đó khác.')])
+        self.assertEqual(rerun.locate(row, t2)[0], 'still_trusted_changed')
+
+    def test_a_withheld_or_unattached_or_missing_region_is_not_served_any_more(self):
+        row = self._row()
+        held = self._tsl([], [dict(id='w1', page=81, bbox=[0.1, 0.1, 0.2, 0.1], reasons=['agree_tones'], order=0)])
+        self.assertEqual(rerun.locate(row, held)[0], 'now_withheld')
+        self.assertEqual(rerun.locate(row, self._tsl([], [], page=99))[0], 'now_unattached')
+        self.assertEqual(rerun.locate(row, None)[0], 'now_unattached')
+        self.assertEqual(rerun.locate(row, self._tsl([]))[0], 'now_absent')
+
+    def test_normalised_text_comparison_ignores_whitespace_but_not_tone_marks(self):
+        row = self._row(text='Tính  (theo mẫu).')
+        same = self._tsl([self._blk('n1', [0.1, 0.1, 0.2, 0.1], 'Tính (theo mẫu).')])
+        self.assertEqual(rerun.locate(row, same)[0], 'still_trusted_identical')
+        tone = self._tsl([self._blk('n1', [0.1, 0.1, 0.2, 0.1], 'Tính (theo mấu).')])
+        self.assertEqual(rerun.locate(row, tone)[0], 'still_trusted_changed')
+
+    def test_summary_counts_only_regions_no_longer_served_as_rescued(self):
+        rows = [dict(sampleId='a', outcome='now_withheld', verdicts=dict(display='WRONG')),
+                dict(sampleId='b', outcome='still_trusted_changed', verdicts=dict(display='WRONG')),
+                dict(sampleId='c', outcome='still_trusted_identical', verdicts=dict(display='WRONG')),
+                dict(sampleId='d', outcome='now_withheld', verdicts=dict(display='OK'))]
+        s = rerun.summarise(rows)['display']
+        self.assertEqual(s['WRONG']['n'], 3)
+        self.assertEqual(s['WRONG']['no_longer_served_as_before'], 1)     # changed text is NOT a rescue
+        self.assertEqual(s['OK']['no_longer_served_as_before'], 1)        # collateral is counted, not hidden
+
+    def test_transfer_carries_verdicts_only_for_identical_rows_and_stamps_their_origin(self):
+        annotated = [_row('a', display_fidelity='WRONG'), _row('b', display_fidelity='OK'), _row('c', display_fidelity='OK')]
+        delta = [dict(sampleId='a', outcome='still_trusted_identical', new_block='n-a', coverage=0.99),
+                 dict(sampleId='b', outcome='still_trusted_changed', new_block='n-b', coverage=0.9),
+                 dict(sampleId='c', outcome='now_withheld', new_block='w-c', coverage=0.9)]
+        t = rerun.transfer_annotations(annotated, delta, 'tc2-p2', 'legacy-b1')
+        self.assertEqual([r['sampleId'] for r in t], ['a'])
+        self.assertEqual(t[0]['display_fidelity'], 'WRONG')
+        self.assertEqual(t[0]['packVersion'], 'tc2-p2')
+        self.assertEqual(t[0]['tslBlockId'], 'n-a')
+        self.assertEqual(t[0]['verdictTransferredFrom']['pipeline'], 'legacy-b1')
+        self.assertIn('identical', t[0]['verdictTransferredFrom']['rule'])
+
+    def test_coverage_reports_the_price_paid_in_withholding(self):
+        d = tempfile.mkdtemp(dir=_SANDBOX)
+        common.dump_json(dict(pipeline='tc2-p2'), f'{d}/run-manifest.json')
+        common.dump_json(dict(book='b', lesson=1, provenance=dict(sourceability='PARTIAL', pagePdfStart=1, pagePdfEnd=2,
+                                                                 tslStats=dict(learning_blocks=10, trusted=4, withheld=6, withheld_by_reason={'agree_tones': 6}))),
+                         f'{d}/lesson-documents/lesson-b-b1.json')
+        c = rerun.coverage(d)['b#1']
+        self.assertEqual((c['trusted'], c['withheld']), (4, 6))
+        self.assertAlmostEqual(c['served_share'], 0.4)
+        self.assertEqual(rerun.pipeline_of(d), 'tc2-p2')
 
 
 if __name__ == '__main__':
