@@ -1,5 +1,7 @@
 # LANE C — DISCOVER / K-12 research (round 3, WAL-210) · READY FOR FOUNDER REVIEW — nothing merged
 
+> **Round 4 (2026-09-05, Golden Slice #2):** the gate for LS&ĐL 5 Bài 8 ran — verdict **PASS WITH WITHHOLDS**, slice built (bounded). See `05-GOLDEN-SLICE-2-GATE.md` (numbers), `06-HISTORY-ABSTRACTIONS.md` (what generalised), the round-4 column appended to `02-ASSUMPTION-LEDGER.md`, and `evidence/round4-device/` (device walk QUEUED — the Nokia was locked). Nothing below is changed by round 4.
+
 **Goal (Founder):** not coverage — find which architecture/capability unlocks the next K-12 step; propose a second golden lesson that is deliberately different from KHTN 6 Bài 17 so it *falsifies* the architecture. **Method:** read-only scripts over the data already on disk (`tool/research/lane_c/`, outputs `poc-out/round3/lane-c/`, copies in `data/`); page dumps read internally (D4); no pack, no fixture, no Dart, no reprocess. Labels: MEASURED · DOC-CLAIM · ESTIMATED · HYPOTHESIS; denominators per D5 (238 TSL slice; 3,679 canonical; per-family `lessonCount` sums).
 
 ## 1. Generalisation verdict per family (one line each; evidence in 01)

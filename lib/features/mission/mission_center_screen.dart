@@ -45,6 +45,7 @@ class MissionCenterScreen extends StatelessWidget {
     this.onStartRecommendation,
     this.workspaceLesson,
     this.onOpenWorkspaceLesson,
+    this.researchLessons = const [],
   });
 
   final MissionData data;
@@ -101,7 +102,15 @@ class MissionCenterScreen extends StatelessWidget {
   final LessonDocument? workspaceLesson;
   final void Function(LessonDocument)? onOpenWorkspaceLesson;
 
+  /// ⭐ ROUND 4 (Lane C, Golden Slice #2) — LÁT CẮT NGHIÊN CỨU của lớp KHÁC
+  /// (LS&ĐL 5 Bài 8 trên máy của học sinh lớp 6): hiện thành thẻ riêng, ghi
+  /// rõ «sách lớp N», để Founder đi được tới lát cắt mà không tạo hồ sơ mới.
+  /// Rỗng ⇒ không thẻ. Mở bằng cùng [onOpenWorkspaceLesson].
+  final List<LessonDocument> researchLessons;
+
   static const workspaceCardKey = Key('home-workspace-card');
+  static Key researchCardKey(String slotKey) =>
+      Key('home-research-card-$slotKey');
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +130,10 @@ class MissionCenterScreen extends StatelessWidget {
             if (workspaceLesson != null) ...[
               const SizedBox(height: WalSpacing.sm),
               _workspaceCard(workspaceLesson!),
+            ],
+            for (final d in researchLessons) ...[
+              const SizedBox(height: WalSpacing.sm),
+              _workspaceCard(d, research: true),
             ],
             if (data.upcomingSubjects.isNotEmpty) ...[
               const SizedBox(height: WalSpacing.sm),
@@ -333,12 +346,14 @@ class MissionCenterScreen extends StatelessWidget {
   /// ROUND 3 B1 — thẻ «Bài học SAM»: một bài, ba cách học, từ Home một chạm.
   /// Mọi chữ đọc từ tài liệu bài (tên, chương, trang); nhãn thử nghiệm bắt
   /// buộc vì `doc.isFixture`.
-  Widget _workspaceCard(LessonDocument doc) {
+  Widget _workspaceCard(LessonDocument doc, {bool research = false}) {
     final where = doc.chapter == null
         ? doc.pageRangeLine
         : '${doc.chapter!.label} · ${doc.pageRangeLine}';
     return Container(
-      key: MissionCenterScreen.workspaceCardKey,
+      key: research
+          ? MissionCenterScreen.researchCardKey(doc.slotKey)
+          : MissionCenterScreen.workspaceCardKey,
       padding: const EdgeInsets.all(WalSpacing.lg),
       decoration: BoxDecoration(
           color: Colors.white,
@@ -346,9 +361,11 @@ class MissionCenterScreen extends StatelessWidget {
           border: Border.all(color: WalColors.primary500.withValues(alpha: 0.35))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
-            doc.isFixture
-                ? 'BÀI HỌC SAM · BẢN THỬ NGHIỆM'
-                : 'BÀI HỌC SAM',
+            research
+                ? 'LÁT CẮT NGHIÊN CỨU · SÁCH LỚP ${doc.grade} · BẢN THỬ NGHIỆM'
+                : doc.isFixture
+                    ? 'BÀI HỌC SAM · BẢN THỬ NGHIỆM'
+                    : 'BÀI HỌC SAM',
             style: const TextStyle(
                 fontSize: WalType.secondary,
                 fontWeight: FontWeight.w700,
