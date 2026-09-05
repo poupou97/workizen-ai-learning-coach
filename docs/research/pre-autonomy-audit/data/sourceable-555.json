@@ -1,0 +1,1808 @@
+{
+ "script": "d_555_recompute.py",
+ "note": "census range rule (printed pageStart used as pdf index, no offset) — same as tc_census_report.py; UNHANDLED = formula/diagram/color_heavy/table/three_col per TC-18 Q3",
+ "total": {
+  "ranged": 3381,
+  "plain": 103,
+  "no_unhandled": 559,
+  "no_unhandled_no_sbs": 362
+ },
+ "per_subject": {
+  "Chuyên đề": {
+   "ranged": 264,
+   "plain": 7,
+   "no_unhandled": 32,
+   "no_unhandled_no_sbs": 23
+  },
+  "Công nghệ": {
+   "ranged": 295,
+   "plain": 5,
+   "no_unhandled": 62,
+   "no_unhandled_no_sbs": 21
+  },
+  "GDCD": {
+   "ranged": 9,
+   "plain": 0,
+   "no_unhandled": 2,
+   "no_unhandled_no_sbs": 1
+  },
+  "GDKT&PL": {
+   "ranged": 85,
+   "plain": 16,
+   "no_unhandled": 61,
+   "no_unhandled_no_sbs": 48
+  },
+  "GDTC": {
+   "ranged": 330,
+   "plain": 52,
+   "no_unhandled": 124,
+   "no_unhandled_no_sbs": 116
+  },
+  "Hoá học": {
+   "ranged": 57,
+   "plain": 1,
+   "no_unhandled": 2,
+   "no_unhandled_no_sbs": 2
+  },
+  "HĐTN": {
+   "ranged": 132,
+   "plain": 3,
+   "no_unhandled": 50,
+   "no_unhandled_no_sbs": 39
+  },
+  "HĐTN-HN": {
+   "ranged": 26,
+   "plain": 0,
+   "no_unhandled": 2,
+   "no_unhandled_no_sbs": 0
+  },
+  "KHTN": {
+   "ranged": 145,
+   "plain": 0,
+   "no_unhandled": 4,
+   "no_unhandled_no_sbs": 3
+  },
+  "Khoa học": {
+   "ranged": 99,
+   "plain": 1,
+   "no_unhandled": 17,
+   "no_unhandled_no_sbs": 6
+  },
+  "LS&ĐL": {
+   "ranged": 64,
+   "plain": 0,
+   "no_unhandled": 6,
+   "no_unhandled_no_sbs": 2
+  },
+  "Lịch sử": {
+   "ranged": 45,
+   "plain": 2,
+   "no_unhandled": 13,
+   "no_unhandled_no_sbs": 4
+  },
+  "Mĩ thuật": {
+   "ranged": 121,
+   "plain": 1,
+   "no_unhandled": 40,
+   "no_unhandled_no_sbs": 26
+  },
+  "Ngữ văn": {
+   "ranged": 41,
+   "plain": 0,
+   "no_unhandled": 7,
+   "no_unhandled_no_sbs": 0
+  },
+  "Sinh học": {
+   "ranged": 90,
+   "plain": 1,
+   "no_unhandled": 8,
+   "no_unhandled_no_sbs": 7
+  },
+  "TN&XH": {
+   "ranged": 89,
+   "plain": 0,
+   "no_unhandled": 4,
+   "no_unhandled_no_sbs": 3
+  },
+  "Tin học": {
+   "ranged": 199,
+   "plain": 1,
+   "no_unhandled": 24,
+   "no_unhandled_no_sbs": 5
+  },
+  "Tiếng Anh": {
+   "ranged": 78,
+   "plain": 0,
+   "no_unhandled": 0,
+   "no_unhandled_no_sbs": 0
+  },
+  "Tiếng Hàn": {
+   "ranged": 24,
+   "plain": 0,
+   "no_unhandled": 0,
+   "no_unhandled_no_sbs": 0
+  },
+  "Tiếng Việt": {
+   "ranged": 251,
+   "plain": 1,
+   "no_unhandled": 41,
+   "no_unhandled_no_sbs": 15
+  },
+  "Toán": {
+   "ranged": 554,
+   "plain": 0,
+   "no_unhandled": 4,
+   "no_unhandled_no_sbs": 1
+  },
+  "Vật lí": {
+   "ranged": 82,
+   "plain": 0,
+   "no_unhandled": 1,
+   "no_unhandled_no_sbs": 0
+  },
+  "Âm nhạc": {
+   "ranged": 133,
+   "plain": 6,
+   "no_unhandled": 15,
+   "no_unhandled_no_sbs": 11
+  },
+  "Đạo đức": {
+   "ranged": 72,
+   "plain": 0,
+   "no_unhandled": 17,
+   "no_unhandled_no_sbs": 17
+  },
+  "Địa lí": {
+   "ranged": 96,
+   "plain": 6,
+   "no_unhandled": 23,
+   "no_unhandled_no_sbs": 12
+  }
+ },
+ "per_grade": {
+  "1": {
+   "ranged": 179,
+   "plain": 1,
+   "no_unhandled": 39,
+   "no_unhandled_no_sbs": 37
+  },
+  "2": {
+   "ranged": 200,
+   "plain": 0,
+   "no_unhandled": 12,
+   "no_unhandled_no_sbs": 7
+  },
+  "3": {
+   "ranged": 286,
+   "plain": 0,
+   "no_unhandled": 27,
+   "no_unhandled_no_sbs": 15
+  },
+  "4": {
+   "ranged": 284,
+   "plain": 3,
+   "no_unhandled": 45,
+   "no_unhandled_no_sbs": 23
+  },
+  "5": {
+   "ranged": 262,
+   "plain": 1,
+   "no_unhandled": 34,
+   "no_unhandled_no_sbs": 19
+  },
+  "6": {
+   "ranged": 186,
+   "plain": 4,
+   "no_unhandled": 20,
+   "no_unhandled_no_sbs": 13
+  },
+  "7": {
+   "ranged": 160,
+   "plain": 9,
+   "no_unhandled": 28,
+   "no_unhandled_no_sbs": 17
+  },
+  "8": {
+   "ranged": 177,
+   "plain": 4,
+   "no_unhandled": 27,
+   "no_unhandled_no_sbs": 14
+  },
+  "9": {
+   "ranged": 198,
+   "plain": 10,
+   "no_unhandled": 33,
+   "no_unhandled_no_sbs": 24
+  },
+  "10": {
+   "ranged": 489,
+   "plain": 25,
+   "no_unhandled": 97,
+   "no_unhandled_no_sbs": 66
+  },
+  "11": {
+   "ranged": 501,
+   "plain": 27,
+   "no_unhandled": 118,
+   "no_unhandled_no_sbs": 74
+  },
+  "12": {
+   "ranged": 459,
+   "plain": 19,
+   "no_unhandled": 79,
+   "no_unhandled_no_sbs": 53
+  }
+ },
+ "baseline_113": {
+  "ranged": 108,
+  "plain": 0,
+  "no_unhandled": 17,
+  "pages": 746,
+  "pages_side_by_side": 287,
+  "pages_any_hard": 576
+ },
+ "baseline_rows": [
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 1,
+   "pages": 12,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 4,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 5,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 6,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 8,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 10,
+   "pages": 3,
+   "hard": [
+    "colored_box",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 12,
+   "pages": 3,
+   "hard": [
+    "colored_box",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 13,
+   "pages": 3,
+   "hard": [
+    "colored_box",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "04-sgk-lich-su-va-dia-li-4",
+   "lesson": 7,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "04-sgk-lich-su-va-dia-li-4",
+   "lesson": 12,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "table"
+   ]
+  },
+  {
+   "book": "04-sgk-toan-4-tap-hai",
+   "lesson": 60,
+   "pages": 6,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "formula",
+    "overlap",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "04-sgk-toan-4-tap-hai",
+   "lesson": 61,
+   "pages": 3,
+   "hard": [
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "04-sgk-toan-4-tap-hai",
+   "lesson": 63,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula",
+    "side_by_side",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "04-sgk-toan-4-tap-hai",
+   "lesson": 64,
+   "pages": 4,
+   "hard": [
+    "diagram",
+    "formula",
+    "side_by_side",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "04-sgk-toan-4-tap-hai",
+   "lesson": 66,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "table"
+   ]
+  },
+  {
+   "book": "04-sgk-toan-4-tap-hai",
+   "lesson": 73,
+   "pages": 7,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "formula",
+    "overlap",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "05-sgk-khoa-hoc-5",
+   "lesson": 1,
+   "pages": 9,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-khoa-hoc-5",
+   "lesson": 3,
+   "pages": 7,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-khoa-hoc-5",
+   "lesson": 5,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-khoa-hoc-5",
+   "lesson": 14,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-lich-su-va-dia-li-5",
+   "lesson": 3,
+   "pages": 16,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "05-sgk-lich-su-va-dia-li-5",
+   "lesson": 9,
+   "pages": 10,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 1,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 2,
+   "pages": 4,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "side_by_side"
+   ],
+   "unhandled": [
+    "color_heavy"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 3,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 4,
+   "pages": 8,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 6,
+   "pages": 4,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 7,
+   "pages": 4,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 8,
+   "pages": 5,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "side_by_side"
+   ],
+   "unhandled": [
+    "color_heavy"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 9,
+   "pages": 6,
+   "hard": [
+    "colored_box",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 10,
+   "pages": 3,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 11,
+   "pages": 5,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 12,
+   "pages": 3,
+   "hard": [
+    "diagram"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 13,
+   "pages": 6,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 14,
+   "pages": 3,
+   "hard": [
+    "diagram",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 15,
+   "pages": 4,
+   "hard": [
+    "color_heavy",
+    "side_by_side"
+   ],
+   "unhandled": [
+    "color_heavy"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 16,
+   "pages": 15,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 17,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "table"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 18,
+   "pages": 8,
+   "hard": [
+    "colored_box",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 20,
+   "pages": 4,
+   "hard": [
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 21,
+   "pages": 4,
+   "hard": [
+    "color_heavy",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 22,
+   "pages": 3,
+   "hard": [
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 23,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 24,
+   "pages": 5,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "low_conf",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 25,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 26,
+   "pages": 4,
+   "hard": [
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 27,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 28,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 29,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-hai",
+   "lesson": 30,
+   "pages": 17,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram",
+    "table"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 1,
+   "pages": 5,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 2,
+   "pages": 3,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 3,
+   "pages": 7,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 4,
+   "pages": 3,
+   "hard": [
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 5,
+   "pages": 3,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "side_by_side"
+   ],
+   "unhandled": [
+    "color_heavy"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 6,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 7,
+   "pages": 5,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 8,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 9,
+   "pages": 7,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 10,
+   "pages": 5,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 11,
+   "pages": 2,
+   "hard": [
+    "colored_box",
+    "diagram"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 12,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "table"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 13,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 14,
+   "pages": 22,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 17,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 18,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 19,
+   "pages": 4,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "overlap",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 20,
+   "pages": 4,
+   "hard": [
+    "sidebar"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 21,
+   "pages": 4,
+   "hard": [
+    "side_by_side"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 22,
+   "pages": 9,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 24,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "side_by_side"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 25,
+   "pages": 4,
+   "hard": [
+    "color_heavy",
+    "diagram",
+    "side_by_side"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 26,
+   "pages": 5,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram",
+    "table"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 27,
+   "pages": 6,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 28,
+   "pages": 3,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 29,
+   "pages": 4,
+   "hard": [
+    "colored_box"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 30,
+   "pages": 4,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 31,
+   "pages": 7,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "05-sgk-tieng-viet-5-tap-mot",
+   "lesson": 32,
+   "pages": 15,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "overlap",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram",
+    "table"
+   ]
+  },
+  {
+   "book": "05-sgk-toan-5-tap-hai",
+   "lesson": 69,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "05-sgk-toan-5-tap-hai",
+   "lesson": 75,
+   "pages": 11,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "formula",
+    "overlap",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "05-sgk-toan-5-tap-mot",
+   "lesson": 6,
+   "pages": 3,
+   "hard": [
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "05-sgk-toan-5-tap-mot",
+   "lesson": 29,
+   "pages": 27,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "formula",
+    "overlap",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "06-sgk-khoa-hoc-tu-nhien-6",
+   "lesson": 11,
+   "pages": 6,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula"
+   ]
+  },
+  {
+   "book": "06-sgk-khoa-hoc-tu-nhien-6",
+   "lesson": 46,
+   "pages": 3,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram"
+   ]
+  },
+  {
+   "book": "06-sgk-khoa-hoc-tu-nhien-6",
+   "lesson": 48,
+   "pages": 3,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "06-sgk-khoa-hoc-tu-nhien-6",
+   "lesson": 50,
+   "pages": 3,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "table"
+   ]
+  },
+  {
+   "book": "07-sgk-khoa-hoc-tu-nhien-7",
+   "lesson": 16,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula"
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 5,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "formula",
+    "sidebar"
+   ],
+   "unhandled": [
+    "formula"
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 7,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula"
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 15,
+   "pages": 3,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula"
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 16,
+   "pages": 6,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula"
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 22,
+   "pages": 109,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 5,
+   "pages": 5,
+   "hard": [
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 8,
+   "pages": 7,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "table"
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 12,
+   "pages": 4,
+   "hard": [
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 14,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 19,
+   "pages": 3,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 23,
+   "pages": 4,
+   "hard": [
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 24,
+   "pages": 3,
+   "hard": [
+    "diagram",
+    "formula",
+    "overlap",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 26,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula"
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 29,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 30,
+   "pages": 3,
+   "hard": [
+    "colored_box"
+   ],
+   "unhandled": []
+  },
+  {
+   "book": "10-sgk-hoa-hoc-10",
+   "lesson": 6,
+   "pages": 6,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula",
+    "overlap",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "10-sgk-hoa-hoc-10",
+   "lesson": 11,
+   "pages": 4,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "table"
+   ]
+  },
+  {
+   "book": "10-sgk-hoa-hoc-10",
+   "lesson": 14,
+   "pages": 55,
+   "hard": [
+    "color_heavy",
+    "colored_box",
+    "diagram",
+    "formula",
+    "overlap",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "color_heavy",
+    "diagram",
+    "formula",
+    "table"
+   ]
+  },
+  {
+   "book": "10-sgk-vat-li-10",
+   "lesson": 14,
+   "pages": 3,
+   "hard": [
+    "diagram",
+    "side_by_side",
+    "sidebar"
+   ],
+   "unhandled": [
+    "diagram"
+   ]
+  },
+  {
+   "book": "10-sgk-vat-li-10",
+   "lesson": 18,
+   "pages": 5,
+   "hard": [
+    "colored_box",
+    "diagram",
+    "formula",
+    "side_by_side",
+    "sidebar",
+    "table"
+   ],
+   "unhandled": [
+    "diagram",
+    "formula",
+    "table"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,8527 @@
+[
+ {
+  "sourceDocumentId": "01-sgk-am-nhac-1",
+  "grade": 1,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "01-sgk-dao-duc-1",
+  "grade": 1,
+  "subject": "Đạo đức",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 30,
+  "paged": 30,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.84,
+  "headGap": 0.08,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "01-sgk-giao-duc-the-chat-1",
+  "grade": 1,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 26,
+  "paged": 26,
+  "dupNumbers": 21,
+  "spineRatio": 0.46,
+  "coverage": 0.83,
+  "headGap": 0.1,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "01-sgk-hoat-dong-trai-nghiem-1",
+  "grade": 1,
+  "subject": "HĐTN",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 30,
+  "paged": 30,
+  "dupNumbers": 9,
+  "spineRatio": 0.77,
+  "coverage": 0.83,
+  "headGap": 0.07,
+  "pageCount": 90
+ },
+ {
+  "sourceDocumentId": "01-sgk-mi-thuat-1",
+  "grade": 1,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "01-sgk-tieng-anh-1-global-success",
+  "grade": 1,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "01-sgk-tieng-viet-1-tap-hai",
+  "grade": 1,
+  "subject": "Tiếng Việt",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "01-sgk-tieng-viet-1-tap-mot",
+  "grade": 1,
+  "subject": "Tiếng Việt",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 26,
+  "paged": 25,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.35,
+  "headGap": 0.6,
+  "pageCount": 186
+ },
+ {
+  "sourceDocumentId": "01-sgk-toan-1-tap-hai",
+  "grade": 1,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 21,
+  "paged": 20,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.87,
+  "headGap": 0.04,
+  "pageCount": 110
+ },
+ {
+  "sourceDocumentId": "01-sgk-toan-1-tap-mot",
+  "grade": 1,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 20,
+  "paged": 20,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.88,
+  "headGap": 0.07,
+  "pageCount": 118
+ },
+ {
+  "sourceDocumentId": "01-sgk-tu-nhien-va-xa-hoi-1",
+  "grade": 1,
+  "subject": "TN&XH",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 28,
+  "paged": 28,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.9,
+  "headGap": 0.05,
+  "pageCount": 126
+ },
+ {
+  "sourceDocumentId": "01-sgv-am-nhac-1",
+  "grade": 1,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 8,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "01-sgv-dao-duc-1",
+  "grade": 1,
+  "subject": "Đạo đức",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 30,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.64,
+  "headGap": 0.28,
+  "pageCount": 102
+ },
+ {
+  "sourceDocumentId": "01-sgv-giao-duc-the-chat-1",
+  "grade": 1,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 25,
+  "paged": 25,
+  "dupNumbers": 20,
+  "spineRatio": 0.48,
+  "coverage": 0.77,
+  "headGap": 0.18,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "01-sgv-hoat-dong-trai-nghiem-1",
+  "grade": 1,
+  "subject": "HĐTN",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 35,
+  "paged": 35,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.89,
+  "headGap": 0.08,
+  "pageCount": 206
+ },
+ {
+  "sourceDocumentId": "01-sgv-mi-thuat-1",
+  "grade": 1,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 16,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.07,
+  "headGap": 0.02,
+  "pageCount": 42
+ },
+ {
+  "sourceDocumentId": "01-sgv-tieng-anh-1-global-success",
+  "grade": 1,
+  "subject": "Tiếng Anh",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 16,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.04,
+  "headGap": 0.37,
+  "pageCount": 167
+ },
+ {
+  "sourceDocumentId": "01-sgv-tieng-viet-1-tap-mot",
+  "grade": 1,
+  "subject": "Tiếng Việt",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 76,
+  "paged": 75,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.87,
+  "headGap": 0.1,
+  "pageCount": 298
+ },
+ {
+  "sourceDocumentId": "01-sgv-toan-1",
+  "grade": 1,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 54,
+  "paged": 50,
+  "dupNumbers": 9,
+  "spineRatio": 0.84,
+  "coverage": 0.84,
+  "headGap": 0.13,
+  "pageCount": 122
+ },
+ {
+  "sourceDocumentId": "01-sgv-tu-nhien-va-xa-hoi-1",
+  "grade": 1,
+  "subject": "TN&XH",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 28,
+  "paged": 21,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.77,
+  "headGap": 0.16,
+  "pageCount": 126
+ },
+ {
+  "sourceDocumentId": "01-sgvtieng-viet-1-tap-hai",
+  "grade": 1,
+  "subject": "Tiếng Việt",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 45,
+  "paged": 44,
+  "dupNumbers": 37,
+  "spineRatio": 0.25,
+  "coverage": 0.42,
+  "headGap": 0.52,
+  "pageCount": 210
+ },
+ {
+  "sourceDocumentId": "02-sgk-am-nhac-2",
+  "grade": 2,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.77,
+  "headGap": 0.08,
+  "pageCount": 62
+ },
+ {
+  "sourceDocumentId": "02-sgk-dao-duc-2",
+  "grade": 2,
+  "subject": "Đạo đức",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 15,
+  "paged": 15,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.82,
+  "headGap": 0.07,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "02-sgk-giao-duc-the-chat-2",
+  "grade": 2,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 25,
+  "paged": 17,
+  "dupNumbers": 11,
+  "spineRatio": 0.65,
+  "coverage": 0.53,
+  "headGap": 0.08,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "02-sgk-hoat-dong-trai-nghiem-2",
+  "grade": 2,
+  "subject": "HĐTN",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "02-sgk-mi-thuat-2",
+  "grade": 2,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "02-sgk-tieng-anh-2-global-success",
+  "grade": 2,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "02-sgk-tieng-viet-2-tap-hai",
+  "grade": 2,
+  "subject": "Tiếng Việt",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 29,
+  "paged": 29,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.83,
+  "headGap": 0.07,
+  "pageCount": 146
+ },
+ {
+  "sourceDocumentId": "02-sgk-tieng-viet-2-tap-mot",
+  "grade": 2,
+  "subject": "Tiếng Việt",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 26,
+  "paged": 25,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.7,
+  "headGap": 0.08,
+  "pageCount": 146
+ },
+ {
+  "sourceDocumentId": "02-sgk-toan-2-tap-hai",
+  "grade": 2,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 39,
+  "paged": 39,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.93,
+  "headGap": 0.03,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "02-sgk-toan-2-tap-mot",
+  "grade": 2,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 36,
+  "paged": 36,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.91,
+  "headGap": 0.04,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "02-sgk-tu-nhien-va-xa-hoi-2",
+  "grade": 2,
+  "subject": "TN&XH",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 31,
+  "paged": 31,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.9,
+  "headGap": 0.05,
+  "pageCount": 122
+ },
+ {
+  "sourceDocumentId": "02-sgv-am-nhac-2",
+  "grade": 2,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 14,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.88,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "02-sgv-dao-duc-2",
+  "grade": 2,
+  "subject": "Đạo đức",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 23,
+  "paged": 17,
+  "dupNumbers": 6,
+  "spineRatio": 0.76,
+  "coverage": 0.58,
+  "headGap": 0.27,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "02-sgv-giao-duc-the-chat-2",
+  "grade": 2,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 25,
+  "paged": 18,
+  "dupNumbers": 12,
+  "spineRatio": 0.56,
+  "coverage": 0.74,
+  "headGap": 0.22,
+  "pageCount": 106
+ },
+ {
+  "sourceDocumentId": "02-sgv-hoat-dong-trai-nghiem-2",
+  "grade": 2,
+  "subject": "HĐTN",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "02-sgv-mi-thuat-2",
+  "grade": 2,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 17,
+  "paged": 11,
+  "dupNumbers": 2,
+  "spineRatio": 0.82,
+  "coverage": 0.05,
+  "headGap": 0.02,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "02-sgv-tieng-anh-2-global-success",
+  "grade": 2,
+  "subject": "Tiếng Anh",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.81,
+  "headGap": 0.05,
+  "pageCount": 150
+ },
+ {
+  "sourceDocumentId": "02-sgv-tieng-viet-2-tap-hai",
+  "grade": 2,
+  "subject": "Tiếng Việt",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 30,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.25,
+  "headGap": 0.72,
+  "pageCount": 218
+ },
+ {
+  "sourceDocumentId": "02-sgv-tieng-viet-2-tap-mot",
+  "grade": 2,
+  "subject": "Tiếng Việt",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 32,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 0.86,
+  "coverage": 0.32,
+  "headGap": 0.65,
+  "pageCount": 246
+ },
+ {
+  "sourceDocumentId": "02-sgv-toan-2",
+  "grade": 2,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 96,
+  "paged": 74,
+  "dupNumbers": 7,
+  "spineRatio": 0.86,
+  "coverage": 0.91,
+  "headGap": 0.06,
+  "pageCount": 266
+ },
+ {
+  "sourceDocumentId": "02-sgv-tu-nhien-va-xa-hoi-2",
+  "grade": 2,
+  "subject": "TN&XH",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 36,
+  "paged": 31,
+  "dupNumbers": 4,
+  "spineRatio": 0.9,
+  "coverage": 0.95,
+  "headGap": 0.02,
+  "pageCount": 130
+ },
+ {
+  "sourceDocumentId": "03-sgk-am-nhac-3",
+  "grade": 3,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.73,
+  "headGap": 0.08,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "03-sgk-cong-nghe-3",
+  "grade": 3,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.71,
+  "headGap": 0.11,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "03-sgk-dao-duc-3",
+  "grade": 3,
+  "subject": "Đạo đức",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.81,
+  "headGap": 0.07,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "03-sgk-giao-duc-the-chat-3",
+  "grade": 3,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 25,
+  "paged": 25,
+  "dupNumbers": 20,
+  "spineRatio": 0.44,
+  "coverage": 0.85,
+  "headGap": 0.08,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "03-sgk-hoat-dong-trai-nghiem-3",
+  "grade": 3,
+  "subject": "HĐTN",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 35,
+  "paged": 35,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.89,
+  "headGap": 0.05,
+  "pageCount": 110
+ },
+ {
+  "sourceDocumentId": "03-sgk-mi-thuat-3",
+  "grade": 3,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-anh-3-tap-1-global-success",
+  "grade": 3,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-anh-3-tap-2-global-success",
+  "grade": 3,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 10,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-han-3-tap-hai",
+  "grade": 3,
+  "subject": "Tiếng Hàn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.72,
+  "headGap": 0.1,
+  "pageCount": 71
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-han-3-tap-mot",
+  "grade": 3,
+  "subject": "Tiếng Hàn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.66,
+  "headGap": 0.17,
+  "pageCount": 64
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-nga-3-tap-hai",
+  "grade": 3,
+  "subject": "Tiếng Nga",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-nga-3-tap-mot",
+  "grade": 3,
+  "subject": "Tiếng Nga",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-nhat-3-tap-hai",
+  "grade": 3,
+  "subject": "Tiếng Nhật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-nhat-3-tap-mot",
+  "grade": 3,
+  "subject": "Tiếng Nhật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-phap-3",
+  "grade": 3,
+  "subject": "Tiếng Pháp",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-trung-quoc-3-tap-hai",
+  "grade": 3,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-trung-quoc-3-tap-mot",
+  "grade": 3,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-viet-3-tap-hai",
+  "grade": 3,
+  "subject": "Tiếng Việt",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 30,
+  "paged": 28,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.83,
+  "headGap": 0.07,
+  "pageCount": 146
+ },
+ {
+  "sourceDocumentId": "03-sgk-tieng-viet-3-tap-mot",
+  "grade": 3,
+  "subject": "Tiếng Việt",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 28,
+  "paged": 28,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.75,
+  "headGap": 0.07,
+  "pageCount": 154
+ },
+ {
+  "sourceDocumentId": "03-sgk-tin-hoc-3",
+  "grade": 3,
+  "subject": "Tin học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 15,
+  "paged": 15,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.85,
+  "headGap": 0.06,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "03-sgk-toan-3-tap-hai",
+  "grade": 3,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 37,
+  "paged": 37,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.93,
+  "headGap": 0.03,
+  "pageCount": 130
+ },
+ {
+  "sourceDocumentId": "03-sgk-toan-3-tap-mot",
+  "grade": 3,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 44,
+  "paged": 44,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.9,
+  "headGap": 0.05,
+  "pageCount": 126
+ },
+ {
+  "sourceDocumentId": "03-sgk-tu-nhien-va-xa-hoi-3",
+  "grade": 3,
+  "subject": "TN&XH",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 30,
+  "paged": 30,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.9,
+  "headGap": 0.05,
+  "pageCount": 126
+ },
+ {
+  "sourceDocumentId": "03-sgv-am-nhac-3",
+  "grade": 3,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 14,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "03-sgv-cong-nghe-3",
+  "grade": 3,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 10,
+  "paged": 6,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.46,
+  "headGap": 0.26,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "03-sgv-dao-duc-3",
+  "grade": 3,
+  "subject": "Đạo đức",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 18,
+  "paged": 15,
+  "dupNumbers": 7,
+  "spineRatio": 1.0,
+  "coverage": 0.62,
+  "headGap": 0.3,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "03-sgv-giao-duc-the-chat-3",
+  "grade": 3,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 24,
+  "paged": 24,
+  "dupNumbers": 19,
+  "spineRatio": 0.46,
+  "coverage": 0.74,
+  "headGap": 0.2,
+  "pageCount": 110
+ },
+ {
+  "sourceDocumentId": "03-sgv-hoat-dong-trai-nghiem-3",
+  "grade": 3,
+  "subject": "HĐTN",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgv-mi-thuat-3",
+  "grade": 3,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 11,
+  "paged": 6,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.05,
+  "headGap": 0.02,
+  "pageCount": 58
+ },
+ {
+  "sourceDocumentId": "03-sgv-tieng-anh-3-global-success",
+  "grade": 3,
+  "subject": "Tiếng Anh",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 20,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.78,
+  "headGap": 0.06,
+  "pageCount": 314
+ },
+ {
+  "sourceDocumentId": "03-sgv-tieng-phap-3",
+  "grade": 3,
+  "subject": "Tiếng Pháp",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgv-tieng-trung-quoc-3",
+  "grade": 3,
+  "subject": "Tiếng Trung",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "03-sgv-tieng-viet-3-tap-hai",
+  "grade": 3,
+  "subject": "Tiếng Việt",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NON_MONOTONIC",
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 30,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 0.75,
+  "coverage": 0.03,
+  "headGap": 0.71,
+  "pageCount": 238
+ },
+ {
+  "sourceDocumentId": "03-sgv-tieng-viet-3-tap-mot",
+  "grade": 3,
+  "subject": "Tiếng Việt",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 32,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.46,
+  "headGap": 0.46,
+  "pageCount": 250
+ },
+ {
+  "sourceDocumentId": "03-sgv-tin-hoc-3",
+  "grade": 3,
+  "subject": "Tin học",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.69,
+  "headGap": 0.23,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "03-sgv-toan-3",
+  "grade": 3,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 86,
+  "paged": 72,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.92,
+  "headGap": 0.06,
+  "pageCount": 298
+ },
+ {
+  "sourceDocumentId": "03-sgv-tu-nhien-va-xa-hoi-3",
+  "grade": 3,
+  "subject": "TN&XH",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 30,
+  "paged": 29,
+  "dupNumbers": 0,
+  "spineRatio": 0.97,
+  "coverage": 0.83,
+  "headGap": 0.13,
+  "pageCount": 155
+ },
+ {
+  "sourceDocumentId": "04-sgk-am-nhac-4",
+  "grade": 4,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.78,
+  "headGap": 0.07,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "04-sgk-cong-nghe-4",
+  "grade": 4,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 12,
+  "paged": 12,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.77,
+  "headGap": 0.09,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "04-sgk-dao-duc-4",
+  "grade": 4,
+  "subject": "Đạo đức",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 9,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.07,
+  "pageCount": 67
+ },
+ {
+  "sourceDocumentId": "04-sgk-giao-duc-the-chat-4",
+  "grade": 4,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 22,
+  "paged": 22,
+  "dupNumbers": 18,
+  "spineRatio": 0.45,
+  "coverage": 0.81,
+  "headGap": 0.09,
+  "pageCount": 94
+ },
+ {
+  "sourceDocumentId": "04-sgk-hoat-dong-trai-nghiem-4",
+  "grade": 4,
+  "subject": "HĐTN",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 34,
+  "paged": 34,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.86,
+  "headGap": 0.05,
+  "pageCount": 94
+ },
+ {
+  "sourceDocumentId": "04-sgk-khoa-hoc-4",
+  "grade": 4,
+  "subject": "Khoa học",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 31,
+  "paged": 27,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.9,
+  "headGap": 0.04,
+  "pageCount": 126
+ },
+ {
+  "sourceDocumentId": "04-sgk-lich-su-va-dia-li-4",
+  "grade": 4,
+  "subject": "LS&ĐL",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 27,
+  "paged": 24,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.9,
+  "headGap": 0.05,
+  "pageCount": 127
+ },
+ {
+  "sourceDocumentId": "04-sgk-mi-thuat-4",
+  "grade": 4,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-anh-4-global-success-tap-hai",
+  "grade": 4,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 5,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 79
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-anh-4-global-success-tap-mot",
+  "grade": 4,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 5,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 83
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-duc-4-tap-hai",
+  "grade": 4,
+  "subject": "Tiếng Đức",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-duc-4-tap-mot",
+  "grade": 4,
+  "subject": "Tiếng Đức",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-han-4-tap-mot",
+  "grade": 4,
+  "subject": "Tiếng Hàn",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-nga-4-tap-hai",
+  "grade": 4,
+  "subject": "Tiếng Nga",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-nga-4-tap-mot",
+  "grade": 4,
+  "subject": "Tiếng Nga",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-nhat-4-tap-hai",
+  "grade": 4,
+  "subject": "Tiếng Nhật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-nhat-4-tap-mot",
+  "grade": 4,
+  "subject": "Tiếng Nhật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-phap-4",
+  "grade": 4,
+  "subject": "Tiếng Pháp",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-trung-quoc-4-tap-hai",
+  "grade": 4,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-trung-quoc-4-tap-mot",
+  "grade": 4,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-viet-4-tap-hai",
+  "grade": 4,
+  "subject": "Tiếng Việt",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 29,
+  "paged": 28,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.84,
+  "headGap": 0.06,
+  "pageCount": 146
+ },
+ {
+  "sourceDocumentId": "04-sgk-tieng-viet-4-tap-mot",
+  "grade": 4,
+  "subject": "Tiếng Việt",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 31,
+  "paged": 31,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.81,
+  "headGap": 0.09,
+  "pageCount": 150
+ },
+ {
+  "sourceDocumentId": "04-sgk-tin-hoc-4",
+  "grade": 4,
+  "subject": "Tin học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 17,
+  "paged": 17,
+  "dupNumbers": 1,
+  "spineRatio": 1.0,
+  "coverage": 0.86,
+  "headGap": 0.06,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "04-sgk-toan-4-tap-hai",
+  "grade": 4,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 35,
+  "paged": 35,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.92,
+  "headGap": 0.03,
+  "pageCount": 122
+ },
+ {
+  "sourceDocumentId": "04-sgk-toan-4-tap-mot",
+  "grade": 4,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 37,
+  "paged": 37,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.9,
+  "headGap": 0.04,
+  "pageCount": 134
+ },
+ {
+  "sourceDocumentId": "04-sgv-am-nhac-4",
+  "grade": 4,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 10,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.77,
+  "pageCount": 90
+ },
+ {
+  "sourceDocumentId": "04-sgv-cong-nghe-4",
+  "grade": 4,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 12,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.56,
+  "headGap": 0.27,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "04-sgv-dao-duc-4",
+  "grade": 4,
+  "subject": "Đạo đức",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 16,
+  "paged": 13,
+  "dupNumbers": 5,
+  "spineRatio": 1.0,
+  "coverage": 0.51,
+  "headGap": 0.28,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "04-sgv-giao-duc-the-chat-4",
+  "grade": 4,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 17,
+  "paged": 6,
+  "dupNumbers": 3,
+  "spineRatio": 0.5,
+  "coverage": 0.27,
+  "headGap": 0.67,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "04-sgv-hoat-dong-trai-nghiem-4",
+  "grade": 4,
+  "subject": "HĐTN",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 1,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.94,
+  "pageCount": 194
+ },
+ {
+  "sourceDocumentId": "04-sgv-khoa-hoc-4",
+  "grade": 4,
+  "subject": "Khoa học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 31,
+  "paged": 24,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.82,
+  "headGap": 0.15,
+  "pageCount": 154
+ },
+ {
+  "sourceDocumentId": "04-sgv-lich-su-va-dia-li-4",
+  "grade": 4,
+  "subject": "LS&ĐL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 32,
+  "paged": 14,
+  "dupNumbers": 2,
+  "spineRatio": 1.0,
+  "coverage": 0.81,
+  "headGap": 0.16,
+  "pageCount": 182
+ },
+ {
+  "sourceDocumentId": "04-sgv-mi-thuat-4",
+  "grade": 4,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 10,
+  "paged": 5,
+  "dupNumbers": 1,
+  "spineRatio": 0.8,
+  "coverage": 0.0,
+  "headGap": 0.07,
+  "pageCount": 54
+ },
+ {
+  "sourceDocumentId": "04-sgv-tieng-anh-4-global-success",
+  "grade": 4,
+  "subject": "Tiếng Anh",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 20,
+  "paged": 20,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.8,
+  "headGap": 0.05,
+  "pageCount": 330
+ },
+ {
+  "sourceDocumentId": "04-sgv-tieng-phap-4",
+  "grade": 4,
+  "subject": "Tiếng Pháp",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgv-tieng-trung-quoc-4",
+  "grade": 4,
+  "subject": "Tiếng Trung",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "04-sgv-tieng-viet-4-tap-hai",
+  "grade": 4,
+  "subject": "Tiếng Việt",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 30,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.93,
+  "pageCount": 246
+ },
+ {
+  "sourceDocumentId": "04-sgv-tieng-viet-4-tap-mot",
+  "grade": 4,
+  "subject": "Tiếng Việt",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 32,
+  "paged": 13,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.45,
+  "headGap": 0.48,
+  "pageCount": 250
+ },
+ {
+  "sourceDocumentId": "04-sgv-tin-hoc-4",
+  "grade": 4,
+  "subject": "Tin học",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 17,
+  "paged": 17,
+  "dupNumbers": 1,
+  "spineRatio": 1.0,
+  "coverage": 0.69,
+  "headGap": 0.24,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "04-sgv-toan-4",
+  "grade": 4,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 82,
+  "paged": 62,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.91,
+  "headGap": 0.06,
+  "pageCount": 290
+ },
+ {
+  "sourceDocumentId": "04-tieng-han-4-tap-hai",
+  "grade": 4,
+  "subject": "Tiếng Hàn",
+  "docType": "UNKNOWN",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.7,
+  "headGap": 0.08,
+  "pageCount": 83
+ },
+ {
+  "sourceDocumentId": "05-sgk-am-nhac-5",
+  "grade": 5,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.06,
+  "pageCount": 79
+ },
+ {
+  "sourceDocumentId": "05-sgk-cong-nghe-5",
+  "grade": 5,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 9,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.7,
+  "headGap": 0.11,
+  "pageCount": 54
+ },
+ {
+  "sourceDocumentId": "05-sgk-dao-duc-5",
+  "grade": 5,
+  "subject": "Đạo đức",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.79,
+  "headGap": 0.08,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "05-sgk-giao-duc-the-chat-5",
+  "grade": 5,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 21,
+  "paged": 21,
+  "dupNumbers": 17,
+  "spineRatio": 0.48,
+  "coverage": 0.78,
+  "headGap": 0.09,
+  "pageCount": 90
+ },
+ {
+  "sourceDocumentId": "05-sgk-hoat-dong-trai-nghiem-5",
+  "grade": 5,
+  "subject": "HĐTN",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 33,
+  "paged": 33,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.89,
+  "headGap": 0.05,
+  "pageCount": 102
+ },
+ {
+  "sourceDocumentId": "05-sgk-khoa-hoc-5",
+  "grade": 5,
+  "subject": "Khoa học",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 30,
+  "paged": 22,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.9,
+  "headGap": 0.04,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "05-sgk-lich-su-va-dia-li-5",
+  "grade": 5,
+  "subject": "LS&ĐL",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 28,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.04,
+  "pageCount": 123
+ },
+ {
+  "sourceDocumentId": "05-sgk-mi-thuat-5",
+  "grade": 5,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-anh-5-global-success-tap-hai",
+  "grade": 5,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 5,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 79
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-anh-5-global-success-tap-mot",
+  "grade": 5,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 10,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 83
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-han-5-tap-hai",
+  "grade": 5,
+  "subject": "Tiếng Hàn",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 9,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.7,
+  "headGap": 0.08,
+  "pageCount": 83
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-han-5-tap-mot",
+  "grade": 5,
+  "subject": "Tiếng Hàn",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-nhat-5-tap-hai",
+  "grade": 5,
+  "subject": "Tiếng Nhật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-nhat-5-tap-mot",
+  "grade": 5,
+  "subject": "Tiếng Nhật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-phap-5",
+  "grade": 5,
+  "subject": "Tiếng Pháp",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-trung-quoc-5-tap-hai",
+  "grade": 5,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-trung-quoc-5-tap-mot",
+  "grade": 5,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-viet-5-tap-hai",
+  "grade": 5,
+  "subject": "Tiếng Việt",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 29,
+  "paged": 28,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.84,
+  "headGap": 0.06,
+  "pageCount": 162
+ },
+ {
+  "sourceDocumentId": "05-sgk-tieng-viet-5-tap-mot",
+  "grade": 5,
+  "subject": "Tiếng Việt",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 31,
+  "paged": 29,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.86,
+  "headGap": 0.06,
+  "pageCount": 170
+ },
+ {
+  "sourceDocumentId": "05-sgk-tin-hoc-5",
+  "grade": 5,
+  "subject": "Tin học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 18,
+  "paged": 18,
+  "dupNumbers": 2,
+  "spineRatio": 0.94,
+  "coverage": 0.85,
+  "headGap": 0.06,
+  "pageCount": 86
+ },
+ {
+  "sourceDocumentId": "05-sgk-toan-5-tap-hai",
+  "grade": 5,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 40,
+  "paged": 39,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.9,
+  "headGap": 0.03,
+  "pageCount": 138
+ },
+ {
+  "sourceDocumentId": "05-sgk-toan-5-tap-mot",
+  "grade": 5,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 35,
+  "paged": 29,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.77,
+  "headGap": 0.04,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "05-sgv-am-nhac-5",
+  "grade": 5,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 12,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.11,
+  "headGap": 0.56,
+  "pageCount": 90
+ },
+ {
+  "sourceDocumentId": "05-sgv-cong-nghe-5",
+  "grade": 5,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 9,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.3,
+  "headGap": 0.48,
+  "pageCount": 54
+ },
+ {
+  "sourceDocumentId": "05-sgv-dao-duc-5",
+  "grade": 5,
+  "subject": "Đạo đức",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 8,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.47,
+  "headGap": 0.45,
+  "pageCount": 102
+ },
+ {
+  "sourceDocumentId": "05-sgv-giao-duc-the-chat-5",
+  "grade": 5,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 21,
+  "paged": 17,
+  "dupNumbers": 13,
+  "spineRatio": 0.53,
+  "coverage": 0.73,
+  "headGap": 0.2,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "05-sgv-hoat-dong-trai-nghiem-5",
+  "grade": 5,
+  "subject": "HĐTN",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "05-sgv-khoa-hoc-5",
+  "grade": 5,
+  "subject": "Khoa học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 30,
+  "paged": 23,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.74,
+  "headGap": 0.16,
+  "pageCount": 170
+ },
+ {
+  "sourceDocumentId": "05-sgv-lich-su-va-dia-li-5",
+  "grade": 5,
+  "subject": "LS&ĐL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 33,
+  "paged": 29,
+  "dupNumbers": 2,
+  "spineRatio": 0.93,
+  "coverage": 0.8,
+  "headGap": 0.16,
+  "pageCount": 186
+ },
+ {
+  "sourceDocumentId": "05-sgv-mi-thuat-5",
+  "grade": 5,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 11,
+  "paged": 8,
+  "dupNumbers": 1,
+  "spineRatio": 0.88,
+  "coverage": 0.59,
+  "headGap": 0.07,
+  "pageCount": 54
+ },
+ {
+  "sourceDocumentId": "05-sgv-tieng-anh-5-global-success",
+  "grade": 5,
+  "subject": "Tiếng Anh",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 20,
+  "paged": 20,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.8,
+  "headGap": 0.05,
+  "pageCount": 370
+ },
+ {
+  "sourceDocumentId": "05-sgv-tieng-phap-5",
+  "grade": 5,
+  "subject": "Tiếng Pháp",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "05-sgv-tieng-trung-quoc-5",
+  "grade": 5,
+  "subject": "Tiếng Trung",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "05-sgv-tieng-viet-5-tap-1",
+  "grade": 5,
+  "subject": "Tiếng Việt",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 32,
+  "paged": 15,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.56,
+  "headGap": 0.37,
+  "pageCount": 278
+ },
+ {
+  "sourceDocumentId": "05-sgv-tieng-viet-5-tap-hai",
+  "grade": 5,
+  "subject": "Tiếng Việt",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 30,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.81,
+  "pageCount": 242
+ },
+ {
+  "sourceDocumentId": "05-sgv-tin-hoc-5",
+  "grade": 5,
+  "subject": "Tin học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 18,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.7,
+  "headGap": 0.23,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "05-sgv-toan-5",
+  "grade": 5,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 87,
+  "paged": 64,
+  "dupNumbers": 6,
+  "spineRatio": 0.86,
+  "coverage": 0.92,
+  "headGap": 0.06,
+  "pageCount": 306
+ },
+ {
+  "sourceDocumentId": "06-sgk-am-nhac-6",
+  "grade": 6,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 4,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.77,
+  "headGap": 0.07,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "06-sgk-cong-nghe-6",
+  "grade": 6,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 14,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.82,
+  "headGap": 0.1,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "06-sgk-giao-duc-cong-dan-6",
+  "grade": 6,
+  "subject": "GDCD",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "06-sgk-giao-duc-the-chat-6",
+  "grade": 6,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 24,
+  "paged": 24,
+  "dupNumbers": 20,
+  "spineRatio": 0.42,
+  "coverage": 0.86,
+  "headGap": 0.07,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "06-sgk-hoat-dong-trai-nghiem-huong-nghiep-6",
+  "grade": 6,
+  "subject": "HĐTN-HN",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 4,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 54
+ },
+ {
+  "sourceDocumentId": "06-sgk-khoa-hoc-tu-nhien-6",
+  "grade": 6,
+  "subject": "KHTN",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 55,
+  "paged": 55,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.92,
+  "headGap": 0.04,
+  "pageCount": 198
+ },
+ {
+  "sourceDocumentId": "06-sgk-lich-su-va-dia-li-6",
+  "grade": 6,
+  "subject": "LS&ĐL",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "06-sgk-mi-thuat-6",
+  "grade": 6,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.85,
+  "headGap": 0.07,
+  "pageCount": 71
+ },
+ {
+  "sourceDocumentId": "06-sgk-ngu-van-6-tap-hai",
+  "grade": 6,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.39,
+  "headGap": 0.03,
+  "pageCount": 122
+ },
+ {
+  "sourceDocumentId": "06-sgk-ngu-van-6-tap-mot",
+  "grade": 6,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.36,
+  "headGap": 0.07,
+  "pageCount": 138
+ },
+ {
+  "sourceDocumentId": "06-sgk-tieng-anh-6-tap-1-global-success",
+  "grade": 6,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 6,
+  "paged": 6,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.7,
+  "headGap": 0.08,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "06-sgk-tieng-anh-6-tap-2-global-success",
+  "grade": 6,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 6,
+  "paged": 6,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.7,
+  "headGap": 0.08,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "06-sgk-tieng-phap-6",
+  "grade": 6,
+  "subject": "Tiếng Pháp",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "06-sgk-tieng-trung-quoc-6",
+  "grade": 6,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "06-sgk-tin-hoc-6",
+  "grade": 6,
+  "subject": "Tin học",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 17,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.72,
+  "headGap": 0.06,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "06-sgk-toan-6-tap-hai",
+  "grade": 6,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 21,
+  "paged": 19,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.79,
+  "headGap": 0.04,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "06-sgk-toan-6-tap-mot",
+  "grade": 6,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 22,
+  "paged": 22,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.78,
+  "headGap": 0.04,
+  "pageCount": 126
+ },
+ {
+  "sourceDocumentId": "06-sgv-am-nhac-6",
+  "grade": 6,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.68,
+  "headGap": 0.19,
+  "pageCount": 99
+ },
+ {
+  "sourceDocumentId": "06-sgv-cong-nghe-6",
+  "grade": 6,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 14,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.32,
+  "headGap": 0.18,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "06-sgv-giao-duc-cong-dan-6",
+  "grade": 6,
+  "subject": "GDCD",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 12,
+  "paged": 11,
+  "dupNumbers": 1,
+  "spineRatio": 0.91,
+  "coverage": 0.62,
+  "headGap": 0.26,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "06-sgv-giao-duc-the-chat-6",
+  "grade": 6,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 31,
+  "paged": 30,
+  "dupNumbers": 26,
+  "spineRatio": 0.47,
+  "coverage": 0.8,
+  "headGap": 0.16,
+  "pageCount": 158
+ },
+ {
+  "sourceDocumentId": "06-sgv-hoat-dong-trai-nghiem-huong-nghiep-6",
+  "grade": 6,
+  "subject": "HĐTN-HN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 34,
+  "paged": 29,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.85,
+  "headGap": 0.08,
+  "pageCount": 250
+ },
+ {
+  "sourceDocumentId": "06-sgv-khoa-hoc-tu-nhien-6",
+  "grade": 6,
+  "subject": "KHTN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 55,
+  "paged": 36,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.83,
+  "headGap": 0.08,
+  "pageCount": 234
+ },
+ {
+  "sourceDocumentId": "06-sgv-lich-su-va-dia-li-6",
+  "grade": 6,
+  "subject": "LS&ĐL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 50,
+  "paged": 44,
+  "dupNumbers": 16,
+  "spineRatio": 0.64,
+  "coverage": 0.87,
+  "headGap": 0.11,
+  "pageCount": 282
+ },
+ {
+  "sourceDocumentId": "06-sgv-mi-thuat-6",
+  "grade": 6,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 43,
+  "paged": 41,
+  "dupNumbers": 25,
+  "spineRatio": 0.49,
+  "coverage": 0.9,
+  "headGap": 0.03,
+  "pageCount": 77
+ },
+ {
+  "sourceDocumentId": "06-sgv-ngu-van-6-tap-hai",
+  "grade": 6,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "06-sgv-ngu-van-6-tap-mot",
+  "grade": 6,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.15,
+  "headGap": 0.34,
+  "pageCount": 158
+ },
+ {
+  "sourceDocumentId": "06-sgv-tin-hoc-6",
+  "grade": 6,
+  "subject": "Tin học",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 17,
+  "paged": 17,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.78,
+  "headGap": 0.14,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "06-sgv-toan-6",
+  "grade": 6,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NON_MONOTONIC",
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 43,
+  "paged": 36,
+  "dupNumbers": 0,
+  "spineRatio": 0.58,
+  "coverage": 0.32,
+  "headGap": 0.61,
+  "pageCount": 222
+ },
+ {
+  "sourceDocumentId": "06-tieng-duc-6",
+  "grade": 6,
+  "subject": "Tiếng Đức",
+  "docType": "UNKNOWN",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "06-tieng-nga-6-tap-hai",
+  "grade": 6,
+  "subject": "Tiếng Nga",
+  "docType": "UNKNOWN",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "06-tieng-nga-6-tap-mot",
+  "grade": 6,
+  "subject": "Tiếng Nga",
+  "docType": "UNKNOWN",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "07-sbt-giao-duc-cong-dan-7-bai-mau",
+  "grade": 7,
+  "subject": "GDCD",
+  "docType": "WORKBOOK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "07-sgk-am-nhac-7",
+  "grade": 7,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.8,
+  "headGap": 0.07,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "07-sgk-cong-nghe-7",
+  "grade": 7,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 15,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.78,
+  "headGap": 0.07,
+  "pageCount": 86
+ },
+ {
+  "sourceDocumentId": "07-sgk-giao-duc-cong-dan-7",
+  "grade": 7,
+  "subject": "GDCD",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "07-sgk-giao-duc-the-chat-7",
+  "grade": 7,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 22,
+  "paged": 22,
+  "dupNumbers": 18,
+  "spineRatio": 0.41,
+  "coverage": 0.83,
+  "headGap": 0.09,
+  "pageCount": 94
+ },
+ {
+  "sourceDocumentId": "07-sgk-hoat-dong-trai-nghiem-huong-nghiep-7",
+  "grade": 7,
+  "subject": "HĐTN-HN",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 4,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 67
+ },
+ {
+  "sourceDocumentId": "07-sgk-khoa-hoc-tu-nhien-7",
+  "grade": 7,
+  "subject": "KHTN",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 18,
+  "paged": 17,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.4,
+  "headGap": 0.08,
+  "pageCount": 182
+ },
+ {
+  "sourceDocumentId": "07-sgk-lich-su-va-dia-li-7",
+  "grade": 7,
+  "subject": "LS&ĐL",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 17,
+  "paged": 12,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.37,
+  "headGap": 0.05,
+  "pageCount": 187
+ },
+ {
+  "sourceDocumentId": "07-sgk-mi-thuat-7",
+  "grade": 7,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.82,
+  "headGap": 0.07,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "07-sgk-ngu-van-7-tap-hai",
+  "grade": 7,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.21,
+  "headGap": 0.18,
+  "pageCount": 138
+ },
+ {
+  "sourceDocumentId": "07-sgk-ngu-van-7-tap-mot",
+  "grade": 7,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.34,
+  "headGap": 0.06,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "07-sgk-tieng-anh-7-global-success",
+  "grade": 7,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 12,
+  "paged": 12,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.82,
+  "headGap": 0.06,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "07-sgk-tieng-nhat-7",
+  "grade": 7,
+  "subject": "Tiếng Nhật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "07-sgk-tieng-phap-7",
+  "grade": 7,
+  "subject": "Tiếng Pháp",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "07-sgk-tieng-trung-quoc-7",
+  "grade": 7,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "07-sgk-tin-hoc-7",
+  "grade": 7,
+  "subject": "Tin học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.85,
+  "headGap": 0.06,
+  "pageCount": 86
+ },
+ {
+  "sourceDocumentId": "07-sgk-toan-7-tap-hai",
+  "grade": 7,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 18,
+  "paged": 18,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.03,
+  "pageCount": 118
+ },
+ {
+  "sourceDocumentId": "07-sgk-toan-7-tap-mot",
+  "grade": 7,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 19,
+  "paged": 19,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.78,
+  "headGap": 0.04,
+  "pageCount": 122
+ },
+ {
+  "sourceDocumentId": "07-sgv-am-nhac-7",
+  "grade": 7,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 8,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 95
+ },
+ {
+  "sourceDocumentId": "07-sgv-cong-nghe-7",
+  "grade": 7,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NON_MONOTONIC",
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 16,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 0.5,
+  "coverage": 0.0,
+  "headGap": 0.42,
+  "pageCount": 106
+ },
+ {
+  "sourceDocumentId": "07-sgv-giao-duc-the-chat-7",
+  "grade": 7,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 21,
+  "paged": 17,
+  "dupNumbers": 13,
+  "spineRatio": 0.53,
+  "coverage": 0.56,
+  "headGap": 0.38,
+  "pageCount": 151
+ },
+ {
+  "sourceDocumentId": "07-sgv-hoat-dong-trai-nghiem-huong-nghiep-7",
+  "grade": 7,
+  "subject": "HĐTN-HN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 14,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.49,
+  "headGap": 0.11,
+  "pageCount": 183
+ },
+ {
+  "sourceDocumentId": "07-sgv-khoa-hoc-tu-nhien-7",
+  "grade": 7,
+  "subject": "KHTN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 42,
+  "paged": 28,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.78,
+  "headGap": 0.13,
+  "pageCount": 202
+ },
+ {
+  "sourceDocumentId": "07-sgv-lich-su-va-dia-li-7",
+  "grade": 7,
+  "subject": "LS&ĐL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 37,
+  "paged": 16,
+  "dupNumbers": 4,
+  "spineRatio": 0.75,
+  "coverage": 0.83,
+  "headGap": 0.1,
+  "pageCount": 322
+ },
+ {
+  "sourceDocumentId": "07-sgv-mi-thuat-7",
+  "grade": 7,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 48,
+  "paged": 43,
+  "dupNumbers": 27,
+  "spineRatio": 0.47,
+  "coverage": 0.88,
+  "headGap": 0.03,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "07-sgv-ngu-van-7-tap-hai",
+  "grade": 7,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "07-sgv-ngu-van-7-tap-mot",
+  "grade": 7,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.12,
+  "headGap": 0.22,
+  "pageCount": 170
+ },
+ {
+  "sourceDocumentId": "07-sgv-tieng-anh-7-global-success",
+  "grade": 7,
+  "subject": "Tiếng Anh",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 12,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.2,
+  "headGap": 0.09,
+  "pageCount": 278
+ },
+ {
+  "sourceDocumentId": "07-sgv-tin-hoc-7",
+  "grade": 7,
+  "subject": "Tin học",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.73,
+  "headGap": 0.17,
+  "pageCount": 94
+ },
+ {
+  "sourceDocumentId": "07-sgv-toan-7",
+  "grade": 7,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 37,
+  "paged": 13,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.52,
+  "headGap": 0.38,
+  "pageCount": 266
+ },
+ {
+  "sourceDocumentId": "07-tieng-nga-7-tap-hai",
+  "grade": 7,
+  "subject": "Tiếng Nga",
+  "docType": "UNKNOWN",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "07-tieng-nga-7-tap-mot",
+  "grade": 7,
+  "subject": "Tiếng Nga",
+  "docType": "UNKNOWN",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "08-sbt-tieng-anh-8-global-success",
+  "grade": 8,
+  "subject": "Tiếng Anh",
+  "docType": "WORKBOOK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "08-sgk-am-nhac-8",
+  "grade": 8,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 16,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 0.89,
+  "coverage": 0.34,
+  "headGap": 0.09,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "08-sgk-cong-nghe-8",
+  "grade": 8,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 20,
+  "paged": 20,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.86,
+  "headGap": 0.05,
+  "pageCount": 110
+ },
+ {
+  "sourceDocumentId": "08-sgk-giao-duc-cong-dan-8",
+  "grade": 8,
+  "subject": "GDCD",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 5,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.51,
+  "headGap": 0.14,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "08-sgk-giao-duc-the-chat-8",
+  "grade": 8,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 21,
+  "paged": 15,
+  "dupNumbers": 12,
+  "spineRatio": 0.53,
+  "coverage": 0.82,
+  "headGap": 0.09,
+  "pageCount": 99
+ },
+ {
+  "sourceDocumentId": "08-sgk-hoat-dong-trai-nghiem-huong-nghiep-8",
+  "grade": 8,
+  "subject": "HĐTN-HN",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 4,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 76
+ },
+ {
+  "sourceDocumentId": "08-sgk-khoa-hoc-tu-nhien-8",
+  "grade": 8,
+  "subject": "KHTN",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 22,
+  "paged": 22,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.43,
+  "headGap": 0.03,
+  "pageCount": 199
+ },
+ {
+  "sourceDocumentId": "08-sgk-lich-su-va-dia-li-8",
+  "grade": 8,
+  "subject": "LS&ĐL",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 19,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 0.94,
+  "coverage": 0.45,
+  "headGap": 0.04,
+  "pageCount": 179
+ },
+ {
+  "sourceDocumentId": "08-sgk-mi-thuat-8",
+  "grade": 8,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.82,
+  "headGap": 0.07,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "08-sgk-ngu-van-8-tap-hai",
+  "grade": 8,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.39,
+  "headGap": 0.03,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "08-sgk-ngu-van-8-tap-mot",
+  "grade": 8,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.37,
+  "headGap": 0.06,
+  "pageCount": 134
+ },
+ {
+  "sourceDocumentId": "08-sgk-tieng-anh-8-global-success",
+  "grade": 8,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 12,
+  "paged": 12,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.82,
+  "headGap": 0.06,
+  "pageCount": 141
+ },
+ {
+  "sourceDocumentId": "08-sgk-tieng-nhat-8",
+  "grade": 8,
+  "subject": "Tiếng Nhật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "08-sgk-tieng-phap-8",
+  "grade": 8,
+  "subject": "Tiếng Pháp",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "08-sgk-tieng-trung-quoc-8",
+  "grade": 8,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "08-sgk-tin-hoc-8",
+  "grade": 8,
+  "subject": "Tin học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 20,
+  "paged": 20,
+  "dupNumbers": 4,
+  "spineRatio": 0.85,
+  "coverage": 0.88,
+  "headGap": 0.05,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "08-sgk-toan-8-tap-hai",
+  "grade": 8,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 19,
+  "paged": 18,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.8,
+  "headGap": 0.03,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "08-sgk-toan-8-tap-mot",
+  "grade": 8,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 20,
+  "paged": 18,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.75,
+  "headGap": 0.04,
+  "pageCount": 126
+ },
+ {
+  "sourceDocumentId": "08-sgv-am-nhac-8",
+  "grade": 8,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 16,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.55,
+  "headGap": 0.28,
+  "pageCount": 102
+ },
+ {
+  "sourceDocumentId": "08-sgv-cong-nghe-8",
+  "grade": 8,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 20,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.6,
+  "headGap": 0.33,
+  "pageCount": 138
+ },
+ {
+  "sourceDocumentId": "08-sgv-giao-duc-cong-dan-8",
+  "grade": 8,
+  "subject": "GDCD",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 10,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.44,
+  "headGap": 0.26,
+  "pageCount": 110
+ },
+ {
+  "sourceDocumentId": "08-sgv-giao-duc-the-chat-8",
+  "grade": 8,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 17,
+  "paged": 17,
+  "dupNumbers": 13,
+  "spineRatio": 0.47,
+  "coverage": 0.77,
+  "headGap": 0.17,
+  "pageCount": 135
+ },
+ {
+  "sourceDocumentId": "08-sgv-hoat-dong-trai-nghiem-huong-nghiep-8",
+  "grade": 8,
+  "subject": "HĐTN-HN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 11,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.57,
+  "headGap": 0.12,
+  "pageCount": 198
+ },
+ {
+  "sourceDocumentId": "08-sgv-khoa-hoc-tu-nhien-8",
+  "grade": 8,
+  "subject": "KHTN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 47,
+  "paged": 28,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.63,
+  "headGap": 0.35,
+  "pageCount": 246
+ },
+ {
+  "sourceDocumentId": "08-sgv-lich-su-va-dia-li-8",
+  "grade": 8,
+  "subject": "LS&ĐL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 31,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.48,
+  "headGap": 0.1,
+  "pageCount": 298
+ },
+ {
+  "sourceDocumentId": "08-sgv-mi-thuat-8",
+  "grade": 8,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 47,
+  "paged": 44,
+  "dupNumbers": 28,
+  "spineRatio": 0.41,
+  "coverage": 0.78,
+  "headGap": 0.15,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "08-sgv-ngu-van-8-tap-hai",
+  "grade": 8,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "08-sgv-ngu-van-8-tap-mot",
+  "grade": 8,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.15,
+  "headGap": 0.22,
+  "pageCount": 174
+ },
+ {
+  "sourceDocumentId": "08-sgv-tieng-anh-8-global-success",
+  "grade": 8,
+  "subject": "Tiếng Anh",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 12,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.28,
+  "headGap": 0.1,
+  "pageCount": 278
+ },
+ {
+  "sourceDocumentId": "08-sgv-tieng-phap-8",
+  "grade": 8,
+  "subject": "Tiếng Pháp",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "08-sgv-tieng-trung-quoc-8",
+  "grade": 8,
+  "subject": "Tiếng Trung",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "08-sgv-tin-hoc-8",
+  "grade": 8,
+  "subject": "Tin học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 20,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 0.89,
+  "coverage": 0.5,
+  "headGap": 0.25,
+  "pageCount": 102
+ },
+ {
+  "sourceDocumentId": "08-sgv-toan-8",
+  "grade": 8,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 39,
+  "paged": 23,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.74,
+  "headGap": 0.11,
+  "pageCount": 274
+ },
+ {
+  "sourceDocumentId": "09-sbt-tieng-anh-9-global-success",
+  "grade": 9,
+  "subject": "Tiếng Anh",
+  "docType": "WORKBOOK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "09-sgk-am-nhac-9",
+  "grade": 9,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.81,
+  "headGap": 0.09,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "09-sgk-cong-nghe-9-dinh-huong-nghe-nghiep",
+  "grade": 9,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 5,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.5,
+  "headGap": 0.13,
+  "pageCount": 38
+ },
+ {
+  "sourceDocumentId": "09-sgk-cong-nghe-9-trai-nghiem-nghe-nghiep-mo-dun-che-bien-thuc-pham",
+  "grade": 9,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 7,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.77,
+  "headGap": 0.07,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "09-sgk-cong-nghe-9-trai-nghiem-nghe-nghiep-mo-dun-trong-cay-an-qua",
+  "grade": 9,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.81,
+  "headGap": 0.07,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "09-sgk-giao-duc-cong-dan-9",
+  "grade": 9,
+  "subject": "GDCD",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 4,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.34,
+  "headGap": 0.24,
+  "pageCount": 58
+ },
+ {
+  "sourceDocumentId": "09-sgk-giao-duc-the-chat-9",
+  "grade": 9,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 22,
+  "paged": 19,
+  "dupNumbers": 16,
+  "spineRatio": 0.63,
+  "coverage": 0.28,
+  "headGap": 0.53,
+  "pageCount": 99
+ },
+ {
+  "sourceDocumentId": "09-sgk-hoat-dong-trai-nghiem-huong-nghiep-9",
+  "grade": 9,
+  "subject": "HĐTN-HN",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 5,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "09-sgk-khoa-hoc-tu-nhien-9",
+  "grade": 9,
+  "subject": "KHTN",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 51,
+  "paged": 51,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.93,
+  "headGap": 0.03,
+  "pageCount": 230
+ },
+ {
+  "sourceDocumentId": "09-sgk-lich-su-va-dia-li-9",
+  "grade": 9,
+  "subject": "LS&ĐL",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 3,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.02,
+  "headGap": 0.91,
+  "pageCount": 243
+ },
+ {
+  "sourceDocumentId": "09-sgk-mi-thuat-9",
+  "grade": 9,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.82,
+  "headGap": 0.07,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "09-sgk-ngu-van-9-tap-hai",
+  "grade": 9,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.41,
+  "headGap": 0.03,
+  "pageCount": 150
+ },
+ {
+  "sourceDocumentId": "09-sgk-ngu-van-9-tap-mot",
+  "grade": 9,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.36,
+  "headGap": 0.05,
+  "pageCount": 154
+ },
+ {
+  "sourceDocumentId": "09-sgk-tieng-anh-9-global-success",
+  "grade": 9,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 12,
+  "paged": 12,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.82,
+  "headGap": 0.06,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "09-sgk-tieng-nhat-9",
+  "grade": 9,
+  "subject": "Tiếng Nhật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "09-sgk-tieng-phap-9",
+  "grade": 9,
+  "subject": "Tiếng Pháp",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "09-sgk-tieng-trung-quoc-9",
+  "grade": 9,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "09-sgk-tin-hoc-9",
+  "grade": 9,
+  "subject": "Tin học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 21,
+  "paged": 21,
+  "dupNumbers": 5,
+  "spineRatio": 0.81,
+  "coverage": 0.87,
+  "headGap": 0.05,
+  "pageCount": 94
+ },
+ {
+  "sourceDocumentId": "09-sgk-toan-9-tap-hai",
+  "grade": 9,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 15,
+  "paged": 15,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.72,
+  "headGap": 0.03,
+  "pageCount": 134
+ },
+ {
+  "sourceDocumentId": "09-sgk-toan-9-tap-mot",
+  "grade": 9,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 17,
+  "paged": 17,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.81,
+  "headGap": 0.04,
+  "pageCount": 122
+ },
+ {
+  "sourceDocumentId": "09-sgv-am-nhac-9",
+  "grade": 9,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.78,
+  "headGap": 0.14,
+  "pageCount": 94
+ },
+ {
+  "sourceDocumentId": "09-sgv-cong-nghe-9-dinh-huong-nghe-nghiep",
+  "grade": 9,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 5,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.42,
+  "headGap": 0.29,
+  "pageCount": 62
+ },
+ {
+  "sourceDocumentId": "09-sgv-cong-nghe-9-trai-nghiem-nghe-nghiep-mo-dun-che-bien-thuc-pham",
+  "grade": 9,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 7,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.59,
+  "headGap": 0.3,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "09-sgv-cong-nghe-9-trai-nghiem-nghe-nghiep-mo-dun-trong-cay-an-qua",
+  "grade": 9,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.67,
+  "headGap": 0.23,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "09-sgv-giao-duc-cong-dan-9",
+  "grade": 9,
+  "subject": "GDCD",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.66,
+  "headGap": 0.25,
+  "pageCount": 106
+ },
+ {
+  "sourceDocumentId": "09-sgv-giao-duc-the-chat-9",
+  "grade": 9,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 26,
+  "paged": 19,
+  "dupNumbers": 15,
+  "spineRatio": 0.53,
+  "coverage": 0.87,
+  "headGap": 0.07,
+  "pageCount": 131
+ },
+ {
+  "sourceDocumentId": "09-sgv-hoat-dong-trai-nghiem-huong-nghiep-9",
+  "grade": 9,
+  "subject": "HĐTN-HN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 7,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 170
+ },
+ {
+  "sourceDocumentId": "09-sgv-khoa-hoc-tu-nhien-9",
+  "grade": 9,
+  "subject": "KHTN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 51,
+  "paged": 18,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.88,
+  "headGap": 0.07,
+  "pageCount": 306
+ },
+ {
+  "sourceDocumentId": "09-sgv-lich-su-va-dia-li-9",
+  "grade": 9,
+  "subject": "LS&ĐL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 42,
+  "paged": 16,
+  "dupNumbers": 5,
+  "spineRatio": 0.62,
+  "coverage": 0.83,
+  "headGap": 0.08,
+  "pageCount": 378
+ },
+ {
+  "sourceDocumentId": "09-sgv-mi-thuat-9",
+  "grade": 9,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 24,
+  "paged": 24,
+  "dupNumbers": 8,
+  "spineRatio": 0.75,
+  "coverage": 0.76,
+  "headGap": 0.16,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "09-sgv-ngu-van-9-tap-2",
+  "grade": 9,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.21,
+  "pageCount": 146
+ },
+ {
+  "sourceDocumentId": "09-sgv-ngu-van-9-tap-mot",
+  "grade": 9,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.14,
+  "headGap": 0.22,
+  "pageCount": 182
+ },
+ {
+  "sourceDocumentId": "09-sgv-tieng-anh-9-global-success",
+  "grade": 9,
+  "subject": "Tiếng Anh",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 12,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.65,
+  "headGap": 0.16,
+  "pageCount": 342
+ },
+ {
+  "sourceDocumentId": "09-sgv-tieng-phap-9",
+  "grade": 9,
+  "subject": "Tiếng Pháp",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "09-sgv-tieng-trung-quoc-9",
+  "grade": 9,
+  "subject": "Tiếng Trung",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "09-sgv-tin-hoc-9",
+  "grade": 9,
+  "subject": "Tin học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 36,
+  "paged": 17,
+  "dupNumbers": 6,
+  "spineRatio": 0.88,
+  "coverage": 0.76,
+  "headGap": 0.18,
+  "pageCount": 102
+ },
+ {
+  "sourceDocumentId": "09-sgv-toan-9",
+  "grade": 9,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 32,
+  "paged": 27,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.79,
+  "headGap": 0.11,
+  "pageCount": 282
+ },
+ {
+  "sourceDocumentId": "10-sgk-am-nhac-10",
+  "grade": 10,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 8,
+  "spineRatio": 0.62,
+  "coverage": 0.87,
+  "headGap": 0.06,
+  "pageCount": 95
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-am-nhac-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 13,
+  "paged": 13,
+  "dupNumbers": 8,
+  "spineRatio": 0.54,
+  "coverage": 0.81,
+  "headGap": 0.09,
+  "pageCount": 58
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-cong-nghe-10-cong-nghe-trong-trot",
+  "grade": 10,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 15,
+  "paged": 15,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.8,
+  "headGap": 0.07,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-cong-nghe-10-thiet-ke-va-cong-nghe",
+  "grade": 10,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 6,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.69,
+  "headGap": 0.15,
+  "pageCount": 62
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-dia-li-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-giao-duc-kinh-te-va-phap-luat-10",
+  "grade": 10,
+  "subject": "GDKT&PL",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 7,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.68,
+  "headGap": 0.07,
+  "pageCount": 71
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-hoa-hoc-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 11,
+  "paged": 11,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.79,
+  "headGap": 0.06,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-lich-su-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 3,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 68
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-mi-thuat-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 9,
+  "paged": 9,
+  "dupNumbers": 6,
+  "spineRatio": 0.67,
+  "coverage": 0.74,
+  "headGap": 0.07,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-ngu-van-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-sinh-hoc-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 12,
+  "paged": 12,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.87,
+  "headGap": 0.06,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-tin-hoc-10-dinh-huong-khoa-hoc-may-tinh",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 14,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.8,
+  "headGap": 0.07,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-tin-hoc-10-dinh-huong-tin-hoc-ung-dung",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 15,
+  "paged": 15,
+  "dupNumbers": 8,
+  "spineRatio": 0.53,
+  "coverage": 0.57,
+  "headGap": 0.06,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-toan-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.79,
+  "headGap": 0.08,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "10-sgk-chuyen-de-hoc-tap-vat-li-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 13,
+  "paged": 12,
+  "dupNumbers": 2,
+  "spineRatio": 0.83,
+  "coverage": 0.82,
+  "headGap": 0.06,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "10-sgk-cong-nghe-10-cong-nghe-trong-trot",
+  "grade": 10,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 28,
+  "paged": 27,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.92,
+  "headGap": 0.04,
+  "pageCount": 146
+ },
+ {
+  "sourceDocumentId": "10-sgk-cong-nghe-10-thiet-ke-va-cong-nghe",
+  "grade": 10,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 22,
+  "paged": 22,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.88,
+  "headGap": 0.04,
+  "pageCount": 138
+ },
+ {
+  "sourceDocumentId": "10-sgk-dia-li-10",
+  "grade": 10,
+  "subject": "Địa lí",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 30,
+  "paged": 30,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.7,
+  "headGap": 0.04,
+  "pageCount": 118
+ },
+ {
+  "sourceDocumentId": "10-sgk-giao-duc-kinh-te-va-phap-luat-10",
+  "grade": 10,
+  "subject": "GDKT&PL",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 30,
+  "paged": 29,
+  "dupNumbers": 8,
+  "spineRatio": 0.76,
+  "coverage": 0.87,
+  "headGap": 0.04,
+  "pageCount": 159
+ },
+ {
+  "sourceDocumentId": "10-sgk-giao-duc-quoc-phong-va-an-ninh-10",
+  "grade": 10,
+  "subject": "GDQP",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "10-sgk-giao-duc-the-chat-10-bong-chuyen",
+  "grade": 10,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 9,
+  "paged": 5,
+  "dupNumbers": 1,
+  "spineRatio": 0.8,
+  "coverage": 0.4,
+  "headGap": 0.14,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "10-sgk-giao-duc-the-chat-10-bong-da",
+  "grade": 10,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 17,
+  "paged": 16,
+  "dupNumbers": 11,
+  "spineRatio": 0.5,
+  "coverage": 0.72,
+  "headGap": 0.15,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "10-sgk-giao-duc-the-chat-10-bong-ro",
+  "grade": 10,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 8,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.17,
+  "headGap": 0.67,
+  "pageCount": 58
+ },
+ {
+  "sourceDocumentId": "10-sgk-giao-duc-the-chat-10-cau-long",
+  "grade": 10,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 22,
+  "paged": 22,
+  "dupNumbers": 16,
+  "spineRatio": 0.5,
+  "coverage": 0.65,
+  "headGap": 0.14,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "10-sgk-hoa-hoc-10",
+  "grade": 10,
+  "subject": "Hoá học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 14,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.45,
+  "headGap": 0.11,
+  "pageCount": 122
+ },
+ {
+  "sourceDocumentId": "10-sgk-hoat-dong-trai-nghiem-huong-nghiep-10",
+  "grade": 10,
+  "subject": "HĐTN-HN",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 11,
+  "paged": 11,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.78,
+  "headGap": 0.06,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "10-sgk-lich-su-10",
+  "grade": 10,
+  "subject": "Lịch sử",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 18,
+  "paged": 17,
+  "dupNumbers": 4,
+  "spineRatio": 0.94,
+  "coverage": 0.82,
+  "headGap": 0.05,
+  "pageCount": 115
+ },
+ {
+  "sourceDocumentId": "10-sgk-mi-thuat-10-dieu-khac",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "10-sgk-mi-thuat-10-do-hoa-tranh-in",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.29,
+  "headGap": 0.15,
+  "pageCount": 34
+ },
+ {
+  "sourceDocumentId": "10-sgk-mi-thuat-10-hoi-hoa",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.63,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "10-sgk-mi-thuat-10-kien-truc",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.24,
+  "headGap": 0.15,
+  "pageCount": 34
+ },
+ {
+  "sourceDocumentId": "10-sgk-mi-thuat-10-li-luan-va-lich-su-mi-thuat",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.49,
+  "headGap": 0.13,
+  "pageCount": 39
+ },
+ {
+  "sourceDocumentId": "10-sgk-mi-thuat-10-thiet-ke-cong-nghiep",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.32,
+  "headGap": 0.15,
+  "pageCount": 34
+ },
+ {
+  "sourceDocumentId": "10-sgk-mi-thuat-10-thiet-ke-do-hoa",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.38,
+  "headGap": 0.15,
+  "pageCount": 34
+ },
+ {
+  "sourceDocumentId": "10-sgk-mi-thuat-10-thiet-ke-mi-thuat-da-phuong-tien",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.31,
+  "headGap": 0.12,
+  "pageCount": 42
+ },
+ {
+  "sourceDocumentId": "10-sgk-mi-thuat-10-thiet-ke-mi-thuat-san-khau-dien-anh",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.29,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "10-sgk-mi-thuat-10-thiet-ke-thoi-trang",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.26,
+  "headGap": 0.15,
+  "pageCount": 34
+ },
+ {
+  "sourceDocumentId": "10-sgk-ngu-van-10-tap-hai",
+  "grade": 10,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 3,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.19,
+  "headGap": 0.53,
+  "pageCount": 138
+ },
+ {
+  "sourceDocumentId": "10-sgk-ngu-van-10-tap-mot",
+  "grade": 10,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 23,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.68,
+  "headGap": 0.05,
+  "pageCount": 170
+ },
+ {
+  "sourceDocumentId": "10-sgk-sinh-hoc-10",
+  "grade": 10,
+  "subject": "Sinh học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 26,
+  "paged": 26,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.93,
+  "headGap": 0.03,
+  "pageCount": 162
+ },
+ {
+  "sourceDocumentId": "10-sgk-tieng-anh-10-global-sucess",
+  "grade": 10,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.06,
+  "pageCount": 134
+ },
+ {
+  "sourceDocumentId": "10-sgk-tieng-trung-quoc-10",
+  "grade": 10,
+  "subject": "Tiếng Trung",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "10-sgk-tin-hoc-10",
+  "grade": 10,
+  "subject": "Tin học",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 33,
+  "paged": 32,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.91,
+  "headGap": 0.04,
+  "pageCount": 170
+ },
+ {
+  "sourceDocumentId": "10-sgk-toan-10-tap-hai",
+  "grade": 10,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 13,
+  "paged": 13,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.77,
+  "headGap": 0.04,
+  "pageCount": 102
+ },
+ {
+  "sourceDocumentId": "10-sgk-toan-10-tap-mot",
+  "grade": 10,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 14,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.75,
+  "headGap": 0.05,
+  "pageCount": 106
+ },
+ {
+  "sourceDocumentId": "10-sgk-vat-li-10",
+  "grade": 10,
+  "subject": "Vật lí",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 34,
+  "paged": 34,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.87,
+  "headGap": 0.05,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "10-sgv-am-nhac-10",
+  "grade": 10,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NON_MONOTONIC"
+  ],
+  "lessons": 16,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 0.67,
+  "coverage": 0.42,
+  "headGap": 0.2,
+  "pageCount": 119
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-am-nhac-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 16,
+  "paged": 13,
+  "dupNumbers": 8,
+  "spineRatio": 0.54,
+  "coverage": 0.43,
+  "headGap": 0.46,
+  "pageCount": 46
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-cong-nghe-10-cong-nghe-trong-trot",
+  "grade": 10,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 15,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.04,
+  "headGap": 0.89,
+  "pageCount": 118
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-cong-nghe-10-thiet-ke-va-cong-nghe",
+  "grade": 10,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 8,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.26,
+  "headGap": 0.35,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-dia-li-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 1,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.82,
+  "pageCount": 50
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-giao-duc-kinh-te-va-phap-luat-10",
+  "grade": 10,
+  "subject": "GDKT&PL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 7,
+  "paged": 6,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.53,
+  "headGap": 0.26,
+  "pageCount": 90
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-hoa-hoc-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 22,
+  "paged": 6,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.65,
+  "headGap": 0.26,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-lich-su-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 3,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.15,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-mi-thuat-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 5,
+  "paged": 5,
+  "dupNumbers": 2,
+  "spineRatio": 1.0,
+  "coverage": 0.47,
+  "headGap": 0.29,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-ngu-van-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 1,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.17,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-sinh-hoc-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 15,
+  "paged": 12,
+  "dupNumbers": 2,
+  "spineRatio": 0.92,
+  "coverage": 0.76,
+  "headGap": 0.09,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-tin-hoc-10-dinh-huong-khoa-hoc-may-tinh",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 14,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.73,
+  "headGap": 0.18,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-tin-hoc-10-dinh-huong-tin-hoc-ung-dung",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 25,
+  "paged": 14,
+  "dupNumbers": 7,
+  "spineRatio": 0.64,
+  "coverage": 0.47,
+  "headGap": 0.17,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-toan-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 11,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.24,
+  "headGap": 0.38,
+  "pageCount": 90
+ },
+ {
+  "sourceDocumentId": "10-sgv-chuyen-de-hoc-tap-vat-li-10",
+  "grade": 10,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 16,
+  "paged": 10,
+  "dupNumbers": 2,
+  "spineRatio": 0.8,
+  "coverage": 0.58,
+  "headGap": 0.17,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "10-sgv-cong-nghe-10-cong-nghe-trong-trot",
+  "grade": 10,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 28,
+  "paged": 27,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.84,
+  "headGap": 0.13,
+  "pageCount": 158
+ },
+ {
+  "sourceDocumentId": "10-sgv-cong-nghe-10-thiet-ke-va-cong-nghe",
+  "grade": 10,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 22,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.73,
+  "headGap": 0.21,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "10-sgv-dia-li-10",
+  "grade": 10,
+  "subject": "Địa lí",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 39,
+  "paged": 26,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.84,
+  "headGap": 0.11,
+  "pageCount": 230
+ },
+ {
+  "sourceDocumentId": "10-sgv-giao-duc-kinh-te-va-phap-luat-10",
+  "grade": 10,
+  "subject": "GDKT&PL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 29,
+  "paged": 17,
+  "dupNumbers": 4,
+  "spineRatio": 0.88,
+  "coverage": 0.76,
+  "headGap": 0.15,
+  "pageCount": 190
+ },
+ {
+  "sourceDocumentId": "10-sgv-giao-duc-the-chat-10-bong-chuyen",
+  "grade": 10,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 12,
+  "paged": 2,
+  "dupNumbers": 1,
+  "spineRatio": 1.0,
+  "coverage": 0.23,
+  "headGap": 0.62,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "10-sgv-giao-duc-the-chat-10-bong-da",
+  "grade": 10,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 18,
+  "paged": 17,
+  "dupNumbers": 11,
+  "spineRatio": 0.47,
+  "coverage": 0.6,
+  "headGap": 0.31,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "10-sgv-giao-duc-the-chat-10-bong-ro",
+  "grade": 10,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 11,
+  "paged": 9,
+  "dupNumbers": 6,
+  "spineRatio": 0.67,
+  "coverage": 0.55,
+  "headGap": 0.32,
+  "pageCount": 62
+ },
+ {
+  "sourceDocumentId": "10-sgv-giao-duc-the-chat-10-cau-long",
+  "grade": 10,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 22,
+  "paged": 19,
+  "dupNumbers": 13,
+  "spineRatio": 0.47,
+  "coverage": 0.52,
+  "headGap": 0.32,
+  "pageCount": 94
+ },
+ {
+  "sourceDocumentId": "10-sgv-hoa-hoc-10",
+  "grade": 10,
+  "subject": "Hoá học",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 14,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.57,
+  "headGap": 0.12,
+  "pageCount": 154
+ },
+ {
+  "sourceDocumentId": "10-sgv-hoat-dong-trai-nghiem-huong-nghiep-10",
+  "grade": 10,
+  "subject": "HĐTN-HN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 11,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.65,
+  "headGap": 0.21,
+  "pageCount": 194
+ },
+ {
+  "sourceDocumentId": "10-sgv-lich-su-10",
+  "grade": 10,
+  "subject": "Lịch sử",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 20,
+  "paged": 13,
+  "dupNumbers": 3,
+  "spineRatio": 0.85,
+  "coverage": 0.79,
+  "headGap": 0.13,
+  "pageCount": 178
+ },
+ {
+  "sourceDocumentId": "10-sgv-mi-thuat-10",
+  "grade": 10,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 22,
+  "paged": 18,
+  "dupNumbers": 15,
+  "spineRatio": 0.89,
+  "coverage": 0.07,
+  "headGap": 0.01,
+  "pageCount": 134
+ },
+ {
+  "sourceDocumentId": "10-sgv-ngu-van-10-tap-hai",
+  "grade": 10,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.27,
+  "headGap": 0.04,
+  "pageCount": 118
+ },
+ {
+  "sourceDocumentId": "10-sgv-ngu-van-10-tap-mot",
+  "grade": 10,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.28,
+  "headGap": 0.54,
+  "pageCount": 166
+ },
+ {
+  "sourceDocumentId": "10-sgv-sinh-hoc-10",
+  "grade": 10,
+  "subject": "Sinh học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 25,
+  "paged": 23,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.81,
+  "headGap": 0.14,
+  "pageCount": 154
+ },
+ {
+  "sourceDocumentId": "10-sgv-tieng-phap-10",
+  "grade": 10,
+  "subject": "Tiếng Pháp",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "10-sgv-tieng-trung-quoc-10",
+  "grade": 10,
+  "subject": "Tiếng Trung",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "10-sgv-tin-hoc-10",
+  "grade": 10,
+  "subject": "Tin học",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 34,
+  "paged": 34,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.85,
+  "headGap": 0.11,
+  "pageCount": 150
+ },
+ {
+  "sourceDocumentId": "10-sgv-toan-10",
+  "grade": 10,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 27,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.38,
+  "headGap": 0.47,
+  "pageCount": 294
+ },
+ {
+  "sourceDocumentId": "10-sgv-vat-li-10",
+  "grade": 10,
+  "subject": "Vật lí",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 34,
+  "paged": 19,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.74,
+  "headGap": 0.14,
+  "pageCount": 134
+ },
+ {
+  "sourceDocumentId": "10-shs-tieng-phap-10",
+  "grade": 10,
+  "subject": "Tiếng Pháp",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "10-tieng-phap-10",
+  "grade": 10,
+  "subject": "Tiếng Pháp",
+  "docType": "UNKNOWN",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "11-sgk-am-nhac-11",
+  "grade": 11,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 30,
+  "paged": 30,
+  "dupNumbers": 24,
+  "spineRatio": 0.5,
+  "coverage": 0.88,
+  "headGap": 0.06,
+  "pageCount": 90
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-am-nhac-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 9,
+  "paged": 9,
+  "dupNumbers": 5,
+  "spineRatio": 0.44,
+  "coverage": 0.69,
+  "headGap": 0.1,
+  "pageCount": 51
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-cong-nghe-11-cong-nghe-chan-nuoi",
+  "grade": 11,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 14,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.8,
+  "headGap": 0.08,
+  "pageCount": 66
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-cong-nghe-11-cong-nghe-co-khi",
+  "grade": 11,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 11,
+  "paged": 11,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.08,
+  "pageCount": 62
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-dia-li-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-giao-duc-kinh-te-va-phap-luat-11",
+  "grade": 11,
+  "subject": "GDKT&PL",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 12,
+  "paged": 4,
+  "dupNumbers": 1,
+  "spineRatio": 1.0,
+  "coverage": 0.35,
+  "headGap": 0.3,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-hoa-hoc-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 9,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.73,
+  "headGap": 0.08,
+  "pageCount": 59
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-lich-su-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 3,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.59,
+  "headGap": 0.1,
+  "pageCount": 58
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-mi-thuat-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 9,
+  "paged": 9,
+  "dupNumbers": 6,
+  "spineRatio": 0.67,
+  "coverage": 0.75,
+  "headGap": 0.07,
+  "pageCount": 67
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-ngu-van-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-sinh-hoc-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 18,
+  "paged": 12,
+  "dupNumbers": 2,
+  "spineRatio": 0.83,
+  "coverage": 0.79,
+  "headGap": 0.08,
+  "pageCount": 63
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-tin-hoc-11-dinh-huong-khoa-hoc-may-tinh",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.84,
+  "headGap": 0.07,
+  "pageCount": 75
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-tin-hoc-11-dinh-huong-tin-hoc-ung-dung",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 15,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.75,
+  "headGap": 0.06,
+  "pageCount": 79
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-toan-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 12,
+  "paged": 12,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.73,
+  "headGap": 0.06,
+  "pageCount": 86
+ },
+ {
+  "sourceDocumentId": "11-sgk-chuyen-de-hoc-tap-vat-li-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 12,
+  "paged": 12,
+  "dupNumbers": 3,
+  "spineRatio": 0.83,
+  "coverage": 0.79,
+  "headGap": 0.08,
+  "pageCount": 62
+ },
+ {
+  "sourceDocumentId": "11-sgk-cong-nghe-11-cong-nghe-chan-nuoi",
+  "grade": 11,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 22,
+  "paged": 22,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.87,
+  "headGap": 0.06,
+  "pageCount": 122
+ },
+ {
+  "sourceDocumentId": "11-sgk-cong-nghe-11-cong-nghe-co-khi",
+  "grade": 11,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 25,
+  "paged": 25,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.87,
+  "headGap": 0.05,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "11-sgk-dia-li-11",
+  "grade": 11,
+  "subject": "Địa lí",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 31,
+  "paged": 31,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.91,
+  "headGap": 0.03,
+  "pageCount": 170
+ },
+ {
+  "sourceDocumentId": "11-sgk-giao-duc-kinh-te-va-phap-luat-11",
+  "grade": 11,
+  "subject": "GDKT&PL",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 24,
+  "paged": 24,
+  "dupNumbers": 4,
+  "spineRatio": 0.83,
+  "coverage": 0.87,
+  "headGap": 0.04,
+  "pageCount": 150
+ },
+ {
+  "sourceDocumentId": "11-sgk-giao-duc-quoc-phong-va-an-ninh-11",
+  "grade": 11,
+  "subject": "GDQP",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "11-sgk-giao-duc-the-chat-11-bong-chuyen",
+  "grade": 11,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 8,
+  "paged": 4,
+  "dupNumbers": 2,
+  "spineRatio": 1.0,
+  "coverage": 0.61,
+  "headGap": 0.15,
+  "pageCount": 59
+ },
+ {
+  "sourceDocumentId": "11-sgk-giao-duc-the-chat-11-bong-da",
+  "grade": 11,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 21,
+  "paged": 21,
+  "dupNumbers": 14,
+  "spineRatio": 0.48,
+  "coverage": 0.76,
+  "headGap": 0.13,
+  "pageCount": 79
+ },
+ {
+  "sourceDocumentId": "11-sgk-giao-duc-the-chat-11-bong-ro",
+  "grade": 11,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 9,
+  "paged": 4,
+  "dupNumbers": 2,
+  "spineRatio": 0.75,
+  "coverage": 0.3,
+  "headGap": 0.54,
+  "pageCount": 67
+ },
+ {
+  "sourceDocumentId": "11-sgk-giao-duc-the-chat-11-cau-long",
+  "grade": 11,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 24,
+  "paged": 23,
+  "dupNumbers": 16,
+  "spineRatio": 0.43,
+  "coverage": 0.79,
+  "headGap": 0.11,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "11-sgk-hoa-hoc-11",
+  "grade": 11,
+  "subject": "Hoá học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 13,
+  "paged": 13,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.47,
+  "headGap": 0.04,
+  "pageCount": 158
+ },
+ {
+  "sourceDocumentId": "11-sgk-hoat-dong-trai-nghiem-huong-nghiep-11",
+  "grade": 11,
+  "subject": "HĐTN-HN",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.83,
+  "headGap": 0.07,
+  "pageCount": 75
+ },
+ {
+  "sourceDocumentId": "11-sgk-lich-su-11",
+  "grade": 11,
+  "subject": "Lịch sử",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 13,
+  "paged": 13,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.06,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "11-sgk-mi-thuat-11-dieu-khac",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "11-sgk-mi-thuat-11-do-hoa-tranh-in",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.31,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "11-sgk-mi-thuat-11-hoi-hoa",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.41,
+  "headGap": 0.15,
+  "pageCount": 34
+ },
+ {
+  "sourceDocumentId": "11-sgk-mi-thuat-11-kien-truc",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.33,
+  "headGap": 0.14,
+  "pageCount": 36
+ },
+ {
+  "sourceDocumentId": "11-sgk-mi-thuat-11-li-luan-va-lich-su-mi-thuat",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.43,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "11-sgk-mi-thuat-11-thiet-ke-cong-nghiep",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.29,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "11-sgk-mi-thuat-11-thiet-ke-do-hoa",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.26,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "11-sgk-mi-thuat-11-thiet-ke-mi-thuat-da-phuong-tien",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.31,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "11-sgk-mi-thuat-11-thiet-ke-mi-thuat-san-khau-dien-anh",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.26,
+  "headGap": 0.13,
+  "pageCount": 39
+ },
+ {
+  "sourceDocumentId": "11-sgk-mi-thuat-11-thiet-ke-thoi-trang",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.39,
+  "headGap": 0.11,
+  "pageCount": 44
+ },
+ {
+  "sourceDocumentId": "11-sgk-ngu-van-11-tap-hai",
+  "grade": 11,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.66,
+  "headGap": 0.03,
+  "pageCount": 134
+ },
+ {
+  "sourceDocumentId": "11-sgk-ngu-van-11-tap-mot",
+  "grade": 11,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 5,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.7,
+  "headGap": 0.05,
+  "pageCount": 166
+ },
+ {
+  "sourceDocumentId": "11-sgk-sinh-hoc-11",
+  "grade": 11,
+  "subject": "Sinh học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 29,
+  "paged": 29,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.95,
+  "headGap": 0.03,
+  "pageCount": 190
+ },
+ {
+  "sourceDocumentId": "11-sgk-tieng-anh-11-global-success",
+  "grade": 11,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.06,
+  "pageCount": 135
+ },
+ {
+  "sourceDocumentId": "11-sgk-tin-hoc-11-dinh-huong-khoa-hoc-may-tinh",
+  "grade": 11,
+  "subject": "Khoa học",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 31,
+  "paged": 28,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.88,
+  "headGap": 0.07,
+  "pageCount": 151
+ },
+ {
+  "sourceDocumentId": "11-sgk-tin-hoc-11-dinh-huong-tin-hoc-ung-dung",
+  "grade": 11,
+  "subject": "Tin học",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 31,
+  "paged": 23,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.72,
+  "headGap": 0.03,
+  "pageCount": 154
+ },
+ {
+  "sourceDocumentId": "11-sgk-toan-11-tap-hai",
+  "grade": 11,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 16,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.8,
+  "headGap": 0.04,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "11-sgk-toan-11-tap-mot",
+  "grade": 11,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 17,
+  "paged": 17,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.85,
+  "headGap": 0.04,
+  "pageCount": 134
+ },
+ {
+  "sourceDocumentId": "11-sgk-vat-li-11",
+  "grade": 11,
+  "subject": "Vật lí",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 26,
+  "paged": 25,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.89,
+  "headGap": 0.05,
+  "pageCount": 118
+ },
+ {
+  "sourceDocumentId": "11-sgv-am-nhac-11",
+  "grade": 11,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 30,
+  "paged": 3,
+  "dupNumbers": 1,
+  "spineRatio": 1.0,
+  "coverage": 0.24,
+  "headGap": 0.16,
+  "pageCount": 106
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-am-nhac-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 11,
+  "paged": 7,
+  "dupNumbers": 3,
+  "spineRatio": 0.57,
+  "coverage": 0.24,
+  "headGap": 0.5,
+  "pageCount": 42
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-cong-nghe-11-cong-nghe-chan-nuoi",
+  "grade": 11,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 19,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.31,
+  "headGap": 0.56,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-cong-nghe-11-cong-nghe-co-khi",
+  "grade": 11,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 11,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.22,
+  "headGap": 0.45,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-dia-li-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-giao-duc-kinh-te-va-phap-luat-11",
+  "grade": 11,
+  "subject": "GDKT&PL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 12,
+  "paged": 6,
+  "dupNumbers": 1,
+  "spineRatio": 0.83,
+  "coverage": 0.47,
+  "headGap": 0.27,
+  "pageCount": 86
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-hoa-hoc-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 24,
+  "paged": 6,
+  "dupNumbers": 1,
+  "spineRatio": 1.0,
+  "coverage": 0.43,
+  "headGap": 0.13,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-lich-su-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 3,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.77,
+  "pageCount": 90
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-mi-thuat-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 10,
+  "paged": 10,
+  "dupNumbers": 7,
+  "spineRatio": 0.8,
+  "coverage": 0.69,
+  "headGap": 0.07,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-ngu-van-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 1,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.45,
+  "pageCount": 86
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-sinh-hoc-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 14,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.26,
+  "headGap": 0.42,
+  "pageCount": 62
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-tin-hoc-11-dinh-huong-khoa-hoc-may-tinh",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 22,
+  "paged": 18,
+  "dupNumbers": 2,
+  "spineRatio": 0.89,
+  "coverage": 0.72,
+  "headGap": 0.19,
+  "pageCount": 86
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-tin-hoc-11-dinh-huong-tin-hoc-ung-dung",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 15,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-toan-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 15,
+  "paged": 10,
+  "dupNumbers": 1,
+  "spineRatio": 0.8,
+  "coverage": 0.69,
+  "headGap": 0.17,
+  "pageCount": 94
+ },
+ {
+  "sourceDocumentId": "11-sgv-chuyen-de-hoc-tap-vat-li-11",
+  "grade": 11,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 15,
+  "paged": 11,
+  "dupNumbers": 2,
+  "spineRatio": 0.82,
+  "coverage": 0.76,
+  "headGap": 0.13,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "11-sgv-cong-nghe-11-cong-nghe-chan-nuoi",
+  "grade": 11,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 22,
+  "paged": 20,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.19,
+  "pageCount": 122
+ },
+ {
+  "sourceDocumentId": "11-sgv-cong-nghe-11-cong-nghe-co-khi",
+  "grade": 11,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 25,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.61,
+  "headGap": 0.29,
+  "pageCount": 150
+ },
+ {
+  "sourceDocumentId": "11-sgv-dia-li-11",
+  "grade": 11,
+  "subject": "Địa lí",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 31,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.63,
+  "headGap": 0.23,
+  "pageCount": 214
+ },
+ {
+  "sourceDocumentId": "11-sgv-giao-duc-kinh-te-va-phap-luat-11",
+  "grade": 11,
+  "subject": "GDKT&PL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 21,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.94,
+  "pageCount": 186
+ },
+ {
+  "sourceDocumentId": "11-sgv-giao-duc-the-chat-11-bong-chuyen",
+  "grade": 11,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 8,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 86
+ },
+ {
+  "sourceDocumentId": "11-sgv-giao-duc-the-chat-11-bong-da",
+  "grade": 11,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 21,
+  "paged": 21,
+  "dupNumbers": 14,
+  "spineRatio": 0.48,
+  "coverage": 0.67,
+  "headGap": 0.27,
+  "pageCount": 90
+ },
+ {
+  "sourceDocumentId": "11-sgv-giao-duc-the-chat-11-cau-long",
+  "grade": 11,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 24,
+  "paged": 22,
+  "dupNumbers": 15,
+  "spineRatio": 0.41,
+  "coverage": 0.67,
+  "headGap": 0.27,
+  "pageCount": 102
+ },
+ {
+  "sourceDocumentId": "11-sgv-hoa-hoc-11",
+  "grade": 11,
+  "subject": "Hoá học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 25,
+  "paged": 19,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.87,
+  "headGap": 0.11,
+  "pageCount": 194
+ },
+ {
+  "sourceDocumentId": "11-sgv-hoat-dong-trai-nghiem-huong-nghiep-11",
+  "grade": 11,
+  "subject": "HĐTN-HN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 10,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.31,
+  "headGap": 0.52,
+  "pageCount": 194
+ },
+ {
+  "sourceDocumentId": "11-sgv-lich-su-11",
+  "grade": 11,
+  "subject": "Lịch sử",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 13,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.52,
+  "headGap": 0.23,
+  "pageCount": 178
+ },
+ {
+  "sourceDocumentId": "11-sgv-mi-thuat-11",
+  "grade": 11,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 13,
+  "paged": 13,
+  "dupNumbers": 10,
+  "spineRatio": 0.92,
+  "coverage": 0.06,
+  "headGap": 0.03,
+  "pageCount": 126
+ },
+ {
+  "sourceDocumentId": "11-sgv-ngu-van-11-tap-hai",
+  "grade": 11,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.24,
+  "headGap": 0.04,
+  "pageCount": 118
+ },
+ {
+  "sourceDocumentId": "11-sgv-ngu-van-11-tap-mot",
+  "grade": 11,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 3,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "11-sgv-sinh-hoc-11",
+  "grade": 11,
+  "subject": "Sinh học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 28,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.15,
+  "pageCount": 178
+ },
+ {
+  "sourceDocumentId": "11-sgv-tieng-anh-11-global-success",
+  "grade": 11,
+  "subject": "Tiếng Anh",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.74,
+  "headGap": 0.02,
+  "pageCount": 262
+ },
+ {
+  "sourceDocumentId": "11-sgv-tin-hoc-11",
+  "grade": 11,
+  "subject": "Tin học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 46,
+  "paged": 42,
+  "dupNumbers": 13,
+  "spineRatio": 0.71,
+  "coverage": 0.89,
+  "headGap": 0.08,
+  "pageCount": 218
+ },
+ {
+  "sourceDocumentId": "11-sgv-toan-11",
+  "grade": 11,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 33,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.36,
+  "headGap": 0.56,
+  "pageCount": 318
+ },
+ {
+  "sourceDocumentId": "11-sgv-vat-li-11",
+  "grade": 11,
+  "subject": "Vật lí",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 26,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.43,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "12-sgk-am-nhac-12",
+  "grade": 12,
+  "subject": "Âm nhạc",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 18,
+  "paged": 18,
+  "dupNumbers": 14,
+  "spineRatio": 0.44,
+  "coverage": 0.85,
+  "headGap": 0.06,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-am-nhac-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 7,
+  "paged": 7,
+  "dupNumbers": 4,
+  "spineRatio": 0.57,
+  "coverage": 0.61,
+  "headGap": 0.11,
+  "pageCount": 44
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-cong-nghe-12-cong-nghe-dien-dien-tu",
+  "grade": 12,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 9,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.55,
+  "headGap": 0.09,
+  "pageCount": 55
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-cong-nghe-12-lam-nghiep-thuy-san",
+  "grade": 12,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 13,
+  "paged": 13,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.81,
+  "headGap": 0.09,
+  "pageCount": 54
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-dia-li-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-giao-duc-kinh-te-va-phap-luat-12",
+  "grade": 12,
+  "subject": "GDKT&PL",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NO_PAGES"
+  ],
+  "lessons": 2,
+  "paged": 0,
+  "dupNumbers": 0,
+  "spineRatio": 0.0,
+  "coverage": null,
+  "headGap": null,
+  "pageCount": 50
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-hoa-hoc-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 8,
+  "paged": 8,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.78,
+  "headGap": 0.11,
+  "pageCount": 54
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-lich-su-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 3,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.53,
+  "headGap": 0.1,
+  "pageCount": 58
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-mi-thuat-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 9,
+  "paged": 8,
+  "dupNumbers": 5,
+  "spineRatio": 0.62,
+  "coverage": 0.73,
+  "headGap": 0.07,
+  "pageCount": 71
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-ngu-van-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-sinh-hoc-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.84,
+  "headGap": 0.06,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-tin-hoc-12-dinh-huong-khoa-hoc-may-tinh",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 17,
+  "paged": 17,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.86,
+  "headGap": 0.06,
+  "pageCount": 87
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-tin-hoc-12-dinh-huong-tin-hoc-ung-dung",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 15,
+  "paged": 14,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.84,
+  "headGap": 0.05,
+  "pageCount": 96
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-toan-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 7,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.73,
+  "headGap": 0.07,
+  "pageCount": 75
+ },
+ {
+  "sourceDocumentId": "12-sgk-chuyen-de-hoc-tap-vat-li-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 15,
+  "paged": 15,
+  "dupNumbers": 3,
+  "spineRatio": 0.87,
+  "coverage": 0.84,
+  "headGap": 0.07,
+  "pageCount": 70
+ },
+ {
+  "sourceDocumentId": "12-sgk-cong-nghe-12-cong-nghe-dien-dien-tu",
+  "grade": 12,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "NON_MONOTONIC",
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 24,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 0.7,
+  "coverage": 0.22,
+  "headGap": 0.65,
+  "pageCount": 147
+ },
+ {
+  "sourceDocumentId": "12-sgk-cong-nghe-12-lam-nghiep-thuy-san",
+  "grade": 12,
+  "subject": "Công nghệ",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 27,
+  "paged": 26,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.89,
+  "headGap": 0.05,
+  "pageCount": 147
+ },
+ {
+  "sourceDocumentId": "12-sgk-dia-li-12",
+  "grade": 12,
+  "subject": "Địa lí",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 35,
+  "paged": 35,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.93,
+  "headGap": 0.03,
+  "pageCount": 179
+ },
+ {
+  "sourceDocumentId": "12-sgk-giao-duc-kinh-te-va-phap-luat-12",
+  "grade": 12,
+  "subject": "GDKT&PL",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 21,
+  "paged": 21,
+  "dupNumbers": 5,
+  "spineRatio": 0.95,
+  "coverage": 0.84,
+  "headGap": 0.04,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "12-sgk-giao-duc-quoc-phong-va-an-ninh-12",
+  "grade": 12,
+  "subject": "GDQP",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "12-sgk-giao-duc-the-chat-12-bong-chuyen",
+  "grade": 12,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 8,
+  "paged": 6,
+  "dupNumbers": 4,
+  "spineRatio": 0.67,
+  "coverage": 0.45,
+  "headGap": 0.36,
+  "pageCount": 64
+ },
+ {
+  "sourceDocumentId": "12-sgk-giao-duc-the-chat-12-bong-da",
+  "grade": 12,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 21,
+  "paged": 18,
+  "dupNumbers": 12,
+  "spineRatio": 0.44,
+  "coverage": 0.74,
+  "headGap": 0.16,
+  "pageCount": 91
+ },
+ {
+  "sourceDocumentId": "12-sgk-giao-duc-the-chat-12-bong-ro",
+  "grade": 12,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 9,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.83,
+  "pageCount": 75
+ },
+ {
+  "sourceDocumentId": "12-sgk-giao-duc-the-chat-12-cau-long",
+  "grade": 12,
+  "subject": "GDTC",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 16,
+  "paged": 16,
+  "dupNumbers": 12,
+  "spineRatio": 0.56,
+  "coverage": 0.71,
+  "headGap": 0.15,
+  "pageCount": 72
+ },
+ {
+  "sourceDocumentId": "12-sgk-hoa-hoc-12",
+  "grade": 12,
+  "subject": "Hoá học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 30,
+  "paged": 30,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.93,
+  "headGap": 0.04,
+  "pageCount": 146
+ },
+ {
+  "sourceDocumentId": "12-sgk-hoat-dong-trai-nghiem-huong-nghiep-12",
+  "grade": 12,
+  "subject": "HĐTN-HN",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 5,
+  "paged": 5,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.73,
+  "headGap": 0.15,
+  "pageCount": 94
+ },
+ {
+  "sourceDocumentId": "12-sgk-lich-su-12",
+  "grade": 12,
+  "subject": "Lịch sử",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 17,
+  "paged": 15,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.87,
+  "headGap": 0.05,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "12-sgk-mi-thuat-12-dieu-khac",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "12-sgk-mi-thuat-12-do-hoa-tranh-in",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.37,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "12-sgk-mi-thuat-12-hoi-hoa",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.36,
+  "headGap": 0.14,
+  "pageCount": 36
+ },
+ {
+  "sourceDocumentId": "12-sgk-mi-thuat-12-kien-truc",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.34,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "12-sgk-mi-thuat-12-li-luan-va-lich-su-mi-thuat",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.26,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "12-sgk-mi-thuat-12-thiet-ke-cong-nghiep",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.31,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "12-sgk-mi-thuat-12-thiet-ke-do-hoa",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.29,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "12-sgk-mi-thuat-12-thiet-ke-mi-thuat-da-phuong-tien",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.29,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "12-sgk-mi-thuat-12-thiet-ke-mi-thuat-san-khau-dien-anh",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.4,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "12-sgk-mi-thuat-12-thiet-ke-thoi-trang",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.31,
+  "headGap": 0.14,
+  "pageCount": 35
+ },
+ {
+  "sourceDocumentId": "12-sgk-ngu-van-12-tap-hai",
+  "grade": 12,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 5,
+  "paged": 4,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.61,
+  "headGap": 0.03,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "12-sgk-ngu-van-12-tap-mot",
+  "grade": 12,
+  "subject": "Ngữ văn",
+  "docType": "SGK",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "12-sgk-sinh-hoc-12",
+  "grade": 12,
+  "subject": "Sinh học",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 35,
+  "paged": 35,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.92,
+  "headGap": 0.03,
+  "pageCount": 198
+ },
+ {
+  "sourceDocumentId": "12-sgk-tieng-anh-12-global-success",
+  "grade": 12,
+  "subject": "Tiếng Anh",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.75,
+  "headGap": 0.05,
+  "pageCount": 159
+ },
+ {
+  "sourceDocumentId": "12-sgk-tin-hoc-12-dinh-huong-khoa-hoc-may-tinh",
+  "grade": 12,
+  "subject": "Khoa học",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 29,
+  "paged": 22,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.89,
+  "headGap": 0.05,
+  "pageCount": 168
+ },
+ {
+  "sourceDocumentId": "12-sgk-tin-hoc-12-dinh-huong-tin-hoc-ung-dung",
+  "grade": 12,
+  "subject": "Tin học",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 28,
+  "paged": 23,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.92,
+  "headGap": 0.03,
+  "pageCount": 159
+ },
+ {
+  "sourceDocumentId": "12-sgk-toan-12-tap-hai",
+  "grade": 12,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 9,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.69,
+  "headGap": 0.04,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "12-sgk-toan-12-tap-mot",
+  "grade": 12,
+  "subject": "Toán",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.73,
+  "headGap": 0.05,
+  "pageCount": 103
+ },
+ {
+  "sourceDocumentId": "12-sgv-am-nhac",
+  "grade": 12,
+  "subject": "Âm nhạc",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 27,
+  "paged": 25,
+  "dupNumbers": 21,
+  "spineRatio": 0.44,
+  "coverage": 0.8,
+  "headGap": 0.1,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-am-nhac-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 7,
+  "paged": 4,
+  "dupNumbers": 1,
+  "spineRatio": 0.75,
+  "coverage": 0.39,
+  "headGap": 0.2,
+  "pageCount": 46
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-cong-nghe-12-cong-nghe-dien-dien-tu",
+  "grade": 12,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 9,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.27,
+  "headGap": 0.48,
+  "pageCount": 62
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-cong-nghe-12-lam-nghiep-thuy-san",
+  "grade": 12,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 13,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.18,
+  "headGap": 0.39,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-dia-li-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "NO_TOC",
+  "flags": [
+   "NO_TOC"
+  ]
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-giao-duc-kinh-te-va-phap-luat-12",
+  "grade": 12,
+  "subject": "GDKT&PL",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.39,
+  "headGap": 0.41,
+  "pageCount": 54
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-hoa-hoc-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 24,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.56,
+  "headGap": 0.12,
+  "pageCount": 82
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-lich-su-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.57,
+  "headGap": 0.12,
+  "pageCount": 94
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-mi-thuat-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 12,
+  "paged": 10,
+  "dupNumbers": 7,
+  "spineRatio": 0.8,
+  "coverage": 0.49,
+  "headGap": 0.26,
+  "pageCount": 78
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-ngu-van-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 2,
+  "paged": 2,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.26,
+  "headGap": 0.22,
+  "pageCount": 74
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-sinh-hoc-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 13,
+  "paged": 9,
+  "dupNumbers": 1,
+  "spineRatio": 0.78,
+  "coverage": 0.69,
+  "headGap": 0.09,
+  "pageCount": 58
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-tin-hoc-12-dinh-huong-khoa-hoc-may-tinh",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 17,
+  "paged": 13,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.64,
+  "headGap": 0.14,
+  "pageCount": 118
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-tin-hoc-12-dinh-huong-tin-hoc-ung-dung",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 15,
+  "paged": 12,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.68,
+  "headGap": 0.21,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "12-sgv-chuyen-de-hoc-tap-toan-12",
+  "grade": 12,
+  "subject": "Chuyên đề",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 10,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.43,
+  "headGap": 0.45,
+  "pageCount": 98
+ },
+ {
+  "sourceDocumentId": "12-sgv-cong-nghe-12-cong-nghe-dien-dien-tu",
+  "grade": 12,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 26,
+  "paged": 7,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.38,
+  "headGap": 0.12,
+  "pageCount": 178
+ },
+ {
+  "sourceDocumentId": "12-sgv-cong-nghe-12-lam-nghiep-thuy-san",
+  "grade": 12,
+  "subject": "Công nghệ",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 27,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.56,
+  "headGap": 0.21,
+  "pageCount": 142
+ },
+ {
+  "sourceDocumentId": "12-sgv-dia-li-12",
+  "grade": 12,
+  "subject": "Địa lí",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 35,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.79,
+  "headGap": 0.19,
+  "pageCount": 198
+ },
+ {
+  "sourceDocumentId": "12-sgv-giao-duc-kinh-te-va-phap-luat-12",
+  "grade": 12,
+  "subject": "GDKT&PL",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 25,
+  "paged": 21,
+  "dupNumbers": 8,
+  "spineRatio": 0.95,
+  "coverage": 0.67,
+  "headGap": 0.15,
+  "pageCount": 162
+ },
+ {
+  "sourceDocumentId": "12-sgv-giao-duc-the-chat-12-bong-chuyen",
+  "grade": 12,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 8,
+  "paged": 5,
+  "dupNumbers": 3,
+  "spineRatio": 0.8,
+  "coverage": 0.47,
+  "headGap": 0.39,
+  "pageCount": 106
+ },
+ {
+  "sourceDocumentId": "12-sgv-giao-duc-the-chat-12-bong-da",
+  "grade": 12,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 17,
+  "paged": 15,
+  "dupNumbers": 10,
+  "spineRatio": 0.47,
+  "coverage": 0.47,
+  "headGap": 0.42,
+  "pageCount": 106
+ },
+ {
+  "sourceDocumentId": "12-sgv-giao-duc-the-chat-12-bong-ro",
+  "grade": 12,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 13,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.78,
+  "pageCount": 106
+ },
+ {
+  "sourceDocumentId": "12-sgv-giao-duc-the-chat-12-cau-long",
+  "grade": 12,
+  "subject": "GDTC",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS",
+   "NON_MONOTONIC"
+  ],
+  "lessons": 16,
+  "paged": 4,
+  "dupNumbers": 1,
+  "spineRatio": 0.75,
+  "coverage": 0.69,
+  "headGap": 0.22,
+  "pageCount": 118
+ },
+ {
+  "sourceDocumentId": "12-sgv-hoa-hoc-12",
+  "grade": 12,
+  "subject": "Hoá học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 30,
+  "paged": 16,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.84,
+  "headGap": 0.14,
+  "pageCount": 146
+ },
+ {
+  "sourceDocumentId": "12-sgv-hoat-dong-trai-nghiem-huong-nghiep-12",
+  "grade": 12,
+  "subject": "HĐTN-HN",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 9,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.43,
+  "headGap": 0.12,
+  "pageCount": 206
+ },
+ {
+  "sourceDocumentId": "12-sgv-lich-su-12",
+  "grade": 12,
+  "subject": "Lịch sử",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 17,
+  "paged": 9,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.71,
+  "headGap": 0.1,
+  "pageCount": 230
+ },
+ {
+  "sourceDocumentId": "12-sgv-mi-thuat-12",
+  "grade": 12,
+  "subject": "Mĩ thuật",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "DUP_NUMBERS",
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 14,
+  "paged": 14,
+  "dupNumbers": 12,
+  "spineRatio": 1.0,
+  "coverage": 0.07,
+  "headGap": 0.03,
+  "pageCount": 118
+ },
+ {
+  "sourceDocumentId": "12-sgv-ngu-van-12-tap-hai",
+  "grade": 12,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 1,
+  "paged": 1,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.0,
+  "headGap": 0.04,
+  "pageCount": 114
+ },
+ {
+  "sourceDocumentId": "12-sgv-ngu-van-12-tap-mot",
+  "grade": 12,
+  "subject": "Ngữ văn",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "PARTIAL_COVERAGE"
+  ],
+  "lessons": 3,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.34,
+  "headGap": 0.11,
+  "pageCount": 146
+ },
+ {
+  "sourceDocumentId": "12-sgv-sinh-hoc-12",
+  "grade": 12,
+  "subject": "Sinh học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 35,
+  "paged": 34,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.9,
+  "headGap": 0.07,
+  "pageCount": 166
+ },
+ {
+  "sourceDocumentId": "12-sgv-tieng-anh-12-global-success",
+  "grade": 12,
+  "subject": "Tiếng Anh",
+  "docType": "SGV",
+  "structureStatus": "OK",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 10,
+  "paged": 10,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.76,
+  "headGap": 0.03,
+  "pageCount": 282
+ },
+ {
+  "sourceDocumentId": "12-sgv-tin-hoc-12",
+  "grade": 12,
+  "subject": "Tin học",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "DUP_NUMBERS"
+  ],
+  "lessons": 37,
+  "paged": 28,
+  "dupNumbers": 2,
+  "spineRatio": 0.93,
+  "coverage": 0.63,
+  "headGap": 0.08,
+  "pageCount": 226
+ },
+ {
+  "sourceDocumentId": "12-sgv-toan-12",
+  "grade": 12,
+  "subject": "Toán",
+  "docType": "SGV",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "PARTIAL_COVERAGE",
+   "HEAD_UNCOVERED"
+  ],
+  "lessons": 18,
+  "paged": 3,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.27,
+  "headGap": 0.5,
+  "pageCount": 246
+ },
+ {
+  "sourceDocumentId": "12-shs-vat-li-12",
+  "grade": 12,
+  "subject": "Vật lí",
+  "docType": "SGK",
+  "structureStatus": "PARTIAL",
+  "flags": [
+   "OK"
+  ],
+  "lessons": 25,
+  "paged": 23,
+  "dupNumbers": 0,
+  "spineRatio": 1.0,
+  "coverage": 0.87,
+  "headGap": 0.08,
+  "pageCount": 126
+ }
+]
