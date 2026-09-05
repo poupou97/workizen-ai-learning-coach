@@ -42,10 +42,20 @@ import 'widgets/source_sheet.dart';
 import 'widgets/trust_sheet.dart';
 
 class VisualView extends StatefulWidget {
-  const VisualView({super.key, required this.doc, required this.onShowInRead});
+  const VisualView({
+    super.key,
+    required this.doc,
+    required this.onShowInRead,
+    this.header,
+  });
 
   final LessonDocument doc;
   final void Function(String blockId) onShowInRead;
+
+  /// ROUND 5 D1 — thẻ «SAM đề xuất» đi vào ĐẦU VÙNG CUỘN thay vì bị ghim trên
+  /// đầu màn (như màn Đọc từ vòng 4): lý do dài 6 dòng ghim lại thì che mất
+  /// nút trung tâm của sơ đồ.
+  final Widget? header;
 
   static const summaryShape = '📋 Bảng tóm tắt';
 
@@ -159,6 +169,10 @@ class _VisualViewState extends State<VisualView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (widget.header != null) ...[
+            widget.header!,
+            const SizedBox(height: WalSpacing.sm),
+          ],
           Wrap(
             spacing: WalSpacing.sm,
             runSpacing: WalSpacing.sm,
@@ -332,6 +346,12 @@ class _VisualViewState extends State<VisualView> {
         'Sách viết hoạt động này thành các bước đánh dấu «·» theo thứ tự — SAM '
             'xếp đúng thứ tự sách, giữ nguyên lời sách, không thêm bước nào. Bước '
             'nào SAM chưa đọc chắc thì để trống và chỉ trang.',
+      // ROUND 5 D2 (Nokia, iter 1): lời này phải nói ĐÚNG THỨ TRẺ ĐANG NHÌN —
+      // mặc định giờ là sơ đồ tư duy, không phải bảng.
+      ComparisonSemantic() when !_comparisonAsTable =>
+        'Phần «Em đã học» của sách liệt kê từng cách kèm chú thích trong '
+            'ngoặc — SAM đặt tên chung vào giữa và mỗi cách một ô xung quanh, '
+            'chữ trong ô vẫn là chữ sách. Màu chỉ để phân biệt các ô.',
       ComparisonSemantic() =>
         'Phần «Em đã học» của sách liệt kê từng cách kèm chú thích trong ngoặc — '
             'SAM xếp thành bảng để con so sánh, chữ vẫn là chữ sách.',

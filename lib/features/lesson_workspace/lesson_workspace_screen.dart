@@ -112,11 +112,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
 
   List<String> get _crumbs =>
       widget.breadcrumb ??
-      [
-        'Giá sách',
-        doc.bookTitle,
-        if (doc.chapter != null) doc.chapter!.label,
-      ];
+      ['Giá sách', doc.bookTitle, if (doc.chapter != null) doc.chapter!.label];
 
   @override
   Widget build(BuildContext context) {
@@ -157,9 +153,15 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
             // Ở màn «Vào bài học» lý do nằm trên thẻ được đề xuất ⇒ không lặp.
             // ROUND 4 §6.3: ở màn ĐỌC thẻ đề xuất đi vào đầu vùng cuộn
             // (`SmartBookView.header`) để trang sách được cả chiều cao — nên
-            // không ghim ở đây nữa. Các màn khác giữ nguyên.
+            // không ghim ở đây nữa.
+            // ROUND 5 D1 (Nokia, iter 1): TRỰC QUAN theo cùng luật ấy. Lý do
+            // của Next Action có thể dài 6 dòng (nó trích nguyên văn câu hỏi
+            // sách); ghim lại thì chrome chiếm 920/1920 px và NÚT TRUNG TÂM
+            // của sơ đồ tư duy nằm khuất sau thẻ — đúng thứ sơ đồ sinh ra để
+            // cho thấy. Đo trên máy: 48 % → 73 % chiều cao cho sơ đồ.
             if (!picking &&
                 _view != WorkspaceView.read &&
+                _view != WorkspaceView.visual &&
                 MediaQuery.viewInsetsOf(context).bottom == 0)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -328,77 +330,77 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   );
 
   Widget _nextActionRow(NextAction next, {required bool compact}) => Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        if (!compact) ...[
-          Image.asset(
-            'assets/mascot/sam-probe@64.png',
-            width: densityOf(context).mascotChip * 0.7,
-            height: densityOf(context).mascotChip * 0.7,
-            errorBuilder: (_, _, _) => const SizedBox.shrink(),
-          ),
-          const SizedBox(width: WalSpacing.sm),
-        ],
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'SAM đề xuất',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: WalColors.primaryText,
-                ),
-              ),
-              // Lý do đọc trọn (câu hỏi trích nguyên văn) — chỉ cắt 1 dòng
-              // khi màn ngang (Nokia n2 D3); cắt 3 dòng giữa câu trích làm
-              // mất «vì sao» (round 3 n1 D-R3-03).
-              Text(
-                next.reason,
-                // 6 dòng là lưới an toàn cho khung cố định (lý do thật ≤ 3
-                // dòng trên Nokia — D-R3-03 vẫn được tôn trọng).
-                maxLines: compact ? 1 : 6,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: WalColors.ink,
-                  height: 1.35,
-                ),
-              ),
-            ],
-          ),
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      if (!compact) ...[
+        Image.asset(
+          'assets/mascot/sam-probe@64.png',
+          width: densityOf(context).mascotChip * 0.7,
+          height: densityOf(context).mascotChip * 0.7,
+          errorBuilder: (_, _, _) => const SizedBox.shrink(),
         ),
-        const SizedBox(width: WalSpacing.xs),
-        SizedBox(
-          height: WalSpacing.minTouch,
-          child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: WalColors.primary500,
-              padding: const EdgeInsets.symmetric(horizontal: WalSpacing.sm),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
-              ),
-            ),
-            onPressed: () {
-              final v = next.view;
-              if (v == null) {
-                Navigator.of(context).maybePop();
-              } else {
-                _switch(v);
-              }
-            },
-            child: Text(
-              next.label,
-              style: const TextStyle(
-                fontSize: WalType.secondary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
+        const SizedBox(width: WalSpacing.sm),
       ],
-    );
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'SAM đề xuất',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: WalColors.primaryText,
+              ),
+            ),
+            // Lý do đọc trọn (câu hỏi trích nguyên văn) — chỉ cắt 1 dòng
+            // khi màn ngang (Nokia n2 D3); cắt 3 dòng giữa câu trích làm
+            // mất «vì sao» (round 3 n1 D-R3-03).
+            Text(
+              next.reason,
+              // 6 dòng là lưới an toàn cho khung cố định (lý do thật ≤ 3
+              // dòng trên Nokia — D-R3-03 vẫn được tôn trọng).
+              maxLines: compact ? 1 : 6,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13,
+                color: WalColors.ink,
+                height: 1.35,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(width: WalSpacing.xs),
+      SizedBox(
+        height: WalSpacing.minTouch,
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: WalColors.primary500,
+            padding: const EdgeInsets.symmetric(horizontal: WalSpacing.sm),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+            ),
+          ),
+          onPressed: () {
+            final v = next.view;
+            if (v == null) {
+              Navigator.of(context).maybePop();
+            } else {
+              _switch(v);
+            }
+          },
+          child: Text(
+            next.label,
+            style: const TextStyle(
+              fontSize: WalType.secondary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
 
   Widget _body(WorkspaceView view) => switch (view) {
     WorkspaceView.read => SmartBookView(
@@ -420,6 +422,14 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     WorkspaceView.visual => VisualView(
       doc: doc,
       onShowInRead: (id) => _switch(WorkspaceView.read, readAnchor: id),
+      // ROUND 5 D1: thẻ đề xuất cuộn cùng sơ đồ (xem chú thích ở build).
+      header: MediaQuery.viewInsetsOf(context).bottom == 0
+          ? _nextActionCard(
+              _proposal(),
+              compact:
+                  MediaQuery.orientationOf(context) == Orientation.landscape,
+            )
+          : null,
     ),
     WorkspaceView.tutor => TutorView(
       doc: doc,

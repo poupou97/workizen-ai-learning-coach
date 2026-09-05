@@ -18,10 +18,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/content_trust.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
+import 'package:learning_coach/core/lesson_model/next_action.dart';
 import 'package:learning_coach/core/lesson_model/semantic_data.dart';
+import 'package:learning_coach/features/lesson_workspace/lesson_workspace_screen.dart';
 import 'package:learning_coach/features/lesson_workspace/views/mindmap_view.dart';
 import 'package:learning_coach/features/lesson_workspace/views/process_flow_view.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_view.dart';
+import 'package:learning_coach/features/lesson_workspace/workspace_trace.dart';
 
 import 'support.dart';
 
@@ -369,5 +372,67 @@ void main() {
         expect(find.textContaining('SAM không tự vẽ'), findsOneWidget);
       },
     );
+  });
+
+  group('§6 lỗi máy thật tìm ra (vòng 5, lượt 1)', () {
+    testWidgets('⭐ D1: ở TRỰC QUAN thẻ «SAM đề xuất» cuộn CÙNG sơ đồ (như màn '
+        'Đọc từ vòng 4) — ghim lại thì nút trung tâm nằm khuất sau thẻ', (
+      t,
+    ) async {
+      t.view.physicalSize = const Size(1080, 1920);
+      t.view.devicePixelRatio = 2.75;
+      addTearDown(t.view.reset);
+      await t.pumpWidget(
+        fixtureHost(
+          LessonWorkspaceScreen(
+            doc: loadSyntheticDoc(),
+            trace: WorkspaceTrace(),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)));
+      await t.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byType(VisualView),
+          matching: find.byKey(LessonWorkspaceScreen.nextActionKey),
+        ),
+        findsOneWidget,
+        reason: 'thẻ đề xuất phải nằm TRONG vùng cuộn của Trực quan',
+      );
+      // màn Học với SAM vẫn ghim như cũ — thay đổi này chỉ cho Trực quan
+      await t.tap(
+        find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.tutor)),
+      );
+      await t.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byType(VisualView),
+          matching: find.byKey(LessonWorkspaceScreen.nextActionKey),
+        ),
+        findsNothing,
+      );
+      expect(find.byKey(LessonWorkspaceScreen.nextActionKey), findsOneWidget);
+    });
+
+    testWidgets('⭐ D2: «Vì sao SAM chọn sơ đồ này» nói ĐÚNG thứ trẻ đang nhìn '
+        '— sơ đồ tư duy thì không được nói «xếp thành bảng»', (t) async {
+      await t.pumpWidget(
+        fixtureHost(
+          Scaffold(
+            body: VisualView(doc: loadSyntheticDoc(), onShowInRead: (_) {}),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(VisualView.shapeKey('Bảng so sánh')));
+      await t.pumpAndSettle();
+      expect(find.textContaining('mỗi cách một ô xung quanh'), findsOneWidget);
+      expect(find.textContaining('xếp thành bảng'), findsNothing);
+      await t.tap(find.byKey(VisualView.comparisonViewKey('table')));
+      await t.pumpAndSettle();
+      expect(find.textContaining('xếp thành bảng'), findsOneWidget);
+    });
   });
 }
