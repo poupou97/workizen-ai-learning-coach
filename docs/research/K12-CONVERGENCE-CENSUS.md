@@ -1,6 +1,17 @@
 # K-12 Convergence Coverage Census
 
-Founder-approved architecture convergence direction (2026-09-04), merging
+> **Status of the convergence claim — TBD / PROPOSED CONVERGENCE** (no Founder
+> approval artefact found as of 2026-09-05; see pre-autonomy audit
+> `docs/research/pre-autonomy-audit/03-LEARNING-ARCHITECTURE.md` §B.3, PR #59:
+> WAL-196 is in Ready with 0 comments and no decision record exists). Marked per
+> workspace `CLAUDE.md` rule 5 and Founder decision D6 (WAL-210, 2026-09-05).
+> Founder decision D2 (same date) frames convergence as *complementary
+> dimensions* with bounded contracts only; the bridge design below remains a
+> proposal under that decision, not an approved direction.
+
+TBD / PROPOSED CONVERGENCE (no Founder approval artefact found as of
+2026-09-05; see pre-autonomy audit 03 §B.3) — architecture convergence
+direction proposed 2026-09-04, merging
 the two curriculum paths WAL-196 found (Deep Intelligence:
 Concept→SkillCase→CurriculumEdge→Pedagogy→retrieval→PlannedAct; Scale:
 Corpus→LearningActivity→Surface→Evidence). Full findings, all 22 Founder
