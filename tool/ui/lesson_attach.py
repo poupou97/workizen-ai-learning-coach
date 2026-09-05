@@ -55,7 +55,7 @@ import os
 import statistics
 from collections import Counter
 
-RULE = 'capped-toc-v1'
+RULE = 'capped-toc-v2'   # round 4: + systematic TOC offset (header-verified starts); v1 rules otherwise unchanged
 CAP_MULT = 2.5
 CAP_MIN = 8
 HEADER_REPAIR = True          # use header-detected starts to repair the TOC (rule 1)
@@ -65,7 +65,10 @@ HEADER_MIN_CONF = 0.8         # header starts at/above this confidence are accep
 # Such a header is accepted only when its page is bracketed by the known starts of the neighbouring
 # lesson numbers (deterministic plausibility check); below this it is never used.
 HEADER_MIN_CONF_BRACKETED = 0.6
-TC2_ATTACH_DIR = 'poc-out/trusted-corpus/tc-v2/tc2-p1/attach'
+# Round 4: the pipeline is versioned (tc2-p1, tc2-p2, …) but this path was pinned to tc2-p1, so a pack
+# built after a new pipeline run would silently read the OLD page verdicts — including the old
+# 'the back cover belongs to the last lesson'. `WAL_TC2_ATTACH_DIR` points it at the run in hand.
+TC2_ATTACH_DIR = os.environ.get('WAL_TC2_ATTACH_DIR') or 'poc-out/trusted-corpus/tc-v2/tc2-p1/attach'
 
 # reason codes — attached
 ATTACHED = 'attached'
@@ -123,13 +126,36 @@ def accepted_header_starts(toc_start, header_lessons):
     return hdr
 
 
+def systematic_toc_offset(toc_start, header_lessons, min_headers=5, min_share=0.6):
+    """Round 4 (audit: some books print the lesson badge N printed pages BEFORE the TOC's pageStart; measured on 42
+    books the pipeline finds it in 3 — TV5 tập hai, TV2 tập một, TV2 tập hai — always −2, and not in TV5 tập một or
+    TV4 tập một, whose headers agree with their TOC). When ≥ min_headers accepted headers (confidence
+    ≥ HEADER_MIN_CONF, source header/both) have a TOC start and ≥ min_share of them share one non-zero
+    (header − TOC) difference, that difference is the book's TOC offset; 0 otherwise."""
+    diffs = []
+    for h in header_lessons or []:
+        n, p = h.get('number'), h.get('page_printed')
+        if n is None or p is None or h.get('source') not in ('header', 'both') or (h.get('confidence') or 0) < HEADER_MIN_CONF:
+            continue
+        if n in toc_start:
+            diffs.append(p - toc_start[n])
+    if len(diffs) < min_headers:
+        return 0
+    best, cnt = Counter(diffs).most_common(1)[0]
+    return best if best != 0 and cnt / len(diffs) >= min_share else 0
+
+
 def capped_ranges(lessons, header_lessons=None):
     """lessons: iterable of {number, pageStart, title} (printed pages).
     header_lessons (optional): iterable of {number, page_printed, source, confidence} from the
     TC-v2 attach file. Returns (ranges, cap, info) with ranges = [{number, title, lo, hi, hi_source,
-    start_source, conflicted, ambiguous_after, unranged_successors}] sorted by lo, hi exclusive."""
+    start_source, conflicted, ambiguous_after, unranged_successors}] sorted by lo, hi exclusive.
+    Round 4: a systematic (header − TOC) offset shifts every TOC start before anything else is decided
+    (`info['toc_offset']`), so a book whose TOC is printed 2 pages late no longer conflicts on every lesson."""
     canon = {l['number']: l for l in lessons if l.get('number') is not None}
-    toc_start = {n: l['pageStart'] for n, l in canon.items() if l.get('pageStart') is not None}
+    toc_raw = {n: l['pageStart'] for n, l in canon.items() if l.get('pageStart') is not None}
+    toc_offset = systematic_toc_offset(toc_raw, header_lessons) if HEADER_REPAIR else 0
+    toc_start = {n: s + toc_offset for n, s in toc_raw.items()}
     hdr_start = accepted_header_starts(toc_start, header_lessons) if HEADER_REPAIR else {}
     starts = {}; start_source = {}; conflicted = set()
     for n in canon:
@@ -156,7 +182,7 @@ def capped_ranges(lessons, header_lessons=None):
         out.append(dict(number=n, title=canon[n].get('title'), lo=lo, hi=hi, hi_source=hi_source, start_source=start_source[n],
                         conflicted=(n in conflicted), ambiguous_after=lo if succ else None, unranged_successors=succ))
     info = dict(cap=cap, canonical=len(canon), toc_ranged=len(toc_start), repaired=sum(1 for n in starts if start_source[n] == 'header'),
-                conflicted=sorted(conflicted), terminators=len(terminators), unranged=unranged)
+                conflicted=sorted(conflicted), terminators=len(terminators), unranged=unranged, toc_offset=toc_offset)
     return out, cap, info
 
 
@@ -170,7 +196,7 @@ class BookAttach:
         self.canonical = {l['number'] for l in lessons if l.get('number') is not None}
         self.ranges, self.cap, self.info = capped_ranges(lessons, header_lessons)
         self.header_pages = header_pages or {}
-        toc_start = {l['number']: l['pageStart'] for l in lessons if l.get('number') is not None and l.get('pageStart') is not None}
+        toc_start = {l['number']: l['pageStart'] + self.info.get('toc_offset', 0) for l in lessons if l.get('number') is not None and l.get('pageStart') is not None}
         self.header_start = accepted_header_starts(toc_start, header_lessons)
         self.has_header_data = bool(header_pages) or bool(header_lessons)
 
