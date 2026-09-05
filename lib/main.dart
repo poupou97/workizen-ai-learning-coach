@@ -108,7 +108,13 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     final p = _profile;
     if (p == null) return;
     final idx = await widget.indexLoader(p.grade);
-    if (mounted) setState(() => _lessonIndex = idx);
+    if (!mounted) return;
+    setState(() {
+      _lessonIndex = idx;
+      // ⭐ WAL-210 G2: thẻ Home của lớp chỉ-có-Scale cần con số bài từ pack
+      // — pack nạp xong thì mission tính lại, không đợi lần mở app sau.
+      _refreshMission();
+    });
   }
 
   Future<void> _loadStories() async {
@@ -165,7 +171,8 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     final p = _profile;
     _mission = p == null
         ? null
-        : buildMissionFromStore(profile: p, store: widget.store);
+        : buildMissionFromStore(
+            profile: p, store: widget.store, index: _lessonIndex);
     if (p != null) {
       widget.store.timetable(p.learnerId).then((t) {
         if (mounted) setState(() => _timetable = t);

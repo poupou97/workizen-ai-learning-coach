@@ -246,16 +246,26 @@ class MissionCenterScreen extends StatelessWidget {
             ? data.nextActionTitle
             : _agendaTitle(data.agenda!.kind));
     // ⭐ reason đến từ resolver (agenda hoặc HomeRecommendation) — hiển thị
-    // NGUYÊN VĂN, UI không suy diễn thêm.
-    final reason =
-        rec != null ? rec.reason : (data.agenda?.reason ?? data.decision.reason);
+    // NGUYÊN VĂN, UI không suy diễn thêm. Lớp chỉ có đường Scale (WAL-210
+    // G2): lý do do buildMissionFromStore viết từ con số thật của pack.
+    final reason = rec != null
+        ? rec.reason
+        : (data.agenda?.reason ??
+            data.nextActionReason ??
+            data.decision.reason);
     final showButton =
         rec != null || data.agenda?.kind != AgendaActionKind.rest;
+    // ⭐ WAL-210 G2: không agenda + có bài Scale ⇒ «Bắt đầu» mở MÔN HỌC (giá
+    // sách), KHÔNG mở camera — camera là đường của nội dung Deep (chip 📷 +
+    // nút «Chụp bài tập» vẫn giữ nguyên cho nó).
     final onPressed = rec != null
         ? (onStartRecommendation == null
             ? null
             : () => onStartRecommendation!(rec))
-        : (_startForAgenda() ?? onStartHomework ?? () {});
+        : (_startForAgenda() ??
+            (data.scaleLessonCount > 0 ? onOpenSubjects : null) ??
+            onStartHomework ??
+            () {});
     return Container(
       padding: const EdgeInsets.all(WalSpacing.lg),
       decoration: BoxDecoration(

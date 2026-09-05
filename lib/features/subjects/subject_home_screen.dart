@@ -713,7 +713,11 @@ class SubjectHomeScreen extends StatelessWidget {
     }
     // Nhiều việc trong cùng một ý định ⇒ để trẻ chọn việc, KHÔNG tự chọn hộ.
     final actions = [
-      for (final a in ordered) _activityAction(context, l, a, ctx),
+      for (final a in ordered)
+        (
+          _distinctLabel(a, ordered, _activityAction(context, l, a, ctx).$1),
+          _activityAction(context, l, a, ctx).$2
+        ),
       if (intent == LearningIntent.lookup && c != null)
         ('📖 Nguồn bài học', () => _openSourceInfo(context, c)),
     ];
@@ -754,6 +758,30 @@ class SubjectHomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// ⭐ WAL-210 item G1 (audit 05 «identical “📖 Đọc bài” rows»): một bài có
+  /// NHIỀU bài đọc thì mỗi dòng phải nói được nó là bài đọc NÀO — bằng thứ
+  /// có thật trong pack (trang in + câu hỏi đầu), KHÔNG bịa tên. Chỉ một bài
+  /// đọc ⇒ nhãn giữ nguyên «📖 Đọc bài» (không thêm chữ khi không cần).
+  static String _distinctLabel(
+      LessonActivity a, List<LessonActivity> siblings, String base) {
+    if (a is! ReadingActivity) return base;
+    if (siblings.whereType<ReadingActivity>().length < 2) return base;
+    final r = a.reading;
+    final parts = <String>[
+      if (r.page != null) 'trang ${r.page}',
+      if (r.questions.isNotEmpty) _snippet(r.questions.first.prompt),
+    ];
+    return parts.isEmpty ? base : '$base · ${parts.join(' — ')}';
+  }
+
+  /// Vài chữ đầu của câu hỏi, cắt ở ranh giới từ — đủ nhận ra, không tràn dòng.
+  static String _snippet(String s, {int max = 36}) {
+    final t = s.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (t.length <= max) return t;
+    final cut = t.lastIndexOf(' ', max);
+    return '${t.substring(0, cut > 12 ? cut : max)}…';
   }
 
   /// WAL-141 #17 — «Nguồn bài học» từ Subject Home: các cách trong chương

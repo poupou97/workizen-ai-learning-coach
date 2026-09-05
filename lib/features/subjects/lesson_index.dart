@@ -76,10 +76,16 @@ class TvReading {
       required this.lesson,
       required this.passage,
       required this.questions,
-      this.page});
+      this.page,
+      this.source});
   final String book;
   final int lesson;
   final int? page; // trang IN của đoạn văn
+
+  /// WAL-210 — nguồn TRÍCH XUẤT của bài đọc như builder ghi (`null` = miner
+  /// mặc định; `pattern-router-*` = thử nghiệm WAL-204/206). Chỉ để guard +
+  /// audit, không để hiển thị.
+  final String? source;
 
   /// Nguyên văn SECTION_TEXT từ units — textbookVerbatim, không viết lại.
   final String passage;
@@ -92,11 +98,14 @@ class TvReading {
 class TvWriting {
   const TvWriting(
       {required this.book, required this.lesson, required this.prompt,
-      this.page});
+      this.page, this.source});
   final String book;
   final int lesson;
   final int? page;
   final String prompt;
+
+  /// WAL-210 — như [TvReading.source].
+  final String? source;
 }
 
 /// WAL-144 #KHTN — khối THÍ NGHIỆM thật từ SGK Khoa học (Chuẩn bị/Tiến hành
@@ -401,12 +410,40 @@ class LessonIndex {
       this.diaMaps = const [],
       this.sourceAssets = const [],
       this.books = const [],
-      this.buildProvenance});
+      this.buildProvenance,
+      this.droppedRouterActivities = 0});
 
   final int grade;
 
   /// WAL-210 — `null` = pack chưa khai provenance (pack cũ / chưa dựng lại).
   final BuildProvenance? buildProvenance;
+
+  /// ⭐ WAL-210 item F — DEFAULT-BUILD GUARD: số mục có `source` bắt đầu bằng
+  /// `pattern-router` đã bị LOẠI lúc parse vì pack không tự khai
+  /// `buildProvenance.experimental == true`. Một APK dựng từ pack thử nghiệm
+  /// trên máy dev (WAL-206 variant) không thể lặng lẽ đưa nội dung router tới
+  /// trẻ — pack phải NÓI RA nó là bản thử nghiệm. Lộ ra để test đếm.
+  final int droppedRouterActivities;
+
+  /// ⭐ WAL-210 item G2 — số BÀI (sách, số bài) có ít nhất một việc trẻ làm
+  /// được — con số THẬT để Home nói «Có N bài để học ở Môn học» thay vì
+  /// «chưa có nội dung» với lớp chưa có chương trình sư phạm.
+  int get openableLessonCount {
+    final seen = <String>{};
+    for (final books in subjects.values) {
+      for (final b in books) {
+        for (final l in b.lessons) {
+          final key = '${b.sourceDocumentId}|${l.no}';
+          if (seen.contains(key)) continue;
+          if (activitiesFor(book: b.sourceDocumentId, lessonNo: l.no)
+              .isNotEmpty) {
+            seen.add(key);
+          }
+        }
+      }
+    }
+    return seen.length;
+  }
 
   /// Version để đóng lên evidence của đường Scale; `null` khi chưa khai —
   /// emitter rơi về hằng cũ, không bịa version.
@@ -488,6 +525,22 @@ class LessonIndex {
     if (j is! Map) return null;
     final grade = j['grade'];
     if (grade is! int) return null;
+    // WAL-210: provenance đọc TRƯỚC — guard bên dưới cần biết pack có tự khai
+    // là bản thử nghiệm không. Tuỳ chọn, fail-closed: thiếu ⇒ null.
+    final provenance = BuildProvenance.fromJson(j['buildProvenance']);
+    final routerAllowed = provenance?.experimental == true;
+    var droppedRouter = 0;
+    // ⭐ item F: mục có `source` = pattern-router* chỉ đi qua khi pack tự
+    // khai experimental. Không khai ⇒ loại và đếm (fail closed).
+    bool guardRouter(Map e) {
+      final src = e['source'];
+      if (src is String && src.startsWith('pattern-router') && !routerAllowed) {
+        droppedRouter++;
+        return false;
+      }
+      return true;
+    }
+
     final subjects = <String, List<BookLessons>>{};
     final sj = j['subjects'];
     if (sj is Map) {
@@ -534,10 +587,12 @@ class LessonIndex {
     if (tj is List) {
       for (final r in tj.whereType<Map>()) {
         if (r['passage'] is! String || r['lesson'] is! num) continue;
+        if (!guardRouter(r)) continue;
         tv.add(TvReading(
             book: '${r['book']}',
             lesson: (r['lesson'] as num).toInt(),
             page: (r['page'] as num?)?.toInt(),
+            source: r['source'] as String?,
             passage: r['passage'] as String,
             questions: [
               for (final q
@@ -558,10 +613,12 @@ class LessonIndex {
     if (wj is List) {
       for (final w in wj.whereType<Map>()) {
         if (w['prompt'] is! String || w['lesson'] is! num) continue;
+        if (!guardRouter(w)) continue;
         tw.add(TvWriting(
             book: '${w['book']}',
             lesson: (w['lesson'] as num).toInt(),
             page: (w['page'] as num?)?.toInt(),
+            source: w['source'] as String?,
             prompt: w['prompt'] as String));
       }
     }
@@ -571,6 +628,7 @@ class LessonIndex {
       for (final e in uj.whereType<Map>()) {
         // thiếu excerpt hoặc attribution ⇒ KHÔNG phải tư liệu dùng được — bỏ.
         if (e['excerpt'] is! String || e['attribution'] is! String) continue;
+        if (!guardRouter(e)) continue;
         su.add(SuSource(
             book: '${e['book']}',
             page: (e['page'] as num?)?.toInt(),
@@ -591,6 +649,7 @@ class LessonIndex {
         ];
         // thiếu bước tiến hành hoặc title ⇒ KHÔNG phải thí nghiệm dùng được.
         if (e['title'] is! String || steps.isEmpty) continue;
+        if (!guardRouter(e)) continue;
         ke.add(KhoaExperiment(
             subject: '${e['subject'] ?? 'Khoa học'}',
             book: '${e['book']}',
@@ -626,6 +685,7 @@ class LessonIndex {
             m['extractionVersion'] is! String) {
           continue;
         }
+        if (!guardRouter(m)) continue;
         dm.add(DiaMap(
             subject: '${m['subject'] ?? 'LS&ĐL'}',
             book: '${m['book']}',
@@ -713,8 +773,10 @@ class LessonIndex {
         diaMaps: dm,
         sourceAssets: sa,
         books: bk,
-        // WAL-210: tuỳ chọn, fail-closed — thiếu ⇒ null, KHÔNG đổi gì khác.
-        buildProvenance: BuildProvenance.fromJson(j['buildProvenance']));
+        // WAL-210: tuỳ chọn, fail-closed — thiếu ⇒ null, KHÔNG đổi gì khác
+        // ngoài guard router phía trên.
+        buildProvenance: provenance,
+        droppedRouterActivities: droppedRouter);
   }
 
   /// `null` khi máy này chưa build asset (poc-out chưa có) — hợp lệ, nói thật.
