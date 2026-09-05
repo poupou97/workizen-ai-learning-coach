@@ -50,6 +50,12 @@ ROOT = tc_sdm.ROOT
 PDF = f'{ROOT}/poc-out/pdf'
 OCR = f'{ROOT}/poc-out/graph/ocr-body'
 PIPELINE_ID = 'tc2-p1'
+# Round 4 (failure class 3: role classification). The icon / box-tint signal measured in
+# docs/research/ROLE-LAYER-SIGNAL-EXPERIMENT-2026-09-05.md is integrated BEHIND A FLAG: None (default) leaves the
+# deterministic lexicon/geometry Role Layer unchanged; 'v2' / 'v3' apply the experiment's frozen rules
+# (R1 orange icon → ACTIVITY, R2 blue icon → QUESTION; v3 never lets an inherited icon override the instruction
+# lexicon). Set with --role-signal on the CLIs or TC2_ROLE_SIGNAL in the environment. No threshold is decided here.
+ROLE_SIGNAL = os.environ.get('TC2_ROLE_SIGNAL') or None
 SDM_VERSION = 'sdm-v3'   # round 4: LIS order agreement + verifier-aligned re-sequencing (see agreement())
 TEXT_SIM = tc_cascade.TEXT_SIM
 
@@ -367,6 +373,65 @@ def box_pass(blocks, mask):
     return blocks
 
 
+def role_signal_pass(book, page, out_blocks, rules):
+    """Apply the icon / box-tint rules of role_signal_experiment to the page's blocks (in place). Deterministic image
+    features from a 72-dpi render; a block whose role the rules change records method `icon-signal:<rule>` and the
+    signal it fired on. Silently a no-op when the PDF or numpy is unavailable (nothing is guessed)."""
+    try:
+        import role_signal_experiment as rse
+    except Exception:  # pragma: no cover
+        return 0
+    if np is None:
+        return 0
+    rse.ROOT = ROOT
+    img = rse.render(book, page, 72)
+    if img is None:
+        return 0
+    hue, sat, mx = rse.hsv(img)
+    heights = [b['bbox'][3] for b in out_blocks if b.get('bbox') and b.get('text') and len(b['text']) < 120]
+    line_h = float(np.median(heights)) if heights else 0.015
+    empty = dict(icon_present=False, icon_bucket=None, tint_share=0.0, tint_bucket=None, icon_hue=None, icon_h_ratio=None, icon_fill=None, strip_colour_frac=0.0, strip_ink_frac=0.0, tint_hue=None)
+    blks = []
+    for ob in out_blocks:
+        f = rse.block_features(img, hue, sat, mx, ob['bbox'], line_h) if ob.get('bbox') else dict(empty)
+        blks.append(dict(id=ob['id'], order=ob['order'], text=ob['text'], bbox=ob['bbox'], fine_role=ob['role']['value'], features=f))
+    rse.inherit_box_icons(blks)
+    rse.RULES = rules
+    changed = 0
+    for ob, b in zip(out_blocks, blks):
+        new, rule = rse.apply_rules(b)
+        ob['role']['signal'] = dict(icon=b.get('icon_eff'), icon_source=b.get('icon_source'), tint=b['features']['tint_share'], tint_bucket=b['features']['tint_bucket'], rules=rules)
+        if rule and new != ob['role']['value']:
+            ob['role'].update(value=new, coarse=COARSE.get(new, 'UNKNOWN'), method=f'icon-signal:{rule}', confidence=0.8,
+                              evidence=ob['role'].get('evidence', []) + [f'{rule}: {b.get("icon_eff")} icon ({b.get("icon_source")})'])
+            changed += 1
+    return changed
+
+
+def question_box_pass(out_blocks, med_h):
+    """Round 4 (Bài 17 p61, audit role error «question 2 of a ?-box served as sidebar»): a numbered line («2. …»)
+    directly under a QUESTION block, in the same tinted box (both on colour, left edges within 0.03) and within two
+    line heights, is the next question of that box — the narrow-right-box-on-colour geometry rule had made it a
+    sidebar. Deterministic; the block keeps every guard."""
+    seq = sorted([o for o in out_blocks if o['role']['value'] not in ('figure', 'empty', 'figure_text')], key=lambda o: o['order'])
+    n = 0
+    for prev, ob in zip(seq, seq[1:]):
+        if ob['role']['value'] not in ('sidebar', 'body') or prev['role']['value'] != 'question':
+            continue
+        t = ob['text'] or ''
+        if not re.match(r'^\s*\d{1,2}[.)]\s+\S', t):
+            continue
+        pb, bb = prev.get('bbox'), ob.get('bbox')
+        pc, oc = (prev.get('colour') or {}).get('share') or 0, (ob.get('colour') or {}).get('share') or 0
+        if not pb or not bb or pc < 0.2 or oc < 0.2 or abs(pb[0] - bb[0]) > 0.03:
+            continue
+        if bb[1] - (pb[1] + pb[3]) > 2.0 * med_h:
+            continue
+        ob['role'].update(value='question', coarse='QUESTION', method='context', confidence=0.8, evidence=ob['role'].get('evidence', []) + ['numbered item under a question in the same tinted box'])
+        n += 1
+    return n
+
+
 COARSE = {'question': 'QUESTION', 'option': 'OPTION', 'answer_slot': 'OPTION', 'heading': 'HEADING', 'stage_label': 'HEADING', 'running_head': 'HEADING',
           'body': 'BODY', 'objective': 'BODY', 'activity': 'BODY', 'instruction': 'BODY', 'answer': 'BODY', 'model_answer': 'BODY', 'teacher_text': 'BODY', 'teacher_prompt': 'BODY', 'rule': 'BODY',
           'caption': 'CAPTION', 'sidebar': 'SIDEBAR', 'table': 'TABLE', 'formula': 'FORMULA', 'figure_text': 'FIGURE_TEXT', 'figure': 'FIGURE', 'footnote': 'FOOTNOTE', 'page_number': 'PAGENUM', 'empty': 'UNKNOWN'}
@@ -615,7 +680,8 @@ def inside(bb, box, frac=0.6):
 
 
 # ---------------------------------------------------------------- build one page
-def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
+def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None):
+    role_signal = role_signal if role_signal is not None else ROLE_SIGNAL
     rawD, srcD = load_raw('docling-ocrmac', book, page, pipeline)
     rawX, srcX = load_raw('current-xycut', book, page, pipeline)
     if rawD is None or rawX is None:
@@ -753,6 +819,9 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
         nxt = next((o for o in out_blocks[i + 1:] if o['role']['value'] not in ('figure', 'empty', 'figure_text')), None)
         if ob['role']['value'] == 'body' and ENUM.match(ob['text'] or '') and nxt is not None and nxt['role']['value'] == 'option' and docType != 'SGV':
             ob['role'].update(value='question', coarse='QUESTION', method='context', confidence=0.8, evidence=ob['role']['evidence'] + ['enumerated stem followed by options'])
+    question_box_pass(out_blocks, med_h)
+    if role_signal:
+        role_signal_pass(book, page, out_blocks, role_signal)
     # re-derive trust for blocks whose role changed in the post-passes (guards that depend on the role)
     for ob in out_blocks:
         r = ob['role']['value']
@@ -781,7 +850,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
     stats = Counter(ob['trust']['status'] for ob in out_blocks if ob['learning'])
     reasons = Counter(r for ob in out_blocks if ob['learning'] for r in ob['trust']['reasons'])
     roles = Counter(ob['role']['value'] for ob in out_blocks)
-    return dict(book=book, page=page, printed_page=printed, docType=docType, pipeline=pipeline, sdm_version=SDM_VERSION,
+    return dict(book=book, page=page, printed_page=printed, docType=docType, pipeline=pipeline, sdm_version=SDM_VERSION, role_signal=role_signal or None,
                 source=dict(docling_raw=srcD, xycut_raw=srcX, docling_seconds=rawD.get('seconds'), xycut_page_trusted=xmeta.get('page_trusted') if xmeta else None),
                 page_size=list(rawD['result']['docling']['pages'].values())[0]['size'], features=dict(diagram=cen.get('diagram'), color_heavy=cen.get('color_heavy'), formula=cen.get('formula'), table=cen.get('table'), sidebar=cen.get('sidebar'), figure=cen.get('figure'), side_by_side=cen.get('side_by_side'), continuation=cen.get('continuation'), front_matter=front_matter),
                 blocks=out_blocks, figures=figures, tables=tables, stats=dict(learning=dict(stats), reasons=dict(reasons), roles=dict(roles), blocks=len(out_blocks)))
@@ -805,9 +874,13 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--pipeline', default=PIPELINE_ID); ap.add_argument('--pages', action='append', default=[])
     ap.add_argument('--gold', action='store_true'); ap.add_argument('--page', nargs=2, default=None); ap.add_argument('--force', action='store_true')
     ap.add_argument('--out', default=None, help='pipeline output root (default poc-out/trusted-corpus/tc-v2/<pipeline>; env TC2_OUT_ROOT)')
+    ap.add_argument('--role-signal', default=None, choices=('v2', 'v3'), help='apply the icon / box-tint role rules of ROLE-LAYER-SIGNAL-EXPERIMENT (default: off; env TC2_ROLE_SIGNAL)')
     a = ap.parse_args()
     if a.out:
         tc2_paths.set_out_root(a.out)
+    if a.role_signal:
+        global ROLE_SIGNAL
+        ROLE_SIGNAL = a.role_signal
     if a.page:
         s = build_page(a.page[0], int(a.page[1]), a.pipeline)
         if not s:
