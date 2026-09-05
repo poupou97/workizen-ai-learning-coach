@@ -82,6 +82,28 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual([e.disposition for e in lg.by_block('b')],
                          [model.Disposition.WITHHELD, model.Disposition.TRUSTED])
 
+    def test_the_ledger_computes_the_false_correction_rate_and_attributes_it(self):
+        """The P0 metric, straight off the ledger, with per-signal attribution."""
+        lg = ledger_mod.Ledger()
+        for bid, observed, served, sig in (('b1', 'wrong', 'right', 'A.vi_lexicon'),          # repaired
+                                           ('b2', 'right', 'other', 'A.vi_lexicon'),          # FALSE CORRECTION
+                                           ('b3', 'wrong', 'other', 'D.in_document')):        # still wrong
+            o = model.Observation(bid, 'stack-a', observed)
+            cand = model.RepairCandidate(block_id=bid, failure_class='vi_text',
+                                         original_observations=(o,), proposed_value=served, rule_id='r',
+                                         supporting_signals=(model.Signal(sig, 'supports', 1.0),))
+            lg.append(model.LedgerEntry(block_id=bid, failure_class='vi_text',
+                                        disposition=model.Disposition.VALIDATED_REPAIR,
+                                        observations=(o,), candidate=cand, final_value=served))
+        truth = {'b1': 'right', 'b2': 'right', 'b3': 'right'}
+        rep = lg.false_correction_report(truth.get)
+        self.assertEqual(rep['changed'], 3)
+        self.assertEqual(rep['totals']['false_correction'], 1)
+        self.assertAlmostEqual(rep['false_correction_rate'], 0.3333, places=3)
+        self.assertAlmostEqual(rep['correction_precision'], 0.3333, places=3)
+        self.assertEqual(rep['by_signal']['A.vi_lexicon'], dict(repaired=1, false_correction=1))
+        self.assertEqual(rep['by_signal']['D.in_document'], dict(still_wrong=1))
+
     def test_file_ledger_round_trips_as_jsonl(self):
         with tempfile.TemporaryDirectory() as d:
             p = os.path.join(d, 'sub', 'ledger.jsonl')

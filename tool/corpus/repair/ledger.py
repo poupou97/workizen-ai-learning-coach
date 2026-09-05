@@ -91,6 +91,54 @@ class Ledger:
         from collections import Counter
         return dict(Counter(e.disposition for e in self.entries))
 
+    def false_correction_report(self, truth):
+        """**P0 metric, computed from the ledger itself** (Founder ACCURACY RECOVERY addendum).
+
+        `truth(block_id) -> the correct value, or None when unknown`. For every row that reached
+        `VALIDATED_REPAIR`, compare what was observed and what was served:
+
+        * `false_correction` — the observation was **already correct** and the repair made it wrong. This is
+          the failure mode the Founder named: *«không được biến OCR sai thành AI tự tin sửa sai theo cách
+          khác»*. It is counted on its own and never folded into precision.
+        * `repaired` — wrong before, right after. `still_wrong` — wrong before, differently wrong after.
+
+        Each row is attributed to **every signal that supported it**, so a false correction can always be
+        traced to the signals that proposed it.
+        """
+        from collections import Counter, defaultdict
+        totals = Counter()
+        by_signal = defaultdict(Counter)
+        rows = []
+        for e in self.entries:
+            if e.disposition != model.Disposition.VALIDATED_REPAIR or not e.candidate:
+                continue
+            want = truth(e.block_id)
+            if want is None:
+                totals['unknown_truth'] += 1
+                continue
+            was = e.candidate.original_observations[0].value
+            now = e.final_value
+            if now == was:
+                verdict = 'unchanged'
+            elif now == want:
+                verdict = 'repaired'
+            elif was == want:
+                verdict = 'false_correction'
+            else:
+                verdict = 'still_wrong'
+            totals[verdict] += 1
+            rows.append(dict(block_id=e.block_id, entry_id=e.entry_id, rule_id=e.candidate.rule_id,
+                             verdict=verdict,
+                             signals=[s.signal_id for s in e.candidate.supporting()]))
+            for sig in e.candidate.supporting():
+                by_signal[sig.signal_id][verdict] += 1
+        changed = totals['repaired'] + totals['false_correction'] + totals['still_wrong']
+        return dict(totals=dict(totals), changed=changed,
+                    false_correction_rate=(round(totals['false_correction'] / changed, 4) if changed else None),
+                    correction_precision=(round(totals['repaired'] / changed, 4) if changed else None),
+                    by_signal={k: dict(v) for k, v in sorted(by_signal.items())},
+                    rows=rows)
+
     def to_json(self):
         return [e.to_json() for e in self.entries]
 
