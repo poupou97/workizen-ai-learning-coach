@@ -557,7 +557,16 @@ def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters
     by_id = {b['id']: b for b in blocks_in}
     pages = sorted({b['page'] for b in blocks_in} | {w['page'] for w in tsl.get('withheld') or []})
     printed = sorted({b['page_printed'] for b in blocks_in if b.get('page_printed') is not None})
-    caption_of = {f['caption']: f['id'] for f in tsl.get('figures') or [] if f.get('caption')}
+    # Round 4 correctness review (F10): `caption_for_picture` deliberately lets ONE caption serve
+    # side-by-side pictures, but this map is keyed by caption id, so the LAST figure silently overwrote
+    # the first. The figure→caption direction is complete either way (every ImageBlock carries its own
+    # `captionBlockId`); the consumer model's `captionOf` is a single id, so it now names the first figure
+    # the caption serves, deterministically — and a figure the document DROPS (too small, or no crop) never
+    # wins over one it keeps, so `captionOf` cannot point at a block that is not in the document.
+    caption_of = {}
+    for f in sorted((tsl.get('figures') or []), key=lambda f: not figure_kept(f)):
+        if f.get('caption'):
+            caption_of.setdefault(f['caption'], f['id'])
 
     # 1. text blocks in reading order (unknown roles become withheld blocks — never dropped)
     seq = []  # (page, y, x, order, block)

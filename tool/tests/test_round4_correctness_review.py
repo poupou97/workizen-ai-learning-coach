@@ -141,5 +141,177 @@ class F2UppercaseAttributionTests(unittest.TestCase):
             self.assertEqual(tc2_sdm.assign_role(blk(t), ctx())[0], 'body', t)
 
 
+def cap_block(i, bbox, text='Hình 1. Mẫu'):
+    return dict(id=f'b:{i:03d}', bbox=list(bbox), text=text,
+                role=dict(value='caption', coarse='CAPTION', method='lexicon', confidence=0.9, evidence=[]))
+
+
+class F1CaptionDeadZoneTests(unittest.TestCase):
+    """F1 — a caption whose TOP is still inside the picture but whose CENTRE has crossed below its bottom
+    edge matched none of inside / below / above and silently lost its link — exactly the «Docling grew the
+    picture over its caption» case the docstring claims to handle."""
+
+    PIC = [0.1, 0.3, 0.4, 0.24]        # bottom edge at y = 0.54
+    MED = 0.015
+
+    def link(self, centre_y, h=0.02):
+        c = cap_block(1, [0.15, round(centre_y - h / 2, 4), 0.3, h])
+        return tc2_sdm.caption_for_picture(self.PIC, [c], self.MED)
+
+    def test_the_dead_zone_straddling_the_bottom_edge_is_linked(self):
+        # measured before the fix: 0.540 and 0.550 linked, 0.545 did not
+        for centre in (0.535, 0.540, 0.545, 0.550, 0.560):
+            self.assertEqual(self.link(centre), 'b:001', centre)
+
+    def test_a_caption_straddling_the_top_edge_is_linked(self):
+        # centre 0.295 (above the box, which starts at 0.30) but its bottom edge 0.305 is inside it —
+        # the mirror image of the dead zone, and equally unmatched before the fix
+        c = cap_block(1, [0.15, 0.285, 0.3, 0.02])
+        self.assertEqual(tc2_sdm.caption_for_picture(self.PIC, [c], self.MED), 'b:001')
+
+    def test_a_caption_whose_centre_sits_high_inside_the_picture_is_still_figure_text(self):
+        c = cap_block(1, [0.15, 0.30, 0.3, 0.02])       # centre 0.31, well above the picture's lower band
+        self.assertIsNone(tc2_sdm.caption_for_picture(self.PIC, [c], self.MED))
+
+    def test_the_distance_limits_are_unchanged(self):
+        self.assertIsNone(self.link(0.60))                       # far below (> 2.5 median line heights)
+        c = cap_block(1, [0.15, 0.20, 0.3, 0.015])               # far above (> 1 median line height)
+        self.assertIsNone(tc2_sdm.caption_for_picture(self.PIC, [c], self.MED))
+        beside = cap_block(1, [0.6, 0.35, 0.3, 0.015])           # no horizontal overlap
+        self.assertIsNone(tc2_sdm.caption_for_picture(self.PIC, [beside], self.MED))
+
+
+class F5DashSubItemEnumeratorTests(unittest.TestCase):
+    """F5 — `num_directive` was computed with `ENUM.match(t)` on the UN-stripped text while `core` was
+    dash-stripped, so a dash sub-item carrying its OWN enumerator could only be promoted through the
+    `^`-anchored QHINT and never through DIRECTIVE_ANY."""
+
+    def test_a_dash_item_with_its_own_enumerator_is_a_question(self):
+        c = ctx(prev_role='body', prev_text='Một đoạn văn mẫu.')
+        for t in ('– 1. Em thử vẽ lại sơ đồ mẫu ở trên', '- 2. Em thử so sánh hai mẫu vật ở trên'):
+            role, _, _, _ = tc2_sdm.assign_role(blk(t), c)
+            self.assertEqual(role, 'question', t)
+
+    def test_a_bare_dash_line_without_a_lead_is_still_body(self):
+        # the fail-closed rule the dash machinery exists for: dialogue in a reading is NOT a question
+        c = ctx(prev_role='body', prev_text='Một đoạn văn mẫu kể chuyện.')
+        for t in ('– Em thử vẽ lại sơ đồ mẫu ở trên', '– Nêu chuyện cho tôi nghe đi.'):
+            self.assertEqual(tc2_sdm.assign_role(blk(t), c)[0], 'body', t)
+
+    def test_an_undashed_enumerated_directive_is_unchanged(self):
+        c = ctx(prev_role='body', prev_text='Một đoạn văn mẫu.')
+        self.assertEqual(tc2_sdm.assign_role(blk('1. Em thử vẽ lại sơ đồ mẫu ở trên'), c)[0], 'question')
+
+
+class F4FigRefOverMatchTests(unittest.TestCase):
+    """F4 — the look-verb clause matched «đọc/xem … bảng» where «bảng» is an arithmetic table the child
+    recites, not a printed figure. Fail-closed, so it costs recall, not trust — tightened narrowly."""
+
+    def test_an_arithmetic_table_is_not_a_figure_reference(self):
+        for t in ('Đọc bảng chia 3 và học thuộc bảng chia đó.', 'Đọc bảng nhân 5.',
+                  'Học thuộc và đọc bảng cộng trong phạm vi 10.'):
+            self.assertIsNone(tc2_sdm.FIG_REF.search(t), t)
+
+    def test_lane_c_request_4_still_matches(self):
+        for t in ('Quan sát các hình từ 1 đến 3 và cho biết điều gì đã xảy ra?',
+                  'Dựa vào lược đồ, em hãy mô tả lại diễn biến.',
+                  'Đọc thông tin và quan sát hình, hãy kể lại câu chuyện.',
+                  'Xem Hình 2 để biết thêm.',
+                  'Đọc bảng số liệu mẫu rồi nhận xét.',
+                  'Xem bảng bên dưới rồi trả lời.'):
+            self.assertIsNotNone(tc2_sdm.FIG_REF.search(t), t)
+
+    def test_plain_prose_still_does_not_match(self):
+        self.assertIsNone(tc2_sdm.FIG_REF.search('Quan sát bầu trời vào buổi sáng sớm.'))
+
+
+class F3RoleChangeReDerivesGuardsTests(unittest.TestCase):
+    """F3 — the post-pass re-derivation recomputed only `figure_dependent`, `answer_leak` and
+    `teacher_text`, so a block promoted INTO a colour-heavy-exempt role kept a guard reason its new role
+    is exempt from: a «Hình 17.1» label was TRUSTED while its continuation sentence, now also `caption`,
+    stayed WITHHELD citing `page_feature:color_heavy`."""
+
+    def ob(self, role, text, guards, colour=0.6):
+        return dict(id='b:001', text=text, colour=dict(share=colour), refers_figure=False,
+                    role=dict(value=role, coarse=tc2_sdm.COARSE[role], method='x', confidence=0.7, evidence=[]),
+                    guards=list(guards), trust=dict(status='WITHHELD', reasons=list(guards)), learning=True)
+
+    def test_a_promotion_into_an_exempt_role_drops_the_colour_guard(self):
+        o = self.ob('caption', 'Một chú thích mẫu', ['page_feature:color_heavy'])   # role already promoted
+        tc2_sdm.rederive_trust([o], dict(color_heavy=True, diagram=False))
+        self.assertEqual(o['guards'], [])
+        self.assertEqual(o['trust']['status'], 'TRUSTED')
+
+    def test_a_block_that_is_still_body_keeps_the_colour_guard(self):
+        o = self.ob('body', 'Một đoạn văn mẫu', ['page_feature:color_heavy'])
+        tc2_sdm.rederive_trust([o], dict(color_heavy=True, diagram=False))
+        self.assertEqual(o['guards'], ['page_feature:color_heavy'])
+        self.assertEqual(o['trust']['status'], 'WITHHELD')
+
+    def test_the_diagram_guard_is_re_derived_too(self):
+        o = self.ob('caption', 'Chú thích ngắn', ['page_feature:diagram'])
+        tc2_sdm.rederive_trust([o], dict(color_heavy=False, diagram=True), {'b:001': True})
+        self.assertNotIn('page_feature:diagram', o['guards'])
+        o2 = self.ob('body', 'Chú thích ngắn', ['page_feature:diagram'])
+        tc2_sdm.rederive_trust([o2], dict(color_heavy=False, diagram=True), {'b:001': True})
+        self.assertIn('page_feature:diagram', o2['guards'])
+
+    def test_guards_that_do_not_depend_on_the_role_are_never_dropped(self):
+        o = self.ob('caption', 'Một chú thích mẫu', ['agree_tones', 'page_feature:color_heavy', 'low_ocr_conf'])
+        tc2_sdm.rederive_trust([o], dict(color_heavy=True, diagram=False))
+        self.assertEqual(sorted(o['guards']), ['agree_tones', 'low_ocr_conf'])
+        self.assertEqual(o['trust']['status'], 'WITHHELD')
+
+    def test_a_chemistry_guard_follows_the_role_it_was_derived_for(self):
+        o = self.ob('body', 'khí CO2 và H2O', [])
+        tc2_sdm.rederive_trust([o], dict(color_heavy=False, diagram=False))
+        self.assertIn('chem_guard', o['guards'])
+        o2 = self.ob('table', 'khí CO2 và H2O', ['chem_guard'])
+        tc2_sdm.rederive_trust([o2], dict(color_heavy=False, diagram=False))
+        self.assertNotIn('chem_guard', o2['guards'])
+
+
+class F10SharedCaptionTests(unittest.TestCase):
+    """F10 — `caption_for_picture` deliberately lets ONE caption serve side-by-side pictures, but the
+    bridge built `caption_of` keyed by caption id, so the second figure overwrote the first."""
+
+    BOOK = '06-sgk-mau-6'
+
+    def tsl(self, figs):
+        cap_id = f'{self.BOOK}:p011:tc2-p1:009'
+        blocks = [{'id': cap_id, 'page': 11, 'page_printed': 10, 'order': 9,
+                   'role': {'value': 'caption', 'coarse': 'CAPTION', 'confidence': 0.9, 'method': 'lexicon'},
+                   'text': '[MẪU] Chú thích chung', 'bbox': [0.1, 0.5, 0.7, 0.02], 'heading_path': [],
+                   'refers_figure': False, 'enumerator_restored': False}]
+        return cap_id, {'book': self.BOOK, 'lesson': 9, 'title': '[MẪU]', 'pipeline': 'tc2-p1', 'docType': 'SGK',
+                        'boundary': {'pages': [11]}, 'sourceability': 'PARTIAL', 'answer_keys_included': False,
+                        'blocks': blocks, 'withheld': [], 'figures': figs}
+
+    def figure(self, n, bbox):
+        return {'id': f'{self.BOOK}:p011:fig{n:02d}', 'page': 11, 'bbox': list(bbox),
+                'caption': f'{self.BOOK}:p011:tc2-p1:009', 'labels': 0}
+
+    def test_both_side_by_side_figures_keep_the_shared_caption(self):
+        left, right = self.figure(0, [0.1, 0.3, 0.35, 0.18]), self.figure(1, [0.5, 0.3, 0.35, 0.18])
+        cap_id, tsl = self.tsl([left, right])
+        crops = {left['id']: {'crop': 'crops/a.png', 'aspect': 1.4}, right['id']: {'crop': 'crops/b.png', 'aspect': 1.4}}
+        doc = br.convert(tsl, tsl_rel_path='x.json', tsl_sha256='ab' * 32, crops=crops)
+        images = [b for b in doc['blocks'] if b['type'] == 'image']
+        self.assertEqual(len(images), 2)
+        for im in images:
+            self.assertEqual(im['captionBlockId'], cap_id)
+        caption = next(b for b in doc['blocks'] if b['id'] == cap_id)
+        # `captionOf` is a single id in the consumer model, so it names the FIRST figure deterministically
+        self.assertEqual(caption['relations']['captionOf'], left['id'])
+
+    def test_caption_of_never_names_a_figure_the_document_dropped(self):
+        tiny, kept = self.figure(0, [0.1, 0.3, 0.02, 0.02]), self.figure(1, [0.5, 0.3, 0.35, 0.18])
+        cap_id, tsl = self.tsl([tiny, kept])
+        doc = br.convert(tsl, tsl_rel_path='x.json', tsl_sha256='ab' * 32,
+                         crops={kept['id']: {'crop': 'crops/b.png', 'aspect': 1.4}})
+        caption = next(b for b in doc['blocks'] if b['id'] == cap_id)
+        self.assertEqual(caption['relations']['captionOf'], kept['id'])
+
+
 if __name__ == '__main__':
     unittest.main()

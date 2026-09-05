@@ -216,7 +216,14 @@ NUM_SEC = re.compile(r'^\s*\d{1,2}[.)]\s+\S')
 # Round 4 (Lane C request 4): «quan sát các hình từ 1 đến 3 …» carries no «Hình N», so the guard trusted a
 # question the child cannot answer from text alone. A look-verb followed within a clause by a figure noun
 # is a figure reference even when no number follows it.
-FIG_REF = re.compile(r'\b(hình|bảng|sơ đồ|biểu đồ|lược đồ|đồ thị)\s*\d|\b(hình|bảng|sơ đồ)\s+(bên|trên|dưới|sau|dưới đây|sau đây)\b|\btrong (các )?hình\b|\bở hình\b|\b(quan sát|nhìn|xem|dựa vào|căn cứ vào|đọc)\b[^.?!]{0,40}?\b(hình|bảng|sơ đồ|biểu đồ|lược đồ|đồ thị)\b', re.IGNORECASE)
+# Round 4 correctness review (F4): that clause also matched «Đọc bảng chia 3 …» — «bảng chia/nhân/cộng/trừ»
+# is the arithmetic table a child recites, not a printed figure, so the guard withheld an ordinary Toán
+# instruction. The exclusion is narrow and lexical: only those four arithmetic tables, only in the look-verb
+# clause. It is fail-closed either way (the guard costs recall, never trust), so it is tightened by naming
+# the idiom rather than by weakening the clause.
+ARITH_TABLE = r'(?!\s+(?:chia|nhân|cộng|trừ)\b)'
+FIG_REF = re.compile(r'\b(hình|bảng|sơ đồ|biểu đồ|lược đồ|đồ thị)\s*\d|\b(hình|bảng|sơ đồ)\s+(bên|trên|dưới|sau|dưới đây|sau đây)\b|\btrong (các )?hình\b|\bở hình\b|'
+                     r'\b(quan sát|nhìn|xem|dựa vào|căn cứ vào|đọc)\b[^.?!]{0,40}?\b(hình|bảng' + ARITH_TABLE + r'|sơ đồ|biểu đồ|lược đồ|đồ thị)\b', re.IGNORECASE)
 # Round 4 (Lane C request 5): «(Theo …)» / «(…, NXB …, 2017)» closes a story and names its source. tc2-p1 served
 # it as body — the child could not tell the SGK's own prose from a quoted source (4 / 4 of Lane C's role
 # disagreements on LS&ĐL 5 Bài 8). Fail closed: the marker word OR an explicit publisher is required, so a
@@ -354,7 +361,15 @@ def assign_role(b, ctx):
     core = ENUM.sub('', t[dash.end():] if lead_ctx else t, count=1)
     is_q = re.search(r'\?\s*$', t) is not None
     directive = (QHINT.search(core) is not None or QUESTION_LEAD.search(t) is not None) and len(t) < 400
-    num_directive = ENUM.match(t) is not None and DIRECTIVE_ANY.search(core[:120]) is not None and len(t) < 400
+    # Round 4 correctness review (F5): `num_directive` tested `ENUM.match(t)` on the UN-stripped text while
+    # `core` was dash-stripped, so «– 1. Em thử vẽ lại sơ đồ trên» — a dash sub-item carrying its OWN
+    # enumerator — could only be promoted by the `^`-anchored QHINT and never by DIRECTIVE_ANY, and stayed
+    # `body`. The enumerator is the evidence here, so the bullet is stepped over only when an enumerator
+    # actually follows it; a bare dash line still needs a question lead, so dialogue in a reading is
+    # untouched (that is what the DASH_LEAD machinery exists for).
+    after_dash = t[dash.end():] if dash else t
+    enum_m = ENUM.match(after_dash)
+    num_directive = enum_m is not None and DIRECTIVE_ANY.search(ENUM.sub('', after_dash, count=1)[:120]) is not None and len(t) < 400
     stem = False  # an enumerated line ending with ":" is a question stem ONLY when options follow (post-pass); alone it is a worked-example lead-in (Toán 7 p41)
     if is_q or directive or num_directive or stem:
         if sgv:
@@ -486,22 +501,27 @@ def caption_for_picture(pic_bbox, captions, med_h):
             continue
         cy0, cy1 = bb[1], bb[1] + bb[3]
         cyc = bb[1] + bb[3] / 2
-        if py <= cyc <= py1:                       # inside the picture box
+        # Round 4 correctness review (F1): the three branches used to be mutually exclusive on DIFFERENT
+        # measurements — the centre for «inside», the edges for «below»/«above» — which left a dead zone
+        # where a caption STRADDLES the picture's edge: top still inside the box, centre already below it
+        # matched nothing and lost its link (measured: centre 0.545 → None while 0.540 and 0.550 both
+        # linked). That is precisely the «Docling grew the picture over its caption» case this function
+        # exists for. The side is now decided by the centre alone and the gap can never be negative, so a
+        # straddling caption is a zero-gap neighbour. No distance limit is relaxed.
+        if py <= cyc <= py1:                       # centre inside the picture box
             if cyc < py1 - inside_band:
                 continue                            # a label in the middle of the picture is figure text, not its caption
             key = (0, 0.0, -ov)
-        elif cy0 >= py1:                            # below
-            gap = cy0 - py1
+        elif cyc > py1:                             # below (its top may still overlap the picture's lower edge)
+            gap = max(0.0, cy0 - py1)
             if gap > below_max:
                 continue
             key = (1, gap, -ov)
-        elif cy1 <= py:                             # above
-            gap = py - cy1
+        else:                                       # above (its bottom may still overlap the picture's top edge)
+            gap = max(0.0, py - cy1)
             if gap > above_max:
                 continue
             key = (1, gap, -ov)
-        else:
-            continue
         if best is None or key < best[0]:
             best = (key, c['id'])
     return best[1] if best else None
@@ -577,6 +597,82 @@ NON_LEARNING = {'page_number', 'running_head', 'figure', 'figure_text', 'empty'}
 # block's own bbox instead of inheriting the page's verdict. Same constant, smaller measurement window.
 COLOUR_HEAVY_SHARE = 0.25
 COLOUR_HEAVY_EXEMPT = ('heading', 'stage_label', 'page_number', 'running_head', 'caption', 'figure', 'empty')
+
+
+# Round 4 correctness review (F3): the guards below are a pure function of the block's ROLE (plus its own
+# text, colour, geometry and the page's census features). Any pass that CHANGES a role must recompute all
+# of them — `caption_continuation_pass` is the first pass that promotes a block INTO a colour-heavy-exempt
+# role, and the old re-derivation recomputed only three of them, so a «Hình 17.1» label was TRUSTED while
+# its continuation sentence, now also `caption`, stayed WITHHELD citing `page_feature:color_heavy` — a
+# reason that no longer applied to its final role. One authority, used by `build_page` and by the
+# re-derivation, so the two cannot drift.
+ROLE_DERIVED_GUARDS = frozenset({'empty_block', 'furniture', 'figure_text', 'math_guard', 'unit_guard', 'chem_guard',
+                                 'figure_dependent', 'answer_leak', 'teacher_text',
+                                 'page_feature:color_heavy', 'page_feature:diagram'})
+
+
+def role_guards(role, text, refers_figure, colour, features, inside_picture=False):
+    """The guard reasons that depend on the block's role. Deterministic; withholds only, never repairs.
+
+    `features` is the page census row (`color_heavy`, `diagram`); `colour` the block's own measured colour.
+    """
+    t = text or ''
+    g = []
+    if role == 'empty' or not t.strip():
+        g.append('empty_block')
+    if role in ('page_number', 'running_head'):
+        g.append('furniture')
+    if role == 'figure_text':
+        g.append('figure_text')
+    if role not in ('formula', 'table', 'figure', 'empty') and MATH.search(t):
+        g.append('math_guard')
+    if role not in ('formula', 'table', 'figure', 'empty') and UNIT_EXP.search(t):
+        g.append('unit_guard')
+    if role not in ('formula', 'table', 'figure', 'empty', 'page_number', 'running_head') and CHEM.search(t):
+        g.append('chem_guard')
+    if refers_figure and role in ('question', 'activity', 'instruction', 'teacher_prompt'):
+        g.append('figure_dependent')
+    if role in ('answer', 'model_answer') or ANSWER_INLINE.search(t):
+        g.append('answer_leak')
+    if role in ('teacher_text', 'teacher_prompt'):
+        g.append('teacher_text')
+    if colour_heavy_withholds((features or {}).get('color_heavy'), role, colour):
+        g.append('page_feature:color_heavy')
+    if (features or {}).get('diagram') and role in ('body', 'sidebar', 'question', 'activity', 'instruction', 'objective') \
+            and (inside_picture or (len(t) < 30 and not ends_sentence(t))):
+        g.append('page_feature:diagram')
+    return g
+
+
+def trust_status(role, withhold):
+    if role in ('figure', 'empty'):
+        return 'WITHHELD'
+    if not withhold:
+        return 'TRUSTED'
+    return 'CONFLICT' if any(x in ('role_conflict', 'agree_order') for x in withhold) and 'agree_text' not in withhold else 'WITHHELD'
+
+
+def rederive_trust(out_blocks, features, inside_pic_by_id=None):
+    """Recompute every role-dependent guard after the post-passes changed roles (round 4 review, F3).
+
+    Guards that do NOT depend on the role — the agreement guards (`agree_text`/`agree_order`/
+    `agree_numbers`/`agree_tones`), `role_conflict`, `box_boundary`, `low_ocr_conf` — are kept exactly as
+    the first pass computed them. That is deliberate and fail-closed: `agree_order` is waived for
+    FLEX_ROLES in the first pass only, and re-deriving it here would ADD trust to promoted blocks. It is a
+    known asymmetry, recorded rather than quietly changed.
+    """
+    inside_pic_by_id = inside_pic_by_id or {}
+    for ob in out_blocks:
+        r = ob['role']['value']
+        keep = [x for x in ob['guards'] if x not in ROLE_DERIVED_GUARDS]
+        g = role_guards(r, ob.get('text') or '', ob.get('refers_figure'), ob.get('colour'), features,
+                        inside_pic_by_id.get(ob.get('id'), False)) + keep
+        ob['guards'] = g
+        withhold = [x for x in g if x != 'enumerator_restored']
+        ob['trust']['reasons'] = withhold
+        ob['trust']['status'] = trust_status(r, withhold)
+        ob['learning'] = r not in NON_LEARNING
+    return out_blocks
 
 
 def colour_heavy_withholds(page_color_heavy, role, colour):
@@ -902,6 +998,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
     # per block
     prev_role = None; prev_text = None; box = None; heading_path = []; answer_section = False
     out_blocks = []
+    inside_pic_by_id = {}          # block id → was it inside a Docling picture box (needed to re-derive the diagram guard)
     for rank, pi in enumerate(order_map):
         b, a = blocks[pi], agree[pi]
         bb = b['bbox']
@@ -954,15 +1051,12 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
                 heading_path = heading_path[:1] + [t[:80]]
             else:
                 heading_path = heading_path[:2] + [t[:80]]
-        # guards
-        guards = []
+        # guards — the ROLE-DEPENDENT ones come from `role_guards` (the single authority the post-pass
+        # re-derivation also uses, round 4 correctness review F3); the rest depend on the agreement, the
+        # verifier or the OCR and are not affected by a later role change.
+        refers_fig = bool(FIG_REF.search(t))
+        guards = role_guards(role, t, refers_fig, col, cen, inside_pic)
         learning = role not in NON_LEARNING
-        if role == 'empty' or not t:
-            guards.append('empty_block')
-        if role in ('page_number', 'running_head'):
-            guards.append('furniture')
-        if role == 'figure_text':
-            guards.append('figure_text')
         if not a['ok'] and role not in ('figure', 'empty', 'page_number', 'running_head'):
             if a['reason'] == 'agree_order' and role in FLEX_ROLES:
                 ev = ev + ['order_flex: verifier places this flex block elsewhere (not withheld)']
@@ -970,12 +1064,6 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
                 guards.append(a['reason'] or 'agree_text')
         if conflict:
             guards.append('role_conflict')
-        if role not in ('formula', 'table', 'figure', 'empty') and MATH.search(t):
-            guards.append('math_guard')
-        if role not in ('formula', 'table', 'figure', 'empty') and UNIT_EXP.search(t):
-            guards.append('unit_guard')
-        if role not in ('formula', 'table', 'figure', 'empty', 'page_number', 'running_head') and CHEM.search(t):
-            guards.append('chem_guard')
         if a.get('ok') and a.get('vtext') is not None and numbers_disagree(t, a['vtext']):
             guards.append('agree_numbers')
         tones = tone_disagreements(t, a.get('vraw')) if a.get('ok') else []
@@ -985,24 +1073,12 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
             lr = (col['left'], col['right']); tb = (col['top'], col['bottom'])
             if (max(lr) >= 0.5 and min(lr) <= 0.08) or (max(tb) >= 0.5 and min(tb) <= 0.08):
                 guards.append('box_boundary')
-        refers_fig = bool(FIG_REF.search(t))
-        if refers_fig and role in ('question', 'activity', 'instruction', 'teacher_prompt'):
-            guards.append('figure_dependent')
-        if role in ('answer', 'model_answer') or ANSWER_INLINE.search(t):
-            guards.append('answer_leak')
-        if role in ('teacher_text', 'teacher_prompt'):
-            guards.append('teacher_text')
-        if colour_heavy_withholds(cen.get('color_heavy'), role, col):
-            guards.append('page_feature:color_heavy')
-        if cen.get('diagram') and role in ('body', 'sidebar', 'question', 'activity', 'instruction', 'objective') and (inside_pic or (len(t) < 30 and not ends_sentence(t))):
-            guards.append('page_feature:diagram')
         if b['ocr_conf'] is not None and b['ocr_conf'] < 0.6:
             guards.append('low_ocr_conf')
         withhold = [g for g in guards if g not in ('enumerator_restored',)]
-        status = 'TRUSTED' if not withhold else ('CONFLICT' if any(g in ('role_conflict', 'agree_order') for g in withhold) and 'agree_text' not in withhold else 'WITHHELD')
-        if role in ('figure', 'empty'):
-            status = 'WITHHELD'
+        status = trust_status(role, withhold)
         sdm_id = f'{book}:p{page:03d}:{pipeline}:{b["order"]:03d}'   # id = the primary's native block index (stable across re-sequencing)
+        inside_pic_by_id[sdm_id] = inside_pic
         ob = dict(id=sdm_id, order=rank, native_order=b['order'], native_label=b.get('native_label'), text=b['text'], text_docling=b.get('text_docling'), enumerator_restored=bool(b.get('enumerator_restored')),
                   bbox=bb, column=(1 if bb and bb[0] + bb[2] / 2 < 0.5 else 2) if bb else None, ocr_conf=b['ocr_conf'], colour=col, extraction=b.get('extraction'),
                   agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok'], verifier_pos=a.get('vpos'), moved=a.get('moved', False), tone_disagreements=tones[:6]),
@@ -1021,28 +1097,12 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
     caption_continuation_pass(out_blocks, med_h)
     if role_signal:
         role_signal_pass(book, page, out_blocks, role_signal)
-    # re-derive trust for blocks whose role changed in the post-passes (guards that depend on the role)
-    for ob in out_blocks:
-        r = ob['role']['value']
-        g = [x for x in ob['guards'] if x not in ('figure_dependent', 'answer_leak', 'teacher_text')]
-        if ob['refers_figure'] and r in ('question', 'activity', 'instruction', 'teacher_prompt'):
-            g.append('figure_dependent')
-        if r in ('answer', 'model_answer') or ANSWER_INLINE.search(ob['text'] or ''):
-            g.append('answer_leak')
-        if r in ('teacher_text', 'teacher_prompt'):
-            g.append('teacher_text')
-        ob['guards'] = g
-        withhold = [x for x in g if x != 'enumerator_restored']
-        ob['trust']['reasons'] = withhold
-        ob['trust']['status'] = 'TRUSTED' if not withhold else ('CONFLICT' if any(x in ('role_conflict', 'agree_order') for x in withhold) and 'agree_text' not in withhold else 'WITHHELD')
-        if r in ('figure', 'empty'):
-            ob['trust']['status'] = 'WITHHELD'
-        ob['learning'] = r not in NON_LEARNING
+    # re-derive trust for blocks whose role changed in the post-passes: EVERY guard that depends on the
+    # role, not only the three that used to be recomputed (round 4 correctness review, F3)
+    rederive_trust(out_blocks, cen, inside_pic_by_id)
     # figures: pictures + their labels + captions
     figures = []
-    rank_of_native = {ob['native_order']: ob['order'] for ob in out_blocks}
     for k, p in enumerate(pics):
-        p_rank = rank_of_native.get(p['order'], p['order'])
         labels = [ob['id'] for ob in out_blocks if ob['role']['value'] == 'figure_text' and inside(ob['bbox'], p['bbox'], 0.6)]
         # Round 4 (failure class 5): geometry decides the caption, not reading-order distance. Fail closed —
         # a picture whose caption cannot be placed geometrically carries no caption.
