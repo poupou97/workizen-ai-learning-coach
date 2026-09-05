@@ -11,6 +11,7 @@
 library;
 
 import '../pedagogy/pedagogy_model.dart' show TeachingAct;
+import '../student/evidence_validation.dart';
 import '../student/learning_evidence.dart';
 import '../student/mastery.dart';
 
@@ -92,6 +93,9 @@ class LearningSession {
         if (e.lessonNo != null) 'lessonNo': e.lessonNo,
         if (e.act != null) 'act': e.act!.name,
         if (e.learnerText != null) 'learnerText': e.learnerText,
+        // ⭐⭐ Round 3 (A3): dấu kiểm chứng sống qua đĩa; khuyết ⇒ null khi đọc
+        // (dữ liệu cũ) — không mặc định một validator nào.
+        if (e.validation != null) 'validation': e.validation!.toJson(),
       };
 
   static LearningEvent? _eventFrom(Map<String, Object?> j) {
@@ -132,6 +136,7 @@ class LearningSession {
         _ => null,
       },
       learnerText: j['learnerText'] as String?,
+      validation: EvidenceValidation.fromJson(j['validation']),
     );
   }
 

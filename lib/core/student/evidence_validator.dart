@@ -11,6 +11,7 @@ library;
 
 import '../intent/learning_intent.dart';
 import '../pedagogy/pedagogy_model.dart' show TeachingAct;
+import 'evidence_validation.dart';
 import 'learning_evidence.dart';
 import 'mastery.dart';
 import '../context/learning_context.dart';
@@ -85,5 +86,10 @@ LearningEvent? validateCandidateEvidence(
     lessonNo: context.lessonNo,
     act: c.act,
     learnerText: c.learnerText,
+    // ⭐⭐ Round 3 (A3): cửa này là validator ĐÃ ĐĂNG KÝ nhưng chỉ cấp
+    // PARTICIPATION (`grantsCompetence: false`) — dấu ghi lại «ai đã cho
+    // qua», không phải «ai đã chấm đúng».
+    validation: const EvidenceValidation(
+        validatorId: 'candidate-gate-v1', validatorVersion: '1'),
   );
 }

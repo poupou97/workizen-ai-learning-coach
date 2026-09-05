@@ -20,6 +20,7 @@
 library;
 
 import '../pedagogy/pedagogy_model.dart' show TeachingAct;
+import 'evidence_validation.dart';
 import 'mastery.dart';
 
 /// ⭐ Bảy loại sự kiện Founder liệt kê. Cố ý **không** gộp.
@@ -102,6 +103,7 @@ class LearningEvent {
     this.lessonNo,
     this.act,
     this.learnerText,
+    this.validation,
   });
 
   final String eventId;
@@ -179,6 +181,28 @@ class LearningEvent {
   /// có/không cần chữ trẻ viết.
   final String? learnerText;
 
+  /// ⭐⭐ WAL-210 round 3 — Founder A3: DẤU KIỂM CHỨNG. Ai đã chấm sự kiện này
+  /// (validatorId + validatorVersion, xem `evidence_validation.dart`).
+  /// `null` = sự kiện KHÔNG QUA validator nào (tự báo, hoặc dữ liệu cũ trước
+  /// hợp đồng — không viết lại log). JSON: khoá `validation` tuỳ chọn,
+  /// tương thích ngược.
+  final EvidenceValidation? validation;
+
+  /// Dấu kiểm chứng có được phép cấp NĂNG LỰC không (fail closed với dấu lạ).
+  bool get hasApprovedValidation => validation?.grantsCompetence ?? false;
+
+  /// ⭐ Sự kiện CÓ CHẤM nhưng KHÔNG mang dấu — dữ liệu trước hợp đồng A3
+  /// (hoặc emitter chưa đóng dấu, xem danh sách trong
+  /// `validated_evidence_doctrine_test`). Đọc THEO LUẬT CŨ (đếm) cho tới khi
+  /// Founder quyết luật đọc dữ liệu cũ — PROPOSED, không phải mặc định êm.
+  bool get isLegacyUnstampedGrade => correct != null && validation == null;
+
+  /// ⭐ Sự kiện mang dấu của validator KHÔNG được đăng ký / không được cấp
+  /// năng lực ⇒ bị TỪ CHỐI ở mọi hàm trạng thái (RETRIEVED ≠ PERMITTED áp cho
+  /// cả validator).
+  bool get hasRejectedValidation =>
+      validation != null && !validation!.grantsCompetence;
+
   /// Sự kiện này có phải một lần **trả lời** không (khác với một lần can thiệp).
   bool get isAttempt => switch (kind) {
         EvidenceKind.independentAttempt ||
@@ -205,10 +229,16 @@ class LearningEvent {
   /// và `correct == true`. Đây là thứ DUY NHẤT được phép thành «Tự làm được»
   /// trên Learning Map / câu kể cho phụ huynh (cùng ngưỡng với
   /// `feedbackFor` — "SAM ghi lại: con TỰ làm được").
+  ///
+  /// ⭐⭐ Round 3 (A3): dấu kiểm chứng LẠ ⇒ không bao giờ là tự-làm-được.
+  /// Không dấu (dữ liệu cũ / emitter chưa đóng dấu) đọc theo luật cũ — xem
+  /// [isLegacyUnstampedGrade]; siết «chỉ có dấu mới đếm» qua
+  /// `learningMapStateFor(requireValidation: true)`.
   bool get isValidatedIndependentSuccess =>
       (kind == EvidenceKind.independentAttempt ||
           kind == EvidenceKind.selfCorrection) &&
-      correct == true;
+      correct == true &&
+      !hasRejectedValidation;
 
   /// ⭐⭐ Câu trả lời này có bị **chính can thiệp của hệ thống** quyết định không.
   ///
