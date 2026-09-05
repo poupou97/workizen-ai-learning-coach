@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/app/theme/wal_tokens.dart';
 import 'package:learning_coach/core/lesson_model/next_action.dart'
     show WorkspaceView;
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
@@ -142,6 +143,22 @@ void main() {
     expect(find.textContaining('3 cách học · Chưa xem'), findsOneWidget);
     expect(find.textContaining('Chưa có Bài học SAM'), findsOneWidget);
     expect(find.textContaining('mục lục hiện tại'), findsNothing);
+
+    // ⭐ ROUND 4 (lỗi thấy trên Nokia, đã sửa): MỘT vốn từ màu cho cả hành
+    // trình — nền tím oải hương = NHẤN MẠNH. Hàng CÓ Bài học SAM phải là hàng
+    // được nhấn; trước đây tô ngược (bài không có thì tím, bài có thì trắng).
+    Color rowColor(String label) => t
+        .widget<Material>(
+          find.ancestor(
+            of: find.textContaining(label),
+            matching: find.byType(Material),
+          ).first,
+        )
+        .color!;
+    expect(rowColor('Bài 17 · Tách chất'), WalColors.surfaceLavender,
+        reason: 'bài CÓ Bài học SAM được nhấn');
+    expect(rowColor('Bài 16 · Hỗn hợp'), Colors.white,
+        reason: 'bài chưa có Bài học SAM KHÔNG được nhấn hơn bài có');
 
     await t.tap(find.textContaining('Bài 16 · Hỗn hợp'));
     expect(legacyTaps, 1);

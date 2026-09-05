@@ -48,6 +48,7 @@ class SmartBookView extends StatefulWidget {
     required this.onFontStep,
     required this.onAskSam,
     this.scrollToBlockId,
+    this.header,
   });
 
   final LessonDocument doc;
@@ -57,6 +58,14 @@ class SmartBookView extends StatefulWidget {
   final void Function(int step) onFontStep;
   final void Function(LessonBlock block) onAskSam;
   final String? scrollToBlockId;
+
+  /// ⭐ ROUND 4 §6.3 (lỗi đo trên Nokia 6.1): khung CỐ ĐỊNH của workspace
+  /// (breadcrumb + chip + ba tab + thẻ «SAM đề xuất») chiếm 820/1920 px —
+  /// 43 % màn — nên trang sách chỉ còn hơn nửa màn để đọc. Thẻ đề xuất là LỜI
+  /// KHUYÊN, không phải thanh điều hướng: ở màn Đọc nó đi vào ĐẦU vùng cuộn
+  /// (vẫn là thứ đầu tiên trẻ thấy) rồi cuộn đi, trả lại chiều cao cho trang.
+  /// `null` ⇒ như cũ. Không cắt chữ lý do (D-R3-03 giữ nguyên).
+  final Widget? header;
 
   static const fontSteps = [17.0, 19.0, 22.0];
 
@@ -275,6 +284,10 @@ class _SmartBookViewState extends State<SmartBookView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (widget.header != null) ...[
+            widget.header!,
+            const SizedBox(height: WalSpacing.sm),
+          ],
           if (pages.length > 1) _pageChips(pages),
           _fontControl(),
           const SizedBox(height: WalSpacing.sm),

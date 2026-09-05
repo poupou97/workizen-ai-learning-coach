@@ -155,7 +155,12 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
             // Bàn phím lên (trẻ đang gõ trả lời SAM) ⇒ tạm ẩn thẻ đề xuất để
             // thân View còn chỗ (Nokia n3 D8). Bàn phím xuống ⇒ thẻ trở lại.
             // Ở màn «Vào bài học» lý do nằm trên thẻ được đề xuất ⇒ không lặp.
-            if (!picking && MediaQuery.viewInsetsOf(context).bottom == 0)
+            // ROUND 4 §6.3: ở màn ĐỌC thẻ đề xuất đi vào đầu vùng cuộn
+            // (`SmartBookView.header`) để trang sách được cả chiều cao — nên
+            // không ghim ở đây nữa. Các màn khác giữ nguyên.
+            if (!picking &&
+                _view != WorkspaceView.read &&
+                MediaQuery.viewInsetsOf(context).bottom == 0)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   WalSpacing.md,
@@ -402,6 +407,15 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
       onFontStep: (s) => setState(() => _fontStep = s),
       onAskSam: (b) => _switch(WorkspaceView.tutor, tutorAnchor: b.id),
       scrollToBlockId: _readAnchor,
+      // Thẻ đề xuất cuộn cùng trang sách ở màn Đọc (xem chú thích ở build).
+      // Bàn phím lên ⇒ ẩn như các màn khác.
+      header: MediaQuery.viewInsetsOf(context).bottom == 0
+          ? _nextActionCard(
+              _proposal(),
+              compact:
+                  MediaQuery.orientationOf(context) == Orientation.landscape,
+            )
+          : null,
     ),
     WorkspaceView.visual => VisualView(
       doc: doc,

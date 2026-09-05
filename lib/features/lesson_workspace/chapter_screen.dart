@@ -172,7 +172,11 @@ class _ChapterScreenState extends State<ChapterScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),
       child: Material(
-        color: doc != null ? Colors.white : WalColors.surfaceLavender,
+        // ⭐ ROUND 4 (lỗi nhìn thấy trên Nokia): nền tím oải hương là NHẤN
+        // MẠNH — Home dùng nó cho thẻ chính. Ở đây nó đang tô cho bài KHÔNG
+        // có Bài học SAM, còn bài CÓ thì trắng: ngược hẳn. Một vốn từ màu cho
+        // cả hành trình ⇒ có Bài học SAM = nền nhấn.
+        color: doc != null ? WalColors.surfaceLavender : Colors.white,
         borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
         child: ListTile(
           minVerticalPadding: WalSpacing.sm,
