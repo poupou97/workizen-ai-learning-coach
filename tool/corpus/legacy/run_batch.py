@@ -35,6 +35,9 @@ sys.path.insert(0, HERE)
 import common  # noqa: E402
 
 CORPUS = os.path.abspath(os.path.join(HERE, '..'))          # tool/corpus (Lane A-pipeline code, called as-is)
+# A re-run measures whether an IMPROVED pipeline rescues the same legacy lesson. --corpus points the run at
+# another checkout of tool/corpus (e.g. Lane A-pipeline's branch) — Lane D still never edits pipeline code, it
+# only chooses which build to call, and the manifest records the checkout + its git sha for both sides.
 READ_LINKS = ('graph', 'pdf', 'units', 'units-k12', 'k12-census-exports', 'layout')
 
 
@@ -88,31 +91,33 @@ def git_sha(cwd):
         return None
 
 
-def commands(batch, batch_dir, python=common.BAKEOFF_PYTHON):
+def commands(batch, batch_dir, python=common.BAKEOFF_PYTHON, corpus=None):
     """The exact commands, in order. Env TC_ROOT = shadow root for the pipeline steps; the bridge runs
     against the main root (it only reads curriculum/units-k12 and writes to --out)."""
+    corpus = corpus or CORPUS
     P = batch['pipeline']
     pages = f'{batch_dir}/pages.json'
     books = books_of(batch)
     env = dict(TC_ROOT=shadow_root(batch_dir))
     cmds = [
-        dict(step='attach', cmd=[python, f'{CORPUS}/tc2_attach.py', '--pipeline', P] + books, env=env),
-        dict(step='fast', cmd=[python, f'{CORPUS}/tc2_run.py', '--pipeline', P, '--pages', pages, '--fast'], env=env),
-        dict(step='docling', cmd=[python, f'{CORPUS}/tc2_run.py', '--pipeline', P, '--pages', pages, '--shard', '0', '--nshards', '1'], env=env),
-        dict(step='manifest', cmd=[python, f'{CORPUS}/tc2_run.py', '--pipeline', P, '--pages', pages, '--manifest'], env=env),
-        dict(step='sdm', cmd=[python, f'{CORPUS}/tc2_sdm.py', '--pipeline', P, '--pages', pages], env=env),
-        dict(step='tsl', cmd=[python, f'{CORPUS}/tc2_tsl.py', '--pipeline', P] + books, env=env),
+        dict(step='attach', cmd=[python, f'{corpus}/tc2_attach.py', '--pipeline', P] + books, env=env),
+        dict(step='fast', cmd=[python, f'{corpus}/tc2_run.py', '--pipeline', P, '--pages', pages, '--fast'], env=env),
+        dict(step='docling', cmd=[python, f'{corpus}/tc2_run.py', '--pipeline', P, '--pages', pages, '--shard', '0', '--nshards', '1'], env=env),
+        dict(step='manifest', cmd=[python, f'{corpus}/tc2_run.py', '--pipeline', P, '--pages', pages, '--manifest'], env=env),
+        dict(step='sdm', cmd=[python, f'{corpus}/tc2_sdm.py', '--pipeline', P, '--pages', pages], env=env),
+        dict(step='tsl', cmd=[python, f'{corpus}/tc2_tsl.py', '--pipeline', P] + books, env=env),
     ]
     return cmds
 
 
-def bridge_commands(batch, batch_dir, python=common.BAKEOFF_PYTHON):
+def bridge_commands(batch, batch_dir, python=common.BAKEOFF_PYTHON, corpus=None):
+    corpus = corpus or CORPUS
     P = batch['pipeline']
     out = []
     for L in batch['lessons']:
         tsl = f'{shadow_root(batch_dir)}/poc-out/trusted-corpus/tc-v2/{P}/lessons/{L["book"]}/bai-{int(L["lesson"]):02d}.tsl.json'
         out.append(dict(step=f'bridge:{L["book"]}:L{L["lesson"]}', tsl=tsl,
-                        cmd=[python, f'{CORPUS}/tsl_to_lesson_document.py', '--tsl', tsl, '--out', f'{batch_dir}/lesson-documents', '--audit-status', 'notAudited'],
+                        cmd=[python, f'{corpus}/tsl_to_lesson_document.py', '--tsl', tsl, '--out', f'{batch_dir}/lesson-documents', '--audit-status', 'notAudited'],
                         env=dict(TC_ROOT=common.MAIN_ROOT)))
     return out
 
@@ -150,6 +155,8 @@ def main(argv=None):
     ap.add_argument('--version', default='', help='suffix for a re-run of the same batch spec (e.g. rerun-tc2-p2) — a new directory, old outputs kept')
     ap.add_argument('--pipeline', default=None, help='override the pipeline id of the spec (e.g. tc2-p2 after Lane A ships)')
     ap.add_argument('--python', default=common.BAKEOFF_PYTHON)
+    ap.add_argument('--corpus', default=CORPUS, help='checkout of tool/corpus to CALL (default: this one) — e.g. Lane A-pipeline\'s branch for a tc2-p2 re-run')
+    ap.add_argument('--corpus-ref', default=None, help='the ref the --corpus tree was exported from, when it is not itself a checkout (recorded in the manifest)')
     ap.add_argument('--dry-run', action='store_true')
     ap.add_argument('--skip-docling', action='store_true')
     ap.add_argument('--only', default=None, help='comma list of steps to run (attach,fast,docling,manifest,sdm,tsl,bridge)')
@@ -160,7 +167,8 @@ def main(argv=None):
     name = batch['batch'] + (f'-{a.version}' if a.version else '')
     batch_dir = f'{common.LEGACY_OUT}/{name}'
     manifest_path = f'{batch_dir}/run-manifest.json'
-    cmds = commands(batch, batch_dir, a.python) + bridge_commands(batch, batch_dir, a.python)
+    corpus = os.path.abspath(a.corpus)
+    cmds = commands(batch, batch_dir, a.python, corpus) + bridge_commands(batch, batch_dir, a.python, corpus)
     if a.dry_run:
         for c in cmds:
             print(c['step'], 'TC_ROOT=' + c['env'].get('TC_ROOT', '<main>'), ' '.join(c['cmd']))
@@ -175,7 +183,7 @@ def main(argv=None):
     started = datetime.now(timezone.utc).isoformat(timespec='seconds')
     results = []
     with open(f'{batch_dir}/run.log', 'a', encoding='utf-8') as log:
-        log.write(f'# {started} batch={name} pipeline={batch["pipeline"]} code={git_sha(CORPUS)}\n')
+        log.write(f'# {started} batch={name} pipeline={batch["pipeline"]} corpus={corpus} code={git_sha(corpus)}\n')
         for c in cmds:
             step = c['step'].split(':')[0]
             if only and step not in only:
@@ -190,7 +198,7 @@ def main(argv=None):
     tc2_manifest = common.load_json(f'{shadow_root(batch_dir)}/poc-out/trusted-corpus/tc-v2/{batch["pipeline"]}/manifest.json', {})
     prev = common.load_json(manifest_path, {}) if a.only else {}
     man = dict(batch=name, spec=os.path.relpath(a.batch, common.REPO_ROOT), pipeline=batch['pipeline'], started=prev.get('started', started),
-               updated=datetime.now(timezone.utc).isoformat(timespec='seconds'), pipeline_code_sha=git_sha(CORPUS), lane_d_code_sha=git_sha(HERE),
+               updated=datetime.now(timezone.utc).isoformat(timespec='seconds'), pipeline_corpus=corpus, pipeline_code_sha=git_sha(corpus) or a.corpus_ref, pipeline_code_ref=a.corpus_ref, lane_d_code_sha=git_sha(HERE),
                python=a.python, versions=tc2_manifest.get('versions'), docling_options=tc2_manifest.get('docling_options'), tc2_summary=tc2_manifest.get('summary'),
                shadow_root=shadow_root(batch_dir), pages=len(pages_of(batch)), books=books_of(batch), steps=(prev.get('steps', []) + results), outputs=inventory(batch_dir, batch['pipeline']))
     common.dump_json(man, manifest_path)

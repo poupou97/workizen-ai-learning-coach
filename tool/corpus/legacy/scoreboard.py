@@ -231,7 +231,8 @@ def build(registry_path, legacy_out, thresholds_path):
         batches.append(dict(batch=spec.get('batch'), dir=os.path.relpath(bd, legacy_out), pipeline=manifest.get('pipeline') or spec.get('pipeline'),
                             started=manifest.get('started'), pipeline_code_sha=manifest.get('pipeline_code_sha'), pages=manifest.get('pages'),
                             lessons=ls, old_vs_new=dict(OLD=class_rates(rows['OLD']), NEW=class_rates(rows['NEW'])),
-                            audit_rows=dict(OLD=len(rows['OLD']), NEW=len(rows['NEW']))))
+                            audit_rows=dict(OLD=len(rows['OLD']), NEW=len(rows['NEW'])),
+                            transferred_verdicts=sum(1 for r in rows['NEW'] if r.get('verdictTransferredFrom'))))
     thresholds, why = load_thresholds(thresholds_path)
     all_lessons = list(lessons_by_key.values())
     counts = collections.Counter(L['state'] for L in all_lessons)
@@ -292,16 +293,24 @@ def render_md(sb):
           f"| **eligible for teaching** | **{s['eligible_for_teaching']}** | requires `trusted` ∧ a Founder teaching authorisation |",
           f"\nFull-sourceability lessons (every learning block trusted): {s['full_sourceability']}. Reprocessed lessons outside the registry scope: {s['out_of_scope_reprocessed']}.\n"]
     for b in sb['batches']:
-        o += [f"## Batch `{b['batch']}` — pipeline `{b['pipeline']}` ({b['pages']} pages, code {(b['pipeline_code_sha'] or '')[:12]})\n",
+        o += [f"## Batch `{b['dir']}` (spec `{b['batch']}`) — pipeline `{b['pipeline']}` ({b['pages']} pages, code {(b['pipeline_code_sha'] or 'n/a')[:60]})\n",
               '| lesson | risk | state | learning blocks | trusted | withheld | withheld reasons | audited rows |', '|---|---|---|---|---|---|---|---|']
         for L in b['lessons']:
             a = L.get('audit') or {}
             o.append(f"| {common.book_label(L['book'])} Bài {L['lesson']} | {', '.join(L['risk'])} | **{L['state']}** | {L.get('learning_blocks', '—')} | {L.get('trusted_blocks', '—')} | "
                      f"{L.get('withheld_blocks', '—')} | {L.get('withheld_by_reason') or '—'} | {a.get('served', 0)} served + {a.get('withheld_reviewed', 0)} withheld |")
-        o += [f"\n### OLD vs NEW false trust per failure class — batch `{b['batch']}`\n",
+        old_n = b['old_vs_new']['OLD']['_meta']['served']
+        basis = (f"OLD = {old_n} served blocks of the old units + packs" if old_n else
+                 "OLD = not re-sampled for this batch — the product side is unchanged, see the batch it re-runs")
+        note = ''
+        if b.get('transferred_verdicts'):
+            note = (f"\n**{b['transferred_verdicts']} of the NEW verdicts were carried over** from the batch this one re-runs, and only where this build serves the "
+                    'identical text in the same region (tool/corpus/legacy/rerun.py). That makes this a *conditional* rate over the rows that survived, '
+                    'not a fresh stratified sample of this build — read it beside the re-run delta, not as a replacement for it.\n')
+        o += [f"\n### OLD vs NEW false trust per failure class — batch `{b['dir']}`\n",
               'rate = WRONG / (OK + WRONG) among **served** rows (what the side actually showed a child), Wilson 95 % · NA / UNSURE excluded and counted beside · no threshold applied.\n',
-              f"OLD = {b['old_vs_new']['OLD']['_meta']['served']} served blocks of the old units + packs · NEW = {b['old_vs_new']['NEW']['_meta']['served']} served blocks of the new Trusted Structured Lessons "
-              f"(+ {b['old_vs_new']['NEW']['_meta']['withheld_rows']} withheld regions reviewed separately). The two sides are different block sets — the comparable quantity is *the share of what each side served that is wrong*.\n",
+              f"{basis} · NEW = {b['old_vs_new']['NEW']['_meta']['served']} served blocks of the new Trusted Structured Lessons "
+              f"(+ {b['old_vs_new']['NEW']['_meta']['withheld_rows']} withheld regions reviewed separately). The two sides are different block sets — the comparable quantity is *the share of what each side served that is wrong*.\n" + note,
               '| failure class | basis | OLD | NEW |', '|---|---|---|---|']
         for cls, _ in FIELD_CLASS:
             o.append(f"| {cls} | verdict field | {fmt(b['old_vs_new']['OLD'][cls])} | {fmt(b['old_vs_new']['NEW'][cls])} |")
