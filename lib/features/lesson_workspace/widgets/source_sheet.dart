@@ -1,12 +1,85 @@
 /// TRACK B — «Sách viết»: sheet nguồn của MỘT block. Nguyên văn + trang in +
 /// (nếu có) ảnh vùng trang nội bộ. Withheld ⇒ placeholder thật, không chữ.
+///
+/// ROUND 4 (§6.3 sheet «tra cứu» cho neo nguồn · §6.10 điều hướng nguồn):
+/// - dòng tra cứu «📖 Tra cứu · SGK KHTN 6 · Bài 17 · trang 61» (concept
+///   concept-chuong khung 8);
+/// - «Trong mục: …» từ đường heading của pipeline (khi có) — trẻ biết đoạn
+///   nằm ở mục nào của bài, không phải chỉ trang;
+/// - ảnh vùng trang NGUYÊN GỐC (không cắt mép) để đối chiếu với hình đã che
+///   mép trong «Đọc» (D-R4 bleed guard);
+/// - mã máy (id block, vai trò, pipeline, mã lý do giữ lại) chỉ nằm trong nếp
+///   gấp «Chi tiết kỹ thuật» — không có mã nào trên phần trẻ đọc (§6.9).
 library;
 
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/wal_tokens.dart';
 import '../../../core/lesson_model/lesson_document.dart';
+import 'tech_details.dart';
 import 'withheld_card.dart';
+
+/// Chữ IN HOA của sách → dạng thường có hoa đầu; chữ thường giữ nguyên.
+String _humanCase(String s) =>
+    s == s.toUpperCase() ? LessonDocument.titleCase(s) : s;
+
+/// «Trong mục: Nguyên tắc tách chất» — mục CON gần nhất trên đường heading
+/// của pipeline, bỏ «Bài N» và tên bài (đã ở tiêu đề). `null` khi không có
+/// đường heading (fixture cũ / mẫu) — không bịa mục.
+String? sectionLineFor(LessonDocument doc, LessonBlock b) {
+  final path = b.relations.headingPath;
+  if (path.isEmpty) return null;
+  final skip = {
+    'bài ${doc.lessonNo}',
+    doc.title.trim().toLowerCase(),
+  };
+  final rest = [
+    for (final h in path)
+      if (!skip.contains(h.trim().toLowerCase())) h,
+  ];
+  if (rest.isEmpty) return null;
+  final last = rest.last.replaceFirst(RegExp(r'^[·•\-\s]+'), '').trim();
+  if (last.isEmpty) return null;
+  return 'Trong mục: ${_humanCase(last)}';
+}
+
+/// «📖 Tra cứu · SGK KHTN 6 · Bài 17 · trang 61» — từ dòng nguồn của block.
+String lookupLineFor(LessonDocument doc, LessonBlock b) {
+  final src = doc.sourceLineForBlock(b);
+  final i = src.indexOf(' · ');
+  final page = i < 0 ? src : src.substring(i + 3);
+  return '📖 Tra cứu · SGK ${doc.bookTitle} · Bài ${doc.lessonNo} · $page';
+}
+
+/// Sự thật máy của một block — nguyên trạng, cho nếp gấp kỹ thuật.
+List<String> techLinesFor(LessonDocument doc, LessonBlock b) {
+  final r = b.sourceRef;
+  return [
+    'Mã phần: ${b.id}',
+    'Vai trò máy: ${b.sourceRole ?? '—'}'
+        '${b.roleMethod != null ? ' (${b.roleMethod})' : ''}'
+        '${b.roleConfidence != null ? ' · tin cậy vai trò ${b.roleConfidence!.toStringAsFixed(2)}' : ''}',
+    'Trang PDF ${r.pagePdf}'
+        '${r.pagePrinted != null ? ' · trang in ${r.pagePrinted}' : ''}'
+        ' · khung ${r.bbox.map((x) => x.toStringAsFixed(3)).join(', ')}',
+    if (r.pipeline != null) 'Pipeline: ${r.pipeline}',
+    if (r.extraction != null)
+      'Trích: ${r.extraction}'
+          '${r.ocrConf != null ? ' · OCR ${r.ocrConf!.toStringAsFixed(2)}' : ''}',
+    if (r.agreementScore != null)
+      'Đồng thuận hai stack: ${r.agreementScore!.toStringAsFixed(2)}',
+    'Độ tin: ${b.trust.name}',
+    if (b.relations.headingPath.isNotEmpty)
+      'Đường mục: ${b.relations.headingPath.join(' › ')}',
+    if (b is WithheldBlock)
+      'Mã lý do giữ lại: ${b.reasons.join(', ')}'
+          '${b.status != null ? ' · trạng thái ${b.status}' : ''}',
+    if (b is ImageBlock && b.captionBlockId != null)
+      'Chú thích máy gán: ${b.captionBlockId} (UI không dùng — liên kết '
+          'pipeline còn sai, O5)',
+    if (b is SourceRefBlock) 'Dòng nguồn máy: ${b.text}',
+  ];
+}
 
 /// Thẻ nguồn gọn (dùng trong Tutor / Visual): «Sách viết: … · SGK trang N».
 class SourceCard extends StatelessWidget {
@@ -67,7 +140,8 @@ class SourceCard extends StatelessWidget {
               ),
             const SizedBox(height: 4),
             Text(
-              doc.sourceLineForBlock(block),
+              '${doc.sourceLineForBlock(block)}'
+              '${onTap != null ? ' · chạm để tra cứu' : ''}',
               style: const TextStyle(fontSize: 13, color: WalColors.inkSoft),
             ),
           ],
@@ -89,6 +163,7 @@ Future<void> showSourceSheet(
     WithheldBlock(:final crop) => crop,
     _ => null,
   };
+  final section = sectionLineFor(doc, block);
   return showModalBottomSheet<void>(
     context: context,
     backgroundColor: WalColors.surface,
@@ -96,6 +171,7 @@ Future<void> showSourceSheet(
     isScrollControlled: true,
     builder: (sheet) => SafeArea(
       child: SingleChildScrollView(
+        key: const Key('source-sheet'),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
             WalSpacing.lg,
@@ -115,15 +191,28 @@ Future<void> showSourceSheet(
                   color: WalColors.ink,
                 ),
               ),
-              const SizedBox(height: WalSpacing.sm),
-              if (block is WithheldBlock) ...[
-                WithheldCard(doc: doc, block: block),
-                const SizedBox(height: 4),
-                Text(
-                  'Mã lý do máy: ${block.reason}',
-                  style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
+              const SizedBox(height: 2),
+              Text(
+                lookupLineFor(doc, block),
+                key: const Key('source-lookup-line'),
+                style: const TextStyle(
+                  fontSize: WalType.secondary,
+                  fontWeight: FontWeight.w600,
+                  color: WalColors.primaryText,
                 ),
-              ]
+              ),
+              if (section != null)
+                Text(
+                  section,
+                  key: const Key('source-section-line'),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: WalColors.inkSoft,
+                  ),
+                ),
+              const SizedBox(height: WalSpacing.sm),
+              if (block is WithheldBlock)
+                WithheldCard(doc: doc, block: block)
               else if (text != null)
                 Container(
                   width: double.infinity,
@@ -154,7 +243,8 @@ Future<void> showSourceSheet(
                   ),
                 ),
                 const Text(
-                  'Ảnh vùng trang · nội bộ, không phát hành',
+                  'Ảnh chụp trang sách · nguyên gốc (có thể lẫn chữ cạnh hình) '
+                  '· chỉ để đối chiếu, không phát hành',
                   style: TextStyle(fontSize: 12, color: WalColors.inkSoft),
                 ),
               ],
@@ -191,6 +281,8 @@ Future<void> showSourceSheet(
                   ),
                 ),
               ],
+              const SizedBox(height: WalSpacing.sm),
+              TechDetails(lines: techLinesFor(doc, block)),
             ],
           ),
         ),

@@ -17,6 +17,19 @@
 /// - NHÃN MỤC: «MỤC TIÊU» 🎯 · «Em đã học» 📌 · «Em có biết?» 💡 — chỉ là
 ///   biểu tượng trang trí theo chữ có sẵn, không thêm chữ.
 ///
+/// ROUND 4 (§6.3 readability · §6.8 crop/caption display-side):
+/// - ĐOẠN VĂN là chữ liền như trang sách (không mỗi đoạn một thẻ trắng — trên
+///   Nokia round 3 một trang thành 8 thẻ rời); thẻ chỉ dành cho câu hỏi,
+///   hoạt động, chỗ để trống.
+/// - HÌNH + CHÚ THÍCH liền kề dựng thành MỘT khối «hình» (ảnh → chú thích →
+///   dòng nguồn) — vẫn theo thứ tự đọc, không theo liên kết máy.
+/// - CHE MÉP ẢNH (`bleedScale`): crop pipeline còn dính chữ/chú thích hàng
+///   xóm ở mép (D-R3-05); UI phóng 14 % trong hộp giữ tỉ lệ để ~6 % mỗi mép
+///   ra ngoài vùng nhìn. Không sửa ảnh, không sửa bbox (Lane A-pipeline); sheet
+///   «Sách viết» vẫn hiện ảnh nguyên gốc.
+/// - DÒNG NGUỒN cuối bài: chỉ «SGK … · trang …»; mã pipeline của dòng nguồn
+///   máy sinh rời màn trẻ đọc (nếp gấp kỹ thuật trong sheet).
+///
 /// Không phát sự kiện học nào: view này là hàm thuần của `LessonDocument`.
 library;
 
@@ -47,7 +60,11 @@ class SmartBookView extends StatefulWidget {
 
   static const fontSteps = [17.0, 19.0, 22.0];
 
+  /// ROUND 4 §6.8 — phóng ảnh trong hộp giữ tỉ lệ để che mép dính chữ.
+  static const bleedScale = 1.14;
+
   static Key pageChipKey(int page) => Key('smart-book-page-$page');
+  static Key figureKey(String firstImageId) => Key('smart-book-figure-$firstImageId');
 
   /// Biểu tượng cho nhãn mục của SÁCH — chỉ trang trí theo chữ có sẵn.
   static String stageIcon(String label) {
@@ -74,11 +91,31 @@ class SmartBookView extends StatefulWidget {
     return out;
   }
 
+  /// Dòng nguồn cuối bài cho trẻ: bỏ mã pipeline mà bộ sinh gắn vào đuôi
+  /// («… · tc2-p1 / sdm-v2») — chỉ khi tài liệu KHAI `pipelineVersion` (dữ
+  /// liệu nói, không đoán); tài liệu mẫu giữ nguyên chữ («FIXTURE MẪU»).
+  static String childSourceRefText(LessonDocument doc, String text) {
+    final pv = doc.provenance.pipelineVersion;
+    if (pv == null) return text;
+    var out = text;
+    for (final tok in pv.split('/')) {
+      final t = tok.trim();
+      if (t.isNotEmpty) out = out.replaceAll(t, '');
+    }
+    out = out
+        .replaceAll(RegExp(r'\s*/\s*'), ' ')
+        .replaceAll(RegExp(r'(\s*·\s*)+$'), '')
+        .replaceAll(RegExp(r'\s{2,}'), ' ')
+        .trim();
+    return out.isEmpty ? doc.pageRangeLine : out;
+  }
+
   @override
   State<SmartBookView> createState() => _SmartBookViewState();
 }
 
-/// Một «mảnh» bố cục: một block thường, MỘT HÀNG hình, hoặc MỘT CỤM chú thích.
+/// Một «mảnh» bố cục: một block thường, MỘT KHỐI hình (hàng ảnh + chú thích
+/// liền kề), hoặc MỘT CỤM chú thích mồ côi.
 sealed class _Piece {
   const _Piece();
 }
@@ -88,9 +125,10 @@ final class _One extends _Piece {
   final LessonBlock block;
 }
 
-final class _ImageRow extends _Piece {
-  const _ImageRow(this.images);
+final class _Figure extends _Piece {
+  const _Figure(this.images, this.captions);
   final List<ImageBlock> images;
+  final List<CaptionBlock> captions;
 }
 
 final class _CaptionGroup extends _Piece {
@@ -152,20 +190,25 @@ class _SmartBookViewState extends State<SmartBookView> {
 
   double get _body => SmartBookView.fontSteps[widget.fontStep.clamp(0, 2)];
 
-  /// Gộp block liên tiếp cùng loại (hình / chú thích) thành hàng / cụm; thứ
-  /// tự đọc giữ nguyên.
+  /// Gộp block liên tiếp: hàng ảnh + chú thích ngay sau ⇒ một khối hình; chú
+  /// thích không có ảnh trước ⇒ cụm mồ côi. Thứ tự đọc giữ nguyên.
   static List<_Piece> piecesOf(List<LessonBlock> blocks) {
     final out = <_Piece>[];
     var i = 0;
     while (i < blocks.length) {
       final b = blocks[i];
       if (b is ImageBlock) {
-        final run = <ImageBlock>[];
+        final images = <ImageBlock>[];
         while (i < blocks.length && blocks[i] is ImageBlock) {
-          run.add(blocks[i] as ImageBlock);
+          images.add(blocks[i] as ImageBlock);
           i++;
         }
-        out.add(_ImageRow(run));
+        final captions = <CaptionBlock>[];
+        while (i < blocks.length && blocks[i] is CaptionBlock) {
+          captions.add(blocks[i] as CaptionBlock);
+          i++;
+        }
+        out.add(_Figure(images, captions));
         continue;
       }
       if (b is CaptionBlock) {
@@ -185,7 +228,7 @@ class _SmartBookViewState extends State<SmartBookView> {
 
   LessonBlock _firstBlockOf(_Piece p) => switch (p) {
     _One(:final block) => block,
-    _ImageRow(:final images) => images.first,
+    _Figure(:final images) => images.first,
     _CaptionGroup(:final captions) => captions.first,
   };
 
@@ -213,7 +256,11 @@ class _SmartBookViewState extends State<SmartBookView> {
       children.add(_piece(p));
       children.add(
         SizedBox(
-          height: first is HeadingBlock ? WalSpacing.xs : WalSpacing.sm,
+          height: switch (first) {
+            HeadingBlock() => WalSpacing.xs,
+            ParagraphBlock() => WalSpacing.sm - 2,
+            _ => WalSpacing.sm,
+          },
         ),
       );
     }
@@ -363,17 +410,24 @@ class _SmartBookViewState extends State<SmartBookView> {
       key: _keys.putIfAbsent(block.id, GlobalKey.new),
       child: _block(block),
     ),
-    _ImageRow(:final images) => _imageRow(images),
+    _Figure(:final images, :final captions) => _figure(images, captions),
     _CaptionGroup(:final captions) => _captionGroup(captions),
   };
 
   Widget _block(LessonBlock b) => switch (b) {
     HeadingBlock() => _heading(b),
+    // ROUND 4: đoạn văn là chữ liền như trang sách — không thẻ.
     ParagraphBlock(:final text) => _tappable(
       b,
-      child: _card(Text(text, style: _bodyStyle())),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: WalSpacing.xs,
+          vertical: 2,
+        ),
+        child: Text(text, style: _bodyStyle()),
+      ),
     ),
-    ImageBlock() => _imageRow([b]),
+    ImageBlock() => _figure([b], const []),
     CaptionBlock() => _captionGroup([b]),
     TableBlock() => _table(b),
     QuestionBlock(:final text) => _tappable(
@@ -409,13 +463,17 @@ class _SmartBookViewState extends State<SmartBookView> {
     WithheldBlock() => WithheldCard(doc: widget.doc, block: b),
     SourceRefBlock(:final text) => Padding(
       padding: const EdgeInsets.only(top: WalSpacing.md),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 13,
-          color: WalColors.inkSoft,
-          height: 1.4,
+      child: InkWell(
+        onTap: () => showSourceSheet(context, doc: widget.doc, block: b),
+        borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+        child: Text(
+          SmartBookView.childSourceRefText(widget.doc, text),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 13,
+            color: WalColors.inkSoft,
+            height: 1.4,
+          ),
         ),
       ),
     ),
@@ -455,32 +513,46 @@ class _SmartBookViewState extends State<SmartBookView> {
     );
   }
 
-  /// Hàng hình: 1 hình = cả bề ngang; ≥2 hình đứng cạnh nhau như trên trang.
-  /// Mỗi hình vẫn có key riêng (neo cuộn «Xem trong Đọc»).
-  Widget _imageRow(List<ImageBlock> images) {
+  /// MỘT khối hình: hàng ảnh (1 ảnh = cả bề ngang; ≥2 ảnh cạnh nhau như trên
+  /// trang) → chú thích liền kề («Hình N» đậm) → dòng nguồn. Mỗi ảnh / chú
+  /// thích vẫn có key riêng (neo cuộn «Xem trong Đọc»).
+  Widget _figure(List<ImageBlock> images, List<CaptionBlock> captions) {
     final line = widget.doc.sourceLineForBlock(images.first);
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var i = 0; i < images.length; i++) ...[
-              if (i > 0) const SizedBox(width: WalSpacing.sm),
-              Expanded(
-                child: KeyedSubtree(
-                  key: _keys.putIfAbsent(images[i].id, GlobalKey.new),
-                  child: _imageBox(images[i]),
+    return Container(
+      key: SmartBookView.figureKey(images.first.id),
+      padding: const EdgeInsets.all(WalSpacing.sm),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var i = 0; i < images.length; i++) ...[
+                if (i > 0) const SizedBox(width: WalSpacing.sm),
+                Expanded(
+                  child: KeyedSubtree(
+                    key: _keys.putIfAbsent(images[i].id, GlobalKey.new),
+                    child: _imageBox(images[i]),
+                  ),
                 ),
-              ),
+              ],
             ],
+          ),
+          if (captions.isNotEmpty) ...[
+            const SizedBox(height: WalSpacing.xs),
+            _captionGroup(captions),
           ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          'Hình trong sách · $line',
-          style: const TextStyle(fontSize: 12, color: WalColors.inkSoft),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            'Hình trong sách · $line · chạm hình để xem ảnh gốc',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
+          ),
+        ],
+      ),
     );
   }
 
@@ -489,29 +561,33 @@ class _SmartBookViewState extends State<SmartBookView> {
     return InkWell(
       onTap: () => showSourceSheet(context, doc: widget.doc, block: b),
       borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-        // Giữ chỗ theo tỉ lệ ảnh: bố cục không nở ra sau khi ảnh giải mã,
-        // nên neo cuộn («Xem trong Đọc») đứng đúng chỗ (Nokia n1 D4).
-        child: _fixedAspect(
-          b.aspect,
-          Image.asset(
-            '${widget.doc.assetBase}${b.crop}',
-            fit: BoxFit.contain,
-            // Máy không có crop (bản clone sạch) ⇒ nói thật, không ô trắng.
-            errorBuilder: (_, _, _) => Container(
-              height: 96,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: WalColors.surfaceLavender,
-                borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-              ),
-              child: Text(
-                'Hình trong sách · $line\n(máy này chưa có ảnh)',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: WalType.secondary,
-                  color: WalColors.inkSoft,
+      // Giữ chỗ theo tỉ lệ ảnh: bố cục không nở ra sau khi ảnh giải mã,
+      // nên neo cuộn («Xem trong Đọc») đứng đúng chỗ (Nokia n1 D4).
+      child: _fixedAspect(
+        b.aspect,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
+          // ROUND 4 §6.8 — che mép dính chữ: phóng trong hộp, phần dư bị cắt.
+          child: Transform.scale(
+            scale: SmartBookView.bleedScale,
+            child: Image.asset(
+              '${widget.doc.assetBase}${b.crop}',
+              fit: BoxFit.contain,
+              // Máy không có crop (bản clone sạch) ⇒ nói thật, không ô trắng.
+              errorBuilder: (_, _, _) => Container(
+                height: 96,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: WalColors.surfaceLavender,
+                  borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
+                ),
+                child: Text(
+                  'Hình trong sách · $line\n(máy này chưa có ảnh)',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: WalType.secondary,
+                    color: WalColors.inkSoft,
+                  ),
                 ),
               ),
             ),
@@ -677,7 +753,7 @@ class _SmartBookViewState extends State<SmartBookView> {
     ),
   };
 
-  /// Chạm một đoạn ⇒ hai việc: hỏi SAM về đoạn này, hoặc xem nguồn.
+  /// Chạm một đoạn ⇒ hai việc: hỏi SAM về đoạn này, hoặc tra cứu sách.
   Widget _tappable(LessonBlock b, {required Widget child}) => InkWell(
     onTap: () => _blockActions(b),
     borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
@@ -731,7 +807,7 @@ class _SmartBookViewState extends State<SmartBookView> {
                   showSourceSheet(context, doc: widget.doc, block: b);
                 },
                 child: Text(
-                  '📖 Nguồn · ${widget.doc.sourceLineForBlock(b)}',
+                  '📖 Tra cứu · ${widget.doc.sourceLineForBlock(b)}',
                   style: const TextStyle(
                     fontSize: WalType.body,
                     color: WalColors.primaryText,

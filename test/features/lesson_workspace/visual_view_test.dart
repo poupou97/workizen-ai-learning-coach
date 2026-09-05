@@ -8,6 +8,7 @@ import 'package:learning_coach/core/lesson_model/content_trust.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
 import 'package:learning_coach/core/lesson_model/semantic_data.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_view.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/tech_details.dart';
 
 import 'support.dart';
 
@@ -52,6 +53,11 @@ void main() {
     await t.tap(find.byKey(const Key('visual-trust-link')));
     await t.pumpAndSettle();
     expect(find.byKey(const Key('trust-sheet')), findsOneWidget);
+    // ROUND 4: mã luật sau nếp gấp kỹ thuật (đóng mặc định).
+    expect(find.textContaining('luật synthetic'), findsNothing);
+    await t.ensureVisible(find.byKey(TechDetails.foldKey));
+    await t.tap(find.byKey(TechDetails.foldKey));
+    await t.pumpAndSettle();
     expect(find.textContaining('luật synthetic'), findsWidgets);
   });
 
