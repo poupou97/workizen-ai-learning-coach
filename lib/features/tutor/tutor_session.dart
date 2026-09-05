@@ -17,9 +17,11 @@
 /// - UI có thể khen tuỳ ý; MODEL chỉ tin log. Khen ≠ ghi công.
 library;
 
+import '../../core/context/learning_context.dart';
 import '../../core/curriculum/pedagogical_boundary.dart';
 import '../../core/curriculum/solvable_problem.dart';
 import '../../core/student/evidence_ids.dart';
+import '../../core/student/evidence_validation.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/mastery.dart';
@@ -55,8 +57,23 @@ class TutorSession {
     String? sessionToken,
     this.sourceDocumentId,
     this.lessonNo,
+    DeterministicValidator? validator,
   })  : _now = now ?? DateTime.now,
+        // ⭐⭐ Round 3 (Founder A3): phiên dạy CHỈ chấm qua validator ĐÃ ĐĂNG
+        // KÝ. Loại bài chưa có validator ⇒ không mở phiên chấm — fail closed
+        // ngay tại biên engine, không có nhánh «tạm chấm».
+        validator = validator ??
+            approvedValidatorFor(problem) ??
+            (throw ArgumentError(
+                'TutorSession: loại bài ${problem.runtimeType} chưa có '
+                'EvidenceValidator đăng ký — không được chấm (A3)')),
         log = EvidenceLog.empty(skillCaseId) {
+    // A3: validator TIÊM VÀO cũng phải nằm trong sổ đăng ký — không có đường
+    // «validator riêng» đi vòng qua registry (RETRIEVED ≠ PERMITTED).
+    if (!this.validator.validation.isRegistered) {
+      throw ArgumentError('TutorSession: validator '
+          '${this.validator.validation} không có trong sổ đăng ký (A3)');
+    }
     // ⭐ WAL-210 (audit C1): token sinh MỘT LẦN lúc mở phiên — mở lại cùng
     // bài là phiên khác, id khác. Lấy từ ĐỒNG HỒ MÁY, không từ `now` tiêm
     // vào: token chỉ cần DUY NHẤT, còn `now` là để test giữ tất định dấu
@@ -65,8 +82,43 @@ class TutorSession {
     this.sessionToken = sessionToken ?? newEvidenceSessionToken(DateTime.now());
   }
 
+  /// ⭐⭐ Round 3 (Founder A5) — LINEAGE CHỈ TỪ CONTEXT ĐÃ GIẢI. Bài mở từ
+  /// pack đi qua đây với `learningContext` có `hasLesson`; bài CHỤP (camera)
+  /// không có context bài ⇒ `sourceDocumentId == null && lessonNo == null`.
+  /// Không có đường «ảnh chụp → AI đoán bài → stamp».
+  TutorSession.inContext({
+    required String exerciseId,
+    required String skillCaseId,
+    required SolvableProblem problem,
+    required TutorScope scope,
+    required LearningContext? learningContext,
+    DateTime Function()? now,
+    String? sessionToken,
+    DeterministicValidator? validator,
+  }) : this(
+          exerciseId: exerciseId,
+          skillCaseId: skillCaseId,
+          problem: problem,
+          scope: scope,
+          now: now,
+          sessionToken: sessionToken,
+          validator: validator,
+          sourceDocumentId: lineageFromContext(learningContext).$1,
+          lessonNo: lineageFromContext(learningContext).$2,
+        );
+
+  /// A5 — luật stamp: CHỈ khi context đã giải ra ĐỦ (sách + số bài). Context
+  /// tầng Global/Subject/Book (thiếu bài) ⇒ `(null, null)`, không stamp nửa
+  /// vời một cuốn sách không có bài.
+  static (String?, int?) lineageFromContext(LearningContext? c) =>
+      (c != null && c.hasLesson) ? (c.sourceDocumentId, c.lessonNo) : (null, null);
+
   final String exerciseId;
   final String skillCaseId;
+
+  /// Validator ĐÃ ĐĂNG KÝ đang chấm phiên này — dấu của nó nằm trên mọi sự
+  /// kiện có `correct` (A3).
+  final DeterministicValidator validator;
 
   /// Định danh PHIÊN — phần làm cho `eventId` duy nhất giữa các lần mở.
   late final String sessionToken;
@@ -131,6 +183,9 @@ class TutorSession {
       // ⭐⭐ WAL-210 lineage (null khi bài không đến từ một bài trong pack).
       sourceDocumentId: sourceDocumentId,
       lessonNo: lessonNo,
+      // ⭐⭐ Round 3 (A3): sự kiện CÓ CHẤM mang dấu của validator đã chấm;
+      // sự kiện không chấm (xin gợi ý) không mang dấu nào.
+      validation: isAnswer ? validator.validation : null,
     ));
     if (isAnswer) _lastAnswerEventId = id;
   }
@@ -138,7 +193,14 @@ class TutorSession {
   /// Trẻ bấm "Xong". Một sự kiện, đúng loại, không đếm kép.
   SubmitOutcome submit(String answer) {
     assert(!finished);
-    final correct = problem.checkAnswer(answer);
+    // ⭐⭐ A3: chấm QUA validator đã đăng ký — `ValidatedEvidence` là thứ duy
+    // nhất được phép quyết `correct`. `grade` chỉ trả null khi validator
+    // không nằm trong sổ — constructor đã chặn, nên nhánh dưới là chốt
+    // fail-closed dự phòng: KHÔNG phát sự kiện trả lời nào (không có bằng
+    // chứng giả), UI chỉ thấy «chưa đúng».
+    final graded = validator.grade(answer);
+    if (graded == null) return SubmitOutcome.wrong;
+    final correct = graded.correct;
     final SubmitOutcome outcome;
     if (support == SupportLevel.none) {
       if (correct && _lastWasWrong && !_supportRaisedSinceWrong) {

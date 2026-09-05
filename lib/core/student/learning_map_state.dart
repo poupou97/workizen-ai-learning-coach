@@ -45,15 +45,25 @@ enum LearningMapState {
 /// một lần trên danh sách event đã tải, không phải một lần cho mỗi bài.
 ///
 /// Thứ tự ưu tiên: tự-làm-được-đã-chấm › học cùng SAM › tự báo › chưa học.
+///
+/// ⭐⭐ Round 3 (Founder A3): [requireValidation] `true` ⇒ «Tự làm được» CHỈ
+/// từ sự kiện mang dấu validator được đăng ký cấp năng lực
+/// (`hasApprovedValidation`); sự kiện có chấm nhưng không dấu (dữ liệu cũ)
+/// rơi xuống `engaged`. Mặc định `false` (đọc dữ liệu cũ theo luật #63) cho
+/// tới khi Founder quyết luật đọc dữ liệu cũ — PROPOSED. Dấu LẠ bị từ chối ở
+/// CẢ HAI chế độ.
 LearningMapState learningMapStateFor({
   required String sourceDocumentId,
   required int lessonNo,
   required Iterable<LearningEvent> allEvents,
+  bool requireValidation = false,
 }) {
   final matching = allEvents.where((e) =>
       e.sourceDocumentId == sourceDocumentId && e.lessonNo == lessonNo);
   if (matching.isEmpty) return LearningMapState.unseen;
-  if (matching.any((e) => e.isValidatedIndependentSuccess)) {
+  if (matching.any((e) =>
+      e.isValidatedIndependentSuccess &&
+      (!requireValidation || e.hasApprovedValidation))) {
     return LearningMapState.independentEvidence;
   }
   // Còn lại: có sự kiện KHÔNG phải tự báo (gợi ý, trả lời có chấm nhưng chưa
