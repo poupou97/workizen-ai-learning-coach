@@ -3,7 +3,7 @@
 ///
 /// KHÔNG dùng sao 1-3/%: cả hai đều ngầm hứa một phép đo liên tục mà dữ
 /// liệu hôm nay không đủ để tính trung thực — CẤM số giả vờ chính xác đã là
-/// doctrine có sẵn (`mission_center_screen.dart`). Đây là 3 trạng thái tính
+/// doctrine có sẵn (`mission_center_screen.dart`). Đây là các trạng thái tính
 /// được NGAY HÔM NAY từ [LearningEvent] lineage (WAL-178/179) cho MỌI bài,
 /// không cần chờ có mô hình skillCase cho từng môn (hôm nay: 1/843 bài).
 ///
@@ -11,6 +11,14 @@
 /// skillCase-của-bài mà 842/843 bài không có (degrade gracefully: thiếu dữ
 /// liệu thì bớt trạng thái, không suy đoán). Thêm được sau, không phá enum
 /// này — mỗi giá trị hiện có vẫn đúng nghĩa khi mở rộng.
+///
+/// ⭐⭐ WAL-210 — Founder D1 (2026-09-05): «Tự làm được» CHỈ từ bằng chứng tự
+/// làm **đã chấm** (`correct == true`). Trước đây hàm này đọc MỌI
+/// `independentAttempt` là 🔵 — kể cả cú chạm «Con đã trả lời xong» với
+/// `correct: null` (audit C6b) — nên phụ huynh được nói «Con đã tự làm được»
+/// từ một nút bấm. Nay tự báo/hoàn thành là trạng thái RIÊNG
+/// ([LearningMapState.participation]), và dữ liệu cũ đọc theo cùng luật mà
+/// không viết lại log.
 library;
 
 import 'learning_evidence.dart';
@@ -19,17 +27,24 @@ enum LearningMapState {
   /// ⚪ Không có sự kiện nào khớp lineage của bài này.
   unseen,
 
-  /// 🟢 Có chạm tới bài (session/evidence tồn tại) nhưng chưa có lần nào
-  /// trẻ TỰ làm không cần hỗ trợ.
+  /// 🟣 Trẻ ĐÃ LÀM XONG hoạt động của bài và TỰ BÁO (participation) — không
+  /// chấm, không phải bằng chứng năng lực. Chỉ có loại sự kiện này ở bài.
+  participation,
+
+  /// 🟢 Có chạm tới bài cùng SAM (có gợi ý / có lần trả lời được chấm…) nhưng
+  /// chưa có lần nào trẻ TỰ làm ĐÚNG không cần hỗ trợ.
   engaged,
 
-  /// 🔵 Có ít nhất một bằng chứng TỰ LÀM (independentAttempt/selfCorrection).
+  /// 🔵 Có ít nhất một bằng chứng TỰ LÀM ĐƯỢC **đã chấm** (independentAttempt/
+  /// selfCorrection với `correct == true`).
   independentEvidence,
 }
 
 /// Suy trạng thái của MỘT bài từ TOÀN BỘ event của learner (không lọc theo
 /// môn trước — lineage tự lọc đúng sách+bài). Hàm THUẦN, không I/O — gọi
 /// một lần trên danh sách event đã tải, không phải một lần cho mỗi bài.
+///
+/// Thứ tự ưu tiên: tự-làm-được-đã-chấm › học cùng SAM › tự báo › chưa học.
 LearningMapState learningMapStateFor({
   required String sourceDocumentId,
   required int lessonNo,
@@ -38,18 +53,21 @@ LearningMapState learningMapStateFor({
   final matching = allEvents.where((e) =>
       e.sourceDocumentId == sourceDocumentId && e.lessonNo == lessonNo);
   if (matching.isEmpty) return LearningMapState.unseen;
-  final hasIndependent = matching.any((e) =>
-      e.kind == EvidenceKind.independentAttempt ||
-      e.kind == EvidenceKind.selfCorrection);
-  return hasIndependent
-      ? LearningMapState.independentEvidence
-      : LearningMapState.engaged;
+  if (matching.any((e) => e.isValidatedIndependentSuccess)) {
+    return LearningMapState.independentEvidence;
+  }
+  // Còn lại: có sự kiện KHÔNG phải tự báo (gợi ý, trả lời có chấm nhưng chưa
+  // đúng, trả lời có hỗ trợ…) ⇒ engaged; toàn tự báo ⇒ participation.
+  if (matching.any((e) => !e.isParticipation)) return LearningMapState.engaged;
+  return LearningMapState.participation;
 }
 
 /// Nhãn + màu cho trẻ — chữ/ký hiệu, không phải số. Founder UX Constraint
 /// 2026-09-04: badge nhỏ trong danh sách bài ĐÃ CÓ, không phải dashboard mới.
 (String, String) childLabelFor(LearningMapState s) => switch (s) {
       LearningMapState.unseen => ('⚪', 'Chưa học'),
+      // «Đã học» = đã làm xong hoạt động, tự báo — không nói gì về đúng/sai.
+      LearningMapState.participation => ('🟣', 'Đã học'),
       LearningMapState.engaged => ('🟢', 'Đã học cùng SAM'),
       LearningMapState.independentEvidence => ('🔵', 'Tự làm được'),
     };

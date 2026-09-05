@@ -128,6 +128,82 @@ class KhoaExperiment {
   final String? quanSat;
 }
 
+/// ⭐ WAL-210 (audit B.6 §4 + top-gap #3 «no build provenance») — PROVENANCE
+/// CỦA CHÍNH PACK: builder nào, commit nào, cờ nào, có phải bản thử nghiệm.
+///
+/// Hợp đồng chia sẻ với lane Python (`tool/ui/build_lesson_index.py` ghi vào
+/// `assets/pack/lesson-index-g{N}.json`, khoá đỉnh `"buildProvenance"`):
+/// `{"schema": 1, "builderVersion", "gitSha", "builtAt": ISO-8601, "grade",
+///   "flags": {"PATTERN_ROUTER": "0|1", "UNITS_SOURCE", "ROUTE_EXPLAIN": "0|1"},
+///   "experimental": bool, "attachmentRule": "capped-toc-v1",
+///   "contentHash": sha256(pack không có field này),
+///   "packVersion": "grade-builtAtCompact-sha8"}` (vd `g6-20260905T1200-abcdef12`).
+///
+/// Fail-closed: thiếu/khuyết/sai kiểu bất kỳ trường BẮT BUỘC nào (`schema`,
+/// `packVersion`, `experimental`) ⇒ `null` — pack cũ vẫn dùng được, chỉ
+/// KHÔNG có version để đóng lên evidence (emitter rơi về hằng cũ) và KHÔNG
+/// được coi là bản thử nghiệm.
+class BuildProvenance {
+  const BuildProvenance({
+    required this.schema,
+    required this.packVersion,
+    required this.experimental,
+    this.builderVersion,
+    this.gitSha,
+    this.builtAt,
+    this.grade,
+    this.flags = const {},
+    this.attachmentRule,
+    this.contentHash,
+  });
+
+  final int schema;
+
+  /// Chuỗi đóng lên `LearningEvent.knowledgeVersion` của đường Scale.
+  final String packVersion;
+
+  /// `true` = pack dựng với cờ thử nghiệm (vd pattern router) — nội dung
+  /// router chỉ được hiện khi pack TỰ khai điều này (item F, PR-C).
+  final bool experimental;
+  final String? builderVersion;
+  final String? gitSha;
+  final DateTime? builtAt;
+  final int? grade;
+  final Map<String, String> flags;
+  final String? attachmentRule;
+  final String? contentHash;
+
+  static BuildProvenance? fromJson(Object? j) {
+    if (j is! Map) return null;
+    final schema = j['schema'], version = j['packVersion'],
+        experimental = j['experimental'];
+    if (schema is! int || version is! String || version.trim().isEmpty ||
+        experimental is! bool) {
+      return null;
+    }
+    final flags = <String, String>{};
+    final fj = j['flags'];
+    if (fj is Map) {
+      fj.forEach((k, v) {
+        if (v != null) flags['$k'] = '$v';
+      });
+    }
+    final built = j['builtAt'];
+    return BuildProvenance(
+      schema: schema,
+      packVersion: version,
+      experimental: experimental,
+      builderVersion: j['builderVersion'] as String?,
+      gitSha: j['gitSha'] as String?,
+      builtAt: built is String ? DateTime.tryParse(built) : null,
+      grade: (j['grade'] as num?)?.toInt(),
+      flags: flags,
+      attachmentRule: j['attachmentRule'] as String?,
+      contentHash: j['contentHash'] as String?,
+    );
+  }
+}
+
 /// WAL-144 #28 — BẢN ĐỒ SGK đã crop (SOURCE_ASSET, human-curation, WAL-43:
 /// localResearchOnly — PNG gitignored, bundle local). Câu hỏi VERBATIM.
 class DiaMap {
@@ -140,10 +216,16 @@ class DiaMap {
       required this.pagePdf,
       required this.bboxFrac,
       required this.extractionVersion,
-      this.page});
+      this.page,
+      this.lesson});
   final String subject;
   final String book;
   final int? page; // trang IN
+
+  /// WAL-210 — số bài IN mà bản đồ thuộc về; pack hôm nay chưa ghi (`null`)
+  /// ⇒ sự kiện Map không có `lessonNo` và KHÔNG hiện trên Learning Map —
+  /// không đoán từ trang.
+  final int? lesson;
   final String asset; // tên file trong assets/pack/
   final String caption; // caption in trong sách
   final List<String> questions;
@@ -318,9 +400,18 @@ class LessonIndex {
       this.khoaExperiments = const [],
       this.diaMaps = const [],
       this.sourceAssets = const [],
-      this.books = const []});
+      this.books = const [],
+      this.buildProvenance});
 
   final int grade;
+
+  /// WAL-210 — `null` = pack chưa khai provenance (pack cũ / chưa dựng lại).
+  final BuildProvenance? buildProvenance;
+
+  /// Version để đóng lên evidence của đường Scale; `null` khi chưa khai —
+  /// emitter rơi về hằng cũ, không bịa version.
+  String? get packVersion => buildProvenance?.packVersion;
+
   final Map<String, List<BookLessons>> subjects;
   final Map<int, List<CorpusExercise>> toanExercises;
   final List<TvReading> tvReadings;
@@ -539,6 +630,7 @@ class LessonIndex {
             subject: '${m['subject'] ?? 'LS&ĐL'}',
             book: '${m['book']}',
             page: (m['page'] as num?)?.toInt(),
+            lesson: (m['lesson'] as num?)?.toInt(),
             asset: m['asset'] as String,
             caption: m['caption'] as String,
             questions: qs,
@@ -620,7 +712,9 @@ class LessonIndex {
         khoaExperiments: ke,
         diaMaps: dm,
         sourceAssets: sa,
-        books: bk);
+        books: bk,
+        // WAL-210: tuỳ chọn, fail-closed — thiếu ⇒ null, KHÔNG đổi gì khác.
+        buildProvenance: BuildProvenance.fromJson(j['buildProvenance']));
   }
 
   /// `null` khi máy này chưa build asset (poc-out chưa có) — hợp lệ, nói thật.

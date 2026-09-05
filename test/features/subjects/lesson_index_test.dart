@@ -122,4 +122,67 @@ void main() {
     final idx = LessonIndex.fromJsonString(_sample)!;
     expect(idx.tvReadings.single.questions.single.options, isEmpty);
   });
+
+  // ⭐ WAL-210 — buildProvenance / packVersion (hợp đồng chia sẻ với lane
+  // Python; audit top-gap #3 «no build provenance», B.6 §4 version constant).
+  group('WAL-210 buildProvenance', () {
+    const prov = '"buildProvenance":{"schema":1,"builderVersion":"build_lesson_index.py@2",'
+        '"gitSha":"abcdef1234567890","builtAt":"2026-09-05T12:00:00Z","grade":6,'
+        '"flags":{"PATTERN_ROUTER":"0","UNITS_SOURCE":"units-v3","ROUTE_EXPLAIN":"0"},'
+        '"experimental":false,"attachmentRule":"capped-toc-v1",'
+        '"contentHash":"0000","packVersion":"g6-20260905T1200-abcdef12"}';
+
+    test('pack CÓ provenance ⇒ parse đủ trường; packVersion lộ ra', () {
+      final idx = LessonIndex.fromJsonString('{"grade":6,"subjects":{},$prov}')!;
+      final p = idx.buildProvenance!;
+      expect(p.schema, 1);
+      expect(p.packVersion, 'g6-20260905T1200-abcdef12');
+      expect(idx.packVersion, 'g6-20260905T1200-abcdef12');
+      expect(p.experimental, isFalse);
+      expect(p.gitSha, 'abcdef1234567890');
+      expect(p.builtAt, DateTime.utc(2026, 9, 5, 12));
+      expect(p.grade, 6);
+      expect(p.flags['PATTERN_ROUTER'], '0');
+      expect(p.attachmentRule, 'capped-toc-v1');
+      expect(p.contentHash, '0000');
+    });
+
+    test('⭐ pack KHÔNG có provenance (pack cũ) ⇒ null, mọi thứ khác không đổi',
+        () {
+      final idx = LessonIndex.fromJsonString(_sample)!;
+      expect(idx.buildProvenance, isNull);
+      expect(idx.packVersion, isNull, reason: 'không bịa version');
+      expect(idx.tvReadings, isNotEmpty);
+    });
+
+    test('⭐ fail closed: thiếu/sai kiểu trường BẮT BUỘC ⇒ null, không nửa vời',
+        () {
+      for (final bad in [
+        '"buildProvenance":{"schema":1,"experimental":false}', // thiếu packVersion
+        '"buildProvenance":{"schema":1,"experimental":false,"packVersion":""}',
+        '"buildProvenance":{"schema":"1","experimental":false,"packVersion":"x"}',
+        '"buildProvenance":{"schema":1,"experimental":"false","packVersion":"x"}',
+        '"buildProvenance":{"experimental":false,"packVersion":"x"}', // thiếu schema
+        '"buildProvenance":"g6-x"',
+        '"buildProvenance":null',
+      ]) {
+        final idx = LessonIndex.fromJsonString('{"grade":6,"subjects":{},$bad}');
+        expect(idx, isNotNull, reason: 'pack vẫn parse: $bad');
+        expect(idx!.buildProvenance, isNull, reason: 'phải null: $bad');
+      }
+    });
+
+    test('FILE THẬT: provenance của pack trên máy (nếu có) parse được', () {
+      final f = File('assets/pack/lesson-index-g6.json');
+      if (!f.existsSync()) {
+        markTestSkipped('pack lớp 6 chưa dựng trên máy này');
+        return;
+      }
+      final idx = LessonIndex.fromJsonString(f.readAsStringSync())!;
+      // Pack dựng TRƯỚC WAL-210 chưa có provenance — hợp lệ (null), chỉ
+      // default_build_guard_test (PR-C) mới đòi hỏi nó.
+      final p = idx.buildProvenance;
+      if (p != null) expect(p.packVersion, isNotEmpty);
+    });
+  });
 }

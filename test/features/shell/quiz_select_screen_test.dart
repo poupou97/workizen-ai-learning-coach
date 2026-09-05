@@ -138,7 +138,8 @@ void main() {
     final events = await _run(tester, _unknown, 0);
     expect(events.single.correct, isNull,
         reason: 'UNKNOWN không bao giờ thành SAI (cũng không thành ĐÚNG)');
-    expect(events.single.kind, EvidenceKind.independentAttempt);
+    expect(events.single.kind, EvidenceKind.participation,
+        reason: 'WAL-210 D1: chọn không có chìa khoá = tham gia, không tự làm');
     expect(find.textContaining('chưa có đáp án'), findsOneWidget);
   });
 

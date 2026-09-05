@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/adaptive/adaptive_engine.dart';
 import '../../core/adaptive/challenge_policy.dart';
+import '../../core/context/learning_context.dart';
 import '../../core/curriculum/canonical_problem.dart';
 import '../../core/knowledge/slice_curriculum.dart';
 import '../../core/store/learner_profile.dart';
@@ -81,11 +82,16 @@ Future<void> startHomeworkFlow(
 
 /// Mở MỘT bài (từ camera / SGK / tự gõ — mọi origin của CanonicalProblem)
 /// vào chuỗi context→diagnostic→tutor→evidence→state. Một đường, một luật.
+///
+/// ⭐ WAL-210 (audit C7) — [learningContext] mang sách + bài khi bài mở TỪ
+/// một bài trong pack; Tutor stamp nó lên evidence. Bài CHỤP (camera) đi vào
+/// với `null`: không biết bài nào, không đoán — Founder quyết stamp gì.
 Future<void> openCanonicalProblem(
   BuildContext context, {
   required CanonicalProblem problem,
   required LearnerProfile profile,
   required LearnerStore store,
+  LearningContext? learningContext,
 }) async {
   final nav = Navigator.of(context);
   // ⭐ WAL-170: bài chụp KHÔNG có định danh bài ⇒ hỏi từng dòng chương
@@ -104,6 +110,7 @@ Future<void> openCanonicalProblem(
             store: store,
             curriculum: curriculum,
             mastery: mastery,
+            learningContext: learningContext,
           )));
 }
 
@@ -117,11 +124,15 @@ class ProblemContextScreen extends StatelessWidget {
     required this.store,
     required this.curriculum,
     required this.mastery,
+    this.learningContext,
   });
 
   final CanonicalProblem problem;
   final LearnerProfile profile;
   final LearnerStore store;
+
+  /// WAL-210 lineage — `null` cho bài chụp (xem [openCanonicalProblem]).
+  final LearningContext? learningContext;
 
   /// `null` = ngoài phạm vi chương trình đã nạp (grade ≠ 5) — fail closed.
   final SliceCurriculum? curriculum;
@@ -284,6 +295,9 @@ class ProblemContextScreen extends StatelessWidget {
       skillCaseId: exerciseCase,
       problem: fp,
       scope: scope,
+      // ⭐ WAL-210 lineage: chỉ khi biết đúng bài (mở từ pack); camera ⇒ null.
+      sourceDocumentId: learningContext?.sourceDocumentId,
+      lessonNo: learningContext?.lessonNo,
     );
     await nav.push(MaterialPageRoute(
         builder: (_) => TutorScreen(

@@ -145,6 +145,12 @@ class ConservativeBktPolicy implements EvidenceWeightingPolicy {
         // Kết quả chốt của cả bài — TRÙNG với lần thử cuối đã ghi. Chấm cả
         // hai là đếm đôi cùng một bằng chứng. Giữ để báo cáo, không để chấm.
         return EvidenceUpdate.noOp;
+
+      case EvidenceKind.participation:
+        // ⭐⭐ D1: tự báo / hoàn thành KHÔNG CHẤM ⇒ không claim gì về năng lực,
+        // không `learn`, không đếm. Cùng kết cục với independentAttempt +
+        // correct == null trước đây — BKT không đổi.
+        return EvidenceUpdate.noOp;
     }
   }
 }

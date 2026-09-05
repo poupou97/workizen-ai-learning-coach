@@ -5,7 +5,10 @@
 /// - Ảnh là SOURCE_ASSET từ sách — caption in trong sách hiển thị cùng nguồn;
 ///   không ảnh minh hoạ AI nào ở đây (SOURCE IMAGE ≠ AI ILLUSTRATION).
 /// - Câu hỏi mở «chỉ trên bản đồ» — trẻ làm bằng mắt/tay, SAM KHÔNG chấm
-///   (correct=null); một sự kiện khi hoàn tất, policy map-reader-v1.
+///   (correct=null); một sự kiện PARTICIPATION khi hoàn tất (WAL-210 /
+///   Founder D1: «Con đã chỉ được» là tự báo, không phải bằng chứng tự làm),
+///   policy map-reader-v1. Mang lineage sách (+ bài khi pack có) và version
+///   của pack; `lookup` ⇒ không sự kiện (cùng luật WAL-189 với các màn kia).
 /// - Không %, không điểm.
 library;
 
@@ -14,6 +17,8 @@ import 'package:flutter/material.dart';
 import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/assets/learning_asset.dart';
+import '../../core/context/learning_context.dart';
+import '../../core/intent/learning_intent.dart';
 import '../shell/learning_asset_image.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/evidence_ids.dart';
@@ -22,9 +27,19 @@ import '../../core/student/mastery.dart';
 import '../subjects/lesson_index.dart';
 
 class MapReaderScreen extends StatefulWidget {
-  const MapReaderScreen({super.key, required this.map, this.onFinished, this.now});
+  const MapReaderScreen(
+      {super.key,
+      required this.map,
+      this.learningContext,
+      this.onFinished,
+      this.now});
 
   final DiaMap map;
+
+  /// ⭐ WAL-210 — trước đây màn này là surface DUY NHẤT không nhận context:
+  /// không gate `lookup`, không lineage, không version pack. `null` = lối vào
+  /// cũ (test/demo) — vẫn chạy, chỉ thiếu những gì context mới có.
+  final LearningContext? learningContext;
   final void Function(List<LearningEvent> events)? onFinished;
   final DateTime Function()? now;
 
@@ -44,6 +59,12 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
   void _finish() {
     if (_done) return;
     setState(() => _done = true);
+    final ctx = widget.learningContext;
+    // ⭐⭐ WAL-189 — tra cứu sinh TRACE, không sinh EVIDENCE.
+    if (ctx?.intent == LearningIntent.lookup) {
+      widget.onFinished?.call(const []);
+      return;
+    }
     widget.onFinished?.call([
       LearningEvent(
         eventId: evidenceEventId(
@@ -51,14 +72,19 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
             sessionToken: _token,
             seq: 0),
         skillCaseId: 'dia-doc-ban-do',
-        kind: EvidenceKind.independentAttempt,
+        kind: EvidenceKind.participation, // D1: «đã chỉ được» = tự báo
         correct: null, // chỉ-trên-bản-đồ là việc của mắt/tay — SAM không chấm
         exerciseId: '${m.book}:p${m.page}:map',
         conceptIds: const ['dia-ban-do'],
         at: _at(),
         support: SupportLevel.none,
         policyId: 'map-reader-v1',
-        knowledgeVersion: knowledgeModelVersion,
+        knowledgeVersion: ctx?.knowledgeModelVersion ?? knowledgeModelVersion,
+        // ⭐⭐ WAL-210 lineage: sách là sự thật của chính bản đồ; số bài lấy
+        // từ pack (`DiaMap.lesson`) hoặc từ context — không có thì null, và
+        // khi ấy bài này KHÔNG hiện trên Learning Map (không đoán).
+        sourceDocumentId: m.book,
+        lessonNo: m.lesson ?? ctx?.lessonNo,
       )
     ]);
   }

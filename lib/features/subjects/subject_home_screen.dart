@@ -245,7 +245,8 @@ class SubjectHomeScreen extends StatelessWidget {
     return low.isEmpty ? low : low[0].toUpperCase() + low.substring(1);
   }
 
-  void _openExercise(BuildContext context, LessonRef l, CorpusExercise e) {
+  void _openExercise(BuildContext context, LessonRef l, CorpusExercise e,
+      LearningContext ctx) {
     // Sách là NGUỒN TIN: bài tập in trong SGK ⇒ sourceStated, có trang.
     final problem = CanonicalProblem.fromCurriculum(
       exerciseLabel: 'b${l.no}',
@@ -260,8 +261,13 @@ class SubjectHomeScreen extends StatelessWidget {
         pageStart: e.page,
       ),
     );
+    // ⭐ WAL-210 (audit C7): bài tập mở TỪ một bài trong pack ⇒ Tutor stamp
+    // đúng sách + bài lên evidence. Đường camera KHÔNG đi qua đây (ctx null).
     openCanonicalProblem(context,
-        problem: problem, profile: profile, store: store);
+        problem: problem,
+        profile: profile,
+        store: store,
+        learningContext: ctx);
   }
 
   Widget _experimentsTile(BuildContext context) {
@@ -309,7 +315,9 @@ class SubjectHomeScreen extends StatelessWidget {
                               grade: profile.grade,
                               subject: subject,
                               sourceDocumentId: ex.book,
-                              lessonNo: ex.lesson));
+                              lessonNo: ex.lesson,
+                              // WAL-210: version của ĐÚNG pack đang mở.
+                              knowledgeModelVersion: index.packVersion));
                     },
                   ),
               ]),
@@ -368,6 +376,17 @@ class SubjectHomeScreen extends StatelessWidget {
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => MapReaderScreen(
                     map: maps.first,
+                    // ⭐ WAL-210: Map reader từng là surface DUY NHẤT không
+                    // nhận context — nay cùng một đường như các màn khác.
+                    // Ý định CHƯA BIẾT (mở từ tile môn, không qua bộ chọn)
+                    // ⇒ giữ null thật lòng.
+                    learningContext: LearningContext(
+                        learnerId: profile.learnerId,
+                        grade: profile.grade,
+                        subject: subject,
+                        sourceDocumentId: maps.first.book,
+                        lessonNo: maps.first.lesson,
+                        knowledgeModelVersion: index.packVersion),
                     onFinished: (events) => recordSession(
                         store: store,
                         learnerId: profile.learnerId,
@@ -645,7 +664,7 @@ class SubjectHomeScreen extends StatelessWidget {
       switch (a) {
         ExerciseActivity(:final items) => (
             '🧮 Làm bài tập',
-            () => _openExercise(context, l, items.first)
+            () => _openExercise(context, l, items.first, ctx)
           ),
         ReadingActivity(:final reading) => (
             '📖 Đọc bài',
@@ -677,7 +696,10 @@ class SubjectHomeScreen extends StatelessWidget {
         subject: subject,
         sourceDocumentId: b.sourceDocumentId,
         lessonNo: l.no,
-        intent: intent);
+        intent: intent,
+        // WAL-210: version của ĐÚNG pack đang mở — emitter Scale đóng nó
+        // lên evidence thay cho hằng Toán 5.
+        knowledgeModelVersion: index.packVersion);
 
     // Tra cứu mà bài không có nguồn nào ⇒ «Nguồn bài học» của chương trình.
     if (intent == LearningIntent.lookup && ordered.isEmpty) {

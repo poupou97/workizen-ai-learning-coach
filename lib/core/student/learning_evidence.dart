@@ -53,6 +53,19 @@ enum EvidenceKind {
   /// Đáp án chốt của cả bài. Là **kết quả**, không phải một lần thử; giữ riêng
   /// để không đếm hai lần cùng một lần làm.
   finalCorrectness,
+
+  /// ⭐⭐ WAL-210 — Founder D1 (2026-09-05): **tự báo / hoàn thành KHÔNG
+  /// CHẤM** — trẻ bấm «Con đã trả lời xong», «Con đã chỉ được trên bản đồ»,
+  /// chọn một lập trường với tư liệu, nộp nháp… Chỉ chứng minh trẻ ĐÃ THAM
+  /// GIA / ĐÃ LÀM XONG hoạt động; **không** phải bằng chứng năng lực, không
+  /// phải một lần tự làm, không đổi belief (BKT: no-op). `correct` luôn
+  /// `null`. Trước D1 các cú chạm này được ghi là `independentAttempt` với
+  /// `correct: null` — Learning Map đọc thành 🔵 «Tự làm được» và Parent
+  /// đọc thành «Con đã tự làm được» từ một nút bấm (audit C6/C6b).
+  ///
+  /// Dữ liệu cũ KHÔNG viết lại: `independentAttempt` + `correct == null` được
+  /// các hàm trạng thái ĐỌC như participation ([LearningEvent.isParticipation]).
+  participation,
 }
 
 /// Dạng câu trả lời — quyết định `guess` **theo cấu trúc**, không phải theo cảm
@@ -174,8 +187,28 @@ class LearningEvent {
         EvidenceKind.selfCorrection ||
         EvidenceKind.finalCorrectness =>
           true,
-        EvidenceKind.hintRequested || EvidenceKind.hintShown => false,
+        EvidenceKind.hintRequested ||
+        EvidenceKind.hintShown ||
+        EvidenceKind.participation =>
+          false,
       };
+
+  /// ⭐⭐ D1 — sự kiện TỰ BÁO / HOÀN THÀNH, không chấm: [EvidenceKind
+  /// .participation], **hoặc** dữ liệu cũ `independentAttempt` với `correct ==
+  /// null` (đọc như participation, KHÔNG viết lại log). Không bao giờ là
+  /// bằng chứng năng lực.
+  bool get isParticipation =>
+      kind == EvidenceKind.participation ||
+      (kind == EvidenceKind.independentAttempt && correct == null);
+
+  /// ⭐⭐ D1 — bằng chứng TỰ LÀM ĐƯỢC **đã được chấm**: tự làm (hoặc tự sửa)
+  /// và `correct == true`. Đây là thứ DUY NHẤT được phép thành «Tự làm được»
+  /// trên Learning Map / câu kể cho phụ huynh (cùng ngưỡng với
+  /// `feedbackFor` — "SAM ghi lại: con TỰ làm được").
+  bool get isValidatedIndependentSuccess =>
+      (kind == EvidenceKind.independentAttempt ||
+          kind == EvidenceKind.selfCorrection) &&
+      correct == true;
 
   /// ⭐⭐ Câu trả lời này có bị **chính can thiệp của hệ thống** quyết định không.
   ///

@@ -7,8 +7,9 @@
 /// - [SamInterpretation] «SAM DIỄN GIẢI» — diễn giải curated (systemDerived);
 ///   không bao giờ render dưới nhãn của nguồn.
 /// - [StudentConclusion] «EM KẾT LUẬN»   — của học sinh; KHÔNG chấm đúng/sai:
-///   evidence phát ra correct=null (UNKNOWN ≠ SAI — kết luận sử không phải
-///   một đáp án duy nhất).
+///   evidence phát ra là PARTICIPATION correct=null (WAL-210 / Founder D1 —
+///   chọn một lập trường là tự báo đã làm, không phải bằng chứng năng lực;
+///   UNKNOWN ≠ SAI — kết luận sử không phải một đáp án duy nhất).
 /// - Gate: diễn giải + kết luận KHOÁ tới khi trẻ xác nhận ĐÃ ĐỌC NGUỒN (cùng
 ///   họ READ gate của Reader); «đọc nguồn xong» KHÔNG phát bằng chứng.
 /// - Không %, không điểm. Sử KHÔNG bị ép vào Step Solver của Toán.
@@ -114,14 +115,19 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
             sessionToken: _token,
             seq: _seq++),
         skillCaseId: 'su-doc-tu-lieu',
-        kind: EvidenceKind.independentAttempt,
+        kind: EvidenceKind.participation, // D1: lập trường = tự báo, không chấm
         correct: null, // ⭐ UNKNOWN ≠ SAI: kết luận sử không có một đáp án duy nhất
         exerciseId: '${s.book}:p${s.page}',
         conceptIds: const ['su-tu-lieu'],
         at: _at(),
         support: SupportLevel.none,
         policyId: 'source-reader-v1',
-        knowledgeVersion: knowledgeModelVersion, // WAL-114
+        // WAL-114 + WAL-210: version của ĐÚNG pack; hằng cũ khi chưa khai.
+        knowledgeVersion: widget.learningContext.knowledgeModelVersion ??
+            knowledgeModelVersion,
+        // ⭐⭐ WAL-210 (audit C7): lineage sách + bài.
+        sourceDocumentId: widget.learningContext.sourceDocumentId,
+        lessonNo: widget.learningContext.lessonNo,
       ));
     }
     setState(() {

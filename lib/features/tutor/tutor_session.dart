@@ -53,6 +53,8 @@ class TutorSession {
     required this.scope,
     DateTime Function()? now,
     String? sessionToken,
+    this.sourceDocumentId,
+    this.lessonNo,
   })  : _now = now ?? DateTime.now,
         log = EvidenceLog.empty(skillCaseId) {
     // ⭐ WAL-210 (audit C1): token sinh MỘT LẦN lúc mở phiên — mở lại cùng
@@ -68,6 +70,12 @@ class TutorSession {
 
   /// Định danh PHIÊN — phần làm cho `eventId` duy nhất giữa các lần mở.
   late final String sessionToken;
+
+  /// ⭐ WAL-210 (audit C7) — LINEAGE sách + bài của bài tập đang dạy, khi
+  /// bài mở TỪ một bài trong pack. Bài CHỤP (camera) không biết bài nào ⇒
+  /// `null` — Founder quyết có/không suy ra từ chương trình (chưa quyết).
+  final String? sourceDocumentId;
+  final int? lessonNo;
 
   /// ⭐ WAL-168: phiên dạy KHÔNG mang kiểu của một môn. Trước đây trường này
   /// là `FractionProblem`, nên môn thứ hai không vào nổi runtime.
@@ -120,6 +128,9 @@ class TutorSession {
               : null),
       // WAL-114: mọi evidence mang CẢ HAI version — tutor policy + knowledge.
       knowledgeVersion: knowledgeModelVersion,
+      // ⭐⭐ WAL-210 lineage (null khi bài không đến từ một bài trong pack).
+      sourceDocumentId: sourceDocumentId,
+      lessonNo: lessonNo,
     ));
     if (isAnswer) _lastAnswerEventId = id;
   }

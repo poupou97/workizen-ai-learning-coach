@@ -26,7 +26,9 @@ import 'features/mission/mission_center_screen.dart';
 import 'features/discovery/story_detail_screen.dart';
 import 'features/parent/parent_area.dart';
 import 'features/settings/settings_screen.dart';
+import 'core/context/learning_context.dart';
 import 'core/curriculum/canonical_problem.dart';
+import 'core/intent/learning_intent.dart';
 import 'core/intent/next_lesson.dart';
 import 'core/knowledge/provenance.dart';
 import 'core/knowledge/slice_curriculum.dart' show curriculaForLearner;
@@ -275,7 +277,16 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
           ),
         ),
         profile: p,
-        store: widget.store);
+        store: widget.store,
+        // ⭐ WAL-210 lineage: bài ôn lấy từ `exercisesForToan(6)` ⇒ đúng
+        // cuốn của bài tập + bài 6 (số bài hoá cứng cùng chỗ với danh sách).
+        learningContext: LearningContext(
+            learnerId: p.learnerId,
+            grade: p.grade,
+            subject: 'Toán',
+            sourceDocumentId: e.book,
+            lessonNo: 6,
+            intent: LearningIntent.review));
     if (mounted) setState(_refreshMission);
   }
 
@@ -353,6 +364,14 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     await nav.push(MaterialPageRoute(
         builder: (_) => AssessmentScreen(
               items: exs.take(3).toList(),
+              // ⭐ WAL-210 lineage: đề lấy từ `exercisesForToan(6)` ⇒ bài 6
+              // của đúng cuốn chứa bài tập (số bài hoá cứng cùng chỗ).
+              learningContext: LearningContext(
+                  learnerId: p.learnerId,
+                  grade: p.grade,
+                  subject: 'Toán',
+                  sourceDocumentId: exs.first.book,
+                  lessonNo: 6),
               onFinished: (events, answers) async {
                 final rec = await recordSession(
                   store: widget.store,

@@ -16,6 +16,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import '../../core/context/learning_context.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/store/assistance_policy.dart';
 import '../../core/student/evidence_ids.dart';
@@ -43,7 +44,13 @@ class AssessmentScreen extends StatefulWidget {
     required this.onFinished,
     this.policy = AssistancePolicy.assessment,
     this.now,
+    this.learningContext,
   });
+
+  /// ⭐ WAL-210 (audit C7) — bài kiểm tra mở TỪ một bài trong pack: context
+  /// mang sách + số bài để sự kiện có lineage. `null` = không biết bài (chỉ
+  /// stamp `sourceDocumentId` từ chính bài tập, `lessonNo` để null).
+  final LearningContext? learningContext;
 
   /// Bài THẬT từ corpus (qmap-v1) — không sinh đề.
   final List<CorpusExercise> items;
@@ -118,7 +125,15 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         // màn này có thể phát. Không nhánh nào tạo được hỗ trợ.
         support: SupportLevel.none,
         policyId: 'assessment-v1',
+        // Đường Deep (Toán 5 slice) giữ hằng của nó — bài tập này được chấm
+        // bằng chính bộ ca của slice.
         knowledgeVersion: knowledgeModelVersion,
+        // ⭐⭐ WAL-210 lineage: sách là sự thật của chính bài tập; số bài chỉ
+        // khi context nói về ĐÚNG cuốn đó — không ghép bài của sách khác.
+        sourceDocumentId: e.book,
+        lessonNo: widget.learningContext?.sourceDocumentId == e.book
+            ? widget.learningContext?.lessonNo
+            : null,
       ));
       _ctrl.clear();
       _i++;

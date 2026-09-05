@@ -12,9 +12,12 @@
 ///   hiện sản phẩm hoàn chỉnh. Góp ý của SAM là CÂU HỎI tự-soát về QUÁ TRÌNH,
 ///   không phải câu văn viết thay.
 /// - Văn KHÔNG được chấm đúng/sai (UNKNOWN ≠ SAI): mọi sự kiện `correct == null`.
-///   Bằng chứng đến từ QUÁ TRÌNH: nháp = independentAttempt; sửa-sau-góp-ý =
+///   Quá trình được ghi lại: nháp = PARTICIPATION (WAL-210 / Founder D1: nộp
+///   nháp là tự báo hoàn thành, không phải bằng chứng tự làm); sửa-sau-góp-ý =
 ///   guidedAttempt (có hỗ trợ, KHÔNG tính tự làm); tự-đọc-lại-rồi-sửa =
-///   selfCorrection (bằng chứng mạnh). Không %, không điểm, không khen tư chất.
+///   selfCorrection — hai loại sau vẫn `correct == null` nên KHÔNG là «tự làm
+///   được» ở tầng trạng thái; loại của chúng chờ Founder quyết (xem PR).
+///   Không %, không điểm, không khen tư chất.
 library;
 
 import 'package:flutter/material.dart';
@@ -106,6 +109,12 @@ class _ComposeLiteScreenState extends State<ComposeLiteScreen> {
       support: _feedbackRequested ? SupportLevel.hint : SupportLevel.none,
       policyId: 'compose-lite-v1',
       priorEventId: _events.isEmpty ? null : _events.last.eventId,
+      // WAL-210: version của pack đang mở (Compose chưa từng đóng hằng Toán 5
+      // lên văn — không bắt đầu làm thế; chưa biết thì để null).
+      knowledgeVersion: widget.learningContext.knowledgeModelVersion,
+      // ⭐⭐ WAL-210 (audit C7): lineage sách + bài.
+      sourceDocumentId: widget.learningContext.sourceDocumentId,
+      lessonNo: widget.learningContext.lessonNo,
     ));
   }
 
@@ -113,8 +122,9 @@ class _ComposeLiteScreenState extends State<ComposeLiteScreen> {
 
   void _submitDraft() {
     if (_draftCtrl.text.trim().isEmpty) return;
-    // Nháp đầu tiên = bằng chứng TỰ LÀM (chưa hỗ trợ nào).
-    _emit(EvidenceKind.independentAttempt);
+    // Nháp đầu tiên = trẻ TỰ BÁO đã viết xong — participation (D1), không
+    // phải bằng chứng tự làm: không ai chấm nháp này.
+    _emit(EvidenceKind.participation);
     setState(() => _stage = _Stage.afterDraft);
   }
 

@@ -90,7 +90,9 @@ void main() {
         scrollable: find.byType(Scrollable).first);
     await t.tap(find.text(kConclusionStances[1]));
     await t.pumpAndSettle();
-    expect(out.single.kind, EvidenceKind.independentAttempt);
+    expect(out.single.kind, EvidenceKind.participation,
+        reason: '⭐⭐ WAL-210 Founder D1: chọn lập trường là tự báo — đột biến '
+            'ghi independentAttempt ⇒ đỏ (audit C6)');
     expect(out.single.correct, isNull,
         reason: '⭐ đột biến chấm kết luận sử thành đúng/sai ⇒ test đỏ');
     expect(out.single.policyId, 'source-reader-v1');

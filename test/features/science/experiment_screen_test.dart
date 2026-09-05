@@ -108,7 +108,9 @@ void main() {
         scrollable: find.byType(Scrollable).first);
     await t.tap(find.text('Em làm xong thí nghiệm ✅'));
     await t.pumpAndSettle();
-    expect(out.single.kind, EvidenceKind.independentAttempt);
+    expect(out.single.kind, EvidenceKind.participation,
+        reason: '⭐⭐ WAL-210 Founder D1: quan sát tự viết chưa được kiểm chứng '
+            '⇒ participation; đột biến ghi independentAttempt ⇒ đỏ (audit C6)');
     expect(out.single.correct, isNull,
         reason: '⭐ đột biến chấm quan sát thành đúng/sai ⇒ test đỏ');
     expect(out.single.policyId, 'experiment-v1');

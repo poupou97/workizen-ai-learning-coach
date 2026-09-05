@@ -91,7 +91,9 @@ class _ExperimentScreenState extends State<ExperimentScreen> {
       act: TeachingAct.askExplanation,
       learnerText: _observeCtrl.text,
       policyId: 'experiment-v1',
-      knowledgeVersion: knowledgeModelVersion,
+      // WAL-210: version của ĐÚNG pack; hằng cũ khi pack chưa khai.
+      knowledgeVersion: widget.learningContext.knowledgeModelVersion ??
+          knowledgeModelVersion,
     );
     final event = validateCandidateEvidence(
       candidate,

@@ -81,8 +81,9 @@ class _QuizSelectScreenState extends State<QuizSelectScreen> {
     if (_done) return;
     setState(() => _picked = i);
     if (!a.gradable) {
-      // Chưa biết đáp án ⇒ ghi nhận đã làm, KHÔNG chấm, KHÔNG kết luận.
-      _emit(EvidenceKind.independentAttempt, null);
+      // Chưa biết đáp án ⇒ ghi nhận đã làm (participation — D1), KHÔNG chấm,
+      // KHÔNG kết luận, KHÔNG «tự làm được».
+      _emit(EvidenceKind.participation, null);
       setState(() => _done = true);
       widget.onFinished?.call(_events);
       return;

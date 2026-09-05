@@ -331,8 +331,10 @@ class _TutorScreenState extends State<TutorScreen> {
           lines.add('· Con thử với gợi ý: chưa đúng');
         case EvidenceKind.postHintSuccess:
           lines.add('✓ Đúng rồi (có gợi ý giúp)');
-        case EvidenceKind.hintShown || EvidenceKind.finalCorrectness:
-          break; // không thành dòng riêng — tránh đếm kép
+        case EvidenceKind.hintShown ||
+              EvidenceKind.finalCorrectness ||
+              EvidenceKind.participation:
+          break; // không thành dòng riêng — tránh đếm kép (Tutor không phát participation)
       }
     }
     if (lines.isEmpty) return const SizedBox.shrink();
