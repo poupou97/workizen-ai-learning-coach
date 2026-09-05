@@ -273,7 +273,20 @@ def image_block(book, f, crop_rel, aspect=None):
 # Round 4 (Lane C request 6): `toc-ocr-chapters-v1` knew only «CHƯƠNG <roman>», so every «Chủ đề» book
 # (LS&ĐL 4/5, Khoa học 4/5, Đạo đức, HĐTN …) reported 0 chapters. The banner font also slips the tone —
 # LS&ĐL 5's own TOC prints «CHỦ ĐẾ 6» — so the marker accepts the same tone variants as the lesson banner.
-CHAPTER_HDR = re.compile(r'(?:CH(?:Ủ|U|Ú|Ũ|Ụ)\s*Đ(?:Ề|Ế|Ề|È|É|Ẻ|Ẽ|Ẹ|E)\s*(\d{1,2})|CHƯƠNG\s+([IVX]+|\d{1,2})|PHẦN\s+([IVX]+|\d{1,2}))\s*[.\-–:]?\s*')
+# Round 4 correctness review (F7 + F9), both child-facing:
+#   F7  the numeral group had NO trailing boundary, so the roman alternative bit into the next word and
+#       invented a chapter out of an ordinary section name: «PHẦN VĂN HỌC» → label «Phần V» + title
+#       «ĂN HỌC», «PHẦN XÃ HỘI» → «Phần X»/«Ã HỘI», «CHƯƠNG VIỆT NAM …» → «Chương VI», and «HUÂN CHƯƠNG I»
+#       (a medal, in Lịch sử prose and on every back cover) matched as a chapter. The numeral must now be
+#       followed by a non-letter/non-digit, and the medal phrase is excluded by name.
+#   F9  the tone class did not match the comment above it: «Ề» was listed twice, four of the six Ê-family
+#       forms were missing (CHỦ ĐỂ / ĐỄ / ĐỆ / ĐÊ all failed) and «Ù» was missing from the CH class. It is
+#       now literally the lesson banner's class — the base vowel plus its five tones — on both syllables.
+CHAPTER_HDR = re.compile(r'(?<!HUÂN )(?<!Huân )'
+                         r'(?:CH[UÙÚỦŨỤ]\s*Đ[ÊỀẾỂỄỆEÈÉẺẼẸ]\s*(\d{1,2})'
+                         r'|CHƯƠNG\s+([IVX]+|\d{1,2})'
+                         r'|PHẦN\s+([IVX]+|\d{1,2}))'
+                         r'(?![0-9A-Za-zÀ-ỹ\u0300-\u036f])\s*[.\-–:]?\s*')
 
 
 def chapter_label(m):
@@ -286,10 +299,20 @@ def chapter_label(m):
 
 
 def clean_toc_title(raw):
-    """TOC titles carry dot leaders and a trailing page number; both are furniture, not title text."""
+    """TOC titles carry dot leaders and a trailing page number; both are furniture, not title text.
+
+    Round 4 correctness review (F8): the trailing-number strip is written for a LESSON line (title ·
+    leader · page number), but this function is applied to CHAPTER titles too, and a chapter title often
+    carries no page number at all. The old pattern let the separator run be EMPTY, so it matched the TAIL
+    of a longer digit run and a History chapter title lost the last digit of its year
+    («… TỪ 1858 ĐẾN NĂM 1945» → «… ĐẾN NĂM 1») — a child-facing wrong title, on exactly the books Lane C's
+    Golden Slice #2 uses. The separator is now REQUIRED, so only a digit run standing on its own after a
+    leader or a space is read as a page number: a year at the end of a title survives, and
+    «… THẾ GIỚI .93» / «… MỘT ..... 5» are still stripped.
+    """
     t = re.sub(r'[.\u2026]{2,}', ' ', raw)
     # the leader may be a single dot glued to the page number («… THẾ GIỚI .93»)
-    t = re.sub(r'[\s.\u2026]*\d{1,3}\s*$', '', t)
+    t = re.sub(r'[\s.\u2026]+\d{1,3}\s*$', '', t)
     return re.sub(r'\s+', ' ', t).strip(' .\u2026-–:')
 
 
