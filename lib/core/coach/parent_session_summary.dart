@@ -22,6 +22,7 @@ class RecentLessonTouch {
     required this.lessonNo,
     required this.state,
     required this.at,
+    this.hasHistoricalUnvalidated = false,
   });
 
   final String sourceDocumentId;
@@ -30,6 +31,11 @@ class RecentLessonTouch {
 
   /// Lần chạm GẦN NHẤT khớp bài này — để xếp thứ tự "gần đây" trung thực.
   final DateTime at;
+
+  /// ⭐ ROUND 4: bài có sự kiện CÓ CHẤM nhưng KHÔNG DẤU (dữ liệu trước hợp
+  /// đồng). Parent được nói thật «ghi nhận trước hợp đồng mới», không nói
+  /// «tự làm được», không giấu.
+  final bool hasHistoricalUnvalidated;
 }
 
 /// Gom TOÀN BỘ session của một con thành danh sách bài đã chạm gần đây,
@@ -56,6 +62,8 @@ List<RecentLessonTouch> recentLessonTouches(
             lessonNo: entry.key.$2,
             allEvents: entry.value),
         at: entry.value.map((e) => e.at).reduce((a, b) => a.isAfter(b) ? a : b),
+        hasHistoricalUnvalidated:
+            entry.value.any((e) => e.isHistoricalUnvalidated),
       ),
   ]..sort((a, b) => b.at.compareTo(a.at));
   return out.take(maxLessons).toList();
@@ -68,8 +76,14 @@ String parentLineFor(RecentLessonTouch t, {String? lessonTitle}) {
   final name = lessonTitle ?? 'Bài ${t.lessonNo}';
   return switch (t.state) {
     LearningMapState.independentEvidence => 'Con đã tự làm được $name.',
+    // ⭐ ROUND 4: dữ liệu cũ có chấm-không-dấu ⇒ nói thật là «ghi nhận trước
+    // hợp đồng mới», KHÔNG nói «tự làm được», không giấu là đã có ghi nhận.
+    LearningMapState.engaged when t.hasHistoricalUnvalidated =>
+      'Con đã học $name — có lần làm được ghi nhận trước hợp đồng mới; SAM '
+          'chưa kiểm lại nên chưa tính là tự làm được.',
     LearningMapState.engaged =>
-      'Con đã học cùng SAM ở $name — chưa có lần nào tự làm được ghi lại.',
+      'Con đã học cùng SAM ở $name — chưa có lần nào tự làm được được kiểm '
+          'ghi lại.',
     // ⭐⭐ D1: tự báo/hoàn thành ⇒ câu HOÀN THÀNH, nói rõ không chấm — không
     // bao giờ «tự làm được» từ một nút bấm.
     LearningMapState.participation =>

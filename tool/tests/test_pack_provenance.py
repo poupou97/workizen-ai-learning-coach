@@ -89,7 +89,7 @@ class StampTests(unittest.TestCase):
         self.assertEqual(set(pa), {'schema', 'builderVersion', 'gitSha', 'builtAt', 'grade', 'flags', 'experimental', 'attachmentRule', 'contentHash', 'packVersion'})
         self.assertEqual(pa['schema'], 1)
         self.assertEqual(pa['grade'], 6)
-        self.assertEqual(pa['attachmentRule'], 'capped-toc-v1')
+        self.assertEqual(pa['attachmentRule'], 'capped-toc-v2')
         self.assertFalse(pa['experimental'])
         self.assertTrue(pa['builderVersion'].startswith('build_lesson_index.py@'))
         self.assertEqual(pa['builtAt'], '2026-09-05T10:20:30Z')

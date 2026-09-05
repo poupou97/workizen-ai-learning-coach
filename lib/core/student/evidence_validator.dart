@@ -82,8 +82,12 @@ LearningEvent? validateCandidateEvidence(
     support: c.support,
     policyId: c.policyId,
     knowledgeVersion: c.knowledgeVersion,
-    sourceDocumentId: context.sourceDocumentId,
-    lessonNo: context.lessonNo,
+    // ⭐⭐ ROUND 4 (Founder §4, cùng luật A5 của TutorSession): lineage CHỈ
+    // khi context đã giải ra ĐỦ sách + bài; context tầng Book (có sách,
+    // chưa có bài) ⇒ (null, null) — không stamp nửa vời. Trước round 4 cửa
+    // này chép `sourceDocumentId` kể cả khi `lessonNo == null`.
+    sourceDocumentId: context.hasLesson ? context.sourceDocumentId : null,
+    lessonNo: context.hasLesson ? context.lessonNo : null,
     act: c.act,
     learnerText: c.learnerText,
     // ⭐⭐ Round 3 (A3): cửa này là validator ĐÃ ĐĂNG KÝ nhưng chỉ cấp

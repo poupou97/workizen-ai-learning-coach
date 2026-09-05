@@ -1,0 +1,126 @@
+{
+  "schema": "lane-c-second-review-v1",
+  "reviewer": "Lane C round 4 (Claude Fable 5.1) reading the 150-dpi grid renders under poc-out/round4/lane-c/tc2-lsdl5/v1/renders/ — never an extractor output; anchors are the first words as printed (D4: no full SGK text in the repo)",
+  "date": "2026-09-05",
+  "book": "05-sgk-lich-su-va-dia-li-5",
+  "printed_offset": 2,
+  "role_equivalence": {
+    "heading": ["heading", "stage_label"],
+    "stage_label": ["stage_label", "heading"],
+    "box_label": ["stage_label", "heading", "figure_text", "figure_label", "sidebar"]
+  },
+  "lesson_identity": [
+    {"page": 38, "printed": 36, "verdict": "BÀI 8", "evidence": "printed «BÀI 8» banner at y≈0.17 beside the title; theme banner «Chủ đề 3» above it on the same page", "toc_page_start": 36, "agree_with_toc": true},
+    {"page": 39, "printed": 37, "verdict": "BÀI 8", "evidence": "no header; continuation of the p38 paragraph (sentence split across the page break)"},
+    {"page": 40, "printed": 38, "verdict": "BÀI 8", "evidence": "no header; two «Câu chuyện Lịch sử» boxes, the second continues onto p41"},
+    {"page": 41, "printed": 39, "verdict": "BÀI 8", "evidence": "no header; LUYỆN TẬP / VẬN DỤNG close the lesson; next page p42 carries «BÀI 9»", "gold_said": 9, "agree_with_gold": false},
+    {"page": 42, "printed": 40, "verdict": "BÀI 9", "evidence": "printed «BÀI 9» banner", "toc_page_start": 40, "agree_with_toc": true},
+    {"page": 80, "printed": 78, "verdict": "BÀI 18", "evidence": "printed «BÀI 18 · NƯỚC CỘNG HOÀ NHÂN DÂN TRUNG HOA» on p78 (printed 76) under the «Chủ đề 4» banner; «BÀI 19» on p84 (printed 82); TOC lists Bài 18 at 76, Bài 19 at 82; p80 is a China physical-map page", "gold_said": 17, "agree_with_gold": false}
+  ],
+  "pages": {
+    "38": {
+      "printed": 36,
+      "features": ["theme_opener_banner", "colour_heavy", "objectives_box", "quote_with_attribution", "question_with_dash_subitems", "side_by_side_body_and_sidebar", "paragraph_continues_to_next_page"],
+      "blocks": [
+        {"n": 1, "role": "heading", "anchor": "Chủ đề 3", "note": "theme banner (3 lines) — belongs to the theme opener, not to the lesson body", "lesson": "theme-opener"},
+        {"n": 2, "role": "heading", "anchor": "BÀI 8", "note": "lesson number badge"},
+        {"n": 3, "role": "heading", "anchor": "ĐẤU TRANH GIÀNH ĐỘC LẬP", "note": "lesson title, two lines; printed «ĐẤU» and «KÌ»"},
+        {"n": 4, "role": "stage_label", "anchor": "Sau bài học này, em sẽ:", "accept": ["heading", "stage_label", "objective"]},
+        {"n": 5, "role": "objective", "anchor": "Kể được tên và vẽ được", "note": "two printed lines, one bullet; ends with the example years list «179 TCN, 40, 248, 542, 938,…»"},
+        {"n": 6, "role": "objective", "anchor": "Sưu tầm và kể lại được"},
+        {"n": 7, "role": "stage_label", "anchor": "KHỞI ĐỘNG"},
+        {"n": 8, "role": "question", "anchor": "Đọc và cho biết những"},
+        {"n": 9, "role": "body", "anchor": "Hai Bà Trưng có đại tài,", "note": "four-line poem, italic, centred — one contiguous quote block", "kind": "quote"},
+        {"n": 10, "role": "attribution", "anchor": "(Hồ Chí Minh, Lịch sử nước ta,", "note": "quote attribution, not «Theo»-form"},
+        {"n": 11, "role": "stage_label", "anchor": "KHÁM PHÁ"},
+        {"n": 12, "role": "heading", "anchor": "1. Một số cuộc đấu tranh"},
+        {"n": 13, "role": "question", "anchor": "Đọc thông tin, em hãy:", "note": "lead line of a question box"},
+        {"n": 14, "role": "question", "anchor": "– Kể tên một số cuộc", "note": "dash sub-item 1 of the question box"},
+        {"n": 15, "role": "question", "anchor": "– Cho biết việc nhân dân", "note": "dash sub-item 2 of the question box"},
+        {"n": 16, "role": "body", "anchor": "Sau khi Triệu Đà thôn tính", "note": "left column beside the sidebar; contains the dated anchor «Âu Lạc (179 TCN)»"},
+        {"n": 17, "role": "body", "anchor": "Dưới ách thống trị của", "note": "left column; the sentence continues on p39 («…tiêu biểu là các cuộc khởi nghĩa của» → «Hai Bà Trưng (40 – 43)…»)", "rel": {"continues_to": "39:1"}},
+        {"n": 18, "role": "stage_label", "anchor": "Em có biết?", "accept": ["stage_label", "sidebar", "heading"]},
+        {"n": 19, "role": "sidebar", "anchor": "Chính quyền đô hộ phong kiến"},
+        {"n": 20, "role": "page_number", "anchor": "36"}
+      ],
+      "flex_groups": [["18", "19"]],
+      "critical": ["poem lines merged into the question = a fabricated question", "the sidebar spliced into the body column = contamination", "«179 TCN» lost or altered = corrupted date", "the p38→p39 sentence break treated as two sentences = a truncated event list"]
+    },
+    "39": {
+      "printed": 37,
+      "features": ["paragraph_continued_from_previous_page", "dated_events_in_prose", "figure_dependent_question", "story_box_with_attribution", "figure_with_caption"],
+      "blocks": [
+        {"n": 1, "role": "body", "anchor": "Hai Bà Trưng (40 – 43),", "note": "continuation of p38 block 17; lists 7 dated events; printed dashes are en dashes «40 – 43»", "rel": {"continues_from": "38:17"}},
+        {"n": 2, "role": "heading", "anchor": "2. Kể chuyện về một số"},
+        {"n": 3, "role": "question", "anchor": "Đọc thông tin và quan sát", "note": "figure-dependent lead line («quan sát các hình từ 1 đến 3»)"},
+        {"n": 4, "role": "question", "anchor": "– Kể câu chuyện về một", "note": "dash sub-item 1"},
+        {"n": 5, "role": "question", "anchor": "– Chia sẻ điều em biết", "note": "dash sub-item 2"},
+        {"n": 6, "role": "body", "anchor": "Trong cuộc đấu tranh chống"},
+        {"n": 7, "role": "box_label", "anchor": "Câu chuyện Lịch sử", "note": "badge of the story box (mascot + two-line label)"},
+        {"n": 8, "role": "heading", "anchor": "TRƯNG VƯƠNG TRỪ GIẶC HÁN", "note": "story title, printed «TRỪ» and «HÁN»"},
+        {"n": 9, "role": "body", "anchor": "Thuở xưa, nước ta bị"},
+        {"n": 10, "role": "body", "anchor": "Cuộc khởi nghĩa được nhân dân", "note": "ends with «(40 – 43)»"},
+        {"n": 11, "role": "body", "anchor": "Cuộc khởi nghĩa Hai Bà Trưng đã"},
+        {"n": 12, "role": "attribution", "anchor": "(Theo Nguyễn Thi, Thành Nam,", "note": "two printed lines, right-aligned; work title in italics"},
+        {"n": 13, "role": "figure", "anchor": "[Đông Hồ painting]", "note": "picture inside the story box"},
+        {"n": 14, "role": "caption", "anchor": "Hình 1. Trưng Vương trừ", "rel": {"caption_of": "39:13"}},
+        {"n": 15, "role": "page_number", "anchor": "37"}
+      ],
+      "flex_groups": [["7"]],
+      "critical": ["any of the 7 «Name (years)» pairs altered = corrupted history data", "the attribution detached from the story = wrong source", "the caption spliced into the story = contamination"]
+    },
+    "40": {
+      "printed": 38,
+      "features": ["two_story_boxes", "attribution", "figure_with_caption", "story_continues_to_next_page"],
+      "blocks": [
+        {"n": 1, "role": "box_label", "anchor": "Câu chuyện Lịch sử"},
+        {"n": 2, "role": "heading", "anchor": "LÝ BÍ VÀ NHÀ NƯỚC VẠN XUÂN", "note": "printed «BÍ»"},
+        {"n": 3, "role": "body", "anchor": "Vào thế kỉ VI, dưới ách", "note": "long paragraph; contains «Mùa xuân năm 544»"},
+        {"n": 4, "role": "body", "anchor": "Cuộc khởi nghĩa Lý Bí thể hiện"},
+        {"n": 5, "role": "attribution", "anchor": "(Theo Đinh Xuân Lâm, Trương Hữu Quýnh", "note": "two printed lines, right-aligned"},
+        {"n": 6, "role": "figure", "anchor": "[temple photo]"},
+        {"n": 7, "role": "caption", "anchor": "Hình 2. Đền thờ Lý Nam Đế", "rel": {"caption_of": "40:6"}},
+        {"n": 8, "role": "box_label", "anchor": "Câu chuyện Lịch sử", "note": "second box"},
+        {"n": 9, "role": "heading", "anchor": "NGÔ QUYỀN ĐẠI PHÁ QUÂN NAM HÁN", "note": "printed «PHÁ» and «HÁN»"},
+        {"n": 10, "role": "body", "anchor": "Năm 937, sau khi Dương Đình Nghệ", "note": "contains «năm 938»; the story continues on p41", "rel": {"continues_to": "41:1"}},
+        {"n": 11, "role": "page_number", "anchor": "38"}
+      ],
+      "flex_groups": [["1"], ["8"]],
+      "critical": ["the first story paragraph dropped = a story without its beginning", "«544», «937», «938» altered = corrupted dates", "the mascot badge read as a caption of Hình 2 = wrong caption link"]
+    },
+    "41": {
+      "printed": 39,
+      "features": ["story_continued", "attribution", "side_by_side_story_and_photo", "timeline_completion_table", "question_block"],
+      "blocks": [
+        {"n": 1, "role": "body", "anchor": "Nghe tin Hoằng Tháo sắp đến,", "rel": {"continues_from": "40:10"}},
+        {"n": 2, "role": "body", "anchor": "Chiến thắng Bạch Đằng của Ngô Quyền"},
+        {"n": 3, "role": "attribution", "anchor": "(Theo Đăng Khoa, Hoài Thu,", "note": "three printed lines, right-aligned; printed «Bạch Đằng» and «Văn hoá»"},
+        {"n": 4, "role": "figure", "anchor": "[statue photo]"},
+        {"n": 5, "role": "caption", "anchor": "Hình 3. Tượng đài Ngô Quyền", "rel": {"caption_of": "41:4"}},
+        {"n": 6, "role": "stage_label", "anchor": "LUYỆN TẬP", "accept": ["heading", "stage_label"]},
+        {"n": 7, "role": "question", "anchor": "1. Hãy vẽ và hoàn thiện"},
+        {"n": 8, "role": "table", "anchor": "Sự kiện", "note": "timeline completion: row «Sự kiện» = Khởi nghĩa Hai Bà Trưng | ? | ? | ?; row «Thời gian» = 40 – 43 | ? | ? | 938 — drawn as boxes on an arrow, not a ruled table"},
+        {"n": 9, "role": "question", "anchor": "2. Kể lại câu chuyện về"},
+        {"n": 10, "role": "stage_label", "anchor": "VẬN DỤNG", "accept": ["heading", "stage_label"]},
+        {"n": 11, "role": "question", "anchor": "Tìm hiểu và kể tên một số", "note": "printed «hiểu»"},
+        {"n": 12, "role": "page_number", "anchor": "39"}
+      ],
+      "flex_groups": [["3"], ["5"]],
+      "critical": ["caption spliced into the story = contamination", "attribution detached or dropped = wrong source", "«?» cells emitted as learner questions", "«40 – 43» / «938» altered = corrupted history data"]
+    }
+  },
+  "gold_p041_review": {
+    "blocks_agree": ["b01", "b02", "b03", "b04", "b05", "b06", "b07", "b08", "b09", "b10", "b11"],
+    "blocks_disagree": [],
+    "notes": "All 11 gold blocks agree on role, order, text and contiguity with my read of the render (b05/b09 «heading» vs my «stage_label» are equivalent by the equivalence table). The gold's lesson number 9 is wrong: the page belongs to Bài 8 (printed «BÀI 8» on p38, «BÀI 9» on p42). The gold's title string already says «Đấu tranh giành độc lập thời kì Bắc thuộc» — the title is right, the number is not.",
+    "lesson_number_gold": 9,
+    "lesson_number_reviewed": 8
+  },
+  "gold_p080_review": {
+    "blocks_agree": ["b01", "b02", "b03", "b04", "b05", "b06", "b07", "b08", "b09"],
+    "blocks_disagree": [],
+    "notes": "All 9 gold blocks agree on role and order with my read of the render (map labels as figure_label, legend and numbered-country box as table-like, caption «Hình 3. Bản đồ tự nhiên Trung Quốc», heading «3. Dân cư», one question, one body with «1,4 tỉ», «56», «90%», page number 78). The gold's lesson number 17 is wrong: the page is inside Bài 18 «Nước Cộng hoà Nhân dân Trung Hoa» (printed «BÀI 18» on p78 = printed 76, «BÀI 19» on p84 = printed 82; TOC: Bài 17 at 72, Bài 18 at 76, Bài 19 at 82). The gold's own note («the census stratum said lesson 15 by TOC offset») already flagged an offset problem; the title string in the gold is the Bài 18 title.",
+    "lesson_number_gold": 17,
+    "lesson_number_reviewed": 18
+  }
+}

@@ -39,9 +39,21 @@ class WorkspaceCatalog {
   }
 
   /// Bài 17 KHTN 6 — bài trưng bày do Founder chốt (2026-09-05).
+  /// Bài 8 LS&ĐL 5 — Golden Slice #2 (Lane C, round 4): LÁT CẮT NGHIÊN CỨU
+  /// (sách lớp 5) — Founder duyệt ứng viên §7; cổng gate ghi ở
+  /// docs/research/lane-c/05-GOLDEN-SLICE-2-GATE.md. Chip thử nghiệm bắt buộc.
   static const defaultSlots = [
     FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 17),
+    FixtureSlot(book: '05-sgk-lich-su-va-dia-li-5', lessonNo: 8),
   ];
+
+  /// Lát cắt NGHIÊN CỨU: hiện trên Home cho mọi lớp (kèm nhãn «sách lớp N»)
+  /// vì học sinh trên máy thử là lớp 6 mà sách là lớp 5 — quyết định hiển thị
+  /// tạm cho vòng kiểm chứng, không phải luật sản phẩm (Lane C round 4).
+  static const researchSlotKeys = {'05-sgk-lich-su-va-dia-li-5#8'};
+
+  static bool isResearchSlot(LessonDocument d) =>
+      researchSlotKeys.contains(d.slotKey);
 
   /// Một catalog cho cả app — nạp một lần, đọc nhiều nơi.
   static final shared = WorkspaceCatalog();

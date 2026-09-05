@@ -30,3 +30,35 @@ Each row names an assumption that is *embedded* in Track B's typed model, genera
 **Counts: PROVEN 5 (A02, A14, A15, A20 + header attachment inside A05) · FALSIFIED 14 (A01, A03, A04, A05-TOC, A06, A07, A08, A09, A10, A13, A16, A17, A19, A22) · UNTESTED 4 (A11, A12, A18, A21).**
 
 What the pattern says: the assumptions that hold are all *document-layer* (trust per element, source lines, printed pages, header boundaries). The ones that fail are the *semantic* and *tutor* layers plus every «convention» string copied from KHTN 6's page furniture. That is the shape a second lesson must attack.
+
+## Round 4 update — LS&ĐL 5 Bài 8 run through the unchanged pipeline, bridge and model (Lane C, 2026-09-05)
+
+Evidence: `05-GOLDEN-SLICE-2-GATE.md` (numbers), `06-HISTORY-ABSTRACTIONS.md` (reading). MEASURED unless marked. The round-3 statuses above stand; this table adds what History did to each.
+
+| # | on History (Bài 8) | status | evidence |
+|---|---|---|---|
+| A01 | dash sub-questions and the question lead are `body`; 4 / 4 (+ 4 more withheld on p38) | FALSIFIED again | second review vs pipeline: question → body ×4 trusted |
+| A02 | no `instruction` block ⇒ no Process; nothing to test | n/a | 0 processes |
+| A04 | 3 photos with captions; 14 pipeline figure regions (badges, mascots); 1 caption mis-link (Lý Bí badge → «Hình 2») | FALSIFIED again | figures table |
+| A05 | header + TOC agree on Bài 8 (0.95); 18 / 28 TOC pages missing; 5 / 28 headers missed by one character class | header attachment PROVEN · TOC FALSIFIED · **regex gap found** | step 3 |
+| A06 | 0 chapters («Chủ đề») | FALSIFIED again | bridge output |
+| A07 | withheld reasons on Bài 8: colour-heavy 14, agree_text 3, agree_order 2, box_boundary 1 — none diagram/math | FALSIFIED again | TSL stats |
+| A08 | attribution has no block kind — worked around by a Dart derivation over `body` blocks | FALSIFIED · mitigated | `timeline_sources.dart` |
+| A09 | the timeline table is a figure with 5 `figure_text` labels; no cells | FALSIFIED again | p41 fig01 |
+| A10 | the check is a typed validator (`TimelineValidator`) over the lesson's own prose; regex remains only for the option asks | FALSIFIED (as the only kind) | `timeline_validator.dart` |
+| A13 | no script existed; a typed one was **generated** from the timeline + sources (7 steps) | FALSIFIED (hand-written) · new path | `history-tutor-v1` |
+| A14 | printed offset +2, all 4 pages carry a printed number | PROVEN | attach |
+| A15 | every element declares trust; chip mandatory; slice reachable only as «LÁT CẮT NGHIÊN CỨU · BẢN THỬ NGHIỆM» | PROVEN | Home card, fixture |
+| A16 | lexicon gaps on History: attribution, sub-question, «Sưu tầm» objective, story-box badge | FALSIFIED again | step 2 disagreements |
+| A17 | both LS&ĐL 5 gold lesson numbers wrong; header method right (second reviewer agrees) | FALSIFIED (gold) | step 2 |
+| A18 | journey keyed by `book#lessonNo` worked; chapters absent; Bookshelf is grade-gated ⇒ needed the Home research card | UNTESTED → PARTIAL | `researchLessons` |
+| A19 | figure-dependent question («quan sát các hình từ 1 đến 3») **trusted** and reaching the text universe — the guard missed it | FALSIFIED (in the other direction) | `figure-dependent-question-v1` |
+| A20 | 4 pages, one boundary | PROVEN | boundary |
+| A21 | crops rendered, internal only (23 files, gitignored) | UNTESTED (J.1) | — |
+| A22 | no «Em đã học»; the summary tab falls back to objectives (withheld on p38 ⇒ empty) | FALSIFIED again | VisualView summary |
+| **A23** (new) | «`TimelineSemantic` is text-derivable at its easiest» — 7 / 7 events from one trusted block with exact spans; the first anchor (179 TCN) lost to a page guard, not to the rule | **PROVEN (narrow)** | step 4 |
+| **A24** (new) | «a deterministic, non-arithmetic validator can be keyed to the lesson's own prose» — pair / order / before-after checks, source ids attached | **PROVEN (narrow)** | `timeline-order-v1` |
+| **A25** (new) | «the page that carries the lesson header is trustworthy for its own objectives» | **FALSIFIED** | p38: 0 / 15 learning blocks trusted |
+| **A26** (new) | «two OCR stacks agreeing (`text_sim` = 100) means the text is verbatim to the print» | **FALSIFIED** | attribution 3 («Đăng», «hóa»), «Tìm hiếu», heading slips — all at 100 |
+
+Round-4 count on History: PROVEN 6 (A05-header, A14, A15, A20, A23, A24) · FALSIFIED 14 (A01, A04, A05-TOC, A06, A07, A08, A09, A10, A13, A16, A17, A19, A22, A25, A26 — 15 rows, A05 counted once) · UNTESTED/PARTIAL 2 (A18, A21) · n/a 1 (A02).

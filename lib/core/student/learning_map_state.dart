@@ -32,11 +32,12 @@ enum LearningMapState {
   participation,
 
   /// 🟢 Có chạm tới bài cùng SAM (có gợi ý / có lần trả lời được chấm…) nhưng
-  /// chưa có lần nào trẻ TỰ làm ĐÚNG không cần hỗ trợ.
+  /// chưa có lần nào trẻ TỰ làm ĐÚNG **được kiểm**. ROUND 4: dữ liệu cũ có
+  /// chấm-không-dấu (`historicalUnvalidated`) cũng nằm ở đây.
   engaged,
 
-  /// 🔵 Có ít nhất một bằng chứng TỰ LÀM ĐƯỢC **đã chấm** (independentAttempt/
-  /// selfCorrection với `correct == true`).
+  /// 🔵 Có ít nhất một bằng chứng TỰ LÀM ĐƯỢC **đã kiểm** (independentAttempt/
+  /// selfCorrection với `correct == true` + dấu validator được duyệt).
   independentEvidence,
 }
 
@@ -46,24 +47,27 @@ enum LearningMapState {
 ///
 /// Thứ tự ưu tiên: tự-làm-được-đã-chấm › học cùng SAM › tự báo › chưa học.
 ///
-/// ⭐⭐ Round 3 (Founder A3): [requireValidation] `true` ⇒ «Tự làm được» CHỈ
-/// từ sự kiện mang dấu validator được đăng ký cấp năng lực
-/// (`hasApprovedValidation`); sự kiện có chấm nhưng không dấu (dữ liệu cũ)
-/// rơi xuống `engaged`. Mặc định `false` (đọc dữ liệu cũ theo luật #63) cho
-/// tới khi Founder quyết luật đọc dữ liệu cũ — PROPOSED. Dấu LẠ bị từ chối ở
+/// ⭐⭐ ROUND 4 (Founder §4 — STRICT EVIDENCE LÀ MẶC ĐỊNH): [requireValidation]
+/// mặc định `true` ⇒ «Tự làm được» CHỈ từ sự kiện mang dấu validator được
+/// đăng ký cấp năng lực (`hasApprovedValidation`). Sự kiện có chấm nhưng
+/// KHÔNG dấu (dữ liệu trước hợp đồng, emitter chưa đóng dấu) đọc là
+/// `historicalUnvalidated` ⇒ rơi xuống 🟢 `engaged` (đã học cùng SAM — chưa
+/// có lần tự làm được ĐƯỢC KIỂM). Không viết lại log; không xoá gì.
+/// `requireValidation: false` là LUẬT ĐỌC CŨ tường minh (#63) — chỉ để đối
+/// chiếu/audit, không dùng cho màn hình trẻ/phụ huynh. Dấu LẠ bị từ chối ở
 /// CẢ HAI chế độ.
 LearningMapState learningMapStateFor({
   required String sourceDocumentId,
   required int lessonNo,
   required Iterable<LearningEvent> allEvents,
-  bool requireValidation = false,
+  bool requireValidation = true,
 }) {
   final matching = allEvents.where((e) =>
       e.sourceDocumentId == sourceDocumentId && e.lessonNo == lessonNo);
   if (matching.isEmpty) return LearningMapState.unseen;
   if (matching.any((e) =>
-      e.isValidatedIndependentSuccess &&
-      (!requireValidation || e.hasApprovedValidation))) {
+      e.isValidatedIndependentSuccess ||
+      (!requireValidation && e.isLegacyUnstampedSuccess))) {
     return LearningMapState.independentEvidence;
   }
   // Còn lại: có sự kiện KHÔNG phải tự báo (gợi ý, trả lời có chấm nhưng chưa

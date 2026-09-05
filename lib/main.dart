@@ -117,10 +117,26 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (!c.isLoaded) return null;
     for (final book in c.booksWithWorkspace) {
       for (final d in c.docsForBook(book)) {
-        if (d.grade == p.grade) return d;
+        if (d.grade == p.grade && !WorkspaceCatalog.isResearchSlot(d)) {
+          return d;
+        }
       }
     }
     return null;
+  }
+
+  /// ⭐ ROUND 4 (Lane C) — lát cắt NGHIÊN CỨU (Golden Slice #2, LS&ĐL 5 Bài 8)
+  /// hiện cho MỌI lớp, thẻ riêng ghi «sách lớp 5» — để tới được lát cắt trên
+  /// máy của học sinh lớp 6 mà không tạo hồ sơ mới (quyết định hiển thị tạm
+  /// cho vòng kiểm chứng; Founder chốt cách xử lí khác lớp sau).
+  List<LessonDocument> _researchLessons() {
+    final c = WorkspaceCatalog.shared;
+    if (!c.isLoaded) return const [];
+    return [
+      for (final book in c.booksWithWorkspace)
+        for (final d in c.docsForBook(book))
+          if (WorkspaceCatalog.isResearchSlot(d)) d,
+    ];
   }
 
   Future<void> _loadLessonIndex() async {
@@ -510,6 +526,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         onStartRecommendation: (rec) =>
                             _startRecommendation(context, data, rec),
                         workspaceLesson: _workspaceLessonFor(_profile!),
+                        researchLessons: _researchLessons(),
                         onOpenWorkspaceLesson: (doc) async {
                           await Navigator.of(context).push(MaterialPageRoute(
                               builder: (_) => LessonWorkspaceScreen(

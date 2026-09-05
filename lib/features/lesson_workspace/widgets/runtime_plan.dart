@@ -53,6 +53,13 @@ RuntimePlan? planForDoc(LessonDocument doc, {String? learnerId}) {
       final b = doc.blockById(id);
       return b == null ? null : LessonDocument.textOf(b);
     },
+    // ⭐ ROUND 4 (A-runtime R4.10): chỉ mục trích dẫn của CHÍNH bài này. Mỗi
+    // «…» trong gợi ý / phản hồi / scaffold phải là chữ NGUYÊN VĂN của một
+    // block chữ trong bài; không truyền vào ⇒ không kiểm được ⇒ mọi bước như
+    // vậy ở lại nhãn «kịch bản thử nghiệm» (fail closed). Truyền vào là điều
+    // kiện để một gợi ý trích đúng sách được nâng lên «runtime có kiểm» —
+    // và để «Sách viết» chỉ đúng block sách đã kiểm.
+    quoteIndex: SourceQuoteIndex.fromLessonDocument(doc),
   );
 }
 

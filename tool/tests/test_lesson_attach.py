@@ -200,7 +200,7 @@ class RegistryTests(unittest.TestCase):
         self.assertFalse(reg.check_upstream('tvReadings', 'b2', 23, 12))
         self.assertTrue(reg.check_upstream('tvReadings', 'b2', 1, 30))       # mismatch: kept + flagged
         s = reg.summary()
-        self.assertEqual(s['rule'], 'capped-toc-v1')
+        self.assertEqual(s['rule'], la.RULE)     # round 4: capped-toc-v2 (systematic TOC offset); the v1 decisions below are unchanged
         self.assertEqual(s['counts']['khoaExperiments'], {la.ATTACHED: 1, la.SUCCESSOR_UNRANGED: 1, la.BEYOND_CAP: 1})
         self.assertEqual(s['counts']['tvReadings'], {la.RANGE_OK: 1, la.NOT_CANONICAL: 1, la.RANGE_MISMATCH: 1})
         self.assertEqual((s['dropped'], s['flagged'], s['moved']), (3, 1, 0))

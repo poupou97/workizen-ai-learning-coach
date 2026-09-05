@@ -52,8 +52,11 @@ LearningEvent _ev(EvidenceKind k,
       validation: validation,
     );
 
-LearningMapState _state(List<LearningEvent> es, {bool strict = false}) =>
-    learningMapStateFor(
+/// `strict == null` ⇒ dùng MẶC ĐỊNH THẬT của hàm (ROUND 4: siết); truyền
+/// `false` chỉ để kiểm luật đọc-cũ tường minh.
+LearningMapState _state(List<LearningEvent> es, {bool? strict}) => strict == null
+    ? learningMapStateFor(sourceDocumentId: _book, lessonNo: 17, allEvents: es)
+    : learningMapStateFor(
         sourceDocumentId: _book,
         lessonNo: 17,
         allEvents: es,
@@ -206,15 +209,12 @@ void main() {
     /// Emitter CÓ CHẤM nhưng CHƯA đóng dấu — ngoài quyền sửa của lane
     /// A-runtime (Lane B / Founder). Danh sách chỉ được NGẮN ĐI.
     const unstampedAllowlist = {
-      // Deep (Toán 5) — chấm bằng FractionProblem.checkAnswer ⇒ cần
-      // `validation: fraction-check-v1` (một dòng, Lane B / coordinator).
-      'lib/features/assessment/assessment_screen.dart',
+      // ROUND 4 (Lane B): assessment_screen.dart đóng dấu `fraction-check-v1`
+      // và mission_data.dart (demo) đóng dấu — hai mục đã RÚT khỏi danh sách.
       // Scale — khoá `correctOption` của pack: KHÔNG bịa validator; Founder
       // quyết có đăng ký «pack-option-key» hay để participation.
       'lib/features/shell/reader_screen.dart',
       'lib/features/shell/quiz_select_screen.dart',
-      // Demo domain của Home (dữ liệu mẫu, không phải bằng chứng thật).
-      'lib/features/mission/mission_data.dart',
     };
 
     test('⭐⭐ LearningEvent( với correct ≠ null ⇒ có validation:, hoặc nằm '
@@ -268,22 +268,36 @@ void main() {
           1);
     });
 
-    test('⭐ chế độ SIẾT: có chấm nhưng KHÔNG dấu (dữ liệu cũ) ⇒ engaged, '
-        'policy validated-only ⇒ noOp; chế độ thường vẫn đọc theo luật #63',
-        () {
+    test('⭐⭐ ROUND 4 — SIẾT LÀ MẶC ĐỊNH: có chấm nhưng KHÔNG dấu (dữ liệu cũ) '
+        '⇒ historicalUnvalidated ⇒ engaged, BKT noOp; luật đọc-cũ chỉ khi gọi '
+        'tường minh (audit), và log không đổi', () {
       final legacy = _ev(EvidenceKind.independentAttempt, correct: true);
       expect(legacy.isLegacyUnstampedGrade, isTrue);
-      expect(_state([legacy]), LearningMapState.independentEvidence,
-          reason: 'luật đọc dữ liệu cũ (PROPOSED, chờ Founder)');
+      expect(legacy.isHistoricalUnvalidated, isTrue);
+      expect(legacy.readClass, EvidenceReadClass.historicalUnvalidated);
+      expect(_state([legacy]), LearningMapState.engaged,
+          reason: '⭐⭐ Founder §4: không viết lại lịch sử để tạo sự thật mới');
       expect(_state([legacy], strict: true), LearningMapState.engaged);
+      expect(_state([legacy], strict: false), LearningMapState.independentEvidence,
+          reason: 'luật đọc-cũ (#63) chỉ khi GỌI TƯỜNG MINH — audit/đối chiếu');
       final log = EvidenceLog(skillCaseId: 'c', events: [legacy]);
+      expect(replayMastery(log, BktParams.freeResponse).evidenceCount, 0,
+          reason: '⭐⭐ mặc định = ValidatedOnlyBktPolicy');
       expect(
           replayMastery(log, BktParams.freeResponse,
                   policy: const ValidatedOnlyBktPolicy())
               .evidenceCount,
           0);
-      expect(replayMastery(log, BktParams.freeResponse).evidenceCount, 1);
+      expect(
+          replayMastery(log, BktParams.freeResponse,
+                  policy: const ConservativeBktPolicy())
+              .evidenceCount,
+          1,
+          reason: 'luật cũ giữ nguyên id + hành vi — không diễn giải lại lặng lẽ');
       expect(const ValidatedOnlyBktPolicy().policyId, 'validated-only-bkt-v1');
+      expect(const ConservativeBktPolicy().policyId, 'conservative-bkt-v1');
+      expect(defaultEvidencePolicy.policyId, 'validated-only-bkt-v1');
+      expect(log.events.single.validation, isNull, reason: 'không đóng dấu hộ');
     });
 
     test('participation có dấu candidate-gate ⇒ vẫn participation ở cả hai '
@@ -293,6 +307,43 @@ void main() {
       final p = _ev(EvidenceKind.participation, validation: gate);
       expect(_state([p]), LearningMapState.participation);
       expect(_state([p], strict: true), LearningMapState.participation);
+    });
+  });
+
+  group('5. ROUND 4 — lớp đọc (EvidenceReadClass): mỗi sự kiện đúng MỘT lớp', () {
+    test('⭐ phân lớp đúng cho từng dạng sự kiện', () {
+      expect(_ev(EvidenceKind.independentAttempt, correct: true, validation: _fraction).readClass,
+          EvidenceReadClass.validatedCompetence);
+      expect(_ev(EvidenceKind.independentAttempt, correct: false, validation: _fraction).readClass,
+          EvidenceReadClass.validatedCompetence,
+          reason: 'sai-có-kiểm vẫn là bằng chứng đã kiểm (BKT đọc correct)');
+      expect(_ev(EvidenceKind.independentAttempt, correct: true).readClass,
+          EvidenceReadClass.historicalUnvalidated);
+      expect(_ev(EvidenceKind.postHintSuccess, correct: true).readClass,
+          EvidenceReadClass.historicalUnvalidated);
+      expect(_ev(EvidenceKind.independentAttempt, correct: true, validation: _rogue).readClass,
+          EvidenceReadClass.rejectedValidation);
+      expect(_ev(EvidenceKind.participation).readClass, EvidenceReadClass.participation);
+      expect(_ev(EvidenceKind.independentAttempt).readClass, EvidenceReadClass.participation,
+          reason: 'D1: independentAttempt + correct null = tự báo cũ');
+      expect(
+          _ev(EvidenceKind.participation,
+                  validation: const EvidenceValidation(
+                      validatorId: 'candidate-gate-v1', validatorVersion: '1'))
+              .readClass,
+          EvidenceReadClass.participation);
+      expect(_ev(EvidenceKind.hintRequested).readClass, EvidenceReadClass.unscored);
+      expect(_ev(EvidenceKind.hintShown).readClass, EvidenceReadClass.unscored);
+    });
+
+    test('⭐⭐ chỉ validatedCompetence mới «tự làm được»; historicalUnvalidated '
+        'không bao giờ — kể cả selfCorrection', () {
+      for (final k in [EvidenceKind.independentAttempt, EvidenceKind.selfCorrection]) {
+        expect(_ev(k, correct: true, validation: _fraction).isValidatedIndependentSuccess, isTrue);
+        expect(_ev(k, correct: true).isValidatedIndependentSuccess, isFalse, reason: k.name);
+        expect(_ev(k, correct: true).isLegacyUnstampedSuccess, isTrue, reason: k.name);
+        expect(_ev(k, correct: true, validation: _rogue).isLegacyUnstampedSuccess, isFalse);
+      }
     });
   });
 
