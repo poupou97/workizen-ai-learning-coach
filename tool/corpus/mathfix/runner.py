@@ -14,7 +14,9 @@ import json
 import os
 
 from . import detect as D
+from . import expression as X
 from . import extract as E
+from . import sci_notation as SN
 from . import validate as V
 from .inkmask import InkMask
 from .tokens import load_tokens, median_height
@@ -53,7 +55,11 @@ def page_report(book, page, sdm=None, dpi=300):
     out = dict(book=book, page=page, dpi=dpi, mask=[mask.width, mask.height],
                median_text_height=round(mh, 5),
                regions=[_region_row(r) for r in regions],
-               token_kinds=_token_census(tokens), blocks=[])
+               token_kinds=_token_census(tokens),
+               destroyed_exponents=[dict(text=t.text, bbox=[t.x, t.y, t.w, t.h],
+                                         matched=f.matched, expected=f.expected_exponent)
+                                    for t in tokens for f in SN.find_destroyed_exponents(t.text)],
+               blocks=[])
     if not sdm:
         return out
 
@@ -88,6 +94,28 @@ def page_report(book, page, sdm=None, dpi=300):
                                    evidence=r.evidence) for r in results]
         row['disposition'] = ('VALIDATED REPAIR' if (verdict == 'RESTORE' and row['eligible'])
                               else 'WITHHELD')
+
+        # The canonical object. A refused region still produces one — named, boxed, crop-bearing —
+        # so a consumer knows a FORMULA was withheld here rather than reading «empty, no letters».
+        expr = X.MathExpression(
+            source_block_id=blk.get('id'), book=book, page_pdf=page,
+            page_printed=sdm.get('printed_page'), bbox=tuple(bbox),
+            ast=(cand.ast if row['disposition'] == 'VALIDATED REPAIR' else None),
+            observations=tuple(X.TokenGeometry(
+                text=o.get('text', ''), bbox=tuple(o['bbox']),
+                source=('apple-vision-ocr-line' if o['kind'] == 'ocr_line' else 'page-raster-300dpi'),
+                index=o.get('index', -1), conf=o.get('conf', 1.0))
+                for o in cand.original_observations),
+            source_geometry=X.geometry_from_sdm_block(blk, btoks),
+            original_text=blk.get('text'), rule_id=cand.rule_id,
+            validations=tuple(row['validations']),
+            provenance=dict(lane='A2', pipeline=sdm.get('pipeline'),
+                            detector='mathfix.stacked-fraction-raster-v1'),
+            disposition=(X.VALIDATED_REPAIR if row['disposition'] == 'VALIDATED REPAIR'
+                         else X.WITHHELD),
+            reasons=tuple([cand.reason] if cand.reason else
+                          [r['validator_id'] for r in row['validations'] if r['verdict'] == 'FAIL']))
+        row['math_expression'] = expr.to_json()
         out['blocks'].append(row)
     return out
 

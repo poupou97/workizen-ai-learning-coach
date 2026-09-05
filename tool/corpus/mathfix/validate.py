@@ -146,6 +146,55 @@ def ink_accounted_v1(candidate, mask, bbox, text_height, bar_len):
                             'ink-accounted-v1')
 
 
+# ---------------------------------------------------------------- 2b · the atoms form an expression
+def structure_grammar_v1(candidate):
+    """Do the printed atoms form a whole expression?
+
+    Independent of the raster: it asks about grammar, not pixels. That matters because it catches
+    the two shapes the ink check can miss — an expression that ENDS on an operator («b) 10 +», the
+    round-4 defect) and two operands with no operator between them («d) 20/18 2/5», the operator the
+    OCR dropped) — even on a page whose ink accounting happens to come out clean.
+    """
+    if getattr(candidate, 'ast', None) is not None:
+        return ValidationResult('PASS', dict(ast_kind=candidate.ast.kind), 'structure-grammar-v1')
+    return ValidationResult('FAIL', dict(reason=getattr(candidate, 'ast_error', '') or 'no structure'),
+                            'structure-grammar-v1')
+
+
+# ---------------------------------------------------------------- 2c · the operator is that operator
+def operator_raster_v1(candidate, mask, text_height):
+    """Every printed operator mark must LOOK like the operator the OCR named.
+
+    Completeness and provenance do not imply identity: on Toán 4 tập hai p118 a printed «×» came
+    back as the token «-», every other check passed, and the candidate said `16/21 - 3/5`. This is
+    the check that refuses it. Operators whose shape cannot be judged ABSTAIN, and abstention is
+    reported, never counted as support.
+    """
+    from . import glyphs
+    ops = getattr(candidate, 'operators', ()) or ()
+    if not ops or mask is None:
+        return ValidationResult('NOT_APPLICABLE', dict(reason='no operator mark to check'),
+                                'operator-raster-v1')
+    checked, mismatch, abstained = [], [], 0
+    for a in ops:
+        shape = glyphs.classify(mask, a.box, text_height)
+        if shape is None:
+            abstained += 1
+            continue
+        checked.append(dict(op=a.payload, shape=shape))
+        if not glyphs.matches(shape, a.payload):
+            mismatch.append(dict(op=a.payload, printed_shape=shape,
+                                 bbox=[round(v, 5) for v in a.box]))
+    if mismatch:
+        return ValidationResult('FAIL', dict(mismatched=mismatch, checked=len(checked)),
+                                'operator-raster-v1')
+    if not checked:
+        return ValidationResult('NOT_APPLICABLE', dict(reason='every operator abstained',
+                                                       abstained=abstained), 'operator-raster-v1')
+    return ValidationResult('PASS', dict(checked=checked, abstained=abstained),
+                            'operator-raster-v1')
+
+
 # ---------------------------------------------------------------- 3 · no character was invented
 def digit_provenance_v1(candidate):
     from .extract import digit_provenance
@@ -241,6 +290,8 @@ def validate(candidate, mask, bbox, text_height, bar_len):
     if not candidate.proposed_value:
         return 'WITHHOLD', []
     results = [ink_accounted_v1(candidate, mask, bbox, text_height, bar_len),
+               structure_grammar_v1(candidate),
+               operator_raster_v1(candidate, mask, text_height),
                digit_provenance_v1(candidate),
                arith_selfcheck_v1(candidate)]
     for r in candidate.regions:

@@ -21,6 +21,8 @@ Two repair rules live here:
 import re
 from dataclasses import dataclass, field
 
+from . import nodes as A
+from . import build as BUILD
 from .tokens import median_height
 
 # Enumerators («a)», «b)», «1.») and operators are the only non-digit characters a repaired maths
@@ -43,7 +45,14 @@ class Piece:
 
 @dataclass
 class Candidate:
-    """A proposed value plus everything needed to audit it. Never replaces a source observation."""
+    """A proposed value plus everything needed to audit it. Never replaces a source observation.
+
+    `ast` is the canonical object; `proposed_value` is its text projection, kept because the repair
+    framework's `RepairCandidate.proposed_value` is a scalar and because a diff of two strings is
+    what a human reviewer reads. When the atoms do not form a printed expression, `ast` is None and
+    `ast_error` says why — the candidate is still built so that every other validator still runs and
+    its evidence is still recorded, but `validate` will refuse it on the grammar alone.
+    """
     rule_id: str
     proposed_value: str
     original_observations: list
@@ -51,6 +60,9 @@ class Candidate:
     pieces: list = field(default_factory=list)
     regions: list = field(default_factory=list)
     reason: str = ''               # why no value was proposed, when `proposed_value` is ''
+    ast: object = None
+    ast_error: str = ''
+    operators: tuple = ()          # the printed operator marks, with their boxes, for raster checking
 
 
 def observation_of_token(t):
@@ -75,7 +87,8 @@ def fraction_candidate(region):
         original_observations=[observation_of_token(n), observation_of_token(d),
                                observation_of_bar(region.bar)],
         supporting_signals=['raster:vinculum', 'ocr:numerator_digit_run', 'ocr:denominator_digit_run'],
-        regions=[region])
+        regions=[region],
+        ast=A.Frac(A.Num(n.stripped), A.Num(d.stripped)))
 
 
 def _is_math_token(t):
@@ -127,12 +140,30 @@ def math_line_candidate(block_tokens, regions, mask):
         pieces.append(Piece(f.proposed_value, r.bar.x0, 'fraction', f.original_observations))
     pieces.sort(key=lambda p: p.x)
     value = ' '.join(p.text for p in pieces)
+
+    # The canonical object. Atoms come from the SAME observations the string does, so the AST is
+    # not a second reading of the page — it is the structure of the one reading there is.
+    tree, err, operators = None, '', []
+    try:
+        atoms = []
+        for t in rest:
+            atoms.extend(BUILD.atoms_of_token(t.stripped, t.x0, t.x1, t.y0, t.y1))
+        for r in regions:
+            atoms.append(BUILD.Atom(r.bar.x0, 'node',
+                                    A.Frac(A.Num(r.numerator.stripped), A.Num(r.denominator.stripped)),
+                                    box=r.bbox))
+        tree = BUILD.build_row(atoms)
+        operators = [a for a in atoms if a.kind == 'op' and a.box]
+    except BUILD.Unparseable as exc:
+        err = str(exc)
+        operators = []
+
     return Candidate(
         rule_id='math-line-v1',
         proposed_value=re.sub(r'\s+', ' ', value).strip(),
         original_observations=[o for p in pieces for o in p.observations],
         supporting_signals=['raster:vinculum', 'ocr:token_geometry', 'layout:single_baseline'],
-        pieces=pieces, regions=regions)
+        pieces=pieces, regions=regions, ast=tree, ast_error=err, operators=tuple(operators))
 
 
 # ---------------------------------------------------------------- provenance

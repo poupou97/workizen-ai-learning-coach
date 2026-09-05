@@ -76,8 +76,8 @@ def _signals(results):
     Layer B is layout/geometry (the printed bar), layer C the deterministic checks. A validator that
     returned NOT_APPLICABLE ABSTAINS — it is recorded, never counted as support.
     """
-    layer = {'vinculum-raster-v1': 'B', 'ink-accounted-v1': 'B',
-             'digit-provenance-v1': 'C', 'arith-selfcheck-v1': 'C'}
+    layer = {'vinculum-raster-v1': 'B', 'ink-accounted-v1': 'B', 'operator-raster-v1': 'B',
+             'structure-grammar-v1': 'C', 'digit-provenance-v1': 'C', 'arith-selfcheck-v1': 'C'}
     out = []
     for r in results:
         verdict = {'PASS': MODEL.SignalVerdict.SUPPORTS,
