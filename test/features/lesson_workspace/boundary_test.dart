@@ -211,7 +211,9 @@ void main() {
     await t.pumpAndSettle();
     expect(find.text('Con đã học cùng SAM phần này'), findsOneWidget);
       // về tận giá sách (nút trong thẻ kết của SAM, không phải thẻ đề xuất)
-      await t.tap(find.widgetWithText(TextButton, 'Về mục lục'));
+      final back = find.widgetWithText(TextButton, 'Về mục lục');
+    await t.ensureVisible(back);
+    await t.tap(back);
       await t.pumpAndSettle();
       await t.tap(find.byTooltip('Về sách'));
       await t.pumpAndSettle();

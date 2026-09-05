@@ -75,19 +75,25 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   @override
   Widget build(BuildContext context) {
     final next = nextActionFor(doc: doc, seen: _seen);
+    // Nokia xoay ngang (n2 D3): khung cố định (tiêu đề + chip + tab + đề
+    // xuất) chiếm ~2/3 chiều cao, thân View còn ~225 px. Chế độ GỌN khi màn
+    // ngang: tiêu đề 1 dòng, lý do đề xuất 1 dòng, bỏ mascot nhỏ — không bỏ
+    // phần tử nào bắt buộc (chip, ba tab, đề xuất vẫn còn).
+    final landscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     return Scaffold(
       backgroundColor: WalColors.surface,
       body: SafeArea(
         child: Column(
           children: [
-            _header(context),
+            _header(context, compact: landscape),
             if (doc.isFixture)
               Padding(
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   WalSpacing.md,
                   0,
                   WalSpacing.md,
-                  WalSpacing.sm,
+                  landscape ? WalSpacing.xs : WalSpacing.sm,
                 ),
                 child: FixtureChip(trust: doc.trust),
               ),
@@ -102,7 +108,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                 WalSpacing.md,
                 0,
               ),
-              child: _nextActionCard(next),
+              child: _nextActionCard(next, compact: landscape),
             ),
             Expanded(child: _body()),
           ],
@@ -111,7 +117,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     );
   }
 
-  Widget _header(BuildContext context) => Padding(
+  Widget _header(BuildContext context, {bool compact = false}) => Padding(
     padding: const EdgeInsets.fromLTRB(
       WalSpacing.xs,
       WalSpacing.xs,
@@ -135,10 +141,10 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
             children: [
               Text(
                 doc.lessonLabel,
-                maxLines: 2,
+                maxLines: compact ? 1 : 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: WalType.title,
+                style: TextStyle(
+                  fontSize: compact ? WalType.body + 1 : WalType.title,
                   fontWeight: FontWeight.w700,
                   color: WalColors.ink,
                   height: 1.2,
@@ -209,9 +215,9 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     ),
   );
 
-  Widget _nextActionCard(NextAction next) => Container(
+  Widget _nextActionCard(NextAction next, {bool compact = false}) => Container(
     key: LessonWorkspaceScreen.nextActionKey,
-    padding: const EdgeInsets.all(WalSpacing.sm),
+    padding: EdgeInsets.all(compact ? WalSpacing.xs : WalSpacing.sm),
     decoration: BoxDecoration(
       color: WalColors.surfaceLavender,
       borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
@@ -219,13 +225,15 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Image.asset(
-          'assets/mascot/sam-probe@64.png',
-          width: densityOf(context).mascotChip * 0.7,
-          height: densityOf(context).mascotChip * 0.7,
-          errorBuilder: (_, _, _) => const SizedBox.shrink(),
-        ),
-        const SizedBox(width: WalSpacing.sm),
+        if (!compact) ...[
+          Image.asset(
+            'assets/mascot/sam-probe@64.png',
+            width: densityOf(context).mascotChip * 0.7,
+            height: densityOf(context).mascotChip * 0.7,
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+          ),
+          const SizedBox(width: WalSpacing.sm),
+        ],
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,6 +248,8 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
               ),
               Text(
                 next.reason,
+                maxLines: compact ? 1 : null,
+                overflow: compact ? TextOverflow.ellipsis : null,
                 style: const TextStyle(
                   fontSize: 13,
                   color: WalColors.ink,

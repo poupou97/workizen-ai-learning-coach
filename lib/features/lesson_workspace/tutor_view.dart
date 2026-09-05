@@ -72,16 +72,32 @@ class _TutorViewState extends State<TutorView> {
     super.dispose();
   }
 
+  /// Lượt SAM mới nhất — cuộn cho nó lên ĐẦU thân màn, không cuộn tới đáy:
+  /// ở màn thấp (Nokia xoay ngang, n2 D6) cuộn tới đáy chỉ còn thấy nút
+  /// «Gợi ý», câu hỏi và các lựa chọn bị đẩy khuất phía trên.
+  final _latestSamKey = GlobalKey();
+
   void _after(VoidCallback fn) {
     setState(fn);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_scroll.hasClients) return;
-      _scroll.animateTo(
-        _scroll.position.maxScrollExtent,
+      final ctx = _latestSamKey.currentContext;
+      if (ctx == null || !mounted) return;
+      Scrollable.ensureVisible(
+        ctx,
+        alignment: 0.0,
         duration: WalMotion.gentle,
         curve: Curves.easeOut,
       );
     });
+  }
+
+  /// Chỉ số lượt SAM (không phải «next») mới nhất trong transcript.
+  static int _latestSamIndex(TutorRunner r) {
+    for (var i = r.transcript.length - 1; i >= 0; i--) {
+      final t = r.transcript[i];
+      if (t.isSam && t.kind != TurnKind.next) return i;
+    }
+    return -1;
   }
 
   void _submit(String answer) {
@@ -173,8 +189,11 @@ class _TutorViewState extends State<TutorView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final t in r.transcript) ...[
-                  _turn(t),
+                for (var i = 0; i < r.transcript.length; i++) ...[
+                  KeyedSubtree(
+                    key: i == _latestSamIndex(r) ? _latestSamKey : null,
+                    child: _turn(r.transcript[i]),
+                  ),
                   const SizedBox(height: WalSpacing.sm),
                 ],
                 if (r.finished || r.current is NextStep) _endCard(r),
