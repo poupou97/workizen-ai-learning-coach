@@ -14,7 +14,7 @@ import ft_audit_score as fs  # noqa: E402
 class WilsonTests(unittest.TestCase):
     def test_wilson_matches_closed_form_for_zero_failures(self):
         p, lo, hi = fs.wilson(0, 100)
-        self.assertEqual(p, 0.0); self.assertEqual(lo, 0.0)
+        self.assertEqual(p, 0.0); self.assertAlmostEqual(lo, 0.0, places=12)     # centre − half is a ~1e-17 float, not exactly 0
         self.assertAlmostEqual(hi, fs.Z ** 2 / (100 + fs.Z ** 2), places=9)
 
     def test_wilson_known_value(self):
