@@ -93,6 +93,29 @@ def score_page(gold, sdm, attach_rec):
     r['attach_toc_ok'] = (r['lesson_toc'] == gl)
     r['gold_set'] = gold.get('gold_set', 'tc-v1'); r['held_out'] = bool(gold.get('held_out'))
     r['trust_reasons'] = dict(Counter(x for b in v1['blocks'] for x in (b.get('reasons') or []) if b['text']))
+    # Round 4 — narrowest reading of teaching-critical fidelity: among TRUSTED matched gold blocks that carry digits,
+    # how many deliver a different digit/operator sequence than the gold text (gold text present only on some pages)
+    enum_re = tc_score.re.compile(r'^\s*(?:(?:HĐ|Bài|Bước)\s*\d+[.:]?|\d{1,2}[.)]|[a-dA-D][.)])\s*')
+    dn = dw = 0; wrong_ids = []
+    for g in gold['blocks']:
+        c = m.get(g['id'])
+        if not c or not g.get('text') or c.get('trusted') is not True:
+            continue
+        gd = tc_score.digits_seq(enum_re.sub('', tc_score.nfc(g['text']), count=1))
+        if not gd:
+            continue
+        dn += 1
+        ct = c['text']
+        if len(tc_score.nfc(ct)) < 0.7 * len(tc_score.nfc(g['text'])):   # same extension rule as tc_score.score: a gold block that spans several pipeline blocks
+            for c2 in v1['blocks']:
+                if c['order'] < c2['order'] <= c['order'] + 8 and c2['text']:
+                    ct += ' ' + c2['text']
+                    if len(tc_score.nfc(ct)) >= len(tc_score.nfc(g['text'])):
+                        break
+        cd = tc_score.digits_seq(enum_re.sub('', tc_score.nfc(ct), count=1))
+        if not (gd == cd[:len(gd)] or all(d in cd for d in gd)):
+            dw += 1; wrong_ids.append(g['id'])
+    r['digits_trusted_n'] = dn; r['digits_trusted_wrong'] = dw; r['digits_trusted_wrong_ids'] = wrong_ids
     r['blocks_trusted_all'] = sum(1 for b in v1['blocks'] if b.get('trusted') is True and b['text'])
     r['blocks_withheld_all'] = sum(1 for b in v1['blocks'] if b.get('trusted') is False and b['text'])
     return r
@@ -120,7 +143,9 @@ def aggregate(rows, name):
     for r in rs:
         reasons.update(r['trust_reasons'])
     att_h = [r['attach_header']['ok'] for r in rs if r['attach_header']['ok'] is not None]
+    dtn = sum(r.get('digits_trusted_n', 0) for r in rs); dtw = sum(r.get('digits_trusted_wrong', 0) for r in rs)
     return dict(name=name, pages=len(rs), learning_blocks=L, trusted=T, coverage=round(T / max(1, L), 3), tlsr=round(sum(r['tlsr'] * r['learning_blocks'] for r in rs) / max(1, L), 3),
+                digits_trusted_n=dtn, digits_trusted_wrong=dtw, digits_trusted_wrong_rate=(round(dtw / dtn, 4) if dtn else None),
                 false_trusted=W, ftr=round(W / max(1, T), 4), safe_rejected=sum(r['safe_rejected'] for r in rs), wrong_kinds=dict(Counter(k for r in rs for _, ks in r['wrong_examples'] for k in ks)),
                 found=mean('found'), order=mean('order'), meaning_inversions=sum(r['order_meaning_inversions'] for r in rs), text_acc=mean('text_acc'), cer_notone=mean('cer_notone'), cer_nodiacritic=mean('cer_nodiacritic'),
                 fidelity=mean('fidelity'), splices=sum(r['splices'] for r in rs), caption_assoc=mean('caption_assoc'), table_role=mean('table_role'), formula_role=mean('formula_role'), digits_ok=mean('digits_ok'), provenance=mean('provenance_bbox'),
@@ -162,12 +187,12 @@ def main():
     if a.json:
         json.dump(out, open(a.json, 'w'), ensure_ascii=False, indent=1)
     L = [f'# TC-v2 pipeline {a.pipeline} on the gold set (MEASURED)', '',
-         '| set | pages | learning blk | trusted (cov) | TLSR | false trusted | FTR | safe rej | found | order | inv | text acc | CER no-tone | fidelity | splices | CTE | CTE pages | attach TOC ok | attach header ok |',
-         '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|']
+         '| set | pages | learning blk | trusted (cov) | TLSR | false trusted | FTR | safe rej | found | order | inv | text acc | CER no-tone | fidelity | splices | CTE | CTE pages | attach TOC ok | attach header ok | trusted digit blocks wrong |',
+         '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|']
     for k, v in agg.items():
         if not v.get('pages'):
             continue
-        L.append(f"| {k} | {v['pages']} | {v['learning_blocks']} | {v['trusted']} ({v['coverage']:.3f}) | {v['tlsr']:.3f} | {v['false_trusted']} | {v['ftr']:.4f} | {v['safe_rejected']} | {fmt(v['found'])} | {fmt(v['order'])} | {v['meaning_inversions']} | {fmt(v['text_acc'])} | {fmt(v['cer_notone'])} | {fmt(v['fidelity'])} | {v['splices']} | {v['cte_total']} | {v['cte_pages']} | {v['attach_toc_ok']}/{v['pages']} | {v['attach_header_ok']}/{v['attach_header_n']} |")
+        L.append(f"| {k} | {v['pages']} | {v['learning_blocks']} | {v['trusted']} ({v['coverage']:.3f}) | {v['tlsr']:.3f} | {v['false_trusted']} | {v['ftr']:.4f} | {v['safe_rejected']} | {fmt(v['found'])} | {fmt(v['order'])} | {v['meaning_inversions']} | {fmt(v['text_acc'])} | {fmt(v['cer_notone'])} | {fmt(v['fidelity'])} | {v['splices']} | {v['cte_total']} | {v['cte_pages']} | {v['attach_toc_ok']}/{v['pages']} | {v['attach_header_ok']}/{v['attach_header_n']} | {v['digits_trusted_wrong']}/{v['digits_trusted_n']} |")
     L += ['', '## Role Layer — precision / recall per role (matched blocks; "(n)" = gold blocks of that role)', '']
     for k, v in agg.items():
         if not v.get('pages'):

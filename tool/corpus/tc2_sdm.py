@@ -16,9 +16,11 @@ SDM block (superset of TC-11 §2):
   conflict}, guards[] (reason codes that fired), trust {status TRUSTED|WITHHELD|CONFLICT,
   reasons[]}, learning (bool), refers_figure, heading_path[], lesson (filled by tc2_attach).
 
-Reason codes (guards): agree_text · agree_order · role_conflict · math_guard · empty_block ·
-furniture (page number / running head) · box_boundary · figure_dependent · answer_leak ·
-teacher_text · page_feature:color_heavy · page_feature:diagram · figure_text · low_ocr_conf.
+Reason codes (guards): agree_text · agree_order · agree_numbers (round 4: the two OCR stacks read different
+digits for the same text) · role_conflict · math_guard · unit_guard · chem_guard (round 4: flattened unit
+exponents / chemical subscripts) · empty_block · furniture (page number / running head) · box_boundary ·
+figure_dependent · answer_leak · teacher_text · page_feature:color_heavy · page_feature:diagram ·
+figure_text · low_ocr_conf.
 Informational (never withhold): enumerator_restored · refers_figure.
 
 Usage (bake-off venv python — rapidfuzz + numpy + pymupdf):
@@ -207,6 +209,16 @@ NUM_SEC = re.compile(r'^\s*\d{1,2}[.)]\s+\S')
 FIG_REF = re.compile(r'\b(hình|bảng|sơ đồ|biểu đồ|lược đồ|đồ thị)\s*\d|\b(hình|bảng|sơ đồ)\s+(bên|trên|dưới|sau|dưới đây|sau đây)\b|\btrong (các )?hình\b|\bở hình\b', re.IGNORECASE)
 FRONT_MATTER = re.compile(r'^\s*(MỤC LỤC|Mục lục|LỜI NÓI ĐẦU|Lời nói đầu|HƯỚNG DẪN SỬ DỤNG SÁCH|BẢNG TRA CỨU|Bảng tra cứu|GIẢI THÍCH THUẬT NGỮ|PHỤ LỤC|Phụ lục|BẢNG THUẬT NGỮ)')
 MATH = tc_cascade.MATH
+# Round 4 (failure class 2: formula / number / unit fidelity) — deterministic guards, fail closed, never a guess:
+#   UNIT_EXP  a length unit whose exponent every text-line OCR flattens («m2», «cm3», «1 360 m2» → the audit measured
+#             «1 360 m²→1 360 m» and «m²→m?/m₴») — a block carrying such a token is withheld unless a parser labelled it
+#             FORMULA/TABLE (same rule as the math guard).
+#   CHEM      inline chemical formulas whose subscripts are flattened or dropped («AgNO₃»→«AgNO,», «NH₃»→«NH,», «H₂O»→
+#             «H,O», «CO2»): an element-symbol run glued to a digit, or followed by a comma before a concentration
+#             («AgNO, 1%») or another element symbol («H,O»).
+UNIT_EXP = re.compile(r'(?<![A-Za-zÀ-ỹ])(?:m|cm|dm|km|mm)[23](?![\d.,])')
+CHEM = re.compile(r'\b(?:[A-Z][a-z]?){1,4}\d(?:[A-Z][a-z]?\d?)*\b|\b(?:[A-Z][a-z]?){1,3},\s*(?=\d+(?:[.,]\d+)?\s*%)|\b[A-Z][a-z]?,[A-Z][a-z]?\b')
+DIGIT_RUNS = re.compile(r'\d+')
 DIGITS = re.compile(r'^\d{1,3}$')
 LETTERS = re.compile(r'[A-Za-zÀ-ỹ]')
 
@@ -453,7 +465,7 @@ def agreement(primary_blocks, verifier):
         vi = next((k for k, (s0, s1, r) in enumerate(roles) if s0 <= start < s1), None)
         a['verifier_role'] = roles[vi][2] if vi is not None else None
         a['verifier_id'] = vblocks[vi]['id'] if vi is not None and vi < len(vblocks) else None
-        a['vpos'] = start; a['vend'] = end
+        a['vpos'] = start; a['vend'] = end; a['vtext'] = st[start:end]
         last_pos = max(last_pos, end)
         out.append(a)
     aligned = [i for i, a in enumerate(out) if a['vpos'] is not None]
@@ -513,6 +525,29 @@ def _move_is_geometric(i, seq, agree, bboxes):
         if k > pos and yj < yc - tol:
             return False
     return seen
+
+
+def numbers_disagree(primary_text, verifier_window):
+    """True when the two OCR stacks read different digit runs for the same aligned text. The verifier window is the
+    stream slice the primary text aligned to, so its digit runs must equal the primary's. Only a run that touches
+    the window's first or last character may be a neighbour's run cut by the fuzzy alignment — such an edge run
+    may be dropped from the comparison; an interior run the primary lacks (a dropped footnote mark, «(2)»→«(<)»)
+    or a run the two stacks read differently («(1, 0)»→«(1, O)») is a disagreement."""
+    p_full = DIGIT_RUNS.findall(tc_score.norm_key(primary_text or ''))
+    p_noenum = DIGIT_RUNS.findall(tc_score.norm_key(ENUM.sub('', primary_text or '', count=1)))   # a leading enumerator («3.», «Bước 5.») is structure, not data: the verifier may hold it in another block
+    w = verifier_window or ''
+    runs = [(m.start(), m.end(), m.group()) for m in DIGIT_RUNS.finditer(w)]
+    v = [r[2] for r in runs]
+    first_edge = bool(runs) and runs[0][0] == 0
+    last_edge = bool(runs) and runs[-1][1] == len(w)
+    cands = [v]
+    if first_edge:
+        cands.append(v[1:])
+    if last_edge:
+        cands.append(v[:-1])
+    if first_edge and last_edge and len(v) >= 2:
+        cands.append(v[1:-1])
+    return not any(c == p for c in cands for p in (p_full, p_noenum))
 
 
 def resequence(agree, bboxes=None):
@@ -676,6 +711,12 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
             guards.append('role_conflict')
         if role not in ('formula', 'table', 'figure', 'empty') and MATH.search(t):
             guards.append('math_guard')
+        if role not in ('formula', 'table', 'figure', 'empty') and UNIT_EXP.search(t):
+            guards.append('unit_guard')
+        if role not in ('formula', 'table', 'figure', 'empty', 'page_number', 'running_head') and CHEM.search(t):
+            guards.append('chem_guard')
+        if a.get('ok') and a.get('vtext') is not None and numbers_disagree(t, a['vtext']):
+            guards.append('agree_numbers')
         if col and bb and bb[3] >= 1.8 * med_h and bb[2] >= 0.15:
             lr = (col['left'], col['right']); tb = (col['top'], col['bottom'])
             if (max(lr) >= 0.5 and min(lr) <= 0.08) or (max(tb) >= 0.5 and min(tb) <= 0.08):
