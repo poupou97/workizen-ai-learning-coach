@@ -31,6 +31,16 @@ String trustChildDescription(ContentTrust t, LessonDocument doc) => switch (t) {
   ContentTrust.prototype =>
     'Phần này do người viết tay cho bản thử — không phải sách, không phải '
         'sách giáo viên.',
+  // Round 3 (A1 bridge, Lane A-data): hai giá trị mới của ContentTrust —
+  // thêm ở đây để switch đủ nhánh sau khi hợp nhánh; Lane B rà lại lời.
+  ContentTrust.trustedStructuredLesson =>
+    'Chữ và hình là NGUYÊN VĂN ${doc.pageRangeLine}, máy đọc từ sách qua '
+        'pipeline có cấu trúc (mỗi đoạn giữ trang, khung, vai trò). CHƯA '
+        'KIỂM ĐỊNH: chưa qua cổng kiểm-tin-giả và chưa có giấy phép phát '
+        'hành — bản nội bộ để nhìn thấy sản phẩm.',
+  ContentTrust.withheld =>
+    'Phần này máy chưa đọc chắc nên KHÔNG hiện chữ — chỉ chỉ trang trong '
+        'sách, không bịa.',
 };
 
 Future<void> showTrustSheet(

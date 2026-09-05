@@ -73,6 +73,36 @@ class RateTests(unittest.TestCase):
         md = fs.render_md(res, 'meta', 'title')
         self.assertIn('| 0 | 381 | 299 |', md)
 
+    def test_round3_partition_and_reading_order(self):
+        """Round 3: reading order is a fifth criterion; derived-WRONG rows split into exactly one of
+        teaching-critical / display-only / other; the protocol's 4-criterion derivation is kept beside."""
+        rows = [row(act='a1', display_fidelity='OK', teaching_critical_fidelity='NA', role_fidelity='OK', lesson_attachment='OK', reading_order='OK', false_trust='OK'),
+                row(act='a1', display_fidelity='WRONG', teaching_critical_fidelity='WRONG', role_fidelity='OK', reading_order='OK', false_trust='WRONG', teaching_critical_class='fraction'),
+                row(act='a1', display_fidelity='WRONG', teaching_critical_fidelity='OK', role_fidelity='OK', reading_order='OK', false_trust='OK', display_error_class='tone_mark'),
+                row(act='a1', display_fidelity='OK', teaching_critical_fidelity='OK', role_fidelity='OK', reading_order='WRONG', false_trust='OK'),
+                row(act='a1', display_fidelity='OK', teaching_critical_fidelity='OK', role_fidelity='WRONG', reading_order='NA', false_trust='OK')]
+        res = fs.score_rows(rows)['ALL']
+        self.assertEqual(res['reading_order']['wrong'], 1); self.assertEqual(res['reading_order']['judged'], 4)
+        self.assertEqual(res['false_trust_derived']['wrong'], 4)            # tc, display-only, order, role
+        self.assertEqual(res['false_trust_derived4']['wrong'], 3)           # order not in the protocol's four
+        self.assertEqual(res['false_trust_teaching_critical']['wrong'], 1)
+        self.assertEqual(res['false_trust_display_only']['wrong'], 1)
+        self.assertEqual(res['false_trust_other']['wrong'], 2)
+        self.assertEqual(res['false_trust_teaching_critical']['judged'], 5)  # one shared denominator
+        self.assertEqual(res['error_classes'], {'tone_mark': 1}); self.assertEqual(res['teaching_critical_classes'], {'fraction': 1})
+        self.assertEqual(fs.n_needed_at_observed_rate(0, 100), 381)
+        self.assertIsNone(fs.n_needed_at_observed_rate(5, 100))            # observed 5 % can never bound < 1 %
+        self.assertEqual(fs.n_needed_at_observed_rate(1, 1000), 1000)      # 1/1000: U ≈ 0.0056 < 0.01 already
+        self.assertGreater(fs.n_needed_at_observed_rate(5, 1000), 1000)    # 5/1000: U ≈ 0.0117 ⇒ needs more
+
+    def test_worst_examples_are_short_quotes_teaching_critical_first(self):
+        rows = [row(act='a1', sampleId='s1', display_fidelity='WRONG', teaching_critical_fidelity='OK', role_fidelity='OK', text='x' * 200),
+                row(act='a2', sampleId='s2', display_fidelity='OK', teaching_critical_fidelity='WRONG', role_fidelity='OK', text='y' * 200)]
+        fs.score_rows(rows)
+        w = fs.worst_examples(rows)
+        self.assertEqual([x['sampleId'] for x in w], ['s2', 's1'])
+        self.assertTrue(all(len(x['quote']) <= 60 for x in w))
+
 
 if __name__ == '__main__':
     unittest.main()

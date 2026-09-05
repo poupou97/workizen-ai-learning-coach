@@ -115,8 +115,8 @@ def _rate(rows, field):
     return dict(wrong=k, ok=ok, judged=n, unsure=c.get('UNSURE', 0), na=c.get('NA', 0), unjudged=c.get('UNJUDGED', 0), rate=p, lo=lo, hi=hi, sampled=len(rows))
 
 
-def derived_false_trust(row, attach_by_activity):
-    vals = [(row.get(f) or '').strip().upper() for f in BLOCK_CRITERIA]
+def derived_false_trust(row, attach_by_activity, criteria=BLOCK_CRITERIA):
+    vals = [(row.get(f) or '').strip().upper() for f in criteria]
     att = (attach_by_activity.get(row.get('activityId')) or '').strip().upper()
     if 'WRONG' in vals or att == 'WRONG':
         return 'WRONG'
@@ -128,6 +128,36 @@ def derived_false_trust(row, attach_by_activity):
     return 'OK'
 
 
+# Round 3 (A2): reading order is a fifth block criterion (CTE class «order changes meaning»); the
+# derived false trust INCLUDES it. The protocol's original four-criterion derivation is reported
+# beside it as `false_trust_derived4` for comparability.
+BLOCK_CRITERIA_R3 = BLOCK_CRITERIA + ('reading_order',)
+
+
+def _partition(row):
+    """Split a derived-WRONG row into ONE class: teaching-critical › display-only › other (role /
+    attachment / order). Returns '' when the row is not derived-WRONG."""
+    if row.get('_false_trust_derived') != 'WRONG':
+        return ''
+    if (row.get('teaching_critical_fidelity') or '').strip().upper() == 'WRONG':
+        return 'teaching_critical'
+    d = (row.get('display_fidelity') or '').strip().upper()
+    others = [(row.get(f) or '').strip().upper() for f in ('role_fidelity', 'reading_order')] + [row.get('_att', '')]
+    if d == 'WRONG' and all(v in ('OK', 'NA', '') for v in others):
+        return 'display_only'
+    return 'other'
+
+
+def _rate_from(rows, pred_wrong, judged_pred):
+    """Rate whose numerator is `pred_wrong(row)` over rows where `judged_pred(row)` holds."""
+    judged = [r for r in rows if judged_pred(r)]
+    k = sum(1 for r in judged if pred_wrong(r))
+    n = len(judged)
+    p, lo, hi = wilson(k, n) if n else (None, None, None)
+    return dict(wrong=k, ok=n - k, judged=n, unsure=sum(1 for r in rows if r.get('_false_trust_derived') == 'UNSURE'),
+                na=0, unjudged=len(rows) - n - sum(1 for r in rows if r.get('_false_trust_derived') == 'UNSURE'), rate=p, lo=lo, hi=hi, sampled=len(rows))
+
+
 def score_rows(rows, group_key=lambda r: r.get('family')):
     served = [r for r in rows if r.get('servedAsTrusted', True)]
     withheld = [r for r in rows if not r.get('servedAsTrusted', True)]
@@ -137,12 +167,16 @@ def score_rows(rows, group_key=lambda r: r.get('family')):
         if v and r.get('activityId') not in attach_by_activity:
             attach_by_activity[r['activityId']] = v
     for r in served:
-        r['_false_trust_derived'] = derived_false_trust(r, attach_by_activity)
+        r['_att'] = attach_by_activity.get(r.get('activityId'), '')
+        r['_false_trust_derived4'] = derived_false_trust(r, attach_by_activity)
+        r['_false_trust_derived'] = derived_false_trust(r, attach_by_activity, BLOCK_CRITERIA_R3)
+        r['_class'] = _partition(r)
     groups = collections.OrderedDict()
     groups['ALL'] = served
     for r in served:
         groups.setdefault(group_key(r), []).append(r)
     out = collections.OrderedDict()
+    judged = lambda r: r.get('_false_trust_derived') in ('OK', 'WRONG')  # noqa: E731
     for g, rs in groups.items():
         acts = {}
         for r in rs:
@@ -150,11 +184,33 @@ def score_rows(rows, group_key=lambda r: r.get('family')):
         out[g] = dict(blocks=len(rs), activities=len(acts),
                       display_only_fidelity=_rate(rs, 'display_fidelity'),
                       teaching_critical_fidelity=_rate(rs, 'teaching_critical_fidelity'),
+                      reading_order=_rate(rs, 'reading_order'),
                       role_fidelity=_rate(rs, 'role_fidelity'),
                       lesson_attachment=_rate(list(acts.values()), 'lesson_attachment'),
                       false_trust_derived=_rate(rs, '_false_trust_derived'),
-                      false_trust_reviewer=_rate(rs, 'false_trust'))
+                      false_trust_derived4=_rate(rs, '_false_trust_derived4'),
+                      false_trust_teaching_critical=_rate_from(rs, lambda r: r['_class'] == 'teaching_critical', judged),
+                      false_trust_display_only=_rate_from(rs, lambda r: r['_class'] == 'display_only', judged),
+                      false_trust_other=_rate_from(rs, lambda r: r['_class'] == 'other', judged),
+                      false_trust_reviewer=_rate(rs, 'false_trust'),
+                      error_classes=dict(collections.Counter(c.strip() for r in rs for c in (r.get('display_error_class') or '').split(',') if c.strip())),
+                      teaching_critical_classes=dict(collections.Counter(c.strip() for r in rs for c in (r.get('teaching_critical_class') or '').split(',') if c.strip())))
     out['_withheld_reviewed'] = dict(rows=len(withheld), with_notes=sum(1 for r in withheld if (r.get('notes') or '').strip()))
+    return out
+
+
+def worst_examples(rows, limit=40):
+    """Derived-WRONG served rows, teaching-critical first, with block ids and a SHORT quote only."""
+    bad = [r for r in rows if r.get('servedAsTrusted', True) and r.get('_false_trust_derived') == 'WRONG']
+    order = {'teaching_critical': 0, 'other': 1, 'display_only': 2}
+    bad.sort(key=lambda r: (order.get(r.get('_class'), 9), r.get('family'), r.get('sampleId')))
+    out = []
+    for r in bad[:limit]:
+        src = r.get('source') or {}
+        out.append(dict(sampleId=r.get('sampleId'), cls=r.get('_class'), family=r.get('family'), book=r.get('book'), lesson=r.get('lesson'),
+                        pagePdf=r.get('pagePdf'), kind=r.get('kind'), blockId=r.get('tslBlockId') or (src.get('sdm') or {}).get('id') or r.get('unitId') or r.get('activityId'),
+                        display_error_class=r.get('display_error_class', ''), teaching_critical_class=r.get('teaching_critical_class', ''),
+                        quote=(r.get('text') or '')[:60], notes=(r.get('notes') or '')[:160]))
     return out
 
 
@@ -164,14 +220,27 @@ def fmt_rate(x):
     return f"**{x['rate']:.4f}** [{x['lo']:.4f}, {x['hi']:.4f}] = {x['wrong']} / {x['judged']} judged (of {x['sampled']} sampled; unsure {x['unsure']}, NA {x['na']}, unjudged {x['unjudged']})"
 
 
+RATE_COLS = [('display_only_fidelity', 'display fidelity error'), ('teaching_critical_fidelity', 'teaching-critical fidelity error'),
+             ('reading_order', 'reading-order error'), ('role_fidelity', 'role error'), ('lesson_attachment', 'lesson-attachment error (per activity)'),
+             ('false_trust_derived', 'false trust (derived, 5 criteria)'), ('false_trust_teaching_critical', 'teaching-critical false trust'),
+             ('false_trust_display_only', 'display-only false trust'), ('false_trust_other', 'other false trust (role / attachment / order)'),
+             ('false_trust_derived4', 'false trust (protocol 4 criteria)'), ('false_trust_reviewer', 'false trust (annotator verdict)')]
+
+
 def render_md(results, meta, title):
-    L = [f'# {title}', '', meta, '',
-         '| group | blocks | activities | display-only fidelity error | teaching-critical error | role error | lesson-attachment error (per activity) | false trust (derived) | false trust (reviewer) |',
-         '|---|---|---|---|---|---|---|---|---|']
+    L = [f'# {title}', '', meta, '']
+    for key, label in RATE_COLS:
+        L += [f'### {label}', '', '| group | blocks | activities | rate [Wilson 95 %] = k / n judged (of m sampled; unsure, NA, unjudged) |', '|---|---|---|---|']
+        for g, v in results.items():
+            if g.startswith('_') or key not in v:
+                continue
+            L.append(f"| {g} | {v['blocks']} | {v['activities']} | {fmt_rate(v[key])} |")
+        L.append('')
+    L += ['### Error classes (display) and teaching-critical classes, per group', '', '| group | display error classes | teaching-critical classes |', '|---|---|---|']
     for g, v in results.items():
         if g.startswith('_'):
             continue
-        L.append(f"| {g} | {v['blocks']} | {v['activities']} | {fmt_rate(v['display_only_fidelity'])} | {fmt_rate(v['teaching_critical_fidelity'])} | {fmt_rate(v['role_fidelity'])} | {fmt_rate(v['lesson_attachment'])} | {fmt_rate(v['false_trust_derived'])} | {fmt_rate(v['false_trust_reviewer'])} |")
+        L.append(f"| {g} | {json.dumps(v.get('error_classes', {}), ensure_ascii=False)} | {json.dumps(v.get('teaching_critical_classes', {}), ensure_ascii=False)} |")
     w = results.get('_withheld_reviewed', {})
     L += ['', f"Withheld rows reviewed (never in a served denominator): {w.get('rows', 0)} ({w.get('with_notes', 0)} with reviewer notes).", '',
           '## Sample size for a "< 1 % false trust" claim', '',
@@ -181,6 +250,24 @@ def render_md(results, meta, title):
         L.append(f"| {r['k']} | {r['wilson']} | {r['exact']} |")
     L += ['', 'Reading: with 0 failures the Wilson bound needs 381 judged served blocks (exact: 299); every observed failure raises the requirement by roughly 130–160 blocks. Blocks from the same activity are not independent — treat the block-level interval as optimistic and report the activity-level count beside it.']
     return '\n'.join(L) + '\n'
+
+
+def n_needed_at_observed_rate(k, n, target=0.01, n_max=200000):
+    """Smallest N such that, at the OBSERVED proportion k/n, the Wilson upper bound is < target — i.e. how
+    large a sample would have to be for a < 1 % claim if the rate stayed what it is (None ⇒ impossible: the
+    observed rate itself is ≥ target)."""
+    if n <= 0:
+        return None
+    p = k / n
+    if p >= target:
+        return None
+    # exact scan (the bound is not strictly monotone because k is rounded), then coarse steps
+    N = n
+    while N <= n_max:
+        if wilson(round(p * N), N)[2] < target:
+            return N
+        N += 1 if N < 20000 else max(1, N // 50)
+    return None
 
 
 # ---------------------------------------------------------------- validation on the TC-v2 gold
@@ -254,15 +341,40 @@ def main():
         print('no rows'); return 2
     results = score_rows(rows)
     by_book = score_rows(rows, group_key=lambda r: f"{r.get('family')}|{r.get('book')}")
+    by_subject = score_rows(rows, group_key=lambda r: f"subject={r.get('subject')}")
+    by_layout = score_rows(rows, group_key=lambda r: f"layout={r.get('layoutFamily')}")
+    by_kind = score_rows(rows, group_key=lambda r: f"{r.get('family')}/{r.get('kind')}")
+    # the shipped-content view: pack families + samUnits, WITHOUT the mandatory Bài 17 TSL stratum
+    shipped = [r for r in rows if r.get('family') != 'tslBai17']
+    results_shipped = score_rows(shipped)
+    worst = worst_examples(rows)
     pv = sorted({r.get('packVersion') for r in rows if r.get('packVersion')})
+    reviewers = sorted({r.get('reviewer') for r in rows if (r.get('reviewer') or '').strip()})
     meta = (f"Rows {len(rows)} ({sum(1 for r in rows if r.get('servedAsTrusted', True))} served, {sum(1 for r in rows if not r.get('servedAsTrusted', True))} withheld) from {', '.join(a.jsonl)} · packs {', '.join(pv)} · "
-            'Denominators per D5: rates are over JUDGED served blocks of the SAMPLE; the population is the frame census in manifest-<seed>.json; nothing here is divided by 3,679.')
-    md = render_md(results, meta, 'False-trust audit — scores (five rates, Wilson 95 %)') + '\n## By family × book\n\n' + render_md(by_book, '', 'per stratum').split('\n', 2)[2]
+            f"annotator(s): {', '.join(reviewers) or 'none'} · "
+            'Denominators per D5: rates are over JUDGED served blocks of the SAMPLE; the population is the frame census in manifest-<seed>.json; nothing here is divided by 3,679. '
+            'No threshold is applied here; PASS/FAIL is a Founder decision.')
+    md = render_md(results, meta, 'False-trust audit — scores (rates reported separately, Wilson 95 %)')
+    md += '\n## Shipped content only (pack families + samUnits; Bài 17 TSL stratum excluded)\n\n' + render_md(results_shipped, '', 'shipped').split('\n', 2)[2]
+    md += '\n## By family × book\n\n' + render_md(by_book, '', 'per stratum').split('\n', 2)[2]
+    md += '\n## By subject\n\n' + render_md(by_subject, '', 'per subject').split('\n', 2)[2]
+    md += '\n## By layout family (K-12 census page class)\n\n' + render_md(by_layout, '', 'per layout').split('\n', 2)[2]
+    md += '\n## By family / kind (served role)\n\n' + render_md(by_kind, '', 'per kind').split('\n', 2)[2]
+    k = results_shipped['ALL']['false_trust_derived']['wrong']; n = results_shipped['ALL']['false_trust_derived']['judged']
+    need = n_needed_at_observed_rate(k, n)
+    md += ('\n## Sample size at the OBSERVED shipped rate\n\n'
+           f"Observed derived false trust on shipped content: {k} / {n}. A «< 1 %» claim at this observed rate would need "
+           f"{'n ≥ ' + str(need) + ' judged blocks (Wilson)' if need else 'an observed rate below 1 % — it is not, so no sample size makes the claim; the failing classes must be fixed and re-sampled with a new seed'}.\n")
+    md += '\n## Worst examples (derived WRONG; teaching-critical first; short quotes only)\n\n| sampleId | class | family | book | lesson | pdf p | kind | block / unit | display class | tc class | quote | notes |\n|---|---|---|---|---|---|---|---|---|---|---|---|\n'
+    for w in worst:
+        md += f"| {w['sampleId']} | {w['cls']} | {w['family']} | {w['book']} | {w['lesson']} | {w['pagePdf']} | {w['kind']} | `{w['blockId']}` | {w['display_error_class']} | {w['teaching_critical_class']} | {w['quote'].replace('|', '¦')} | {w['notes'].replace('|', '¦')} |\n"
     print(md)
     if a.md:
         open(a.md, 'w', encoding='utf-8').write(md)
     if a.json:
-        json.dump(dict(results=results, byStratum=by_book, sampleSize=sample_size_table()), open(a.json, 'w'), ensure_ascii=False, indent=1)
+        json.dump(dict(results=results, shipped=results_shipped, byStratum=by_book, bySubject=by_subject, byLayout=by_layout, byKind=by_kind,
+                       worst=worst, sampleSize=sample_size_table(), sampleSizeAtObservedShippedRate=dict(k=k, n=n, nNeeded=need), annotators=reviewers),
+                  open(a.json, 'w'), ensure_ascii=False, indent=1)
     return 0
 
 

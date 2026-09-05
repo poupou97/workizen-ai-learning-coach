@@ -84,16 +84,29 @@ enum EvidencePolicy {
   static EvidencePolicy? parse(Object? v) => v == 'none' ? none : null;
 }
 
-/// Chế độ của SAM trong workspace. Chỉ một giá trị, và giá trị đó BẮT BUỘC
-/// hiện thành chữ trên màn: «SAM (kịch bản thử nghiệm)».
+/// Chế độ của SAM trong workspace — nhãn BẮT BUỘC hiện thành chữ trên màn.
+///
+/// Round 3 (A-runtime hand-off): thêm `runtimeGuided` cho những bước Pedagogy
+/// Runtime CHỨNG MINH được (block nguồn + bước tiếp có kiểm) — cùng chuỗi tên
+/// và nhãn với `PlannedStepMode` (`lib/core/pedagogy/pedagogy_runtime.dart`).
+/// Không có mode nào để giả làm SAM thật: hai nhãn đều nói rõ tình trạng.
 enum SamMode {
-  prototypeScripted;
+  prototypeScripted('SAM (kịch bản thử nghiệm)'),
+  runtimeGuided('SAM (runtime có kiểm)');
+
+  const SamMode(this.childLabel);
 
   /// Nhãn trẻ nhìn thấy — test quét đúng chuỗi này trên mọi màn Tutor.
-  String get childLabel => 'SAM (kịch bản thử nghiệm)';
+  final String childLabel;
 
-  static SamMode? parse(Object? v) =>
-      v == 'prototypeScripted' ? prototypeScripted : null;
+  /// Fail-closed: chuỗi lạ ⇒ `null`, không mặc định thành mode nào.
+  static SamMode? parse(Object? v) {
+    if (v is! String) return null;
+    for (final m in values) {
+      if (m.name == v) return m;
+    }
+    return null;
+  }
 }
 
 /// Sáu bất đẳng thức của Founder — máy đọc được, tài liệu trích từ đây.
