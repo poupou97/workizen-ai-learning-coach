@@ -1,7 +1,7 @@
 # DATA ACCURACY FRAMEWORK — `WRONG → DETECT → WITHHOLD → REPAIR → VALIDATE → RESTORE`
 
 Round 5 · Lane A1 · `tool/corpus/repair/` · framework version `repair-v1` · **published first so the other
-lanes can build on it.** Contract tests: `tool/tests/test_repair_framework.py` (21).
+lanes can build on it.** Contract tests: `tool/tests/test_repair_framework.py` (27) · regression cases from the Founder's 97-row audit: `tool/tests/test_repair_vi_defects.py` (25).
 
 > **Read this if you are Lane A2 (maths) or Lane D (legacy).** A2 registers a repairer + validator for the
 > formula/number/unit classes; D consumes the ledger. Neither needs to edit `repair/` — registration is by

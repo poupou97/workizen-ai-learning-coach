@@ -13,6 +13,7 @@ Defects covered here:
   4 «Cộng hoà → Cộng hoa»        Vietnamese tone                       (NOT repairable by layer A - asserted)
   5 «cây ổi → cây ỗi»            Vietnamese tone                       (invalid/unattested sub-class)
   7 «chem_guard blocks a Physics heading»                              (guard precision)
+  6 imprint / back matter attached to a lesson                        (end matter)
   8 «incomplete multiple choice because a sibling was withheld»        (group disposition)
   STEM §4 «a FORMULA label must not buy trust»
   STEM §2 «per-line geometry survives the flattening»

@@ -219,7 +219,7 @@ resolves») keeps it withheld. It is row 1 of the human queue.
 | 7 | `chem_guard` blocks a Physics heading | **DONE** — §4, guard precision 0/5 → the five gold-set false positives all cleared |
 | 8 | incomplete multiple choice because a sibling was withheld | **DONE** — §8 |
 
-Every one of 2–5, 7 and 8 is a regression test in `tool/tests/test_repair_vi_defects.py` (21 tests). None of
+Every one of 2–5, 7 and 8 is a regression test in `tool/tests/test_repair_vi_defects.py` (25 tests). None of
 the rules was written against these strings: each is stated generally and each was re-measured on the 16-page
 held-out split (§3).
 
@@ -261,7 +261,7 @@ python3 tool/corpus/tc2_sdm.py --gold --pipeline tc2-p2 --out poc-out/round5/pip
 python3 tool/corpus/repair/run_gold.py --split dev|heldout|all [--no-group-rule] [--linearisation] \
         --baseline-out poc-out/round5/pipeline/tc2-p3-base --out poc-out/round5/pipeline/<variant>
 python3 tool/corpus/tc2_score.py --pipeline <variant> --out poc-out/round5/pipeline/<variant> --md …
-python3 -m unittest discover -s tool/tests -p "test_*.py"        # 274 tests, green
+python3 -m unittest discover -s tool/tests -p "test_*.py"        # 279 tests, green
 ```
 
 Artefacts per variant (gitignored, internal): `repair-ledger.jsonl` (append-only, every step),
