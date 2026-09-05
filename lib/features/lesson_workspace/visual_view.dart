@@ -9,12 +9,21 @@
 /// - Tab theo HÌNH DẠNG (🔁 Sơ đồ quy trình · ⚖️ Bảng so sánh · 🕸️ Sơ đồ
 ///   khái niệm · 🕰️ Dòng thời gian · 📋 Bảng tóm tắt); hình dạng có nhiều sơ đồ
 ///   ⇒ hàng chọn thứ hai «1 · tên» «2 · tên» (Nokia n1 D2: hai tab y hệt).
-/// - `ProcessStep[]` → quy trình: dải tổng quan 1→2→3 + từng bước; bước
-///   withheld là chỗ trống chỉ trang.
-/// - `ConceptRelation[]` → sơ đồ khái niệm: nút TRUNG TÂM (thực thể xuất hiện
-///   nhiều nhất, tất định) + nan hoa có nhãn quan hệ, vẽ bằng CustomPaint;
-///   quan hệ không chạm nút trung tâm ⇒ thẻ «a —quan hệ→ b» bên dưới.
-/// - `TimelineEvent[]` → dòng thời gian: trục dọc + mốc.
+/// - `TimelineEvent[]` → dòng thời gian: trục dọc + mốc (Lane C sở hữu).
+///
+/// ROUND 5 B — TRỰC QUAN THÀNH SƠ ĐỒ THẬT (Founder §12: «Trực quan vẫn chưa
+/// tới khung concept»). Không đổi nguồn sự thật, chỉ đổi CÁCH VẼ dữ liệu có
+/// kiểu; vẫn không có đường «bài → LLM → hình»:
+/// - `ProcessStep[]` → `ProcessFlowView`: nút trên MỘT TRỤC liên tục + mũi
+///   tên + dải tổng quan chạm được; bước withheld là nút rỗng chỉ trang
+///   (trước: danh sách đánh số).
+/// - `ComparisonSemantic` → `MindmapView`: nút trung tâm là tiêu đề dữ liệu,
+///   mỗi thực thể một nút nhánh có màu mang chữ sách — đúng hình khung concept
+///   khung 5. Bảng vẫn còn, sau nút chuyển «Sơ đồ tư duy / Bảng».
+/// - `ConceptRelation[]` → cùng `MindmapView` (nút trung tâm tất định =
+///   thực thể gặp nhiều nhất); quan hệ không chạm trung tâm ⇒ thẻ bên dưới.
+/// - MÀU CHỈ PHÂN BIỆT NHÁNH/BƯỚC, có một dòng nói đúng thế cho trẻ; KHÔNG
+///   emoji theo nghĩa (chọn emoji = suy ra nội dung nguồn không nói).
 /// Bài 17 chỉ có Process + Comparison ⇒ hai tab kia KHÔNG hiện (fail closed);
 /// hai renderer còn lại được kiểm bằng dữ liệu có kiểu dựng trong test.
 /// Mã luật sinh (`derivation`) rời màn trẻ đọc ⇒ nằm trong sheet «Nguồn & độ tin».
@@ -26,6 +35,8 @@ import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/semantic_data.dart';
+import 'views/mindmap_view.dart';
+import 'views/process_flow_view.dart';
 import 'views/timeline_view.dart';
 import 'widgets/source_sheet.dart';
 import 'widgets/trust_sheet.dart';
@@ -40,6 +51,14 @@ class VisualView extends StatefulWidget {
 
   static Key shapeKey(String shapeLabel) => Key('visual-shape-$shapeLabel');
   static Key instanceKey(String id) => Key('visual-instance-$id');
+
+  /// Sơ đồ tư duy chỉ đọc được khi mỗi nút mang tối đa 2 dòng chữ; nhiều
+  /// chiều hơn ⇒ CHỈ bảng (fail closed, không nhồi chữ vào nút).
+  static bool mindmapFits(ComparisonSemantic s) => s.dimensions.length <= 2;
+
+  /// ROUND 5 — nút chuyển cách nhìn của bảng so sánh («mindmap» / «table»).
+  static Key comparisonViewKey(String v) => Key('visual-comparison-view-$v');
+  static const comparisonLegendKey = Key('visual-comparison-legend');
 
   /// Mục tiêu + các dòng sau «Em đã học» tới nhãn/tiêu đề kế — NGUYÊN VĂN.
   static List<LessonBlock> summaryBlocks(LessonDocument doc) {
@@ -104,6 +123,10 @@ class _VisualViewState extends State<VisualView> {
 
   /// Sơ đồ đang xem trong hình dạng đó (khi có nhiều).
   int _instance = 0;
+
+  /// ROUND 5 — bảng so sánh có HAI cách nhìn: sơ đồ tư duy (khung concept,
+  /// mặc định) và bảng. Cùng một dữ liệu có kiểu, không thêm sự thật nào.
+  bool _comparisonAsTable = false;
 
   @override
   void initState() {
@@ -209,7 +232,8 @@ class _VisualViewState extends State<VisualView> {
     );
   }
 
-  static String _short(String t) => t.length > 30 ? '${t.substring(0, 30)}…' : t;
+  static String _short(String t) =>
+      t.length > 30 ? '${t.substring(0, 30)}…' : t;
 
   Widget _chip({
     required Key key,
@@ -240,39 +264,49 @@ class _VisualViewState extends State<VisualView> {
     ),
   );
 
-  Widget _renderer(SemanticData s) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Text(
-        s.title,
-        style: const TextStyle(
-          fontSize: WalType.title,
-          fontWeight: FontWeight.w700,
-          color: WalColors.ink,
+  Widget _renderer(SemanticData s) {
+    // Sơ đồ tư duy của bảng so sánh LẤY CHÍNH tiêu đề làm nút trung tâm ⇒
+    // không in lại tiêu đề bên trên (Nokia: một dòng thừa là một dòng đọc mất).
+    final titleIsHub =
+        s is ComparisonSemantic &&
+        !_comparisonAsTable &&
+        VisualView.mindmapFits(s);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (!titleIsHub) ...[
+          Text(
+            s.title,
+            style: const TextStyle(
+              fontSize: WalType.title,
+              fontWeight: FontWeight.w700,
+              color: WalColors.ink,
+            ),
+          ),
+          const SizedBox(height: 2),
+        ],
+        Text(
+          _subtitle(s),
+          style: const TextStyle(fontSize: 13, color: WalColors.inkSoft),
         ),
-      ),
-      const SizedBox(height: 2),
-      Text(
-        _subtitle(s),
-        style: const TextStyle(fontSize: 13, color: WalColors.inkSoft),
-      ),
-      const SizedBox(height: WalSpacing.sm),
-      switch (s) {
-        ProcessSemantic() => _process(s),
-        ComparisonSemantic() => _comparison(s),
-        ConceptMapSemantic() => _conceptMap(s),
-        // Round 4 (Lane C, Golden Slice #2): renderer Lịch sử — mốc + nguồn kể
-        // chuyện + thử xếp thứ tự (TimelineValidator), views/timeline_view.dart.
-        TimelineSemantic() => TimelineView(
-          doc: widget.doc,
-          semantic: s,
-          onOpenSource: _openSource,
-        ),
-      },
-      const SizedBox(height: WalSpacing.md),
-      _why(s),
-    ],
-  );
+        const SizedBox(height: WalSpacing.sm),
+        switch (s) {
+          ProcessSemantic() => _process(s),
+          ComparisonSemantic() => _comparison(s),
+          ConceptMapSemantic() => _conceptMap(s),
+          // Round 4 (Lane C, Golden Slice #2): renderer Lịch sử — mốc + nguồn kể
+          // chuyện + thử xếp thứ tự (TimelineValidator), views/timeline_view.dart.
+          TimelineSemantic() => TimelineView(
+            doc: widget.doc,
+            semantic: s,
+            onOpenSource: _openSource,
+          ),
+        },
+        const SizedBox(height: WalSpacing.md),
+        _why(s),
+      ],
+    );
+  }
 
   /// Dòng phụ: kích thước + trang nguồn — đếm từ dữ liệu.
   String _subtitle(SemanticData s) {
@@ -356,8 +390,7 @@ class _VisualViewState extends State<VisualView> {
                         padding: EdgeInsets.zero,
                         minimumSize: const Size(WalSpacing.minTouch, 36),
                       ),
-                      onPressed: () =>
-                          showTrustSheet(context, doc: widget.doc),
+                      onPressed: () => showTrustSheet(context, doc: widget.doc),
                       child: const Text(
                         'ⓘ Nguồn & độ tin',
                         style: TextStyle(
@@ -392,162 +425,77 @@ class _VisualViewState extends State<VisualView> {
     return b == null ? 'sách' : widget.doc.sourceLineForBlock(b);
   }
 
-  // ── Process ──
-  Widget _process(ProcessSemantic s) => Column(
-    children: [
-      _processStrip(s),
-      // ROUND 4 §6.5 — chú giải + cách dùng, lời trẻ.
-      Padding(
-        padding: const EdgeInsets.only(top: WalSpacing.xs),
-        child: Text(
-          s.steps.any((st) => st.isWithheld)
-              ? 'Số tím = bước sách viết · số xám = bước SAM để trống (xem '
-                    'trong sách) · chạm một bước để tra cứu lời sách'
-              : 'Mỗi số là một bước sách viết · chạm một bước để tra cứu '
-                    'lời sách',
-          key: const Key('visual-legend'),
-          style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
-        ),
-      ),
-      const SizedBox(height: WalSpacing.md),
-      for (var i = 0; i < s.steps.length; i++) ...[
-        _processNode(s.steps[i]),
-        if (i < s.steps.length - 1)
-          const SizedBox(
-            height: 28,
-            child: CustomPaint(painter: _ArrowPainter()),
-          ),
-      ],
-    ],
+  // ── Process: dòng chảy nút + cạnh (ROUND 5, views/process_flow_view.dart) ──
+  Widget _process(ProcessSemantic s) => ProcessFlowView(
+    doc: widget.doc,
+    semantic: s,
+    onOpenSource: _openSource,
+    onShowInRead: widget.onShowInRead,
+    pageOf: _pageOf,
   );
 
-  /// Dải tổng quan ①→②→③: nhìn một cái thấy cả quy trình, rồi đọc từng bước.
-  Widget _processStrip(ProcessSemantic s) => Container(
-    key: const Key('visual-process-strip'),
-    padding: const EdgeInsets.symmetric(
-      horizontal: WalSpacing.sm,
-      vertical: WalSpacing.sm,
-    ),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-    ),
-    child: SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (var i = 0; i < s.steps.length; i++) ...[
-            if (i > 0)
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 2),
-                child: Icon(
-                  Icons.arrow_forward,
-                  size: 18,
-                  color: WalColors.primary500,
-                ),
-              ),
-            Container(
-              width: 32,
-              height: 32,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: s.steps[i].isWithheld
-                    ? WalColors.inkSoft
-                    : WalColors.primary500,
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                '${s.steps[i].order}',
-                style: const TextStyle(
-                  fontSize: WalType.secondary,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    ),
-  );
+  // ── Comparison: sơ đồ tư duy (mặc định) hoặc bảng ──
 
-  Widget _processNode(ProcessStep st) => InkWell(
-    onTap: () => _openSource(st.sourceBlockId),
-    borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _comparison(ComparisonSemantic s) {
+    final fits = VisualView.mindmapFits(s);
+    final asTable = _comparisonAsTable || !fits;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          width: 40,
-          height: 40,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: st.isWithheld ? WalColors.inkSoft : WalColors.primary500,
-            shape: BoxShape.circle,
+        if (fits) ...[
+          Row(
+            children: [
+              _chip(
+                key: VisualView.comparisonViewKey('mindmap'),
+                label: '🕸️ Sơ đồ tư duy',
+                selected: !asTable,
+                small: true,
+                onTap: () => setState(() => _comparisonAsTable = false),
+              ),
+              const SizedBox(width: WalSpacing.xs),
+              _chip(
+                key: VisualView.comparisonViewKey('table'),
+                label: '⚖️ Bảng',
+                selected: asTable,
+                small: true,
+                onTap: () => setState(() => _comparisonAsTable = true),
+              ),
+            ],
           ),
+          const SizedBox(height: WalSpacing.sm),
+        ],
+        Padding(
+          padding: const EdgeInsets.only(bottom: WalSpacing.sm),
           child: Text(
-            '${st.order}',
-            style: const TextStyle(
-              fontSize: WalType.body,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
+            asTable
+                ? 'Mỗi hàng là một cách sách nêu · chạm một hàng để tra cứu '
+                      'lời sách'
+                : 'Mỗi ô là một cách sách nêu · màu chỉ để phân biệt, không '
+                      'phải điểm số · chạm một ô để tra cứu lời sách',
+            key: VisualView.comparisonLegendKey,
+            style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
           ),
         ),
-        const SizedBox(width: WalSpacing.sm),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(WalSpacing.md),
-            decoration: BoxDecoration(
-              color: st.isWithheld ? WalColors.surface : Colors.white,
-              border: st.isWithheld
-                  ? Border.all(color: WalColors.inkSoft.withValues(alpha: 0.35))
-                  : null,
-              borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    st.isWithheld
-                        ? 'Bước này SAM chưa đọc được — con xem trong sách '
-                              '(${_pageOf(st.sourceBlockId)}).'
-                        : st.text!,
-                    style: TextStyle(
-                      fontSize: WalType.body,
-                      color: st.isWithheld ? WalColors.inkSoft : WalColors.ink,
-                      height: 1.45,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: WalSpacing.xs),
-                // dấu «chạm để tra cứu» — không phải nội dung
-                const Icon(
-                  Icons.menu_book_outlined,
-                  size: 18,
-                  color: WalColors.primaryText,
-                ),
-              ],
-            ),
-          ),
-        ),
+        if (asTable) _comparisonTable(s) else _comparisonMindmap(s),
       ],
-    ),
-  );
+    );
+  }
 
-  // ── Comparison ──
-  Widget _comparison(ComparisonSemantic s) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      const Padding(
-        padding: EdgeInsets.only(bottom: WalSpacing.xs),
-        child: Text(
-          'Mỗi hàng là một cách sách nêu · chạm một hàng để tra cứu lời sách',
-          style: TextStyle(fontSize: 11, color: WalColors.inkSoft),
+  /// Thực thể → nút nhánh; mỗi chiều so sánh → một dòng chữ SÁCH trong nút.
+  Widget _comparisonMindmap(ComparisonSemantic s) => MindmapView(
+    hub: s.title,
+    hubSourceBlockId: s.entities.first.sourceBlockId,
+    onOpenSource: _openSource,
+    nodes: [
+      for (var i = 0; i < s.entities.length; i++)
+        MindmapNode(
+          label: s.entities[i].name,
+          sourceBlockId: s.entities[i].sourceBlockId,
+          lines: [
+            for (final d in s.dimensions)
+              MindmapLine(name: d.name, value: d.values[i]),
+          ],
         ),
-      ),
-      _comparisonTable(s),
     ],
   );
 
@@ -605,7 +553,7 @@ class _VisualViewState extends State<VisualView> {
         ),
       );
 
-  // ── Concept map: nút trung tâm + nan hoa có nhãn ──
+  // ── Concept map: cùng sơ đồ tư duy với bảng so sánh (ROUND 5) ──
   Widget _conceptMap(ConceptMapSemantic s) {
     final hub = VisualView.hubOf(s);
     final spokes = <ConceptRelation>[];
@@ -614,79 +562,32 @@ class _VisualViewState extends State<VisualView> {
       (r.a == hub || r.b == hub ? spokes : rest).add(r);
     }
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
+        const Padding(
+          padding: EdgeInsets.only(bottom: WalSpacing.sm),
+          child: Text(
+            'Ô giữa là khái niệm sách nói tới nhiều nhất · màu chỉ để phân '
+            'biệt nhánh · chạm một ô để tra cứu lời sách',
+            key: Key('visual-concept-legend'),
+            style: TextStyle(fontSize: 11, color: WalColors.inkSoft),
+          ),
+        ),
+        MindmapView(
           key: const Key('visual-concept-map'),
-          padding: const EdgeInsets.all(WalSpacing.sm),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-          ),
-          child: LayoutBuilder(
-            builder: (ctx, c) {
-              final w = c.maxWidth.isFinite ? c.maxWidth : 360.0;
-              // Mỗi nan hoa một hàng cao 72; nút trung tâm ở cột trái.
-              final h = (spokes.length * 72.0).clamp(96.0, 720.0);
-              return SizedBox(
-                width: w,
-                height: h,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: _SpokePainter(
-                          count: spokes.length,
-                          hubX: w * 0.22,
-                          leafX: w * 0.62,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 0,
-                      top: h / 2 - 28,
-                      width: w * 0.44,
-                      child: Center(
-                        child: _node(
-                          hub,
-                          hub: true,
-                          onTap: () => _openSource(spokes.isNotEmpty
-                              ? spokes.first.sourceBlockId
-                              : s.relations.first.sourceBlockId),
-                        ),
-                      ),
-                    ),
-                    for (var i = 0; i < spokes.length; i++) ...[
-                      Positioned(
-                        left: w * 0.62,
-                        top: (i + 0.5) * (h / spokes.length) - 22,
-                        width: w * 0.38,
-                        child: _node(
-                          spokes[i].a == hub ? spokes[i].b : spokes[i].a,
-                          onTap: () => _openSource(spokes[i].sourceBlockId),
-                        ),
-                      ),
-                      Positioned(
-                        left: w * 0.36,
-                        top: (i + 0.5) * (h / spokes.length) - 32,
-                        width: w * 0.26,
-                        child: Text(
-                          spokes[i].relation,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: WalColors.primaryText,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              );
-            },
-          ),
+          hub: hub,
+          hubSourceBlockId: spokes.isNotEmpty
+              ? spokes.first.sourceBlockId
+              : s.relations.first.sourceBlockId,
+          onOpenSource: _openSource,
+          nodes: [
+            for (final r in spokes)
+              MindmapNode(
+                label: r.a == hub ? r.b : r.a,
+                edgeLabel: r.relation,
+                sourceBlockId: r.sourceBlockId,
+              ),
+          ],
         ),
         if (rest.isNotEmpty) ...[
           const SizedBox(height: WalSpacing.sm),
@@ -707,35 +608,6 @@ class _VisualViewState extends State<VisualView> {
       ],
     );
   }
-
-  Widget _node(String label, {bool hub = false, VoidCallback? onTap}) =>
-      Material(
-        color: hub ? WalColors.primary500 : WalColors.surfaceLavender,
-        borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 44),
-            padding: const EdgeInsets.symmetric(
-              horizontal: WalSpacing.sm,
-              vertical: 6,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: hub ? WalType.body : WalType.secondary,
-                fontWeight: FontWeight.w700,
-                color: hub ? Colors.white : WalColors.primaryText,
-              ),
-            ),
-          ),
-        ),
-      );
 
   // ── Bảng tóm tắt (fallback) ──
   Widget _summary(LessonDocument doc) {
@@ -781,63 +653,4 @@ class _VisualViewState extends State<VisualView> {
     ),
     child: child,
   );
-}
-
-/// Mũi tên nối hai bước — vẽ tay, không gói ngoài.
-class _ArrowPainter extends CustomPainter {
-  const _ArrowPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final p = Paint()
-      ..color = WalColors.primary500
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    const x = 20.0; // tâm vòng tròn số (width 40)
-    canvas.drawLine(Offset(x, 2), Offset(x, size.height - 8), p);
-    canvas.drawLine(
-      Offset(x - 6, size.height - 14),
-      Offset(x, size.height - 6),
-      p,
-    );
-    canvas.drawLine(
-      Offset(x + 6, size.height - 14),
-      Offset(x, size.height - 6),
-      p,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_ArrowPainter old) => false;
-}
-
-/// Nan hoa từ nút trung tâm tới từng nút lá của sơ đồ khái niệm.
-class _SpokePainter extends CustomPainter {
-  const _SpokePainter({
-    required this.count,
-    required this.hubX,
-    required this.leafX,
-  });
-  final int count;
-  final double hubX, leafX;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (count == 0) return;
-    final p = Paint()
-      ..color = WalColors.primary500.withValues(alpha: 0.6)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    final hub = Offset(hubX, size.height / 2);
-    for (var i = 0; i < count; i++) {
-      final y = (i + 0.5) * (size.height / count);
-      canvas.drawLine(hub, Offset(leafX, y), p);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_SpokePainter old) =>
-      old.count != count || old.hubX != hubX || old.leafX != leafX;
 }

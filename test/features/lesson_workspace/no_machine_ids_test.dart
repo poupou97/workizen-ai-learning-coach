@@ -197,6 +197,14 @@ Future<void> _journey(WidgetTester t, LessonDocument d, String tag) async {
     await t.tap(find.byKey(VisualView.shapeKey(shape)));
     await t.pumpAndSettle();
     _expectClean(t, '$tag Trực quan $shape');
+    // ROUND 5: hình dạng so sánh có HAI cách nhìn — quét cả hai.
+    for (final v in ['table', 'mindmap']) {
+      final btn = find.byKey(VisualView.comparisonViewKey(v));
+      if (btn.evaluate().isEmpty) continue;
+      await t.tap(btn);
+      await t.pumpAndSettle();
+      _expectClean(t, '$tag Trực quan $shape ($v)');
+    }
   }
   await t.tap(find.byKey(VisualView.shapeKey('summary')));
   await t.pumpAndSettle();

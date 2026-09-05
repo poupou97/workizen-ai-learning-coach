@@ -195,11 +195,18 @@ void main() {
       );
       await t.pumpAndSettle();
       final legend = t.widget<Text>(find.byKey(const Key('visual-legend')));
-      expect(legend.data, contains('số xám = bước SAM để trống'));
+      // ROUND 5: quy trình là SƠ ĐỒ (ô + mũi tên) chứ không còn danh sách số ⇒
+      // chú giải nói «ô xám», nhưng ĐIỀU ĐƯỢC NÓI không đổi: chỗ trống là chỗ
+      // SAM chưa đọc được, và chạm được để tra cứu.
+      expect(legend.data, contains('ô xám là bước SAM để trống'));
       expect(legend.data, contains('chạm một bước'));
       expect(find.byIcon(Icons.menu_book_outlined), findsWidgets);
       expect(find.text('ⓘ Nguồn & độ tin'), findsOneWidget);
       await t.tap(find.byKey(VisualView.shapeKey('Bảng so sánh')));
+      await t.pumpAndSettle();
+      // mặc định vòng 5 là sơ đồ tư duy; bảng vẫn còn sau nút chuyển
+      expect(find.textContaining('chạm một ô'), findsOneWidget);
+      await t.tap(find.byKey(VisualView.comparisonViewKey('table')));
       await t.pumpAndSettle();
       expect(find.textContaining('chạm một hàng'), findsOneWidget);
     });
