@@ -1,0 +1,3342 @@
+{
+ "tc_v1_single": {
+  "current-naive": {
+   "pages": 38,
+   "learning_blocks": 462,
+   "trusted": null,
+   "coverage": null,
+   "tlsr": 0.656,
+   "false_trusted": 143,
+   "ftr": 0.3206,
+   "safe_rejected": 0,
+   "order": 0.966,
+   "text_acc": 0.902,
+   "fidelity": 0.718,
+   "splices": 24
+  },
+  "current-xycut": {
+   "pages": 38,
+   "learning_blocks": 462,
+   "trusted": null,
+   "coverage": null,
+   "tlsr": 0.193,
+   "false_trusted": 12,
+   "ftr": 0.1188,
+   "safe_rejected": 352,
+   "order": 0.976,
+   "text_acc": 0.907,
+   "fidelity": 0.847,
+   "splices": 17
+  },
+  "docling-ocrmac": {
+   "pages": 38,
+   "learning_blocks": 462,
+   "trusted": null,
+   "coverage": null,
+   "tlsr": 0.814,
+   "false_trusted": 63,
+   "ftr": 0.1435,
+   "safe_rejected": 0,
+   "order": 0.987,
+   "text_acc": 0.954,
+   "fidelity": 0.975,
+   "splices": 6
+  },
+  "mineru": {
+   "pages": 38,
+   "learning_blocks": 462,
+   "trusted": null,
+   "coverage": null,
+   "tlsr": 0.323,
+   "false_trusted": 263,
+   "ftr": 0.6383,
+   "safe_rejected": 0,
+   "order": 0.977,
+   "text_acc": 0.828,
+   "fidelity": 0.985,
+   "splices": 2
+  },
+  "marker": {
+   "pages": 32,
+   "learning_blocks": 394,
+   "trusted": null,
+   "coverage": null,
+   "tlsr": 0.863,
+   "false_trusted": 35,
+   "ftr": 0.0933,
+   "safe_rejected": 0,
+   "order": 0.991,
+   "text_acc": 0.961,
+   "fidelity": 0.963,
+   "splices": 7
+  },
+  "vlm-mlx": {
+   "pages": 31,
+   "learning_blocks": 379,
+   "trusted": null,
+   "coverage": null,
+   "tlsr": 0.615,
+   "false_trusted": 85,
+   "ftr": 0.2673,
+   "safe_rejected": 0,
+   "order": 0.992,
+   "text_acc": 0.944,
+   "fidelity": 0.576,
+   "splices": 12
+  },
+  "pymupdf4llm": {
+   "pages": 1,
+   "learning_blocks": 15,
+   "trusted": null,
+   "coverage": null,
+   "tlsr": 0.133,
+   "false_trusted": 3,
+   "ftr": 0.6,
+   "safe_rejected": 0,
+   "order": 1.0,
+   "text_acc": 0.737,
+   "fidelity": null,
+   "splices": 0
+  }
+ },
+ "tc_v1_single_keys": {
+  "current-naive": [
+   "caption_assoc",
+   "cer",
+   "cer_nodiacritic",
+   "cer_notone",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "errors",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "order",
+   "pages",
+   "provenance",
+   "question_p",
+   "question_r",
+   "ran",
+   "role_acc",
+   "safe_rejected",
+   "sec_median",
+   "sec_per_page",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trusted_blocks"
+  ],
+  "current-xycut": [
+   "caption_assoc",
+   "cer",
+   "cer_nodiacritic",
+   "cer_notone",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "errors",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "order",
+   "pages",
+   "provenance",
+   "question_p",
+   "question_r",
+   "ran",
+   "role_acc",
+   "safe_rejected",
+   "sec_median",
+   "sec_per_page",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trusted_blocks"
+  ],
+  "docling-ocrmac": [
+   "caption_assoc",
+   "cer",
+   "cer_nodiacritic",
+   "cer_notone",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "errors",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "order",
+   "pages",
+   "provenance",
+   "question_p",
+   "question_r",
+   "ran",
+   "role_acc",
+   "safe_rejected",
+   "sec_median",
+   "sec_per_page",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trusted_blocks"
+  ],
+  "mineru": [
+   "caption_assoc",
+   "cer",
+   "cer_nodiacritic",
+   "cer_notone",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "errors",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "order",
+   "pages",
+   "provenance",
+   "question_p",
+   "question_r",
+   "ran",
+   "role_acc",
+   "safe_rejected",
+   "sec_median",
+   "sec_per_page",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trusted_blocks"
+  ],
+  "marker": [
+   "caption_assoc",
+   "cer",
+   "cer_nodiacritic",
+   "cer_notone",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "errors",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "order",
+   "pages",
+   "provenance",
+   "question_p",
+   "question_r",
+   "ran",
+   "role_acc",
+   "safe_rejected",
+   "sec_median",
+   "sec_per_page",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trusted_blocks"
+  ],
+  "vlm-mlx": [
+   "caption_assoc",
+   "cer",
+   "cer_nodiacritic",
+   "cer_notone",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "errors",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "order",
+   "pages",
+   "provenance",
+   "question_p",
+   "question_r",
+   "ran",
+   "role_acc",
+   "safe_rejected",
+   "sec_median",
+   "sec_per_page",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trusted_blocks"
+  ],
+  "pymupdf4llm": [
+   "caption_assoc",
+   "cer",
+   "cer_nodiacritic",
+   "cer_notone",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "errors",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "order",
+   "pages",
+   "provenance",
+   "question_p",
+   "question_r",
+   "ran",
+   "role_acc",
+   "safe_rejected",
+   "sec_median",
+   "sec_per_page",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trusted_blocks"
+  ]
+ },
+ "tc_v1_cascades": {
+  "docling>xycut": {
+   "pages": 38,
+   "learning_blocks": 462,
+   "trusted": 374,
+   "coverage": 0.81,
+   "tlsr": 0.699,
+   "false_trusted": 51,
+   "ftr": 0.1364,
+   "safe_rejected": 65,
+   "order": 0.987,
+   "text_acc": 0.954,
+   "fidelity": null,
+   "splices": null
+  },
+  "docling>marker": {
+   "pages": 32,
+   "learning_blocks": 394,
+   "trusted": 321,
+   "coverage": 0.815,
+   "tlsr": 0.7,
+   "false_trusted": 45,
+   "ftr": 0.1402,
+   "safe_rejected": 52,
+   "order": 0.986,
+   "text_acc": 0.95,
+   "fidelity": null,
+   "splices": null
+  },
+  "docling>vlm": {
+   "pages": 31,
+   "learning_blocks": 379,
+   "trusted": 293,
+   "coverage": 0.773,
+   "tlsr": 0.657,
+   "false_trusted": 44,
+   "ftr": 0.1502,
+   "safe_rejected": 66,
+   "order": 0.985,
+   "text_acc": 0.95,
+   "fidelity": null,
+   "splices": null
+  },
+  "marker>vlm": {
+   "pages": 31,
+   "learning_blocks": 379,
+   "trusted": 297,
+   "coverage": 0.784,
+   "tlsr": 0.728,
+   "false_trusted": 21,
+   "ftr": 0.0707,
+   "safe_rejected": 63,
+   "order": 0.992,
+   "text_acc": 0.96,
+   "fidelity": null,
+   "splices": null
+  },
+  "marker>docling": {
+   "pages": 32,
+   "learning_blocks": 394,
+   "trusted": 322,
+   "coverage": 0.817,
+   "tlsr": 0.764,
+   "false_trusted": 21,
+   "ftr": 0.0652,
+   "safe_rejected": 53,
+   "order": 0.991,
+   "text_acc": 0.961,
+   "fidelity": null,
+   "splices": null
+  },
+  "docling>marker+vlm": {
+   "pages": 31,
+   "learning_blocks": 379,
+   "trusted": 265,
+   "coverage": 0.699,
+   "tlsr": 0.607,
+   "false_trusted": 35,
+   "ftr": 0.1321,
+   "safe_rejected": 94,
+   "order": 0.985,
+   "text_acc": 0.95,
+   "fidelity": null,
+   "splices": null
+  },
+  "xycut>docling": {
+   "pages": 38,
+   "learning_blocks": 462,
+   "trusted": 186,
+   "coverage": 0.403,
+   "tlsr": 0.331,
+   "false_trusted": 33,
+   "ftr": 0.1774,
+   "safe_rejected": 267,
+   "order": 0.976,
+   "text_acc": 0.907,
+   "fidelity": null,
+   "splices": null
+  },
+  "docling>xycut+mathguard": {
+   "pages": 38,
+   "learning_blocks": 462,
+   "trusted": 354,
+   "coverage": 0.766,
+   "tlsr": 0.673,
+   "false_trusted": 43,
+   "ftr": 0.1215,
+   "safe_rejected": 85,
+   "order": 0.987,
+   "text_acc": 0.954,
+   "fidelity": null,
+   "splices": null
+  },
+  "marker>docling+mathguard": {
+   "pages": 32,
+   "learning_blocks": 394,
+   "trusted": 314,
+   "coverage": 0.797,
+   "tlsr": 0.744,
+   "false_trusted": 21,
+   "ftr": 0.0669,
+   "safe_rejected": 61,
+   "order": 0.991,
+   "text_acc": 0.961,
+   "fidelity": null,
+   "splices": null
+  },
+  "docling>marker+vlm+mathguard": {
+   "pages": 31,
+   "learning_blocks": 379,
+   "trusted": 251,
+   "coverage": 0.662,
+   "tlsr": 0.588,
+   "false_trusted": 28,
+   "ftr": 0.1116,
+   "safe_rejected": 108,
+   "order": 0.985,
+   "text_acc": 0.95,
+   "fidelity": null,
+   "splices": null
+  }
+ },
+ "tc_v2_gold_raw_keys": {
+  "all": [
+   "attach_header_n",
+   "attach_header_ok",
+   "attach_toc_ok",
+   "blocks_trusted_all",
+   "blocks_withheld_all",
+   "caption_assoc",
+   "cer_nodiacritic",
+   "cer_notone",
+   "confusion",
+   "coverage",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "name",
+   "order",
+   "pages",
+   "provenance",
+   "question_trusted_n",
+   "question_trusted_precision",
+   "roles",
+   "safe_rejected",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trust_reasons",
+   "trusted",
+   "unmatched_pipeline",
+   "wrong_kinds"
+  ],
+  "dev": [
+   "attach_header_n",
+   "attach_header_ok",
+   "attach_toc_ok",
+   "blocks_trusted_all",
+   "blocks_withheld_all",
+   "caption_assoc",
+   "cer_nodiacritic",
+   "cer_notone",
+   "confusion",
+   "coverage",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "name",
+   "order",
+   "pages",
+   "provenance",
+   "question_trusted_n",
+   "question_trusted_precision",
+   "roles",
+   "safe_rejected",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trust_reasons",
+   "trusted",
+   "unmatched_pipeline",
+   "wrong_kinds"
+  ],
+  "heldout": [
+   "attach_header_n",
+   "attach_header_ok",
+   "attach_toc_ok",
+   "blocks_trusted_all",
+   "blocks_withheld_all",
+   "caption_assoc",
+   "cer_nodiacritic",
+   "cer_notone",
+   "confusion",
+   "coverage",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "name",
+   "order",
+   "pages",
+   "provenance",
+   "question_trusted_n",
+   "question_trusted_precision",
+   "roles",
+   "safe_rejected",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trust_reasons",
+   "trusted",
+   "unmatched_pipeline",
+   "wrong_kinds"
+  ],
+  "science": [
+   "attach_header_n",
+   "attach_header_ok",
+   "attach_toc_ok",
+   "blocks_trusted_all",
+   "blocks_withheld_all",
+   "caption_assoc",
+   "cer_nodiacritic",
+   "cer_notone",
+   "confusion",
+   "coverage",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "name",
+   "order",
+   "pages",
+   "provenance",
+   "question_trusted_n",
+   "question_trusted_precision",
+   "roles",
+   "safe_rejected",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trust_reasons",
+   "trusted",
+   "unmatched_pipeline",
+   "wrong_kinds"
+  ],
+  "science_sgk": [
+   "attach_header_n",
+   "attach_header_ok",
+   "attach_toc_ok",
+   "blocks_trusted_all",
+   "blocks_withheld_all",
+   "caption_assoc",
+   "cer_nodiacritic",
+   "cer_notone",
+   "confusion",
+   "coverage",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "name",
+   "order",
+   "pages",
+   "provenance",
+   "question_trusted_n",
+   "question_trusted_precision",
+   "roles",
+   "safe_rejected",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trust_reasons",
+   "trusted",
+   "unmatched_pipeline",
+   "wrong_kinds"
+  ],
+  "sgv": [
+   "attach_header_n",
+   "attach_header_ok",
+   "attach_toc_ok",
+   "blocks_trusted_all",
+   "blocks_withheld_all",
+   "caption_assoc",
+   "cer_nodiacritic",
+   "cer_notone",
+   "confusion",
+   "coverage",
+   "cte",
+   "cte_pages",
+   "cte_total",
+   "digits_ok",
+   "false_trusted",
+   "fidelity",
+   "formula_role",
+   "found",
+   "ftr",
+   "learning_blocks",
+   "meaning_inversions",
+   "name",
+   "order",
+   "pages",
+   "provenance",
+   "question_trusted_n",
+   "question_trusted_precision",
+   "roles",
+   "safe_rejected",
+   "splices",
+   "table_role",
+   "text_acc",
+   "tlsr",
+   "trust_reasons",
+   "trusted",
+   "unmatched_pipeline",
+   "wrong_kinds"
+  ]
+ },
+ "tc_v2_gold": {
+  "all": {
+   "pages": 54,
+   "learning_blocks": 643,
+   "trusted": 439,
+   "coverage": 0.683,
+   "tlsr": 0.605,
+   "false_trusted": 50,
+   "ftr": 0.1139,
+   "safe_rejected": 188,
+   "order": 0.985,
+   "text_acc": 0.969,
+   "fidelity": 0.976,
+   "splices": 10,
+   "roles": {
+    "QUESTION": {
+     "p": 0.882,
+     "r": 0.776,
+     "tp": 90,
+     "pred": 102,
+     "gold": 116
+    },
+    "ANSWER": {
+     "p": 0.8,
+     "r": 0.267,
+     "tp": 4,
+     "pred": 5,
+     "gold": 15
+    },
+    "ACTIVITY": {
+     "p": 0.0,
+     "r": 0.0,
+     "tp": 0,
+     "pred": 6,
+     "gold": 11
+    },
+    "INSTRUCTION": {
+     "p": 0.3,
+     "r": 0.5,
+     "tp": 3,
+     "pred": 10,
+     "gold": 6
+    },
+    "OBJECTIVE": {
+     "p": 0.704,
+     "r": 0.826,
+     "tp": 19,
+     "pred": 27,
+     "gold": 23
+    },
+    "SIDEBAR": {
+     "p": 0.738,
+     "r": 0.62,
+     "tp": 31,
+     "pred": 42,
+     "gold": 50
+    },
+    "HEADING": {
+     "p": 0.901,
+     "r": 0.753,
+     "tp": 128,
+     "pred": 142,
+     "gold": 170
+    },
+    "BODY": {
+     "p": 0.699,
+     "r": 0.825,
+     "tp": 146,
+     "pred": 209,
+     "gold": 177
+    },
+    "CAPTION": {
+     "p": 0.824,
+     "r": 0.8,
+     "tp": 28,
+     "pred": 34,
+     "gold": 35
+    },
+    "OPTION": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 4,
+     "pred": 4,
+     "gold": 4
+    },
+    "ANSWER_SLOT": {
+     "p": null,
+     "r": 0.0,
+     "tp": 0,
+     "pred": 0,
+     "gold": 1
+    },
+    "TABLE": {
+     "p": 1.0,
+     "r": 0.55,
+     "tp": 11,
+     "pred": 11,
+     "gold": 20
+    },
+    "FORMULA": {
+     "p": null,
+     "r": 0.0,
+     "tp": 0,
+     "pred": 0,
+     "gold": 13
+    },
+    "FOOTNOTE": {
+     "p": 1.0,
+     "r": 0.727,
+     "tp": 8,
+     "pred": 8,
+     "gold": 11
+    },
+    "FIGURE_TEXT": {
+     "p": 0.292,
+     "r": 0.75,
+     "tp": 21,
+     "pred": 72,
+     "gold": 28
+    },
+    "PAGENUM": {
+     "p": 1.0,
+     "r": 0.944,
+     "tp": 51,
+     "pred": 51,
+     "gold": 54
+    },
+    "TEACHER_PROMPT": {
+     "p": 1.0,
+     "r": 0.667,
+     "tp": 4,
+     "pred": 4,
+     "gold": 6
+    }
+   },
+   "attach_toc_ok": 37,
+   "attach_header_ok": 43,
+   "cte": {
+    "lesson_attach_wrong": 17,
+    "corrupted_data": 22,
+    "enumerator_dropped": 2,
+    "order_changes_meaning": 44,
+    "cross_column_contamination": 10,
+    "nonquestion_as_question": 9,
+    "heading_as_question": 2
+   }
+  },
+  "dev": {
+   "pages": 38,
+   "learning_blocks": 462,
+   "trusted": 323,
+   "coverage": 0.699,
+   "tlsr": 0.621,
+   "false_trusted": 36,
+   "ftr": 0.1115,
+   "safe_rejected": 125,
+   "order": 0.984,
+   "text_acc": 0.964,
+   "fidelity": 0.975,
+   "splices": 8,
+   "roles": {
+    "QUESTION": {
+     "p": 0.893,
+     "r": 0.75,
+     "tp": 75,
+     "pred": 84,
+     "gold": 100
+    },
+    "ANSWER": {
+     "p": null,
+     "r": 0.0,
+     "tp": 0,
+     "pred": 0,
+     "gold": 5
+    },
+    "ACTIVITY": {
+     "p": 0.0,
+     "r": 0.0,
+     "tp": 0,
+     "pred": 3,
+     "gold": 5
+    },
+    "INSTRUCTION": {
+     "p": 0.0,
+     "r": null,
+     "tp": 0,
+     "pred": 7,
+     "gold": 0
+    },
+    "OBJECTIVE": {
+     "p": 0.7,
+     "r": 0.7,
+     "tp": 7,
+     "pred": 10,
+     "gold": 10
+    },
+    "SIDEBAR": {
+     "p": 0.444,
+     "r": 0.348,
+     "tp": 8,
+     "pred": 18,
+     "gold": 23
+    },
+    "HEADING": {
+     "p": 0.869,
+     "r": 0.729,
+     "tp": 86,
+     "pred": 99,
+     "gold": 118
+    },
+    "BODY": {
+     "p": 0.71,
+     "r": 0.833,
+     "tp": 115,
+     "pred": 162,
+     "gold": 138
+    },
+    "CAPTION": {
+     "p": 0.947,
+     "r": 0.75,
+     "tp": 18,
+     "pred": 19,
+     "gold": 24
+    },
+    "OPTION": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 4,
+     "pred": 4,
+     "gold": 4
+    },
+    "ANSWER_SLOT": {
+     "p": null,
+     "r": 0.0,
+     "tp": 0,
+     "pred": 0,
+     "gold": 1
+    },
+    "TABLE": {
+     "p": 1.0,
+     "r": 0.4,
+     "tp": 6,
+     "pred": 6,
+     "gold": 15
+    },
+    "FORMULA": {
+     "p": null,
+     "r": 0.0,
+     "tp": 0,
+     "pred": 0,
+     "gold": 13
+    },
+    "FOOTNOTE": {
+     "p": 1.0,
+     "r": 0.727,
+     "tp": 8,
+     "pred": 8,
+     "gold": 11
+    },
+    "FIGURE_TEXT": {
+     "p": 0.283,
+     "r": 0.708,
+     "tp": 17,
+     "pred": 60,
+     "gold": 24
+    },
+    "PAGENUM": {
+     "p": 1.0,
+     "r": 0.947,
+     "tp": 36,
+     "pred": 36,
+     "gold": 38
+    },
+    "TEACHER_PROMPT": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    }
+   },
+   "attach_toc_ok": 28,
+   "attach_header_ok": 28,
+   "cte": {
+    "lesson_attach_wrong": 10,
+    "corrupted_data": 21,
+    "enumerator_dropped": 2,
+    "order_changes_meaning": 31,
+    "cross_column_contamination": 8,
+    "heading_as_question": 2,
+    "nonquestion_as_question": 7
+   }
+  },
+  "heldout": {
+   "pages": 16,
+   "learning_blocks": 181,
+   "trusted": 116,
+   "coverage": 0.641,
+   "tlsr": 0.564,
+   "false_trusted": 14,
+   "ftr": 0.1207,
+   "safe_rejected": 63,
+   "order": 0.986,
+   "text_acc": 0.981,
+   "fidelity": 0.979,
+   "splices": 2,
+   "roles": {
+    "QUESTION": {
+     "p": 0.833,
+     "r": 0.938,
+     "tp": 15,
+     "pred": 18,
+     "gold": 16
+    },
+    "ANSWER": {
+     "p": 0.8,
+     "r": 0.4,
+     "tp": 4,
+     "pred": 5,
+     "gold": 10
+    },
+    "ACTIVITY": {
+     "p": 0.0,
+     "r": 0.0,
+     "tp": 0,
+     "pred": 3,
+     "gold": 6
+    },
+    "INSTRUCTION": {
+     "p": 1.0,
+     "r": 0.5,
+     "tp": 3,
+     "pred": 3,
+     "gold": 6
+    },
+    "OBJECTIVE": {
+     "p": 0.706,
+     "r": 0.923,
+     "tp": 12,
+     "pred": 17,
+     "gold": 13
+    },
+    "SIDEBAR": {
+     "p": 0.958,
+     "r": 0.852,
+     "tp": 23,
+     "pred": 24,
+     "gold": 27
+    },
+    "HEADING": {
+     "p": 0.977,
+     "r": 0.808,
+     "tp": 42,
+     "pred": 43,
+     "gold": 52
+    },
+    "BODY": {
+     "p": 0.66,
+     "r": 0.795,
+     "tp": 31,
+     "pred": 47,
+     "gold": 39
+    },
+    "CAPTION": {
+     "p": 0.667,
+     "r": 0.909,
+     "tp": 10,
+     "pred": 15,
+     "gold": 11
+    },
+    "OPTION": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "ANSWER_SLOT": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "TABLE": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 5,
+     "pred": 5,
+     "gold": 5
+    },
+    "FORMULA": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "FOOTNOTE": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "FIGURE_TEXT": {
+     "p": 0.333,
+     "r": 1.0,
+     "tp": 4,
+     "pred": 12,
+     "gold": 4
+    },
+    "PAGENUM": {
+     "p": 1.0,
+     "r": 0.938,
+     "tp": 15,
+     "pred": 15,
+     "gold": 16
+    },
+    "TEACHER_PROMPT": {
+     "p": 1.0,
+     "r": 0.667,
+     "tp": 4,
+     "pred": 4,
+     "gold": 6
+    }
+   },
+   "attach_toc_ok": 9,
+   "attach_header_ok": 15,
+   "cte": {
+    "corrupted_data": 1,
+    "cross_column_contamination": 2,
+    "lesson_attach_wrong": 7,
+    "nonquestion_as_question": 2,
+    "order_changes_meaning": 13
+   }
+  },
+  "science": {
+   "pages": 23,
+   "learning_blocks": 269,
+   "trusted": 190,
+   "coverage": 0.706,
+   "tlsr": 0.636,
+   "false_trusted": 19,
+   "ftr": 0.1,
+   "safe_rejected": 77,
+   "order": 0.987,
+   "text_acc": 0.982,
+   "fidelity": 0.987,
+   "splices": 3,
+   "roles": {
+    "QUESTION": {
+     "p": 0.889,
+     "r": 0.87,
+     "tp": 40,
+     "pred": 45,
+     "gold": 46
+    },
+    "ANSWER": {
+     "p": 0.8,
+     "r": 0.4,
+     "tp": 4,
+     "pred": 5,
+     "gold": 10
+    },
+    "ACTIVITY": {
+     "p": 0.0,
+     "r": 0.0,
+     "tp": 0,
+     "pred": 3,
+     "gold": 10
+    },
+    "INSTRUCTION": {
+     "p": 0.5,
+     "r": 0.5,
+     "tp": 3,
+     "pred": 6,
+     "gold": 6
+    },
+    "OBJECTIVE": {
+     "p": 0.696,
+     "r": 0.941,
+     "tp": 16,
+     "pred": 23,
+     "gold": 17
+    },
+    "SIDEBAR": {
+     "p": 0.964,
+     "r": 0.818,
+     "tp": 27,
+     "pred": 28,
+     "gold": 33
+    },
+    "HEADING": {
+     "p": 0.983,
+     "r": 0.826,
+     "tp": 57,
+     "pred": 58,
+     "gold": 69
+    },
+    "BODY": {
+     "p": 0.642,
+     "r": 0.827,
+     "tp": 43,
+     "pred": 67,
+     "gold": 52
+    },
+    "CAPTION": {
+     "p": 0.75,
+     "r": 0.783,
+     "tp": 18,
+     "pred": 24,
+     "gold": 23
+    },
+    "OPTION": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 1,
+     "pred": 1,
+     "gold": 1
+    },
+    "ANSWER_SLOT": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "TABLE": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 7,
+     "pred": 7,
+     "gold": 7
+    },
+    "FORMULA": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "FOOTNOTE": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 1,
+     "pred": 1,
+     "gold": 1
+    },
+    "FIGURE_TEXT": {
+     "p": 0.429,
+     "r": 0.818,
+     "tp": 9,
+     "pred": 21,
+     "gold": 11
+    },
+    "PAGENUM": {
+     "p": 1.0,
+     "r": 0.957,
+     "tp": 22,
+     "pred": 22,
+     "gold": 23
+    },
+    "TEACHER_PROMPT": {
+     "p": 1.0,
+     "r": 0.667,
+     "tp": 4,
+     "pred": 4,
+     "gold": 6
+    }
+   },
+   "attach_toc_ok": 15,
+   "attach_header_ok": 22,
+   "cte": {
+    "corrupted_data": 5,
+    "cross_column_contamination": 3,
+    "lesson_attach_wrong": 8,
+    "order_changes_meaning": 15,
+    "nonquestion_as_question": 4
+   }
+  },
+  "science_sgk": {
+   "pages": 18,
+   "learning_blocks": 205,
+   "trusted": 165,
+   "coverage": 0.805,
+   "tlsr": 0.732,
+   "false_trusted": 15,
+   "ftr": 0.0909,
+   "safe_rejected": 39,
+   "order": 0.989,
+   "text_acc": 0.981,
+   "fidelity": 0.983,
+   "splices": 3,
+   "roles": {
+    "QUESTION": {
+     "p": 0.889,
+     "r": 0.87,
+     "tp": 40,
+     "pred": 45,
+     "gold": 46
+    },
+    "ANSWER": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "ACTIVITY": {
+     "p": null,
+     "r": 0.0,
+     "tp": 0,
+     "pred": 0,
+     "gold": 10
+    },
+    "INSTRUCTION": {
+     "p": 0.5,
+     "r": 0.5,
+     "tp": 3,
+     "pred": 6,
+     "gold": 6
+    },
+    "OBJECTIVE": {
+     "p": 0.75,
+     "r": 1.0,
+     "tp": 15,
+     "pred": 20,
+     "gold": 15
+    },
+    "SIDEBAR": {
+     "p": 0.964,
+     "r": 0.818,
+     "tp": 27,
+     "pred": 28,
+     "gold": 33
+    },
+    "HEADING": {
+     "p": 1.0,
+     "r": 0.8,
+     "tp": 40,
+     "pred": 40,
+     "gold": 50
+    },
+    "BODY": {
+     "p": 0.55,
+     "r": 0.88,
+     "tp": 22,
+     "pred": 40,
+     "gold": 25
+    },
+    "CAPTION": {
+     "p": 0.857,
+     "r": 0.783,
+     "tp": 18,
+     "pred": 21,
+     "gold": 23
+    },
+    "OPTION": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 1,
+     "pred": 1,
+     "gold": 1
+    },
+    "ANSWER_SLOT": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "TABLE": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 3,
+     "pred": 3,
+     "gold": 3
+    },
+    "FORMULA": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "FOOTNOTE": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 1,
+     "pred": 1,
+     "gold": 1
+    },
+    "FIGURE_TEXT": {
+     "p": 0.45,
+     "r": 0.818,
+     "tp": 9,
+     "pred": 20,
+     "gold": 11
+    },
+    "PAGENUM": {
+     "p": 1.0,
+     "r": 0.944,
+     "tp": 17,
+     "pred": 17,
+     "gold": 18
+    },
+    "TEACHER_PROMPT": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    }
+   },
+   "attach_toc_ok": 12,
+   "attach_header_ok": 18,
+   "cte": {
+    "corrupted_data": 5,
+    "cross_column_contamination": 3,
+    "lesson_attach_wrong": 6,
+    "order_changes_meaning": 9,
+    "nonquestion_as_question": 4
+   }
+  },
+  "sgv": {
+   "pages": 8,
+   "learning_blocks": 97,
+   "trusted": 45,
+   "coverage": 0.464,
+   "tlsr": 0.423,
+   "false_trusted": 4,
+   "ftr": 0.0889,
+   "safe_rejected": 50,
+   "order": 0.989,
+   "text_acc": 0.986,
+   "fidelity": 1.0,
+   "splices": 0,
+   "roles": {
+    "QUESTION": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "ANSWER": {
+     "p": 0.8,
+     "r": 0.308,
+     "tp": 4,
+     "pred": 5,
+     "gold": 13
+    },
+    "ACTIVITY": {
+     "p": 0.0,
+     "r": null,
+     "tp": 0,
+     "pred": 3,
+     "gold": 0
+    },
+    "INSTRUCTION": {
+     "p": 0.0,
+     "r": null,
+     "tp": 0,
+     "pred": 2,
+     "gold": 0
+    },
+    "OBJECTIVE": {
+     "p": 0.6,
+     "r": 0.5,
+     "tp": 3,
+     "pred": 5,
+     "gold": 6
+    },
+    "SIDEBAR": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 1,
+     "pred": 1,
+     "gold": 1
+    },
+    "HEADING": {
+     "p": 0.853,
+     "r": 0.853,
+     "tp": 29,
+     "pred": 34,
+     "gold": 34
+    },
+    "BODY": {
+     "p": 0.763,
+     "r": 0.806,
+     "tp": 29,
+     "pred": 38,
+     "gold": 36
+    },
+    "CAPTION": {
+     "p": 0.0,
+     "r": null,
+     "tp": 0,
+     "pred": 3,
+     "gold": 0
+    },
+    "OPTION": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "ANSWER_SLOT": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "TABLE": {
+     "p": 1.0,
+     "r": 0.857,
+     "tp": 6,
+     "pred": 6,
+     "gold": 7
+    },
+    "FORMULA": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "FOOTNOTE": {
+     "p": null,
+     "r": null,
+     "tp": 0,
+     "pred": 0,
+     "gold": 0
+    },
+    "FIGURE_TEXT": {
+     "p": 0.667,
+     "r": 1.0,
+     "tp": 2,
+     "pred": 3,
+     "gold": 2
+    },
+    "PAGENUM": {
+     "p": 1.0,
+     "r": 1.0,
+     "tp": 8,
+     "pred": 8,
+     "gold": 8
+    },
+    "TEACHER_PROMPT": {
+     "p": 1.0,
+     "r": 0.667,
+     "tp": 4,
+     "pred": 4,
+     "gold": 6
+    }
+   },
+   "attach_toc_ok": 4,
+   "attach_header_ok": 4,
+   "cte": {
+    "order_changes_meaning": 6,
+    "lesson_attach_wrong": 4,
+    "corrupted_data": 1
+   }
+  }
+ },
+ "tc_v2_slice_keys": [
+  "books",
+  "denominators",
+  "funnel_old",
+  "pipeline",
+  "totals"
+ ],
+ "tc_v2_slice": {
+  "pipeline": "tc2-p1",
+  "denominators": {
+   "canonical_3679": 3679,
+   "ranged_3381": 3381
+  },
+  "books": {
+   "04-sgk-khoa-hoc-4": {
+    "stats": {
+     "pages": 126,
+     "learning_blocks": 1427,
+     "trusted": 1184,
+     "withheld": 222,
+     "conflict": 21,
+     "trusted_rate": 0.83,
+     "withheld_by_reason": {
+      "figure_dependent": 129,
+      "agree_text": 69,
+      "agree_order": 19,
+      "page_feature:color_heavy": 18,
+      "page_feature:diagram": 10,
+      "box_boundary": 8,
+      "math_guard": 3,
+      "role_conflict": 2
+     },
+     "roles": {
+      "figure_text": 717,
+      "figure": 617,
+      "question": 365,
+      "body": 295,
+      "caption": 228,
+      "heading": 210,
+      "sidebar": 142,
+      "page_number": 122,
+      "objective": 92,
+      "stage_label": 46,
+      "empty": 44,
+      "instruction": 29,
+      "table": 18,
+      "running_head": 6,
+      "activity": 2
+     },
+     "roles_trusted": {
+      "body": 273,
+      "question": 231,
+      "caption": 218,
+      "heading": 182,
+      "sidebar": 130,
+      "objective": 85,
+      "stage_label": 44,
+      "instruction": 18,
+      "activity": 2,
+      "table": 1
+     },
+     "page_features": {
+      "color_heavy": 6,
+      "figure": 104,
+      "sidebar": 41,
+      "diagram": 54,
+      "side_by_side": 64,
+      "front_matter": 2,
+      "continuation": 30,
+      "table": 8,
+      "formula": 2
+     },
+     "enumerators_restored": 657,
+     "docling_sec_total": 202.4
+    },
+    "attach": {
+     "canonical_lesson_count": 31,
+     "toc_lessons": 31,
+     "toc_ranged": 27,
+     "header_detected": 31,
+     "header_confirmed_by_toc": 27,
+     "header_only": 4,
+     "repaired_ranged": 31,
+     "beyond_canonical": 0,
+     "max_lesson_number": 31,
+     "rejected_headers": 0,
+     "pages": 126,
+     "pages_with_lesson": 121,
+     "pages_no_lesson": 5,
+     "page_kinds": {
+      "page": 124,
+      "front_matter": 2
+     },
+     "printed_offset": 1,
+     "structure_status": "PARTIAL"
+    },
+    "tsl": {
+     "book": "04-sgk-khoa-hoc-4",
+     "lessons": 31,
+     "FULL": 1,
+     "PARTIAL": 30,
+     "NONE": 0,
+     "header_found": 31,
+     "pages_no_lesson": 5,
+     "trusted_blocks": 1166,
+     "withheld_blocks": 240,
+     "hsb_native": 1166,
+     "hsb_crop_or_ref": 240,
+     "withheld_by_reason": {
+      "agree_order": 19,
+      "agree_text": 67,
+      "page_feature:color_heavy": 17,
+      "figure_dependent": 129,
+      "math_guard": 3,
+      "page_feature:diagram": 10,
+      "role_conflict": 2,
+      "box_boundary": 8
+     }
+    },
+    "funnel_new": {
+     "toc_lessons": 31,
+     "recovered": 30,
+     "attached": 30,
+     "patterned_any": 29,
+     "patterned_scope": 4,
+     "explain_only": 22,
+     "gate_pass_exact": 3,
+     "gate_pass_variant": 19,
+     "gate_reasons": {
+      "explain:no_context": 13,
+      "explain:label_in_passage": 4,
+      "passage_is_objectives": 1,
+      "explain:leadin_not_question": 1
+     }
+    },
+    "repaired_lessons": [
+     {
+      "number": 2,
+      "page_printed": 9,
+      "source": "header",
+      "title": "SỰ CHUYỂN THỂ CỦA NƯỚC VÃ VÔNG TUẦN HOÀN CỦA NƯỚC TRONG TỰ N"
+     },
+     {
+      "number": 3,
+      "page_printed": 13,
+      "source": "header",
+      "title": "SỰ Ô NHIỄM VÀ BẢO VỆ NGUỒN NƯỚC. MỘT SỐ CÁCH LẬM SẠCH NƯỚC"
+     },
+     {
+      "number": 20,
+      "page_printed": 74,
+      "source": "header",
+      "title": "NẤM ĂN VÀ NẤM TRONG CHỀ BIỂN THỰC PHẨM"
+     },
+     {
+      "number": 30,
+      "page_printed": 113,
+      "source": "header",
+      "title": "VAI TRÔ CỦA THỰC VẬT TRONG CHUỖI THỨC ĂN"
+     }
+    ]
+   },
+   "05-sgk-khoa-hoc-5": {
+    "stats": {
+     "pages": 114,
+     "learning_blocks": 1292,
+     "trusted": 1098,
+     "withheld": 182,
+     "conflict": 12,
+     "trusted_rate": 0.85,
+     "withheld_by_reason": {
+      "figure_dependent": 102,
+      "agree_text": 75,
+      "agree_order": 11,
+      "page_feature:diagram": 6,
+      "page_feature:color_heavy": 5,
+      "box_boundary": 2,
+      "role_conflict": 1
+     },
+     "roles": {
+      "figure_text": 763,
+      "figure": 598,
+      "body": 333,
+      "question": 271,
+      "caption": 264,
+      "heading": 178,
+      "page_number": 110,
+      "sidebar": 101,
+      "objective": 77,
+      "empty": 67,
+      "stage_label": 45,
+      "table": 11,
+      "instruction": 11,
+      "running_head": 6,
+      "activity": 1
+     },
+     "roles_trusted": {
+      "body": 312,
+      "caption": 240,
+      "heading": 161,
+      "question": 161,
+      "sidebar": 93,
+      "objective": 75,
+      "stage_label": 44,
+      "instruction": 10,
+      "table": 1,
+      "activity": 1
+     },
+     "page_features": {
+      "color_heavy": 3,
+      "figure": 99,
+      "sidebar": 38,
+      "diagram": 48,
+      "side_by_side": 61,
+      "front_matter": 2,
+      "continuation": 32,
+      "formula": 1,
+      "table": 2
+     },
+     "enumerators_restored": 546,
+     "docling_sec_total": 167.7
+    },
+    "attach": {
+     "canonical_lesson_count": 30,
+     "toc_lessons": 30,
+     "toc_ranged": 22,
+     "header_detected": 30,
+     "header_confirmed_by_toc": 22,
+     "header_only": 8,
+     "repaired_ranged": 30,
+     "beyond_canonical": 0,
+     "max_lesson_number": 30,
+     "rejected_headers": 0,
+     "pages": 114,
+     "pages_with_lesson": 109,
+     "pages_no_lesson": 5,
+     "page_kinds": {
+      "page": 112,
+      "front_matter": 2
+     },
+     "printed_offset": 1,
+     "structure_status": "PARTIAL"
+    },
+    "tsl": {
+     "book": "05-sgk-khoa-hoc-5",
+     "lessons": 30,
+     "FULL": 0,
+     "PARTIAL": 30,
+     "NONE": 0,
+     "header_found": 30,
+     "pages_no_lesson": 5,
+     "trusted_blocks": 1077,
+     "withheld_blocks": 191,
+     "hsb_native": 1077,
+     "hsb_crop_or_ref": 191,
+     "withheld_by_reason": {
+      "agree_order": 11,
+      "figure_dependent": 102,
+      "agree_text": 73,
+      "page_feature:diagram": 6,
+      "page_feature:color_heavy": 4,
+      "role_conflict": 1,
+      "box_boundary": 2
+     }
+    },
+    "funnel_new": {
+     "toc_lessons": 30,
+     "recovered": 30,
+     "attached": 30,
+     "patterned_any": 26,
+     "patterned_scope": 4,
+     "explain_only": 14,
+     "gate_pass_exact": 3,
+     "gate_pass_variant": 15,
+     "gate_reasons": {
+      "explain:no_context": 6,
+      "explain:passage_fragment_start": 3,
+      "explain:label_in_passage": 2,
+      "explain:fragment_or_heading": 1,
+      "no_context": 1
+     }
+    },
+    "repaired_lessons": [
+     {
+      "number": 2,
+      "page_printed": 9,
+      "source": "header",
+      "title": "Ô NHIỄM, XÔI MÔN ĐẤT VÀ BẢO VỆ MÔI TRƯỜNG ĐẤT"
+     },
+     {
+      "number": 4,
+      "page_printed": 17,
+      "source": "header",
+      "title": "ĐẶC ĐIỂM CỦA CHẤT Ở TRẠNG THÁI RẮN, LỎNG, KHÍ. SỰ BIỀN ĐỔI T"
+     },
+     {
+      "number": 11,
+      "page_printed": 42,
+      "source": "header",
+      "title": "SỬ DỤNG NĂNG LƯỢNG MẶT TRỜI, NĂNG LƯỢNG GIÓ, NĂNG LƯỢNG NƯỚC"
+     },
+     {
+      "number": 18,
+      "page_printed": 66,
+      "source": "header",
+      "title": "CHỦ ĐẾ 4 VI KHUẨN XUNG QUANH CHÚNG TA"
+     },
+     {
+      "number": 19,
+      "page_printed": 69,
+      "source": "header",
+      "title": "VI KHUẨN CÓ ÍCH TRONG CHỀ BIỂN THỰC PHẨM"
+     },
+     {
+      "number": 23,
+      "page_printed": 81,
+      "source": "header",
+      "title": "CÁC GIAI ĐOẠN PHÁT TRIỂN CHÍNH CỦA CON NGƯỜI"
+     },
+     {
+      "number": 27,
+      "page_printed": 98,
+      "source": "header",
+      "title": "ÔN TẬP CHỦ ĐỂ CON NGƯỜI VÀ SỨC KHOẺ"
+     },
+     {
+      "number": 29,
+      "page_printed": 104,
+      "source": "header",
+      "title": "TÁC ĐỘNG CỦA CON NGƯỜI VÀ MỘT SỐ BIỆN PHÁP BẢO VỆ MÔI TRƯỜNG"
+     }
+    ]
+   },
+   "06-sgk-khoa-hoc-tu-nhien-6": {
+    "stats": {
+     "pages": 198,
+     "learning_blocks": 2988,
+     "trusted": 2466,
+     "withheld": 444,
+     "conflict": 78,
+     "trusted_rate": 0.825,
+     "withheld_by_reason": {
+      "agree_text": 181,
+      "page_feature:diagram": 123,
+      "figure_dependent": 93,
+      "agree_order": 77,
+      "page_feature:color_heavy": 54,
+      "box_boundary": 34,
+      "math_guard": 4,
+      "low_ocr_conf": 2,
+      "role_conflict": 2,
+      "answer_leak": 1
+     },
+     "roles": {
+      "figure_text": 1220,
+      "body": 951,
+      "figure": 878,
+      "heading": 495,
+      "question": 422,
+      "caption": 362,
+      "sidebar": 226,
+      "objective": 198,
+      "page_number": 194,
+      "stage_label": 155,
+      "instruction": 95,
+      "empty": 58,
+      "table": 45,
+      "activity": 26,
+      "running_head": 14,
+      "footnote": 12,
+      "model_answer": 1
+     },
+     "roles_trusted": {
+      "body": 784,
+      "heading": 449,
+      "caption": 313,
+      "question": 297,
+      "sidebar": 192,
+      "objective": 172,
+      "stage_label": 154,
+      "instruction": 77,
+      "footnote": 12,
+      "table": 8,
+      "activity": 8
+     },
+     "page_features": {
+      "color_heavy": 7,
+      "figure": 178,
+      "sidebar": 127,
+      "diagram": 130,
+      "side_by_side": 117,
+      "front_matter": 3,
+      "table": 16,
+      "continuation": 34,
+      "formula": 11
+     },
+     "enumerators_restored": 934,
+     "docling_sec_total": 330.6
+    },
+    "attach": {
+     "canonical_lesson_count": 55,
+     "toc_lessons": 55,
+     "toc_ranged": 55,
+     "header_detected": 53,
+     "header_confirmed_by_toc": 53,
+     "header_only": 0,
+     "repaired_ranged": 55,
+     "beyond_canonical": 0,
+     "max_lesson_number": 55,
+     "rejected_headers": 0,
+     "pages": 198,
+     "pages_with_lesson": 191,
+     "pages_no_lesson": 7,
+     "page_kinds": {
+      "page": 195,
+      "front_matter": 3
+     },
+     "printed_offset": 1,
+     "structure_status": "OK"
+    },
+    "tsl": {
+     "book": "06-sgk-khoa-hoc-tu-nhien-6",
+     "lessons": 53,
+     "FULL": 0,
+     "PARTIAL": 53,
+     "NONE": 0,
+     "header_found": 53,
+     "pages_no_lesson": 7,
+     "trusted_blocks": 2441,
+     "withheld_blocks": 517,
+     "hsb_native": 2441,
+     "hsb_crop_or_ref": 517,
+     "withheld_by_reason": {
+      "agree_order": 77,
+      "page_feature:diagram": 122,
+      "figure_dependent": 93,
+      "agree_text": 179,
+      "box_boundary": 34,
+      "math_guard": 4,
+      "low_ocr_conf": 2,
+      "page_feature:color_heavy": 52,
+      "answer_leak": 1,
+      "role_conflict": 2
+     }
+    },
+    "funnel_new": {
+     "toc_lessons": 53,
+     "recovered": 53,
+     "attached": 53,
+     "patterned_any": 45,
+     "patterned_scope": 4,
+     "explain_only": 37,
+     "gate_pass_exact": 0,
+     "gate_pass_variant": 32,
+     "gate_reasons": {
+      "explain:no_context": 16,
+      "explain:deictic_prompt": 3,
+      "explain:leadin_not_question": 3,
+      "passage_fragment_start": 1,
+      "passage_is_objectives": 1,
+      "leadin_not_question": 1,
+      "deictic_prompt": 1
+     }
+    },
+    "repaired_lessons": []
+   },
+   "07-sgk-khoa-hoc-tu-nhien-7": {
+    "stats": {
+     "pages": 182,
+     "learning_blocks": 2337,
+     "trusted": 1993,
+     "withheld": 309,
+     "conflict": 35,
+     "trusted_rate": 0.853,
+     "withheld_by_reason": {
+      "agree_text": 144,
+      "figure_dependent": 112,
+      "agree_order": 35,
+      "page_feature:color_heavy": 25,
+      "page_feature:diagram": 25,
+      "box_boundary": 15,
+      "math_guard": 8,
+      "answer_leak": 5,
+      "low_ocr_conf": 1
+     },
+     "roles": {
+      "figure_text": 1225,
+      "body": 738,
+      "figure": 558,
+      "heading": 445,
+      "question": 338,
+      "caption": 216,
+      "page_number": 179,
+      "sidebar": 174,
+      "objective": 137,
+      "stage_label": 101,
+      "empty": 91,
+      "instruction": 81,
+      "table": 46,
+      "footnote": 30,
+      "activity": 22,
+      "running_head": 16,
+      "model_answer": 5,
+      "option": 4
+     },
+     "roles_trusted": {
+      "body": 658,
+      "heading": 408,
+      "question": 249,
+      "caption": 187,
+      "sidebar": 149,
+      "objective": 133,
+      "stage_label": 101,
+      "instruction": 53,
+      "footnote": 30,
+      "activity": 16,
+      "table": 5,
+      "option": 4
+     },
+     "page_features": {
+      "color_heavy": 5,
+      "figure": 113,
+      "sidebar": 85,
+      "side_by_side": 90,
+      "front_matter": 3,
+      "diagram": 63,
+      "table": 15,
+      "continuation": 34,
+      "formula": 13
+     },
+     "enumerators_restored": 753,
+     "docling_sec_total": 295.0
+    },
+    "attach": {
+     "canonical_lesson_count": 18,
+     "toc_lessons": 18,
+     "toc_ranged": 17,
+     "header_detected": 33,
+     "header_confirmed_by_toc": 9,
+     "header_only": 24,
+     "repaired_ranged": 37,
+     "beyond_canonical": 20,
+     "max_lesson_number": 39,
+     "rejected_headers": 1,
+     "pages": 182,
+     "pages_with_lesson": 168,
+     "pages_no_lesson": 14,
+     "page_kinds": {
+      "page": 178,
+      "front_matter": 3,
+      "toc": 1
+     },
+     "printed_offset": 1,
+     "structure_status": "PARTIAL"
+    },
+    "tsl": {
+     "book": "07-sgk-khoa-hoc-tu-nhien-7",
+     "lessons": 33,
+     "FULL": 0,
+     "PARTIAL": 33,
+     "NONE": 0,
+     "header_found": 33,
+     "pages_no_lesson": 13,
+     "trusted_blocks": 1869,
+     "withheld_blocks": 323,
+     "hsb_native": 1869,
+     "hsb_crop_or_ref": 323,
+     "withheld_by_reason": {
+      "agree_text": 132,
+      "box_boundary": 14,
+      "figure_dependent": 109,
+      "agree_order": 33,
+      "page_feature:diagram": 25,
+      "math_guard": 8,
+      "page_feature:color_heavy": 20,
+      "answer_leak": 5,
+      "low_ocr_conf": 1
+     }
+    },
+    "funnel_new": {
+     "toc_lessons": 33,
+     "recovered": 33,
+     "attached": 33,
+     "patterned_any": 27,
+     "patterned_scope": 5,
+     "explain_only": 21,
+     "gate_pass_exact": 3,
+     "gate_pass_variant": 24,
+     "gate_reasons": {
+      "explain:no_context": 6,
+      "explain:label_in_passage": 3,
+      "leadin_not_question": 2
+     }
+    },
+    "repaired_lessons": [
+     {
+      "number": 3,
+      "page_printed": 3,
+      "source": "header",
+      "title": "NGUYÊN TỐ HÓÁ HỌC"
+     },
+     {
+      "number": 6,
+      "page_printed": 6,
+      "source": "header",
+      "title": "GIỚI THIỆU VỀ LIÊN KẾT HOÁ HỌC"
+     },
+     {
+      "number": 7,
+      "page_printed": 7,
+      "source": "header",
+      "title": "HÓÁ TRỊ VÀ CÔNG THỨC HÓÁ HỌC"
+     },
+     {
+      "number": 9,
+      "page_printed": 9,
+      "source": "header",
+      "title": "ĐO TỐC ĐỘ"
+     },
+     {
+      "number": 19,
+      "page_printed": 90,
+      "source": "header",
+      "title": "TỪ TRƯỜNG"
+     },
+     {
+      "number": 20,
+      "page_printed": 96,
+      "source": "header",
+      "title": "CHẾ TẠO NAM CHÂM ĐIỆN ĐƠN GIẢN"
+     },
+     {
+      "number": 21,
+      "page_printed": 99,
+      "source": "header",
+      "title": "VÀ CHUYẾN HÓA NĂNG LƯỢNG"
+     },
+     {
+      "number": 22,
+      "page_printed": 101,
+      "source": "header",
+      "title": "QUANG HỢP Ở THỰC VẬT"
+     },
+     {
+      "number": 23,
+      "page_printed": 104,
+      "source": "header",
+      "title": "QUANG HỢP"
+     },
+     {
+      "number": 24,
+      "page_printed": 108,
+      "source": "header",
+      "title": "Ở CÂY XANH"
+     },
+     {
+      "number": 26,
+      "page_printed": 113,
+      "source": "header",
+      "title": "ĐẾN HÔ HẤP TẾ BÀO"
+     },
+     {
+      "number": 27,
+      "page_printed": 116,
+      "source": "header",
+      "title": "THỰC HÀNH: HÔ HẤP Ở THỰC VẬT"
+     },
+     {
+      "number": 28,
+      "page_printed": 118,
+      "source": "header",
+      "title": "TRAO ĐỔI KHÍ Ở SINH VẬT"
+     },
+     {
+      "number": 29,
+      "page_printed": 122,
+      "source": "header",
+      "title": "CHẤT DINH DƯỠNG ĐỐI VỚI SINH VẬT"
+     },
+     {
+      "number": 30,
+      "page_printed": 127,
+      "source": "header",
+      "title": "Ở THỰC VẬT"
+     },
+     {
+      "number": 31,
+      "page_printed": 131,
+      "source": "header",
+      "title": "Ở ĐỘNG VẬT"
+     },
+     {
+      "number": 32,
+      "page_printed": 136,
+      "source": "header",
+      "title": "THÂN VẬN CHUYẾN NƯỚC VÀ LÁ THOÁT HƠI NƯỚC"
+     },
+     {
+      "number": 33,
+      "page_printed": 138,
+      "source": "header",
+      "title": "Ở ĐỘNG VẬT"
+     },
+     {
+      "number": 34,
+      "page_printed": 141,
+      "source": "header",
+      "title": "Ở SINH VẬT VÀO THỰC TIỀN"
+     },
+     {
+      "number": 35,
+      "page_printed": 145,
+      "source": "header",
+      "title": "THỰC HÀNH: CẢM ỨNG Ở SINH VẬT"
+     },
+     {
+      "number": 36,
+      "page_printed": 148,
+      "source": "header",
+      "title": "VÀ PHÁT TRIỂN Ở SINH VẬT"
+     },
+     {
+      "number": 37,
+      "page_printed": 151,
+      "source": "header",
+      "title": "Ở SINH VẬT VÀO THỰC TIỀN"
+     },
+     {
+      "number": 38,
+      "page_printed": 156,
+      "source": "header",
+      "title": "VÀ PHÁT TRIỂN Ở MỘT SỐ SINH VẬT"
+     },
+     {
+      "number": 39,
+      "page_printed": 158,
+      "source": "header",
+      "title": "SINH SẢN VÔ TÍNH Ở SINH VẬT"
+     }
+    ]
+   },
+   "08-sgk-khoa-hoc-tu-nhien-8": {
+    "stats": {
+     "pages": 199,
+     "learning_blocks": 3001,
+     "trusted": 2633,
+     "withheld": 313,
+     "conflict": 55,
+     "trusted_rate": 0.877,
+     "withheld_by_reason": {
+      "agree_text": 173,
+      "figure_dependent": 95,
+      "agree_order": 54,
+      "box_boundary": 21,
+      "page_feature:diagram": 18,
+      "math_guard": 12,
+      "answer_leak": 11,
+      "page_feature:color_heavy": 3,
+      "low_ocr_conf": 1,
+      "role_conflict": 1
+     },
+     "roles": {
+      "figure_text": 1135,
+      "body": 1013,
+      "heading": 601,
+      "figure": 583,
+      "question": 394,
+      "sidebar": 244,
+      "objective": 198,
+      "page_number": 194,
+      "caption": 169,
+      "instruction": 159,
+      "empty": 138,
+      "stage_label": 131,
+      "table": 53,
+      "activity": 20,
+      "running_head": 11,
+      "model_answer": 11,
+      "footnote": 8
+     },
+     "roles_trusted": {
+      "body": 934,
+      "heading": 550,
+      "question": 315,
+      "sidebar": 227,
+      "objective": 182,
+      "caption": 137,
+      "stage_label": 131,
+      "instruction": 128,
+      "activity": 16,
+      "footnote": 8,
+      "table": 5
+     },
+     "page_features": {
+      "diagram": 60,
+      "color_heavy": 3,
+      "figure": 90,
+      "sidebar": 94,
+      "side_by_side": 83,
+      "front_matter": 3,
+      "table": 22,
+      "continuation": 24,
+      "formula": 23
+     },
+     "enumerators_restored": 958,
+     "docling_sec_total": 343.2
+    },
+    "attach": {
+     "canonical_lesson_count": 22,
+     "toc_lessons": 22,
+     "toc_ranged": 22,
+     "header_detected": 42,
+     "header_confirmed_by_toc": 13,
+     "header_only": 29,
+     "repaired_ranged": 44,
+     "beyond_canonical": 22,
+     "max_lesson_number": 47,
+     "rejected_headers": 0,
+     "pages": 199,
+     "pages_with_lesson": 193,
+     "pages_no_lesson": 6,
+     "page_kinds": {
+      "page": 195,
+      "front_matter": 3,
+      "toc": 1
+     },
+     "printed_offset": 1,
+     "structure_status": "OK"
+    },
+    "tsl": {
+     "book": "08-sgk-khoa-hoc-tu-nhien-8",
+     "lessons": 42,
+     "FULL": 0,
+     "PARTIAL": 42,
+     "NONE": 0,
+     "header_found": 42,
+     "pages_no_lesson": 6,
+     "trusted_blocks": 2614,
+     "withheld_blocks": 363,
+     "hsb_native": 2614,
+     "hsb_crop_or_ref": 363,
+     "withheld_by_reason": {
+      "page_feature:diagram": 18,
+      "agree_text": 170,
+      "figure_dependent": 95,
+      "agree_order": 54,
+      "box_boundary": 21,
+      "math_guard": 12,
+      "answer_leak": 11,
+      "low_ocr_conf": 1,
+      "role_conflict": 1,
+      "page_feature:color_heavy": 1
+     }
+    },
+    "funnel_new": {
+     "toc_lessons": 42,
+     "recovered": 42,
+     "attached": 42,
+     "patterned_any": 38,
+     "patterned_scope": 7,
+     "explain_only": 27,
+     "gate_pass_exact": 1,
+     "gate_pass_variant": 25,
+     "gate_reasons": {
+      "explain:no_context": 18,
+      "explain:deictic_prompt": 4,
+      "explain:passage_fragment_start": 3,
+      "leadin_not_question": 3,
+      "passage_fragment_start": 2,
+      "explain:leadin_not_question": 1,
+      "deictic_prompt": 1
+     }
+    },
+    "repaired_lessons": [
+     {
+      "number": 1,
+      "page_printed": 1,
+      "source": "header",
+      "title": "SỬ DỤNG MỘT SỐ HOÁ CHẤT, THIẾT BỊ CƠ BẢN TRONG PHÒNG THÍ NGH"
+     },
+     {
+      "number": 3,
+      "page_printed": 3,
+      "source": "header",
+      "title": "MOL VÀ TỈ KHỐI CHẤT KHÍ"
+     },
+     {
+      "number": 4,
+      "page_printed": 4,
+      "source": "header",
+      "title": "DUNG DỊCH VÀ NỒNG ĐỘ"
+     },
+     {
+      "number": 5,
+      "page_printed": 5,
+      "source": "header",
+      "title": "ĐỊNH LUẬT BẢO TOÀN KHỐI LƯỢNG VÀ PHƯƠNG TRÌNH HÓÁ HỌC"
+     },
+     {
+      "number": 6,
+      "page_printed": 6,
+      "source": "header",
+      "title": "TÍNH THEO PHƯƠNG TRÌNH HÓÁ HỌC"
+     },
+     {
+      "number": 7,
+      "page_printed": 7,
+      "source": "header",
+      "title": "TỐC ĐỘ PHẢN ỨNG VÀ CHẤT XÚC TÁC"
+     },
+     {
+      "number": 9,
+      "page_printed": 9,
+      "source": "header",
+      "title": "BASE • THANG pH"
+     },
+     {
+      "number": 23,
+      "page_printed": 95,
+      "source": "header",
+      "title": "TÁC DỤNG CỦA DÒNG ĐIỆN"
+     },
+     {
+      "number": 24,
+      "page_printed": 99,
+      "source": "header",
+      "title": "CƯỜNG ĐỘ DÒNG ĐIỆN VÀ HIỆU ĐIỆN THẾ"
+     },
+     {
+      "number": 25,
+      "page_printed": 102,
+      "source": "header",
+      "title": "THỰC HÀNH ĐO CƯỜNG ĐỘ DÒNG ĐIỆN VÀ HIỆU ĐIỆN THẾ"
+     },
+     {
+      "number": 26,
+      "page_printed": 105,
+      "source": "header",
+      "title": "NĂNG LƯỢNG NHIỆT VÀ NỘI NĂNG"
+     },
+     {
+      "number": 27,
+      "page_printed": 109,
+      "source": "header",
+      "title": "JOULEMETER"
+     },
+     {
+      "number": 28,
+      "page_printed": 112,
+      "source": "header",
+      "title": "SỰ TRUYỀN NHIỆT"
+     },
+     {
+      "number": 29,
+      "page_printed": 118,
+      "source": "header",
+      "title": "SỰ NỞ VÌ NHIỆT"
+     },
+     {
+      "number": 30,
+      "page_printed": 123,
+      "source": "header",
+      "title": "KHÁI QUÁT VỀ CƠ THỂ NGƯỜI"
+     },
+     {
+      "number": 31,
+      "page_printed": 125,
+      "source": "header",
+      "title": "HỆ VẬN ĐỘNG Ở NGƯỜI"
+     },
+     {
+      "number": 32,
+      "page_printed": 128,
+      "source": "header",
+      "title": "DINH DƯỠNG VÀ TIÊU HOÁ Ở NGƯỜI"
+     },
+     {
+      "number": 33,
+      "page_printed": 135,
+      "source": "header",
+      "title": "CỦA CƠ THỂ NGƯỜI"
+     },
+     {
+      "number": 34,
+      "page_printed": 142,
+      "source": "header",
+      "title": "HỆ HÔ HẤP Ở NGƯỜI"
+     },
+     {
+      "number": 35,
+      "page_printed": 146,
+      "source": "header",
+      "title": "HỆ BÀI TIẾT Ở NGƯỜI"
+     },
+     {
+      "number": 36,
+      "page_printed": 150,
+      "source": "header",
+      "title": "ĐIỀU HÒÀ MÔI TRƯỜNG TRONG CỦA CƠ THẾ NGƯỜI"
+     },
+     {
+      "number": 37,
+      "page_printed": 152,
+      "source": "header",
+      "title": "Ở NGƯỜI"
+     },
+     {
+      "number": 38,
+      "page_printed": 157,
+      "source": "header",
+      "title": "HỆ NỘI TIẾT Ở NGƯỜI"
+     },
+     {
+      "number": 39,
+      "page_printed": 160,
+      "source": "header",
+      "title": "DA VÀ ĐIỀU HÒA THÂN NHIỆT Ở NGƯỜI"
+     },
+     {
+      "number": 40,
+      "page_printed": 165,
+      "source": "header",
+      "title": "SINH SẢN Ở NGƯỜI"
+     },
+     {
+      "number": 41,
+      "page_printed": 170,
+      "source": "header",
+      "title": "MÔI TRƯỜNG VÀ CÁC NHÂN TỐ SINH THÁI"
+     },
+     {
+      "number": 42,
+      "page_printed": 174,
+      "source": "header",
+      "title": "QUẦN THỂ SINH VẬT"
+     },
+     {
+      "number": 45,
+      "page_printed": 185,
+      "source": "header",
+      "title": "SINH QUYỂN"
+     },
+     {
+      "number": 47,
+      "page_printed": 191,
+      "source": "header",
+      "title": "BẢO VỆ MÔI TRƯỜNG"
+     }
+    ]
+   },
+   "09-sgk-khoa-hoc-tu-nhien-9": {
+    "stats": {
+     "pages": 230,
+     "learning_blocks": 3406,
+     "trusted": 2974,
+     "withheld": 398,
+     "conflict": 34,
+     "trusted_rate": 0.873,
+     "withheld_by_reason": {
+      "agree_text": 223,
+      "figure_dependent": 107,
+      "agree_order": 33,
+      "page_feature:diagram": 17,
+      "low_ocr_conf": 16,
+      "box_boundary": 15,
+      "math_guard": 15,
+      "answer_leak": 13,
+      "page_feature:color_heavy": 6,
+      "role_conflict": 1
+     },
+     "roles": {
+      "figure_text": 1719,
+      "body": 1212,
+      "figure": 683,
+      "heading": 564,
+      "question": 534,
+      "sidebar": 323,
+      "objective": 231,
+      "page_number": 223,
+      "caption": 223,
+      "empty": 212,
+      "stage_label": 137,
+      "instruction": 89,
+      "table": 42,
+      "footnote": 25,
+      "running_head": 13,
+      "model_answer": 13,
+      "activity": 10,
+      "formula": 2,
+      "option": 1
+     },
+     "roles_trusted": {
+      "body": 1115,
+      "heading": 524,
+      "question": 416,
+      "sidebar": 295,
+      "objective": 222,
+      "caption": 146,
+      "stage_label": 135,
+      "instruction": 81,
+      "footnote": 25,
+      "activity": 10,
+      "table": 5
+     },
+     "page_features": {
+      "color_heavy": 4,
+      "figure": 100,
+      "sidebar": 105,
+      "side_by_side": 88,
+      "front_matter": 3,
+      "diagram": 74,
+      "continuation": 56,
+      "formula": 34,
+      "table": 26
+     },
+     "enumerators_restored": 1262,
+     "docling_sec_total": 392.0
+    },
+    "attach": {
+     "canonical_lesson_count": 51,
+     "toc_lessons": 51,
+     "toc_ranged": 51,
+     "header_detected": 49,
+     "header_confirmed_by_toc": 44,
+     "header_only": 5,
+     "repaired_ranged": 51,
+     "beyond_canonical": 0,
+     "max_lesson_number": 51,
+     "rejected_headers": 0,
+     "pages": 230,
+     "pages_with_lesson": 213,
+     "pages_no_lesson": 17,
+     "page_kinds": {
+      "page": 223,
+      "front_matter": 3,
+      "theme_opener": 1,
+      "back_matter": 3
+     },
+     "printed_offset": 1,
+     "structure_status": "OK"
+    },
+    "tsl": {
+     "book": "09-sgk-khoa-hoc-tu-nhien-9",
+     "lessons": 49,
+     "FULL": 1,
+     "PARTIAL": 48,
+     "NONE": 0,
+     "header_found": 49,
+     "pages_no_lesson": 17,
+     "trusted_blocks": 2804,
+     "withheld_blocks": 398,
+     "hsb_native": 2804,
+     "hsb_crop_or_ref": 398,
+     "withheld_by_reason": {
+      "agree_text": 203,
+      "agree_order": 30,
+      "page_feature:diagram": 16,
+      "page_feature:color_heavy": 1,
+      "box_boundary": 13,
+      "figure_dependent": 104,
+      "answer_leak": 12,
+      "math_guard": 14,
+      "role_conflict": 1,
+      "low_ocr_conf": 15
+     }
+    },
+    "funnel_new": {
+     "toc_lessons": 49,
+     "recovered": 49,
+     "attached": 49,
+     "patterned_any": 46,
+     "patterned_scope": 5,
+     "explain_only": 40,
+     "gate_pass_exact": 2,
+     "gate_pass_variant": 39,
+     "gate_reasons": {
+      "explain:no_context": 12,
+      "explain:deictic_prompt": 3,
+      "explain:passage_fragment_start": 2,
+      "explain:leadin_not_question": 2,
+      "explain:passage_is_objectives": 1,
+      "explain:label_in_passage": 1,
+      "no_context": 1,
+      "leadin_not_question": 1,
+      "deictic_prompt": 1
+     }
+    },
+    "repaired_lessons": [
+     {
+      "number": 1,
+      "page_printed": 1,
+      "source": "header",
+      "title": "NHẬN BIẾT MỘT SỐ DỤNG CỤ, HÓA CHẤT. THUYẾT TRÌNH MỘT"
+     },
+     {
+      "number": 3,
+      "page_printed": 3,
+      "source": "header",
+      "title": "CƠ NĂNG"
+     },
+     {
+      "number": 4,
+      "page_printed": 4,
+      "source": "header",
+      "title": "CÔNG VÀ CÔNG SUẤT"
+     },
+     {
+      "number": 6,
+      "page_printed": 6,
+      "source": "header",
+      "title": "PHẢN XẠ TOÀN PHẦN"
+     },
+     {
+      "number": 7,
+      "page_printed": 7,
+      "source": "header",
+      "title": "LĂNG KÍNH"
+     }
+    ]
+   }
+  },
+  "totals": {
+   "funnel_new": {
+    "toc_lessons": 238,
+    "recovered": 237,
+    "attached": 237,
+    "patterned_any": 211,
+    "patterned_scope": 29,
+    "explain_only": 161,
+    "gate_pass_exact": 12,
+    "gate_pass_variant": 154
+   },
+   "tsl": {
+    "lessons": 238,
+    "FULL": 2,
+    "PARTIAL": 236,
+    "NONE": 0,
+    "header_found": 238,
+    "pages_no_lesson": 53,
+    "trusted_blocks": 11971,
+    "withheld_blocks": 2032,
+    "hsb_native": 11971,
+    "hsb_crop_or_ref": 2032
+   }
+  },
+  "funnel_old": {
+   "exact": {
+    "toc": 194,
+    "recovered": 185,
+    "attached": 185,
+    "patternedAny": 169,
+    "patternedScope": 19,
+    "routed": 5,
+    "newRouted": 3,
+    "contentValid": 5,
+    "newContentValid": 3,
+    "deviceValid": 0,
+    "newDeviceValid": 0
+   },
+   "variant": {
+    "toc": 194,
+    "recovered": 185,
+    "attached": 185,
+    "patternedAny": 169,
+    "patternedScope": 19,
+    "routed": 96,
+    "newRouted": 76,
+    "contentValid": 96,
+    "newContentValid": 76,
+    "deviceValid": 6,
+    "newDeviceValid": 6
+   }
+  }
+ },
+ "tc_v2_sgv_keys": [
+  "04-sgv-khoa-hoc-4",
+  "05-sgv-khoa-hoc-5",
+  "06-sgv-khoa-hoc-tu-nhien-6",
+  "07-sgv-khoa-hoc-tu-nhien-7",
+  "08-sgv-khoa-hoc-tu-nhien-8",
+  "09-sgv-khoa-hoc-tu-nhien-9"
+ ],
+ "tc_v2_sgv": {
+  "04-sgv-khoa-hoc-4": {
+   "sample_pages": 7,
+   "roles": {
+    "teacher_text": 69,
+    "figure": 24,
+    "heading": 20,
+    "teacher_prompt": 15,
+    "answer": 13,
+    "page_number": 7,
+    "option": 4,
+    "table": 3,
+    "objective": 3,
+    "stage_label": 2,
+    "activity": 2,
+    "instruction": 1,
+    "empty": 1,
+    "sidebar": 1,
+    "footnote": 1
+   },
+   "learning_trusted": 34,
+   "guard_reasons": {
+    "teacher_text": 84,
+    "answer_leak": 13,
+    "agree_text": 3,
+    "agree_order": 3,
+    "box_boundary": 1,
+    "math_guard": 1
+   },
+   "answer_leak_blocks": 13,
+   "teacher_text_blocks": 84,
+   "would_reach_learner_without_sgv_guards": 93,
+   "pairing": {
+    "candidates": 6,
+    "AMBIGUOUS": 3,
+    "UNPAIRED": 2,
+    "PAIRABLE": 1
+   },
+   "pairing_examples": [
+    {
+     "page": 28,
+     "lesson": 1,
+     "enum": "#1",
+     "status": "AMBIGUOUS",
+     "sgk_blocks": [
+      "04-sgk-khoa-hoc-4:p008:tc2-p1:001",
+      "04-sgk-khoa-hoc-4:p009:tc2-p1:002"
+     ],
+     "sgv_block": "04-sgv-khoa-hoc-4:p028:tc2-p1:014"
+    },
+    {
+     "page": 28,
+     "lesson": 1,
+     "enum": "#2",
+     "status": "AMBIGUOUS",
+     "sgk_blocks": [
+      "04-sgk-khoa-hoc-4:p008:tc2-p1:002",
+      "04-sgk-khoa-hoc-4:p009:tc2-p1:003"
+     ],
+     "sgv_block": "04-sgv-khoa-hoc-4:p028:tc2-p1:015"
+    },
+    {
+     "page": 28,
+     "lesson": 1,
+     "enum": "#3",
+     "status": "UNPAIRED",
+     "sgk_blocks": [],
+     "sgv_block": "04-sgv-khoa-hoc-4:p028:tc2-p1:016"
+    },
+    {
+     "page": 144,
+     "lesson": 27,
+     "enum": "#1",
+     "status": "PAIRABLE",
+     "sgk_blocks": [
+      "04-sgk-khoa-hoc-4:p107:tc2-p1:012"
+     ],
+     "sgv_block": "04-sgv-khoa-hoc-4:p144:tc2-p1:017"
+    },
+    {
+     "page": 144,
+     "lesson": 27,
+     "enum": "#2",
+     "status": "AMBIGUOUS",
+     "sgk_blocks": [
+      "04-sgk-khoa-hoc-4:p104:tc2-p1:013",
+      "04-sgk-khoa-hoc-4:p107:tc2-p1:013"
+     ],
+     "sgv_block": "04-sgv-khoa-hoc-4:p144:tc2-p1:018"
+    },
+    {
+     "page": 144,
+     "lesson": 27,
+     "enum": "#3",
+     "status": "UNPAIRED",
+     "sgk_blocks": [],
+     "sgv_block": "04-sgv-khoa-hoc-4:p144:tc2-p1:019"
+    }
+   ],
+   "attach": {
+    "canonical": 31,
+    "toc_ranged": 24,
+    "header_detected": 23,
+    "repaired_ranged": 30
+   }
+  },
+  "05-sgv-khoa-hoc-5": {
+   "sample_pages": 3,
+   "roles": {
+    "answer": 30,
+    "teacher_text": 11,
+    "heading": 7,
+    "instruction": 6,
+    "teacher_prompt": 5,
+    "page_number": 3,
+    "empty": 2,
+    "footnote": 2,
+    "table": 1
+   },
+   "learning_trusted": 15,
+   "guard_reasons": {
+    "answer_leak": 30,
+    "teacher_text": 16,
+    "agree_text": 5,
+    "agree_order": 4,
+    "math_guard": 1
+   },
+   "answer_leak_blocks": 30,
+   "teacher_text_blocks": 16,
+   "would_reach_learner_without_sgv_guards": 38,
+   "pairing": {
+    "candidates": 18,
+    "UNPAIRED": 18
+   },
+   "pairing_examples": [
+    {
+     "page": 165,
+     "lesson": 30,
+     "enum": "#1",
+     "status": "UNPAIRED",
+     "sgk_blocks": [],
+     "sgv_block": "05-sgv-khoa-hoc-5:p165:tc2-p1:018"
+    },
+    {
+     "page": 165,
+     "lesson": 30,
+     "enum": "#2",
+     "status": "UNPAIRED",
+     "sgk_blocks": [],
+     "sgv_block": "05-sgv-khoa-hoc-5:p165:tc2-p1:019"
+    },
+    {
+     "page": 165,
+     "lesson": 30,
+     "enum": "#3",
+     "status": "UNPAIRED",
+     "sgk_blocks": [],
+     "sgv_block": "05-sgv-khoa-hoc-5:p165:tc2-p1:020"
+    },
+    {
+     "page": 165,
+     "lesson": 30,
+     "enum": "#4",
+     "status": "UNPAIRED",
+     "sgk_blocks": [],
+     "sgv_block": "05-sgv-khoa-hoc-5:p165:tc2-p1:021"
+    },
+    {
+     "page": 165,
+     "lesson": 30,
+     "enum": "#5",
+     "status": "UNPAIRED",
+     "sgk_blocks": [],
+     "sgv_block": "05-sgv-khoa-hoc-5:p165:tc2-p1:023"
+    },
+    {
+     "page": 165,
+     "lesson": 30,
+     "enum": "#6",
+     "status": "UNPAIRED",
+     "sgk_blocks": [],
+     "sgv_block": "05-sgv-khoa-hoc-5:p165:tc2-p1:024"
+    }
+   ],
+   "attach": {
+    "canonical": 30,
+    "toc_ranged": 23,
+    "header_detected": 24,
+    "repaired_ranged": 30
+   }
+  },
+  "06-sgv-khoa-hoc-tu-nhien-6": {
+   "sample_pages": 17,
+   "roles": {
+    "teacher_text": 148,
+    "figure": 83,
+    "heading": 62,
+    "page_number": 17,
+    "caption": 9,
+    "activity": 8,
+    "answer": 7,
+    "objective": 7,
+    "table": 6,
+    "figure_text": 5,
+    "teacher_prompt": 5,
+    "instruction": 5,
+    "empty": 1,
+    "sidebar": 1
+   },
+   "learning_trusted": 88,
+   "guard_reasons": {
+    "teacher_text": 153,
+    "agree_text": 24,
+    "answer_leak": 7,
+    "agree_order": 4,
+    "box_boundary": 3,
+    "figure_dependent": 1
+   },
+   "answer_leak_blocks": 7,
+   "teacher_text_blocks": 153,
+   "would_reach_learner_without_sgv_guards": 142,
+   "pairing": {
+    "candidates": 2,
+    "AMBIGUOUS": 1,
+    "PAIRABLE": 1
+   },
+   "pairing_examples": [
+    {
+     "page": 71,
+     "lesson": 11,
+     "enum": "#2",
+     "status": "AMBIGUOUS",
+     "sgk_blocks": [
+      "06-sgk-khoa-hoc-tu-nhien-6:p037:tc2-p1:025",
+      "06-sgk-khoa-hoc-tu-nhien-6:p038:tc2-p1:010",
+      "06-sgk-khoa-hoc-tu-nhien-6:p038:tc2-p1:020"
+     ],
+     "sgv_block": "06-sgv-khoa-hoc-tu-nhien-6:p071:tc2-p1:006"
+    },
+    {
+     "page": 71,
+     "lesson": 11,
+     "enum": "#3",
+     "status": "PAIRABLE",
+     "sgk_blocks": [
+      "06-sgk-khoa-hoc-tu-nhien-6:p042:tc2-p1:003"
+     ],
+     "sgv_block": "06-sgv-khoa-hoc-tu-nhien-6:p071:tc2-p1:008"
+    }
+   ],
+   "attach": {
+    "canonical": 55,
+    "toc_ranged": 36,
+    "header_detected": 26,
+    "repaired_ranged": 45
+   }
+  },
+  "07-sgv-khoa-hoc-tu-nhien-7": {
+   "sample_pages": 16,
+   "roles": {
+    "teacher_text": 141,
+    "figure": 97,
+    "heading": 60,
+    "page_number": 16,
+    "activity": 14,
+    "objective": 11,
+    "teacher_prompt": 7,
+    "instruction": 4,
+    "table": 3,
+    "answer": 3,
+    "figure_text": 1,
+    "footnote": 1
+   },
+   "learning_trusted": 86,
+   "guard_reasons": {
+    "teacher_text": 148,
+    "agree_text": 7,
+    "answer_leak": 3,
+    "agree_order": 1
+   },
+   "answer_leak_blocks": 3,
+   "teacher_text_blocks": 148,
+   "would_reach_learner_without_sgv_guards": 150,
+   "pairing": {
+    "candidates": 0
+   },
+   "pairing_examples": [],
+   "attach": {
+    "canonical": 42,
+    "toc_ranged": 28,
+    "header_detected": 26,
+    "repaired_ranged": 34
+   }
+  },
+  "08-sgv-khoa-hoc-tu-nhien-8": {
+   "sample_pages": 16,
+   "roles": {
+    "teacher_text": 125,
+    "heading": 87,
+    "objective": 62,
+    "figure": 45,
+    "page_number": 16,
+    "figure_text": 6,
+    "instruction": 2,
+    "activity": 1,
+    "caption": 1,
+    "empty": 1,
+    "teacher_prompt": 1,
+    "table": 1
+   },
+   "learning_trusted": 140,
+   "guard_reasons": {
+    "teacher_text": 126,
+    "agree_text": 14,
+    "empty": 1,
+    "agree_order": 1,
+    "figure_dependent": 1
+   },
+   "answer_leak_blocks": 0,
+   "teacher_text_blocks": 126,
+   "would_reach_learner_without_sgv_guards": 124,
+   "pairing": {
+    "candidates": 0
+   },
+   "pairing_examples": [],
+   "attach": {
+    "canonical": 47,
+    "toc_ranged": 28,
+    "header_detected": 29,
+    "repaired_ranged": 38
+   }
+  },
+  "09-sgv-khoa-hoc-tu-nhien-9": {
+   "sample_pages": 16,
+   "roles": {
+    "teacher_text": 158,
+    "figure": 85,
+    "heading": 70,
+    "objective": 29,
+    "page_number": 15,
+    "activity": 11,
+    "teacher_prompt": 8,
+    "figure_text": 6,
+    "empty": 5,
+    "answer": 3,
+    "instruction": 2,
+    "caption": 1,
+    "stage_label": 1
+   },
+   "learning_trusted": 110,
+   "guard_reasons": {
+    "teacher_text": 166,
+    "agree_text": 7,
+    "answer_leak": 3,
+    "agree_order": 2
+   },
+   "answer_leak_blocks": 3,
+   "teacher_text_blocks": 166,
+   "would_reach_learner_without_sgv_guards": 164,
+   "pairing": {
+    "candidates": 0
+   },
+   "pairing_examples": [],
+   "attach": {
+    "canonical": 51,
+    "toc_ranged": 18,
+    "header_detected": 27,
+    "repaired_ranged": 31
+   }
+  }
+ },
+ "tsl_recount": {
+  "documents": 238,
+  "sourceability": {
+   "PARTIAL": 236,
+   "FULL": 2
+  },
+  "native_blocks": 11971,
+  "withheld_regions": 2032,
+  "withheld_per_lesson_median": 8,
+  "roles_trusted": {
+   "body": 3930,
+   "heading": 2147,
+   "question": 1642,
+   "caption": 1227,
+   "sidebar": 1075,
+   "objective": 857,
+   "stage_label": 596,
+   "instruction": 359,
+   "footnote": 64,
+   "activity": 50,
+   "table": 20,
+   "option": 4
+  },
+  "withheld_by_reason": {
+   "agree_text": 824,
+   "figure_dependent": 632,
+   "agree_order": 224,
+   "page_feature:diagram": 197,
+   "page_feature:color_heavy": 95,
+   "box_boundary": 92,
+   "math_guard": 41,
+   "answer_leak": 29,
+   "low_ocr_conf": 19,
+   "role_conflict": 7
+  },
+  "lessons_with_trusted_question": 236,
+  "answer_keys_included_true": 0,
+  "boundary_source": {
+   "both": 168,
+   "header": 70
+  },
+  "withheld_blocks_carrying_text": 0,
+  "per_book": {
+   "04-sgk-khoa-hoc-4": {
+    "PARTIAL": 30,
+    "FULL": 1
+   },
+   "05-sgk-khoa-hoc-5": {
+    "PARTIAL": 30
+   },
+   "06-sgk-khoa-hoc-tu-nhien-6": {
+    "PARTIAL": 53
+   },
+   "07-sgk-khoa-hoc-tu-nhien-7": {
+    "PARTIAL": 33
+   },
+   "08-sgk-khoa-hoc-tu-nhien-8": {
+    "PARTIAL": 42
+   },
+   "09-sgk-khoa-hoc-tu-nhien-9": {
+    "PARTIAL": 48,
+    "FULL": 1
+   }
+  }
+ },
+ "sdm_sgk_recount": {
+  "pages": 1049,
+  "learning_blocks": 14451,
+  "by_status": {
+   "TRUSTED": 12348,
+   "WITHHELD": 1868,
+   "CONFLICT": 235
+  },
+  "trusted_share": 0.854,
+  "withheld_reasons": {
+   "agree_text": 865,
+   "figure_dependent": 638,
+   "agree_order": 229,
+   "page_feature:diagram": 199,
+   "page_feature:color_heavy": 111,
+   "box_boundary": 95,
+   "math_guard": 42,
+   "answer_leak": 30,
+   "low_ocr_conf": 20,
+   "role_conflict": 7
+  }
+ },
+ "sdm_sgv_recount": {
+  "pages": 75,
+  "learning_blocks": 1261,
+  "by_status": {
+   "TRUSTED": 473,
+   "WITHHELD": 773,
+   "CONFLICT": 15
+  },
+  "trusted_roles": {
+   "heading": 282,
+   "objective": 111,
+   "activity": 36,
+   "instruction": 20,
+   "caption": 10,
+   "footnote": 4,
+   "option": 4,
+   "stage_label": 3,
+   "sidebar": 2,
+   "table": 1
+  }
+ }
+}

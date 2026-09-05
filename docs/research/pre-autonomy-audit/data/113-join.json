@@ -1,0 +1,3154 @@
+{
+ "script": "b_113_join.py",
+ "baseline": 113,
+ "by_activity_type": {
+  "EXPERIMENT": 37,
+  "TOAN_EXERCISE": 10,
+  "READING": 61,
+  "WRITING": 41,
+  "SOURCE": 4
+ },
+ "extractor_per_type": {
+  "EXPERIMENT": "ocr-body naive line order (build_lesson_index.py Chuẩn bị/Tiến hành scan) = TC-v1 \"current-naive\", FTR 0.32 on hard pages",
+  "READING": "poc-out/units TV5 extractor (extract_units_tv, SECTION_TEXT >=400 chars + numbered EXERCISE) = naive line order",
+  "WRITING": "poc-out/units TV5 extractor (EXERCISE \"Viết…\") = naive line order",
+  "SOURCE": "ocr-body naive lines (\"TƯ LIỆU\" block + attribution) = naive line order",
+  "TOAN_EXERCISE": "poc-out/units/exercise-case-map.json (Toán 4-5 fraction expressions; page from footer)"
+ },
+ "by_book": {
+  "10-sgk-hoa-hoc-10": 3,
+  "08-sgk-khoa-hoc-tu-nhien-8": 5,
+  "04-sgk-toan-4-tap-hai": 6,
+  "05-sgk-tieng-viet-5-tap-hai": 30,
+  "04-sgk-khoa-hoc-4": 8,
+  "05-sgk-tieng-viet-5-tap-mot": 32,
+  "10-sgk-vat-li-10": 2,
+  "09-sgk-khoa-hoc-tu-nhien-9": 10,
+  "06-sgk-khoa-hoc-tu-nhien-6": 4,
+  "05-sgk-toan-5-tap-hai": 2,
+  "05-sgk-khoa-hoc-5": 4,
+  "05-sgk-lich-su-va-dia-li-5": 2,
+  "05-sgk-toan-5-tap-mot": 2,
+  "04-sgk-lich-su-va-dia-li-4": 2,
+  "07-sgk-khoa-hoc-tu-nhien-7": 1
+ },
+ "experiments_in_baseline": 49,
+ "experiments_covered_by_tc2": 44,
+ "string_match_totals": {
+  "WITHHELD": 35,
+  "CONFLICT": 3,
+  "reason:page_feature:color_heavy": 1,
+  "reason:agree_order": 3,
+  "experiments": 44,
+  "attach_agree": 39,
+  "attach_disagree": 5,
+  "xycut_page_trusted": 15,
+  "xycut_page_untrusted": 29,
+  "TRUSTED": 164,
+  "reason:figure_dependent": 7,
+  "reason:figure_text": 18,
+  "reason:agree_text": 7,
+  "reason:empty_block": 2
+ },
+ "lessons": {
+  "covered": 32,
+  "all_strings_matched_and_trusted": 11,
+  "with_any_withheld_or_conflict_string": 21,
+  "with_unmatched_string": 0,
+  "tc2_header_attach_disagrees": 3,
+  "on_xycut_untrusted_page": 22
+ },
+ "per_lesson": {
+  "04-sgk-khoa-hoc-4|1": {
+   "experiments": 2,
+   "strings": 10,
+   "str_WITHHELD": 3,
+   "str_CONFLICT": 2,
+   "exp_with_withheld_or_conflict": 2,
+   "exp_attach_disagree": 1,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 2,
+   "str_TRUSTED": 5
+  },
+  "04-sgk-khoa-hoc-4|4": {
+   "experiments": 1,
+   "strings": 4,
+   "str_TRUSTED": 4,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 0
+  },
+  "04-sgk-khoa-hoc-4|5": {
+   "experiments": 1,
+   "strings": 3,
+   "str_TRUSTED": 2,
+   "str_WITHHELD": 1,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "04-sgk-khoa-hoc-4|6": {
+   "experiments": 2,
+   "strings": 9,
+   "str_TRUSTED": 9,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 2
+  },
+  "04-sgk-khoa-hoc-4|8": {
+   "experiments": 1,
+   "strings": 5,
+   "str_TRUSTED": 5,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 0,
+   "page_has_withheld": 1
+  },
+  "04-sgk-khoa-hoc-4|10": {
+   "experiments": 1,
+   "strings": 4,
+   "str_TRUSTED": 3,
+   "str_WITHHELD": 1,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 0,
+   "page_has_withheld": 1
+  },
+  "04-sgk-khoa-hoc-4|12": {
+   "experiments": 2,
+   "strings": 10,
+   "str_TRUSTED": 8,
+   "str_WITHHELD": 2,
+   "exp_with_withheld_or_conflict": 2,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 0,
+   "page_has_withheld": 1
+  },
+  "04-sgk-khoa-hoc-4|13": {
+   "experiments": 1,
+   "strings": 4,
+   "str_TRUSTED": 3,
+   "str_WITHHELD": 1,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 0,
+   "page_has_withheld": 1
+  },
+  "05-sgk-khoa-hoc-5|1": {
+   "experiments": 1,
+   "strings": 4,
+   "str_TRUSTED": 3,
+   "str_CONFLICT": 1,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 0,
+   "page_has_withheld": 1
+  },
+  "05-sgk-khoa-hoc-5|3": {
+   "experiments": 2,
+   "strings": 13,
+   "str_TRUSTED": 12,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 1,
+   "exp_page_xycut_untrusted": 0,
+   "page_has_withheld": 1,
+   "str_WITHHELD": 1
+  },
+  "05-sgk-khoa-hoc-5|5": {
+   "experiments": 1,
+   "strings": 4,
+   "str_WITHHELD": 2,
+   "str_TRUSTED": 2,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "05-sgk-khoa-hoc-5|14": {
+   "experiments": 1,
+   "strings": 5,
+   "str_TRUSTED": 5,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "06-sgk-khoa-hoc-tu-nhien-6|11": {
+   "experiments": 1,
+   "strings": 5,
+   "str_TRUSTED": 3,
+   "str_WITHHELD": 2,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "06-sgk-khoa-hoc-tu-nhien-6|46": {
+   "experiments": 1,
+   "strings": 3,
+   "str_TRUSTED": 2,
+   "str_WITHHELD": 1,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "06-sgk-khoa-hoc-tu-nhien-6|48": {
+   "experiments": 1,
+   "strings": 4,
+   "str_TRUSTED": 2,
+   "str_WITHHELD": 2,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "06-sgk-khoa-hoc-tu-nhien-6|50": {
+   "experiments": 1,
+   "strings": 4,
+   "str_WITHHELD": 2,
+   "str_TRUSTED": 2,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 0,
+   "page_has_withheld": 1
+  },
+  "07-sgk-khoa-hoc-tu-nhien-7|16": {
+   "experiments": 1,
+   "strings": 3,
+   "str_TRUSTED": 3,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "08-sgk-khoa-hoc-tu-nhien-8|5": {
+   "experiments": 1,
+   "strings": 4,
+   "str_TRUSTED": 4,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 0,
+   "page_has_withheld": 1
+  },
+  "08-sgk-khoa-hoc-tu-nhien-8|7": {
+   "experiments": 2,
+   "strings": 14,
+   "str_TRUSTED": 12,
+   "str_WITHHELD": 2,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 2,
+   "page_has_withheld": 2
+  },
+  "08-sgk-khoa-hoc-tu-nhien-8|15": {
+   "experiments": 1,
+   "strings": 5,
+   "str_TRUSTED": 5,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "08-sgk-khoa-hoc-tu-nhien-8|16": {
+   "experiments": 1,
+   "strings": 3,
+   "str_WITHHELD": 2,
+   "str_TRUSTED": 1,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 0,
+   "page_has_withheld": 1
+  },
+  "08-sgk-khoa-hoc-tu-nhien-8|22": {
+   "experiments": 3,
+   "strings": 15,
+   "str_TRUSTED": 14,
+   "str_WITHHELD": 1,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 3,
+   "exp_page_xycut_untrusted": 2,
+   "page_has_withheld": 2
+  },
+  "09-sgk-khoa-hoc-tu-nhien-9|5": {
+   "experiments": 3,
+   "strings": 13,
+   "str_TRUSTED": 11,
+   "exp_with_withheld_or_conflict": 2,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 3,
+   "page_has_withheld": 3,
+   "str_WITHHELD": 2
+  },
+  "09-sgk-khoa-hoc-tu-nhien-9|8": {
+   "experiments": 1,
+   "strings": 6,
+   "str_TRUSTED": 6,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "09-sgk-khoa-hoc-tu-nhien-9|12": {
+   "experiments": 1,
+   "strings": 3,
+   "str_TRUSTED": 2,
+   "str_WITHHELD": 1,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "09-sgk-khoa-hoc-tu-nhien-9|14": {
+   "experiments": 3,
+   "strings": 12,
+   "str_TRUSTED": 11,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 3,
+   "page_has_withheld": 3,
+   "str_WITHHELD": 1
+  },
+  "09-sgk-khoa-hoc-tu-nhien-9|19": {
+   "experiments": 2,
+   "strings": 7,
+   "str_TRUSTED": 6,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 2,
+   "page_has_withheld": 2,
+   "str_WITHHELD": 1
+  },
+  "09-sgk-khoa-hoc-tu-nhien-9|23": {
+   "experiments": 1,
+   "strings": 5,
+   "str_TRUSTED": 5,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "09-sgk-khoa-hoc-tu-nhien-9|24": {
+   "experiments": 1,
+   "strings": 5,
+   "str_TRUSTED": 5,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "09-sgk-khoa-hoc-tu-nhien-9|26": {
+   "experiments": 1,
+   "strings": 3,
+   "str_WITHHELD": 3,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "09-sgk-khoa-hoc-tu-nhien-9|29": {
+   "experiments": 1,
+   "strings": 6,
+   "str_TRUSTED": 6,
+   "exp_with_withheld_or_conflict": 0,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 1,
+   "page_has_withheld": 1
+  },
+  "09-sgk-khoa-hoc-tu-nhien-9|30": {
+   "experiments": 1,
+   "strings": 7,
+   "str_WITHHELD": 4,
+   "str_TRUSTED": 3,
+   "exp_with_withheld_or_conflict": 1,
+   "exp_attach_disagree": 0,
+   "exp_page_xycut_untrusted": 0,
+   "page_has_withheld": 1
+  }
+ },
+ "rows": [
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 1,
+   "pagePdf": 6,
+   "covered_by_tc2": true,
+   "n_strings": 3,
+   "match_status": {
+    "WITHHELD": 1,
+    "CONFLICT": 2
+   },
+   "match_reasons": {
+    "page_feature:color_heavy": 1,
+    "agree_order": 2
+   },
+   "page_learning_blocks": {
+    "CONFLICT": 1,
+    "WITHHELD": 9,
+    "TRUSTED": 2
+   },
+   "tc2_attach_lesson": 1,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "page_feature:color_heavy"
+     ],
+     "role": "objective",
+     "block": "04-sgk-khoa-hoc-4:p006:tc2-p1:009"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "CONFLICT",
+     "reasons": [
+      "agree_order"
+     ],
+     "role": "heading",
+     "block": "04-sgk-khoa-hoc-4:p006:tc2-p1:006"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "CONFLICT",
+     "reasons": [
+      "agree_order"
+     ],
+     "role": "heading",
+     "block": "04-sgk-khoa-hoc-4:p006:tc2-p1:006"
+    }
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 1,
+   "pagePdf": 11,
+   "covered_by_tc2": true,
+   "n_strings": 7,
+   "match_status": {
+    "WITHHELD": 2,
+    "TRUSTED": 5
+   },
+   "match_reasons": {
+    "figure_dependent": 1,
+    "figure_text": 1
+   },
+   "page_learning_blocks": {
+    "WITHHELD": 3,
+    "TRUSTED": 11
+   },
+   "tc2_attach_lesson": 2,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": false,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_dependent"
+     ],
+     "role": "question",
+     "block": "04-sgk-khoa-hoc-4:p011:tc2-p1:000"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 0.8,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p011:tc2-p1:001"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p011:tc2-p1:002"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p011:tc2-p1:003"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p011:tc2-p1:004"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "04-sgk-khoa-hoc-4:p011:tc2-p1:024"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p011:tc2-p1:012"
+    }
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 4,
+   "pagePdf": 18,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 4
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 14
+   },
+   "tc2_attach_lesson": 4,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 2,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "04-sgk-khoa-hoc-4:p018:tc2-p1:003"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 0.94,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p018:tc2-p1:014"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p018:tc2-p1:016"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p018:tc2-p1:017"
+    }
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 5,
+   "pagePdf": 22,
+   "covered_by_tc2": true,
+   "n_strings": 3,
+   "match_status": {
+    "TRUSTED": 2,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "figure_dependent": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 12,
+    "WITHHELD": 1
+   },
+   "tc2_attach_lesson": 5,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 0.94,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "04-sgk-khoa-hoc-4:p022:tc2-p1:011"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_dependent"
+     ],
+     "role": "instruction",
+     "block": "04-sgk-khoa-hoc-4:p022:tc2-p1:013"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "objective",
+     "block": "04-sgk-khoa-hoc-4:p022:tc2-p1:014"
+    }
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 6,
+   "pagePdf": 26,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 5
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "WITHHELD": 4,
+    "TRUSTED": 13
+   },
+   "tc2_attach_lesson": 6,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "04-sgk-khoa-hoc-4:p026:tc2-p1:008"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "04-sgk-khoa-hoc-4:p026:tc2-p1:012"
+    },
+    {
+     "kind": "step",
+     "ratio": 0.9,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p026:tc2-p1:014"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p026:tc2-p1:015"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p026:tc2-p1:016"
+    }
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 6,
+   "pagePdf": 27,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 4
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 12,
+    "WITHHELD": 3
+   },
+   "tc2_attach_lesson": 6,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "04-sgk-khoa-hoc-4:p027:tc2-p1:010"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 0.83,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "04-sgk-khoa-hoc-4:p027:tc2-p1:013"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "04-sgk-khoa-hoc-4:p027:tc2-p1:015"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p027:tc2-p1:016"
+    }
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 8,
+   "pagePdf": 33,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 5
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 21,
+    "WITHHELD": 2,
+    "CONFLICT": 2
+   },
+   "tc2_attach_lesson": 8,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p033:tc2-p1:003"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "04-sgk-khoa-hoc-4:p033:tc2-p1:007"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p033:tc2-p1:009"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p033:tc2-p1:010"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p033:tc2-p1:011"
+    }
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 10,
+   "pagePdf": 41,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 3,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "figure_dependent": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 12,
+    "WITHHELD": 1
+   },
+   "tc2_attach_lesson": 10,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "04-sgk-khoa-hoc-4:p041:tc2-p1:003"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 0.92,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "04-sgk-khoa-hoc-4:p041:tc2-p1:007"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "04-sgk-khoa-hoc-4:p041:tc2-p1:009"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_dependent"
+     ],
+     "role": "question",
+     "block": "04-sgk-khoa-hoc-4:p041:tc2-p1:010"
+    }
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 12,
+   "pagePdf": 46,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 4,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "figure_dependent": 1
+   },
+   "page_learning_blocks": {
+    "WITHHELD": 2,
+    "TRUSTED": 13
+   },
+   "tc2_attach_lesson": 12,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p046:tc2-p1:012"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "04-sgk-khoa-hoc-4:p046:tc2-p1:013"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_dependent"
+     ],
+     "role": "question",
+     "block": "04-sgk-khoa-hoc-4:p046:tc2-p1:014"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p046:tc2-p1:015"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p046:tc2-p1:016"
+    }
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 12,
+   "pagePdf": 48,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 4,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "figure_text": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 21
+   },
+   "tc2_attach_lesson": 12,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "04-sgk-khoa-hoc-4:p048:tc2-p1:000"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "04-sgk-khoa-hoc-4:p048:tc2-p1:004"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p048:tc2-p1:005"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "04-sgk-khoa-hoc-4:p048:tc2-p1:011"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "04-sgk-khoa-hoc-4:p048:tc2-p1:007"
+    }
+   ]
+  },
+  {
+   "book": "04-sgk-khoa-hoc-4",
+   "lesson": 13,
+   "pagePdf": 49,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 3,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "figure_dependent": 1
+   },
+   "page_learning_blocks": {
+    "WITHHELD": 2,
+    "TRUSTED": 13
+   },
+   "tc2_attach_lesson": 13,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p049:tc2-p1:011"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "04-sgk-khoa-hoc-4:p049:tc2-p1:012"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_dependent"
+     ],
+     "role": "question",
+     "block": "04-sgk-khoa-hoc-4:p049:tc2-p1:014"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "04-sgk-khoa-hoc-4:p049:tc2-p1:015"
+    }
+   ]
+  },
+  {
+   "book": "05-sgk-khoa-hoc-5",
+   "lesson": 1,
+   "pagePdf": 6,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 3,
+    "CONFLICT": 1
+   },
+   "match_reasons": {
+    "agree_order": 1
+   },
+   "page_learning_blocks": {
+    "CONFLICT": 1,
+    "TRUSTED": 14,
+    "WITHHELD": 1
+   },
+   "tc2_attach_lesson": 1,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "objective",
+     "block": "05-sgk-khoa-hoc-5:p006:tc2-p1:008"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "CONFLICT",
+     "reasons": [
+      "agree_order"
+     ],
+     "role": "heading",
+     "block": "05-sgk-khoa-hoc-5:p006:tc2-p1:006"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p006:tc2-p1:022"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p006:tc2-p1:023"
+    }
+   ]
+  },
+  {
+   "book": "05-sgk-khoa-hoc-5",
+   "lesson": 3,
+   "pagePdf": 17,
+   "covered_by_tc2": true,
+   "n_strings": 7,
+   "match_status": {
+    "TRUSTED": 7
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 19
+   },
+   "tc2_attach_lesson": 3,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "05-sgk-khoa-hoc-5:p017:tc2-p1:000"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 0.76,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "05-sgk-khoa-hoc-5:p017:tc2-p1:005"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p017:tc2-p1:007"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p017:tc2-p1:008"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p017:tc2-p1:009"
+    },
+    {
+     "kind": "duDoan",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "05-sgk-khoa-hoc-5:p017:tc2-p1:010"
+    },
+    {
+     "kind": "quanSat",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p017:tc2-p1:011"
+    }
+   ]
+  },
+  {
+   "book": "05-sgk-khoa-hoc-5",
+   "lesson": 3,
+   "pagePdf": 20,
+   "covered_by_tc2": true,
+   "n_strings": 6,
+   "match_status": {
+    "TRUSTED": 5,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "agree_text": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 12,
+    "WITHHELD": 2
+   },
+   "tc2_attach_lesson": 4,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": false,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "05-sgk-khoa-hoc-5:p020:tc2-p1:002"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 0.77,
+     "status": "WITHHELD",
+     "reasons": [
+      "agree_text"
+     ],
+     "role": "instruction",
+     "block": "05-sgk-khoa-hoc-5:p020:tc2-p1:003"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p020:tc2-p1:006"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p020:tc2-p1:007"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "caption",
+     "block": "05-sgk-khoa-hoc-5:p020:tc2-p1:011"
+    },
+    {
+     "kind": "quanSat",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p020:tc2-p1:008"
+    }
+   ]
+  },
+  {
+   "book": "05-sgk-khoa-hoc-5",
+   "lesson": 5,
+   "pagePdf": 22,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "WITHHELD": 2,
+    "TRUSTED": 2
+   },
+   "match_reasons": {
+    "agree_text": 1,
+    "figure_text": 1
+   },
+   "page_learning_blocks": {
+    "WITHHELD": 4,
+    "TRUSTED": 12
+   },
+   "tc2_attach_lesson": 5,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "agree_text"
+     ],
+     "role": "question",
+     "block": "05-sgk-khoa-hoc-5:p022:tc2-p1:014"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "05-sgk-khoa-hoc-5:p022:tc2-p1:022"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p022:tc2-p1:016"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p022:tc2-p1:017"
+    }
+   ]
+  },
+  {
+   "book": "05-sgk-khoa-hoc-5",
+   "lesson": 14,
+   "pagePdf": 57,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 5
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 20,
+    "WITHHELD": 1
+   },
+   "tc2_attach_lesson": 14,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 2,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "05-sgk-khoa-hoc-5:p057:tc2-p1:000"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p057:tc2-p1:003"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p057:tc2-p1:008"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p057:tc2-p1:009"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "05-sgk-khoa-hoc-5:p057:tc2-p1:010"
+    }
+   ]
+  },
+  {
+   "book": "06-sgk-khoa-hoc-tu-nhien-6",
+   "lesson": 11,
+   "pagePdf": 39,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 3,
+    "WITHHELD": 2
+   },
+   "match_reasons": {
+    "figure_text": 2
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 10,
+    "WITHHELD": 4,
+    "CONFLICT": 1
+   },
+   "tc2_attach_lesson": 11,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p039:tc2-p1:002"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p039:tc2-p1:002"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p039:tc2-p1:002"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p039:tc2-p1:007"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p039:tc2-p1:004"
+    }
+   ]
+  },
+  {
+   "book": "06-sgk-khoa-hoc-tu-nhien-6",
+   "lesson": 46,
+   "pagePdf": 164,
+   "covered_by_tc2": true,
+   "n_strings": 3,
+   "match_status": {
+    "TRUSTED": 2,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "figure_dependent": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 17,
+    "WITHHELD": 3,
+    "CONFLICT": 1
+   },
+   "tc2_attach_lesson": 46,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 2,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p164:tc2-p1:013"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "stage_label",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p164:tc2-p1:025"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_dependent"
+     ],
+     "role": "instruction",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p164:tc2-p1:015"
+    }
+   ]
+  },
+  {
+   "book": "06-sgk-khoa-hoc-tu-nhien-6",
+   "lesson": 48,
+   "pagePdf": 170,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 2,
+    "WITHHELD": 2
+   },
+   "match_reasons": {
+    "figure_text": 1,
+    "agree_text": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 28,
+    "WITHHELD": 4,
+    "CONFLICT": 1
+   },
+   "tc2_attach_lesson": 48,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p170:tc2-p1:001"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p170:tc2-p1:040"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p170:tc2-p1:010"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "agree_text"
+     ],
+     "role": "body",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p170:tc2-p1:011"
+    }
+   ]
+  },
+  {
+   "book": "06-sgk-khoa-hoc-tu-nhien-6",
+   "lesson": 50,
+   "pagePdf": 176,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "WITHHELD": 2,
+    "TRUSTED": 2
+   },
+   "match_reasons": {
+    "figure_dependent": 1,
+    "figure_text": 1
+   },
+   "page_learning_blocks": {
+    "WITHHELD": 2,
+    "TRUSTED": 17,
+    "CONFLICT": 1
+   },
+   "tc2_attach_lesson": 50,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_dependent"
+     ],
+     "role": "question",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p176:tc2-p1:001"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p176:tc2-p1:005"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "sidebar",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p176:tc2-p1:014"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "06-sgk-khoa-hoc-tu-nhien-6:p176:tc2-p1:015"
+    }
+   ]
+  },
+  {
+   "book": "07-sgk-khoa-hoc-tu-nhien-7",
+   "lesson": 16,
+   "pagePdf": 80,
+   "covered_by_tc2": true,
+   "n_strings": 3,
+   "match_status": {
+    "TRUSTED": 3
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 22,
+    "WITHHELD": 1
+   },
+   "tc2_attach_lesson": 16,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 2,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "07-sgk-khoa-hoc-tu-nhien-7:p080:tc2-p1:005"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "07-sgk-khoa-hoc-tu-nhien-7:p080:tc2-p1:006"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "07-sgk-khoa-hoc-tu-nhien-7:p080:tc2-p1:019"
+    }
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 5,
+   "pagePdf": 25,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 4
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "WITHHELD": 1,
+    "TRUSTED": 19
+   },
+   "tc2_attach_lesson": 5,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p025:tc2-p1:012"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p025:tc2-p1:014"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p025:tc2-p1:015"
+    },
+    {
+     "kind": "step",
+     "ratio": 0.69,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p025:tc2-p1:016"
+    }
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 7,
+   "pagePdf": 33,
+   "covered_by_tc2": true,
+   "n_strings": 7,
+   "match_status": {
+    "TRUSTED": 5,
+    "WITHHELD": 2
+   },
+   "match_reasons": {
+    "agree_text": 2
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 18,
+    "WITHHELD": 1,
+    "CONFLICT": 1
+   },
+   "tc2_attach_lesson": 7,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p033:tc2-p1:008"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p033:tc2-p1:009"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p033:tc2-p1:011"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "agree_text"
+     ],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p033:tc2-p1:012"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p033:tc2-p1:013"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p033:tc2-p1:014"
+    },
+    {
+     "kind": "quanSat",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "agree_text"
+     ],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p033:tc2-p1:012"
+    }
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 7,
+   "pagePdf": 34,
+   "covered_by_tc2": true,
+   "n_strings": 7,
+   "match_status": {
+    "TRUSTED": 7
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 18,
+    "CONFLICT": 1
+   },
+   "tc2_attach_lesson": 7,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p034:tc2-p1:000"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p034:tc2-p1:001"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p034:tc2-p1:003"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p034:tc2-p1:004"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p034:tc2-p1:006"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p034:tc2-p1:007"
+    },
+    {
+     "kind": "quanSat",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p034:tc2-p1:005"
+    }
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 15,
+   "pagePdf": 66,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 5
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 19,
+    "WITHHELD": 1
+   },
+   "tc2_attach_lesson": 15,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p066:tc2-p1:001"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p066:tc2-p1:003"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p066:tc2-p1:005"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p066:tc2-p1:006"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p066:tc2-p1:007"
+    }
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 16,
+   "pagePdf": 68,
+   "covered_by_tc2": true,
+   "n_strings": 3,
+   "match_status": {
+    "WITHHELD": 2,
+    "TRUSTED": 1
+   },
+   "match_reasons": {
+    "figure_text": 1,
+    "agree_text": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 16,
+    "WITHHELD": 6
+   },
+   "tc2_attach_lesson": 16,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p068:tc2-p1:022"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p068:tc2-p1:018"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "agree_text"
+     ],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p068:tc2-p1:020"
+    }
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 22,
+   "pagePdf": 100,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 4,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "empty_block": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 17
+   },
+   "tc2_attach_lesson": 24,
+   "tc2_attach_method": "header",
+   "attach_agrees": false,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p100:tc2-p1:006"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "empty_block"
+     ],
+     "role": "empty",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p100:tc2-p1:018"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p100:tc2-p1:009"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p100:tc2-p1:010"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p100:tc2-p1:011"
+    }
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 22,
+   "pagePdf": 101,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 5
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "WITHHELD": 2,
+    "TRUSTED": 18
+   },
+   "tc2_attach_lesson": 24,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": false,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p101:tc2-p1:006"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p101:tc2-p1:009"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p101:tc2-p1:011"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p101:tc2-p1:012"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p101:tc2-p1:013"
+    }
+   ]
+  },
+  {
+   "book": "08-sgk-khoa-hoc-tu-nhien-8",
+   "lesson": 22,
+   "pagePdf": 116,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 5
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 16,
+    "WITHHELD": 2
+   },
+   "tc2_attach_lesson": 28,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": false,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p116:tc2-p1:000"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p116:tc2-p1:003"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p116:tc2-p1:007"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p116:tc2-p1:008"
+    },
+    {
+     "kind": "step",
+     "ratio": 0.62,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "08-sgk-khoa-hoc-tu-nhien-8:p116:tc2-p1:009"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 5,
+   "pagePdf": 26,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 5
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "WITHHELD": 7,
+    "TRUSTED": 17
+   },
+   "tc2_attach_lesson": 5,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p026:tc2-p1:004"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p026:tc2-p1:016"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p026:tc2-p1:021"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p026:tc2-p1:022"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p026:tc2-p1:023"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 5,
+   "pagePdf": 27,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 3,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "figure_text": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 25,
+    "WITHHELD": 2
+   },
+   "tc2_attach_lesson": 5,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p027:tc2-p1:025"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p027:tc2-p1:027"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p027:tc2-p1:029"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p027:tc2-p1:009"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 5,
+   "pagePdf": 28,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 3,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "figure_text": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 21,
+    "WITHHELD": 4
+   },
+   "tc2_attach_lesson": 5,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 2,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p028:tc2-p1:001"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p028:tc2-p1:003"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p028:tc2-p1:008"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p028:tc2-p1:037"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 8,
+   "pagePdf": 43,
+   "covered_by_tc2": true,
+   "n_strings": 6,
+   "match_status": {
+    "TRUSTED": 6
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 17,
+    "WITHHELD": 2
+   },
+   "tc2_attach_lesson": 8,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p043:tc2-p1:001"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p043:tc2-p1:005"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p043:tc2-p1:008"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p043:tc2-p1:009"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p043:tc2-p1:010"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p043:tc2-p1:011"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 12,
+   "pagePdf": 63,
+   "covered_by_tc2": true,
+   "n_strings": 3,
+   "match_status": {
+    "TRUSTED": 2,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "agree_text": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 19,
+    "WITHHELD": 4
+   },
+   "tc2_attach_lesson": 12,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p063:tc2-p1:004"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p063:tc2-p1:008"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "agree_text"
+     ],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p063:tc2-p1:013"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 14,
+   "pagePdf": 68,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 4
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 12,
+    "WITHHELD": 3
+   },
+   "tc2_attach_lesson": 14,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p068:tc2-p1:010"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p068:tc2-p1:010"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p068:tc2-p1:011"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p068:tc2-p1:012"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 14,
+   "pagePdf": 69,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 3,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "empty_block": 1
+   },
+   "page_learning_blocks": {
+    "WITHHELD": 5,
+    "TRUSTED": 13
+   },
+   "tc2_attach_lesson": 14,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 2,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p069:tc2-p1:010"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "empty_block"
+     ],
+     "role": "empty",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p069:tc2-p1:024"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p069:tc2-p1:013"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p069:tc2-p1:014"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 14,
+   "pagePdf": 70,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 4
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 17,
+    "WITHHELD": 5,
+    "CONFLICT": 1
+   },
+   "tc2_attach_lesson": 14,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 3,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p070:tc2-p1:001"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p070:tc2-p1:004"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p070:tc2-p1:021"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p070:tc2-p1:022"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 19,
+   "pagePdf": 93,
+   "covered_by_tc2": true,
+   "n_strings": 4,
+   "match_status": {
+    "TRUSTED": 4
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 22,
+    "WITHHELD": 1
+   },
+   "tc2_attach_lesson": 19,
+   "tc2_attach_method": "header",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p093:tc2-p1:012"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p093:tc2-p1:013"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p093:tc2-p1:014"
+    },
+    {
+     "kind": "quanSat",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p093:tc2-p1:017"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 19,
+   "pagePdf": 94,
+   "covered_by_tc2": true,
+   "n_strings": 3,
+   "match_status": {
+    "TRUSTED": 2,
+    "WITHHELD": 1
+   },
+   "match_reasons": {
+    "figure_text": 1
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 16,
+    "WITHHELD": 1
+   },
+   "tc2_attach_lesson": 19,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p094:tc2-p1:000"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p094:tc2-p1:004"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p094:tc2-p1:000"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 23,
+   "pagePdf": 110,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 5
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 15,
+    "WITHHELD": 1
+   },
+   "tc2_attach_lesson": 23,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "activity",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p110:tc2-p1:002"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p110:tc2-p1:003"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p110:tc2-p1:005"
+    },
+    {
+     "kind": "step",
+     "ratio": 0.67,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p110:tc2-p1:006"
+    },
+    {
+     "kind": "duDoan",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p110:tc2-p1:008"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 24,
+   "pagePdf": 113,
+   "covered_by_tc2": true,
+   "n_strings": 5,
+   "match_status": {
+    "TRUSTED": 5
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 17,
+    "WITHHELD": 1,
+    "CONFLICT": 1
+   },
+   "tc2_attach_lesson": 24,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "activity",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p113:tc2-p1:002"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "caption",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p113:tc2-p1:005"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p113:tc2-p1:020"
+    },
+    {
+     "kind": "step",
+     "ratio": 0.75,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p113:tc2-p1:021"
+    },
+    {
+     "kind": "quanSat",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "question",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p113:tc2-p1:023"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 26,
+   "pagePdf": 120,
+   "covered_by_tc2": true,
+   "n_strings": 3,
+   "match_status": {
+    "WITHHELD": 3
+   },
+   "match_reasons": {
+    "figure_text": 3
+   },
+   "page_learning_blocks": {
+    "TRUSTED": 20,
+    "WITHHELD": 2
+   },
+   "tc2_attach_lesson": 26,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 2,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p120:tc2-p1:005"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p120:tc2-p1:005"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p120:tc2-p1:005"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 29,
+   "pagePdf": 133,
+   "covered_by_tc2": true,
+   "n_strings": 6,
+   "match_status": {
+    "TRUSTED": 6
+   },
+   "match_reasons": {},
+   "page_learning_blocks": {
+    "TRUSTED": 16,
+    "WITHHELD": 6,
+    "CONFLICT": 1
+   },
+   "tc2_attach_lesson": 29,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": false,
+   "xycut_marginal_cuts": 1,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "heading",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p133:tc2-p1:018"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "instruction",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p133:tc2-p1:022"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p133:tc2-p1:024"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p133:tc2-p1:025"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p133:tc2-p1:026"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p133:tc2-p1:027"
+    }
+   ]
+  },
+  {
+   "book": "09-sgk-khoa-hoc-tu-nhien-9",
+   "lesson": 30,
+   "pagePdf": 137,
+   "covered_by_tc2": true,
+   "n_strings": 7,
+   "match_status": {
+    "WITHHELD": 4,
+    "TRUSTED": 3
+   },
+   "match_reasons": {
+    "figure_text": 4
+   },
+   "page_learning_blocks": {
+    "WITHHELD": 2,
+    "TRUSTED": 21,
+    "CONFLICT": 1
+   },
+   "tc2_attach_lesson": 30,
+   "tc2_attach_method": "continuation",
+   "attach_agrees": true,
+   "xycut_page_trusted": true,
+   "xycut_marginal_cuts": 0,
+   "matches": [
+    {
+     "kind": "title",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p137:tc2-p1:004"
+    },
+    {
+     "kind": "chuanBi",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p137:tc2-p1:004"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p137:tc2-p1:004"
+    },
+    {
+     "kind": "step",
+     "ratio": 0.96,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p137:tc2-p1:019"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "WITHHELD",
+     "reasons": [
+      "figure_text"
+     ],
+     "role": "figure_text",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p137:tc2-p1:004"
+    },
+    {
+     "kind": "step",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "body",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p137:tc2-p1:021"
+    },
+    {
+     "kind": "quanSat",
+     "ratio": 1.0,
+     "status": "TRUSTED",
+     "reasons": [],
+     "role": "activity",
+     "block": "09-sgk-khoa-hoc-tu-nhien-9:p137:tc2-p1:014"
+    }
+   ]
+  },
+  {
+   "book": "10-sgk-vat-li-10",
+   "lesson": 14,
+   "pagePdf": 62,
+   "covered_by_tc2": false
+  },
+  {
+   "book": "10-sgk-vat-li-10",
+   "lesson": 18,
+   "pagePdf": 74,
+   "covered_by_tc2": false
+  },
+  {
+   "book": "10-sgk-hoa-hoc-10",
+   "lesson": 6,
+   "pagePdf": 39,
+   "covered_by_tc2": false
+  },
+  {
+   "book": "10-sgk-hoa-hoc-10",
+   "lesson": 11,
+   "pagePdf": 54,
+   "covered_by_tc2": false
+  },
+  {
+   "book": "10-sgk-hoa-hoc-10",
+   "lesson": 14,
+   "pagePdf": 111,
+   "covered_by_tc2": false
+  }
+ ],
+ "tsl_objects": {
+  "figures": 3864,
+  "table_blocks_trusted": 20,
+  "formula_blocks_trusted": 0
+ }
+}

@@ -1,0 +1,77 @@
+{
+  "audit": "Layer A — DATA / TRUSTED CORPUS QUALITY",
+  "date": "2026-09-05",
+  "repo_head": "main e5155f4; TC-v2 read from origin/research/tc-v2-science-slice (PR #58, not merged)",
+  "labels": {"MEASURED": "produced by a script under poc-out/audit/pre-autonomy/scripts/ in this audit", "DOC-CLAIM": "quoted from a document, not reproduced", "ESTIMATED": "no measurement exists"},
+  "denominators": {
+    "canonical_sgk_lessons": {"value": 3679, "label": "MEASURED", "source": "scripts/a_layers.py <- poc-out/graph/curriculum-structure.json (sum SGK lessons[])"},
+    "ranged_sgk_lessons": {"value": 3381, "label": "MEASURED", "source": "scripts/a_layers.py (lessons with pageStart; identical under number-and-pageStart rule)"},
+    "six_science_books": {"canonical": 207, "old_ranged": 194, "repaired_ranged_tsl": 238, "label": "MEASURED (238 by TSL file count) / DOC-CLAIM (207, 194 from I.1)", "canonical_proposed_min": 3725, "proposed_status": "NOT adopted (DECISIONS-REQUESTED #5)"}
+  },
+  "corpus": {
+    "documents": {"value": 531, "by_doctype": {"SGK": 301, "SGV": 220, "UNKNOWN": 7, "WORKBOOK": 3}, "label": "MEASURED", "source": "scripts/a_layers.py"},
+    "ocr_pages": {"value": 62729, "sgk_pages": 29943, "label": "MEASURED", "source": "scripts/a_layers.py (count of graph/ocr-body/*/p*.json)"},
+    "units_k12_books": {"value": 525, "of": 531, "label": "MEASURED"},
+    "toc_health_fresh": {"OK": 203, "NO_TOC": 92, "NO_PAGES": 18, "other_flags": 218, "label": "MEASURED", "source": "tool/corpus/toc_health.py --json -> data/toc-health-fresh.json"}
+  },
+  "layers": {
+    "BROWSABLE": {"count": 3240, "denominator": 3679, "books_on_shelf": 238, "rating": "GREEN (exists) / YELLOW (naive text)", "label": "MEASURED", "source": "scripts/a_layers.py <- assets/pack/lesson-index-g*.json"},
+    "SOURCE_ADDRESSABLE": {"count": 3381, "denominator": 3679, "toc_attach_correct_gold": {"tc_v1": "28/38", "tc_v2_all": "37/54", "tc_v2_science": "15/23"}, "header_attach_correct_gold": {"tc_v2_all": "43/54", "tc_v2_science": "22/23", "held_out": "15/16"}, "rating": "YELLOW", "label": "MEASURED (counts) / MEASURED via gold-scores.json (attach)"},
+    "TRUSTED_TSL": {"count": 238, "full": 2, "partial": 236, "none": 0, "native_trusted_blocks": 11971, "withheld_regions": 2032, "withheld_per_lesson_median": 8, "boundary_source": {"both": 168, "header": 70}, "per_book": {"04-sgk-khoa-hoc-4": 31, "05-sgk-khoa-hoc-5": 30, "06-sgk-khoa-hoc-tu-nhien-6": 53, "07-sgk-khoa-hoc-tu-nhien-7": 33, "08-sgk-khoa-hoc-tu-nhien-8": 42, "09-sgk-khoa-hoc-tu-nhien-9": 49}, "elsewhere": 0, "denominator": "238 repaired ranged (six books); NOT 3679", "rating": "RED corpus-wide / YELLOW six books", "label": "MEASURED", "source": "scripts/c_tc_metrics.py (tsl_recount) <- poc-out/trusted-corpus/tc-v2/tc2-p1/lessons/"},
+    "LEARNABLE_baseline": {"count": 113, "denominator": 3679, "pct": 3.07, "still_wired_non_router_in_pack": 113, "keys_not_in_canonical_lesson_list": [["05-sgk-tieng-viet-5-tap-hai", 5], ["05-sgk-tieng-viet-5-tap-mot", 23]], "keys_without_pageStart": [["05-sgk-tieng-viet-5-tap-hai", 19], ["05-sgk-tieng-viet-5-tap-mot", 15], ["05-sgk-tieng-viet-5-tap-mot", 16]], "by_activity_type_multilabel": {"EXPERIMENT": 37, "READING": 61, "WRITING": 41, "SOURCE": 4, "TOAN_EXERCISE": 10}, "rating": "YELLOW", "label": "MEASURED", "source": "scripts/a_layers.py, scripts/b_113_join.py, scripts/d_555_recompute.py"},
+    "LEARNABLE_wal206_exact": {"content_valid": 5, "new_vs_baseline": 3, "device_valid": 0, "shipped_by_default": false, "label": "MEASURED (files) / DOC-CLAIM (gate semantics)", "source": "poc-out/p0-experiment/content-valid-exact.json, funnel-exact.json"},
+    "LEARNABLE_wal206_variant": {"content_valid": 96, "new_vs_baseline": 76, "device_valid": 6, "shipped_by_default": false, "present_in_on_disk_packs": true, "router_entries_on_disk": 97, "router_lessons_on_disk": 96, "router_only_lessons_on_disk": 76, "label": "MEASURED", "source": "scripts/a_layers.py (source startswith 'pattern-router' in assets/pack/lesson-index-g4..9.json)"},
+    "SAM_SUPPORTABLE_activity": {"count": 189, "composition": "113 baseline + 76 router-only", "denominator": 3679, "rating": "YELLOW", "label": "MEASURED"},
+    "SAM_SUPPORTABLE_grounding_units": {"lessons": 202, "units": 2584, "books": ["04-sgk-toan-4-tap-hai", "04-sgk-toan-4-tap-mot", "05-sgk-tieng-viet-5-tap-hai", "05-sgk-tieng-viet-5-tap-mot", "05-sgk-toan-5-tap-hai", "05-sgk-toan-5-tap-mot"], "label": "MEASURED", "source": "assets/pack/sam-units.db via scripts/a_layers.py"},
+    "DEVICE_VALIDATED": {"count": 6, "lessons": [["06-sgk-khoa-hoc-tu-nhien-6", 6], ["06-sgk-khoa-hoc-tu-nhien-6", 10], ["06-sgk-khoa-hoc-tu-nhien-6", 14], ["06-sgk-khoa-hoc-tu-nhien-6", 15], ["06-sgk-khoa-hoc-tu-nhien-6", 16], ["06-sgk-khoa-hoc-tu-nhien-6", 17]], "build": "variant (ROUTE_EXPLAIN=1), not default", "in_baseline": 0, "wal204_device_valid": 0, "screenshots_on_disk": 0, "desktop_wal_evidence_files": ["audit-01-home-top.png"], "earlier_nokia_claims": "DOC-CLAIM only (WAL-178 walk, WAL-193, SAM-PRODUCT-EXPERIENCE-REVIEW) — no artefacts in repo or poc-out", "rating": "RED (verifiability)", "label": "hand-written JSON = DOC-CLAIM; file counts MEASURED"}
+  },
+  "q2_113_after_tc_v1": {
+    "extractor_family": "all 113 via Apple-Vision naive line order (TC-v1 'current-naive'); XY-cut used only by the gated router", "naive_ftr_hard_pages": 0.3206, "naive_false_trusted": "143/446", "label": "MEASURED (tc-v1 bakeoff/scores.json re-read)",
+    "hard_page_exposure": {"ranged_of_113": 108, "pages": 746, "pages_any_hard_feature": 576, "pages_side_by_side": 287, "lessons_plain": 0, "lessons_no_unhandled": 17, "label": "MEASURED", "source": "scripts/d_555_recompute.py (baseline_113)"},
+    "tc_v2_join": {"experiment_entries_carrying_baseline": 49, "covered_by_tc2_sdm": 44, "lessons_covered": 32, "strings": 202, "TRUSTED": 164, "WITHHELD": 35, "CONFLICT": 3, "withheld_or_conflict_share": 0.188, "reasons": {"figure_text": 18, "figure_dependent": 7, "agree_text": 7, "agree_order": 3, "empty_block": 2, "page_feature:color_heavy": 1}, "lessons_fully_trusted": 11, "lessons_with_withheld_or_conflict": 21, "lessons_header_attach_disagrees": 3, "attach_disagreements": [{"book": "04-sgk-khoa-hoc-4", "pack_lesson": 1, "pdf": 11, "tc2_lesson": 2}, {"book": "05-sgk-khoa-hoc-5", "pack_lesson": 3, "pdf": 20, "tc2_lesson": 4}, {"book": "08-sgk-khoa-hoc-tu-nhien-8", "pack_lesson": 22, "pdf": [100, 101, 116], "tc2_lesson": [24, 24, 28]}], "lessons_on_xycut_untrusted_page": 22, "pages_xycut_untrusted": "29/44", "label": "MEASURED", "source": "scripts/b_113_join.py -> data/113-join.json/.md"},
+    "non_science_81": {"label": "ESTIMATED", "note": "no TC-v2 pages; TV5 tập hai XY-cut page gate 95/162 trusted, Toán 5 tập một 21/142 (scripts/e_layout_gate.py); fractions flattened in every stack (TC-09)"}
+  },
+  "q3_sourceable_555": {
+    "definition": "ranged lesson with no page carrying an unhandled feature (formula, diagram, color_heavy, table, three_col) — TC-18 Q3/Q17; predicts 'fully sourceable' under the TC-v1 cascade; not trust, not learnable",
+    "recomputed": {"no_unhandled": 559, "plain": 103, "ranged": 3381, "per_subject": {"Toán": "4/554", "KHTN": "4/145", "Vật lí": "1/82", "Khoa học": "17/99", "Tiếng Anh": "0/78", "Ngữ văn": "7/41", "Tiếng Việt": "41/251"}, "label": "MEASURED", "source": "scripts/d_555_recompute.py"},
+    "doc_claim": {"value": 555, "range": "555–603", "label": "DOC-CLAIM (TC-18); exact feature set not written down"},
+    "caveats": ["census uses printed pageStart as PDF index (no offset)", "detectors ±15% relative (TC-03 §7)"],
+    "relation_to_tc_v2_238": {"555_rule_on_six_books": 21, "tc_v2_full": 2, "tc_v2_partial": 236, "reading": "different units: feature-filter estimate vs measured PARTIAL lessons; neither divisible by 3679"}
+  },
+  "q4_false_trust": {
+    "tc_v1_single": {"current-naive": 0.3206, "current-xycut": 0.1188, "docling-ocrmac": 0.1435, "marker": 0.0933, "mineru": 0.6383, "vlm-mlx": 0.2673, "label": "MEASURED", "source": "scripts/c_tc_metrics.py <- tc-v1/bakeoff/scores.json"},
+    "tc_v1_cascades": {"docling>xycut+mathguard": 0.1215, "marker>docling": 0.0652, "marker>docling+mathguard": 0.0669, "label": "MEASURED"},
+    "tc_v2_gold": {"all_54p": 0.1139, "dev_38p": 0.1115, "heldout_16p": 0.1207, "science_23p": 0.1, "science_sgk_18p": 0.0909, "sgv_8p": 0.0889, "plain_prose": "0 on 1 page / 15 blocks", "label": "MEASURED", "source": "scripts/c_tc_metrics.py <- tc-v2/tc2-p1/metrics/gold-scores.json"},
+    "slice_trust": {"pages": 1049, "learning_blocks": 14451, "TRUSTED": 12348, "WITHHELD": 1868, "CONFLICT": 235, "trusted_share": 0.854, "guards": {"agree_text": 865, "figure_dependent": 638, "agree_order": 229, "page_feature:diagram": 199, "page_feature:color_heavy": 111, "box_boundary": 95, "math_guard": 42, "answer_leak": 30, "low_ocr_conf": 20, "role_conflict": 7}, "label": "MEASURED (sdm recount)"},
+    "guards_did_not_lower_floor": {"tc_v1_cascade_dev": 0.1215, "tc_v2_dev": 0.1115, "tc_v2_heldout": 0.1207, "label": "MEASURED"},
+    "cte_science_gold": {"events": 27, "pages": 23, "by_class": {"order_changes_meaning": 15, "corrupted_data": 5, "cross_column_contamination": 3, "nonquestion_as_question": 4, "lesson_attach_wrong_toc": 8}, "label": "MEASURED"},
+    "sgv": {"sample_pages": 75, "would_leak_without_lexicon": 711, "answer_leak_blocks": 56, "teacher_text_blocks": 693, "answer_keys_in_tsl": 0, "tsl_answer_keys_included_true": 0, "trusted_sgv_blocks": 473, "trusted_sgv_roles_recount": {"heading": 282, "objective": 111, "activity": 36, "instruction": 20, "caption": 10, "footnote": 4, "option": 4, "stage_label": 3, "sidebar": 2, "table": 1}, "contradiction": "docs say trusted SGV blocks are 'headings/captions only'; recount shows 167 objective/activity/instruction blocks TRUSTED (not served — TSLs never merge SGV)", "label": "MEASURED"},
+    "shipping_today_via_naive_extractor": {"baseline_activities": 113, "sam_units": 2584, "router_readings_on_disk": 97, "sgv_text_in_packs": 0, "stories": {"count": 38, "status": "VERIFIED", "all_sgk": true}, "label": "MEASURED"},
+    "certification_limit": "54 gold pages cannot certify < 1 %; no false-trust measurement exists on the 113 served lessons (proxy: 18.8 % strings withheld by TC-v2)"
+  },
+  "q5_role_layer": {
+    "roles_science_23p": {"QUESTION": [0.889, 0.87, 46], "ANSWER": [0.8, 0.4, 10], "ACTIVITY": [0.0, 0.0, 10], "INSTRUCTION": [0.5, 0.5, 6], "OBJECTIVE": [0.696, 0.941, 17], "SIDEBAR": [0.964, 0.818, 33], "TABLE": [1.0, 1.0, 7], "FORMULA": [null, null, 0]},
+    "roles_dev_38p": {"QUESTION": [0.893, 0.75, 100], "ANSWER": [null, 0.0, 5], "ACTIVITY": [0.0, 0.0, 5], "INSTRUCTION": [0.0, null, 0], "OBJECTIVE": [0.7, 0.7, 10], "SIDEBAR": [0.444, 0.348, 23], "TABLE": [1.0, 0.4, 15], "FORMULA": [null, 0.0, 13]},
+    "roles_heldout_16p": {"QUESTION": [0.833, 0.938, 16], "ANSWER": [0.8, 0.4, 10], "ACTIVITY": [0.0, 0.0, 6], "INSTRUCTION": [1.0, 0.5, 6], "OBJECTIVE": [0.706, 0.923, 13], "SIDEBAR": [0.958, 0.852, 27], "TABLE": [1.0, 1.0, 5]},
+    "trusted_question_precision": {"science": [0.97, 33], "dev": [0.917, 72], "heldout": [0.917, 12], "all": [0.917, 84], "bar": 0.95, "met": false},
+    "format": "[precision, recall, n_gold]", "label": "MEASURED", "source": "tc-v2/tc2-p1/metrics/gold-scores.json (aggregate.*.roles, question_trusted_precision)",
+    "attachment": {"header_vs_toc": {"science": "22/23 vs 15/23", "all": "43/54 vs 37/54", "heldout": "15/16 vs 9/16"}, "toc_truncation": {"07-sgk-khoa-hoc-tu-nhien-7": {"toc": 18, "header": 37, "printed_max": 39}, "08-sgk-khoa-hoc-tu-nhien-8": {"toc": 22, "header": 44, "printed_max": 47}, "04-sgk-khoa-hoc-4": {"toc": 27, "header": 31}, "05-sgk-khoa-hoc-5": {"toc": 22, "header": 30}}, "tsl_boundaries_from_header": 224, "tsl_boundaries_toc_fallback": 14, "cap_rule": "2.5x median lesson length (min 8 pages) in tool/ui/pattern_router.py toc_ranges only; tool/ui/build_lesson_index.py lesson_for is UNCAPPED", "label": "MEASURED (slice-report.json, attach/*.json, code read)"},
+    "objects": {"formula_trusted_blocks": 0, "math_guard_withheld": 42, "table_trusted_blocks_tsl": 20, "figures_in_tsl": 3864, "figure_dependent_withheld": 638, "question_trusted_blocks_tsl": 1642, "lessons_with_trusted_question": 236, "activity_trusted_blocks_tsl": 50, "withheld_blocks_carrying_text": 0, "label": "MEASURED", "source": "scripts/b_113_join.py (tsl_objects), scripts/c_tc_metrics.py"},
+    "registry_doc_claim": {"patterns": 27, "EXPLAIN_SHORT_unique_lessons": 874, "OBSERVE_unique_lessons": 352, "with_surface": ["EXPERIMENT", "READ_TEXT", "WRITE_TEXT", "SELECT_MCQ", "SOURCE_REASONING", "MAP_SPATIAL", "TRUE_FALSE"], "label": "DOC-CLAIM (K12-ACTIVITY-PATTERN-REGISTRY.md, not re-run)"}
+  },
+  "q6_missing_gates": [
+    {"id": "G1", "name": "false-trust audit on shipped lessons (statistical sample of 113 + sam-units)", "blocks": "serving naive text with unmeasured FTR", "state": "MISSING; proxy 18.8% strings withheld by TC-v2"},
+    {"id": "G2", "name": "lesson-attachment gate in pack build (header or capped TOC)", "blocks": "wrong-lesson activities (3/32 measured)", "state": "MISSING in build_lesson_index.py"},
+    {"id": "G3", "name": "lesson-identity gate (activity key resolves to canonical lesson)", "blocks": "2/113 non-canonical keys", "state": "MISSING"},
+    {"id": "G4", "name": "QUESTION precision >= 0.95 and ACTIVITY >= 0.8 on >= 300 science gold questions", "blocks": "graded / Short-Answer prompts; router readings' questions", "state": "MEASURED, not met (0.889 / 0.00)"},
+    {"id": "G5", "name": "build-provenance gate (pack manifest: default vs experiment build)", "blocks": "97 experiment-gated readings in on-disk packs", "state": "MISSING"},
+    {"id": "G6", "name": "device-evidence retention", "blocks": "every device-valid claim", "state": "MISSING; 0 screenshots on disk"},
+    {"id": "G7", "name": "formula / math path or image-first with legal clearance", "blocks": "Toán/Vật lí/Hoá text; 10 shipped Toán lessons", "state": "MISSING (legal gate J.1)"},
+    {"id": "G8", "name": "SGV answer-leak guard in product pipeline", "blocks": "n/a today (no SGV shipped)", "state": "MISSING as a gate"},
+    {"id": "G9", "name": "denominator/TOC repair adopted + second human read of >= 10 gold pages", "blocks": "every /3,679 statement; gates tuned on single-annotator gold", "state": "OPEN (DECISIONS-REQUESTED #5, TC-19 #9)"}
+  ],
+  "verdict": {"layer_A": "RED for trusted, YELLOW for wired", "autonomy_recommendation": "do not grant autonomy over Layer A until G1–G6 exist as measured gates"},
+  "not_verified": ["6 device-valid lessons and all earlier Nokia-verified claims (no screenshots on disk)", "TC-18 exact '555' feature set (recomputed 559)", "68% pages / 84% blocks corpus-wide sourceability (TC-18 ESTIMATE)", "816 EXTERNAL_MODALITY lessons and 27-pattern registry counts (scripts not re-run)", "0% false trust on plain prose (15 blocks, 1 page)", "true false-trust on 1,049 slice pages (unannotated; TC-v2 ESTIMATE 4–8%)"],
+  "scripts": ["scripts/a_layers.py", "scripts/b_113_join.py", "scripts/c_tc_metrics.py", "scripts/d_555_recompute.py", "scripts/e_layout_gate.py"],
+  "data_files": ["data/layers.json", "data/layers-by-grade-subject.md", "data/113-join.json", "data/113-join.md", "data/tc-metrics.json", "data/sourceable-555.json", "data/layout-gate.json", "data/toc-health-fresh.json"]
+}
