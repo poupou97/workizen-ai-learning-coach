@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """WAL-210 — LESSON ATTACHMENT with a capped, header-repaired TOC range (audit gate G2)
-and a LESSON-IDENTITY gate (audit gate G3). Rule id: ``capped-toc-v1``.
+and a LESSON-IDENTITY gate (audit gate G3). Rule id: ``capped-toc-v2``.
 
 Why: `build_lesson_index.lesson_for` attached an activity to "the last lesson whose
 pageStart ≤ page" with NO upper bound. When a TOC is truncated (KHTN 8 stops at Bài 22
@@ -11,7 +11,7 @@ previous lesson (Khoa học 4 "Bài 1" p11 is Bài 2; Khoa học 5 "Bài 3" p20 
 And two TV5 activities were keyed to lesson numbers that do not exist in the canonical
 lesson list at all.
 
-capped-toc-v1 (printed-page space, deterministic, fail closed):
+capped-toc-v2 (printed-page space, deterministic, fail closed; v2 = v1 + the systematic TOC offset):
   1. STARTS — a canonical lesson's start is its TOC pageStart. When the TC-v2
      header-based attachment for the book is on disk
      (poc-out/trusted-corpus/tc-v2/tc2-p1/attach/<book>.json — a deterministic
@@ -68,7 +68,18 @@ HEADER_MIN_CONF_BRACKETED = 0.6
 # Round 4: the pipeline is versioned (tc2-p1, tc2-p2, …) but this path was pinned to tc2-p1, so a pack
 # built after a new pipeline run would silently read the OLD page verdicts — including the old
 # 'the back cover belongs to the last lesson'. `WAL_TC2_ATTACH_DIR` points it at the run in hand.
-TC2_ATTACH_DIR = os.environ.get('WAL_TC2_ATTACH_DIR') or 'poc-out/trusted-corpus/tc-v2/tc2-p1/attach'
+TC2_ATTACH_DEFAULT = 'poc-out/trusted-corpus/tc-v2/tc2-p1/attach'
+
+
+def tc2_attach_dir():
+    """The attach directory for THIS call. Round 4 correctness review: the value used to be frozen into
+    default argument values at `def` time, so an in-process caller that set `WAL_TC2_ATTACH_DIR` after
+    importing this module kept the old path (which is why the test had to `importlib.reload`). Read it at
+    call time; an explicit `attach_dir=` argument still wins."""
+    return os.environ.get('WAL_TC2_ATTACH_DIR') or TC2_ATTACH_DEFAULT
+
+
+TC2_ATTACH_DIR = tc2_attach_dir()   # module-level snapshot, kept for callers that read the attribute
 
 # reason codes — attached
 ATTACHED = 'attached'
@@ -263,9 +274,9 @@ class BookAttach:
 
 
 # ---------------------------------------------------------------- loading helpers
-def load_header_data(book, attach_dir=TC2_ATTACH_DIR):
+def load_header_data(book, attach_dir=None):
     """(pages_map, lessons_list) from the TC-v2 header attachment file, or ({}, []) when absent."""
-    p = os.path.join(attach_dir, f'{book}.json')
+    p = os.path.join(attach_dir or tc2_attach_dir(), f'{book}.json')
     if not os.path.exists(p):
         return {}, []
     try:
@@ -288,10 +299,10 @@ def load_header_data(book, attach_dir=TC2_ATTACH_DIR):
 class AttachRegistry:
     """Lazy per-book BookAttach over curriculum-structure documents + a reason-coded log."""
 
-    def __init__(self, docs, attach_dir=TC2_ATTACH_DIR, use_headers=True):
+    def __init__(self, docs, attach_dir=None, use_headers=True):
         self._docs = {d['sourceDocumentId']: d for d in docs}
         self._books = {}
-        self.attach_dir = attach_dir
+        self.attach_dir = attach_dir or tc2_attach_dir()
         self.use_headers = use_headers
         self.counts = Counter()      # (family, reason) → n
         self.dropped = []            # detailed rows for withheld/dropped activities

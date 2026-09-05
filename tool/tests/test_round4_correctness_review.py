@@ -16,6 +16,7 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', 'corpus'))
+sys.path.insert(0, os.path.join(HERE, '..', 'ui'))
 import tc2_sdm  # noqa: E402
 import tsl_to_lesson_document as br  # noqa: E402
 
@@ -378,6 +379,76 @@ class R7cVerseLayoutTests(unittest.TestCase):
         self.assertEqual(o['trust']['status'], 'WITHHELD')
         self.assertEqual(o['guards'], ['line_structure'])
         self.assertEqual(o['text'], before)        # withheld, never reflowed and never repaired
+
+
+class F11CropNeighbourTests(unittest.TestCase):
+    """F11 — `render_crops` built its neighbour set from blocks + withheld regions only, so two adjacent
+    FIGURE crops could still bleed into each other by the full pad."""
+
+    def tsl(self):
+        return {'book': 'b', 'blocks': [{'id': 'blk', 'page': 3, 'bbox': [0.1, 0.8, 0.6, 0.03]}],
+                'withheld': [{'id': 'wh', 'page': 3, 'bbox': [0.1, 0.9, 0.6, 0.03]}],
+                'figures': [{'id': 'f0', 'page': 3, 'bbox': [0.1, 0.3, 0.35, 0.2], 'caption': None},
+                            {'id': 'f1', 'page': 3, 'bbox': [0.46, 0.3, 0.35, 0.2], 'caption': None}]}
+
+    def test_a_figure_is_a_neighbour_of_the_figure_beside_it(self):
+        nbs = br.crop_neighbours(self.tsl())
+        self.assertEqual({i for i, _ in nbs[3]}, {'blk', 'wh', 'f0', 'f1'})
+
+    def test_the_padding_between_two_side_by_side_figures_stops_short(self):
+        nbs = br.crop_neighbours(self.tsl())[3]
+        own = [bb for i, bb in nbs if i != 'f0']
+        L, T, Rp, B = br.crop_pads([0.1, 0.3, 0.35, 0.2], own, pad=0.012, gap=0.003)
+        self.assertAlmostEqual(Rp, 0.007, places=6)      # 0.01 free to the figure beside it, minus the 0.003 gap
+        self.assertEqual((L, T), (0.012, 0.012))
+        # without the figures in the neighbour set the crop took the full pad and bled into its neighbour
+        blocks_only = [bb for i, bb in nbs if i in ('blk', 'wh')]
+        self.assertEqual(br.crop_pads([0.1, 0.3, 0.35, 0.2], blocks_only, pad=0.012, gap=0.003)[2], 0.012)
+
+
+class ImportTimeAttachDirTests(unittest.TestCase):
+    """The pack builder froze `TC2_ATTACH_DIR` into DEFAULT ARGUMENT VALUES at import time, so an
+    in-process caller that set `WAL_TC2_ATTACH_DIR` after import kept the old path — which is why the
+    existing test had to `importlib.reload`. The directory is now read at call time."""
+
+    def setUp(self):
+        sys.path.insert(0, os.path.join(HERE, '..', 'ui'))
+        self.old = os.environ.get('WAL_TC2_ATTACH_DIR')
+
+    def tearDown(self):
+        if self.old is None:
+            os.environ.pop('WAL_TC2_ATTACH_DIR', None)
+        else:
+            os.environ['WAL_TC2_ATTACH_DIR'] = self.old
+
+    def test_the_env_var_is_honoured_without_reimporting_the_module(self):
+        import lesson_attach as la
+        os.environ['WAL_TC2_ATTACH_DIR'] = '/tmp/does-not-exist-round4/attach'
+        self.assertEqual(la.tc2_attach_dir(), '/tmp/does-not-exist-round4/attach')
+        self.assertEqual(la.AttachRegistry([]).attach_dir, '/tmp/does-not-exist-round4/attach')
+        self.assertEqual(la.load_header_data('00-sgk-mau'), ({}, []))     # reads the new path, finds nothing
+        os.environ.pop('WAL_TC2_ATTACH_DIR')
+        self.assertTrue(la.tc2_attach_dir().endswith('tc-v2/tc2-p1/attach'))
+
+    def test_an_explicit_directory_still_wins(self):
+        import lesson_attach as la
+        os.environ['WAL_TC2_ATTACH_DIR'] = '/tmp/does-not-exist-round4/attach'
+        self.assertEqual(la.AttachRegistry([], attach_dir='/tmp/explicit/attach').attach_dir, '/tmp/explicit/attach')
+
+
+class DocStringRuleIdTests(unittest.TestCase):
+    """The attachment rule id was bumped to `capped-toc-v2`, but four doc strings still said v1."""
+
+    def files(self):
+        for rel in ('ui/lesson_attach.py', 'ui/build_lesson_index.py'):
+            with open(os.path.join(HERE, '..', rel), encoding='utf-8') as f:
+                yield rel, f.read()
+
+    def test_no_doc_string_still_names_the_old_rule_id(self):
+        import lesson_attach as la
+        self.assertEqual(la.RULE, 'capped-toc-v2')
+        for rel, src in self.files():
+            self.assertNotIn('capped-toc-v1', src, rel)
 
 
 if __name__ == '__main__':

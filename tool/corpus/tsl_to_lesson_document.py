@@ -766,6 +766,21 @@ def crop_png(pdf, page, bbox, out_path, dpi, pad=0.012, pads=None):
     return pm.width, pm.height
 
 
+def crop_neighbours(tsl):
+    """{page: [(id, bbox)]} — everything a crop's padding must stop short of.
+
+    Round 4 correctness review (F11): this set was built from `blocks` + `withheld` only, so two adjacent
+    FIGURE crops could still bleed into each other by the full pad — the very failure `crop_pads` exists to
+    stop, in the one case where the foreign content is another picture. Figures are neighbours too. A
+    figure's own caption and its own bbox are excluded by the caller, as before.
+    """
+    out = {}
+    for b in list(tsl.get('blocks') or []) + list(tsl.get('withheld') or []) + list(tsl.get('figures') or []):
+        if b.get('bbox'):
+            out.setdefault(b['page'], []).append((b.get('id'), b['bbox']))
+    return out
+
+
 def render_crops(tsl, out_dir, dpi=150):
     """Figure + withheld-region crops → {id: {'crop': rel, 'aspect': w/h}}. No PDF ⇒ {} (the document is
     still produced, without images). INTERNAL / RESEARCH ONLY (D4)."""
@@ -775,12 +790,7 @@ def render_crops(tsl, out_dir, dpi=150):
         print(f'  ! không thấy PDF cho {book} — sinh tài liệu KHÔNG crop', file=sys.stderr)
         return {}
     out = {}
-    # Round 4: neighbours per page — every TSL block and withheld region that carries a bbox. A crop's padding
-    # stops short of them (crop_pads), so a crop cannot bleed into the next paragraph.
-    nb_by_page = {}
-    for b in list(tsl.get('blocks') or []) + list(tsl.get('withheld') or []):
-        if b.get('bbox'):
-            nb_by_page.setdefault(b['page'], []).append((b.get('id'), b['bbox']))
+    nb_by_page = crop_neighbours(tsl)
 
     for w in tsl.get('withheld') or []:
         rel = f'crops/{book}-p{w["page"]:03d}-withheld-{w["order"]:03d}.png'
