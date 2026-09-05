@@ -167,5 +167,32 @@ class ChapterChuDeTests(unittest.TestCase):
         self.assertEqual(self.chapters('không có mục lục ở đây'), [])
 
 
+class GoldErrataTests(unittest.TestCase):
+    """Request 1 — the gold's lesson numbers on LS&ĐL 5 p041 and p080 contradicted the printed banners.
+
+    Lane C's second reviewer and this lane's own banner scan of all 123 pages agree with the pipeline:
+    «BÀI 8» is printed on PDF 38 and «BÀI 9» on PDF 42, so PDF 41 is Bài 8; «BÀI 18» on PDF 78 and
+    «BÀI 19» on PDF 84, so PDF 80 is Bài 18. The gold's own titles were already the right lessons'.
+    The correction is recorded in the file, never silent."""
+
+    GOLD = os.path.join(HERE, '..', 'corpus', 'tc_gold')
+
+    def gold(self, name):
+        with open(os.path.join(self.GOLD, name), encoding='utf-8') as f:
+            return json.load(f)
+
+    def test_the_corrected_numbers_carry_their_errata(self):
+        for name, number, was in (('05-sgk-lich-su-va-dia-li-5-p041.json', 8, 9),
+                                  ('05-sgk-lich-su-va-dia-li-5-p080.json', 18, 17)):
+            les = self.gold(name)['lesson']
+            self.assertEqual(les['number'], number, name)
+            err = les.get('errata')
+            self.assertIsNotNone(err, name)
+            self.assertEqual(err['was']['number'], was, name)
+            self.assertEqual(err['now']['number'], number, name)
+            for k in ('id', 'date', 'reportedBy', 'verifiedBy', 'why', 'effect'):
+                self.assertTrue(err.get(k), f'{name}: errata.{k}')
+
+
 if __name__ == '__main__':
     unittest.main()
