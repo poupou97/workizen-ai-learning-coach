@@ -75,6 +75,20 @@ void main() {
     expect(r.requestHint(), isNull);
   });
 
+  test(
+    '⭐ khớp mẫu KHÔNG dùng mascot celebrate (claim chưa có bằng chứng, D9)',
+    () {
+      const t = TutorTurn(kind: TurnKind.matched, text: 'x');
+      expect(t.mascot, isNot('sam-celebrate-independence'));
+      for (final k in TurnKind.values) {
+        expect(
+          TutorTurn(kind: k, text: 'x').mascot,
+          isNot('sam-celebrate-independence'),
+        );
+      }
+    },
+  );
+
   test('câu trả lời rỗng không khớp gì', () {
     expect(answerMatches('   ', [r'.*']), isFalse);
     expect(answerMatches('cô cạn', [r'^cô cạn$']), isTrue);

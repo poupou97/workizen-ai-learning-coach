@@ -254,7 +254,9 @@ class TutorTurn {
     TurnKind.ask => 'sam-probe',
     TurnKind.learner => '',
     TurnKind.hint => 'sam-hint',
-    TurnKind.matched => 'sam-celebrate-independence',
+    // KHÔNG dùng CELEBRATE: khớp mẫu kịch bản không phải claim có bằng chứng
+    // (MASCOT-STATE: celebrate chỉ khi claim THẬT — Nokia n4 D9).
+    TurnKind.matched => 'sam-explain',
     TurnKind.scaffold => 'sam-step-back',
     TurnKind.next => 'sam-your-turn',
   };
