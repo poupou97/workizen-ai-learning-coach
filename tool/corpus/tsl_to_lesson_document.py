@@ -71,6 +71,7 @@ AUDIT_STATUSES = ('notAudited', 'sampledNoGate')
 ROLE_MAP = {
     'heading': ('heading', None),
     'body': ('paragraph', None),
+    'attribution': ('paragraph', None),   # round 4: same block type, `sourceRole` names it so the UI can say «Kể theo: …»
     'caption': ('caption', None),
     'question': ('question', None),
     'objective': ('activity', 'objective'),
@@ -269,11 +270,60 @@ def image_block(book, f, crop_rel, aspect=None):
 
 
 # ------------------------------------------------------------------ chapters (outside the TC gate)
+# Round 4 (Lane C request 6): `toc-ocr-chapters-v1` knew only «CHƯƠNG <roman>», so every «Chủ đề» book
+# (LS&ĐL 4/5, Khoa học 4/5, Đạo đức, HĐTN …) reported 0 chapters. The banner font also slips the tone —
+# LS&ĐL 5's own TOC prints «CHỦ ĐẾ 6» — so the marker accepts the same tone variants as the lesson banner.
+# Round 4 correctness review (F7 + F9), both child-facing:
+#   F7  the numeral group had NO trailing boundary, so the roman alternative bit into the next word and
+#       invented a chapter out of an ordinary section name: «PHẦN VĂN HỌC» → label «Phần V» + title
+#       «ĂN HỌC», «PHẦN XÃ HỘI» → «Phần X»/«Ã HỘI», «CHƯƠNG VIỆT NAM …» → «Chương VI», and «HUÂN CHƯƠNG I»
+#       (a medal, in Lịch sử prose and on every back cover) matched as a chapter. The numeral must now be
+#       followed by a non-letter/non-digit, and the medal phrase is excluded by name.
+#   F9  the tone class did not match the comment above it: «Ề» was listed twice, four of the six Ê-family
+#       forms were missing (CHỦ ĐỂ / ĐỄ / ĐỆ / ĐÊ all failed) and «Ù» was missing from the CH class. It is
+#       now literally the lesson banner's class — the base vowel plus its five tones — on both syllables.
+CHAPTER_HDR = re.compile(r'(?<!HUÂN )(?<!Huân )'
+                         r'(?:CH[UÙÚỦŨỤ]\s*Đ[ÊỀẾỂỄỆEÈÉẺẼẸ]\s*(\d{1,2})'
+                         r'|CHƯƠNG\s+([IVX]+|\d{1,2})'
+                         r'|PHẦN\s+([IVX]+|\d{1,2}))'
+                         r'(?![0-9A-Za-zÀ-ỹ\u0300-\u036f])\s*[.\-–:]?\s*')
+
+
+def chapter_label(m):
+    """A GENERATED label (never SGK text): the printed marker normalised, its number kept verbatim."""
+    if m.group(1):
+        return f'Chủ đề {m.group(1)}'
+    if m.group(2):
+        return f'Chương {m.group(2)}'
+    return f'Phần {m.group(3)}'
+
+
+def clean_toc_title(raw):
+    """TOC titles carry dot leaders and a trailing page number; both are furniture, not title text.
+
+    Round 4 correctness review (F8): the trailing-number strip is written for a LESSON line (title ·
+    leader · page number), but this function is applied to CHAPTER titles too, and a chapter title often
+    carries no page number at all. The old pattern let the separator run be EMPTY, so it matched the TAIL
+    of a longer digit run and a History chapter title lost the last digit of its year
+    («… TỪ 1858 ĐẾN NĂM 1945» → «… ĐẾN NĂM 1») — a child-facing wrong title, on exactly the books Lane C's
+    Golden Slice #2 uses. The separator is now REQUIRED, so only a digit run standing on its own after a
+    leader or a space is read as a page number: a year at the end of a title survives, and
+    «… THẾ GIỚI .93» / «… MỘT ..... 5» are still stripped.
+    """
+    t = re.sub(r'[.\u2026]{2,}', ' ', raw)
+    # the leader may be a single dot glued to the page number («… THẾ GIỚI .93»)
+    t = re.sub(r'[\s.\u2026]+\d{1,3}\s*$', '', t)
+    return re.sub(r'\s+', ' ', t).strip(' .\u2026-–:')
+
+
 def chapters_from_toc(book, units_path=None):
     """Printed TOC (naive OCR) → [{label, title, lessonNos}] with trust `fixtureFromTrustedCorpus`.
     None found ⇒ []. Never edits the OCR text."""
     p = units_path or f'{ROOT}/poc-out/units-k12/{book}.json'
     if not os.path.exists(p):
+        # Silent [] used to be indistinguishable from «this book has no chapters». It is usually ROOT:
+        # the bridge derives it from __file__, so running from a git worktree finds no poc-out at all.
+        print(f'  ! không thấy TOC units cho {book} tại {p} — chapters=[] (đặt TC_ROOT nếu chạy ngoài checkout chính)', file=sys.stderr)
         return []
     units = json.load(open(p)).get('units') or []
     toc = next((u.get('text') for u in units if 'MỤC LỤC' in (u.get('text') or '')), None)
@@ -282,21 +332,22 @@ def chapters_from_toc(book, units_path=None):
     start = toc.index('MỤC LỤC')
     end = toc.find('Giải thích một số thuật ngữ', start)
     seg = toc[start:end if end > 0 else None]
-    parts = re.split(r'(?=CHƯƠNG\s+[IVX]+\s*[-–])', seg)
     out = []
-    for part in parts:
-        m = re.match(r'CHƯƠNG\s+([IVX]+)\s*[-–]\s*(.+?)\s+(?=Bài\s+\d+\.)', part, re.S)
-        if not m:
+    for m in CHAPTER_HDR.finditer(seg):
+        nxt = CHAPTER_HDR.search(seg, m.end())
+        part = seg[m.end():nxt.start() if nxt else None]
+        b = re.search(r'Bài\s+\d+\.', part)
+        if not b:
             continue
         nos = [int(n) for n in re.findall(r'Bài\s+(\d+)\.', part)]
         if not nos:
             continue
         out.append({
-            'label': f'Chương {m.group(1)}',
-            'title': re.sub(r'\s+', ' ', m.group(2)).strip(),
+            'label': chapter_label(m),
+            'title': clean_toc_title(part[:b.start()]),
             'lessonNos': nos,
             'trust': TRUST_OUTSIDE_GATE,
-            'derivation': 'toc-ocr-chapters-v1',
+            'derivation': 'toc-ocr-chapters-v2',
         })
     return out
 
@@ -373,24 +424,41 @@ def derive_comparison(tsl):
 
 
 # ------------------------------------------------------------------ tutor script (PROTOTYPE, Bài 17 only)
+def block_key(block_id):
+    """`<book>:pNNN:<pipeline>:<order>` → `<book>:pNNN:<order>`.
+
+    Round 4: a TSL block id embeds the PIPELINE NAME, so every id written down by hand (the Bài 17 tutor
+    script below) stopped resolving the moment the lesson was rebuilt as `tc2-p2` — the script vanished
+    with the message «TSL thiếu block», which blamed withholding for what was really a naming mismatch.
+    Keys are compared without the pipeline segment; the id carried in the output is still the real one."""
+    parts = (block_id or '').split(':')
+    return ':'.join(parts[:2] + parts[3:]) if len(parts) >= 4 else block_id
+
+
 def tutor_script_bai17(tsl, by_id):
     """Hand-written script for KHTN 6 Bài 17 — `prototype`. Prompts are VERBATIM TSL blocks (by id);
     everything else (SAM's words, acceptable patterns, hints, scaffold) is the slice author's, NOT the
-    SGV, NOT the Pedagogy Runtime. Any other TSL ⇒ None (no invented script)."""
+    SGV, NOT the Pedagogy Runtime. Any other TSL ⇒ None (no invented script).
+
+    Blocks are looked up pipeline-agnostically (see block_key), so a versioned re-run keeps the script
+    when — and only when — every block it quotes is still TRUSTED."""
     B = '06-sgk-khoa-hoc-tu-nhien-6:'
     need = {
-        'principle': B + 'p061:tc2-p1:016',
-        'q_salt': B + 'p063:tc2-p1:011',
-        'q_funnel': B + 'p063:tc2-p1:022',
-        'q_sand': B + 'p063:tc2-p1:012',
-        'summary': B + 'p064:tc2-p1:003',
-        'co_can': B + 'p063:tc2-p1:005',
+        'principle': B + 'p061:016',
+        'q_salt': B + 'p063:011',
+        'q_funnel': B + 'p063:022',
+        'q_sand': B + 'p063:012',
+        'summary': B + 'p064:003',
+        'co_can': B + 'p063:005',
     }
     if tsl.get('book') != '06-sgk-khoa-hoc-tu-nhien-6' or tsl.get('lesson') != 17:
         return None
-    if any(k not in by_id for k in need.values()):
-        print('  ! TSL thiếu block cho kịch bản Bài 17 — không sinh tutorScript', file=sys.stderr)
+    by_key = {block_key(k): v for k, v in by_id.items()}
+    missing = [k for k, v in need.items() if v not in by_key]
+    if missing:
+        print(f'  ! TSL thiếu block cho kịch bản Bài 17 ({", ".join(missing)}) — không sinh tutorScript', file=sys.stderr)
         return None
+    need = {k: by_key[v]['id'] for k, v in need.items()}   # back to the REAL ids: they are emitted as provenance
     q = lambda k: by_id[need[k]]['text']  # noqa: E731
     return {
         'samMode': 'prototypeScripted',
@@ -489,7 +557,16 @@ def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters
     by_id = {b['id']: b for b in blocks_in}
     pages = sorted({b['page'] for b in blocks_in} | {w['page'] for w in tsl.get('withheld') or []})
     printed = sorted({b['page_printed'] for b in blocks_in if b.get('page_printed') is not None})
-    caption_of = {f['caption']: f['id'] for f in tsl.get('figures') or [] if f.get('caption')}
+    # Round 4 correctness review (F10): `caption_for_picture` deliberately lets ONE caption serve
+    # side-by-side pictures, but this map is keyed by caption id, so the LAST figure silently overwrote
+    # the first. The figure→caption direction is complete either way (every ImageBlock carries its own
+    # `captionBlockId`); the consumer model's `captionOf` is a single id, so it now names the first figure
+    # the caption serves, deterministically — and a figure the document DROPS (too small, or no crop) never
+    # wins over one it keeps, so `captionOf` cannot point at a block that is not in the document.
+    caption_of = {}
+    for f in sorted((tsl.get('figures') or []), key=lambda f: not figure_kept(f)):
+        if f.get('caption'):
+            caption_of.setdefault(f['caption'], f['id'])
 
     # 1. text blocks in reading order (unknown roles become withheld blocks — never dropped)
     seq = []  # (page, y, x, order, block)
@@ -637,19 +714,71 @@ def check_document(doc, tsl):
 
 
 # ------------------------------------------------------------------ crops (I/O, internal only)
-def crop_png(pdf, page, bbox, out_path, dpi, pad=0.012):
+def crop_pads(bbox, neighbours, pad=0.012, gap=0.003):
+    """Round 4 (failure class 5, «crop bbox bleed»): per-side padding for one crop.
+
+    The crop was padded by a fixed `pad` on all four sides. On a dense page that pulls the neighbouring
+    paragraph's first line into a figure crop — the child then sees text that is not part of the figure and
+    reads it as its caption. Here each side is padded by at most the free distance to the nearest neighbouring
+    block on that side, minus `gap`, and never below 0: a crop can lose padding, never gain foreign content.
+
+    `bbox` / `neighbours` are [x, y, w, h] in page fractions. A block counts on a side only when it also
+    overlaps the figure on the perpendicular axis (a paragraph in the other column is not "below").
+    Returns (left, top, right, bottom)."""
+    x, y, w, h = bbox
+    x1, y1 = x + w, y + h
+    out = []
+    for side in ('left', 'top', 'right', 'bottom'):
+        free = None
+        for nb in neighbours or []:
+            nx, ny, nw, nh = nb
+            nx1, ny1 = nx + nw, ny + nh
+            x_ov = min(x1, nx1) - max(x, nx) > 0
+            y_ov = min(y1, ny1) - max(y, ny) > 0
+            d = None
+            if side == 'left' and y_ov and nx1 <= x:
+                d = x - nx1
+            elif side == 'right' and y_ov and nx >= x1:
+                d = nx - x1
+            elif side == 'top' and x_ov and ny1 <= y:
+                d = y - ny1
+            elif side == 'bottom' and x_ov and ny >= y1:
+                d = ny - y1
+            if d is not None and (free is None or d < free):
+                free = d
+        out.append(pad if free is None else max(0.0, min(pad, free - gap)))
+    return tuple(out)
+
+
+def crop_png(pdf, page, bbox, out_path, dpi, pad=0.012, pads=None):
     import fitz
     doc = fitz.open(pdf)
     pg = doc[page - 1]
     r = pg.rect
     x, y, w, h = bbox
-    x0, y0 = max(0.0, x - pad), max(0.0, y - pad)
-    x1, y1 = min(1.0, x + w + pad), min(1.0, y + h + pad)
+    pl, pt, pr, pb = pads if pads is not None else (pad, pad, pad, pad)
+    x0, y0 = max(0.0, x - pl), max(0.0, y - pt)
+    x1, y1 = min(1.0, x + w + pr), min(1.0, y + h + pb)
     clip = fitz.Rect(r.x0 + x0 * r.width, r.y0 + y0 * r.height, r.x0 + x1 * r.width, r.y0 + y1 * r.height)
     pm = pg.get_pixmap(dpi=dpi, colorspace=fitz.csRGB, alpha=False, clip=clip)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     pm.save(out_path)
     return pm.width, pm.height
+
+
+def crop_neighbours(tsl):
+    """{page: [(id, bbox)]} — everything a crop's padding must stop short of.
+
+    Round 4 correctness review (F11): this set was built from `blocks` + `withheld` only, so two adjacent
+    FIGURE crops could still bleed into each other by the full pad — the very failure `crop_pads` exists to
+    stop, in the one case where the foreign content is another picture. Figures are neighbours too. A
+    figure's own caption and its own bbox are excluded by the caller, as before.
+    """
+    out = {}
+    for b in list(tsl.get('blocks') or []) + list(tsl.get('withheld') or []) + list(tsl.get('figures') or []):
+        if b.get('bbox'):
+            out.setdefault(b['page'], []).append((b.get('id'), b['bbox']))
+    return out
 
 
 def render_crops(tsl, out_dir, dpi=150):
@@ -661,15 +790,23 @@ def render_crops(tsl, out_dir, dpi=150):
         print(f'  ! không thấy PDF cho {book} — sinh tài liệu KHÔNG crop', file=sys.stderr)
         return {}
     out = {}
+    nb_by_page = crop_neighbours(tsl)
+
     for w in tsl.get('withheld') or []:
         rel = f'crops/{book}-p{w["page"]:03d}-withheld-{w["order"]:03d}.png'
-        crop_png(pdf, w['page'], w['bbox'], os.path.join(out_dir, rel), dpi)
+        nbs = [bb for bid, bb in nb_by_page.get(w['page'], []) if bid != w.get('id')]
+        crop_png(pdf, w['page'], w['bbox'], os.path.join(out_dir, rel), dpi, pads=crop_pads(w['bbox'], nbs))
         out[w['id']] = {'crop': rel, 'aspect': None}
     for f in tsl.get('figures') or []:
         if not figure_kept(f):
             continue
         rel = f'crops/{book}-p{f["page"]:03d}-{f["id"].split(":")[-1]}.png'
-        wpx, hpx = crop_png(pdf, f['page'], f['bbox'], os.path.join(out_dir, rel), dpi)
+        # a figure's own caption belongs to the figure — it never clips its padding. (The TSL stores
+        # `labels` as a COUNT, not a list, so figure labels cannot be excluded by id; they sit inside the
+        # picture bbox anyway, which no side test can turn into a neighbour.)
+        own = {f.get('caption'), f.get('id')}
+        nbs = [bb for bid, bb in nb_by_page.get(f['page'], []) if bid not in own]
+        wpx, hpx = crop_png(pdf, f['page'], f['bbox'], os.path.join(out_dir, rel), dpi, pads=crop_pads(f['bbox'], nbs))
         out[f['id']] = {'crop': rel, 'aspect': round(wpx / hpx, 4)}
     return out
 

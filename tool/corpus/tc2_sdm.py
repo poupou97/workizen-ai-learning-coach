@@ -16,9 +16,11 @@ SDM block (superset of TC-11 §2):
   conflict}, guards[] (reason codes that fired), trust {status TRUSTED|WITHHELD|CONFLICT,
   reasons[]}, learning (bool), refers_figure, heading_path[], lesson (filled by tc2_attach).
 
-Reason codes (guards): agree_text · agree_order · role_conflict · math_guard · empty_block ·
-furniture (page number / running head) · box_boundary · figure_dependent · answer_leak ·
-teacher_text · page_feature:color_heavy · page_feature:diagram · figure_text · low_ocr_conf.
+Reason codes (guards): agree_text · agree_order · agree_numbers (round 4: the two OCR stacks read different
+digits for the same text) · agree_tones (round 4: same word, different tone marks between the stacks) · role_conflict · math_guard · unit_guard · chem_guard (round 4: flattened unit
+exponents / chemical subscripts) · empty_block · furniture (page number / running head) · box_boundary ·
+figure_dependent · answer_leak · teacher_text · page_feature:color_heavy · page_feature:diagram ·
+figure_text · low_ocr_conf.
 Informational (never withhold): enumerator_restored · refers_figure.
 
 Usage (bake-off venv python — rapidfuzz + numpy + pymupdf):
@@ -27,6 +29,7 @@ Usage (bake-off venv python — rapidfuzz + numpy + pymupdf):
   tc2_sdm.py --pipeline tc2-p1 --page <book> <pdfPage>   # print one page
 """
 import argparse
+import difflib
 import glob
 import json
 import os
@@ -42,12 +45,19 @@ import tc_sdm  # noqa: E402
 import tc_score  # noqa: E402
 import tc_cascade  # noqa: E402
 import layout_extract  # noqa: E402
+import tc2_paths  # noqa: E402
 
 ROOT = tc_sdm.ROOT
 PDF = f'{ROOT}/poc-out/pdf'
 OCR = f'{ROOT}/poc-out/graph/ocr-body'
 PIPELINE_ID = 'tc2-p1'
-SDM_VERSION = 'sdm-v2'
+# Round 4 (failure class 3: role classification). The icon / box-tint signal measured in
+# docs/research/ROLE-LAYER-SIGNAL-EXPERIMENT-2026-09-05.md is integrated BEHIND A FLAG: None (default) leaves the
+# deterministic lexicon/geometry Role Layer unchanged; 'v2' / 'v3' apply the experiment's frozen rules
+# (R1 orange icon → ACTIVITY, R2 blue icon → QUESTION; v3 never lets an inherited icon override the instruction
+# lexicon). Set with --role-signal on the CLIs or TC2_ROLE_SIGNAL in the environment. No threshold is decided here.
+ROLE_SIGNAL = os.environ.get('TC2_ROLE_SIGNAL') or None
+SDM_VERSION = 'sdm-v3'   # round 4: LIS order agreement + verifier-aligned re-sequencing (see agreement())
 TEXT_SIM = tc_cascade.TEXT_SIM
 
 try:
@@ -61,17 +71,16 @@ except Exception:  # pragma: no cover
 
 
 def out_root(pipeline):
-    return f'{ROOT}/poc-out/trusted-corpus/tc-v2/{pipeline}'
+    return tc2_paths.out_root(pipeline)
 
 
 # ---------------------------------------------------------------- raw loading
 def load_raw(cand, book, page, pipeline, allow_v1=True):
-    """tc-v2 raw first; fall back (read-only) to tc-v1 bake-off raw for gold pages outside the slice."""
-    p = f'{out_root(pipeline)}/bakeoff/raw/{cand}/{book}-p{page:03d}.json'
-    src = f'tc-v2/{pipeline}'
-    if not os.path.exists(p) and allow_v1:
-        p = f'{ROOT}/poc-out/trusted-corpus/tc-v1/bakeoff/raw/{cand}/{book}-p{page:03d}.json'; src = 'tc-v1'
-    if not os.path.exists(p):
+    """This run's raw first; then (read-only) the tc2-p1 raw, then the tc-v1 bake-off raw — the raw candidate
+    output is deterministic per page and independent of the SDM/role/guard code, so a later pipeline version
+    reuses it (tc2_paths.raw_path records which one)."""
+    p, src = tc2_paths.raw_path(cand, book, page, pipeline, allow_fallback=allow_v1)
+    if p is None:
         return None, None
     r = json.load(open(p))
     if r.get('error') or r.get('result') is None:
@@ -200,13 +209,42 @@ QHINT = layout_extract.QUESTION_HINT
 DIRECTIVE_ANY = layout_extract.DIRECTIVE_ANY
 CAPTION = re.compile(r'^\s*(Hình|Bảng|Sơ đồ|Biểu đồ|Lược đồ|Tranh|Ảnh)\s*\d', re.IGNORECASE)
 FOOTNOTE = layout_extract.FOOTNOTE
-LESSON_HDR = re.compile(r'^\s*(BÀI|Bài)\s+(\d{1,2})\b')
+LESSON_HDR = re.compile(r'^\s*(B[ÀÁẢÃẠ]I|B[àáảãạ]i)\s+(\d{1,2})\b')   # round 4: + Ã (banner OCR «BÃI»), as tc2_attach
 THEME_HDR = re.compile(r'^\s*(CHỦ ĐỀ|Chủ đề|CHƯƠNG|Chương)\s+([IVX]+|\d+)\b')
 ROMAN_SEC = re.compile(r'^\s*(I|II|III|IV|V|VI|VII|VIII|IX|X)[.)]\s+\S')
 NUM_SEC = re.compile(r'^\s*\d{1,2}[.)]\s+\S')
-FIG_REF = re.compile(r'\b(hình|bảng|sơ đồ|biểu đồ|lược đồ|đồ thị)\s*\d|\b(hình|bảng|sơ đồ)\s+(bên|trên|dưới|sau|dưới đây|sau đây)\b|\btrong (các )?hình\b|\bở hình\b', re.IGNORECASE)
+# Round 4 (Lane C request 4): «quan sát các hình từ 1 đến 3 …» carries no «Hình N», so the guard trusted a
+# question the child cannot answer from text alone. A look-verb followed within a clause by a figure noun
+# is a figure reference even when no number follows it.
+# Round 4 correctness review (F4): that clause also matched «Đọc bảng chia 3 …» — «bảng chia/nhân/cộng/trừ»
+# is the arithmetic table a child recites, not a printed figure, so the guard withheld an ordinary Toán
+# instruction. The exclusion is narrow and lexical: only those four arithmetic tables, only in the look-verb
+# clause. It is fail-closed either way (the guard costs recall, never trust), so it is tightened by naming
+# the idiom rather than by weakening the clause.
+ARITH_TABLE = r'(?!\s+(?:chia|nhân|cộng|trừ)\b)'
+FIG_REF = re.compile(r'\b(hình|bảng|sơ đồ|biểu đồ|lược đồ|đồ thị)\s*\d|\b(hình|bảng|sơ đồ)\s+(bên|trên|dưới|sau|dưới đây|sau đây)\b|\btrong (các )?hình\b|\bở hình\b|'
+                     r'\b(quan sát|nhìn|xem|dựa vào|căn cứ vào|đọc)\b[^.?!]{0,40}?\b(hình|bảng' + ARITH_TABLE + r'|sơ đồ|biểu đồ|lược đồ|đồ thị)\b', re.IGNORECASE)
+# Round 4 (Lane C request 5): «(Theo …)» / «(…, NXB …, 2017)» closes a story and names its source. tc2-p1 served
+# it as body — the child could not tell the SGK's own prose from a quoted source (4 / 4 of Lane C's role
+# disagreements on LS&ĐL 5 Bài 8). Fail closed: the marker word OR an explicit publisher is required, so a
+# parenthesised proper name alone («(Hồ Chí Minh …)») is still body — a recorded gap, not a guess.
+ATTRIBUTION = re.compile(r'^\s*[(\[]\s*(Theo|THEO|Nguồn|NGUỒN|Dẫn theo|DẪN THEO|Trích|TRÍCH|Kể theo|Phỏng theo|Sưu tầm)\b', re.IGNORECASE)
+ATTRIBUTION_PUB = re.compile(r'\b(NXB|Nhà xuất bản)\b', re.IGNORECASE)
+# Round 4 (Lane C request 5): a «… em hãy:» lead and the dash sub-items under it were served as body.
+DASH_LEAD = re.compile(r'^\s*[-–—]\s+(?=\S)')
+QUESTION_LEAD = re.compile(r'\b(em hãy|các em hãy|hãy)\s*:\s*$', re.IGNORECASE)
 FRONT_MATTER = re.compile(r'^\s*(MỤC LỤC|Mục lục|LỜI NÓI ĐẦU|Lời nói đầu|HƯỚNG DẪN SỬ DỤNG SÁCH|BẢNG TRA CỨU|Bảng tra cứu|GIẢI THÍCH THUẬT NGỮ|PHỤ LỤC|Phụ lục|BẢNG THUẬT NGỮ)')
 MATH = tc_cascade.MATH
+# Round 4 (failure class 2: formula / number / unit fidelity) — deterministic guards, fail closed, never a guess:
+#   UNIT_EXP  a length unit whose exponent every text-line OCR flattens («m2», «cm3», «1 360 m2» → the audit measured
+#             «1 360 m²→1 360 m» and «m²→m?/m₴») — a block carrying such a token is withheld unless a parser labelled it
+#             FORMULA/TABLE (same rule as the math guard).
+#   CHEM      inline chemical formulas whose subscripts are flattened or dropped («AgNO₃»→«AgNO,», «NH₃»→«NH,», «H₂O»→
+#             «H,O», «CO2»): an element-symbol run glued to a digit, or followed by a comma before a concentration
+#             («AgNO, 1%») or another element symbol («H,O»).
+UNIT_EXP = re.compile(r'(?<![A-Za-zÀ-ỹ])(?:m|cm|dm|km|mm)[23](?![\d.,])')
+CHEM = re.compile(r'\b(?:[A-Z][a-z]?){1,4}\d(?:[A-Z][a-z]?\d?)*\b|\b(?:[A-Z][a-z]?){1,3},\s*(?=\d+(?:[.,]\d+)?\s*%)|\b[A-Z][a-z]?,[A-Z][a-z]?\b')
+DIGIT_RUNS = re.compile(r'\d+')
 DIGITS = re.compile(r'^\d{1,3}$')
 LETTERS = re.compile(r'[A-Za-zÀ-ỹ]')
 
@@ -259,7 +297,19 @@ def assign_role(b, ctx):
         return 'heading', 'lexicon', 0.95, ['theme/chapter header']
     if STAGE.match(t) and len(t) <= 45:
         return 'stage_label', 'lexicon', 0.95, ['stage label']
-    if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 45 and not re.search(r'\?\s*$', t) and not DIGITS.match(t):
+    # Round 4 correctness review (F2): the attribution test must run BEFORE the two `upper_ratio >= 0.7`
+    # heading rules. It used to sit after them, so an UPPERCASE «(THEO …)» / «(NGUỒN: …)» could never reach
+    # it and became a `heading` — a role that is COLOUR_HEAVY_EXEMPT and that `build_page` then makes the
+    # `heading_path` of every following block in the lesson. Only the title-case form ever worked.
+    # Fail closed on both sides: a line the extractor itself labelled a caption keeps `caption`, a line that
+    # ends in «?» is left to the question rules, and in an SGV it stays `teacher_text` (still withheld by
+    # the `teacher_text` guard) exactly as before — only the role NAME changes there.
+    if (lab != 'caption' and len(t) <= 220 and not re.search(r'\?\s*$', t)
+            and (ATTRIBUTION.match(t) or (re.match(r'^\s*[(\[]', t) and ATTRIBUTION_PUB.search(t)))):
+        return ('teacher_text' if sgv else 'attribution'), 'lexicon', 0.9, ['source attribution «(Theo …)» / publisher line']
+    # (F2, same finding) a line that OPENS WITH A BRACKET is never a section heading — that is what made an
+    # uppercase parenthesised source line a heading, and a heading_path, while its title-case twin stayed body.
+    if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 45 and not re.search(r'\?\s*$', t) and not DIGITS.match(t) and not re.match(r'^\s*[(\[]', t):
         return 'heading', 'typography', 0.88, ['short uppercase label']
     if ACTIVITY.match(t) and upper_ratio(ACTIVITY.sub('', t, count=1)) >= 0.7 and len(t) <= 120:
         return 'heading', 'lexicon+typography', 0.9, ['Hoạt động N. + UPPERCASE title']
@@ -298,21 +348,36 @@ def assign_role(b, ctx):
     # heading candidates
     if lab in ('section_header', 'title') and len(t) <= 100 and not re.search(r'\?\s*$', t) and not (ENUM.match(t) and QHINT.search(t)):
         return 'heading', 'native', 0.85, ['docling section_header']
-    if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 90 and not re.search(r'\?\s*$', t):
+    if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 90 and not re.search(r'\?\s*$', t) and not re.match(r'^\s*[(\[]', t):
         return 'heading', 'typography', 0.85, ['uppercase run']
     if (ROMAN_SEC.match(t) or NUM_SEC.match(t)) and len(t) <= 70 and not ends_sentence(t) and not QHINT.search(ENUM.sub('', t)) and not DIRECTIVE_ANY.search(t) and t[len(ENUM.match(t).group(0)):][:1].isupper():
         return 'heading', 'lexicon', 0.75, ['numbered title-case section']
     # questions
-    core = ENUM.sub('', t, count=1)
+    # A dash sub-item is read WITHOUT its bullet only under a question lead (previous block is a question, or
+    # ends with «… hãy:»); everywhere else a leading dash stays part of the text, so dialogue lines in a
+    # reading are not promoted to questions.
+    dash = DASH_LEAD.match(t)
+    lead_ctx = bool(dash) and (prev == 'question' or QUESTION_LEAD.search((ctx.get('prev_text') or '').strip()) is not None)
+    core = ENUM.sub('', t[dash.end():] if lead_ctx else t, count=1)
     is_q = re.search(r'\?\s*$', t) is not None
-    directive = QHINT.search(core) is not None and len(t) < 400
-    num_directive = ENUM.match(t) is not None and DIRECTIVE_ANY.search(core[:120]) is not None and len(t) < 400
+    directive = (QHINT.search(core) is not None or QUESTION_LEAD.search(t) is not None) and len(t) < 400
+    # Round 4 correctness review (F5): `num_directive` tested `ENUM.match(t)` on the UN-stripped text while
+    # `core` was dash-stripped, so «– 1. Em thử vẽ lại sơ đồ trên» — a dash sub-item carrying its OWN
+    # enumerator — could only be promoted by the `^`-anchored QHINT and never by DIRECTIVE_ANY, and stayed
+    # `body`. The enumerator is the evidence here, so the bullet is stepped over only when an enumerator
+    # actually follows it; a bare dash line still needs a question lead, so dialogue in a reading is
+    # untouched (that is what the DASH_LEAD machinery exists for).
+    after_dash = t[dash.end():] if dash else t
+    enum_m = ENUM.match(after_dash)
+    num_directive = enum_m is not None and DIRECTIVE_ANY.search(ENUM.sub('', after_dash, count=1)[:120]) is not None and len(t) < 400
     stem = False  # an enumerated line ending with ":" is a question stem ONLY when options follow (post-pass); alone it is a worked-example lead-in (Toán 7 p41)
     if is_q or directive or num_directive or stem:
         if sgv:
             return 'teacher_prompt', 'lexicon', 0.85, ['question form inside SGV → teacher prompt']
         conf = 0.92 if is_q else (0.85 if directive else (0.78 if num_directive else 0.75))
         ev = ['ends with ?'] if is_q else (['leading directive verb'] if directive else (['enumerator + directive verb'] if num_directive else ['enumerated stem ending with ":"']))
+        if lead_ctx:
+            ev = ev + ['dash sub-item under a question lead']
         if prev in ('activity', 'instruction') and not is_q:
             return 'activity', 'context', 0.7, ev + ['follows activity/instruction']
         return 'question', 'lexicon', conf, ev
@@ -355,44 +420,576 @@ def box_pass(blocks, mask):
     return blocks
 
 
+def role_signal_pass(book, page, out_blocks, rules):
+    """Apply the icon / box-tint rules of role_signal_experiment to the page's blocks (in place). Deterministic image
+    features from a 72-dpi render; a block whose role the rules change records method `icon-signal:<rule>` and the
+    signal it fired on. Silently a no-op when the PDF or numpy is unavailable (nothing is guessed)."""
+    try:
+        import role_signal_experiment as rse
+    except Exception:  # pragma: no cover
+        return 0
+    if np is None:
+        return 0
+    rse.ROOT = ROOT
+    img = rse.render(book, page, 72)
+    if img is None:
+        return 0
+    hue, sat, mx = rse.hsv(img)
+    heights = [b['bbox'][3] for b in out_blocks if b.get('bbox') and b.get('text') and len(b['text']) < 120]
+    line_h = float(np.median(heights)) if heights else 0.015
+    empty = dict(icon_present=False, icon_bucket=None, tint_share=0.0, tint_bucket=None, icon_hue=None, icon_h_ratio=None, icon_fill=None, strip_colour_frac=0.0, strip_ink_frac=0.0, tint_hue=None)
+    blks = []
+    for ob in out_blocks:
+        f = rse.block_features(img, hue, sat, mx, ob['bbox'], line_h) if ob.get('bbox') else dict(empty)
+        blks.append(dict(id=ob['id'], order=ob['order'], text=ob['text'], bbox=ob['bbox'], fine_role=ob['role']['value'], features=f))
+    rse.inherit_box_icons(blks)
+    rse.RULES = rules
+    changed = 0
+    for ob, b in zip(out_blocks, blks):
+        new, rule = rse.apply_rules(b)
+        ob['role']['signal'] = dict(icon=b.get('icon_eff'), icon_source=b.get('icon_source'), tint=b['features']['tint_share'], tint_bucket=b['features']['tint_bucket'], rules=rules)
+        if rule and new != ob['role']['value']:
+            ob['role'].update(value=new, coarse=COARSE.get(new, 'UNKNOWN'), method=f'icon-signal:{rule}', confidence=0.8,
+                              evidence=ob['role'].get('evidence', []) + [f'{rule}: {b.get("icon_eff")} icon ({b.get("icon_source")})'])
+            changed += 1
+    return changed
+
+
+# ---------------------------------------------------------------- figure / caption relation (failure class 5)
+CAPTION_LABEL = re.compile(r'^\s*(Hình|Bảng|Sơ đồ|Biểu đồ|Lược đồ|Tranh|Ảnh)\s*\d+(?:[.\-]\d+)*\s*[.:]?\s*$', re.IGNORECASE)
+
+
+def _cx_overlap(a, b):
+    """Horizontal overlap of two [x, y, w, h] boxes (page fractions); ≤ 0 when they do not overlap."""
+    return min(a[0] + a[2], b[0] + b[2]) - max(a[0], b[0])
+
+
+def caption_for_picture(pic_bbox, captions, med_h):
+    """Round 4 (failure class 5) — WHICH caption belongs to this picture, decided by geometry, never by
+    reading order.
+
+    tc2-p1 linked a `caption` block to a picture by reading-order distance (`abs(order - rank) <= 2`). On a
+    page carrying several pictures, badges and mascots that mislinks: Lane C's O5 (LS&ĐL 5 p039, the Lý Bí
+    badge took caption «Hình 2»). A wrong caption is worse than none — the child is told the picture shows
+    something it does not.
+
+    A caption qualifies when it overlaps the picture HORIZONTALLY and one of:
+      · it sits just BELOW the picture — gap ≤ 2.5 × the page's median line height (the printed convention);
+      · it sits INSIDE the picture's lower band — Docling grows a picture box over its own caption
+        (Khoa học 4 p30, Vật lí 10 p30, Toán 12 p20);
+      · it sits just ABOVE the picture — held much tighter (≤ 1 × median line height), because a caption
+        above is rare and a body line above is common.
+    The nearest qualifying caption wins (inside first, then the smallest gap, then the largest overlap).
+    Returns the caption block id, or None — a picture with no caption is honest.
+
+    `captions` are SDM blocks (dicts with `id`, `bbox` and a `role`); non-caption roles are ignored.
+    """
+    if not pic_bbox:
+        return None
+    med_h = med_h or 0.01
+    px, py, pw, ph = pic_bbox
+    py1 = py + ph
+    below_max, above_max = 2.5 * med_h, 1.0 * med_h
+    inside_band = max(3.0 * med_h, 0.1 * ph)
+    best = None
+    for c in captions or []:
+        bb = c.get('bbox')
+        if not bb or (c.get('role') or {}).get('value') != 'caption':
+            continue
+        ov = _cx_overlap(pic_bbox, bb)
+        if ov <= 0:
+            continue
+        cy0, cy1 = bb[1], bb[1] + bb[3]
+        cyc = bb[1] + bb[3] / 2
+        # Round 4 correctness review (F1): the three branches used to be mutually exclusive on DIFFERENT
+        # measurements — the centre for «inside», the edges for «below»/«above» — which left a dead zone
+        # where a caption STRADDLES the picture's edge: top still inside the box, centre already below it
+        # matched nothing and lost its link (measured: centre 0.545 → None while 0.540 and 0.550 both
+        # linked). That is precisely the «Docling grew the picture over its caption» case this function
+        # exists for. The side is now decided by the centre alone and the gap can never be negative, so a
+        # straddling caption is a zero-gap neighbour. No distance limit is relaxed.
+        if py <= cyc <= py1:                       # centre inside the picture box
+            if cyc < py1 - inside_band:
+                continue                            # a label in the middle of the picture is figure text, not its caption
+            key = (0, 0.0, -ov)
+        elif cyc > py1:                             # below (its top may still overlap the picture's lower edge)
+            gap = max(0.0, cy0 - py1)
+            if gap > below_max:
+                continue
+            key = (1, gap, -ov)
+        else:                                       # above (its bottom may still overlap the picture's top edge)
+            gap = max(0.0, py - cy1)
+            if gap > above_max:
+                continue
+            key = (1, gap, -ov)
+        if best is None or key < best[0]:
+            best = (key, c['id'])
+    return best[1] if best else None
+
+
+def caption_continuation_pass(blocks, med_h):
+    """Round 4 (failure class 5) — a caption printed as «Hình 17.1» + its sentence in a SEPARATE block on the
+    same printed line. tc2-p1 gave the label `caption` and left the sentence `body`: the audit saw the sentence
+    served as lesson prose («caption fragment served as body», 1 of the 2 Bài 17 role errors).
+
+    A block becomes the continuation of a caption label when ALL hold: the label is a bare «Hình/Bảng/… N»
+    caption; the candidate starts on the same printed line (centre within ½ a line height); it starts within
+    3 line heights to the right of the label; it is short (≤ 90 chars), carries no enumerator, and does not end
+    a sentence. Deterministic, geometry + lexicon, no repair of any text. Returns how many blocks moved.
+    """
+    med_h = med_h or 0.01
+    same_line, near_x, moved = 0.5 * med_h, 3.0 * med_h, 0
+    labels = [b for b in blocks if b.get('bbox') and (b.get('role') or {}).get('value') == 'caption' and CAPTION_LABEL.match((b.get('text') or '').strip())]
+    for lab in labels:
+        lx, ly, lw, lh = lab['bbox']
+        lyc, lx1 = ly + lh / 2, lx + lw
+        for b in blocks:
+            if b is lab or not b.get('bbox'):
+                continue
+            r = b.get('role') or {}
+            if r.get('value') not in ('body',) or b.get('continues'):
+                continue
+            t = (b.get('text') or '').strip()
+            if not t or len(t) > 90 or ENUM.match(t) or ends_sentence(t) or CAPTION_LABEL.match(t):
+                continue
+            bx, by, bw, bh = b['bbox']
+            if abs((by + bh / 2) - lyc) > same_line:
+                continue
+            if not (0 <= bx - lx1 <= near_x):
+                continue
+            r.update(value='caption', coarse='CAPTION', method='caption-continuation',
+                     evidence=list(r.get('evidence') or []) + [f'continues caption label {lab["id"]}'])
+            b['continues'] = lab['id']
+            moved += 1
+    return moved
+
+
+def question_box_pass(out_blocks, med_h):
+    """Round 4 (Bài 17 p61, audit role error «question 2 of a ?-box served as sidebar»): a numbered line («2. …»)
+    directly under a QUESTION block, in the same tinted box (both on colour, left edges within 0.03) and within two
+    line heights, is the next question of that box — the narrow-right-box-on-colour geometry rule had made it a
+    sidebar. Deterministic; the block keeps every guard."""
+    seq = sorted([o for o in out_blocks if o['role']['value'] not in ('figure', 'empty', 'figure_text')], key=lambda o: o['order'])
+    n = 0
+    for prev, ob in zip(seq, seq[1:]):
+        if ob['role']['value'] not in ('sidebar', 'body') or prev['role']['value'] != 'question':
+            continue
+        t = ob['text'] or ''
+        if not re.match(r'^\s*\d{1,2}[.)]\s+\S', t):
+            continue
+        pb, bb = prev.get('bbox'), ob.get('bbox')
+        pc, oc = (prev.get('colour') or {}).get('share') or 0, (ob.get('colour') or {}).get('share') or 0
+        if not pb or not bb or pc < 0.2 or oc < 0.2 or abs(pb[0] - bb[0]) > 0.03:
+            continue
+        if bb[1] - (pb[1] + pb[3]) > 2.0 * med_h:
+            continue
+        ob['role'].update(value='question', coarse='QUESTION', method='context', confidence=0.8, evidence=ob['role'].get('evidence', []) + ['numbered item under a question in the same tinted box'])
+        n += 1
+    return n
+
+
 COARSE = {'question': 'QUESTION', 'option': 'OPTION', 'answer_slot': 'OPTION', 'heading': 'HEADING', 'stage_label': 'HEADING', 'running_head': 'HEADING',
           'body': 'BODY', 'objective': 'BODY', 'activity': 'BODY', 'instruction': 'BODY', 'answer': 'BODY', 'model_answer': 'BODY', 'teacher_text': 'BODY', 'teacher_prompt': 'BODY', 'rule': 'BODY',
+          'attribution': 'BODY',
           'caption': 'CAPTION', 'sidebar': 'SIDEBAR', 'table': 'TABLE', 'formula': 'FORMULA', 'figure_text': 'FIGURE_TEXT', 'figure': 'FIGURE', 'footnote': 'FOOTNOTE', 'page_number': 'PAGENUM', 'empty': 'UNKNOWN'}
 NON_LEARNING = {'page_number', 'running_head', 'figure', 'figure_text', 'empty'}
+# tc_layout_census marks a PAGE `color_heavy` at colour share ≥ 0.25; round 4 measures the same share on the
+# block's own bbox instead of inheriting the page's verdict. Same constant, smaller measurement window.
+COLOUR_HEAVY_SHARE = 0.25
+COLOUR_HEAVY_EXEMPT = ('heading', 'stage_label', 'page_number', 'running_head', 'caption', 'figure', 'empty')
 
 
-# ---------------------------------------------------------------- agreement (per block, same rule as tc_cascade.verify)
+# Round 4 correctness review (F3): the guards below are a pure function of the block's ROLE (plus its own
+# text, colour, geometry and the page's census features). Any pass that CHANGES a role must recompute all
+# of them — `caption_continuation_pass` is the first pass that promotes a block INTO a colour-heavy-exempt
+# role, and the old re-derivation recomputed only three of them, so a «Hình 17.1» label was TRUSTED while
+# its continuation sentence, now also `caption`, stayed WITHHELD citing `page_feature:color_heavy` — a
+# reason that no longer applied to its final role. One authority, used by `build_page` and by the
+# re-derivation, so the two cannot drift.
+ROLE_DERIVED_GUARDS = frozenset({'empty_block', 'furniture', 'figure_text', 'math_guard', 'unit_guard', 'chem_guard',
+                                 'figure_dependent', 'answer_leak', 'teacher_text',
+                                 'page_feature:color_heavy', 'page_feature:diagram', 'line_structure'})
+# Round 4, R7c (found by Lane D's measured re-run of legacy batch 1, newly reachable because the block-level
+# colour fix serves these regions again): a block's text is ONE string, so a poem's verse lines arrive joined
+# into prose — «Tôi đạp vỡ màu nâu Bầu trời trong quả trứng Bỗng thấy nhiều gió lộng …». Roles whose line
+# breaks are typography, not meaning, are exempt; for the rest the block is WITHHELD, never reflowed and
+# never repaired. A withheld region still carries its crop, so the printed verse survives as an image.
+VERSE_EXEMPT = ('heading', 'stage_label', 'page_number', 'running_head', 'figure_text', 'figure', 'empty', 'table')
+VERSE_MIN_LINES = 3
+VERSE_MIN_CAPS = 0.8          # share of lines that begin with a capital — the printed convention for verse
+VERSE_MAX_WIDTH = 0.95        # of the page's own text width: prose is justified to the column, verse is not
+#   calibrated, not guessed: over 14 546 measurable text blocks the prose that reaches VERSE_MIN_CAPS by
+#   coincidence sits at 1.00–1.06 of the column width, and the whole 0.85–0.97 band holds exactly two
+#   blocks, both genuinely line-structured (a verse stanza and a structural chemical formula).
+VERSE_MAX_ENDS = 1.0 / 3      # share of non-final lines ending in sentence punctuation (prose sentences do)
+
+
+def page_text_width(lines):
+    """The page's own text-column width: the 90th percentile of the widths of its substantial OCR lines.
+    None when the page has none (the verse test then fails OPEN — unknown geometry must not withhold)."""
+    ws = sorted(l['w'] for l in (lines or []) if len(l.get('text', '').strip()) > 20)
+    return ws[int(0.9 * (len(ws) - 1))] if ws else None
+
+
+def verse_layout(under_lines, page_width):
+    """Are these OCR lines laid out as VERSE (or another line-break-significant block)?
+
+    Deterministic geometry + the printed convention, calibrated on real pages (TV5 «Hạt gạo làng ta»,
+    «Mầm non», «Tiếng đàn ba-la-lai-ca», LS&ĐL 5's ca dao) against the prose of the same books:
+      · at least VERSE_MIN_LINES lines;
+      · at least VERSE_MIN_CAPS of them begin with a capital (a poet capitalises every line; prose only
+        reaches this by coincidence, and rarely);
+      · the longest line stays under VERSE_MAX_WIDTH of the page's text width — prose fills its column;
+      · at most VERSE_MAX_ENDS of the non-final lines end in sentence punctuation (three sentences on three
+        short lines are maths prose, not verse).
+    Fails OPEN (False) when the geometry is unknown: this guard withholds, so a false positive costs a
+    trusted block.
+    """
+    lines = [l for l in (under_lines or []) if (l.get('text') or '').strip()]
+    if len(lines) < VERSE_MIN_LINES or not page_width:
+        return False
+    texts = [l['text'].strip() for l in lines]
+    caps = sum(1 for t in texts if t[:1].isupper()) / len(texts)
+    if caps < VERSE_MIN_CAPS:
+        return False
+    if max(l['w'] for l in lines) > VERSE_MAX_WIDTH * page_width:
+        return False
+    ends = sum(1 for t in texts[:-1] if re.search(r'[.!?:;]\s*$', t)) / max(1, len(texts) - 1)
+    return ends <= VERSE_MAX_ENDS
+
+
+def role_guards(role, text, refers_figure, colour, features, inside_picture=False, verse=False):
+    """The guard reasons that depend on the block's role. Deterministic; withholds only, never repairs.
+
+    `features` is the page census row (`color_heavy`, `diagram`); `colour` the block's own measured colour.
+    """
+    t = text or ''
+    g = []
+    if role == 'empty' or not t.strip():
+        g.append('empty_block')
+    if role in ('page_number', 'running_head'):
+        g.append('furniture')
+    if role == 'figure_text':
+        g.append('figure_text')
+    if role not in ('formula', 'table', 'figure', 'empty') and MATH.search(t):
+        g.append('math_guard')
+    if role not in ('formula', 'table', 'figure', 'empty') and UNIT_EXP.search(t):
+        g.append('unit_guard')
+    if role not in ('formula', 'table', 'figure', 'empty', 'page_number', 'running_head') and CHEM.search(t):
+        g.append('chem_guard')
+    if refers_figure and role in ('question', 'activity', 'instruction', 'teacher_prompt'):
+        g.append('figure_dependent')
+    if role in ('answer', 'model_answer') or ANSWER_INLINE.search(t):
+        g.append('answer_leak')
+    if role in ('teacher_text', 'teacher_prompt'):
+        g.append('teacher_text')
+    if colour_heavy_withholds((features or {}).get('color_heavy'), role, colour):
+        g.append('page_feature:color_heavy')
+    if (features or {}).get('diagram') and role in ('body', 'sidebar', 'question', 'activity', 'instruction', 'objective') \
+            and (inside_picture or (len(t) < 30 and not ends_sentence(t))):
+        g.append('page_feature:diagram')
+    if verse and role not in VERSE_EXEMPT:
+        g.append('line_structure')
+    return g
+
+
+def trust_status(role, withhold):
+    if role in ('figure', 'empty'):
+        return 'WITHHELD'
+    if not withhold:
+        return 'TRUSTED'
+    return 'CONFLICT' if any(x in ('role_conflict', 'agree_order') for x in withhold) and 'agree_text' not in withhold else 'WITHHELD'
+
+
+def rederive_trust(out_blocks, features, inside_pic_by_id=None, verse_by_id=None):
+    """Recompute every role-dependent guard after the post-passes changed roles (round 4 review, F3).
+
+    Guards that do NOT depend on the role — the agreement guards (`agree_text`/`agree_order`/
+    `agree_numbers`/`agree_tones`), `role_conflict`, `box_boundary`, `low_ocr_conf` — are kept exactly as
+    the first pass computed them. That is deliberate and fail-closed: `agree_order` is waived for
+    FLEX_ROLES in the first pass only, and re-deriving it here would ADD trust to promoted blocks. It is a
+    known asymmetry, recorded rather than quietly changed.
+    """
+    inside_pic_by_id = inside_pic_by_id or {}
+    verse_by_id = verse_by_id or {}
+    for ob in out_blocks:
+        r = ob['role']['value']
+        keep = [x for x in ob['guards'] if x not in ROLE_DERIVED_GUARDS]
+        g = role_guards(r, ob.get('text') or '', ob.get('refers_figure'), ob.get('colour'), features,
+                        inside_pic_by_id.get(ob.get('id'), False), verse_by_id.get(ob.get('id'), False)) + keep
+        ob['guards'] = g
+        withhold = [x for x in g if x != 'enumerator_restored']
+        ob['trust']['reasons'] = withhold
+        ob['trust']['status'] = trust_status(r, withhold)
+        ob['learning'] = r not in NON_LEARNING
+    return out_blocks
+
+
+def colour_heavy_withholds(page_color_heavy, role, colour):
+    """Round 4 (Lane C request 3) — does the colour-heavy guard withhold THIS block?
+
+    `color_heavy` is a PAGE property of the census: ≥ 25 % of the page's pixels are saturated colour
+    (tc_layout_census §color_heavy). tc2-p1 applied that page verdict to every block on the page, so a
+    theme-opener with a full-bleed photograph withheld the white-column body text printed beside it —
+    LS&ĐL 5 Bài 8's header page lost 15 / 15 of its learning-text blocks, and the «Âu Lạc (179 TCN)»
+    timeline anchor with them (Lane C, 05-GOLDEN-SLICE-2-GATE §1).
+
+    The page flag still decides WHICH pages are examined at all — no page the census never flagged becomes
+    trustable here. Inside such a page the block's OWN measured colour share decides, against the census's
+    own 0.25. Fail closed: when there is no colour mask (no PDF, no numpy) the page verdict withholds
+    exactly as it did before.
+    """
+    if not page_color_heavy or role in COLOUR_HEAVY_EXEMPT:
+        return False
+    if colour is None:
+        return True
+    return (colour.get('share') or 0) >= COLOUR_HEAVY_SHARE
+
+
+# ---------------------------------------------------------------- agreement (per block: text as tc_cascade.verify; order by LIS)
+def longest_nondecreasing(seq):
+    """Indices of one longest non-decreasing subsequence of `seq` (O(n log n); ties keep the earlier element,
+    so a stable primary order is preferred). Deterministic."""
+    import bisect
+    if not seq:
+        return set()
+    tails, tails_idx, prev = [], [], [-1] * len(seq)
+    for i, v in enumerate(seq):
+        k = bisect.bisect_right(tails, v)
+        if k == len(tails):
+            tails.append(v); tails_idx.append(i)
+        else:
+            tails[k] = v; tails_idx[k] = i
+        prev[i] = tails_idx[k - 1] if k > 0 else -1
+    out, i = set(), tails_idx[-1]
+    while i != -1:
+        out.add(i); i = prev[i]
+    return out
+
+
+def _earliest_acceptable(pk, st, base=0):
+    """Earliest window of `st` (a stream suffix starting at absolute offset `base`) that aligns with `pk` at
+    ≥ TEXT_SIM: the best alignment is found, then the text BEFORE it is searched again for an earlier one, until
+    none qualifies. → (score, start, end) with absolute offsets, or (best_score, -1, -1)."""
+    best = None
+    lo, hi = 0, len(st)
+    while hi - lo >= 4:
+        al = fuzz.partial_ratio_alignment(pk, st[lo:hi])
+        if al is None or al.score < TEXT_SIM:
+            if best is None:
+                best = (al.score if al else 0.0, -1, -1)
+            break
+        best = (al.score, base + lo + al.dest_start, base + lo + al.dest_end)
+        hi = lo + al.dest_start          # look for an even earlier acceptable window
+    return best or (0.0, -1, -1)
+
+
+def align_in_stream(pk, st, last_pos):
+    """Where does primary text `pk` sit in the verifier stream `st`?
+    Round 4: (1) prefer the earliest acceptable match AT OR AFTER the previous aligned block (`last_pos`) — a page
+    that repeats a label («Cách tiếp cận:» twice on SGV Toán 4 p54, «Tiến hành:» in every experiment box) must
+    not send the second occurrence to the first one; (2) only when nothing after `last_pos` reaches TEXT_SIM is
+    the whole stream searched (a block Docling displaced to the end of the page really is earlier in the
+    verifier — that is the order disagreement the LIS then reports). Short texts (< 12 chars) are located
+    verbatim on word boundaries the same way."""
+    if len(pk) >= 12:
+        if last_pos > 0 and len(st) - last_pos >= 4:
+            score, start, end = _earliest_acceptable(pk, st[last_pos:], last_pos)
+            if start >= 0:
+                return score, start, end
+        return _earliest_acceptable(pk, st, 0)
+    padded = ' ' + st + ' '
+    idx = padded.find(' ' + pk + ' ', max(0, last_pos))
+    if idx < 0:
+        idx = padded.find(' ' + pk + ' ')
+    return (100.0, idx, idx + len(pk)) if idx >= 0 else (0.0, -1, -1)
+
+
 def agreement(primary_blocks, verifier):
+    """Per primary block: text agreement (partial-ratio alignment inside the verifier's reading-order stream,
+    ≥ TEXT_SIM) and ORDER agreement.
+
+    Round 4 (failure class: two-column / displaced-box reading order). The tc2-p1 rule compared each block's
+    alignment offset with the minimum of the two previous offsets («one-block tolerance»), which (a) never
+    flags an adjacent swap and (b) withholds only the FIRST block of a displaced group — Docling moves a whole
+    MỤC TIÊU box or a title to the end of the page (KHTN 8 p96, Toán 12 p20) and the gate let the rest of the
+    group through, so every block between the group's true and displaced positions was delivered inverted.
+    Now the blocks that agree on text are the sequence of their verifier offsets; the longest non-decreasing
+    subsequence is the order both stacks share, every block outside it is an order disagreement
+    (`agree_order`, fail closed), and `vpos` lets build_page RE-SEQUENCE the page by the verifier's offsets so
+    a displaced (withheld) box is at least placed where the geometry saw it instead of dragging its neighbours
+    into inversions. Short blocks (< 12 chars) are located at their first occurrence at or after the previous
+    aligned block, not the first on the page (repeated labels such as «Tiến hành:»)."""
     st, roles = tc_cascade._stream(verifier)
     vblocks = [v for v in verifier['blocks'] if tc_score.norm_key(v['text'])]
-    last2 = [-1, -1]
     out = []
+    last_pos = 0
     for p in primary_blocks:
         pk = tc_score.norm_key(p['text'])
-        a = dict(text_sim=None, verifier_id=None, verifier_role=None, order_ok=None, ok=False, reason=None)
+        a = dict(text_sim=None, verifier_id=None, verifier_role=None, order_ok=None, ok=False, reason=None, vpos=None, vend=None)
         if not pk or p['role'] == 'FIGURE':
             a['reason'] = None if p['role'] == 'FIGURE' else 'empty'; out.append(a); continue
         if fuzz is None or not st:
             a['reason'] = 'agree_text'; out.append(a); continue
-        if len(pk) >= 12:
-            al = fuzz.partial_ratio_alignment(pk, st)
-            score, start = (al.score, al.dest_start) if al else (0.0, -1)
-        else:
-            idx = (' ' + st + ' ').find(' ' + pk + ' ')
-            score, start = (100.0, idx) if idx >= 0 else (0.0, -1)
+        score, start, end = align_in_stream(pk, st, last_pos)
         a['text_sim'] = round(float(score), 1)
         if score < TEXT_SIM:
             a['reason'] = 'agree_text'; out.append(a); continue
         vi = next((k for k, (s0, s1, r) in enumerate(roles) if s0 <= start < s1), None)
         a['verifier_role'] = roles[vi][2] if vi is not None else None
         a['verifier_id'] = vblocks[vi]['id'] if vi is not None and vi < len(vblocks) else None
-        if start < min(last2):
-            a['order_ok'] = False; a['reason'] = 'agree_order'; last2 = [last2[1], start]; out.append(a); continue
-        a['order_ok'] = True
-        last2 = [last2[1], start]
-        a['ok'] = True
+        a['vpos'] = start; a['vend'] = end; a['vtext'] = st[start:end]
+        a['vraw'] = [vblocks[k]['text'] for k, (s0, s1, r) in enumerate(roles) if s0 < end and s1 > start and k < len(vblocks)]
+        last_pos = max(last_pos, end)
         out.append(a)
+    aligned = [i for i, a in enumerate(out) if a['vpos'] is not None]
+    keep = longest_nondecreasing([out[i]['vpos'] for i in aligned])
+    for k, i in enumerate(aligned):
+        if k in keep:
+            out[i]['order_ok'] = True; out[i]['ok'] = True
+        else:
+            out[i]['order_ok'] = False; out[i]['reason'] = 'agree_order'
     return out
+
+
+def _x_overlap(a, b):
+    if not a or not b:
+        return 0.0
+    return max(0.0, min(a[0] + a[2], b[0] + b[2]) - max(a[0], b[0])) / max(1e-6, min(a[2], b[2]))
+
+
+def _y_overlap(a, b):
+    if not a or not b:
+        return 0.0
+    return max(0.0, min(a[1] + a[3], b[1] + b[3]) - max(a[1], b[1])) / max(1e-6, min(a[3], b[3]))
+
+
+def _move_is_geometric(i, seq, agree, bboxes):
+    """The verifier's slot for block i is accepted only when it agrees with the page geometry, judged against
+    the agreed blocks (LIS) around it in `seq`: (1) column band — a block that x-overlaps i (≥ 0.3 of the
+    narrower) and precedes i must lie above i's centre, one that follows must lie below (tolerance half the
+    block height); (2) row band — a block that y-overlaps i (≥ 0.5 of the shorter) and precedes i must lie to
+    its LEFT, one that follows to its RIGHT (two side-by-side captions read right-to-left by the verifier stay
+    where the primary put them). A block with no such neighbour keeps its primary position."""
+    bi = bboxes[i]
+    if not bi:
+        return False
+    yc = bi[1] + bi[3] / 2; xc = bi[0] + bi[2] / 2
+    tol = max(0.004, bi[3] / 2)
+    pos = seq.index(i)
+    seen = False
+    for k, j in enumerate(seq):
+        if j == i or not (agree[j].get('vpos') is not None and agree[j].get('order_ok')):
+            continue
+        bj = bboxes[j]
+        if not bj:
+            continue
+        if _y_overlap(bi, bj) >= 0.5 and _x_overlap(bi, bj) < 0.3:
+            seen = True
+            xj = bj[0] + bj[2] / 2
+            if (k < pos and xj > xc) or (k > pos and xj < xc):
+                return False
+            continue
+        if _x_overlap(bi, bj) < 0.3:
+            continue
+        seen = True
+        yj = bj[1] + bj[3] / 2
+        if k < pos and yj > yc + tol:
+            return False
+        if k > pos and yj < yc - tol:
+            return False
+    return seen
+
+
+TOKEN = re.compile(r'[0-9A-Za-zÀ-ỹĂăÂâĐđÊêÔôƠơƯư]+')
+
+
+def tone_tokens(text):
+    """[(diacritic-stripped key, tone-placement-normalised token)] for the Vietnamese word tokens of `text`."""
+    out = []
+    for tok in TOKEN.findall(tc_score.nfc(text or '').lower()):
+        out.append((tc_score.norm_key(tok), tc_score.norm_tone_placement(tok)))
+    return out
+
+
+def tone_disagreements(primary_text, verifier_texts):
+    """Round 4 (cross-lane finding from A-runtime: «vặn khoa lại» served trusted for «vặn khóa lại»). The text-agreement
+    gate compares diacritic-STRIPPED strings, so it is blind to tone marks by construction. This compares the two
+    stacks token by token WITH diacritics: tokens are matched on their stripped form (difflib, so extra neighbour
+    text in the verifier blocks is skipped); a matched token whose tone-placement-normalised forms differ («khoa» vs
+    «khóa», «lặng» vs «lăng») is a tone disagreement. → [(primary token, verifier token)] (nothing is repaired)."""
+    pt = tone_tokens(primary_text)
+    vt = tone_tokens(' '.join(verifier_texts or []))
+    if not pt or not vt:
+        return []
+    sm = difflib.SequenceMatcher(None, [k for k, _ in pt], [k for k, _ in vt], autojunk=False)
+    out = []
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag != 'equal':
+            continue
+        for k in range(i2 - i1):
+            if pt[i1 + k][1] != vt[j1 + k][1]:
+                out.append((pt[i1 + k][1], vt[j1 + k][1]))
+    return out
+
+
+def numbers_disagree(primary_text, verifier_window):
+    """True when the two OCR stacks read different digit runs for the same aligned text. The verifier window is the
+    stream slice the primary text aligned to, so its digit runs must equal the primary's. Only a run that touches
+    the window's first or last character may be a neighbour's run cut by the fuzzy alignment — such an edge run
+    may be dropped from the comparison; an interior run the primary lacks (a dropped footnote mark, «(2)»→«(<)»)
+    or a run the two stacks read differently («(1, 0)»→«(1, O)») is a disagreement."""
+    p_full = DIGIT_RUNS.findall(tc_score.norm_key(primary_text or ''))
+    p_noenum = DIGIT_RUNS.findall(tc_score.norm_key(ENUM.sub('', primary_text or '', count=1)))   # a leading enumerator («3.», «Bước 5.») is structure, not data: the verifier may hold it in another block
+    w = verifier_window or ''
+    runs = [(m.start(), m.end(), m.group()) for m in DIGIT_RUNS.finditer(w)]
+    v = [r[2] for r in runs]
+    first_edge = bool(runs) and runs[0][0] == 0
+    last_edge = bool(runs) and runs[-1][1] == len(w)
+    cands = [v]
+    if first_edge:
+        cands.append(v[1:])
+    if last_edge:
+        cands.append(v[:-1])
+    if first_edge and last_edge and len(v) >= 2:
+        cands.append(v[1:-1])
+    return not any(c == p for c in cands for p in (p_full, p_noenum))
+
+
+def resequence(agree, bboxes=None):
+    """Reading order for the page. Everything the two stacks agree on (the LIS) and everything without verifier
+    evidence (figures, empty, text disagreements) keeps the primary (Docling) order; ONLY a block whose position
+    the verifier contradicts (`agree_order`, i.e. outside the LIS) is moved — to just after the last agreed
+    block whose verifier offset is ≤ its own (to the front when none) — and only when that slot agrees with the
+    page geometry (`_move_is_geometric`: vertical order inside the block's own column band). So a MỤC TIÊU box
+    Docling appended to the page goes back under the title (geometry confirms: it sits between the title and
+    the first paragraph), while a verifier that read two side-by-side captions right-to-left, or two columns as
+    one block, cannot drag blocks around. The block stays withheld (`agree_order`) either way — the move only
+    decides where its card is shown. Returns the primary indices in reading order (deterministic)."""
+    bboxes = bboxes or [None] * len(agree)
+    moved = [i for i, a in enumerate(agree) if a.get('vpos') is not None and a.get('order_ok') is False]
+    kept = [i for i in range(len(agree)) if i not in set(moved)]
+    for i in moved:
+        v = agree[i]['vpos']
+        anchor = None
+        for j in kept:
+            if agree[j].get('vpos') is not None and agree[j].get('order_ok') and agree[j]['vpos'] <= v:
+                anchor = j
+        trial = list(kept)
+        at = 0 if anchor is None else trial.index(anchor) + 1
+        # a displaced GROUP (title + MỤC TIÊU box …) shares one anchor: keep the group's own verifier order
+        while at < len(trial) and agree[trial[at]].get('moved') and agree[trial[at]].get('vpos') is not None and agree[trial[at]]['vpos'] <= v:
+            at += 1
+        trial.insert(at, i)
+        if _move_is_geometric(i, trial, agree, bboxes):
+            kept = trial
+            agree[i]['moved'] = True
+        else:
+            # keep the primary slot: insert after the nearest preceding primary index already placed
+            prev = [j for j in kept if j < i]
+            kept.insert((kept.index(max(prev)) + 1) if prev else 0, i)
+            agree[i]['moved'] = False
+    return kept
 
 
 # ---------------------------------------------------------------- census + OCR helpers
@@ -424,7 +1021,8 @@ def inside(bb, box, frac=0.6):
 
 
 # ---------------------------------------------------------------- build one page
-def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
+def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None):
+    role_signal = role_signal if role_signal is not None else ROLE_SIGNAL
     rawD, srcD = load_raw('docling-ocrmac', book, page, pipeline)
     rawX, srcX = load_raw('current-xycut', book, page, pipeline)
     if rawD is None or rawX is None:
@@ -438,6 +1036,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
     med_h = statistics.median([l['h'] for l in lines]) if lines else 0.01
     mask = colour_mask(book, page)
     agree = agreement(blocks, verifier)
+    order_map = resequence(agree, [b['bbox'] for b in blocks])   # reading order → primary (Docling) index
     xy_by_id = {b['id']: b for b in X}
     # printed page from footer digits
     printed = None
@@ -449,7 +1048,11 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
     # per block
     prev_role = None; prev_text = None; box = None; heading_path = []; answer_section = False
     out_blocks = []
-    for b, a in zip(blocks, agree):
+    inside_pic_by_id = {}          # block id → was it inside a Docling picture box (needed to re-derive the diagram guard)
+    verse_by_id = {}               # block id → are its OCR lines laid out as verse (R7c)
+    ptw = page_text_width(lines)   # the page's own text-column width, for the verse test
+    for rank, pi in enumerate(order_map):
+        b, a = blocks[pi], agree[pi]
         bb = b['bbox']
         col = colour_of(mask, bb)
         b['colour'] = col
@@ -500,15 +1103,13 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
                 heading_path = heading_path[:1] + [t[:80]]
             else:
                 heading_path = heading_path[:2] + [t[:80]]
-        # guards
-        guards = []
+        # guards — the ROLE-DEPENDENT ones come from `role_guards` (the single authority the post-pass
+        # re-derivation also uses, round 4 correctness review F3); the rest depend on the agreement, the
+        # verifier or the OCR and are not affected by a later role change.
+        refers_fig = bool(FIG_REF.search(t))
+        verse = verse_layout(under, ptw)
+        guards = role_guards(role, t, refers_fig, col, cen, inside_pic, verse)
         learning = role not in NON_LEARNING
-        if role == 'empty' or not t:
-            guards.append('empty_block')
-        if role in ('page_number', 'running_head'):
-            guards.append('furniture')
-        if role == 'figure_text':
-            guards.append('figure_text')
         if not a['ok'] and role not in ('figure', 'empty', 'page_number', 'running_head'):
             if a['reason'] == 'agree_order' and role in FLEX_ROLES:
                 ev = ev + ['order_flex: verifier places this flex block elsewhere (not withheld)']
@@ -516,33 +1117,25 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
                 guards.append(a['reason'] or 'agree_text')
         if conflict:
             guards.append('role_conflict')
-        if role not in ('formula', 'table', 'figure', 'empty') and MATH.search(t):
-            guards.append('math_guard')
+        if a.get('ok') and a.get('vtext') is not None and numbers_disagree(t, a['vtext']):
+            guards.append('agree_numbers')
+        tones = tone_disagreements(t, a.get('vraw')) if a.get('ok') else []
+        if tones:
+            guards.append('agree_tones')
         if col and bb and bb[3] >= 1.8 * med_h and bb[2] >= 0.15:
             lr = (col['left'], col['right']); tb = (col['top'], col['bottom'])
             if (max(lr) >= 0.5 and min(lr) <= 0.08) or (max(tb) >= 0.5 and min(tb) <= 0.08):
                 guards.append('box_boundary')
-        refers_fig = bool(FIG_REF.search(t))
-        if refers_fig and role in ('question', 'activity', 'instruction', 'teacher_prompt'):
-            guards.append('figure_dependent')
-        if role in ('answer', 'model_answer') or ANSWER_INLINE.search(t):
-            guards.append('answer_leak')
-        if role in ('teacher_text', 'teacher_prompt'):
-            guards.append('teacher_text')
-        if cen.get('color_heavy') and role not in ('heading', 'stage_label', 'page_number', 'running_head', 'caption', 'figure', 'empty'):
-            guards.append('page_feature:color_heavy')
-        if cen.get('diagram') and role in ('body', 'sidebar', 'question', 'activity', 'instruction', 'objective') and (inside_pic or (len(t) < 30 and not ends_sentence(t))):
-            guards.append('page_feature:diagram')
         if b['ocr_conf'] is not None and b['ocr_conf'] < 0.6:
             guards.append('low_ocr_conf')
         withhold = [g for g in guards if g not in ('enumerator_restored',)]
-        status = 'TRUSTED' if not withhold else ('CONFLICT' if any(g in ('role_conflict', 'agree_order') for g in withhold) and 'agree_text' not in withhold else 'WITHHELD')
-        if role in ('figure', 'empty'):
-            status = 'WITHHELD'
-        sdm_id = f'{book}:p{page:03d}:{PIPELINE_ID}:{b["order"]:03d}'
-        ob = dict(id=sdm_id, order=b['order'], native_label=b.get('native_label'), text=b['text'], text_docling=b.get('text_docling'), enumerator_restored=bool(b.get('enumerator_restored')),
+        status = trust_status(role, withhold)
+        sdm_id = f'{book}:p{page:03d}:{pipeline}:{b["order"]:03d}'   # id = the primary's native block index (stable across re-sequencing)
+        inside_pic_by_id[sdm_id] = inside_pic
+        verse_by_id[sdm_id] = verse
+        ob = dict(id=sdm_id, order=rank, native_order=b['order'], native_label=b.get('native_label'), text=b['text'], text_docling=b.get('text_docling'), enumerator_restored=bool(b.get('enumerator_restored')),
                   bbox=bb, column=(1 if bb and bb[0] + bb[2] / 2 < 0.5 else 2) if bb else None, ocr_conf=b['ocr_conf'], colour=col, extraction=b.get('extraction'),
-                  agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok']),
+                  agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok'], verifier_pos=a.get('vpos'), moved=a.get('moved', False), tone_disagreements=tones[:6]),
                   role=dict(value=role, coarse=COARSE.get(role, 'UNKNOWN'), method=method, confidence=round(rconf, 2), evidence=ev, verifier_hint=xy_hint, conflict=conflict),
                   guards=guards, trust=dict(status=status, reasons=withhold), learning=learning, refers_figure=refers_fig, heading_path=list(heading_path),
                   lesson=None, cells=b.get('cells'))
@@ -554,33 +1147,26 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
         nxt = next((o for o in out_blocks[i + 1:] if o['role']['value'] not in ('figure', 'empty', 'figure_text')), None)
         if ob['role']['value'] == 'body' and ENUM.match(ob['text'] or '') and nxt is not None and nxt['role']['value'] == 'option' and docType != 'SGV':
             ob['role'].update(value='question', coarse='QUESTION', method='context', confidence=0.8, evidence=ob['role']['evidence'] + ['enumerated stem followed by options'])
-    # re-derive trust for blocks whose role changed in the post-passes (guards that depend on the role)
-    for ob in out_blocks:
-        r = ob['role']['value']
-        g = [x for x in ob['guards'] if x not in ('figure_dependent', 'answer_leak', 'teacher_text')]
-        if ob['refers_figure'] and r in ('question', 'activity', 'instruction', 'teacher_prompt'):
-            g.append('figure_dependent')
-        if r in ('answer', 'model_answer') or ANSWER_INLINE.search(ob['text'] or ''):
-            g.append('answer_leak')
-        if r in ('teacher_text', 'teacher_prompt'):
-            g.append('teacher_text')
-        ob['guards'] = g
-        withhold = [x for x in g if x != 'enumerator_restored']
-        ob['trust']['reasons'] = withhold
-        ob['trust']['status'] = 'TRUSTED' if not withhold else ('CONFLICT' if any(x in ('role_conflict', 'agree_order') for x in withhold) and 'agree_text' not in withhold else 'WITHHELD')
-        if r in ('figure', 'empty'):
-            ob['trust']['status'] = 'WITHHELD'
-        ob['learning'] = r not in NON_LEARNING
+    question_box_pass(out_blocks, med_h)
+    caption_continuation_pass(out_blocks, med_h)
+    if role_signal:
+        role_signal_pass(book, page, out_blocks, role_signal)
+    # re-derive trust for blocks whose role changed in the post-passes: EVERY guard that depends on the
+    # role, not only the three that used to be recomputed (round 4 correctness review, F3)
+    rederive_trust(out_blocks, cen, inside_pic_by_id, verse_by_id)
     # figures: pictures + their labels + captions
     figures = []
     for k, p in enumerate(pics):
         labels = [ob['id'] for ob in out_blocks if ob['role']['value'] == 'figure_text' and inside(ob['bbox'], p['bbox'], 0.6)]
-        cap = next((ob['id'] for ob in out_blocks if ob['role']['value'] == 'caption' and abs(ob['order'] - p['order']) <= 2), None)
+        # Round 4 (failure class 5): geometry decides the caption, not reading-order distance. Fail closed —
+        # a picture whose caption cannot be placed geometrically carries no caption.
+        # One caption may legitimately serve side-by-side pictures, so it is not consumed by the first of them.
+        cap = caption_for_picture(p['bbox'], [ob for ob in out_blocks if ob['role']['value'] == 'caption'], med_h)
         figures.append(dict(id=f'{book}:p{page:03d}:fig{k:02d}', bbox=p['bbox'], labels=labels, caption=cap))
     stats = Counter(ob['trust']['status'] for ob in out_blocks if ob['learning'])
     reasons = Counter(r for ob in out_blocks if ob['learning'] for r in ob['trust']['reasons'])
     roles = Counter(ob['role']['value'] for ob in out_blocks)
-    return dict(book=book, page=page, printed_page=printed, docType=docType, pipeline=pipeline, sdm_version=SDM_VERSION,
+    return dict(book=book, page=page, printed_page=printed, docType=docType, pipeline=pipeline, sdm_version=SDM_VERSION, role_signal=role_signal or None,
                 source=dict(docling_raw=srcD, xycut_raw=srcX, docling_seconds=rawD.get('seconds'), xycut_page_trusted=xmeta.get('page_trusted') if xmeta else None),
                 page_size=list(rawD['result']['docling']['pages'].values())[0]['size'], features=dict(diagram=cen.get('diagram'), color_heavy=cen.get('color_heavy'), formula=cen.get('formula'), table=cen.get('table'), sidebar=cen.get('sidebar'), figure=cen.get('figure'), side_by_side=cen.get('side_by_side'), continuation=cen.get('continuation'), front_matter=front_matter),
                 blocks=out_blocks, figures=figures, tables=tables, stats=dict(learning=dict(stats), reasons=dict(reasons), roles=dict(roles), blocks=len(out_blocks)))
@@ -603,7 +1189,14 @@ def to_v1_sdm(sdm):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--pipeline', default=PIPELINE_ID); ap.add_argument('--pages', action='append', default=[])
     ap.add_argument('--gold', action='store_true'); ap.add_argument('--page', nargs=2, default=None); ap.add_argument('--force', action='store_true')
+    ap.add_argument('--out', default=None, help='pipeline output root (default poc-out/trusted-corpus/tc-v2/<pipeline>; env TC2_OUT_ROOT)')
+    ap.add_argument('--role-signal', default=None, choices=('v2', 'v3'), help='apply the icon / box-tint role rules of ROLE-LAYER-SIGNAL-EXPERIMENT (default: off; env TC2_ROLE_SIGNAL)')
     a = ap.parse_args()
+    if a.out:
+        tc2_paths.set_out_root(a.out)
+    if a.role_signal:
+        global ROLE_SIGNAL
+        ROLE_SIGNAL = a.role_signal
     if a.page:
         s = build_page(a.page[0], int(a.page[1]), a.pipeline)
         if not s:

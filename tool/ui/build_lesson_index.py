@@ -11,7 +11,7 @@ Output: assets/pack/lesson-index-g<N>.json — pack policy (gitignored,
 localResearchOnly; build local vào APK dev).
 
 WAL-210 (pre-autonomy audit gates G2/G3/G5):
-  - mọi gắn-bài theo trang dùng tool/ui/lesson_attach (capped-toc-v1: cap 2.5×
+  - mọi gắn-bài theo trang dùng tool/ui/lesson_attach (capped-toc-v2: cap 2.5×
     median, min 8; successor-unranged guard; TC-v2 header cross-check khi có
     dữ liệu) — trang ngoài phạm vi ⇒ KHÔNG gắn, KHÔNG phát hành (fail closed);
   - mọi hoạt động chỉ được mang số bài CÓ trong danh sách bài canonical của
@@ -119,7 +119,7 @@ SAM_GLOSS = {
         'một quyết định có tính toán, không phải ngẫu nhiên.',
 }
 su_book = f'0{GRADE}-sgk-lich-su-va-dia-li-{GRADE}'
-# WAL-210: gắn bài qua ATT.attach (capped-toc-v1) thay cho bảng «pageStart ≤ trang»
+# WAL-210: gắn bài qua ATT.attach (capped-toc-v2) thay cho bảng «pageStart ≤ trang»
 # không chặn trên; khối không gắn được ⇒ KHÔNG phát hành.
 
 su_sources = []
@@ -178,7 +178,7 @@ EXPERIMENT_BOOKS = {  # môn × sách theo lớp — khối «Chuẩn bị/Dụn
 # WAL-210 (audit G2): bảng «pageStart ≤ trang» KHÔNG có chặn trên nên KHTN 8
 # «Bài 22» (mục lục dừng ở bài 22/47) nuốt thí nghiệm của bài 24 và 28, và bài
 # không có pageStart (Khoa học 4 Bài 2, Khoa học 5 Bài 4) bị bài trước nuốt.
-# Nay dùng lesson_attach.capped-toc-v1; trang không gắn được ⇒ KHÔNG phát hành.
+# Nay dùng lesson_attach.capped-toc-v2; trang không gắn được ⇒ KHÔNG phát hành.
 
 khoa_experiments = []
 _exp_sources = []
@@ -284,7 +284,7 @@ for m in DIA_MAPS:
                          extractionVersion=r['extraction']))
 
 # WAL-210 (Dart lane request, PR #63/#64): mọi diaMaps[] mang `lesson` canonical, gắn bằng
-# cùng luật capped-toc-v1 + identity như các họ khác — không gắn được ⇒ không phát hành.
+# cùng luật capped-toc-v2 + identity như các họ khác — không gắn được ⇒ không phát hành.
 dia_maps = ATT.attach_items('diaMaps', dia_maps, page_key='page', pdf_key='pagePdf', note_key='asset')
 
 # ---- books (WAL-167): manifest sách + bìa thật, để trẻ nhận ra cuốn sách ----
