@@ -201,6 +201,23 @@ class AuditTests(unittest.TestCase):
         a, _ = audit.sample_second(rows, seed=20260906, n=2)
         self.assertEqual([r['sampleId'] for r in a], ['s-1'])
 
+    def test_kind_quota_sample_takes_only_the_asked_roles_and_marks_itself_within_class(self):
+        d = tempfile.mkdtemp(dir=_SANDBOX)
+        common.dump_json(dict(batch='b', pipeline='p', lessons=[dict(book='06-sgk-khoa-hoc-tu-nhien-6', lesson=11)]), f'{d}/batch-spec.json')
+        blocks = [dict(id=f'x:{i}', page=37, order=i, bbox=[0.1, 0.1 * i, 0.2, 0.05], text=f't{i}',
+                       role=dict(value='caption' if i < 5 else 'body', confidence=0.9)) for i in range(9)]
+        common.dump_json(dict(boundary=dict(pages=[37]), blocks=blocks, withheld=[]),
+                         f'{d}/tcroot/poc-out/trusted-corpus/tc-v2/p/lessons/06-sgk-khoa-hoc-tu-nhien-6/bai-11.tsl.json')
+        rows = audit.sample_kind(d, 20260907, ['caption'], per_lesson=8)
+        self.assertEqual(len(rows), 5)                                   # only the 5 caption blocks exist
+        self.assertTrue(all(r['kind'] == 'caption' for r in rows))
+        self.assertEqual(rows[0]['_kindSample']['kinds'], ['caption'])
+        self.assertIn('never rates over the batch', rows[0]['_kindSample']['warning'])
+        again = audit.sample_kind(d, 20260907, ['caption'], per_lesson=8)
+        self.assertEqual([r['tslBlockId'] for r in rows], [r['tslBlockId'] for r in again])
+        capped = audit.sample_kind(d, 20260907, ['caption'], per_lesson=2)
+        self.assertEqual(len(capped), 2)
+
     def test_annotate_rejects_a_verdict_outside_the_vocabulary(self):
         rows = [_row('s-1')]
         with self.assertRaises(ValueError):

@@ -124,7 +124,7 @@ counted beside. Wilson 95 %. No threshold applied.
 | formula / number / unit (tagged) | 22 / 55 = **0.400** [0.281, 0.532] | 7 / 74 = **0.095** [0.047, 0.183] | better |
 | role fidelity | 9 / 55 = **0.164** [0.089, 0.283] | 16 / 74 = **0.216** [0.138, 0.323] | **not better** |
 | lesson attachment | 2 / 55 = **0.036** [0.010, 0.123] | 8 / 74 = **0.108** [0.056, 0.199] | **worse** |
-| figure / caption (tagged) | 2 / 55 = 0.036 [0.010, 0.123] | 1 / 74 = 0.013 [0.002, 0.073] | **n too small to read** |
+| figure / caption (tagged) | 2 / 55 = 0.036 [0.010, 0.123] | 1 / 74 = 0.013 [0.002, 0.073] | **n too small to read — see §5a** |
 | false trust (derived, 5 criteria) | 40 / 55 = **0.727** [0.598, 0.827] | 27 / 74 = **0.365** [0.264, 0.479] | better |
 | false trust (annotator's own field) | 29 / 55 = 0.527 [0.398, 0.653] | 13 / 74 = 0.176 [0.106, 0.278] | better |
 
@@ -134,6 +134,34 @@ divides by 3,679 or 3,381; those denominators describe the historical corpus, no
 
 The 30 NEW withheld regions were all reviewed: each carries a note on whether the refusal was safe. None was
 judged a wrong refusal of clean, simple text.
+
+### 5a. Figure/caption: a targeted quota sample, because the stratified one could not see it
+
+Role-proportional sampling drew only 2 caption blocks out of 74, so the class the Founder named could not be
+measured. A **quota sample of the `caption` role** was drawn separately (seed 20260907, 8 blocks — every
+caption block of the batch's one figure-heavy lesson, KHTN 6 Bài 11) and annotated the same way. These rows
+are *not* a random sample of what the pipeline serves: the rate below is a rate **within the caption class**
+and is never pooled with §5.
+
+| measure | result |
+|---|---|
+| caption blocks judged | 8 (KHTN 6 Bài 11, pdf p37–p40) |
+| display fidelity WRONG | **2 / 8 = 0.250** [0.071, 0.591] |
+| teaching-critical / reading order | NA on all 8 (captions carry no numbers or multi-line order here) |
+| role fidelity WRONG | 0 / 8 |
+
+The two defects are both *caption assembly*, and they are two different mechanisms:
+
+- `…:p037:*:016` — the figure-number chip “Hình 11.1” is served as a caption block **on its own**; the caption
+  text that follows it on the same printed line is a different block, so neither block carries the whole caption.
+- `…:p039:*:020` — a caption **cut after its first line**, dropping the line that says what the experiment
+  determines (the same block the stratified sample had already flagged).
+
+A third finding has no verdict field to land in and is recorded here in words: **5 of the 8 caption blocks are
+sub-panel labels** (“a) …”, “b) …”, “c) …”) served as standalone captions with **no reference to the figure
+they label**. Each is character-perfect, so every fidelity field says OK — yet a child reading “a) Rác thải”
+with no figure attached learns nothing. The audit protocol has no *figure–caption relation* verdict; that is a
+protocol gap, not a clean result, and it is filed as a request rather than scored.
 
 **The two classes that did not improve are the finding, not a footnote.**
 
@@ -290,8 +318,10 @@ corpus safer and smaller. It did not make it teachable.**
 5. **Two annotators disagree about *applicability* more than about verdicts.** Teaching-critical had 7
    NA/UNSURE mismatches on 35 judged rows while κ was 0.826 — the protocol needs a sharper rule for when the
    class applies, not a better annotator.
-6. **The figure/caption class was not really measured.** Only 2 of 74 NEW rows were caption-kind. Role-stratified
-   sampling under-samples a rare-but-important role; the next batch must sample that class explicitly.
+6. **Role-proportional sampling cannot measure a rare role.** Only 2 of 74 NEW rows were caption-kind, so the
+   figure/caption class was invisible until a **quota sample** was drawn for it (§5a) — which then found
+   0.250 display-WRONG within the class and a defect the fidelity fields cannot express at all (a caption
+   detached from its figure). A sampling design that is right for the *batch* can be blind to a *class*.
 7. **Shadow-root containment worked.** Two full pipeline runs wrote nothing outside their own batch directories,
    and the old outputs are still byte-identical beside them.
 
@@ -320,7 +350,10 @@ the trusted set is a subset.
 ## 11. What is still not measured
 
 - **No second annotator on the batch-1 rows.** §5 rests on one annotator plus an 8-row successor spot-check.
-- **Figure/caption: n = 2 per side.** The rates in §5 for that class are unreadable and are marked as such.
+- **Figure/caption is measured only within one lesson.** §5 has n = 2 per side and is unreadable; §5a's quota
+  sample covers the batch's single figure-heavy lesson (8 blocks, KHTN 6 Bài 11) and no other book.
+- **The audit protocol has no figure–caption *relation* field**, so a caption detached from its figure scores
+  as fully correct. Batch 1 found 5 such blocks; they are described in §5a and cannot be counted.
 - **`tc2-p2` was previewed on an unreviewed WIP snapshot.** The re-run must be repeated on Lane A-pipeline's
   merged build before the delta is quoted anywhere outside this document.
 - **Six lessons out of 243 in scope, out of 3,679 canonical.** Nothing here supports a claim about the corpus.

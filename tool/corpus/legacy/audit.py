@@ -125,6 +125,41 @@ def sample_second(rows, seed, n, priority=SECOND_PRIORITY):
     return blind, dict(seed=seed, n=len(blind), requested=n, strata=dict(sorted((k, dict(size=len(v), picked=alloc[k])) for k, v in strata.items())))
 
 
+# ---------------------------------------------------------------- sample-kind (targeted class sample)
+def sample_kind(batch_dir, seed, kinds, per_lesson):
+    """A QUOTA sample of one or more roles across a batch — for a class that role-proportional sampling
+    under-samples (batch 1 drew 2 caption rows of 74, so the figure/caption class could not be measured).
+
+    These rows are NOT a random sample of what the pipeline serves: they are a census-or-quota of one class,
+    and the rate computed from them is the rate WITHIN that class, never a rate over the batch. The sample
+    file records that, so it cannot later be pooled with the stratified sample by accident."""
+    spec = common.load_json(f'{batch_dir}/batch-spec.json')
+    P = spec['pipeline']
+    rng = random.Random(seed)
+    want = {k.strip() for k in kinds if k.strip()}
+    rows = []
+    for L in spec['lessons']:
+        book, n = L['book'], int(L['lesson'])
+        tsl = common.load_json(f'{batch_dir}/tcroot/poc-out/trusted-corpus/tc-v2/{P}/lessons/{book}/bai-{n:02d}.tsl.json')
+        if not tsl:
+            continue
+        pool = [b for b in tsl['blocks'] if b['role']['value'] in want]
+        rng.shuffle(pool)
+        for b in sorted(pool[:per_lesson], key=lambda b: (b['page'], b['order'])):
+            rows.append(dict(family='legacyNewKind', side='NEW', grade=int(book[:2]), book=book, lesson=n,
+                             activityId=f'legacyNew:{P}:{book}:L{n}:p{b["page"]:03d}', kind=b['role']['value'], text=b['text'],
+                             pagePdf=b['page'], pagePrinted=b.get('page_printed'), bbox=b['bbox'], tslBlockId=b['id'], tslStatus='TRUSTED',
+                             roleConfidence=b['role'].get('confidence'), packVersion=P, servedAsTrusted=True,
+                             source=dict(kind='tsl', tslBlockId=b['id'], bbox=b['bbox'], status='TRUSTED', reasons=[]),
+                             subject=common.subject_of(book), precheck=dict(hasNumbers=bool(re.search(r'\d', b['text'] or '')), hasMath=False, multiLine=False)))
+    for i, r in enumerate(rows):
+        r['sampleId'] = f'k{seed}-{i:04d}'
+        r['layoutFamily'] = None
+        r['_kindSample'] = dict(kinds=sorted(want), seed=seed, per_lesson=per_lesson,
+                                warning='quota sample of one class — rates from it are WITHIN-CLASS rates, never rates over the batch; do not pool with the stratified sample')
+    return rows
+
+
 # ---------------------------------------------------------------- sample-new / sample-old
 def sample_new(batch_dir, seed, per_lesson, withheld_per_lesson):
     spec = common.load_json(f'{batch_dir}/batch-spec.json')
@@ -377,6 +412,7 @@ def main(argv=None):
     s = sub.add_parser('sample-second'); s.add_argument('--seed', type=int, default=20260906); s.add_argument('--n', type=int, default=54); s.add_argument('--first', default=common.ROUND3_ANNOTATED); s.add_argument('--out-dir', default=f'{AUDIT_OUT}/second-annotation')
     s = sub.add_parser('sample-new'); s.add_argument('--batch-dir', default=f'{common.LEGACY_OUT}/batch-1'); s.add_argument('--seed', type=int, default=20260906); s.add_argument('--per-lesson', type=int, default=12); s.add_argument('--withheld-per-lesson', type=int, default=5); s.add_argument('--out-dir', default=None)
     s = sub.add_parser('sample-old'); s.add_argument('--batch-dir', default=f'{common.LEGACY_OUT}/batch-1'); s.add_argument('--seed', type=int, default=20260906); s.add_argument('--per-lesson', type=int, default=10); s.add_argument('--out-dir', default=None)
+    s = sub.add_parser('sample-kind'); s.add_argument('--batch-dir', default=f'{common.LEGACY_OUT}/batch-1'); s.add_argument('--seed', type=int, default=20260906); s.add_argument('--kinds', required=True, help='comma list of TSL roles, e.g. caption'); s.add_argument('--per-lesson', type=int, default=8); s.add_argument('--out-dir', default=None)
     s = sub.add_parser('sheets'); s.add_argument('--sample', required=True); s.add_argument('--out-dir', required=True); s.add_argument('--per-sheet', type=int, default=4); s.add_argument('--dpi', type=int, default=170)
     s = sub.add_parser('annotate'); s.add_argument('--sample', required=True); s.add_argument('--judgments', required=True); s.add_argument('--out', required=True); s.add_argument('--reviewer', required=True); s.add_argument('--log', default=None)
     s = sub.add_parser('score'); s.add_argument('--annotated', required=True); s.add_argument('--group', default='lesson', choices=['lesson', 'family', 'side', 'subject', 'kind']); s.add_argument('--out', required=True); s.add_argument('--title', default='audit scores')
@@ -396,6 +432,11 @@ def main(argv=None):
         rows = sample_old(a.batch_dir, a.seed, a.per_lesson)
         p = versioned_jsonl(rows, f'{a.out_dir or (a.batch_dir + "/audit")}/old-sample-{a.seed}.jsonl')
         print(f'{len(rows)} rows → {p}')
+    elif a.cmd == 'sample-kind':
+        kinds = a.kinds.split(',')
+        rows = sample_kind(a.batch_dir, a.seed, kinds, a.per_lesson)
+        p = versioned_jsonl(rows, f'{a.out_dir or (a.batch_dir + "/audit")}/kind-sample-{"-".join(sorted(k.strip() for k in kinds))}-{a.seed}.jsonl')
+        print(f'{len(rows)} rows of kinds {sorted(k.strip() for k in kinds)} → {p} (WITHIN-CLASS rates only)')
     elif a.cmd == 'sheets':
         rows = read_jsonl(a.sample)
         idx = make_sheets(rows, a.out_dir, a.per_sheet, a.dpi)

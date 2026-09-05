@@ -101,17 +101,31 @@ page). If the enumerator cannot be recovered, the role should not be asserted as
 
 ---
 
-## R5 — a caption is truncated to its first line · **OPEN** · P1
+## R5 — caption assembly: captions split from their number, and cut after the first line · **OPEN** · P1
 
-`06-sgk-khoa-hoc-tu-nhien-6:p039:*:020`, role `caption`, confidence 0.92, served as
-`Hình 11.5 Thí nghiệm xác định` — the second line of the caption is missing.
+Role-proportional sampling drew only 2 caption rows of 74, so a **quota sample of the `caption` role** was
+drawn separately (seed 20260907; all 8 caption blocks of KHTN 6 Bài 11). Within that class, **2 of 8 are
+display-WRONG (0.250 [0.071, 0.591])**, by two different mechanisms:
 
-**Suspected:** caption assembly in `tool/corpus/tc2_sdm.py` (you added `tool/tests/test_tc2_captions.py` —
-this looks like a missing continuation case: a caption whose text wraps below the figure).
+| block | printed | served |
+|---|---|---|
+| `06-sgk-khoa-hoc-tu-nhien-6:p037:*:016` | `Hình 11.1  Oxygen có ở khắp nơi trên Trái Đất` (one caption line) | `Hình 11.1` **alone** — the caption text after the chip is a separate block, so neither block carries the whole caption |
+| `06-sgk-khoa-hoc-tu-nhien-6:p039:*:020` | a two-line caption under the experiment figure | `Hình 11.5 Thí nghiệm xác định` — **cut after the first line** |
 
-**Request:** a caption block must contain every line of the caption or be withheld; a truncated caption is a
-false claim about what a figure shows. This is also the class batch 1 could **not** measure — only 2 of 74
-audited NEW rows were caption-kind — so a fix here needs its own sampling, see R9.
+**Suspected:** caption assembly in `tool/corpus/tc2_sdm.py` (you added `tool/tests/test_tc2_captions.py`).
+The first case looks like the tinted “Hình N.N” chip being segmented as its own region; the second like a
+missing wrap-continuation.
+
+**Request:** a caption block must contain the figure number **and** every line of the caption, or be withheld.
+A caption that names a figure it does not describe — or describes a figure it does not name — is a false claim
+about what the child is looking at.
+
+**And one the audit cannot score at all:** 5 of those 8 caption blocks are sub-panel labels (`a) …`, `b) …`,
+`c) …`) served as standalone captions **with no reference to the figure they label** —
+`…:p037:*:012`, `…:p037:*:015`, `…:p038:*:004`, `…:p038:*:006`, `…:p040:*:013`, `…:p040:*:017`.
+Every one is character-perfect, so every fidelity field says OK. “a) Rác thải” with no figure attached teaches
+nothing. **Request:** a caption/sub-label block should carry the id of the figure region it belongs to (the SDM
+already computes figure regions), so a consumer can refuse to serve a label without its figure.
 
 ---
 
@@ -159,9 +173,10 @@ indistinguishable by id. Your line 844 now uses the `pipeline` argument, and the
 2. **No served text changed.** Across all 74 audited rows, `tc2-p2` changed **zero** texts — it only withheld.
    If a later build starts repairing text, tell Lane D: the re-run delta's verdict-transfer rule (identical
    text, same region) silently stops applying and the batch needs re-annotation.
-3. **Caption sampling.** Batch 2 will sample caption-kind blocks by quota rather than proportionally, so R5 can
-   be measured rather than asserted. If your caption work lands first, say so and Lane D will size the sample
-   to it.
+3. **Caption sampling is now available.** `audit.py sample-kind --kinds caption` draws a quota sample of one
+   role (`poc-out/round4/legacy/batch-1/audit/kind-sample-caption-20260907.jsonl`); it is what produced R5's
+   numbers. When your caption work lands, Lane D re-draws the same quota on the new build and reports the
+   within-class delta. Rates from it are within-class only and are never pooled with the batch rates.
 
 ---
 
