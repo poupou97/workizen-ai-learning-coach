@@ -101,3 +101,21 @@ jobs:
       # nên runner không có nó là đúng thiết kế, không phải thiếu sót.
       - name: flutter test
         run: flutter test
+
+      # WAL-210 (audit G2/G3/G5): test Python cho tầng DỰNG PACK — gắn bài có
+      # chặn (capped-toc-v1), cổng định danh bài, và provenance của pack.
+      # Chỉ dữ liệu tổng hợp, không cần corpus. Đỏ ⇒ sửa code, không nới test.
+      - name: Python pack-builder tests (tool/tests)
+        run: python3 -m unittest discover -s tool/tests -v
+
+      # Cổng «bản build mặc định»: pack trên máy CÓ pack phải mang provenance
+      # đúng hash, KHÔNG experimental, KHÔNG có nguồn pattern-router*. Runner
+      # không có corpus ⇒ không có pack ⇒ bỏ qua có chủ đích (không xanh giả:
+      # bước in rõ là bỏ qua, và test Python ở trên vẫn chạy).
+      - name: Pack provenance verify (only when packs exist)
+        run: |
+          if ls assets/pack/lesson-index-g*.json >/dev/null 2>&1; then
+            python3 tool/ui/pack_provenance.py verify assets/pack/lesson-index-g*.json
+          else
+            echo "no lesson-index packs on this runner (corpus never enters the repo) — verify skipped"
+          fi
