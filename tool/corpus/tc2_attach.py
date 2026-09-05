@@ -37,7 +37,8 @@ from collections import Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-ROOT = os.environ.get('TC_ROOT', '/Users/alexnguyen/projects/workizen-ai-learning-coach')
+import tc2_paths  # noqa: E402
+ROOT = tc2_paths.ROOT
 OCR = f'{ROOT}/poc-out/graph/ocr-body'
 CURR = f'{ROOT}/poc-out/graph/curriculum-structure.json'
 
@@ -227,13 +228,13 @@ def attach_book(book, pipeline='tc2-p1', write=True):
                   page_kinds=dict(Counter(r['kind'] for r in out_pages)), printed_offset=off, structure_status=meta.get('structureStatus'))
     res = dict(book=book, pipeline=pipeline, docType=meta.get('docType'), grade=meta.get('grade'), subject=meta.get('subject'), counts=counts, lessons=lessons, rejected_headers=rejected, pages=out_pages)
     if write:
-        d = f'{ROOT}/poc-out/trusted-corpus/tc-v2/{pipeline}/attach'; os.makedirs(d, exist_ok=True)
+        d = f'{tc2_paths.out_root(pipeline)}/attach'; os.makedirs(d, exist_ok=True)
         json.dump(res, open(f'{d}/{book}.json', 'w'), ensure_ascii=False, indent=0)
     return res
 
 
 def load_attach(book, pipeline='tc2-p1'):
-    p = f'{ROOT}/poc-out/trusted-corpus/tc-v2/{pipeline}/attach/{book}.json'
+    p = f'{tc2_paths.out_root(pipeline)}/attach/{book}.json'
     return json.load(open(p)) if os.path.exists(p) else None
 
 
@@ -249,7 +250,10 @@ def lesson_for_block(page_rec, bbox):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--pipeline', default='tc2-p1'); ap.add_argument('books', nargs='*'); ap.add_argument('--gold-books', action='store_true')
+    ap.add_argument('--out', default=None, help='pipeline output root (default poc-out/trusted-corpus/tc-v2/<pipeline>; env TC2_OUT_ROOT)')
     a = ap.parse_args()
+    if a.out:
+        tc2_paths.set_out_root(a.out)
     books = list(a.books)
     if a.gold_books:
         books += sorted({json.load(open(f))['book'] for f in glob.glob(f'{HERE}/tc_gold/*.json')})

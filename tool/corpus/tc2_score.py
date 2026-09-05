@@ -18,6 +18,7 @@ Short-Answer surface would consume).
 Usage: <venv python> tool/corpus/tc2_score.py --pipeline tc2-p1 [--json out] [--md out]
 """
 import argparse
+import glob
 import json
 import os
 import sys
@@ -29,6 +30,7 @@ import tc_sdm  # noqa: E402
 import tc_score  # noqa: E402
 import tc2_sdm  # noqa: E402
 import tc2_attach  # noqa: E402
+import tc2_paths  # noqa: E402
 
 ROOT = tc_sdm.ROOT
 SLICE = set(tc2_sdm.__dict__.get('SLICE_BOOKS', [])) or {'04-sgk-khoa-hoc-4', '05-sgk-khoa-hoc-5', '06-sgk-khoa-hoc-tu-nhien-6', '07-sgk-khoa-hoc-tu-nhien-7', '08-sgk-khoa-hoc-tu-nhien-8', '09-sgk-khoa-hoc-tu-nhien-9'}
@@ -134,12 +136,18 @@ def fmt(x):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--pipeline', default='tc2-p1'); ap.add_argument('--json', default=None); ap.add_argument('--md', default=None)
+    ap.add_argument('--out', default=None, help='pipeline output root (default poc-out/trusted-corpus/tc-v2/<pipeline>; env TC2_OUT_ROOT)')
+    ap.add_argument('--gold-dir', default=None, help='score a different gold directory (e.g. tool/corpus/tc_gold_bai17); pages are read from sdm/ when sdm-gold/ lacks them')
     a = ap.parse_args()
-    golds = tc_sdm.all_gold()
+    if a.out:
+        tc2_paths.set_out_root(a.out)
+    golds = tc_sdm.all_gold() if not a.gold_dir else [json.load(open(f)) for f in sorted(glob.glob(f'{a.gold_dir}/*.json'))]
     attach_cache = {}
     rows = []
     for g in golds:
         p = tc2_sdm.sdm_path(a.pipeline, g['book'], g['page'], gold=True)
+        if not os.path.exists(p):
+            p = tc2_sdm.sdm_path(a.pipeline, g['book'], g['page'], gold=False)
         if not os.path.exists(p):
             rows.append(dict(book=g['book'], page=g['page'], error='no sdm-gold')); continue
         sdm = json.load(open(p))

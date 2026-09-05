@@ -36,14 +36,15 @@ from collections import Counter, defaultdict
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import tc2_attach  # noqa: E402
+import tc2_paths  # noqa: E402
 
-ROOT = os.environ.get('TC_ROOT', '/Users/alexnguyen/projects/workizen-ai-learning-coach')
+ROOT = tc2_paths.ROOT
 NEVER_TEXT = {'answer_leak', 'teacher_text'}
 FURNITURE = {'page_number', 'running_head', 'figure', 'empty', 'figure_text'}
 
 
 def out_root(pipeline):
-    return f'{ROOT}/poc-out/trusted-corpus/tc-v2/{pipeline}'
+    return tc2_paths.out_root(pipeline)
 
 
 def build_book(book, pipeline='tc2-p1', write=True):
@@ -117,7 +118,10 @@ def build_book(book, pipeline='tc2-p1', write=True):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--pipeline', default='tc2-p1'); ap.add_argument('books', nargs='+')
+    ap.add_argument('--out', default=None, help='pipeline output root (default poc-out/trusted-corpus/tc-v2/<pipeline>; env TC2_OUT_ROOT)')
     a = ap.parse_args()
+    if a.out:
+        tc2_paths.set_out_root(a.out)
     for b in a.books:
         _, s = build_book(b, a.pipeline)
         print(json.dumps(s, ensure_ascii=False))

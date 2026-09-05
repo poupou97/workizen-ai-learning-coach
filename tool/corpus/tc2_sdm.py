@@ -42,6 +42,7 @@ import tc_sdm  # noqa: E402
 import tc_score  # noqa: E402
 import tc_cascade  # noqa: E402
 import layout_extract  # noqa: E402
+import tc2_paths  # noqa: E402
 
 ROOT = tc_sdm.ROOT
 PDF = f'{ROOT}/poc-out/pdf'
@@ -61,17 +62,16 @@ except Exception:  # pragma: no cover
 
 
 def out_root(pipeline):
-    return f'{ROOT}/poc-out/trusted-corpus/tc-v2/{pipeline}'
+    return tc2_paths.out_root(pipeline)
 
 
 # ---------------------------------------------------------------- raw loading
 def load_raw(cand, book, page, pipeline, allow_v1=True):
-    """tc-v2 raw first; fall back (read-only) to tc-v1 bake-off raw for gold pages outside the slice."""
-    p = f'{out_root(pipeline)}/bakeoff/raw/{cand}/{book}-p{page:03d}.json'
-    src = f'tc-v2/{pipeline}'
-    if not os.path.exists(p) and allow_v1:
-        p = f'{ROOT}/poc-out/trusted-corpus/tc-v1/bakeoff/raw/{cand}/{book}-p{page:03d}.json'; src = 'tc-v1'
-    if not os.path.exists(p):
+    """This run's raw first; then (read-only) the tc2-p1 raw, then the tc-v1 bake-off raw — the raw candidate
+    output is deterministic per page and independent of the SDM/role/guard code, so a later pipeline version
+    reuses it (tc2_paths.raw_path records which one)."""
+    p, src = tc2_paths.raw_path(cand, book, page, pipeline, allow_fallback=allow_v1)
+    if p is None:
         return None, None
     r = json.load(open(p))
     if r.get('error') or r.get('result') is None:
@@ -539,7 +539,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None):
         status = 'TRUSTED' if not withhold else ('CONFLICT' if any(g in ('role_conflict', 'agree_order') for g in withhold) and 'agree_text' not in withhold else 'WITHHELD')
         if role in ('figure', 'empty'):
             status = 'WITHHELD'
-        sdm_id = f'{book}:p{page:03d}:{PIPELINE_ID}:{b["order"]:03d}'
+        sdm_id = f'{book}:p{page:03d}:{pipeline}:{b["order"]:03d}'
         ob = dict(id=sdm_id, order=b['order'], native_label=b.get('native_label'), text=b['text'], text_docling=b.get('text_docling'), enumerator_restored=bool(b.get('enumerator_restored')),
                   bbox=bb, column=(1 if bb and bb[0] + bb[2] / 2 < 0.5 else 2) if bb else None, ocr_conf=b['ocr_conf'], colour=col, extraction=b.get('extraction'),
                   agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok']),
