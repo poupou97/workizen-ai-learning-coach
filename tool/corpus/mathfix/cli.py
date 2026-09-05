@@ -5,6 +5,8 @@
   python3 tool/corpus/mathfix/cli.py census  --books toan-sgk --sample 60 --seed 20260906
   python3 tool/corpus/mathfix/cli.py project --sdm <dir> --book <book> --pages 20-24
   python3 tool/corpus/mathfix/cli.py crops   --book <book> --page 23 --out DIR
+  python3 tool/corpus/mathfix/cli.py overlay --book <book> --page 23        # boxes on the page
+  python3 tool/corpus/mathfix/cli.py sheet   --book <book> --page 23        # the precision contact sheet
 
 Everything is written under `poc-out/round5/mathfix/`. Corpus never enters the repo.
 Requires PyMuPDF + numpy (the page raster); the library itself does not.
@@ -123,10 +125,81 @@ def cmd_crops(a):
     print(f'{len(rep["regions"])} crops -> {d}')
 
 
+def cmd_overlay(a):
+    """Draw every detected region on the page render — the hand-check sheet.
+
+    Green = a stacked fraction this lane could extract; amber = a fraction region it found but
+    refused; grey = a bar region with no digit token at all. Detection precision and recall are
+    judged against these sheets and the printed page, never against the pipeline's own output.
+    """
+    import pymupdf
+    rep = R.page_report(a.book, a.page, dpi=a.dpi)
+    doc = pymupdf.open(R.pdf_path(a.book))
+    pg = doc[a.page - 1]
+    W, H = pg.rect.width, pg.rect.height
+    colour = {True: (0, 0.62, 0.25), False: (0.90, 0.55, 0.0)}
+    for r in rep['regions']:
+        x0, y0, x1, y1 = r['bbox']
+        c = colour[r['extractable']] if r['kind'] == 'stacked_fraction' else (0.45, 0.45, 0.45)
+        pg.draw_rect(pymupdf.Rect(x0 * W, y0 * H, x1 * W, y1 * H), color=c, width=1.6)
+    d = a.out or f'{OUT}/overlay'
+    os.makedirs(d, exist_ok=True)
+    path = f'{d}/{a.book}-p{a.page:03d}-overlay.png'
+    pg.get_pixmap(dpi=a.dpi_out or 150).save(path)
+    print(f"{len(rep['regions'])} regions -> {path}")
+    for i, r in enumerate(rep['regions']):
+        print(f"  {i:2d} {r['kind']:24s} {str(r['extractable']):5s} {r['reason'] or '':28s} "
+              f"{r['value'] or '':10s} bbox={[round(v, 4) for v in r['bbox']]}")
+
+
+def cmd_sheet(a):
+    """A contact sheet of every detected region on one page — the precision hand-check.
+
+    One tile per region, in detection order, cropped from the page at reading size and labelled
+    with its index. The judge answers one question per tile — «is this a printed stacked fraction,
+    and is the extracted value what the book prints?» — without seeing the pipeline's opinion.
+    """
+    import pymupdf
+    from PIL import Image, ImageDraw
+    rep = R.page_report(a.book, a.page, dpi=a.dpi)
+    doc = pymupdf.open(R.pdf_path(a.book))
+    pg = doc[a.page - 1]
+    W, H = pg.rect.width, pg.rect.height
+    tiles = []
+    for r in rep['regions']:
+        x0, y0, x1, y1 = r['bbox']
+        padx, pady = 0.012, 0.012
+        clip = pymupdf.Rect(max(0, (x0 - padx)) * W, max(0, (y0 - pady)) * H,
+                            min(1, (x1 + padx)) * W, min(1, (y1 + pady)) * H)
+        pix = pg.get_pixmap(dpi=300, clip=clip)
+        tiles.append(Image.frombytes('RGB', (pix.width, pix.height), pix.samples))
+    if not tiles:
+        print('no regions on this page')
+        return
+    tw = max(t.width for t in tiles) + 8
+    th = max(t.height for t in tiles) + 26
+    cols = a.cols or 6
+    rows = (len(tiles) + cols - 1) // cols
+    sheet = Image.new('RGB', (cols * tw, rows * th), 'white')
+    dr = ImageDraw.Draw(sheet)
+    for i, t in enumerate(tiles):
+        cx, cy = (i % cols) * tw, (i // cols) * th
+        sheet.paste(t, (cx + 4, cy + 22))
+        dr.text((cx + 6, cy + 6), f'{i}', fill=(180, 0, 0))
+        dr.rectangle([cx, cy, cx + tw - 2, cy + th - 2], outline=(210, 210, 210))
+    d = a.out or f'{OUT}/sheets'
+    os.makedirs(d, exist_ok=True)
+    path = f'{d}/{a.book}-p{a.page:03d}-sheet.png'
+    sheet.save(path)
+    print(f"{len(tiles)} regions -> {path}")
+    for i, r in enumerate(rep['regions']):
+        print(f"  {i:2d} {str(r['extractable']):5s} {r['value'] or '-':10s} {r['reason'] or ''}")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest='cmd', required=True)
-    for name in ('census', 'project', 'crops'):
+    for name in ('census', 'project', 'crops', 'overlay', 'sheet'):
         s = sub.add_parser(name)
         s.add_argument('--book')
         s.add_argument('--pages')
@@ -135,9 +208,12 @@ def main(argv=None):
         s.add_argument('--sample', type=int)
         s.add_argument('--seed', type=int, default=20260906)
         s.add_argument('--dpi', type=int, default=300)
+        s.add_argument('--dpi-out', type=int, dest='dpi_out')
+        s.add_argument('--cols', type=int)
         s.add_argument('--out')
     a = ap.parse_args(argv)
-    return dict(census=cmd_census, project=cmd_project, crops=cmd_crops)[a.cmd](a)
+    return dict(census=cmd_census, project=cmd_project, crops=cmd_crops,
+                overlay=cmd_overlay, sheet=cmd_sheet)[a.cmd](a)
 
 
 if __name__ == '__main__':

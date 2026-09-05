@@ -74,6 +74,9 @@ def find_bars(mask, min_len_frac=MIN_LEN, max_len_frac=MAX_LEN, max_thick_frac=M
 
     Runs on consecutive rows that overlap horizontally by `_OVERLAP` of the shorter one are merged
     into a single bar, so a 9-pixel-thick printed rule is ONE object rather than nine.
+
+    Read off the mask's NEUTRAL layer: a press prints a rule in ink, so an illustration's coloured
+    edge is not a candidate vinculum at all. See `InkMask` for why the two layers exist.
     """
     min_len = max(1, int(round(min_len_frac * mask.width)))
     max_len = max_len_frac * mask.width
@@ -82,7 +85,7 @@ def find_bars(mask, min_len_frac=MIN_LEN, max_len_frac=MAX_LEN, max_thick_frac=M
     open_bars = []      # bars still growing downward
     done = []
     for y in range(mask.height):
-        runs = mask.row_runs(y, 0, mask.width, min_len=min_len)
+        runs = mask.row_runs(y, 0, mask.width, min_len=min_len, neutral=True)
         still_open = []
         used = set()
         for b in open_bars:

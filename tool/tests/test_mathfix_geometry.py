@@ -110,6 +110,44 @@ class TestFindBars(unittest.TestCase):
         self.assertAlmostEqual(b.length, 8 / 40, places=6)
 
 
+class TestNeutralLayer(unittest.TestCase):
+    """A press prints a rule in neutral ink; an illustration's edge is coloured.
+
+    On an unbiased 12-page sample of ordinary Toán pages, 4 of 7 detected regions were parts of
+    PICTURES — a grass band, a speech-bubble tail, the brim of a hat. Reading bars off the neutral
+    layer removed two of them and cost nothing on the 45 real fractions of the dense pages.
+    """
+
+    ART = """\
+..........
+..######..
+..........
+..######..
+..........
+"""
+
+    def test_from_ascii_treats_every_pixel_as_neutral(self):
+        m = IM.InkMask.from_ascii(self.ART)
+        self.assertIs(m.neutral_rows, m.rows)
+
+    def test_find_bars_reads_the_neutral_layer(self):
+        m = IM.InkMask.from_ascii(self.ART)
+        # the second rule is «coloured»: dark, but not neutral
+        m.neutral_rows = [m.rows[0], m.rows[1], m.rows[2], bytes(m.width), m.rows[4]]
+        found = BARS.find_bars(m, 0.2, 0.9, 0.30)
+        self.assertEqual([(b.px0, b.py0) for b in found], [(2, 1)])
+
+    def test_ink_queries_still_see_the_coloured_pixels(self):
+        """A printed DIGIT may be coloured — Toán 5 tập một p22 sets «× 5» in red and «× 2» in
+        blue — so the ink-accounting scan must keep seeing it, or a dropped coloured digit would
+        pass unnoticed."""
+        m = IM.InkMask.from_ascii(self.ART)
+        m.neutral_rows = [m.rows[0], m.rows[1], m.rows[2], bytes(m.width), m.rows[4]]
+        self.assertTrue(m.any_ink(2, 3, 8, 4))
+        self.assertEqual(m.row_runs(3, 0, 10), [(2, 6)])
+        self.assertEqual(m.row_runs(3, 0, 10, neutral=True), [])
+
+
 class TestToken(unittest.TestCase):
     def test_derived_edges(self):
         t = Token(text='31', x=0.75, y=0.13, w=0.03, h=0.017, conf=1.0, index=3)

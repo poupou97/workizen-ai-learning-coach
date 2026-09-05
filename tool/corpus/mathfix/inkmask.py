@@ -23,10 +23,21 @@ _RUN = re.compile(b'\x01+')
 
 
 class InkMask:
-    __slots__ = ('rows', 'width', 'height')
+    """`rows` is every dark pixel. `neutral_rows` is the dark pixels that are also near-GREY.
 
-    def __init__(self, rows, width, height):
-        self.rows = rows        # list of bytes/bytearray, one per raster row, 1 = ink
+    Two layers, because they answer different questions. A printed rule is always neutral ink, so
+    `find_bars` reads `neutral_rows` and an illustration's coloured edge — a green grass band, the
+    brim of a yellow hat — can never be mistaken for a vinculum. But a printed DIGIT may be
+    coloured (Toán 5 tập một p22 prints the «× 5» of a common-denominator step in red and the
+    «× 2» in blue), so `ink-accounted` must see all of it or a dropped coloured digit would go
+    unnoticed. One mask for shapes, the other for ink.
+    """
+
+    __slots__ = ('rows', 'neutral_rows', 'width', 'height')
+
+    def __init__(self, rows, width, height, neutral_rows=None):
+        self.rows = rows                                   # list of bytes, one per raster row, 1 = ink
+        self.neutral_rows = neutral_rows if neutral_rows is not None else rows
         self.width = width
         self.height = height
 
@@ -49,13 +60,18 @@ class InkMask:
         return cls(rows, width, len(rows))
 
     @classmethod
-    def from_pdf(cls, pdf_path, page, dpi=300, threshold=160):
+    def from_pdf(cls, pdf_path, page, dpi=300, threshold=160, max_chroma=55):
         """Render one PDF page and threshold it. Requires PyMuPDF + numpy (CLI only, imported lazily).
 
         `threshold` is a grey level: a pixel darker than it is ink. 160/255 was chosen against the
         real books — the printed vinculum in the Toán pages sits at ≈ 30-60 grey and the tinted
         exercise boxes at ≈ 225-240, so the whole tint band stays paper and no box background is
         ever read as a rule.
+
+        `max_chroma` (max channel − min channel) separates printed ink from illustration. On an
+        unbiased 12-page sample of ordinary Toán pages, 4 of the 7 detected regions were parts of
+        PICTURES — a grass band, a speech-bubble tail, the brim of a hat — every one of them
+        strongly coloured. Neutral ink is what a press uses for a rule.
         """
         import numpy as np                                 # noqa: PLC0415  (optional dependency)
         import pymupdf                                     # noqa: PLC0415  (optional dependency)
@@ -63,12 +79,16 @@ class InkMask:
         pix = doc[page - 1].get_pixmap(dpi=dpi)
         arr = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.stride)
         arr = arr[:, :pix.width * pix.n].reshape(pix.height, pix.width, pix.n)
-        grey = arr[:, :, :3].sum(axis=2)
-        buf = (grey < threshold * 3).astype(np.uint8).tobytes()
+        rgb = arr[:, :, :3].astype(np.int16)
+        dark = rgb.sum(axis=2) < threshold * 3
+        chroma = rgb.max(axis=2) - rgb.min(axis=2)
         w, h = pix.width, pix.height
+        buf = dark.astype(np.uint8).tobytes()
+        nbuf = (dark & (chroma <= max_chroma)).astype(np.uint8).tobytes()
         rows = [buf[y * w:(y + 1) * w] for y in range(h)]
+        nrows = [nbuf[y * w:(y + 1) * w] for y in range(h)]
         doc.close()
-        return cls(rows, w, h)
+        return cls(rows, w, h, neutral_rows=nrows)
 
     # ---------------------------------------------------------------- queries
     def ink(self, x, y):
@@ -120,18 +140,19 @@ class InkMask:
             right = x0 + j if right is None else max(right, x0 + j)
         return None if left is None else (left, right + 1)
 
-    def row_runs(self, y, x0, x1, min_len=1):
+    def row_runs(self, y, x0, x1, min_len=1, neutral=False):
         """[(start, length)] of contiguous ink runs in row `y` restricted to `[x0, x1)`.
 
         `min_len` filters inside the C scan, which matters: `find_bars` calls this once per raster
-        row of a 4608-row page and only ever wants runs above a length floor.
+        row of a 4608-row page and only ever wants runs above a length floor. `neutral=True` reads
+        the near-grey layer — what a printed rule is made of.
         """
         if not (0 <= y < self.height):
             return []
         x0, x1 = max(0, x0), min(self.width, x1)
         if x1 <= x0:
             return []
-        seg = self.rows[y][x0:x1]
+        seg = (self.neutral_rows if neutral else self.rows)[y][x0:x1]
         out = []
         for m in _RUN.finditer(seg):
             ln = m.end() - m.start()
