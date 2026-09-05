@@ -27,7 +27,8 @@ from fractions import Fraction
 
 # ---- calibrated against the real pages, and stated as ratios of the bar's own length
 MIN_BAR_OVERHANG = 1.02      # the vinculum must be at least this much longer than the wider half
-MAX_INK_UNACCOUNTED = 0.10   # share of the region's ink columns that may be covered by nothing
+MAX_INK_UNACCOUNTED = 0.10   # share of the region's glyph ink that may be covered by nothing
+MAX_UNACCOUNTED_RUN = 0.25   # the widest UNBROKEN run of it, in bar lengths — see `widest_unaccounted_run`
 BOX_MARGIN_X = 0.02          # OCR box jitter allowance, in bar lengths
 BOX_MARGIN_Y = 0.30          # ditto vertically, in text heights (accents and descenders)
 
@@ -70,14 +71,14 @@ def _px_boxes(boxes, mask, mx, my):
     return out
 
 
-def ink_accounted(mask, bbox, token_boxes, bar_boxes, text_height, bar_len):
-    """Share of the printed GLYPH ink inside `bbox` that no token box accounts for.
+def _scan(mask, bbox, token_boxes, bar_boxes, text_height, bar_len):
+    """(glyph ink px, unaccounted px, widest unbroken unaccounted run px) inside `bbox`.
 
-    Both the numerator and the denominator of that ratio exclude ink covered by a `bar_box`, and
-    that is the whole point: a vinculum is a solid 9-pixel-thick run, several times the ink of the
-    digits it separates, so leaving it in would dilute a whole dropped digit down to a few per cent
-    and the check would never fire. What is being asked is «of the printed glyphs in this region,
-    how much did no OCR token read?» — the bar is not a glyph.
+    Both the count and the ratio exclude ink covered by a `bar_box`, and that is the whole point:
+    a vinculum is a solid 9-pixel-thick run, several times the ink of the digits it separates, so
+    leaving it in would dilute a whole dropped digit down to a few per cent and the check would
+    never fire. What is being asked is «of the printed glyphs in this region, how much did no OCR
+    token read?» — the bar is not a glyph.
 
     Rows are scanned through `row_runs`, so this is a C-speed scan per row rather than a per-pixel
     Python loop over the box.
@@ -89,18 +90,44 @@ def ink_accounted(mask, bbox, token_boxes, bar_boxes, text_height, bar_len):
     py1 = min(mask.height, int(bbox[3] * mask.height + my))
     toks = _px_boxes(token_boxes, mask, mx, my)
     rules = _px_boxes(bar_boxes, mask, mx, my)
-    glyph = unaccounted = 0
+    glyph = unaccounted = widest = 0
     for y in range(py0, py1):
         on_tok = [b for b in toks if b[1] <= y < b[3]]
         on_rule = [b for b in rules if b[1] <= y < b[3]]
+        run = 0
         for start, ln in mask.row_runs(y, px0, px1):
             for x in range(start, start + ln):
                 if any(b[0] <= x < b[2] for b in on_rule):
+                    run = 0
                     continue
                 glyph += 1
-                if not any(b[0] <= x < b[2] for b in on_tok):
+                if any(b[0] <= x < b[2] for b in on_tok):
+                    run = 0
+                else:
                     unaccounted += 1
-    return (unaccounted / glyph if glyph else 0.0), glyph, unaccounted
+                    run += 1
+                    widest = max(widest, run)
+            run = 0
+    return glyph, unaccounted, widest
+
+
+def ink_accounted(mask, bbox, token_boxes, bar_boxes, text_height, bar_len):
+    """(share, glyph px, unaccounted px) — how much of the printed glyph ink no token read."""
+    glyph, un, _ = _scan(mask, bbox, token_boxes, bar_boxes, text_height, bar_len)
+    return (un / glyph if glyph else 0.0), glyph, un
+
+
+def widest_unaccounted_run(mask, bbox, token_boxes, bar_boxes, text_height, bar_len):
+    """The widest UNBROKEN horizontal run of unaccounted ink, in bar lengths.
+
+    Area is the wrong unit for a dropped operator. On Toán 5 tập một p22 the «−» of «20/18 − 2/5»
+    is 3.75 % of the block's glyph ink — under any ceiling one would dare set — but it is an
+    unbroken 42-pixel run, 45 % of a bar. Area says «rounding error»; shape says «a printed mark
+    nobody read». Shape is right, and round 3 already paid for the other answer: «2/5 + 1/4» was
+    served for a printed «2/5 − 1/4».
+    """
+    _, _, widest = _scan(mask, bbox, token_boxes, bar_boxes, text_height, bar_len)
+    return widest / (bar_len * mask.width) if bar_len else 0.0
 
 
 def ink_accounted_v1(candidate, mask, bbox, text_height, bar_len):
@@ -108,11 +135,14 @@ def ink_accounted_v1(candidate, mask, bbox, text_height, bar_len):
     for o in candidate.original_observations:
         x, y, w, h = o['bbox']
         (rules if o['kind'] == 'raster_bar' else toks).append((x, y, x + w, y + h))
-    share, glyph, un = ink_accounted(mask, bbox, toks, rules, text_height, bar_len)
-    ok = share <= MAX_INK_UNACCOUNTED
+    glyph, un, widest = _scan(mask, bbox, toks, rules, text_height, bar_len)
+    share = (un / glyph) if glyph else 0.0
+    run = widest / (bar_len * mask.width) if bar_len else 0.0
+    ok = share <= MAX_INK_UNACCOUNTED and run <= MAX_UNACCOUNTED_RUN
     return ValidationResult('PASS' if ok else 'FAIL',
                             dict(unaccounted_share=round(share, 4), glyph_ink_px=glyph,
-                                 unaccounted_px=un, ceiling=MAX_INK_UNACCOUNTED),
+                                 unaccounted_px=un, widest_unaccounted_run=round(run, 4),
+                                 ceiling=MAX_INK_UNACCOUNTED, run_ceiling=MAX_UNACCOUNTED_RUN),
                             'ink-accounted-v1')
 
 

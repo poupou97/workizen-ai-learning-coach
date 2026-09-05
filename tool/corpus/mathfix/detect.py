@@ -31,11 +31,20 @@ from .tokens import Token, median_height
 #      length, never absolute pixels, so a book set in a different point size behaves the same.
 STRIP_H = 1.35           # how far above/below the bar to look, in median text heights
 MIN_SIDE_COVER = 0.15    # share of the bar's columns that must carry ink on each side
-MIN_DETACH = 0.10        # blank gap between the bar and that ink, in median text heights
+MIN_DETACH = 0.02        # blank gap between the bar and that ink, in median text heights.
+#   ≈1.5 px at 300 dpi. Deliberately as small as printing allows: the gap's job is only to say
+#   «this ink does not CONTINUE through the bar» — the stroke of a «+», the stem of a «5». At the
+#   0.10 first tried (≈8 px) three of the six fractions in the «1 Tính» row of Toán 5 tập một p22
+#   were rejected because the book sets its denominators tight under the rule.
 SIDE_CENTRE_TOL = 0.45   # |centre(ink) − centre(bar)| may not exceed this share of the bar length
 SIDE_WINDOW = 0.25       # how far past the bar's ends to look when measuring how WIDE a half really is
 NEIGHBOUR_BAR_LEN_TOL = 0.35   # a neighbour whose length is this close is «another bar», i.e. an «=»
 TOKEN_OVERLAP = 0.35     # share of a token's width that must sit over the bar to be its half
+MAX_TOUCH_COVER = 0.05   # ink in the detachment gap under this share of the bar's columns is noise.
+#   A single stray pixel is not «the stroke continues through the bar»: the printed rule under the
+#   «3/11» of Toán 5 tập một p22 leaves one anti-aliased pixel at its left end, and reading that as
+#   attachment rejected three of the six fractions in that row. A «+» puts its whole stem there —
+#   ≈14 % of the bar's columns — so the two cases are still an order of magnitude apart.
 
 
 @dataclass
@@ -101,7 +110,7 @@ def _side(mask, bar, strip_h, detach_px, above):
         y0 = bar.py1 + detach_px
         y1 = y0 + strip_h
         touch = (bar.py1, bar.py1 + detach_px)
-    if mask.any_ink(bar.px0, touch[0], bar.px1, touch[1]):
+    if mask.column_coverage(bar.px0, touch[0], bar.px1, touch[1]) > MAX_TOUCH_COVER:
         return None, None, False                # attached ink: a «+», a «±», a boxed rule
     cover = mask.column_coverage(bar.px0, y0, bar.px1, y1)
     if cover < MIN_SIDE_COVER:
