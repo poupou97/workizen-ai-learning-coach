@@ -51,8 +51,8 @@ Reading per family (the Science line is §1; one-line verdicts are in 00):
 
 ## 3. What is missing to make any of §2 a measurement rather than a census (evidence gaps)
 
-1. **No TSL outside Science.** Every non-Science statement above is layout census + old-extractor units + ≤ 7 gold pages per family. A tc-v2-style run on one non-Science book (LS&ĐL 5 = 123 pages ≈ 3–4 min Docling at 1.5 s/page, MEASURED rate from I.7) is the cheapest way to turn §2 into §1-style numbers; it is a slice run, not the corpus reprocess the Founder deferred (D-135…D-138 are PROPOSED).
-2. **No role gold for History/Math conventions.** The gold has 6 History/Geo and 5 Math pages; `attribution`, `answer_slot`, «HĐ», «Ví dụ/Giải», «Ghi nhớ» never reach n ≥ 30. RISKS #4 (Science over-fit) is confirmed by the Toán 9 row.
-3. **The gold's lesson numbers on the two LS&ĐL 5 pages contradict the printed headers** (02, A17) — attachment accuracy for History is currently scored inverted.
-4. **Table cells** never appear in a TSL (0/20); every table-dependent shape (Comparison, DATA_CHART, MATCH, timeline-completion) is unmeasurable on the Mac path.
-5. **Figure-dependent questions** (28 % of Science question regions) have no measured route; the Founder's OBSERVE pattern (352 lessons, 166 primary — DOC-CLAIM) is exactly this class.
+1. **No TSL outside Science.** Every non-Science statement above is layout census + old-extractor units + ≤ 7 gold pages per family. A tc-v2-style run on one book (LS&ĐL 5 = 123 pages ≈ 3–4 min at 1.5 s/page, I.7) would turn §2 into §1-style numbers; it is a slice run, not the deferred corpus reprocess (D-135…D-138 PROPOSED).
+2. **No role gold for History/Math conventions** (6 History/Geo and 5 Math gold pages; `attribution`, `answer_slot`, «HĐ», «Ví dụ/Giải», «Ghi nhớ» never reach n ≥ 30); RISKS #4 confirmed by the Toán 9 row.
+3. **Gold lesson numbers on the two LS&ĐL 5 pages contradict the printed headers** (02, A17) — History attachment is scored inverted.
+4. **Table cells** never appear in a TSL (0/20); every table-dependent shape is unmeasurable on the Mac path.
+5. **Figure-dependent questions** (28 % of Science question regions) have no measured route — the OBSERVE class (352 lessons, DOC-CLAIM).
