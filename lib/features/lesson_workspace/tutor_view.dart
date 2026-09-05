@@ -132,19 +132,51 @@ class TutorView extends StatefulWidget {
     return null;
   }
 
+  /// Tên LOẠI BƯỚC bằng lời trẻ — dùng để liệt kê đúng những loại thật sự
+  /// nằm ở mỗi bên của dòng runtime.
+  static const _phaseWord = {
+    PlannedStepPhase.explain: 'giải thích',
+    PlannedStepPhase.ask: 'câu hỏi',
+    PlannedStepPhase.hint: 'gợi ý',
+    PlannedStepPhase.feedbackMatched: 'phản hồi',
+    PlannedStepPhase.scaffold: 'chỉ từng bước',
+    PlannedStepPhase.next: 'bước tiếp',
+  };
+
+  /// Liệt kê loại bước theo thứ tự enum, không lặp — `null` khi rỗng.
+  static String? _phaseList(RuntimePlan plan, {required bool guided}) {
+    final out = <String>[];
+    for (final e in _phaseWord.entries) {
+      final any = plan.steps.any(
+        (s) =>
+            s.phase == e.key &&
+            (s.mode == PlannedStepMode.runtimeGuided) == guided,
+      );
+      if (any) out.add(e.value);
+    }
+    return out.isEmpty ? null : out.join(', ');
+  }
+
   /// Dòng runtime cho phần đầu Tutor và sheet «Nguồn & độ tin» — LỜI TRẺ
-  /// (round 4 §6.6), con số giữ nguyên: PEDAGOGY REALITY vẫn đọc được trên
-  /// máy («kiểm 5/17 bước»). Mã máy nằm ở [runtimeLineTechnical].
+  /// (round 4 §6.6), con số giữ nguyên: PEDAGOGY REALITY đọc được trên máy.
+  /// Mã máy nằm ở [runtimeLineTechnical].
+  ///
+  /// ⭐ ROUND 4 (lỗi thấy trên Nokia): danh sách loại bước trong ngoặc trước
+  /// đây là chữ CỨNG «(giải thích, câu hỏi, bước tiếp)». Khi hai gợi ý của
+  /// Bài 17 qua được luật trích dẫn (5/17 → 7/17), câu vẫn nói như cũ ⇒ dòng
+  /// tự mâu thuẫn với chính con số của nó. Nay liệt kê ĐO TỪ kế hoạch.
   static String runtimeLine(RuntimePlan? plan) {
     if (plan == null) return 'Bài này không có kịch bản.';
     if (!plan.isBound) {
       return 'Máy chưa ràng buộc được bài này với sách — mọi bước là lời '
           'viết sẵn để thử.';
     }
+    final guided = _phaseList(plan, guided: true);
+    final proto = _phaseList(plan, guided: false);
     return 'Máy đã kiểm ${plan.runtimeGuidedCount}/${plan.steps.length} bước '
-        'là lời lấy đúng trong sách (giải thích, câu hỏi, bước tiếp) · '
-        '${plan.prototypeCount} bước còn lại là lời viết sẵn để thử '
-        '(gợi ý, phản hồi).';
+        'là lời lấy đúng trong sách${guided == null ? '' : ' ($guided)'} · '
+        '${plan.prototypeCount} bước còn lại là lời viết sẵn để thử'
+        '${proto == null ? '' : ' ($proto)'}.';
   }
 
   /// Dòng runtime KỸ THUẬT (mã từ chối) — chỉ trong nếp gấp «Chi tiết kỹ
