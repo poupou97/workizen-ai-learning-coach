@@ -159,3 +159,23 @@ Tests: `tool/tests/test_tsl_to_lesson_document.py` (10: provenance 100 %, verbat
 no withheld text, fail-closed refusals, deterministic hash, figure order, real TSL when present) ·
 `test/core/lesson_model/lesson_bridge_contract_test.dart` (9: parse, WITHHELD ≠ TRUSTED, injected text ignored, fail-closed enums,
 legacy fixture, round-trip, real fixture counts) · existing lesson_model tests updated (real fixture now `trustedStructuredLesson`).
+
+## 7. PROPOSED (round 4, Lane C — Golden Slice #2, LS&ĐL 5 Bài 8): History additions on top of the bridge
+
+Status: **PROPOSED**, nothing decided; owner of the bridge stays A-pipeline. Lane C did **not** modify `tsl_to_lesson_document.py`; the
+additions run as a post-processor (`tool/research/lane_c/history_rules.py`) on the bridge's JSON and are consumed by
+`lib/core/lesson_model/timeline_*.dart` without any change to `semantic_data.dart` / `lesson_document.dart`. Gate and numbers:
+`docs/research/lane-c/05-GOLDEN-SLICE-2-GATE.md`.
+
+| addition | JSON (document) | Dart | rule id | note |
+|---|---|---|---|---|
+| timeline from prose | `semantic[] += {type: timeline, id, title = nearest numbered section heading (verbatim), trust = source block trust, derivation, events[]}` | parsed by the existing `SemanticData.fromJson` (`when`, `title`, `text`, `sourceBlockId`) | `prose-dated-events-v1` | extra keys per event `yearStart`, `yearEnd`, `era` (`CN`/`TCN`), `charSpan` are **ignored** by the Dart parser (forward-compatible); `TimelineDate.parse(when)` recovers them on the Dart side, fail-closed |
+| story sources | `semantic[timeline].sources[] = {attributionBlockId, titleBlockId, storyBlockIds[], withheldPartIds[], publisher, year, form, derivation}` | **not** parsed from JSON — re-derived from the document's blocks by `deriveStoryAttributions(doc)` (`timeline_sources.dart`), so the fixture cannot carry a source the blocks do not support | `story-attribution-v1` | no new block kind; the attribution keeps `sourceRole = body` (pipeline label) |
+| lesson title | `title` (replaced) + `provenance.historyRules.titleDerivation` | `LessonDocument.title` | `lesson-title-v1` | header-confirmed-by-TOC ⇒ TOC title when the header title is a diacritics-insensitive suffix; else header |
+| tutor script | `tutorScript` (`prototype`, `prototypeScripted`, `evidencePolicy none`) | existing `TutorScript` | `history-tutor-v1` | generated from the timeline + sources; ≤ 2 hints; `keySource` names the rule and block; patterns escape only regex syntax characters (Dart `RegExp(unicode: true)` rejects `\-` / `\ `) |
+| record | `provenance.historyRules = {version, rules[], events, narrativeYearMentionsNotEvents, attributions, attributionsComplete, figureDependentQuestions[], withheldQuestionsNotUsed[], timelineAskBlockId, titleDerivation, tutorSteps}` | — (JSON only) | — | the census of what the rules did and did not use |
+
+Requested from A-pipeline (bridge or upstream), in priority order: (1) `Ã/ã` in `tc2_attach.LESSON_HDR`; (2) block-level colour share instead of the
+page-level `page_feature:color_heavy` withhold; (3) an `attribution` role (the gold already has it) and dash sub-questions; (4) `figure_dependent`
+on «quan sát … hình»; (5) a «Chủ đề» variant of `toc-ocr-chapters-v1`; (6) fold `prose-dated-events-v1` / `story-attribution-v1` into the bridge
+once accepted, so the post-processor disappears. Requested from the gold owner: lesson numbers on LS&ĐL 5 p041 (9 → 8) and p080 (17 → 18).

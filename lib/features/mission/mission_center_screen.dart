@@ -41,6 +41,16 @@ String workspaceWhyLine(LessonDocument doc) {
       '${ways.join(', ')} — con thử trước nhé.';
 }
 
+/// ⭐ ROUND 4 (Lane C × Lane B) — dòng giới thiệu khu LÁT CẮT NGHIÊN CỨU.
+///
+/// Máy của Na là máy lớp 6; lát cắt của Lane C là sách LỚP 5. Nó có mặt ở đây
+/// để Founder đi tới được mà KHÔNG phải tạo hồ sơ mới — nên phải nói thật với
+/// trẻ rằng đây không phải bài của lớp mình, bằng lời trẻ, không hứa hẹn gì,
+/// và không đẩy trẻ vào đó (việc hôm nay vẫn ở phía trên).
+const String researchAreaLine =
+    'Đây không phải bài của lớp con — SAM đang tập đọc thử một cuốn sách khác. '
+    'Con xem cho biết cũng được. Bài hôm nay của con ở phía trên nhé.';
+
 class MissionCenterScreen extends StatelessWidget {
   const MissionCenterScreen({
     super.key,
@@ -63,6 +73,7 @@ class MissionCenterScreen extends StatelessWidget {
     this.onStartRecommendation,
     this.workspaceLesson,
     this.onOpenWorkspaceLesson,
+    this.researchLessons = const [],
   });
 
   final MissionData data;
@@ -119,9 +130,20 @@ class MissionCenterScreen extends StatelessWidget {
   final LessonDocument? workspaceLesson;
   final void Function(LessonDocument)? onOpenWorkspaceLesson;
 
+  /// ⭐ ROUND 4 (Lane C, Golden Slice #2) — LÁT CẮT NGHIÊN CỨU của lớp KHÁC
+  /// (LS&ĐL 5 Bài 8 trên máy của học sinh lớp 6): hiện thành thẻ riêng, ghi
+  /// rõ «sách lớp N», để Founder đi được tới lát cắt mà không tạo hồ sơ mới.
+  /// Rỗng ⇒ không thẻ. Mở bằng cùng [onOpenWorkspaceLesson].
+  final List<LessonDocument> researchLessons;
+
   static const workspaceCardKey = Key('home-workspace-card');
   static const samLineKey = Key('home-sam-line');
   static const secondaryCardKey = Key('home-secondary-card');
+
+  /// ROUND 4 (Lane C) — thẻ lát cắt NGHIÊN CỨU, một khoá cho mỗi bài.
+  static Key researchCardKey(String slotKey) =>
+      Key('home-research-card-$slotKey');
+  static const researchAreaLineKey = Key('home-research-area-line');
 
   /// Bài học SAM là VIỆC CHÍNH của «Hôm nay» khi có bài cho lớp này và không
   /// có việc Toán khẩn vì bằng chứng thật (review/retrieve thắng — Convergence
@@ -158,6 +180,26 @@ class MissionCenterScreen extends StatelessWidget {
               if (workspaceLesson != null) ...[
                 const SizedBox(height: WalSpacing.sm),
                 _workspaceCard(workspaceLesson!, primary: false),
+              ],
+            ],
+            // ⭐ ROUND 4 (Lane C × Lane B) — lát cắt NGHIÊN CỨU đứng NGOÀI khu
+            // «Hôm nay», dưới nhãn riêng: một bài sách lớp khác không được
+            // trôi vào việc hôm nay của trẻ lớp 6 như nội dung bình thường.
+            if (researchLessons.isNotEmpty) ...[
+              const SizedBox(height: WalSpacing.lg),
+              _sectionLabel('SAM ĐANG TẬP ĐỌC SÁCH KHÁC'),
+              Padding(
+                padding: const EdgeInsets.only(bottom: WalSpacing.sm),
+                child: Text(researchAreaLine,
+                    key: MissionCenterScreen.researchAreaLineKey,
+                    style: const TextStyle(
+                        fontSize: WalType.secondary,
+                        color: WalColors.inkSoft,
+                        height: 1.4)),
+              ),
+              for (final d in researchLessons) ...[
+                _workspaceCard(d, research: true),
+                const SizedBox(height: WalSpacing.sm),
               ],
             ],
             if (data.upcomingSubjects.isNotEmpty) ...[
@@ -397,12 +439,18 @@ class MissionCenterScreen extends StatelessWidget {
   /// buộc vì `doc.isFixture`.
   /// ROUND 4: [primary] ⇒ thẻ chính của «Hôm nay» (nền lavender, dòng «vì sao
   /// bài này» bằng lời trẻ); không ⇒ thẻ trắng viền như round 3.
-  Widget _workspaceCard(LessonDocument doc, {required bool primary}) {
+  /// [research] (Lane C) ⇒ lát cắt NGHIÊN CỨU của lớp khác: KHÔNG BAO GIỜ là
+  /// thẻ chính, luôn nằm ngoài khu «Hôm nay», và nhãn nói rõ sách lớp mấy.
+  Widget _workspaceCard(LessonDocument doc,
+      {bool primary = false, bool research = false}) {
+    assert(!(primary && research), 'lát cắt nghiên cứu không được làm thẻ chính');
     final where = doc.chapter == null
         ? doc.pageRangeLine
         : '${doc.chapter!.label} · ${doc.pageRangeLine}';
     return Container(
-      key: MissionCenterScreen.workspaceCardKey,
+      key: research
+          ? MissionCenterScreen.researchCardKey(doc.slotKey)
+          : MissionCenterScreen.workspaceCardKey,
       padding: const EdgeInsets.all(WalSpacing.lg),
       decoration: BoxDecoration(
           color: primary ? WalColors.surfaceLavender : Colors.white,
@@ -413,9 +461,11 @@ class MissionCenterScreen extends StatelessWidget {
                   color: WalColors.primary500.withValues(alpha: 0.35))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
-            doc.isFixture
-                ? 'BÀI HỌC SAM · BẢN THỬ NGHIỆM'
-                : 'BÀI HỌC SAM',
+            research
+                ? 'LÁT CẮT NGHIÊN CỨU · SÁCH LỚP ${doc.grade} · BẢN THỬ NGHIỆM'
+                : doc.isFixture
+                    ? 'BÀI HỌC SAM · BẢN THỬ NGHIỆM'
+                    : 'BÀI HỌC SAM',
             style: const TextStyle(
                 fontSize: WalType.secondary,
                 fontWeight: FontWeight.w700,

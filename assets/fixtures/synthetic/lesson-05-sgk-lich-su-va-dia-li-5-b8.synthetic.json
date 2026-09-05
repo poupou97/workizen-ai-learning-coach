@@ -1,0 +1,824 @@
+{
+ "schema": "wal-lesson-fixture-v1",
+ "book": "05-sgk-lich-su-va-dia-li-5",
+ "bookTitle": "LS&ĐL 5",
+ "subject": "LS&ĐL",
+ "grade": 5,
+ "lesson": 8,
+ "title": "Đấu tranh mẫu thời kì mẫu (giả lập)",
+ "chapter": null,
+ "chapters": [],
+ "provenance": {
+  "trust": "fixtureSynthetic",
+  "book": "05-sgk-lich-su-va-dia-li-5",
+  "pagePdfStart": 38,
+  "pagePdfEnd": 41,
+  "pagePrintedStart": 36,
+  "pagePrintedEnd": 39,
+  "generator": "tool/research/lane_c/make_history_synthetic_fixture.py@v1",
+  "sourcePipeline": "synthetic",
+  "distribution": "synthetic sample — không phải lời sách",
+  "boundary": {
+   "pageStart": 38,
+   "pageEnd": 41,
+   "confidence": 1.0,
+   "headerFound": true,
+   "source": "both"
+  },
+  "auditStatus": "notAudited",
+  "answerKeysIncluded": false,
+  "historyRules": {
+   "version": "history-rules@v1",
+   "rules": [
+    "prose-dated-events-v1",
+    "story-attribution-v1",
+    "figure-dependent-question-v1",
+    "lesson-title-v1",
+    "history-tutor-v1"
+   ],
+   "events": 5,
+   "narrativeYearMentionsNotEvents": 1,
+   "attributions": 1,
+   "attributionsComplete": 1,
+   "figureDependentQuestions": [
+    "05-sgk-lich-su-va-dia-li-5:p039:synthetic:010"
+   ],
+   "withheldQuestionsNotUsed": [
+    "05-sgk-lich-su-va-dia-li-5:p038:synthetic:withheld1"
+   ],
+   "timelineAskBlockId": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:017",
+   "titleDerivation": {
+    "rule": "lesson-title-v1",
+    "source": "toc",
+    "match": "diacritics-insensitive-suffix",
+    "pipelineTitle": "ĐẤU TRANH MẪU THỜI KÌ MẪU (GIẢ LẬP)",
+    "tocTitle": "Đấu tranh mẫu thời kì mẫu (giả lập)..."
+   },
+   "tutorSteps": 7
+  }
+ },
+ "evidencePolicy": "none",
+ "licence": "internalResearchOnly",
+ "blocks": [
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:001",
+   "type": "heading",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 38,
+    "pagePrinted": 36,
+    "bbox": [
+     0.1,
+     0.1,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:001",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "BÀI MẪU 8: ĐẤU TRANH MẪU THỜI KÌ MẪU (GIẢ LẬP)",
+   "level": 1,
+   "roleConfidence": 0.9,
+   "sourceRole": "heading"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:002",
+   "type": "heading",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 38,
+    "pagePrinted": 36,
+    "bbox": [
+     0.1,
+     0.2,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:002",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "Sau bài học này, em sẽ:",
+   "level": 2,
+   "roleConfidence": 0.85,
+   "sourceRole": "heading"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:003",
+   "type": "activity",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 38,
+    "pagePrinted": 36,
+    "bbox": [
+     0.1,
+     0.23,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:003",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "kind": "objective",
+   "text": "• [MẪU] Kể được tên và vẽ được trục thời gian mẫu (ví dụ: 101, 205, 450,…).",
+   "roleConfidence": 0.8,
+   "sourceRole": "objective"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:004",
+   "type": "activity",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 38,
+    "pagePrinted": 36,
+    "bbox": [
+     0.1,
+     0.3,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:004",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "kind": "stageLabel",
+   "text": "KHỞI ĐỘNG",
+   "roleConfidence": 0.95,
+   "sourceRole": "stage_label"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:withheld1",
+   "type": "withheld",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 38,
+    "pagePrinted": 36,
+    "bbox": [
+     0.1,
+     0.34,
+     0.8,
+     0.1
+    ],
+    "blockId": null,
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "withheld",
+   "sourceRole": "question",
+   "reason": "page_feature:color_heavy",
+   "reasons": [
+    "page_feature:color_heavy"
+   ],
+   "status": "WITHHELD",
+   "crop": "crops/synthetic-history-withheld-1.png"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:005",
+   "type": "activity",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 38,
+    "pagePrinted": 36,
+    "bbox": [
+     0.1,
+     0.5,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:005",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "kind": "stageLabel",
+   "text": "KHÁM PHÁ",
+   "roleConfidence": 0.95,
+   "sourceRole": "stage_label"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:006",
+   "type": "heading",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 38,
+    "pagePrinted": 36,
+    "bbox": [
+     0.1,
+     0.55,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:006",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "1. [MẪU] Một số cuộc đấu tranh mẫu",
+   "level": 2,
+   "roleConfidence": 0.85,
+   "sourceRole": "heading",
+   "relations": {
+    "headingPath": [
+     "Bài mẫu 8",
+     "1. [MẪU] Một số cuộc đấu tranh mẫu"
+    ]
+   }
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:007",
+   "type": "question",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 38,
+    "pagePrinted": 36,
+    "bbox": [
+     0.1,
+     0.6,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p038:synthetic:007",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Đọc thông tin, em hãy kể tên một số cuộc đấu tranh mẫu.",
+   "roleConfidence": 0.85,
+   "sourceRole": "question",
+   "relations": {
+    "headingPath": [
+     "Bài mẫu 8",
+     "1. [MẪU] Một số cuộc đấu tranh mẫu"
+    ]
+   }
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 39,
+    "pagePrinted": 37,
+    "bbox": [
+     0.1,
+     0.07,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "roleConfidence": 0.6,
+   "sourceRole": "body",
+   "relations": {
+    "headingPath": [
+     "Bài mẫu 8",
+     "1. [MẪU] Một số cuộc đấu tranh mẫu"
+    ]
+   },
+   "text": "[MẪU] Ông Mẫu A (101 - 103), Bà Mẫu B (205), Ông Mẫu C - Bà Mẫu D (310 - 320), Ông Mẫu E (398). Chiến thắng mẫu của Ông Mẫu G (450) đã kết thúc thời kì mẫu."
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:009",
+   "type": "heading",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 39,
+    "pagePrinted": 37,
+    "bbox": [
+     0.1,
+     0.16,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:009",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "2. [MẪU] Kể chuyện về nhân vật mẫu",
+   "level": 2,
+   "roleConfidence": 0.85,
+   "sourceRole": "heading"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:010",
+   "type": "question",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 39,
+    "pagePrinted": 37,
+    "bbox": [
+     0.1,
+     0.23,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:010",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Đọc thông tin và quan sát các hình từ 1 đến 3, em hãy kể câu chuyện mẫu.",
+   "roleConfidence": 0.85,
+   "sourceRole": "question"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:011",
+   "type": "heading",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 39,
+    "pagePrinted": 37,
+    "bbox": [
+     0.1,
+     0.38,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:011",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "CHUYỆN MẪU VỀ ÔNG MẪU A",
+   "level": 3,
+   "roleConfidence": 0.88,
+   "sourceRole": "heading",
+   "relations": {
+    "headingPath": [
+     "Bài mẫu 8",
+     "CHUYỆN MẪU VỀ ÔNG MẪU A"
+    ]
+   }
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:012",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 39,
+    "pagePrinted": 37,
+    "bbox": [
+     0.1,
+     0.43,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:012",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Thuở xưa, ở một vùng mẫu có Ông Mẫu A. Năm 101, Ông Mẫu A phất cờ khởi nghĩa mẫu.",
+   "roleConfidence": 0.6,
+   "sourceRole": "body",
+   "relations": {
+    "headingPath": [
+     "Bài mẫu 8",
+     "CHUYỆN MẪU VỀ ÔNG MẪU A"
+    ]
+   }
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:013",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 39,
+    "pagePrinted": 37,
+    "bbox": [
+     0.1,
+     0.53,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:013",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Cuộc khởi nghĩa mẫu đã chứng tỏ tinh thần đấu tranh bất khuất mẫu, tạo tiền đề mẫu cho mai sau.",
+   "roleConfidence": 0.6,
+   "sourceRole": "body",
+   "relations": {
+    "headingPath": [
+     "Bài mẫu 8",
+     "CHUYỆN MẪU VỀ ÔNG MẪU A"
+    ]
+   }
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:014",
+   "type": "paragraph",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 39,
+    "pagePrinted": 37,
+    "bbox": [
+     0.1,
+     0.69,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:014",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "(Theo Tác Giả Mẫu, Sách mẫu về Ông Mẫu A, NXB Mẫu, 2000)",
+   "roleConfidence": 0.6,
+   "sourceRole": "body",
+   "relations": {
+    "headingPath": [
+     "Bài mẫu 8",
+     "CHUYỆN MẪU VỀ ÔNG MẪU A"
+    ]
+   }
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:fig1",
+   "type": "image",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 39,
+    "pagePrinted": 37,
+    "bbox": [
+     0.3,
+     0.74,
+     0.35,
+     0.14
+    ],
+    "blockId": null,
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "crop": "crops/synthetic-history-fig-1.png",
+   "captionBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:016",
+   "labels": 0,
+   "aspect": 1.875
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:015",
+   "type": "caption",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 39,
+    "pagePrinted": 37,
+    "bbox": [
+     0.1,
+     0.9,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:015",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Hình 1. Tranh mẫu về Ông Mẫu A",
+   "refersFigure": true,
+   "roleConfidence": 0.9,
+   "sourceRole": "caption"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:016",
+   "type": "activity",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 41,
+    "pagePrinted": 39,
+    "bbox": [
+     0.1,
+     0.45,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:016",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "kind": "stageLabel",
+   "text": "LUYỆN TẬP",
+   "roleConfidence": 0.95,
+   "sourceRole": "stage_label"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:017",
+   "type": "question",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 41,
+    "pagePrinted": 39,
+    "bbox": [
+     0.1,
+     0.49,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:017",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] 1. Hãy vẽ và hoàn thiện trục thời gian (theo gợi ý dưới đây vào vở) thể hiện một số cuộc đấu tranh mẫu.",
+   "roleConfidence": 0.85,
+   "sourceRole": "question"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:018",
+   "type": "question",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 41,
+    "pagePrinted": 39,
+    "bbox": [
+     0.1,
+     0.69,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:018",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] 2. Kể lại câu chuyện mẫu mà em sưu tầm được.",
+   "roleConfidence": 0.85,
+   "sourceRole": "question"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:019",
+   "type": "activity",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 41,
+    "pagePrinted": 39,
+    "bbox": [
+     0.1,
+     0.77,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:019",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "kind": "stageLabel",
+   "text": "VẬN DỤNG",
+   "roleConfidence": 0.95,
+   "sourceRole": "stage_label"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:020",
+   "type": "question",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 41,
+    "pagePrinted": 39,
+    "bbox": [
+     0.1,
+     0.8,
+     0.8,
+     0.03
+    ],
+    "blockId": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:020",
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] Tìm hiểu và kể tên một số di tích mẫu.",
+   "roleConfidence": 0.85,
+   "sourceRole": "question"
+  },
+  {
+   "id": "05-sgk-lich-su-va-dia-li-5:b8:sourceRef",
+   "type": "sourceRef",
+   "sourceRef": {
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "pagePdf": 38,
+    "pagePrinted": 36,
+    "bbox": [
+     0,
+     0,
+     1,
+     1
+    ],
+    "blockId": null,
+    "extraction": "synthetic",
+    "ocrConf": null
+   },
+   "trust": "fixtureSynthetic",
+   "text": "[MẪU] SGK LS&ĐL 5 · trang 36–39 (giả lập)"
+  }
+ ],
+ "semantic": [
+  {
+   "type": "timeline",
+   "id": "timeline-1",
+   "title": "1. [MẪU] Một số cuộc đấu tranh mẫu",
+   "trust": "fixtureSynthetic",
+   "derivation": "prose-dated-events-v1",
+   "events": [
+    {
+     "when": "101 - 103",
+     "title": "Ông Mẫu A",
+     "text": "[MẪU] Ông Mẫu A (101 - 103)",
+     "sourceBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008",
+     "yearStart": 101,
+     "yearEnd": 103,
+     "era": "CN",
+     "charSpan": [
+      6,
+      27
+     ]
+    },
+    {
+     "when": "205",
+     "title": "Bà Mẫu B",
+     "text": "Bà Mẫu B (205)",
+     "sourceBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008",
+     "yearStart": 205,
+     "yearEnd": 205,
+     "era": "CN",
+     "charSpan": [
+      29,
+      43
+     ]
+    },
+    {
+     "when": "310 - 320",
+     "title": "Ông Mẫu C - Bà Mẫu D",
+     "text": "Ông Mẫu C - Bà Mẫu D (310 - 320)",
+     "sourceBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008",
+     "yearStart": 310,
+     "yearEnd": 320,
+     "era": "CN",
+     "charSpan": [
+      45,
+      77
+     ]
+    },
+    {
+     "when": "398",
+     "title": "Ông Mẫu E",
+     "text": "Ông Mẫu E (398)",
+     "sourceBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008",
+     "yearStart": 398,
+     "yearEnd": 398,
+     "era": "CN",
+     "charSpan": [
+      79,
+      94
+     ]
+    },
+    {
+     "when": "450",
+     "title": "Ông Mẫu G",
+     "text": "Chiến thắng mẫu của Ông Mẫu G (450)",
+     "sourceBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008",
+     "yearStart": 450,
+     "yearEnd": 450,
+     "era": "CN",
+     "charSpan": [
+      116,
+      131
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "attributionBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:014",
+     "titleBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:011",
+     "storyBlockIds": [
+      "05-sgk-lich-su-va-dia-li-5:p039:synthetic:012",
+      "05-sgk-lich-su-va-dia-li-5:p039:synthetic:013"
+     ],
+     "withheldPartIds": [],
+     "publisher": "NXB Mẫu",
+     "year": 2000,
+     "form": "theo",
+     "derivation": "story-attribution-v1"
+    }
+   ]
+  }
+ ],
+ "tutorScript": {
+  "samMode": "prototypeScripted",
+  "trust": "prototype",
+  "evidencePolicy": "none",
+  "steps": [
+   {
+    "type": "explain",
+    "id": "e1",
+    "mascot": "sam-explain",
+    "sourceBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008",
+    "text": "Bài này kể về những cuộc đấu tranh giành độc lập trong thời kì Bắc thuộc. Sách liệt kê từng cuộc kèm năm diễn ra trong ngoặc — con đọc đoạn sách bên dưới rồi mình thử ba câu nhé."
+   },
+   {
+    "type": "ask",
+    "id": "q1",
+    "prompt": "Theo sách, Ông Mẫu A gắn với những năm nào?",
+    "promptBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008",
+    "options": [
+     "101 - 103",
+     "205",
+     "310 - 320"
+    ],
+    "acceptable": [
+     "^101\\s*[-–—]\\s*103$",
+     "\\b101\\b"
+    ],
+    "hints": [
+     "Con tìm tên «Ông Mẫu A» trong đoạn sách — năm nằm ngay trong ngoặc sau tên.",
+     "Đoạn đó ở SGK trang 37, ngay dòng có tên Ông Mẫu A."
+    ],
+    "feedbackMatched": "Khớp với sách: Ông Mẫu A (101 - 103). Con đã đọc đúng năm trong ngoặc.",
+    "scaffold": "Sách viết «Ông Mẫu A (101 - 103)» — mình cùng đọc lại dòng đó rồi đi tiếp nhé.",
+    "keySource": "prose-dated-events-v1 — block 05-sgk-lich-su-va-dia-li-5:p039:synthetic:008 (SGK trang 37); KHÔNG phải SGV"
+   },
+   {
+    "type": "ask",
+    "id": "q2",
+    "prompt": "Theo sách, Bà Mẫu B và Ông Mẫu C - Bà Mẫu D — cuộc nào diễn ra trước?",
+    "promptBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008",
+    "options": [
+     "Bà Mẫu B",
+     "Ông Mẫu C - Bà Mẫu D"
+    ],
+    "acceptable": [
+     "^bà\\s*mẫu\\s*b$",
+     "bà\\s*mẫu\\s*b"
+    ],
+    "hints": [
+     "So hai năm trong ngoặc sau mỗi tên trong đoạn sách — số nhỏ hơn là sớm hơn.",
+     "Cả hai tên nằm trong cùng đoạn ở SGK trang 37."
+    ],
+    "feedbackMatched": "Khớp với sách: Bà Mẫu B (205) diễn ra trước.",
+    "scaffold": "Sách ghi Bà Mẫu B (205) và Ông Mẫu C - Bà Mẫu D (310 - 320) — năm nhỏ hơn là sớm hơn. Mình đi tiếp nhé.",
+    "keySource": "prose-dated-events-v1 — so sánh yearStart của hai sự kiện trong block 05-sgk-lich-su-va-dia-li-5:p039:synthetic:008; KHÔNG phải SGV"
+   },
+   {
+    "type": "ask",
+    "id": "q3",
+    "prompt": "Theo câu chuyện «CHUYỆN MẪU VỀ ÔNG MẪU A», cuộc khởi nghĩa ấy đã chứng tỏ điều gì?",
+    "promptBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:013",
+    "options": [],
+    "acceptable": [
+     "bất\\s*khuất",
+     "tiền\\s*đề",
+     "tinh\\s*thần"
+    ],
+    "hints": [
+     "Con đọc câu cuối của câu chuyện — câu nói về ý nghĩa, không phải diễn biến.",
+     "Câu đó nằm ngay trên dòng «(Theo …)» ở SGK trang 37."
+    ],
+    "feedbackMatched": "SAM thấy câu trả lời của con có ý sách nêu ở câu kết. (Đây là kịch bản thử nghiệm; thầy cô mới là người xác nhận.)",
+    "scaffold": "Ý ở câu kết của câu chuyện — mình đọc lại câu đó rồi đi tiếp nhé.",
+    "keySource": "story-attribution-v1 — câu kết 05-sgk-lich-su-va-dia-li-5:p039:synthetic:013 của câu chuyện có nguồn 05-sgk-lich-su-va-dia-li-5:p039:synthetic:014; KHÔNG phải SGV"
+   },
+   {
+    "type": "explain",
+    "id": "e2",
+    "mascot": "sam-explain",
+    "sourceBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:014",
+    "text": "Câu chuyện «CHUYỆN MẪU VỀ ÔNG MẪU A» được sách kể theo một nguồn khác — dòng «(Theo …)» cuối câu chuyện cho biết nguồn ấy (NXB Mẫu, 2000). Khi kể lại cho bạn, con cũng nói rõ mình kể theo sách nào nhé."
+   },
+   {
+    "type": "ask",
+    "id": "q4",
+    "prompt": "[MẪU] 1. Hãy vẽ và hoàn thiện trục thời gian (theo gợi ý dưới đây vào vở) thể hiện một số cuộc đấu tranh mẫu.",
+    "promptBlockId": "05-sgk-lich-su-va-dia-li-5:p041:synthetic:017",
+    "options": [],
+    "acceptable": [
+     "(bà\\s*mẫu\\s*b|ông\\s*mẫu\\s*c\\s*[-–—]\\s*bà\\s*mẫu\\s*d|ông\\s*mẫu\\s*e).{0,40}\\b(205|310|398)\\b"
+    ],
+    "hints": [
+     "Trục bắt đầu bằng Ông Mẫu A (101 - 103) và kết thúc bằng năm 450 — con chọn các cuộc ở giữa theo thứ tự năm, ghi tên kèm năm.",
+     "Các cuộc đấu tranh và năm nằm trong đoạn sách ở SGK trang 37."
+    ],
+    "feedbackMatched": "SAM thấy con ghi đúng một cặp «tên — năm» có trong sách. Con kiểm thứ tự trên trục trong phần Trực quan nhé.",
+    "scaffold": "Mình mở phần Trực quan: dòng thời gian xếp sẵn các cuộc theo năm sách nêu — con chép lại vào vở rồi đi tiếp nhé.",
+    "keySource": "prose-dated-events-v1 — các cặp tên/năm từ block 05-sgk-lich-su-va-dia-li-5:p039:synthetic:008; kiểm thứ tự bằng TimelineValidator; KHÔNG phải SGV"
+   },
+   {
+    "type": "next",
+    "id": "n1",
+    "label": "Xem dòng thời gian trong Trực quan",
+    "target": "visual",
+    "anchorBlockId": "05-sgk-lich-su-va-dia-li-5:p039:synthetic:008"
+   }
+  ]
+ }
+}

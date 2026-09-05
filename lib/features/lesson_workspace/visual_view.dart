@@ -26,6 +26,7 @@ import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/semantic_data.dart';
+import 'views/timeline_view.dart';
 import 'widgets/source_sheet.dart';
 import 'widgets/trust_sheet.dart';
 
@@ -260,7 +261,13 @@ class _VisualViewState extends State<VisualView> {
         ProcessSemantic() => _process(s),
         ComparisonSemantic() => _comparison(s),
         ConceptMapSemantic() => _conceptMap(s),
-        TimelineSemantic() => _timeline(s),
+        // Round 4 (Lane C, Golden Slice #2): renderer Lịch sử — mốc + nguồn kể
+        // chuyện + thử xếp thứ tự (TimelineValidator), views/timeline_view.dart.
+        TimelineSemantic() => TimelineView(
+          doc: widget.doc,
+          semantic: s,
+          onOpenSource: _openSource,
+        ),
       },
       const SizedBox(height: WalSpacing.md),
       _why(s),
@@ -730,68 +737,6 @@ class _VisualViewState extends State<VisualView> {
         ),
       );
 
-  // ── Timeline: trục dọc + mốc ──
-  Widget _timeline(TimelineSemantic s) => Column(
-    key: const Key('visual-timeline'),
-    children: [
-      for (var i = 0; i < s.events.length; i++)
-        InkWell(
-          onTap: () => _openSource(s.events[i].sourceBlockId),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  width: 28,
-                  child: CustomPaint(
-                    painter: _TimelinePainter(
-                      first: i == 0,
-                      last: i == s.events.length - 1,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: WalSpacing.sm),
-                Expanded(
-                  child: _card(
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          s.events[i].when,
-                          style: const TextStyle(
-                            fontSize: WalType.secondary,
-                            fontWeight: FontWeight.w700,
-                            color: WalColors.primaryText,
-                          ),
-                        ),
-                        Text(
-                          s.events[i].title,
-                          style: const TextStyle(
-                            fontSize: WalType.body,
-                            fontWeight: FontWeight.w600,
-                            color: WalColors.ink,
-                          ),
-                        ),
-                        if (s.events[i].text != null)
-                          Text(
-                            s.events[i].text!,
-                            style: const TextStyle(
-                              fontSize: WalType.secondary,
-                              color: WalColors.ink,
-                              height: 1.4,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-    ],
-  );
-
   // ── Bảng tóm tắt (fallback) ──
   Widget _summary(LessonDocument doc) {
     final blocks = VisualView.summaryBlocks(doc);
@@ -895,33 +840,4 @@ class _SpokePainter extends CustomPainter {
   @override
   bool shouldRepaint(_SpokePainter old) =>
       old.count != count || old.hubX != hubX || old.leafX != leafX;
-}
-
-/// Trục dọc + chấm mốc của dòng thời gian.
-class _TimelinePainter extends CustomPainter {
-  const _TimelinePainter({required this.first, required this.last});
-  final bool first, last;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final line = Paint()
-      ..color = WalColors.primary500.withValues(alpha: 0.5)
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    const x = 14.0;
-    const dotY = 22.0;
-    if (!first) canvas.drawLine(const Offset(x, 0), const Offset(x, dotY), line);
-    if (!last) {
-      canvas.drawLine(const Offset(x, dotY), Offset(x, size.height), line);
-    }
-    canvas.drawCircle(
-      const Offset(x, dotY),
-      7,
-      Paint()..color = WalColors.primary500,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_TimelinePainter old) =>
-      old.first != first || old.last != last;
 }
