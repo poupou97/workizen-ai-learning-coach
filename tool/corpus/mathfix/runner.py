@@ -97,10 +97,14 @@ def page_report(book, page, sdm=None, dpi=300):
 
         # The canonical object. A refused region still produces one — named, boxed, crop-bearing —
         # so a consumer knows a FORMULA was withheld here rather than reading «empty, no letters».
+        # The AST is attached whenever the VALIDATORS confirmed it, even where the block's other
+        # withhold reasons keep it out of service: whether a structure is sound and whether a block
+        # is eligible to be served are two different questions, and conflating them would hide the
+        # first behind the second.
         expr = X.MathExpression(
             source_block_id=blk.get('id'), book=book, page_pdf=page,
             page_printed=sdm.get('printed_page'), bbox=tuple(bbox),
-            ast=(cand.ast if row['disposition'] == 'VALIDATED REPAIR' else None),
+            ast=(cand.ast if verdict == 'RESTORE' else None),
             observations=tuple(X.TokenGeometry(
                 text=o.get('text', ''), bbox=tuple(o['bbox']),
                 source=('apple-vision-ocr-line' if o['kind'] == 'ocr_line' else 'page-raster-300dpi'),
