@@ -38,7 +38,7 @@ class _ThrowingStore implements LearnerStore {
       throw StateError('⭐⭐ BOUNDARY VIOLATION: workspace ghi kho qua $op');
 
   @override
-  Future<void> appendSession(LearningSession s) async => _boom('appendSession');
+  Future<bool> appendSession(LearningSession s) async => _boom('appendSession');
   @override
   Future<void> saveProfile(LearnerProfile p) async => _boom('saveProfile');
   @override
