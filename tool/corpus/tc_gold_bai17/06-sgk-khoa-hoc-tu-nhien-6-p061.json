@@ -1,0 +1,33 @@
+{
+  "book": "06-sgk-khoa-hoc-tu-nhien-6",
+  "page": 61,
+  "printed_page": 60,
+  "grade": 6,
+  "subject": "KHTN",
+  "docType": "SGK",
+  "gold_set": "bai17-2026-09-05",
+  "held_out": false,
+  "why": "WAL-210 Founder addendum: showcase lesson KHTN 6 Bài 17 «Tách chất khỏi hỗn hợp» — lesson opener (banner, MỤC TIÊU box, hand-icon opening activity, section I, photo pair with sub-captions, ?-icon question box)",
+  "features": ["lesson_start", "colored_box", "figure", "question_block", "objective_box", "activity_icon"],
+  "lesson": {"number": 17, "title": "Tách chất khỏi hỗn hợp", "note": "page is the lesson start (Bài 17 banner)"},
+  "annotator": "Claude (WAL-210 B-lane) reading tc_render 100 dpi grid image; roles per the TC-v1 gold convention (KNTT hand icon = activity, ? bubble box = question, MỤC TIÊU bullets = objective); bbox by eye ±0.03; anchors only (D4)",
+  "blocks": [
+    {"id": "b01", "order": 1, "role": "heading", "bbox": [0.08, 0.06, 0.13, 0.06], "anchor": "Bài 17"},
+    {"id": "b02", "order": 2, "role": "heading", "bbox": [0.25, 0.06, 0.5, 0.04], "anchor": "TÁCH CHẤT KHỎI HỖN HỢP"},
+    {"id": "b03", "order": 3, "role": "heading", "bbox": [0.24, 0.15, 0.1, 0.02], "anchor": "MỤC TIÊU"},
+    {"id": "b04", "order": 4, "role": "objective", "bbox": [0.24, 0.17, 0.65, 0.04], "anchor": "Trình bày được một số cách đơn giản"},
+    {"id": "b05", "order": 5, "role": "objective", "bbox": [0.24, 0.21, 0.65, 0.04], "anchor": "Sử dụng được một số dụng cụ và"},
+    {"id": "b06", "order": 6, "role": "activity", "bbox": [0.12, 0.275, 0.7, 0.02], "anchor": "Từ xưa có câu: “Đãi cát tìm vàng”"},
+    {"id": "b07", "order": 7, "role": "heading", "bbox": [0.09, 0.32, 0.35, 0.03], "anchor": "Nguyên tắc tách chất"},
+    {"id": "b08", "order": 8, "role": "body", "bbox": [0.12, 0.35, 0.76, 0.04], "anchor": "Trong tự nhiên và cuộc sống, ta gặp"},
+    {"id": "b09", "order": 9, "role": "caption", "bbox": [0.12, 0.69, 0.22, 0.04], "anchor": "Phù sa trong nước sông lắng xuống"},
+    {"id": "b10", "order": 10, "role": "caption", "bbox": [0.46, 0.69, 0.33, 0.02], "anchor": "Làm bay hơi nước biển, thu được"},
+    {"id": "b11", "order": 11, "role": "caption", "bbox": [0.26, 0.735, 0.45, 0.02], "anchor": "Hình 17.1 Một số hiện tượng tách chất"},
+    {"id": "b12", "order": 12, "role": "body", "bbox": [0.12, 0.78, 0.41, 0.1], "anchor": "Trong các ví dụ ở Hình 17.1, hạt phù sa"},
+    {"id": "b13", "order": 13, "role": "question", "bbox": [0.61, 0.78, 0.3, 0.07], "anchor": "1. Trên thực tế em thường gặp chất tinh khiết"},
+    {"id": "b14", "order": 14, "role": "question", "bbox": [0.61, 0.86, 0.3, 0.05], "anchor": "2. Lấy một số ví dụ về quá trình tách chất"},
+    {"id": "b15", "order": 15, "role": "page_number", "bbox": [0.09, 0.955, 0.03, 0.015], "anchor": "60"}
+  ],
+  "flex_groups": [],
+  "critical": ["b06 is an opening ACTIVITY (orange hand icon, orange-outlined box) phrased as a question — the pipeline labels it question", "b13/b14 sit in the orange-tinted ? box: questions", "b09/b10 are photo sub-captions, not body"]
+}
