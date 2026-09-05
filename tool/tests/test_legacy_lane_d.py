@@ -454,6 +454,26 @@ class RerunDeltaTests(unittest.TestCase):
         self.assertEqual(t[0]['verdictTransferredFrom']['pipeline'], 'legacy-b1')
         self.assertIn('identical', t[0]['verdictTransferredFrom']['rule'])
 
+    def test_withheld_regions_are_followed_too_so_over_withholding_can_be_measured(self):
+        """A re-run that only counts rescued rows would score a build that withholds everything as perfect."""
+        base = [_row('w-1', served=False, kind='body'), _row('w-2', served=False), _row('s-1', served=True)]
+        for r in base:
+            r.update(pagePdf=81, bbox=[0.1, 0.1, 0.2, 0.1], source=dict(kind='tsl', bbox=[0.1, 0.1, 0.2, 0.1]), text=None)
+            r['withheldReasons'] = ['page_feature:color_heavy']
+        base[1]['bbox'] = base[1]['source']['bbox'] = [0.5, 0.5, 0.2, 0.1]
+        base[2]['text'] = 'x'
+        d = tempfile.mkdtemp(dir=_SANDBOX)
+        common.dump_json(dict(boundary=dict(pages=[81]),
+                              blocks=[dict(id='n1', page=81, bbox=[0.1, 0.1, 0.2, 0.1], text='now served', role=dict(value='body'), order=0)],
+                              withheld=[dict(id='w9', page=81, bbox=[0.5, 0.5, 0.2, 0.1], reasons=['agree_text'], order=0)]),
+                         f'{d}/tcroot/poc-out/trusted-corpus/tc-v2/p/lessons/04-sgk-toan-4-tap-hai/bai-61.tsl.json')
+        rec = rerun.recovered(base, d, 'p')
+        self.assertEqual(rec['reviewed'], 2)                                # only the withheld rows, not the served one
+        self.assertEqual(rec['now_served'], 1)
+        self.assertEqual(rec['outcomes'], {'now_served': 1, 'now_withheld': 1})
+        self.assertEqual(rec['by_base_reason']['page_feature:color_heavy'], {'reviewed': 2, 'now_served': 1})
+        self.assertNotIn('still_trusted_identical', rec['outcomes'])         # a withheld row served no text to compare
+
     def test_coverage_reports_the_price_paid_in_withholding(self):
         d = tempfile.mkdtemp(dir=_SANDBOX)
         common.dump_json(dict(pipeline='tc2-p2'), f'{d}/run-manifest.json')
