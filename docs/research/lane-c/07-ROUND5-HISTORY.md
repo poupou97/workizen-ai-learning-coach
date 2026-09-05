@@ -23,7 +23,7 @@ Evidence (gitignored): `poc-out/round5/lane-c/tc2-lsdl5/v1/` — `root/…/tc2-r
 
 Book-level withhold reasons moved as much as the totals: `agree_tones` **0 → 179**, `agree_order` 21 → 63, `agree_numbers` 0 → 22, `line_structure` 0 → 4, `chem_guard` 0 → 1, while `page_feature:color_heavy` fell 23 → 10. **Trusted text fell by 243 blocks book-wide.** That is the round-4 third signal doing exactly what it was built to do, and it is the reason round 5's priority is repair, not more withholding.
 
-**The five Lane C requests from round 4 all landed.** Block-level colour released the whole white column of the opener page (p038: 7 / 21 learning blocks trusted → **13 / 21**, and 0 / 15 of its learning TEXT → 9 / 15; colour withholds 14 → 4); the `Ã` character class found the five missing headers; the `attribution` role exists (4 on Bài 8, 31 across the book); the `figure_dependent` guard now catches «quan sát các hình từ 1 đến 3»; `Chủ đề` chapters parse; both gold errata are fixed.
+**The five Lane C requests from round 4 all landed.** Block-level colour released the whole white column of the opener page (p038: 7 / 21 learning blocks trusted → **13 / 21**, and 0 / 15 of its learning TEXT → 9 / 15; colour withholds 14 → 4); the `Ã` character class found the five missing headers; the `attribution` role exists (4 trusted on Bài 8, **36** across the book, from which `story-attribution-v1` derives 31 attributions); the `figure_dependent` guard now catches «quan sát các hình từ 1 đến 3»; `Chủ đề` chapters parse; both gold errata are fixed.
 
 ### The 10 blocks that came back and the 8 that left
 
