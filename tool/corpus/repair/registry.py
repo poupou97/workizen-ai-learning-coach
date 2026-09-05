@@ -28,6 +28,8 @@ from collections import defaultdict
 _REPAIRERS = defaultdict(list)      # failure_class -> [(order, id, fn)]
 _VALIDATORS = defaultdict(list)     # failure_class -> [(order, id, fn)]
 _SIGNALS = {}                       # signal_id -> fn
+_TOKEN_PROVIDERS = []               # extra per-token signal providers (Lane A4 registers here)
+_BLOCK_PROVIDERS = []               # extra per-block signal providers
 
 
 class DuplicatePlugin(ValueError):
@@ -76,6 +78,57 @@ def signal(signal_id):
     return deco
 
 
+def token_signal_provider(provider_id):
+    """**Extension point for another lane (A4).** Register a callable
+    `fn(observed, proposed, ctx) -> Signal | [Signal] | None` that is consulted for every token a repairer
+    is about to change. Use it to add cross-corpus consistency, an LLM anomaly reading (candidate only,
+    never truth) or an external authority - without forking the repairer.
+
+    A provider that returns an `objects` Signal **vetoes** the repair, exactly like a built-in one. There is
+    no precedence order between providers and no trust ladder: a signal counts by its layer, its
+    independence and its evidence, never by who produced it."""
+    def deco(fn):
+        fn.provider_id = provider_id
+        _TOKEN_PROVIDERS.append((provider_id, fn))
+        return fn
+    return deco
+
+
+def block_signal_provider(provider_id):
+    """As above, but consulted once per candidate block with `fn(observed_text, proposed_text, ctx)`."""
+    def deco(fn):
+        fn.provider_id = provider_id
+        _BLOCK_PROVIDERS.append((provider_id, fn))
+        return fn
+    return deco
+
+
+def _run_providers(providers, *args):
+    out = []
+    for pid, fn in providers:
+        try:
+            r = fn(*args)
+        except Exception as e:                      # a provider must never take the pipeline down
+            out.append(('error', pid, str(e)))
+            continue
+        if r is None:
+            continue
+        out.extend(r if isinstance(r, (list, tuple)) else [r])
+    return [s for s in out if not isinstance(s, tuple)]
+
+
+def token_signals(observed, proposed, ctx):
+    return _run_providers(_TOKEN_PROVIDERS, observed, proposed, ctx)
+
+
+def block_signals(observed_text, proposed_text, ctx):
+    return _run_providers(_BLOCK_PROVIDERS, observed_text, proposed_text, ctx)
+
+
+def providers():
+    return dict(token=[p for p, _ in _TOKEN_PROVIDERS], block=[p for p, _ in _BLOCK_PROVIDERS])
+
+
 def repairers_for(failure_class):
     return [fn for _, _, fn in _REPAIRERS.get(failure_class, ())]
 
@@ -100,6 +153,7 @@ def describe():
                                   validators=[pid for _, pid, _ in _VALIDATORS.get(fc, ())])
                          for fc in failure_classes()},
         signals=sorted(_SIGNALS),
+        providers=providers(),
     )
 
 
@@ -108,17 +162,21 @@ def reset():
     _REPAIRERS.clear()
     _VALIDATORS.clear()
     _SIGNALS.clear()
+    _TOKEN_PROVIDERS.clear()
+    _BLOCK_PROVIDERS.clear()
 
 
 def snapshot():
     """Tests only: (repairers, validators, signals) deep copy for save/restore around a test."""
     return ({k: list(v) for k, v in _REPAIRERS.items()},
             {k: list(v) for k, v in _VALIDATORS.items()},
-            dict(_SIGNALS))
+            dict(_SIGNALS), list(_TOKEN_PROVIDERS), list(_BLOCK_PROVIDERS))
 
 
 def restore(snap):
-    r, v, s = snap
+    r, v, s, tp, bp = snap
     _REPAIRERS.clear(); _REPAIRERS.update({k: list(x) for k, x in r.items()})
     _VALIDATORS.clear(); _VALIDATORS.update({k: list(x) for k, x in v.items()})
     _SIGNALS.clear(); _SIGNALS.update(s)
+    _TOKEN_PROVIDERS[:] = tp
+    _BLOCK_PROVIDERS[:] = bp

@@ -136,10 +136,11 @@ class EnginePolicyTests(_Registered):
                                         detected=dict(what='demo'))
         registry.repairer('vi_text', 'demo')(fn)
 
-    def test_no_validator_means_the_repair_stays_a_candidate_and_the_block_is_withheld(self):
+    def test_no_validator_means_the_repair_stays_a_candidate_and_the_block_is_not_served(self):
         self._propose()
         out = engine.RepairEngine().run_block(self._ctx())
-        self.assertEqual(out.disposition, model.Disposition.WITHHELD)
+        self.assertEqual(out.disposition, model.Disposition.SUSPECT)
+        self.assertNotIn(out.disposition, model.Disposition.SERVABLE)
         self.assertFalse(out.restorable)
         self.assertEqual(len(out.candidates), 1)
 
@@ -147,14 +148,28 @@ class EnginePolicyTests(_Registered):
         self._propose()
         registry.validator('vi_text', 'v')(lambda c, ctx: model.ValidationResult('v', model.Verdict.INSUFFICIENT))
         out = engine.RepairEngine().run_block(self._ctx())
+        self.assertEqual(out.disposition, model.Disposition.SUSPECT)
+        self.assertNotIn(out.disposition, model.Disposition.SERVABLE)
+
+    def test_a_withheld_block_whose_repair_is_not_confirmed_stays_withheld(self):
+        self._propose()
+        out = engine.RepairEngine().run_block(self._ctx(model.Disposition.WITHHELD, ('agree_tones',)))
         self.assertEqual(out.disposition, model.Disposition.WITHHELD)
+
+    def test_contradicting_evidence_produces_CONFLICT_not_a_quiet_withhold(self):
+        self._propose(signals=(model.Signal('D.consistency', 'objects', 1.0),))
+        registry.validator('vi_text', 'v')(lambda c, ctx: model.ValidationResult('v', model.Verdict.REJECTED))
+        out = engine.RepairEngine().run_block(self._ctx())
+        self.assertEqual(out.disposition, model.Disposition.CONFLICT)
+        self.assertEqual([s.signal_id for s in out.candidates[0].contradicting()], ['D.consistency'])
+        self.assertEqual(out.candidates[0].to_json()['contradictory_evidence'][0]['verdict'], 'objects')
 
     def test_one_rejection_beats_any_number_of_validations(self):
         self._propose()
         registry.validator('vi_text', 'yes')(lambda c, ctx: model.ValidationResult('yes', model.Verdict.VALIDATED))
         registry.validator('vi_text', 'no')(lambda c, ctx: model.ValidationResult('no', model.Verdict.REJECTED))
         out = engine.RepairEngine().run_block(self._ctx())
-        self.assertEqual(out.disposition, model.Disposition.WITHHELD)
+        self.assertNotIn(out.disposition, model.Disposition.SERVABLE)
 
     def test_a_validated_repair_of_a_withheld_block_is_restorable(self):
         self._propose(covers=('agree_tones',))
@@ -176,11 +191,37 @@ class EnginePolicyTests(_Registered):
         self.assertIn('math_guard', out.reasons)
         self.assertFalse(out.restorable)
 
-    def test_a_detected_but_unrepaired_failure_withholds_a_trusted_block(self):
+    def test_a_detected_but_unrepaired_failure_stops_serving_a_trusted_block(self):
         self._propose()
         registry.validator('vi_text', 'v')(lambda c, ctx: model.ValidationResult('v', model.Verdict.INSUFFICIENT))
         out = engine.RepairEngine().run_block(self._ctx(model.Disposition.TRUSTED))
-        self.assertEqual(out.disposition, model.Disposition.WITHHELD)
+        self.assertNotIn(out.disposition, model.Disposition.SERVABLE)
+
+    def test_the_addendum_names_map_onto_the_existing_states(self):
+        self.assertEqual(model.Disposition.check('RAW'), model.Disposition.ORIGINAL_OBSERVATION)
+        self.assertEqual(model.Disposition.check('CORRECTION_PROPOSED'), model.Disposition.REPAIRED_CANDIDATE)
+        for extra in ('SUSPECT', 'HUMAN_VERIFIED', 'CONFLICT'):
+            self.assertEqual(model.Disposition.check(extra), extra)
+            self.assertNotIn(extra, model.Disposition.SERVABLE)
+
+    def test_another_lane_can_veto_a_repair_through_the_provider_hook(self):
+        seen = []
+
+        @registry.token_signal_provider('a4.demo')
+        def provider(observed, proposed, ctx):
+            seen.append((observed, proposed))
+            return model.Signal('A4.cross_corpus', 'objects', 1.0, dict(why='demo veto'))
+
+        self.assertEqual(registry.describe()['providers']['token'], ['a4.demo'])
+        sig = registry.token_signals('a', 'b', None)
+        self.assertEqual([s.verdict for s in sig], ['objects'])
+        self.assertEqual(seen, [('a', 'b')])
+
+    def test_a_provider_that_raises_cannot_take_the_run_down(self):
+        @registry.token_signal_provider('a4.broken')
+        def provider(observed, proposed, ctx):
+            raise RuntimeError('boom')
+        self.assertEqual(registry.token_signals('a', 'b', None), [])
 
     def test_a_block_with_nothing_detected_keeps_its_pipeline_disposition(self):
         out = engine.RepairEngine().run_block(self._ctx(model.Disposition.TRUSTED))

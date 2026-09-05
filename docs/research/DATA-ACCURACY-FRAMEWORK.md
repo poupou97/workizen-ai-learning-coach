@@ -25,19 +25,38 @@ Two rules are absolute and are enforced in code, not in prose:
    mapping raises on write. A repaired value lives in the *ledger*, beside the observations it came from —
    it never replaces them.
 
-## 2. The seven dispositions (`model.Disposition`)
+## 2. The dispositions (`model.Disposition`)
 
 | disposition | meaning | may be served to a child |
 |---|---|---|
-| `ORIGINAL_OBSERVATION` | what one source actually produced; immutable, forever | no |
-| `REPAIRED_CANDIDATE` | a proposal, from any generator including an LLM | **no** |
+| `ORIGINAL_OBSERVATION` (alias `RAW`) | what one source actually produced; immutable, forever | no |
+| `REPAIRED_CANDIDATE` (alias `CORRECTION_PROPOSED`) | a proposal, from any generator including an LLM | **no** |
 | `VALIDATED_REPAIR` | a candidate an independent validator confirmed | not until restored |
 | `TRUSTED` | eligible to be served — still behind the (non-existent) Founder trust gate | yes |
 | `WITHHELD` | detected wrong, or not confirmed | no |
+| `SUSPECT` | a failure was **detected** on a served block and no repair was confirmed | no |
+| `CONFLICT` | signals actively contradict each other and neither side is decisive | no |
+| `HUMAN_VERIFIED` | a person ruled on it — evidence with provenance, never an override | (as recorded) |
 | `LEGACY` | produced by a superseded pipeline; kept for comparison | no |
 | `SUPERSEDED` | replaced by a later disposition; kept, never deleted | no |
 
 `Disposition.SERVABLE == {TRUSTED}`. Nothing else is servable, and `check()` refuses an unknown string.
+
+**Mapping, not duplication** (Founder ACCURACY RECOVERY addendum). `RAW` and `CORRECTION_PROPOSED` are the
+addendum's names for states this model already expressed, so they are **aliases** — a ledger reader written
+against either vocabulary works. `SUSPECT`, `CONFLICT` and `HUMAN_VERIFIED` had **no** equivalent and were
+added. What was already covered elsewhere and is deliberately *not* duplicated: both stacks' text,
+`agreement`, `guards`, `trust` and `ocr_conf` live on the SDM block; `provenance`, `reasons` and `status`
+live on the TSL. The framework references them rather than copying them.
+
+**Contradicting evidence is first class.** `RepairCandidate.supporting()` / `.contradicting()` /
+`.abstaining()`, and `to_json()` emits `supporting_evidence` and `contradictory_evidence` side by side. A
+candidate is not a bag of reasons to say yes.
+
+**No trust ladder.** There is no `LLM < Internet < Human` precedence anywhere in this model, and none should
+be added. A signal counts by its **layer** (independence), its evidence and its provenance — not by who
+produced it. A human signal is `Signal('E.human', …)` with provenance like everything else, and it can be
+contradicted.
 
 ## 3. The types (`repair/model.py`)
 
@@ -163,7 +182,44 @@ block the ledger was opened with. That is the Founder's full trace,
 *only* supporting layer, i.e. how often the repair would not have been validated without it. Pass
 `validator_rule` to `table()` to ablate a layer and count what a run would have lost without it.
 
-## 9. What this framework does **not** do
+## 9. Structural groups — the group is the unit of disposition
+
+`repair/groups.py`. Founder audit defect 8: *withholding one option of a multiple-choice question leaves the
+served question **wrong**, not merely smaller.* So for blocks with structural siblings the group, not the
+block, is what gets a disposition:
+
+```python
+from repair import groups
+gs = groups.structural_groups(sdm)                 # question_options · figure_caption · table_rows · procedure_steps
+mut = groups.mutilated(gs, servable_by_id)         # groups that WOULD be served incomplete — a defect in itself
+groups.apply_group_rule(gs, servable_by_id, reasons, ledger=lg)   # serve the whole group or none of it
+```
+
+Groups are derived deterministically from the SDM's own roles and reading order; a block in no group keeps
+its own disposition exactly as before. `apply_group_rule` writes one immutable ledger row per group it
+resolves, keyed by `group_id`, so a group decision is as traceable as a block decision.
+
+Measured on the 54 gold pages: **tc2-p2 serves 7 mutilated structures**; the rule takes that to 0 at a cost
+of 20 blocks. Over-withholding can therefore *raise* the teaching-critical rate, not only lower coverage.
+
+## 10. Extension points — use these instead of forking
+
+| you need | call | note |
+|---|---|---|
+| a repairer for your failure class | `registry.repairer(fc, id)` | §5 |
+| a validator | `registry.validator(fc, id)` | §5 |
+| a deterministic numeric check | `repair.signals.numeric.register_provider(fn)` | **Lane A2's slot**; the default only guarantees no repair moved a digit |
+| an extra signal on every token a repairer is about to change | `registry.token_signal_provider(id)` → `fn(observed, proposed, ctx)` | **Lane A4**: cross-corpus, LLM-as-anomaly (candidate only), external authority |
+| an extra signal per candidate block | `registry.block_signal_provider(id)` → `fn(observed_text, proposed_text, ctx)` | as above |
+| the ledger, joined to the SDM | `ledger.read(path)`; `block_id` is **byte-identical** to the SDM/TSL block `id` | **Lane D / A3** |
+| per-block disposition for a gate | `repair-dispositions.jsonl` per run: `block_id · disposition · servable · trust · reasons · repair` | a gate must key on *validation*, never on the absence of a guard |
+| per-signal false-correction attribution | `engine.SignalContribution.by_signal()` → `false_corrections`, `false_correction_rate` per `signal_id` | **P0 metric** |
+
+A provider that returns an `objects` Signal **vetoes** the repair, exactly like a built-in one; a provider
+that raises is caught and ignored rather than taking the run down. If a hook you need is missing, ask for it
+— do not fork the framework.
+
+## 11. What this framework does **not** do
 
 - It does not set, imply or store a production trust threshold. `TRUSTED` here means «this repair was
   confirmed», not «this corpus may teach a child». The second gate does not exist and A1 did not create it.

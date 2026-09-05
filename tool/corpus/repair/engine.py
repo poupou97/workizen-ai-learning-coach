@@ -131,7 +131,14 @@ class RepairEngine:
             final, disp, restorable = best[0].proposed_value, model.Disposition.WITHHELD, False
             reasons = tuple(['repaired:' + best[0].rule_id, 'residual_withhold'] + residual)
         else:
-            final, disp, restorable = base_value, model.Disposition.WITHHELD, False
+            # A failure was DETECTED and nothing was confirmed. On a served block that is SUSPECT (and it
+            # is not served any more); on an already-withheld block it stays WITHHELD. CONFLICT is recorded
+            # when the evidence actively contradicts itself rather than merely being insufficient.
+            contradicted = any(c.contradicting() for c in candidates)
+            disp = (model.Disposition.CONFLICT if contradicted
+                    else (model.Disposition.SUSPECT if ctx.disposition == model.Disposition.TRUSTED
+                          else model.Disposition.WITHHELD))
+            final, restorable = base_value, False
             reasons = tuple(list(ctx.withhold_reasons) + ['detected_unrepaired:' + candidates[0].failure_class])
         entry = self.ledger.append(model.LedgerEntry(
             block_id=ctx.block_id, failure_class=(best[0].failure_class if best else candidates[0].failure_class),
@@ -189,8 +196,40 @@ class SignalContribution:
     def __init__(self):
         self.rows = []
 
-    def observe(self, candidate, validated, correct=None):
-        self.rows.append(dict(candidate=candidate, validated=bool(validated), correct=correct))
+    def observe(self, candidate, validated, correct=None, tokens_changed=0, tokens_right=0,
+                false_corrections=0):
+        """`false_corrections` is the token-level count the Founder called the number that matters most:
+        tokens this candidate changed that were ALREADY correct. It is attributed to every signal that
+        supported the candidate, so a signal cannot hide behind an aggregate."""
+        self.rows.append(dict(candidate=candidate, validated=bool(validated), correct=correct,
+                              tokens_changed=int(tokens_changed), tokens_right=int(tokens_right),
+                              false_corrections=int(false_corrections)))
+
+    def by_signal(self):
+        """The same accounting one level finer - per `signal_id` rather than per layer - so «which of the
+        three layer-A sub-signals actually did the work» is answerable."""
+        from collections import defaultdict
+        agg = defaultdict(lambda: dict(consulted=0, supports=0, objects=0, abstains=0,
+                                       validated_with=0, right=0, wrong=0,
+                                       tokens_changed=0, tokens_right=0, false_corrections=0))
+        for r in self.rows:
+            for s in r['candidate'].supporting_signals:
+                a = agg[s.signal_id]
+                a['consulted'] += 1
+                a['supports'] += s.supports
+                a['objects'] += s.objects
+                a['abstains'] += (s.verdict == model.SignalVerdict.ABSTAINS)
+                if r['validated'] and s.supports:
+                    a['validated_with'] += 1
+                    a['right'] += (r['correct'] is True)
+                    a['wrong'] += (r['correct'] is False)
+                    a['tokens_changed'] += r.get('tokens_changed', 0)
+                    a['tokens_right'] += r.get('tokens_right', 0)
+                    a['false_corrections'] += r.get('false_corrections', 0)
+        for a in agg.values():
+            a['false_correction_rate'] = (round(a['false_corrections'] / a['tokens_changed'], 4)
+                                          if a['tokens_changed'] else None)
+        return {k: dict(v) for k, v in sorted(agg.items())}
 
     def table(self, validator_rule=None):
         from collections import defaultdict
@@ -217,5 +256,5 @@ class SignalContribution:
                     if validator_rule(cand, layer):
                         a['ablate_kept'] += 1
                     else:
-                        a['ablate_lost'] += 1
+                        a['ablate_lost'] += 1        # this layer was NECESSARY: without it the repair fails
         return {k: dict(v) for k, v in sorted(agg.items())}

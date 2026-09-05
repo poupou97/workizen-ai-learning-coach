@@ -244,9 +244,99 @@ MATH = tc_cascade.MATH
 #             («AgNO, 1%») or another element symbol («H,O»).
 UNIT_EXP = re.compile(r'(?<![A-Za-zÀ-ỹ])(?:m|cm|dm|km|mm)[23](?![\d.,])')
 CHEM = re.compile(r'\b(?:[A-Z][a-z]?){1,4}\d(?:[A-Z][a-z]?\d?)*\b|\b(?:[A-Z][a-z]?){1,3},\s*(?=\d+(?:[.,]\d+)?\s*%)|\b[A-Z][a-z]?,[A-Z][a-z]?\b')
+
+# Round 5 (Founder audit defect 7: «chem_guard blocks a Physics heading»). The CHEM pattern above matches
+# any capital-plus-digit run, so on the 54 gold pages it fired 5 times and was WRONG all 5: «A4» (a paper
+# size), «B1» (a vitamin), «D0» / «S0» / «NA1» (map labels). Guard precision 0/5.
+# The fix makes the mechanism DISCRIMINATE - it does not loosen it. A flattened chemical formula still
+# withholds; a capital next to a digit no longer does. Three deterministic conditions, all of them facts
+# about chemical notation rather than thresholds:
+#   1. every letter run in the token must be a real element symbol;
+#   2. a printed subscript is never 0 and never 1, so «B1», «S0», «D0» cannot be formulas;
+#   3. a single-element formula needs a real subscript («O2», «N2», «Cl2»); anything else needs at least two
+#      element symbols («H2O», «AgNO3», «CaCO3»).
+# Where it genuinely cannot tell, it still withholds.
+ELEMENTS = frozenset("""H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga
+Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho
+Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr
+Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og""".split())
+_CHEM_PART = re.compile(r'([A-Z][a-z]?)|(\d+)')
+
+
+def chem_formula_like(token):
+    """True when `token` can be a chemical formula whose subscripts were flattened into digits."""
+    parts = _CHEM_PART.findall(token or '')
+    if not parts:
+        return False
+    consumed = ''.join(a or b for a, b in parts)
+    if consumed != re.sub(r'[^A-Za-z0-9]', '', token or ''):
+        return False
+    symbols = [a for a, b in parts if a]
+    digits = [b for a, b in parts if b]
+    if not symbols or not digits:
+        return False
+    if any(sym not in ELEMENTS for sym in symbols):
+        return False
+    if any(d in ('0', '1') or len(d) > 1 for d in digits):
+        return False          # a printed subscript is 2..9; «B1», «S0», «Fe203» are not formulas
+    return len(symbols) >= 2 or len(digits) >= 1 and len(symbols) == 1 and symbols[0] in ('H', 'N', 'O', 'F', 'C', 'S', 'P', 'I', 'Cl', 'Br')
+
+
+def chem_like(text):
+    """The guard's question: does this text carry a chemical formula whose subscript we cannot confirm?"""
+    t = text or ''
+    for m in CHEM.finditer(t):
+        g = m.group(0)
+        if ',' in g:
+            syms = [x for x in re.findall(r'[A-Z][a-z]?', g)]
+            if syms and all(x in ELEMENTS for x in syms):
+                return True          # «AgNO,» / «Ca, 5 %»: a comma where a subscript belongs
+            continue
+        if chem_formula_like(g):
+            return True
+    return False
 DIGIT_RUNS = re.compile(r'\d+')
 DIGITS = re.compile(r'^\d{1,3}$')
 LETTERS = re.compile(r'[A-Za-zÀ-ỹ]')
+
+
+def line_geometry(under_lines):
+    """The OCR lines that sit under a block, in printed order, with their own boxes and confidences.
+
+    Founder STEM §2: *«preserve per-line/per-token geometry through OCR → SDM → TSL → LessonDocument. Flat
+    text may remain as a projection, but must no longer be the only representation.»* This is the SDM end of
+    that: the block keeps its flat `text` exactly as before (nothing downstream changes), and gains the
+    geometry the flattening used to throw away - which is where `3/10 + 5/21` loses the structure that makes
+    it recoverable and where `10⁸` becomes `10°`.
+    """
+    out = []
+    for l in sorted(under_lines, key=lambda l: (round(l['y'], 3), l['x'])):
+        out.append(dict(text=l.get('text', ''), bbox=[round(l['x'], 5), round(l['y'], 5),
+                                                      round(l['w'], 5), round(l['h'], 5)],
+                        conf=l.get('conf')))
+    return out
+
+
+def token_geometry(lines):
+    """Per-token boxes. Apple Vision reports geometry per LINE, not per token, so a token box is an
+    **estimate**: the line's width shared out by character advance. It is marked `estimated: true` and must
+    never be presented as a measurement - but it is enough for a structured STEM model to ask «is this
+    digit a superscript?» (a token whose box sits in the upper band of its line) without a second
+    extraction pass.
+    """
+    out = []
+    for li, l in enumerate(lines):
+        t = l['text'] or ''
+        if not t.strip():
+            continue
+        x, y, w, h = l['bbox']
+        n = max(1, len(t))
+        adv = w / n
+        for m in re.finditer(r'\S+', t):
+            out.append(dict(text=m.group(0), line=li, estimated=True,
+                            bbox=[round(x + adv * m.start(), 5), round(y, 5),
+                                  round(adv * (m.end() - m.start()), 5), round(h, 5)]))
+    return out
 
 
 def upper_ratio(t):
@@ -288,7 +378,16 @@ def assign_role(b, ctx):
     if b['role'] == 'TABLE':
         return 'table', 'native', 0.95, ['docling table']
     if b['role'] == 'FORMULA':
-        return 'formula', 'native', 0.95, ['docling formula']
+        # Round 5 (Founder STEM §4). A *label* is not a validation. This used to hand back confidence 0.95
+        # on the strength of the word FORMULA, and `role_guards` then waived the math/unit/chem guards for
+        # that role - so the day Docling formula enrichment is switched on, formula recognition would
+        # silently become trusted teaching content. The label now yields a LOW confidence and the block is
+        # withheld (`formula_unvalidated`) until a structured, validated STEM representation exists
+        # (Lane A2's `formula_structured`). Dormant today - FORMULA recall is 0.000 - and it must stay
+        # dormant by construction, not by luck.
+        structured = bool(b.get('formula_structured'))
+        return ('formula', 'native', 0.95 if structured else 0.60,
+                ['docling formula'] + ([] if structured else ['structure NOT validated: label only']))
     if lab == 'footnote' or FOOTNOTE.match(t):
         return 'footnote', 'lexicon', 0.9, ['footnote mark']
     if ctx.get('inside_picture') and not (THEME_HDR.match(t) or (STAGE.match(t) and len(t) <= 45) or SIDEBAR_LABEL.match(t)):
@@ -606,7 +705,7 @@ COLOUR_HEAVY_EXEMPT = ('heading', 'stage_label', 'page_number', 'running_head', 
 # its continuation sentence, now also `caption`, stayed WITHHELD citing `page_feature:color_heavy` — a
 # reason that no longer applied to its final role. One authority, used by `build_page` and by the
 # re-derivation, so the two cannot drift.
-ROLE_DERIVED_GUARDS = frozenset({'empty_block', 'furniture', 'figure_text', 'math_guard', 'unit_guard', 'chem_guard',
+ROLE_DERIVED_GUARDS = frozenset({'empty_block', 'furniture', 'figure_text', 'math_guard', 'unit_guard', 'chem_guard', 'formula_unvalidated',
                                  'figure_dependent', 'answer_leak', 'teacher_text',
                                  'page_feature:color_heavy', 'page_feature:diagram', 'line_structure'})
 # Round 4, R7c (found by Lane D's measured re-run of legacy batch 1, newly reachable because the block-level
@@ -658,7 +757,14 @@ def verse_layout(under_lines, page_width):
     return ends <= VERSE_MAX_ENDS
 
 
-def role_guards(role, text, refers_figure, colour, features, inside_picture=False, verse=False):
+#: A role may waive the math / unit / chem guards only when a *validated structure* stands behind it.
+#: `formula` is no longer in this set on the strength of its label (Founder STEM §4); it re-enters only
+#: when the block carries `formula_structured=True`, which Lane A2's structured STEM path sets.
+STRUCTURED_EXEMPT = ('table', 'figure', 'empty')
+
+
+def role_guards(role, text, refers_figure, colour, features, inside_picture=False, verse=False,
+                formula_structured=False):
     """The guard reasons that depend on the block's role. Deterministic; withholds only, never repairs.
 
     `features` is the page census row (`color_heavy`, `diagram`); `colour` the block's own measured colour.
@@ -671,11 +777,14 @@ def role_guards(role, text, refers_figure, colour, features, inside_picture=Fals
         g.append('furniture')
     if role == 'figure_text':
         g.append('figure_text')
-    if role not in ('formula', 'table', 'figure', 'empty') and MATH.search(t):
+    exempt = STRUCTURED_EXEMPT + (('formula',) if formula_structured else ())
+    if role == 'formula' and not formula_structured:
+        g.append('formula_unvalidated')     # a FORMULA label alone never earns trust
+    if role not in exempt and MATH.search(t):
         g.append('math_guard')
-    if role not in ('formula', 'table', 'figure', 'empty') and UNIT_EXP.search(t):
+    if role not in exempt and UNIT_EXP.search(t):
         g.append('unit_guard')
-    if role not in ('formula', 'table', 'figure', 'empty', 'page_number', 'running_head') and CHEM.search(t):
+    if role not in exempt + ('page_number', 'running_head') and chem_like(t):
         g.append('chem_guard')
     if refers_figure and role in ('question', 'activity', 'instruction', 'teacher_prompt'):
         g.append('figure_dependent')
@@ -1108,7 +1217,9 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
         # verifier or the OCR and are not affected by a later role change.
         refers_fig = bool(FIG_REF.search(t))
         verse = verse_layout(under, ptw)
-        guards = role_guards(role, t, refers_fig, col, cen, inside_pic, verse)
+        _lg = line_geometry(under)
+        guards = role_guards(role, t, refers_fig, col, cen, inside_pic, verse,
+                             formula_structured=bool(b.get('formula_structured')))
         learning = role not in NON_LEARNING
         if not a['ok'] and role not in ('figure', 'empty', 'page_number', 'running_head'):
             if a['reason'] == 'agree_order' and role in FLEX_ROLES:
@@ -1138,7 +1249,11 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
                   agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok'], verifier_pos=a.get('vpos'), moved=a.get('moved', False), tone_disagreements=tones[:6]),
                   role=dict(value=role, coarse=COARSE.get(role, 'UNKNOWN'), method=method, confidence=round(rconf, 2), evidence=ev, verifier_hint=xy_hint, conflict=conflict),
                   guards=guards, trust=dict(status=status, reasons=withhold), learning=learning, refers_figure=refers_fig, heading_path=list(heading_path),
-                  lesson=None, cells=b.get('cells'))
+                  lesson=None, cells=b.get('cells'),
+                  # Founder STEM §2 - additive, backward-compatible: `text` above is the flat PROJECTION;
+                  # this is the geometry it was flattened from. Lane A2's structured math model reads it.
+                  geometry=dict(source='apple-vision lines (ocr-body)', lines=_lg, tokens=token_geometry(_lg),
+                                token_boxes='estimated by character advance within the line'))
         out_blocks.append(ob)
         prev_role = role; prev_text = t
     # post-passes: (1) box context for labels ordered after their content; (2) MCQ stem = enumerated body followed by an option
