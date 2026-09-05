@@ -16,6 +16,7 @@ import '../../app/theme/wal_tokens.dart';
 import '../../core/assets/learning_asset.dart';
 import '../shell/learning_asset_image.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
+import '../../core/student/evidence_ids.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../subjects/lesson_index.dart';
@@ -32,6 +33,9 @@ class MapReaderScreen extends StatefulWidget {
 }
 
 class _MapReaderScreenState extends State<MapReaderScreen> {
+  // ⭐ WAL-210 (audit C1): token PHIÊN sinh một lần lúc mở màn — mở lại
+  // cùng bài là phiên khác, id khác (đồng hồ máy, không ăn nhịp `now`).
+  final String _token = newEvidenceSessionToken(DateTime.now());
   bool _done = false;
 
   DiaMap get m => widget.map;
@@ -42,7 +46,10 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
     setState(() => _done = true);
     widget.onFinished?.call([
       LearningEvent(
-        eventId: '${m.book}:p${m.page}:map#0',
+        eventId: evidenceEventId(
+            exerciseId: '${m.book}:p${m.page}:map',
+            sessionToken: _token,
+            seq: 0),
         skillCaseId: 'dia-doc-ban-do',
         kind: EvidenceKind.independentAttempt,
         correct: null, // chỉ-trên-bản-đồ là việc của mắt/tay — SAM không chấm

@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/store/assistance_policy.dart';
+import '../../core/student/evidence_ids.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../subjects/lesson_index.dart';
@@ -58,6 +59,9 @@ class AssessmentScreen extends StatefulWidget {
 }
 
 class _AssessmentScreenState extends State<AssessmentScreen> {
+  // ⭐ WAL-210 (audit C1): token PHIÊN sinh một lần lúc mở màn — mở lại
+  // cùng bài là phiên khác, id khác (đồng hồ máy, không ăn nhịp `now`).
+  final String _token = newEvidenceSessionToken(DateTime.now());
   int _i = 0;
   final _ctrl = TextEditingController();
   final List<LearningEvent> _events = [];
@@ -71,19 +75,40 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     super.dispose();
   }
 
+  /// ⭐ WAL-210 (audit B.6 §3, «unknown-case must go»): bài KHÔNG quy
+  /// được về ca ⇒ KHÔNG chấm, KHÔNG sinh bằng chứng dưới một ca bịa. Trước
+  /// đây `skillCaseId ?? «unknown-case»` biến UNKNOWN thành một cái xô —
+  /// bằng chứng có chấm điểm treo dưới một ca không tồn tại. Nay câu đó
+  /// được bỏ qua và nói thật; không có sự kiện nào (kể cả participation —
+  /// participation cũng cần một ca thật để gắn vào).
+  bool get _caseUnknown => widget.items[_i].skillCaseId == null;
+
+  void _skipUnknownCase() {
+    setState(() {
+      _ctrl.clear();
+      _i++;
+    });
+    if (_i >= widget.items.length) {
+      widget.onFinished(List.unmodifiable(_events), List.unmodifiable(_answers));
+    }
+  }
+
   void _submit() {
     final e = widget.items[_i];
+    if (_caseUnknown) return _skipUnknownCase(); // phòng hờ — UI không mở ô
     final fp = FractionProblem.parse(e.expr);
     final raw = _ctrl.text.trim();
     if (raw.isEmpty) return;
     // fp == null ⇒ máy KHÔNG đọc được dạng bài ⇒ không dám chấm (fail closed).
     final ok = fp?.checkAnswer(raw);
     if (ok == null) return;
+    final skillCaseId = e.skillCaseId!; // _caseUnknown đã loại null phía trên
     setState(() {
       _answers.add(AssessmentAnswer(expr: e.expr, raw: raw, correct: ok));
       _events.add(LearningEvent(
-        eventId: '${e.book}:${e.expr}#$_i',
-        skillCaseId: e.skillCaseId ?? 'unknown-case',
+        eventId: evidenceEventId(
+            exerciseId: '${e.book}:${e.expr}', sessionToken: _token, seq: _i),
+        skillCaseId: skillCaseId,
         kind: EvidenceKind.independentAttempt,
         correct: ok,
         exerciseId: '${e.book}:${e.expr}',
@@ -164,14 +189,25 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                           color: WalColors.inkSoft)),
                 ],
                 const SizedBox(height: WalSpacing.md),
-                TextField(
-                  controller: _ctrl,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                      hintText: 'Đáp án của con',
-                      border: OutlineInputBorder()),
-                  onSubmitted: (_) => _submit(),
-                ),
+                if (_caseUnknown)
+                  // Cùng giọng với `adaptive_engine.decide` khi không biết ca
+                  // («Chưa xác định được dạng bài…») — không đỏ, không chấm.
+                  const Text(
+                      'Tớ chưa xác định được dạng bài này nên không chấm câu '
+                      'này — không tính vào kết quả. Mình sang câu tiếp nhé.',
+                      style: TextStyle(
+                          fontSize: WalType.body,
+                          color: WalColors.ink,
+                          height: 1.45))
+                else
+                  TextField(
+                    controller: _ctrl,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                        hintText: 'Đáp án của con',
+                        border: OutlineInputBorder()),
+                    onSubmitted: (_) => _submit(),
+                  ),
               ]),
             ),
             const SizedBox(height: WalSpacing.md),
@@ -180,7 +216,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
               child: FilledButton(
                 style: FilledButton.styleFrom(
                     backgroundColor: WalColors.primary500),
-                onPressed: _submit,
+                onPressed: _caseUnknown ? _skipUnknownCase : _submit,
                 child: Text(
                     _i == widget.items.length - 1 ? 'Nộp bài' : 'Câu tiếp theo',
                     style: const TextStyle(fontSize: WalType.body)),

@@ -23,6 +23,7 @@ import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/context/learning_context.dart';
 import '../../core/intent/learning_intent.dart';
+import '../../core/student/evidence_ids.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../../core/tutor/learning_activity.dart';
@@ -62,6 +63,9 @@ class ComposeLiteScreen extends StatefulWidget {
 enum _Stage { outline, draft, afterDraft, revise, done }
 
 class _ComposeLiteScreenState extends State<ComposeLiteScreen> {
+  // ⭐ WAL-210 (audit C1): token PHIÊN sinh một lần lúc mở màn — mở lại
+  // cùng bài là phiên khác, id khác (đồng hồ máy, không ăn nhịp `now`).
+  final String _token = newEvidenceSessionToken(DateTime.now());
   final _outlineCtrl = TextEditingController();
   final _draftCtrl = TextEditingController();
   final List<LearningEvent> _events = [];
@@ -89,7 +93,8 @@ class _ComposeLiteScreenState extends State<ComposeLiteScreen> {
     // Cửa DUY NHẤT của màn này — mọi chỗ gọi _emit đều qua đây.
     if (widget.learningContext.intent == LearningIntent.lookup) return;
     _events.add(LearningEvent(
-      eventId: '${a.activityId}#${_seq++}',
+      eventId: evidenceEventId(
+          exerciseId: a.activityId, sessionToken: _token, seq: _seq++),
       skillCaseId: a.skillCaseId ?? a.conceptId,
       kind: kind,
       // ⭐ Văn KHÔNG chấm đúng/sai: correct luôn null (UNKNOWN ≠ SAI).

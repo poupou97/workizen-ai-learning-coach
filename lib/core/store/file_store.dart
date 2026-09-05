@@ -38,9 +38,10 @@ class FileLearnerStore implements LearnerStore {
   }
 
   @override
-  Future<void> appendSession(LearningSession s) async {
-    await _mem.appendSession(s);
-    await _flush();
+  Future<bool> appendSession(LearningSession s) async {
+    final appended = await _mem.appendSession(s);
+    if (appended) await _flush(); // no-op thì không ghi lại cả tệp cho không
+    return appended;
   }
 
   @override

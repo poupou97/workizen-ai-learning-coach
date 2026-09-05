@@ -113,7 +113,12 @@ void main() {
     await t.pumpWidget(MaterialApp(
         home: AssessmentScreen(
             items: const [
-              CorpusExercise(expr: 'vẽ đoạn thẳng AB', book: 'b'),
+              // Có ca (nên ô đáp án mở) nhưng biểu thức KHÔNG parse được —
+              // đường fail-closed của BỘ CHẤM, khác đường ca-không-rõ (WAL-210).
+              CorpusExercise(
+                  expr: 'vẽ đoạn thẳng AB',
+                  book: 'b',
+                  skillCaseId: 'denominator-non-divisible'),
             ],
             onFinished: (e, _) => ev = e)));
     await t.enterText(find.byType(TextField), '5');
@@ -214,5 +219,77 @@ void main() {
     await t.pumpAndSettle();
     expect(find.textContaining('lượt hỗ trợ lọt vào'), findsOneWidget,
         reason: '⭐ nuốt vi phạm ⇒ kết luận rút ra từ phiên bẩn');
+  });
+
+  // ⭐⭐ WAL-210 (audit B.6 §3 / hole A): bài KHÔNG quy được về ca ⇒ không
+  // chấm, không sinh bằng chứng dưới ca bịa `'unknown-case'`.
+  group('WAL-210 — ca KHÔNG XÁC ĐỊNH: fail closed, không xô «unknown-case»', () {
+    testWidgets('⭐⭐ câu không có skillCaseId ⇒ nói thật, KHÔNG ô đáp án, '
+        'bỏ qua, KHÔNG sự kiện; câu có ca sau đó vẫn chấm bình thường',
+        (t) async {
+      List<LearningEvent> ev = const [];
+      List<AssessmentAnswer> ans = const [];
+      await t.pumpWidget(MaterialApp(
+          home: AssessmentScreen(
+              items: const [
+                // parse ĐƯỢC (máy chấm được) nhưng KHÔNG có ca ⇒ vẫn phải từ chối
+                CorpusExercise(expr: '1/2 + 1/3', book: '05-sgk-toan-5-tap-mot'),
+                CorpusExercise(
+                    expr: '1/2 - 1/5',
+                    book: '05-sgk-toan-5-tap-mot',
+                    skillCaseId: 'denominator-non-divisible',
+                    page: 21),
+              ],
+              now: () => DateTime(2026, 9, 5, 10),
+              onFinished: (e, a) {
+                ev = e;
+                ans = a;
+              })));
+      expect(find.textContaining('chưa xác định được dạng bài'), findsOneWidget,
+          reason: 'trạng thái trung thực, cùng giọng với decide()');
+      expect(find.byType(TextField), findsNothing,
+          reason: '⭐ đột biến vẫn mở ô đáp án cho ca không rõ ⇒ đỏ');
+      await t.tap(find.byType(FilledButton));
+      await t.pumpAndSettle();
+      // Sang câu có ca: chấm như thường.
+      expect(find.byType(TextField), findsOneWidget);
+      await t.enterText(find.byType(TextField), '3/10');
+      await t.tap(find.byType(FilledButton));
+      await t.pumpAndSettle();
+      expect(ev, hasLength(1),
+          reason: '⭐⭐ đột biến mint sự kiện cho câu không ca ⇒ 2 sự kiện ⇒ đỏ');
+      expect(ev.single.skillCaseId, 'denominator-non-divisible');
+      expect(ans, hasLength(1));
+      expect(ans.single.expr, '1/2 - 1/5');
+    });
+
+    testWidgets('mọi câu đều không có ca ⇒ kết thúc với 0 sự kiện, 0 đáp án',
+        (t) async {
+      List<LearningEvent>? ev;
+      await t.pumpWidget(MaterialApp(
+          home: AssessmentScreen(
+              items: const [
+                CorpusExercise(expr: '1/2 + 1/3', book: 'b'),
+              ],
+              onFinished: (e, _) => ev = e)));
+      await t.tap(find.byType(FilledButton));
+      await t.pumpAndSettle();
+      expect(ev, isEmpty,
+          reason: 'không ca thật ⇒ không bằng chứng nào, kể cả participation');
+    });
+
+    test('⭐ CẤU TRÚC: chuỗi «unknown-case» không còn ở bất kỳ đâu trong lib/',
+        () {
+      final hits = Directory('lib')
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'))
+          .where((f) => f.readAsStringSync().contains("'unknown-case'"))
+          .map((f) => f.path)
+          .toList();
+      expect(hits, isEmpty,
+          reason: '⭐ một ca bịa quay lại ⇒ bằng chứng chấm điểm treo dưới ca '
+              'không tồn tại (audit B.6 §3)');
+    });
   });
 }

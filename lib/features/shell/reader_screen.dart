@@ -21,6 +21,7 @@ import '../../app/theme/wal_tokens.dart';
 import '../../core/context/learning_context.dart';
 import '../../core/intent/learning_intent.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
+import '../../core/student/evidence_ids.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../../core/tutor/learning_activity.dart';
@@ -56,6 +57,9 @@ class ReaderScreen extends StatefulWidget {
 }
 
 class _ReaderScreenState extends State<ReaderScreen> {
+  // ⭐ WAL-210 (audit C1): token PHIÊN sinh một lần lúc mở màn — mở lại
+  // cùng bài là phiên khác, id khác (đồng hồ máy, không ăn nhịp `now`).
+  final String _token = newEvidenceSessionToken(DateTime.now());
   final List<LearningEvent> _events = [];
   bool _read = false; // trẻ đã tự xác nhận đọc xong đoạn văn
   int? _picked;
@@ -79,7 +83,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
     // đều qua đây, không hở chỗ nào.
     if (widget.learningContext.intent == LearningIntent.lookup) return;
     _events.add(LearningEvent(
-      eventId: '${a.activityId}#${_seq++}',
+      eventId: evidenceEventId(
+          exerciseId: a.activityId, sessionToken: _token, seq: _seq++),
       skillCaseId: a.skillCaseId ?? a.conceptId,
       kind: kind,
       correct: correct,

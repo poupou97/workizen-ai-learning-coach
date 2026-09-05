@@ -15,11 +15,15 @@ import '../../core/store/learning_session.dart';
 import '../../core/student/learning_evidence.dart';
 
 class RecordedSession {
-  const RecordedSession(this.session, this.violations);
+  const RecordedSession(this.session, this.violations, {this.appended = true});
   final LearningSession? session;
 
   /// Rỗng = sạch. Không rỗng = phiên thi bị nhiễm dạy học (F7).
   final List<LearningEvent> violations;
+
+  /// ⭐ WAL-210 (audit C3) — `false` khi kho đã có phiên cùng `sessionId`
+  /// (callback bắn hai lần / thử lại): không ghi thêm, không đếm kép.
+  final bool appended;
 }
 
 Future<RecordedSession> recordSession({
@@ -47,6 +51,6 @@ Future<RecordedSession> recordSession({
     events: events,
   );
   final violations = tutoringViolationsInExam(session);
-  await store.appendSession(session);
-  return RecordedSession(session, violations);
+  final appended = await store.appendSession(session);
+  return RecordedSession(session, violations, appended: appended);
 }

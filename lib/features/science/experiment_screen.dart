@@ -21,6 +21,7 @@ import '../../core/context/learning_context.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/pedagogy/pedagogy_model.dart' show TeachingAct;
 import '../../core/student/evidence_validator.dart';
+import '../../core/student/evidence_ids.dart';
 import '../../core/student/learning_evidence.dart';
 import '../subjects/lesson_index.dart';
 
@@ -48,6 +49,9 @@ class ExperimentScreen extends StatefulWidget {
 }
 
 class _ExperimentScreenState extends State<ExperimentScreen> {
+  // ⭐ WAL-210 (audit C1): token PHIÊN sinh một lần lúc mở màn — mở lại
+  // cùng bài là phiên khác, id khác (đồng hồ máy, không ăn nhịp `now`).
+  final String _token = newEvidenceSessionToken(DateTime.now());
   final _predictCtrl = TextEditingController();
   final _observeCtrl = TextEditingController();
   bool _predicted = false;
@@ -92,7 +96,8 @@ class _ExperimentScreenState extends State<ExperimentScreen> {
     final event = validateCandidateEvidence(
       candidate,
       context: widget.learningContext,
-      eventId: '${e.book}:p${e.page}#0',
+      eventId: evidenceEventId(
+          exerciseId: '${e.book}:p${e.page}', sessionToken: _token, seq: 0),
       at: _at(),
     );
     widget.onFinished?.call(event == null ? const [] : [event]);

@@ -19,6 +19,7 @@ library;
 
 import '../../core/curriculum/pedagogical_boundary.dart';
 import '../../core/curriculum/solvable_problem.dart';
+import '../../core/student/evidence_ids.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/student/mastery.dart';
@@ -51,11 +52,22 @@ class TutorSession {
     required this.problem,
     required this.scope,
     DateTime Function()? now,
+    String? sessionToken,
   })  : _now = now ?? DateTime.now,
-        log = EvidenceLog.empty(skillCaseId);
+        log = EvidenceLog.empty(skillCaseId) {
+    // ⭐ WAL-210 (audit C1): token sinh MỘT LẦN lúc mở phiên — mở lại cùng
+    // bài là phiên khác, id khác. Lấy từ ĐỒNG HỒ MÁY, không từ `now` tiêm
+    // vào: token chỉ cần DUY NHẤT, còn `now` là để test giữ tất định dấu
+    // thời gian sự kiện — không được "ăn" mất một nhịp của nó. Tiêm
+    // `sessionToken` khi cần id tất định.
+    this.sessionToken = sessionToken ?? newEvidenceSessionToken(DateTime.now());
+  }
 
   final String exerciseId;
   final String skillCaseId;
+
+  /// Định danh PHIÊN — phần làm cho `eventId` duy nhất giữa các lần mở.
+  late final String sessionToken;
 
   /// ⭐ WAL-168: phiên dạy KHÔNG mang kiểu của một môn. Trước đây trường này
   /// là `FractionProblem`, nên môn thứ hai không vào nổi runtime.
@@ -85,7 +97,8 @@ class TutorSession {
   String? _activeInterventionId;
 
   void _emit(EvidenceKind kind, bool? correct, {String? interventionId}) {
-    final id = '$exerciseId#${_seq++}';
+    final id = evidenceEventId(
+        exerciseId: exerciseId, sessionToken: sessionToken, seq: _seq++);
     final isAnswer = correct != null;
     log = log.append(LearningEvent(
       eventId: id,

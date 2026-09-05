@@ -21,6 +21,7 @@ import '../../app/theme/wal_tokens.dart';
 import '../../core/context/learning_context.dart';
 import '../../core/intent/learning_intent.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
+import '../../core/student/evidence_ids.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../subjects/lesson_index.dart';
@@ -76,6 +77,9 @@ class SourceReaderScreen extends StatefulWidget {
 }
 
 class _SourceReaderScreenState extends State<SourceReaderScreen> {
+  // ⭐ WAL-210 (audit C1): token PHIÊN sinh một lần lúc mở màn — mở lại
+  // cùng bài là phiên khác, id khác (đồng hồ máy, không ăn nhịp `now`).
+  final String _token = newEvidenceSessionToken(DateTime.now());
   final List<LearningEvent> _events = [];
   bool _readSource = false;
   int? _stance;
@@ -105,7 +109,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
     // trẻ vẫn thấy đúng luồng kết luận, chỉ không ghi thành bằng chứng.
     if (widget.learningContext.intent != LearningIntent.lookup) {
       _events.add(LearningEvent(
-        eventId: '${s.book}:p${s.page}#${_seq++}',
+        eventId: evidenceEventId(
+            exerciseId: '${s.book}:p${s.page}',
+            sessionToken: _token,
+            seq: _seq++),
         skillCaseId: 'su-doc-tu-lieu',
         kind: EvidenceKind.independentAttempt,
         correct: null, // ⭐ UNKNOWN ≠ SAI: kết luận sử không có một đáp án duy nhất
