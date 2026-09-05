@@ -109,6 +109,8 @@ class LessonNextAction {
       };
 }
 
+/// Luật A8 — thuần, tất định. [viewsSeen] là DẤU VẾT UI (trace) của phiên,
+/// không phải bằng chứng; [state] là bằng chứng có lineage.
 ///
 /// ⭐⭐ ROUND 4 (Founder §4): [state] đọc dưới luật SIẾT mặc định. Các kết cục
 /// «đã tham gia nhưng chưa được kiểm» được nói ra qua
