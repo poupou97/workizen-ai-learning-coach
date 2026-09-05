@@ -53,8 +53,13 @@ void main() {
     ]) {
       expect(find.text(chip), findsOneWidget, reason: chip);
     }
-    expect(find.textContaining('SAM đang học cách trò chuyện'), findsOneWidget,
-        reason: 'ô hỏi SAM là trạng thái trung thực, không chat giả');
+    // ROUND 4: ô mic «SAM đang học cách trò chuyện» đã bỏ — không hứa chat.
+    expect(find.byKey(MissionCenterScreen.samLineKey), findsOneWidget);
+    expect(find.textContaining('trò chuyện'), findsNothing,
+        reason: 'không còn câu giữ chỗ hứa chat');
+    expect(find.byIcon(Icons.mic_none), findsNothing);
+    expect(find.textContaining('xem thẻ bên dưới'), findsOneWidget,
+        reason: 'dòng SAM nói thật: có việc gợi ý, xem thẻ');
     expect(find.text('VIỆC SAM ĐỀ XUẤT'), findsOneWidget);
     expect(find.text(data.agenda!.reason), findsOneWidget,
         reason: 'reason agenda NGUYÊN VĂN');
