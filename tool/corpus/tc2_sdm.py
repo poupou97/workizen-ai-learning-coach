@@ -290,7 +290,19 @@ def assign_role(b, ctx):
         return 'heading', 'lexicon', 0.95, ['theme/chapter header']
     if STAGE.match(t) and len(t) <= 45:
         return 'stage_label', 'lexicon', 0.95, ['stage label']
-    if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 45 and not re.search(r'\?\s*$', t) and not DIGITS.match(t):
+    # Round 4 correctness review (F2): the attribution test must run BEFORE the two `upper_ratio >= 0.7`
+    # heading rules. It used to sit after them, so an UPPERCASE «(THEO …)» / «(NGUỒN: …)» could never reach
+    # it and became a `heading` — a role that is COLOUR_HEAVY_EXEMPT and that `build_page` then makes the
+    # `heading_path` of every following block in the lesson. Only the title-case form ever worked.
+    # Fail closed on both sides: a line the extractor itself labelled a caption keeps `caption`, a line that
+    # ends in «?» is left to the question rules, and in an SGV it stays `teacher_text` (still withheld by
+    # the `teacher_text` guard) exactly as before — only the role NAME changes there.
+    if (lab != 'caption' and len(t) <= 220 and not re.search(r'\?\s*$', t)
+            and (ATTRIBUTION.match(t) or (re.match(r'^\s*[(\[]', t) and ATTRIBUTION_PUB.search(t)))):
+        return ('teacher_text' if sgv else 'attribution'), 'lexicon', 0.9, ['source attribution «(Theo …)» / publisher line']
+    # (F2, same finding) a line that OPENS WITH A BRACKET is never a section heading — that is what made an
+    # uppercase parenthesised source line a heading, and a heading_path, while its title-case twin stayed body.
+    if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 45 and not re.search(r'\?\s*$', t) and not DIGITS.match(t) and not re.match(r'^\s*[(\[]', t):
         return 'heading', 'typography', 0.88, ['short uppercase label']
     if ACTIVITY.match(t) and upper_ratio(ACTIVITY.sub('', t, count=1)) >= 0.7 and len(t) <= 120:
         return 'heading', 'lexicon+typography', 0.9, ['Hoạt động N. + UPPERCASE title']
@@ -329,7 +341,7 @@ def assign_role(b, ctx):
     # heading candidates
     if lab in ('section_header', 'title') and len(t) <= 100 and not re.search(r'\?\s*$', t) and not (ENUM.match(t) and QHINT.search(t)):
         return 'heading', 'native', 0.85, ['docling section_header']
-    if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 90 and not re.search(r'\?\s*$', t):
+    if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 90 and not re.search(r'\?\s*$', t) and not re.match(r'^\s*[(\[]', t):
         return 'heading', 'typography', 0.85, ['uppercase run']
     if (ROMAN_SEC.match(t) or NUM_SEC.match(t)) and len(t) <= 70 and not ends_sentence(t) and not QHINT.search(ENUM.sub('', t)) and not DIRECTIVE_ANY.search(t) and t[len(ENUM.match(t).group(0)):][:1].isupper():
         return 'heading', 'lexicon', 0.75, ['numbered title-case section']
@@ -356,8 +368,6 @@ def assign_role(b, ctx):
         return 'question', 'lexicon', conf, ev
     if sgv:
         return 'teacher_text', 'default', 0.7, ['SGV prose']
-    if len(t) <= 220 and (ATTRIBUTION.match(t) or (re.match(r'^\s*[(\[]', t) and ATTRIBUTION_PUB.search(t))):
-        return 'attribution', 'lexicon', 0.9, ['source attribution «(Theo …)» / publisher line']
     if narrow_right and on_colour and len(t) >= 20:
         return 'sidebar', 'geometry', 0.75, ['narrow right box on colour']
     if ctx.get('xy_hint') == 'sidebar' and on_colour:

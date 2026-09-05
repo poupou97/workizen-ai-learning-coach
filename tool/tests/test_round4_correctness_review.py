@@ -89,5 +89,57 @@ class F8TocTitleTrailingNumberTests(unittest.TestCase):
         self.assertEqual(br.clean_toc_title('TIÊU ĐỀ MẪU ĐẾN NĂM 1945 ..... 93'), 'TIÊU ĐỀ MẪU ĐẾN NĂM 1945')
 
 
+def ctx(**kw):
+    base = dict(prev_role=None, prev_text=None, box=None, docType='SGK', inside_picture=False,
+                xy_hint=None, big_digit=False, answer_section=False)
+    base.update(kw)
+    return base
+
+
+def blk(text, bbox=(0.12, 0.6, 0.5, 0.03), native_label=None):
+    return dict(text=text, role='TEXT', bbox=list(bbox), native_label=native_label, colour=None)
+
+
+class F2UppercaseAttributionTests(unittest.TestCase):
+    """F2 — the `attribution` role was unreachable for an UPPERCASE line: the two `upper_ratio >= 0.7`
+    heading rules run far earlier. The fallback is worse than «body»: `heading` is COLOUR_HEAVY_EXEMPT and
+    then becomes the `heading_path` of every following block in the lesson."""
+
+    def test_an_uppercase_attribution_is_an_attribution_not_a_heading(self):
+        for t in ('(THEO TÁC GIẢ MẪU)', '(NGUỒN: CƠ QUAN MẪU)', '(DẪN THEO TÀI LIỆU MẪU)',
+                  '(SÁCH MẪU, NXB MẪU, 2014)'):
+            role, _, _, _ = tc2_sdm.assign_role(blk(t), ctx())
+            self.assertEqual(role, 'attribution', t)
+
+    def test_the_title_case_form_still_works(self):
+        for t in ('(Theo Tác giả Mẫu, Sách Mẫu, NXB Mẫu, 2017)', '(Nguồn: Tài liệu mẫu)'):
+            self.assertEqual(tc2_sdm.assign_role(blk(t), ctx())[0], 'attribution', t)
+
+    def test_an_attribution_never_becomes_a_heading_path(self):
+        # `heading_path` is only extended for role == 'heading', so keeping the line out of `heading`
+        # is what keeps it out of every following block's heading path
+        import inspect
+        src = inspect.getsource(tc2_sdm.build_page)
+        self.assertIn("if role == 'heading':", src)
+        self.assertNotIn('attribution', src.split('# heading path')[1].split('# guards')[0])
+
+    def test_a_docling_caption_keeps_its_caption_role(self):
+        role, _, _, _ = tc2_sdm.assign_role(blk('(Theo Tác giả Mẫu)', native_label='caption'), ctx())
+        self.assertEqual(role, 'caption')
+
+    def test_in_an_sgv_the_line_stays_teacher_text_and_withheld(self):
+        role, _, _, _ = tc2_sdm.assign_role(blk('(THEO TÁC GIẢ MẪU)'), ctx(docType='SGV'))
+        self.assertEqual(role, 'teacher_text')
+
+    def test_a_line_that_opens_like_an_attribution_but_asks_a_question_is_still_a_question(self):
+        # moving the test earlier must not take a question away from the question rules
+        role, _, _, _ = tc2_sdm.assign_role(blk('(Theo em) vì sao mẫu vật lại thay đổi?'), ctx())
+        self.assertEqual(role, 'question')
+
+    def test_prose_and_bare_names_still_stay_body(self):
+        for t in ('(MỘT TÊN RIÊNG MẪU, 1960)', 'Theo dòng thời gian, mọi thứ đều đổi thay rất nhiều.'):
+            self.assertEqual(tc2_sdm.assign_role(blk(t), ctx())[0], 'body', t)
+
+
 if __name__ == '__main__':
     unittest.main()
