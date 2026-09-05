@@ -114,49 +114,15 @@ class _TutorViewState extends State<TutorView> {
     final anchor = widget.anchorBlockId == null
         ? null
         : widget.doc.blockById(widget.anchorBlockId!);
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            WalSpacing.md,
-            WalSpacing.sm,
-            WalSpacing.md,
-            0,
-          ),
-          child: Row(
-            children: [
-              Image.asset(
-                'assets/mascot/sam-hello@64.png',
-                width: 28,
-                height: 28,
-                errorBuilder: (_, _, _) =>
-                    const SizedBox(width: 28, height: 28),
-              ),
-              const SizedBox(width: WalSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      SamMode.prototypeScripted.childLabel,
-                      style: const TextStyle(
-                        fontSize: WalType.secondary,
-                        fontWeight: FontWeight.w700,
-                        color: WalColors.ink,
-                      ),
-                    ),
-                    const Text(
-                      'SAM đi theo kịch bản viết sẵn — chưa phải SAM thật, không ghi '
-                      'bằng chứng học.',
-                      style: TextStyle(fontSize: 12, color: WalColors.inkSoft),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (anchor != null)
+    // Toàn bộ thân (nhãn, neo, transcript, ô nhập) là MỘT vùng cuộn: bàn phím
+    // lên thì không có phần cố định nào để tràn (Nokia n3 D8: tràn 60 px, ô
+    // nhập bị bàn phím che).
+    return SingleChildScrollView(
+      controller: _scroll,
+      padding: const EdgeInsets.only(bottom: WalSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
               WalSpacing.md,
@@ -164,27 +130,69 @@ class _TutorViewState extends State<TutorView> {
               WalSpacing.md,
               0,
             ),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(WalSpacing.sm),
-              decoration: BoxDecoration(
-                color: WalColors.surfaceLavender,
-                borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
-              ),
-              child: Text(
-                r.anchoredToBlock
-                    ? 'Con hỏi về đoạn: «${_snippet(anchor)}»'
-                    : 'Con hỏi về đoạn: «${_snippet(anchor)}» — SAM chưa có kịch '
-                          'bản riêng cho đoạn này, mình bắt đầu từ đầu bài nhé.',
-                style: const TextStyle(fontSize: 13, color: WalColors.ink),
-              ),
+            child: Row(
+              children: [
+                Image.asset(
+                  'assets/mascot/sam-hello@64.png',
+                  width: 28,
+                  height: 28,
+                  errorBuilder: (_, _, _) =>
+                      const SizedBox(width: 28, height: 28),
+                ),
+                const SizedBox(width: WalSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        SamMode.prototypeScripted.childLabel,
+                        style: const TextStyle(
+                          fontSize: WalType.secondary,
+                          fontWeight: FontWeight.w700,
+                          color: WalColors.ink,
+                        ),
+                      ),
+                      const Text(
+                        'SAM đi theo kịch bản viết sẵn — chưa phải SAM thật, không ghi '
+                        'bằng chứng học.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: WalColors.inkSoft,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        // Ô nhập nằm CUỐI danh sách (như một lượt), không ghim đáy: màn thấp /
-        // bàn phím lên vẫn cuộn tới được mọi lựa chọn — không tràn (đo ở test).
-        Expanded(
-          child: SingleChildScrollView(
-            controller: _scroll,
+          if (anchor != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                WalSpacing.md,
+                WalSpacing.sm,
+                WalSpacing.md,
+                0,
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(WalSpacing.sm),
+                decoration: BoxDecoration(
+                  color: WalColors.surfaceLavender,
+                  borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+                ),
+                child: Text(
+                  r.anchoredToBlock
+                      ? 'Con hỏi về đoạn: «${_snippet(anchor)}»'
+                      : 'Con hỏi về đoạn: «${_snippet(anchor)}» — SAM chưa có kịch '
+                            'bản riêng cho đoạn này, mình bắt đầu từ đầu bài nhé.',
+                  style: const TextStyle(fontSize: 13, color: WalColors.ink),
+                ),
+              ),
+            ),
+          // Ô nhập nằm CUỐI danh sách (như một lượt), không ghim đáy: màn thấp /
+          // bàn phím lên vẫn cuộn tới được mọi lựa chọn — không tràn (đo ở test).
+          Padding(
             padding: const EdgeInsets.all(WalSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -201,8 +209,8 @@ class _TutorViewState extends State<TutorView> {
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

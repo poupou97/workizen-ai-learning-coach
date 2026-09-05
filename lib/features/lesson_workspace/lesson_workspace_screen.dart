@@ -101,15 +101,18 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
               padding: const EdgeInsets.symmetric(horizontal: WalSpacing.md),
               child: _segmented(),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                WalSpacing.md,
-                WalSpacing.sm,
-                WalSpacing.md,
-                0,
+            // Bàn phím lên (trẻ đang gõ trả lời SAM) ⇒ tạm ẩn thẻ đề xuất để
+            // thân View còn chỗ (Nokia n3 D8). Bàn phím xuống ⇒ thẻ trở lại.
+            if (MediaQuery.viewInsetsOf(context).bottom == 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  WalSpacing.md,
+                  WalSpacing.sm,
+                  WalSpacing.md,
+                  0,
+                ),
+                child: _nextActionCard(next, compact: landscape),
               ),
-              child: _nextActionCard(next, compact: landscape),
-            ),
             Expanded(child: _body()),
           ],
         ),
