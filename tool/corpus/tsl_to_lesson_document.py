@@ -298,6 +298,9 @@ def chapters_from_toc(book, units_path=None):
     None found ⇒ []. Never edits the OCR text."""
     p = units_path or f'{ROOT}/poc-out/units-k12/{book}.json'
     if not os.path.exists(p):
+        # Silent [] used to be indistinguishable from «this book has no chapters». It is usually ROOT:
+        # the bridge derives it from __file__, so running from a git worktree finds no poc-out at all.
+        print(f'  ! không thấy TOC units cho {book} tại {p} — chapters=[] (đặt TC_ROOT nếu chạy ngoài checkout chính)', file=sys.stderr)
         return []
     units = json.load(open(p)).get('units') or []
     toc = next((u.get('text') for u in units if 'MỤC LỤC' in (u.get('text') or '')), None)

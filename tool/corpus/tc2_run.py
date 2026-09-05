@@ -28,6 +28,7 @@ Usage (bake-off venv python for docling; system python3 is enough for --fast / -
   .venv-bakeoff/bin/python tool/corpus/tc2_run.py --pipeline tc2-p1 --pages P.json --workers 2   # docling, spawns shards
   python3 tool/corpus/tc2_run.py --pipeline tc2-p1 --pages P.json --manifest
   python3 tool/corpus/tc2_run.py --pipeline tc2-p1 --make-pages slice   # → pages-slice.json (all OCR pages of the 6 SGK books)
+  python3 tool/corpus/tc2_run.py --pipeline tc2-p2 --make-pages 06-sgk-khoa-hoc-tu-nhien-6:61-64 --out DIR   # one bounded batch
 """
 import argparse
 import glob
@@ -85,16 +86,33 @@ def write_raw(pipeline, cand, book, page, seconds, result, err=None):
 
 # ---------------------------------------------------------------- page lists
 def make_pages(kind, pipeline):
+    """`slice` = the six science SGK books. Round 4 (Lane D asked for a bounded, arbitrary batch):
+    `<book>` = every OCR page of one book, `<book>:FROM-TO` = a PDF page range of one book. The file is
+    named after the request so two batches never overwrite each other."""
+    lo = hi = None
     if kind == 'slice':
-        books = SLICE_BOOKS
+        books, name = SLICE_BOOKS, 'slice'
     else:
-        raise SystemExit('kinds: slice')
+        book, _, rng = kind.partition(':')
+        if not os.path.isdir(f'{OCR}/{book}'):
+            raise SystemExit(f'kinds: slice | <book> | <book>:FROM-TO   (no OCR pages for book {book!r})')
+        if rng:
+            m = re.fullmatch(r'(\d+)-(\d+)', rng)
+            if not m:
+                raise SystemExit('page range must be FROM-TO in PDF pages, e.g. 06-sgk-khoa-hoc-tu-nhien-6:61-64')
+            lo, hi = int(m.group(1)), int(m.group(2))
+        books, name = [book], kind.replace(':', '-')
     pages = []
     for b in books:
         for f in sorted(glob.glob(f'{OCR}/{b}/p*.json')):
-            pages.append(dict(book=b, page=int(re.search(r'p(\d+)\.json', f).group(1))))
+            n = int(re.search(r'p(\d+)\.json', f).group(1))
+            if lo is not None and not (lo <= n <= hi):
+                continue
+            pages.append(dict(book=b, page=n))
+    if not pages:
+        raise SystemExit(f'no pages for {kind!r}')
     os.makedirs(outdir(pipeline), exist_ok=True)
-    out = f'{outdir(pipeline)}/pages-{kind}.json'
+    out = f'{outdir(pipeline)}/pages-{name}.json'
     json.dump(pages, open(out, 'w'))
     print(len(pages), 'pages →', out)
     return out

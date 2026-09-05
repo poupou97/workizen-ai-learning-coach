@@ -194,6 +194,17 @@ class PackAttachDirTests(unittest.TestCase):
             importlib.reload(importlib.import_module('lesson_attach'))
 
 
+class BoundedBatchCliTests(unittest.TestCase):
+    """Lane D asked for a stable way to run ONE bounded batch: `--make-pages <book>[:FROM-TO]`."""
+
+    def test_a_bad_request_is_refused_and_never_silently_widened(self):
+        import tc2_run  # noqa
+        with self.assertRaises(SystemExit):
+            tc2_run.make_pages('00-khong-co-sach-nay', 'tc2-test')
+        with self.assertRaises(SystemExit):
+            tc2_run.make_pages('slice:1-2', 'tc2-test')
+
+
 class GoldErrataTests(unittest.TestCase):
     """Request 1 — the gold's lesson numbers on LS&ĐL 5 p041 and p080 contradicted the printed banners.
 
