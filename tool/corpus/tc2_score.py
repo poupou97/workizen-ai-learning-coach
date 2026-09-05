@@ -43,7 +43,7 @@ GOLD_CANON = {'question': 'QUESTION', 'answer': 'ANSWER', 'activity': 'ACTIVITY'
               'caption': 'CAPTION', 'option': 'OPTION', 'answer_slot': 'ANSWER_SLOT', 'table': 'TABLE', 'formula': 'FORMULA', 'footnote': 'FOOTNOTE',
               'figure_label': 'FIGURE_TEXT', 'diagram': 'FIGURE_TEXT', 'page_number': 'PAGENUM'}
 PIPE_CANON = {'question': 'QUESTION', 'answer': 'ANSWER', 'model_answer': 'ANSWER', 'activity': 'ACTIVITY', 'instruction': 'INSTRUCTION', 'objective': 'OBJECTIVE', 'sidebar': 'SIDEBAR',
-              'heading': 'HEADING', 'stage_label': 'HEADING', 'running_head': 'HEADING', 'body': 'BODY', 'teacher_text': 'BODY', 'rule': 'BODY', 'teacher_prompt': 'TEACHER_PROMPT',
+              'heading': 'HEADING', 'stage_label': 'HEADING', 'running_head': 'HEADING', 'body': 'BODY', 'teacher_text': 'BODY', 'rule': 'BODY', 'attribution': 'BODY', 'teacher_prompt': 'TEACHER_PROMPT',
               'caption': 'CAPTION', 'option': 'OPTION', 'answer_slot': 'ANSWER_SLOT', 'table': 'TABLE', 'formula': 'FORMULA', 'footnote': 'FOOTNOTE',
               'figure_text': 'FIGURE_TEXT', 'figure': 'FIGURE_TEXT', 'page_number': 'PAGENUM', 'empty': 'EMPTY'}
 

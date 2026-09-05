@@ -71,6 +71,7 @@ AUDIT_STATUSES = ('notAudited', 'sampledNoGate')
 ROLE_MAP = {
     'heading': ('heading', None),
     'body': ('paragraph', None),
+    'attribution': ('paragraph', None),   # round 4: same block type, `sourceRole` names it so the UI can say «Kể theo: …»
     'caption': ('caption', None),
     'question': ('question', None),
     'objective': ('activity', 'objective'),
@@ -269,6 +270,28 @@ def image_block(book, f, crop_rel, aspect=None):
 
 
 # ------------------------------------------------------------------ chapters (outside the TC gate)
+# Round 4 (Lane C request 6): `toc-ocr-chapters-v1` knew only «CHƯƠNG <roman>», so every «Chủ đề» book
+# (LS&ĐL 4/5, Khoa học 4/5, Đạo đức, HĐTN …) reported 0 chapters. The banner font also slips the tone —
+# LS&ĐL 5's own TOC prints «CHỦ ĐẾ 6» — so the marker accepts the same tone variants as the lesson banner.
+CHAPTER_HDR = re.compile(r'(?:CH(?:Ủ|U|Ú|Ũ|Ụ)\s*Đ(?:Ề|Ế|Ề|È|É|Ẻ|Ẽ|Ẹ|E)\s*(\d{1,2})|CHƯƠNG\s+([IVX]+|\d{1,2})|PHẦN\s+([IVX]+|\d{1,2}))\s*[.\-–:]?\s*')
+
+
+def chapter_label(m):
+    """A GENERATED label (never SGK text): the printed marker normalised, its number kept verbatim."""
+    if m.group(1):
+        return f'Chủ đề {m.group(1)}'
+    if m.group(2):
+        return f'Chương {m.group(2)}'
+    return f'Phần {m.group(3)}'
+
+
+def clean_toc_title(raw):
+    """TOC titles carry dot leaders and a trailing page number; both are furniture, not title text."""
+    t = re.sub(r'[.\u2026]{2,}', ' ', raw)
+    t = re.sub(r'\s+\d{1,3}\s*$', '', t)
+    return re.sub(r'\s+', ' ', t).strip(' .\u2026-–:')
+
+
 def chapters_from_toc(book, units_path=None):
     """Printed TOC (naive OCR) → [{label, title, lessonNos}] with trust `fixtureFromTrustedCorpus`.
     None found ⇒ []. Never edits the OCR text."""
@@ -282,21 +305,22 @@ def chapters_from_toc(book, units_path=None):
     start = toc.index('MỤC LỤC')
     end = toc.find('Giải thích một số thuật ngữ', start)
     seg = toc[start:end if end > 0 else None]
-    parts = re.split(r'(?=CHƯƠNG\s+[IVX]+\s*[-–])', seg)
     out = []
-    for part in parts:
-        m = re.match(r'CHƯƠNG\s+([IVX]+)\s*[-–]\s*(.+?)\s+(?=Bài\s+\d+\.)', part, re.S)
-        if not m:
+    for m in CHAPTER_HDR.finditer(seg):
+        nxt = CHAPTER_HDR.search(seg, m.end())
+        part = seg[m.end():nxt.start() if nxt else None]
+        b = re.search(r'Bài\s+\d+\.', part)
+        if not b:
             continue
         nos = [int(n) for n in re.findall(r'Bài\s+(\d+)\.', part)]
         if not nos:
             continue
         out.append({
-            'label': f'Chương {m.group(1)}',
-            'title': re.sub(r'\s+', ' ', m.group(2)).strip(),
+            'label': chapter_label(m),
+            'title': clean_toc_title(part[:b.start()]),
             'lessonNos': nos,
             'trust': TRUST_OUTSIDE_GATE,
-            'derivation': 'toc-ocr-chapters-v1',
+            'derivation': 'toc-ocr-chapters-v2',
         })
     return out
 

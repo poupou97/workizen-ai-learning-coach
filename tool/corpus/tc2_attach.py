@@ -42,8 +42,11 @@ ROOT = tc2_paths.ROOT
 OCR = f'{ROOT}/poc-out/graph/ocr-body'
 CURR = f'{ROOT}/poc-out/graph/curriculum-structure.json'
 
-LESSON_HDR = re.compile(r'^\s*(B[ÀÁẢẠ]I|B[àáảạ]i)\s+(\d{1,2})\b\s*[.:]?\s*(.*)$')   # OCR tone slips on display fonts: "Bải 19", "Bái 3"
-BAI_ALONE = re.compile(r'^\s*(B[ÀÁẢẠ]I|B[àáảạ]i)\s*$')
+# Round 4 (Lane C request 2): the banner font makes OCR read «BÀI» as «BÃI» on 5 of the 28 LS&ĐL 5 lessons
+# (Bài 3, 7, 11, 13, 23) — the class had no `Ã`, so those five lessons were never ranged and 17 of 123 pages
+# stayed attached to their predecessor. One character class; the sequence rule below is unchanged.
+LESSON_HDR = re.compile(r'^\s*(B[ÀÁẢÃẠ]I|B[àáảãạ]i)\s+(\d{1,2})\b\s*[.:]?\s*(.*)$')   # OCR tone slips on display fonts: "Bải 19", "Bái 3", "BÃI 7"
+BAI_ALONE = re.compile(r'^\s*(B[ÀÁẢÃẠ]I|B[àáảãạ]i)\s*$')
 DIGITS = re.compile(r'^\d{1,3}$')
 THEME = re.compile(r'^\s*(CHỦ ĐỀ|Chủ đề|CHƯƠNG|Chương|PHẦN|Phần)\s+([IVX]+|\d+)\b')
 FRONT = re.compile(r'^\s*(MỤC LỤC|Mục lục|LỜI NÓI ĐẦU|Lời nói đầu|HƯỚNG DẪN SỬ DỤNG|Hướng dẫn sử dụng|BẢNG TRA CỨU|Bảng tra cứu|GIẢI THÍCH THUẬT NGỮ|Giải thích thuật ngữ|PHỤ LỤC|Phụ lục|BẢNG THUẬT NGỮ|TÀI LIỆU THAM KHẢO|Tài liệu tham khảo)')

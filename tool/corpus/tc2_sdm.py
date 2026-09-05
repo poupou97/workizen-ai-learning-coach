@@ -209,11 +209,23 @@ QHINT = layout_extract.QUESTION_HINT
 DIRECTIVE_ANY = layout_extract.DIRECTIVE_ANY
 CAPTION = re.compile(r'^\s*(Hình|Bảng|Sơ đồ|Biểu đồ|Lược đồ|Tranh|Ảnh)\s*\d', re.IGNORECASE)
 FOOTNOTE = layout_extract.FOOTNOTE
-LESSON_HDR = re.compile(r'^\s*(BÀI|Bài)\s+(\d{1,2})\b')
+LESSON_HDR = re.compile(r'^\s*(B[ÀÁẢÃẠ]I|B[àáảãạ]i)\s+(\d{1,2})\b')   # round 4: + Ã (banner OCR «BÃI»), as tc2_attach
 THEME_HDR = re.compile(r'^\s*(CHỦ ĐỀ|Chủ đề|CHƯƠNG|Chương)\s+([IVX]+|\d+)\b')
 ROMAN_SEC = re.compile(r'^\s*(I|II|III|IV|V|VI|VII|VIII|IX|X)[.)]\s+\S')
 NUM_SEC = re.compile(r'^\s*\d{1,2}[.)]\s+\S')
-FIG_REF = re.compile(r'\b(hình|bảng|sơ đồ|biểu đồ|lược đồ|đồ thị)\s*\d|\b(hình|bảng|sơ đồ)\s+(bên|trên|dưới|sau|dưới đây|sau đây)\b|\btrong (các )?hình\b|\bở hình\b', re.IGNORECASE)
+# Round 4 (Lane C request 4): «quan sát các hình từ 1 đến 3 …» carries no «Hình N», so the guard trusted a
+# question the child cannot answer from text alone. A look-verb followed within a clause by a figure noun
+# is a figure reference even when no number follows it.
+FIG_REF = re.compile(r'\b(hình|bảng|sơ đồ|biểu đồ|lược đồ|đồ thị)\s*\d|\b(hình|bảng|sơ đồ)\s+(bên|trên|dưới|sau|dưới đây|sau đây)\b|\btrong (các )?hình\b|\bở hình\b|\b(quan sát|nhìn|xem|dựa vào|căn cứ vào|đọc)\b[^.?!]{0,40}?\b(hình|bảng|sơ đồ|biểu đồ|lược đồ|đồ thị)\b', re.IGNORECASE)
+# Round 4 (Lane C request 5): «(Theo …)» / «(…, NXB …, 2017)» closes a story and names its source. tc2-p1 served
+# it as body — the child could not tell the SGK's own prose from a quoted source (4 / 4 of Lane C's role
+# disagreements on LS&ĐL 5 Bài 8). Fail closed: the marker word OR an explicit publisher is required, so a
+# parenthesised proper name alone («(Hồ Chí Minh …)») is still body — a recorded gap, not a guess.
+ATTRIBUTION = re.compile(r'^\s*[(\[]\s*(Theo|THEO|Nguồn|NGUỒN|Dẫn theo|DẪN THEO|Trích|TRÍCH|Kể theo|Phỏng theo|Sưu tầm)\b', re.IGNORECASE)
+ATTRIBUTION_PUB = re.compile(r'\b(NXB|Nhà xuất bản)\b', re.IGNORECASE)
+# Round 4 (Lane C request 5): a «… em hãy:» lead and the dash sub-items under it were served as body.
+DASH_LEAD = re.compile(r'^\s*[-–—]\s+(?=\S)')
+QUESTION_LEAD = re.compile(r'\b(em hãy|các em hãy|hãy)\s*:\s*$', re.IGNORECASE)
 FRONT_MATTER = re.compile(r'^\s*(MỤC LỤC|Mục lục|LỜI NÓI ĐẦU|Lời nói đầu|HƯỚNG DẪN SỬ DỤNG SÁCH|BẢNG TRA CỨU|Bảng tra cứu|GIẢI THÍCH THUẬT NGỮ|PHỤ LỤC|Phụ lục|BẢNG THUẬT NGỮ)')
 MATH = tc_cascade.MATH
 # Round 4 (failure class 2: formula / number / unit fidelity) — deterministic guards, fail closed, never a guess:
@@ -322,9 +334,14 @@ def assign_role(b, ctx):
     if (ROMAN_SEC.match(t) or NUM_SEC.match(t)) and len(t) <= 70 and not ends_sentence(t) and not QHINT.search(ENUM.sub('', t)) and not DIRECTIVE_ANY.search(t) and t[len(ENUM.match(t).group(0)):][:1].isupper():
         return 'heading', 'lexicon', 0.75, ['numbered title-case section']
     # questions
-    core = ENUM.sub('', t, count=1)
+    # A dash sub-item is read WITHOUT its bullet only under a question lead (previous block is a question, or
+    # ends with «… hãy:»); everywhere else a leading dash stays part of the text, so dialogue lines in a
+    # reading are not promoted to questions.
+    dash = DASH_LEAD.match(t)
+    lead_ctx = bool(dash) and (prev == 'question' or QUESTION_LEAD.search((ctx.get('prev_text') or '').strip()) is not None)
+    core = ENUM.sub('', t[dash.end():] if lead_ctx else t, count=1)
     is_q = re.search(r'\?\s*$', t) is not None
-    directive = QHINT.search(core) is not None and len(t) < 400
+    directive = (QHINT.search(core) is not None or QUESTION_LEAD.search(t) is not None) and len(t) < 400
     num_directive = ENUM.match(t) is not None and DIRECTIVE_ANY.search(core[:120]) is not None and len(t) < 400
     stem = False  # an enumerated line ending with ":" is a question stem ONLY when options follow (post-pass); alone it is a worked-example lead-in (Toán 7 p41)
     if is_q or directive or num_directive or stem:
@@ -332,11 +349,15 @@ def assign_role(b, ctx):
             return 'teacher_prompt', 'lexicon', 0.85, ['question form inside SGV → teacher prompt']
         conf = 0.92 if is_q else (0.85 if directive else (0.78 if num_directive else 0.75))
         ev = ['ends with ?'] if is_q else (['leading directive verb'] if directive else (['enumerator + directive verb'] if num_directive else ['enumerated stem ending with ":"']))
+        if lead_ctx:
+            ev = ev + ['dash sub-item under a question lead']
         if prev in ('activity', 'instruction') and not is_q:
             return 'activity', 'context', 0.7, ev + ['follows activity/instruction']
         return 'question', 'lexicon', conf, ev
     if sgv:
         return 'teacher_text', 'default', 0.7, ['SGV prose']
+    if len(t) <= 220 and (ATTRIBUTION.match(t) or (re.match(r'^\s*[(\[]', t) and ATTRIBUTION_PUB.search(t))):
+        return 'attribution', 'lexicon', 0.9, ['source attribution «(Theo …)» / publisher line']
     if narrow_right and on_colour and len(t) >= 20:
         return 'sidebar', 'geometry', 0.75, ['narrow right box on colour']
     if ctx.get('xy_hint') == 'sidebar' and on_colour:
@@ -539,8 +560,34 @@ def question_box_pass(out_blocks, med_h):
 
 COARSE = {'question': 'QUESTION', 'option': 'OPTION', 'answer_slot': 'OPTION', 'heading': 'HEADING', 'stage_label': 'HEADING', 'running_head': 'HEADING',
           'body': 'BODY', 'objective': 'BODY', 'activity': 'BODY', 'instruction': 'BODY', 'answer': 'BODY', 'model_answer': 'BODY', 'teacher_text': 'BODY', 'teacher_prompt': 'BODY', 'rule': 'BODY',
+          'attribution': 'BODY',
           'caption': 'CAPTION', 'sidebar': 'SIDEBAR', 'table': 'TABLE', 'formula': 'FORMULA', 'figure_text': 'FIGURE_TEXT', 'figure': 'FIGURE', 'footnote': 'FOOTNOTE', 'page_number': 'PAGENUM', 'empty': 'UNKNOWN'}
 NON_LEARNING = {'page_number', 'running_head', 'figure', 'figure_text', 'empty'}
+# tc_layout_census marks a PAGE `color_heavy` at colour share ≥ 0.25; round 4 measures the same share on the
+# block's own bbox instead of inheriting the page's verdict. Same constant, smaller measurement window.
+COLOUR_HEAVY_SHARE = 0.25
+COLOUR_HEAVY_EXEMPT = ('heading', 'stage_label', 'page_number', 'running_head', 'caption', 'figure', 'empty')
+
+
+def colour_heavy_withholds(page_color_heavy, role, colour):
+    """Round 4 (Lane C request 3) — does the colour-heavy guard withhold THIS block?
+
+    `color_heavy` is a PAGE property of the census: ≥ 25 % of the page's pixels are saturated colour
+    (tc_layout_census §color_heavy). tc2-p1 applied that page verdict to every block on the page, so a
+    theme-opener with a full-bleed photograph withheld the white-column body text printed beside it —
+    LS&ĐL 5 Bài 8's header page lost 15 / 15 of its learning-text blocks, and the «Âu Lạc (179 TCN)»
+    timeline anchor with them (Lane C, 05-GOLDEN-SLICE-2-GATE §1).
+
+    The page flag still decides WHICH pages are examined at all — no page the census never flagged becomes
+    trustable here. Inside such a page the block's OWN measured colour share decides, against the census's
+    own 0.25. Fail closed: when there is no colour mask (no PDF, no numpy) the page verdict withholds
+    exactly as it did before.
+    """
+    if not page_color_heavy or role in COLOUR_HEAVY_EXEMPT:
+        return False
+    if colour is None:
+        return True
+    return (colour.get('share') or 0) >= COLOUR_HEAVY_SHARE
 
 
 # ---------------------------------------------------------------- agreement (per block: text as tc_cascade.verify; order by LIS)
@@ -935,7 +982,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
             guards.append('answer_leak')
         if role in ('teacher_text', 'teacher_prompt'):
             guards.append('teacher_text')
-        if cen.get('color_heavy') and role not in ('heading', 'stage_label', 'page_number', 'running_head', 'caption', 'figure', 'empty'):
+        if colour_heavy_withholds(cen.get('color_heavy'), role, col):
             guards.append('page_feature:color_heavy')
         if cen.get('diagram') and role in ('body', 'sidebar', 'question', 'activity', 'instruction', 'objective') and (inside_pic or (len(t) < 30 and not ends_sentence(t))):
             guards.append('page_feature:diagram')
