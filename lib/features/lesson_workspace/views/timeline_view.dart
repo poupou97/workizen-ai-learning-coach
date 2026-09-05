@@ -248,7 +248,14 @@ class _TimelineViewState extends State<TimelineView> {
             ],
           ),
           const SizedBox(height: WalSpacing.sm),
-          Row(
+          // ⭐ ROUND 4 (Lane B, lỗi tìm thấy trên fixture THẬT): hai nút này
+          // tràn 33 px trên bề ngang Nokia 6.1 khi chữ dài hơn bản MẪU. `Wrap`
+          // cho nút thứ hai xuống dòng thay vì bị cắt — mitigation phía hiển
+          // thị, không đổi chữ.
+          Wrap(
+            spacing: WalSpacing.sm,
+            runSpacing: WalSpacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               SizedBox(
                 height: WalSpacing.minTouch,
@@ -270,7 +277,6 @@ class _TimelineViewState extends State<TimelineView> {
                   child: const Text('Kiểm với sách'),
                 ),
               ),
-              const SizedBox(width: WalSpacing.sm),
               TextButton(
                 key: TimelineView.orderResetKey,
                 onPressed: _picked.isEmpty

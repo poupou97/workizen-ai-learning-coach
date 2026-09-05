@@ -8,6 +8,9 @@
 /// nơi id block mang `tc2-p1`, dòng nguồn mang `tc2-p1 / sdm-v2`).
 library;
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
@@ -18,6 +21,7 @@ import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/features/lesson_workspace/book_screen.dart';
 import 'package:learning_coach/features/lesson_workspace/chapter_screen.dart';
 import 'package:learning_coach/features/lesson_workspace/lesson_workspace_screen.dart';
+import 'package:learning_coach/features/lesson_workspace/views/timeline_view.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_view.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/mode_picker.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/source_sheet.dart';
@@ -229,6 +233,20 @@ Future<void> _journey(WidgetTester t, LessonDocument d, String tag) async {
   await _openAndCheckSheet(t, d, wh, '$tag Sách viết (để trống)');
 }
 
+/// Tài liệu lát cắt nghiên cứu: bản THẬT nếu máy có (gitignored), không thì
+/// bản MẪU đã commit — luật «không mã máy» phải đúng ở cả hai.
+LessonDocument _historyDoc() {
+  const real = 'assets/fixtures/real/lesson-05-sgk-lich-su-va-dia-li-5-b8.json';
+  const syn =
+      'assets/fixtures/synthetic/lesson-05-sgk-lich-su-va-dia-li-5-b8.synthetic.json';
+  final useReal = File(real).existsSync();
+  final j = jsonDecode(File(useReal ? real : syn).readAsStringSync()) as Map;
+  return LessonDocument.fromJson(
+    j.cast<String, Object?>(),
+    assetBase: useReal ? FixtureSlot.realDir : FixtureSlot.syntheticDir,
+  )!;
+}
+
 void main() {
   test('regex bắt được mã máy thật, không bắt lời trẻ', () {
     for (final s in [
@@ -264,6 +282,60 @@ void main() {
     final d = loadRealDocOrSkip();
     if (d == null) return;
     await _journey(t, d, 'thật');
+  });
+
+  /// ⭐⭐ ROUND 4 (Lane C × Lane B) — LÁT CẮT NGHIÊN CỨU cũng là màn TRẺ đọc.
+  /// Nó đi qua cùng luật: thẻ Home, khu riêng, Trực quan → Dòng thời gian,
+  /// nguồn kể chuyện, thử xếp thứ tự — không chỗ nào lộ id block / mã pipeline.
+  /// Chạy trên fixture THẬT khi máy có, không thì trên fixture MẪU.
+  testWidgets('⭐⭐ lát cắt nghiên cứu (LS&ĐL 5): Home + Trực quan → Dòng thời '
+      'gian → nguồn không lộ mã máy', (t) async {
+    final d = _historyDoc();
+    t.view.physicalSize = const Size(1080, 6000);
+    t.view.devicePixelRatio = 2.75;
+    addTearDown(t.view.reset);
+
+    // Home: thẻ lát cắt + dòng khu nghiên cứu.
+    final data = await buildMissionFromStore(
+      profile: _p,
+      store: JsonlLearnerStore(),
+      now: DateTime(2026, 9, 5, 19),
+      index: _idx(),
+    );
+    await t.pumpWidget(
+      fixtureHost(
+        MissionCenterScreen(
+          data: data,
+          onOpenSubjects: () {},
+          workspaceLesson: loadSyntheticDoc(),
+          researchLessons: [d],
+          onOpenWorkspaceLesson: (_) {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(find.byKey(MissionCenterScreen.researchCardKey(d.slotKey)),
+        findsOneWidget);
+    _expectClean(t, 'nghiên cứu Home');
+
+    // Workspace → Trực quan → Dòng thời gian.
+    await t.pumpWidget(
+      fixtureHost(LessonWorkspaceScreen(doc: d, trace: WorkspaceTrace())),
+    );
+    await t.pumpAndSettle();
+    _expectClean(t, 'nghiên cứu Vào bài học');
+    await t.tap(find.byKey(ModePicker.cardKey(WorkspaceView.visual)));
+    await t.pumpAndSettle();
+    _expectClean(t, 'nghiên cứu Trực quan');
+    expect(find.byKey(TimelineView.rootKey), findsOneWidget,
+        reason: 'lát cắt phải mở thẳng vào Dòng thời gian');
+    _expectClean(t, 'nghiên cứu Dòng thời gian');
+
+    // Chạm một mốc ⇒ sheet «Sách viết» (gấp đóng) vẫn sạch.
+    await t.ensureVisible(find.byKey(TimelineView.sourceKey(0)));
+    await t.tap(find.byKey(TimelineView.sourceKey(0)));
+    await t.pumpAndSettle();
+    _expectClean(t, 'nghiên cứu Sách viết (mốc)');
   });
 
   test('mã máy vẫn ở nếp gấp: trustTechLines / techLinesFor mang mã', () {
