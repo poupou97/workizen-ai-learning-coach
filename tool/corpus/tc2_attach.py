@@ -54,10 +54,22 @@ BACK = re.compile(r'^\s*(BẢNG TRA CỨU|Bảng tra cứu|GIẢI THÍCH THUẬT
 # Round 4 (failure class 4: lesson attachment / identity). The audit's 8 of 11 wrong attachments were the BACK COVER
 # (publisher's book list, ISBN, barcode, price, website) attached to a book's last lesson: nothing above marked it as
 # end matter. A cover is recognised by its furniture, never by position alone; two independent marks are required.
-COVER_MARKS = (re.compile(r'\bISBN\b'), re.compile(r'\bWebsite\s*:', re.IGNORECASE), re.compile(r'^\s*Giá\s*:', re.IGNORECASE),
-               re.compile(r'\bBỘ SÁCH GIÁO KHOA\b'), re.compile(r'\bHUÂN CHƯƠNG\b|\bHUÀN CHƯƠNG\b'), re.compile(r'\bNHÀ XUẤT BẢN GIÁO DỤC\b'),
-               re.compile(r'^\s*9\s?7\d{4}\s?\d{6}\s*$'))    # EAN-13 barcode digits
+#
+# Round 4 correctness review (F13): "two of any seven marks" was not discriminating — three of the seven are ORDINARY
+# CONTENT («Giá:» is a price in a Toán word problem, «Website:» sits in an «Em có biết» box, «HUÂN CHƯƠNG» is Lịch sử
+# prose), and a false positive did not merely mislabel one page: it ended the book. The marks are now split, and a
+# cover needs at least one mark that only a cover carries. Measured over the 42 attached books: all 42 back covers
+# carry ≥ 1 strong mark (the 7 SGV covers print «BỘ SÁCH GIÁO VIÊN», not «… GIÁO KHOA» — hence both spellings).
+COVER_STRONG = (re.compile(r'\bISBN\b'),
+                re.compile(r'\bBỘ SÁCH GIÁO (?:KHOA|VIÊN)\b'),
+                re.compile(r'\bNHÀ XUẤT BẢN GIÁO DỤC\b'),
+                re.compile(r'^\s*9\s?7\d{4}\s?\d{6}\s*$'))    # EAN-13 barcode digits
+COVER_WEAK = (re.compile(r'\bWebsite\s*:', re.IGNORECASE),
+              re.compile(r'^\s*Giá\s*:', re.IGNORECASE),
+              re.compile(r'\bHUÂN CHƯƠNG\b|\bHUÀN CHƯƠNG\b'))
+COVER_MARKS = COVER_STRONG + COVER_WEAK
 COVER_MIN_MARKS = 2
+COVER_MIN_STRONG = 1
 
 
 def upper_ratio(t):
@@ -109,10 +121,8 @@ def page_info(book, page, n_pages=None, lines=None):
             info['printed'] = int(t)
     top = sorted(lines, key=lambda l: l['y'])[:8]
     big_top = [l for l in top if l['h'] >= 1.2 * med]
-    marks = sum(1 for rx in COVER_MARKS if any(rx.search(l['text'].strip()) for l in lines))
-    if marks >= COVER_MIN_MARKS and (info['_tail'] or page <= 3):
-        info['kind'] = 'back_cover' if info['_tail'] else 'front_cover'; info['cover_marks'] = marks
-        return info
+    strong = sum(1 for rx in COVER_STRONG if any(rx.search(l['text'].strip()) for l in lines))
+    weak = sum(1 for rx in COVER_WEAK if any(rx.search(l['text'].strip()) for l in lines))
     if any(FRONT.match(l['text'].strip()) for l in top):
         is_back = any(BACK.match(l['text'].strip()) for l in big_top)
         # back matter only counts in the last 12 % of the book (a "Tài liệu tham khảo" line inside a lesson is not the end of the book)
@@ -167,6 +177,14 @@ def page_info(book, page, n_pages=None, lines=None):
                 cands.append(dict(number=None, title=title[:120], y=round(bai[0]['y'], 3), form='elementary-no-digit', h=round(bai[0]['h'] / med, 2)))
     if cands:
         info['header'] = sorted(cands, key=lambda c: c['y'])[0]
+    # Round 4 correctness review (F13): the cover verdict runs LAST, so a page that is a TOC, front/back matter,
+    # or that PRINTS ITS OWN LESSON BANNER is never called a cover. Measured over the 42 attached books: no page
+    # currently classified a cover carries a detected lesson header, so this costs no back cover and it closes the
+    # «a Lịch sử page naming a medal and the publisher ends the book» case.
+    if info['header'] is None and strong >= COVER_MIN_STRONG and strong + weak >= COVER_MIN_MARKS and (info['_tail'] or page <= 3):
+        info['kind'] = 'back_cover' if info['_tail'] else 'front_cover'
+        info['cover_marks'] = strong + weak; info['cover_strong'] = strong
+        return info
     th = [l for l in lines if THEME.match(l['text'].strip()) and l['h'] >= 1.4 * med and l['y'] < 0.4]
     if th:
         info['theme'] = th[0]['text'].strip()[:60]
@@ -176,9 +194,13 @@ def page_info(book, page, n_pages=None, lines=None):
 
 
 def _systematic_toc_offset(pages, infos, toc, off, min_headers=5, min_share=0.6):
-    """Median of (printed page of a detected header − TOC pageStart) over plausible headers when ≥ min_headers carry a
+    """MODE of (printed page of a detected header − TOC pageStart) over plausible headers when ≥ min_headers carry a
     TOC start and ≥ min_share of them agree on one non-zero value; 0 otherwise. Plausible = the sequence rule alone
-    (first header, or current + 1 … current + 4)."""
+    (first header, or current + 1 … current + 4).
+
+    (Round 4 correctness review, F12: the docstring said «Median». The code takes the mode — `Counter.most_common`
+    — and the `min_share` gate below only makes sense for a mode: it asks what share of the headers agree on ONE
+    value. The comment was wrong, not the code.)"""
     diffs = []
     current = None
     for p in pages:
@@ -215,11 +237,37 @@ def attach_book(book, pipeline='tc2-p1', write=True):
     toc_offset = _systematic_toc_offset(pages, infos, toc, off)
     toc_start = {n: (l['pageStart'] + toc_offset) for n, l in toc.items() if l.get('pageStart') is not None}
     out_pages, headers, rejected = [], [], []
-    current, conf, seen_first, ended = None, 0.0, False, False
+    current, conf, seen_first, ended, last_lesson = None, 0.0, False, False, None
     for p in pages:
         info = infos[p]; info.pop('_tail', None)
-        printed = info['printed'] if info['printed'] is not None else (p - off if off is not None else None)
+        # Round 4 correctness review (found while fixing F14): a footer digit that disagrees with the book's own
+        # measured printed offset is a MISREAD, not this page's printed page — a number in the top/bottom band
+        # (a year, a big result, the lesson badge) is read as the footer. Measured: on LS&ĐL 5 p024 the footer
+        # read 104 on a 123-page book (p − off = 22), on Tin học 6 p022 it read 210 (21), on TV2 p045 303 (44),
+        # on Toán 9 p052 132 (51). Such a number makes EVERY remaining TOC start «already due» and, with F14's
+        # clamp, would jump the page four lessons forward. The offset is the mode over the whole book; the single
+        # page's digit only wins when the two agree to within a page.
+        printed = info['printed']
+        if off is not None:
+            derived = p - off
+            if printed is None or abs(printed - derived) > 1:
+                if printed is not None:
+                    info['printed_misread'] = printed
+                printed = derived
+        # Round 4 correctness review (F13): ending the book is REVERSIBLE. `ended` used to delete every page after
+        # the first back-cover verdict, so a single false positive silently removed the tail of a book with no way
+        # back. A page that PRINTS a plausible lesson banner re-opens the book — the printed header is this module's
+        # truth and the TOC only a cross-check, so the same evidence that opens a lesson anywhere else opens it here.
+        # Real end matter carries no banner, so the class-4 gain is untouched.
+        resumed = False
+        if ended and info['kind'] == 'page':
+            h0 = info.get('header') or {}
+            n0 = h0.get('number')
+            if n0 is not None and (last_lesson is None or last_lesson < n0 <= last_lesson + 4):
+                ended, current, resumed = False, last_lesson, True
         rec = dict(page=p, printed=printed, kind=info['kind'], lesson=None, method='none', confidence=0.0, header=info['header'], theme=info['theme'], prev_lesson=current, continues=info['continuation'])
+        if resumed:
+            rec['resumed_after_end'] = True
         if info['kind'] in ('front_matter', 'toc', 'empty', 'front_cover'):
             out_pages.append(rec); continue
         if info['kind'] in ('back_matter', 'back_cover'):
@@ -250,7 +298,7 @@ def attach_book(book, pipeline='tc2-p1', write=True):
             elif current is not None and current + 1 < n <= current + 4:
                 accept, c = True, 0.6
             if accept:
-                current, conf, seen_first = n, c, True
+                current, conf, seen_first, last_lesson = n, c, True, n
                 headers.append(dict(number=n, title=h['title'], page_pdf=p, page_printed=printed, source='both' if toc_ok else 'header', confidence=c, form=h['form']))
                 rec.update(lesson=n, method='header', confidence=c)
             else:
@@ -267,11 +315,15 @@ def attach_book(book, pipeline='tc2-p1', write=True):
         # Fail closed on both ends (round 4, measured): the fallback NEVER runs before the book's first header
         # — before it, `max(due)` is an unbounded jump into the middle of the book (it put KHTN 9's second TOC
         # page, and the eight lesson pages after it, into Bài 26) — and it never skips more than 4 lessons.
+        # Round 4 correctness review (F14): the +4 bound is a CLAMP on which lessons the fallback may choose, not a
+        # veto on the whole page. `max(due) <= current + 4` threw away a legitimate `current + 1` whenever a far
+        # outlier (an OCR-misread TOC start) sat in the same set, and the page then silently kept the WRONG lesson.
         if printed is not None and toc_start and seen_first and current is not None:
             due = [n for n, s in toc_start.items() if s <= printed and n > current and n not in {hh['number'] for hh in headers}]
-            if due and max(due) <= current + 4:
-                n = max(due)
-                current, conf = n, 0.6
+            near = [n for n in due if n <= current + 4]
+            if near:
+                n = max(near)
+                current, conf, last_lesson = n, 0.6, n
                 headers.append(dict(number=n, title=toc[n].get('title'), page_pdf=p, page_printed=printed, source='toc_range', confidence=0.6, form=None))
                 rec.update(lesson=n, method='toc_range', confidence=0.6); out_pages.append(rec); continue
         if current is not None:
