@@ -637,14 +637,51 @@ def check_document(doc, tsl):
 
 
 # ------------------------------------------------------------------ crops (I/O, internal only)
-def crop_png(pdf, page, bbox, out_path, dpi, pad=0.012):
+def crop_pads(bbox, neighbours, pad=0.012, gap=0.003):
+    """Round 4 (failure class 5, «crop bbox bleed»): per-side padding for one crop.
+
+    The crop was padded by a fixed `pad` on all four sides. On a dense page that pulls the neighbouring
+    paragraph's first line into a figure crop — the child then sees text that is not part of the figure and
+    reads it as its caption. Here each side is padded by at most the free distance to the nearest neighbouring
+    block on that side, minus `gap`, and never below 0: a crop can lose padding, never gain foreign content.
+
+    `bbox` / `neighbours` are [x, y, w, h] in page fractions. A block counts on a side only when it also
+    overlaps the figure on the perpendicular axis (a paragraph in the other column is not "below").
+    Returns (left, top, right, bottom)."""
+    x, y, w, h = bbox
+    x1, y1 = x + w, y + h
+    out = []
+    for side in ('left', 'top', 'right', 'bottom'):
+        free = None
+        for nb in neighbours or []:
+            nx, ny, nw, nh = nb
+            nx1, ny1 = nx + nw, ny + nh
+            x_ov = min(x1, nx1) - max(x, nx) > 0
+            y_ov = min(y1, ny1) - max(y, ny) > 0
+            d = None
+            if side == 'left' and y_ov and nx1 <= x:
+                d = x - nx1
+            elif side == 'right' and y_ov and nx >= x1:
+                d = nx - x1
+            elif side == 'top' and x_ov and ny1 <= y:
+                d = y - ny1
+            elif side == 'bottom' and x_ov and ny >= y1:
+                d = ny - y1
+            if d is not None and (free is None or d < free):
+                free = d
+        out.append(pad if free is None else max(0.0, min(pad, free - gap)))
+    return tuple(out)
+
+
+def crop_png(pdf, page, bbox, out_path, dpi, pad=0.012, pads=None):
     import fitz
     doc = fitz.open(pdf)
     pg = doc[page - 1]
     r = pg.rect
     x, y, w, h = bbox
-    x0, y0 = max(0.0, x - pad), max(0.0, y - pad)
-    x1, y1 = min(1.0, x + w + pad), min(1.0, y + h + pad)
+    pl, pt, pr, pb = pads if pads is not None else (pad, pad, pad, pad)
+    x0, y0 = max(0.0, x - pl), max(0.0, y - pt)
+    x1, y1 = min(1.0, x + w + pr), min(1.0, y + h + pb)
     clip = fitz.Rect(r.x0 + x0 * r.width, r.y0 + y0 * r.height, r.x0 + x1 * r.width, r.y0 + y1 * r.height)
     pm = pg.get_pixmap(dpi=dpi, colorspace=fitz.csRGB, alpha=False, clip=clip)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
@@ -661,15 +698,26 @@ def render_crops(tsl, out_dir, dpi=150):
         print(f'  ! không thấy PDF cho {book} — sinh tài liệu KHÔNG crop', file=sys.stderr)
         return {}
     out = {}
+    # Round 4: neighbours per page — every TSL block and withheld region that carries a bbox. A crop's padding
+    # stops short of them (crop_pads), so a crop cannot bleed into the next paragraph.
+    nb_by_page = {}
+    for b in list(tsl.get('blocks') or []) + list(tsl.get('withheld') or []):
+        if b.get('bbox'):
+            nb_by_page.setdefault(b['page'], []).append((b.get('id'), b['bbox']))
+
     for w in tsl.get('withheld') or []:
         rel = f'crops/{book}-p{w["page"]:03d}-withheld-{w["order"]:03d}.png'
-        crop_png(pdf, w['page'], w['bbox'], os.path.join(out_dir, rel), dpi)
+        nbs = [bb for bid, bb in nb_by_page.get(w['page'], []) if bid != w.get('id')]
+        crop_png(pdf, w['page'], w['bbox'], os.path.join(out_dir, rel), dpi, pads=crop_pads(w['bbox'], nbs))
         out[w['id']] = {'crop': rel, 'aspect': None}
     for f in tsl.get('figures') or []:
         if not figure_kept(f):
             continue
         rel = f'crops/{book}-p{f["page"]:03d}-{f["id"].split(":")[-1]}.png'
-        wpx, hpx = crop_png(pdf, f['page'], f['bbox'], os.path.join(out_dir, rel), dpi)
+        # a figure's own caption and labels belong to the figure — they never clip its padding
+        own = {f.get('caption'), f.get('id')} | set(f.get('labels') or [])
+        nbs = [bb for bid, bb in nb_by_page.get(f['page'], []) if bid not in own]
+        wpx, hpx = crop_png(pdf, f['page'], f['bbox'], os.path.join(out_dir, rel), dpi, pads=crop_pads(f['bbox'], nbs))
         out[f['id']] = {'crop': rel, 'aspect': round(wpx / hpx, 4)}
     return out
 

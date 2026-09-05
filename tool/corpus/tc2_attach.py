@@ -90,9 +90,11 @@ def printed_offset(book):
     return best if n >= 3 else None
 
 
-def page_info(book, page, n_pages=None):
-    fp = f'{OCR}/{book}/p{page:03d}.json'
-    lines = json.load(open(fp))['lines'] if os.path.exists(fp) else []
+def page_info(book, page, n_pages=None, lines=None):
+    """`lines` (OCR lines of the page) may be injected instead of read from disk — used by the tests."""
+    if lines is None:
+        fp = f'{OCR}/{book}/p{page:03d}.json'
+        lines = json.load(open(fp))['lines'] if os.path.exists(fp) else []
     lines = [l for l in lines if l.get('text', '').strip()]
     info = dict(page=page, lines=len(lines), printed=None, kind='page', header=None, theme=None, continuation=False, _tail=bool(n_pages and page >= 0.88 * n_pages))
     if not lines:

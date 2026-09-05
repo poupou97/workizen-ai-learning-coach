@@ -409,6 +409,110 @@ def role_signal_pass(book, page, out_blocks, rules):
     return changed
 
 
+# ---------------------------------------------------------------- figure / caption relation (failure class 5)
+CAPTION_LABEL = re.compile(r'^\s*(Hình|Bảng|Sơ đồ|Biểu đồ|Lược đồ|Tranh|Ảnh)\s*\d+(?:[.\-]\d+)*\s*[.:]?\s*$', re.IGNORECASE)
+
+
+def _cx_overlap(a, b):
+    """Horizontal overlap of two [x, y, w, h] boxes (page fractions); ≤ 0 when they do not overlap."""
+    return min(a[0] + a[2], b[0] + b[2]) - max(a[0], b[0])
+
+
+def caption_for_picture(pic_bbox, captions, med_h):
+    """Round 4 (failure class 5) — WHICH caption belongs to this picture, decided by geometry, never by
+    reading order.
+
+    tc2-p1 linked a `caption` block to a picture by reading-order distance (`abs(order - rank) <= 2`). On a
+    page carrying several pictures, badges and mascots that mislinks: Lane C's O5 (LS&ĐL 5 p039, the Lý Bí
+    badge took caption «Hình 2»). A wrong caption is worse than none — the child is told the picture shows
+    something it does not.
+
+    A caption qualifies when it overlaps the picture HORIZONTALLY and one of:
+      · it sits just BELOW the picture — gap ≤ 2.5 × the page's median line height (the printed convention);
+      · it sits INSIDE the picture's lower band — Docling grows a picture box over its own caption
+        (Khoa học 4 p30, Vật lí 10 p30, Toán 12 p20);
+      · it sits just ABOVE the picture — held much tighter (≤ 1 × median line height), because a caption
+        above is rare and a body line above is common.
+    The nearest qualifying caption wins (inside first, then the smallest gap, then the largest overlap).
+    Returns the caption block id, or None — a picture with no caption is honest.
+
+    `captions` are SDM blocks (dicts with `id`, `bbox` and a `role`); non-caption roles are ignored.
+    """
+    if not pic_bbox:
+        return None
+    med_h = med_h or 0.01
+    px, py, pw, ph = pic_bbox
+    py1 = py + ph
+    below_max, above_max = 2.5 * med_h, 1.0 * med_h
+    inside_band = max(3.0 * med_h, 0.1 * ph)
+    best = None
+    for c in captions or []:
+        bb = c.get('bbox')
+        if not bb or (c.get('role') or {}).get('value') != 'caption':
+            continue
+        ov = _cx_overlap(pic_bbox, bb)
+        if ov <= 0:
+            continue
+        cy0, cy1 = bb[1], bb[1] + bb[3]
+        cyc = bb[1] + bb[3] / 2
+        if py <= cyc <= py1:                       # inside the picture box
+            if cyc < py1 - inside_band:
+                continue                            # a label in the middle of the picture is figure text, not its caption
+            key = (0, 0.0, -ov)
+        elif cy0 >= py1:                            # below
+            gap = cy0 - py1
+            if gap > below_max:
+                continue
+            key = (1, gap, -ov)
+        elif cy1 <= py:                             # above
+            gap = py - cy1
+            if gap > above_max:
+                continue
+            key = (1, gap, -ov)
+        else:
+            continue
+        if best is None or key < best[0]:
+            best = (key, c['id'])
+    return best[1] if best else None
+
+
+def caption_continuation_pass(blocks, med_h):
+    """Round 4 (failure class 5) — a caption printed as «Hình 17.1» + its sentence in a SEPARATE block on the
+    same printed line. tc2-p1 gave the label `caption` and left the sentence `body`: the audit saw the sentence
+    served as lesson prose («caption fragment served as body», 1 of the 2 Bài 17 role errors).
+
+    A block becomes the continuation of a caption label when ALL hold: the label is a bare «Hình/Bảng/… N»
+    caption; the candidate starts on the same printed line (centre within ½ a line height); it starts within
+    3 line heights to the right of the label; it is short (≤ 90 chars), carries no enumerator, and does not end
+    a sentence. Deterministic, geometry + lexicon, no repair of any text. Returns how many blocks moved.
+    """
+    med_h = med_h or 0.01
+    same_line, near_x, moved = 0.5 * med_h, 3.0 * med_h, 0
+    labels = [b for b in blocks if b.get('bbox') and (b.get('role') or {}).get('value') == 'caption' and CAPTION_LABEL.match((b.get('text') or '').strip())]
+    for lab in labels:
+        lx, ly, lw, lh = lab['bbox']
+        lyc, lx1 = ly + lh / 2, lx + lw
+        for b in blocks:
+            if b is lab or not b.get('bbox'):
+                continue
+            r = b.get('role') or {}
+            if r.get('value') not in ('body',) or b.get('continues'):
+                continue
+            t = (b.get('text') or '').strip()
+            if not t or len(t) > 90 or ENUM.match(t) or ends_sentence(t) or CAPTION_LABEL.match(t):
+                continue
+            bx, by, bw, bh = b['bbox']
+            if abs((by + bh / 2) - lyc) > same_line:
+                continue
+            if not (0 <= bx - lx1 <= near_x):
+                continue
+            r.update(value='caption', coarse='CAPTION', method='caption-continuation',
+                     evidence=list(r.get('evidence') or []) + [f'continues caption label {lab["id"]}'])
+            b['continues'] = lab['id']
+            moved += 1
+    return moved
+
+
 def question_box_pass(out_blocks, med_h):
     """Round 4 (Bài 17 p61, audit role error «question 2 of a ?-box served as sidebar»): a numbered line («2. …»)
     directly under a QUESTION block, in the same tinted box (both on colour, left edges within 0.03) and within two
@@ -857,6 +961,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
         if ob['role']['value'] == 'body' and ENUM.match(ob['text'] or '') and nxt is not None and nxt['role']['value'] == 'option' and docType != 'SGV':
             ob['role'].update(value='question', coarse='QUESTION', method='context', confidence=0.8, evidence=ob['role']['evidence'] + ['enumerated stem followed by options'])
     question_box_pass(out_blocks, med_h)
+    caption_continuation_pass(out_blocks, med_h)
     if role_signal:
         role_signal_pass(book, page, out_blocks, role_signal)
     # re-derive trust for blocks whose role changed in the post-passes (guards that depend on the role)
@@ -882,7 +987,10 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
     for k, p in enumerate(pics):
         p_rank = rank_of_native.get(p['order'], p['order'])
         labels = [ob['id'] for ob in out_blocks if ob['role']['value'] == 'figure_text' and inside(ob['bbox'], p['bbox'], 0.6)]
-        cap = next((ob['id'] for ob in out_blocks if ob['role']['value'] == 'caption' and abs(ob['order'] - p_rank) <= 2), None)
+        # Round 4 (failure class 5): geometry decides the caption, not reading-order distance. Fail closed —
+        # a picture whose caption cannot be placed geometrically carries no caption.
+        # One caption may legitimately serve side-by-side pictures, so it is not consumed by the first of them.
+        cap = caption_for_picture(p['bbox'], [ob for ob in out_blocks if ob['role']['value'] == 'caption'], med_h)
         figures.append(dict(id=f'{book}:p{page:03d}:fig{k:02d}', bbox=p['bbox'], labels=labels, caption=cap))
     stats = Counter(ob['trust']['status'] for ob in out_blocks if ob['learning'])
     reasons = Counter(r for ob in out_blocks if ob['learning'] for r in ob['trust']['reasons'])
