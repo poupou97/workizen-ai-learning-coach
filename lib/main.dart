@@ -47,6 +47,7 @@ import 'app/theme/wal_tokens.dart' show WalBandDensity;
 import 'core/pedagogy/presentation_policy.dart' show bandForGrade;
 import 'features/subjects/book_shelf_screen.dart';
 import 'features/subjects/subjects_screen.dart';
+import 'features/subjects/subject_display.dart';
 import 'features/subjects/subject_home_screen.dart';
 import 'features/mission/mission_data.dart';
 import 'features/onboarding/onboarding_screen.dart';
@@ -133,6 +134,14 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     }
     final idx = await widget.indexLoader(p.grade);
     if (!mounted) return;
+    // ROUND 3 B5: tên sách cho dòng nguồn của Kho khám phá (mã sách → tên).
+    if (idx != null) {
+      knownBookTitles.addAll({
+        for (final b in idx.books)
+          b.sourceDocumentId:
+              b.volumeLabel == null ? b.title : '${b.title} · ${b.volumeLabel}',
+      });
+    }
     setState(() {
       _lessonIndex = idx;
       // ⭐ WAL-210 G2: thẻ Home của lớp chỉ-có-Scale cần con số bài từ pack

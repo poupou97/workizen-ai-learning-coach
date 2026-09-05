@@ -21,6 +21,7 @@ import '../../core/store/learner_profile.dart';
 import '../camera/camera_demo_flow.dart';
 import '../parent/parent_tonight_screen.dart';
 import 'mission_data.dart';
+import '../subjects/subject_display.dart';
 
 class MissionCenterScreen extends StatelessWidget {
   const MissionCenterScreen({
@@ -511,7 +512,7 @@ class MissionCenterScreen extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: WalColors.ink)),
             const SizedBox(height: 2),
-            Text(st.sourceLine,
+            Text(storySourceLine(sourceDocumentId: st.sourceDocumentId, pagePdf: st.pagePdf),
                 style: const TextStyle(
                     fontSize: WalType.secondary, color: WalColors.inkSoft)),
           ]),

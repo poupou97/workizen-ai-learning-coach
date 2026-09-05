@@ -52,3 +52,21 @@ String childSourceLine({
   final book = title == null ? sourceDocumentId : 'SGK $title';
   return pagePrinted == null ? book : '$book · trang $pagePrinted';
 }
+
+/// Mã sách → tên sách, nạp từ mục lục pack khi app đọc pack (main.dart).
+/// Tích luỹ qua các lớp đã mở (tên ổn định theo mã). Không có ⇒ hàm dưới
+/// giữ mã.
+final Map<String, String> knownBookTitles = <String, String>{};
+
+/// Dòng nguồn của một mẩu «Kho khám phá» (StoryItem chỉ mang trang PDF):
+/// «Nguồn: SGK Ngữ văn 6 · Tập 1 · trang PDF 26». Nói «trang PDF» vì đó là
+/// điều dữ liệu có — không đội lốt số trang in.
+String storySourceLine({
+  required String sourceDocumentId,
+  required int pagePdf,
+  Map<String, String>? bookTitles,
+}) {
+  final title = (bookTitles ?? knownBookTitles)[sourceDocumentId];
+  final book = title == null ? sourceDocumentId : 'SGK $title';
+  return 'Nguồn: $book · trang PDF $pagePdf';
+}
