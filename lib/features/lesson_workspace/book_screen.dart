@@ -120,7 +120,20 @@ class BookScreen extends StatelessWidget {
                   color: WalColors.ink,
                 ),
               ),
-              const SizedBox(height: WalSpacing.sm),
+              const SizedBox(height: 2),
+              // ROUND 3 B5 (audit O4): tên chương là chữ MỤC LỤC IN đọc máy,
+              // giữ nguyên văn (có thể còn lỗi chữ) — nói rõ, không sửa tay.
+              if (chapters.any((c) => c.derivation.startsWith('toc-ocr')))
+                const Padding(
+                  padding: EdgeInsets.only(bottom: WalSpacing.sm),
+                  child: Text(
+                    'Tên chương lấy từ mục lục in của sách (máy đọc, chưa '
+                    'soát) — có thể còn lỗi chữ.',
+                    style: TextStyle(fontSize: 12, color: WalColors.inkSoft),
+                  ),
+                )
+              else
+                const SizedBox(height: WalSpacing.sm - 2),
               for (final c in chapters) _chapterRow(context, c),
               const SizedBox(height: WalSpacing.md),
               Material(
@@ -226,6 +239,12 @@ class BookScreen extends StatelessWidget {
     ],
   );
 
+  static String _range(ChapterRef c) {
+    if (c.lessonNos.isEmpty) return '';
+    final a = c.lessonNos.first, b = c.lessonNos.last;
+    return a == b ? 'Bài $a · ' : 'Bài $a–$b · ';
+  }
+
   Widget _chapterRow(BuildContext context, ChapterRef c) {
     final ls = _lessonsOf(c);
     final withSam = docs.where((d) => c.contains(d.lessonNo)).length;
@@ -245,9 +264,11 @@ class BookScreen extends StatelessWidget {
             ),
           ),
           subtitle: Text(
+            // ROUND 3 B1: dải số bài («Bài 16–17») để trẻ biết chương nằm
+            // đâu trong sách — từ mục lục, không suy thêm.
             withSam > 0
-                ? '${ls.length} bài · ✨ $withSam bài học SAM'
-                : '${ls.length} bài',
+                ? '${_range(c)}${ls.length} bài · ✨ $withSam bài học SAM'
+                : '${_range(c)}${ls.length} bài',
             style: TextStyle(
               fontSize: WalType.secondary,
               color: withSam > 0 ? WalColors.primaryText : WalColors.inkSoft,
