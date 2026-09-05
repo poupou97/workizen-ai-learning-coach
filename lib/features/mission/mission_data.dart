@@ -15,6 +15,7 @@ import '../learning_session/slice_flow.dart' show masteryFromStore;
 import '../../core/curriculum/pedagogical_boundary.dart';
 import '../../core/curriculum/skill_case.dart';
 import '../../core/student/concept_summary.dart';
+import '../../core/student/evidence_validation.dart';
 import '../../core/student/evidence_weighting.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
@@ -115,6 +116,13 @@ DemoDomain buildDemoDomain({DateTime? now}) {
         kind: EvidenceKind.independentAttempt,
         correct: true,
         at: t.subtract(age).add(Duration(minutes: i)),
+        // ⭐ ROUND 4 (strict default, A-runtime R4.2–R4.4): các sự kiện MẪU
+        // này mô phỏng câu trả lời Deep (phân số) mà `fraction-check-v1`
+        // chấm — đóng đúng dấu của validator đó để fixture đi cùng luật đọc
+        // nghiêm ngặt như dữ liệu thật. DEMO ≠ dữ liệu học sinh: domain này
+        // chỉ dựng cho màn demo/camera-demo/Tonight-demo, không vào kho.
+        validation: const EvidenceValidation(
+            validatorId: 'fraction-check-v1', validatorVersion: '1'),
       ));
     }
     return l;

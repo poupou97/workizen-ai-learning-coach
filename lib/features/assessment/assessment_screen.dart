@@ -20,6 +20,7 @@ import '../../core/context/learning_context.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
 import '../../core/store/assistance_policy.dart';
 import '../../core/student/evidence_ids.dart';
+import '../../core/student/evidence_validation.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../subjects/lesson_index.dart';
@@ -134,6 +135,11 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         lessonNo: widget.learningContext?.sourceDocumentId == e.book
             ? widget.learningContext?.lessonNo
             : null,
+        // ⭐ ROUND 4 (strict default, A-runtime R4.2): câu trả lời được chấm
+        // bằng chính `FractionProblem.checkAnswer` ⇒ đóng dấu validator đã
+        // đăng ký `fraction-check-v1`; không dấu thì từ round 4 câu trả lời
+        // đọc là «ghi nhận trước hợp đồng mới» và không vào mastery.
+        validation: FractionCheckValidator(fp!).validation,
       ));
       _ctrl.clear();
       _i++;

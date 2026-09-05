@@ -412,7 +412,10 @@ def tutor_script_bai17(tsl, by_id):
                 'hints': [
                     'Con nghĩ xem: muối ăn không bay hơi, còn nước thì bay hơi được. Cách nào dùng đúng điều đó?',
                     # ROUND 3 (A7 guard, Lane B hand-off): gợi ý chỉ chỗ trong sách, KHÔNG nêu tên phương pháp (dạng đáp án).
-                    'Ở trang 62 sách có một mục nói về cách «tách chất tan rắn ra khỏi dung dịch… bằng cách làm cho dung môi bay hơi» — con tìm tên mục đó nhé.',
+                    # ROUND 4 (A-runtime R4.10 quote rule, coordinator-directed Lane B fix): trích NGUYÊN VĂN một
+                    # đoạn liền của block p063:tc2-p1:005 (không «…»), KHÔNG tự chèn số trang (GUARD:CITATION_FABRICATION —
+                    # trang được vẽ từ sourceBlockId), vẫn không nêu tên phương pháp (dạng đáp án).
+                    'Trong sách có một mục nói về cách «tách chất tan rắn ra khỏi dung dịch hoặc huyền phù bằng cách làm cho dung môi bay hơi» — con tìm tên mục đó nhé.',
                 ],
                 'feedbackMatched': 'Khớp với điều sách viết: làm nước biển bay hơi để thu muối là phương pháp cô cạn. '
                                    'Con đã tự nối được ví dụ với tên phương pháp.',
@@ -451,7 +454,8 @@ def tutor_script_bai17(tsl, by_id):
                 'acceptable': [r'^hoà tan vào nước'],
                 'hints': [
                     'Muối tan trong nước, cát thì không. Con dùng điều đó để tách hai thứ ra bằng hai bước nào?',
-                    'Sách viết: lọc «tách chất rắn không tan ra khỏi chất lỏng», cô cạn «tách chất khó bay hơi ra khỏi chất dễ bay hơi». Ghép hai bước lại xem.',
+                    # ROUND 4 (R4.10): trích thứ hai nguyên văn block p064:tc2-p1:006 — sách viết «các chất … các chất».
+                    'Sách viết: lọc «tách chất rắn không tan ra khỏi chất lỏng», cô cạn «tách các chất khó bay hơi ra khỏi các chất dễ bay hơi». Ghép hai bước lại xem.',
                 ],
                 'feedbackMatched': 'Khớp với hai cách sách đã nêu: lọc bỏ cát (không tan), rồi cô cạn để lấy lại muối. '
                                    'Con đã ghép được hai phương pháp cho một bài toán mới.',
