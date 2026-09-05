@@ -38,7 +38,11 @@ import ft_audit_score as fscore  # noqa: E402  (Lane A-pipeline code, read-only 
 
 AUDIT_OUT = f'{common.LEGACY_OUT}/audit'
 ANNOT_FIELDS = ('display_fidelity', 'teaching_critical_fidelity', 'reading_order', 'role_fidelity', 'lesson_attachment', 'false_trust')
-EXTRA_FIELDS = ('notes', 'display_error_class', 'teaching_critical_class', 'reviewer', 'reviewedAt')
+# Round 5: `figure_relation` closes the protocol gap round 4 named — a caption can be character-perfect
+# and still teach nothing when it is served detached from the figure it labels (batch-1 report §5a found
+# 5 such blocks and had no field to record them in). Values: OK / DETACHED / NA / UNSURE.
+EXTRA_FIELDS = ('notes', 'display_error_class', 'teaching_critical_class', 'figure_relation', 'reviewer', 'reviewedAt')
+FIGURE_RELATION_VALUES = ('OK', 'DETACHED', 'NA', 'UNSURE', '')
 VALUES = ('OK', 'WRONG', 'UNSURE', 'NA')
 CLASSES = ('display', 'teaching_critical', 'reading_order', 'role', 'attachment', 'false_trust')
 CLASS_FIELD = dict(display='display_fidelity', teaching_critical='teaching_critical_fidelity', reading_order='reading_order', role='role_fidelity', attachment='lesson_attachment', false_trust='false_trust')
@@ -341,6 +345,10 @@ def annotate(rows, judgments, reviewer, log_path=None):
             r[f] = v
         for f in ('notes', 'display_error_class', 'teaching_critical_class'):
             r[f] = j.get(f, '')
+        fr = (j.get('figure_relation') or '').strip().upper()
+        if fr not in FIGURE_RELATION_VALUES:
+            raise ValueError(f'{r["sampleId"]}: figure_relation={fr!r} not in {FIGURE_RELATION_VALUES}')
+        r['figure_relation'] = fr
         r['reviewer'] = reviewer; r['reviewedAt'] = now
         out.append(r)
         if log_path:
