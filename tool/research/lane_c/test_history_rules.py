@@ -197,6 +197,69 @@ class ToneProbeTest(unittest.TestCase):
         self.assertEqual([(c['observed'], c['proposed']) for c in dom], [('Đăng', 'Đằng')])
 
 
+class RepairPluginSignalsTest(unittest.TestCase):
+    """Lane C's signals for A1's repair framework. These are PURE — they do not need the framework, so they
+    run on a clean clone; the end-to-end run is exercised by `repair_plugin.py` itself and skips without it."""
+
+    def setUp(self):
+        sys.path.insert(0, HERE)
+        import repair_plugin as rp
+        self.rp = rp
+
+    def test_corpus_signal_supports_objects_abstains(self):
+        from collections import Counter
+        ev = {('bach', 'đăng'): Counter({'đằng': 7, 'đăng': 2})}
+        k = ('bach', 'đăng')
+        self.assertEqual(self.rp.corpus_signal('Đăng', 'Đằng', ev, k)[0], 'supports')
+        self.assertEqual(self.rp.corpus_signal('Đằng', 'Đăng', ev, k)[0], 'objects')
+        self.assertEqual(self.rp.corpus_signal('x', 'y', ev, ('never', 'seen'))[0], 'abstains')
+
+    def test_human_signal_on_a_no_op_repair(self):
+        led = {'b': {'block': 'b', 'verdict': 'verbatim_glyph', 'slips': []}}
+        self.assertEqual(self.rp.human_signal('b', 'text', [], led)[0], 'supports')
+        led2 = {'b': {'block': 'b', 'verdict': 'slip', 'slips': [{'pipeline': 'A', 'printed': 'Á'}]}}
+        self.assertEqual(self.rp.human_signal('b', 'text', [], led2)[0], 'objects')
+        self.assertEqual(self.rp.human_signal('unread', 'text', [], led)[0], 'abstains')
+
+    def test_human_signal_is_scoped_to_the_occurrence(self):
+        # «Theo Đăng Khoa … sông Bạch Đăng»: the print shows a slip only at the SECOND «Đăng»
+        text = 'Theo Đăng Khoa và sông Bạch Đăng'
+        led = {'b': {'block': 'b', 'verdict': 'slip',
+                     'slips': [{'pipeline': 'Đăng', 'printed': 'Đằng', 'context': 'Bạch —'}]}}
+        river = [dict(index=6, observed='Đăng', proposed='Đằng')]
+        author = [dict(index=1, observed='Đăng', proposed='Đặng')]
+        self.assertEqual(self.rp.human_signal('b', text, river, led)[0], 'supports')
+        v, _, d = self.rp.human_signal('b', text, author, led)
+        self.assertEqual(v, 'objects')
+        self.assertIn('no slip at this', d['reason'])
+
+    def test_human_signal_objects_when_a_repair_leaves_the_block_non_verbatim(self):
+        text = 'Bạch Đăng Văn hóa'
+        led = {'b': {'block': 'b', 'verdict': 'slip', 'slips': [
+            {'pipeline': 'Đăng', 'printed': 'Đằng', 'context': 'Bạch —'},
+            {'pipeline': 'hóa', 'printed': 'hoá', 'context': 'Văn —'}]}}
+        half = [dict(index=1, observed='Đăng', proposed='Đằng')]
+        v, _, d = self.rp.human_signal('b', text, half, led)
+        self.assertEqual(v, 'objects')
+        self.assertEqual(d['uncovered'], ['hóa→hoá'])
+
+    def test_subsequence_check_for_the_column_linearisation_signal(self):
+        primary = ['sau', 'khi', 'trieu', 'da']
+        merged = ['sau', 'khi', 'trieu', 'chinh', 'quyen', 'da']     # verifier merged a second column in
+        self.assertTrue(self.rp.tokens_in_order(primary, merged))
+        self.assertFalse(self.rp.tokens_in_order(primary, ['sau', 'khi', 'da', 'trieu']))
+
+    def test_slip_context_matching(self):
+        self.assertTrue(self.rp._slip_matches_occurrence({'context': 'Bạch —'}, 'Bạch'))
+        self.assertTrue(self.rp._slip_matches_occurrence({}, 'anything'))
+        self.assertFalse(self.rp._slip_matches_occurrence({'context': 'Bạch —'}, 'Theo'))
+
+    def test_end_to_end_needs_lane_a1(self):
+        if not self.rp.available():
+            self.skipTest('Lane A1 repair framework not on the path (tool/corpus/repair)')
+        self.assertTrue(hasattr(self.rp, 'register'))
+
+
 class RegexPortabilityTest(unittest.TestCase):
     def test_rx_never_emits_identity_escapes(self):
         for s in ('40 - 43', 'Lý Bí - Triệu Quang Phục', 'a.b (c)', 'x/y'):

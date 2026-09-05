@@ -55,6 +55,28 @@ def tokens(text):
     return WORD.findall(text or '')
 
 
+def spans(text):
+    """[(start, end, surface)] — the same tokens as [tokens], with their character offsets, so a repair can
+    be applied to ONE occurrence («sông Bạch Đăng») and not to another spelt the same («Theo Đăng Khoa»)."""
+    return [(m.start(), m.end(), m.group()) for m in WORD.finditer(text or '')]
+
+
+def apply_candidates(text, cands):
+    """Rebuild `text` with each candidate applied at its own token index. Never a global replace."""
+    sp = spans(text)
+    out, last = [], 0
+    for c in sorted(cands, key=lambda c: c['index']):
+        i = c['index']
+        if i >= len(sp):
+            continue
+        s, e, surface = sp[i]
+        if surface != c['observed']:
+            continue
+        out.append(text[last:s]); out.append(c['proposed']); last = e
+    out.append(text[last:])
+    return ''.join(out)
+
+
 def keyed(text):
     """[(key, surface)] — key is (tone-stripped previous token or '^', tone-stripped token)."""
     ts = tokens(text)
