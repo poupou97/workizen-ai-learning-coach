@@ -49,10 +49,10 @@ Toán 6 Bài 9 is the recommended *third* slice (same persona, RULE/EXAMPLE/EXER
 
 ## 4. What must be true before H1 can become a production slice (Founder gate — review requested, nothing decided)
 
-1. **Source run (bounded slice, not a reprocess):** tc-v2 pipeline on LS&ĐL 5 (123 pages ≈ 3–4 min at the measured 1.5 s/page) or on the 4 pages alone; gate: Bài 8 attached to PDF 38–41 by header with confidence ≥ 0.85; the 7 dated events present as TRUSTED body text on p39; p38's objectives and Khởi động block either trusted or withheld with a reason the UI can state honestly.
-2. **Gold:** second human read of p041 (fix the lesson number 9 → 8) and of p080 (17 → 18); new gold for p38–p40 with `attribution`, `answer_slot`, `stage_label`; QUESTION precision on History pages ≥ the Science figure before any question is asked (the 0.95 gate stays).
-3. **Rules, written before code (PROPOSED):** `prose-dated-events-v1` → `TimelineSemantic`; `story-attribution-v1` → a `source` block kind carrying `attribution` verbatim (fail closed when the attribution line is missing — the critical class of gold p041); `TimelineValidator` keyed to the lesson's own prose, never to SGV.
-4. **Boundary unchanged:** `ContentTrust.fixtureFromTrustedCorpus`, `EvidencePolicy.none`, `SamMode.prototypeScripted`, no `LearningEvent`; «Kể lại / Chia sẻ» steps end as participation only.
-5. **Legal / D4:** crops of p38–41 internal only; the four-line poem and the «(Theo …)» lines quoted verbatim only inside the gitignored fixture; J.1 stays closed.
-6. **Persona:** a grade-5 profile on the device, or the Founder accepts the Lớp 6 persona browsing a grade-5 book for the falsification run.
-7. **Report the two gold contradictions** (A17) and the DRAW_CREATE mislabel of the timeline task (04 §4) to the study owners before the run, so the scoring is not inverted again.
+1. **Source run (bounded slice, not a reprocess):** tc-v2 on LS&ĐL 5 (123 pages ≈ 3–4 min at 1.5 s/page) or the 4 pages alone; gate: Bài 8 attached to PDF 38–41 by header at ≥ 0.85; the 7 dated events TRUSTED on p39; p38's objectives and Khởi động either trusted or withheld with a reason the UI can state.
+2. **Gold:** second human read of p041 (9 → 8) and p080 (17 → 18); new gold for p38–p40 with `attribution`, `answer_slot`, `stage_label`; the 0.95 QUESTION gate stays.
+3. **Rules before code (PROPOSED):** `prose-dated-events-v1` → `TimelineSemantic`; `story-attribution-v1` → a `source` block kind with verbatim `attribution` (fail closed when missing); `TimelineValidator` keyed to the lesson's own prose, never to SGV.
+4. **Boundary unchanged:** `fixtureFromTrustedCorpus`, `EvidencePolicy.none`, `prototypeScripted`, no `LearningEvent`; retelling/sharing steps end as participation only.
+5. **Legal / D4:** crops internal only; the poem and «(Theo …)» lines verbatim only inside the gitignored fixture; J.1 stays closed.
+6. **Persona:** a grade-5 profile, or an explicit cross-grade decision for the falsification run.
+7. **Report the gold contradictions** (A17) and the DRAW_CREATE mislabel (04 §5) to the study owners before the run.

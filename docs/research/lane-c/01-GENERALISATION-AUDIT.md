@@ -24,7 +24,7 @@ Method: `tsl_generalisation_audit.py` imports `to_block`, `derive_process`, `der
 
 Per book (MEASURED): Process lessons Khoa học 4 5/31 · Khoa học 5 5/30 · KHTN 6 13/53 · KHTN 7 6/33 · KHTN 8 22/42 · KHTN 9 17/49; unmapped-block lessons 2 · 1 · 16 · 10 · 16 · 15; Comparison 0 · 0 · 6 · 0 · 0 · 0.
 
-**Verdict for the Science family.** The *document* layer (blocks with `sourceRef` + trust + withheld regions, header boundaries, source lines) generalises unchanged to 238 / 238. The *semantic* layer generalises to 68 / 238 (Process) and 6 / 238 (Comparison). The *tutor* layer generalises to 1 / 238. What fails closed today: tables (cells absent), figure-dependent questions (28 % of question regions), `activity`/`option` blocks (dropped), and every withheld region — 2,160 of them — rendered as the same placeholder card with a reason string that reads as a diagram problem in 45 % of cases.
+**Verdict for the Science family.** The *document* layer (blocks with `sourceRef` + trust, withheld regions, header boundaries, source lines) generalises to 238 / 238; the *semantic* layer to 68 / 238 (Process) and 6 / 238 (Comparison); the *tutor* layer to 1 / 238. Fails closed today: tables (no cells), figure-dependent questions (28 % of question regions), dropped `activity`/`option` blocks, and 2,160 withheld regions shown as one placeholder card whose reason reads as a diagram problem in only 45 % of cases.
 
 ## 2. Other families — what the data on disk can say (MEASURED where a number is given)
 
