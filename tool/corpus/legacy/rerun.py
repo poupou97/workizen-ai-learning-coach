@@ -138,6 +138,38 @@ def rescue(annotated, rerun_dir, rerun_pipeline):
     return rows
 
 
+def recovered(annotated, rerun_dir, rerun_pipeline):
+    """The other half of a re-run: what happens to the regions the base build REFUSED.
+
+    Withholding is safe but not free — a build that refuses a lesson's own reading passage is worse for the
+    child than one that serves it. For every withheld region the audit reviewed, this reports whether the
+    re-run still refuses it or now serves it, so an over-withholding fix can be measured rather than claimed."""
+    tsls = {}
+    rows = []
+    for r in annotated:
+        if r.get('servedAsTrusted', True):
+            continue
+        key = (r['book'], int(r['lesson']))
+        if key not in tsls:
+            tsls[key] = tsl_of(rerun_dir, rerun_pipeline, *key)
+        outcome, blk, cov = locate(r, tsls[key])
+        if outcome.startswith('still_trusted'):
+            outcome = 'now_served'          # a withheld row served no text, so there is nothing to compare it against
+        rows.append(dict(sampleId=r['sampleId'], book=r['book'], lesson=r['lesson'], pagePdf=r.get('pagePdf'),
+                         base_reasons=r.get('withheldReasons') or [], outcome=outcome, coverage=cov,
+                         new_block=(blk or {}).get('id'),
+                         new_reasons=((blk or {}).get('reasons') if outcome == 'now_withheld' else None),
+                         now_served=(outcome == 'now_served'), notes=r.get('notes', '')))
+    by_reason = collections.defaultdict(lambda: collections.Counter())
+    for r in rows:
+        for reason in (r['base_reasons'] or ['(none recorded)']):
+            by_reason[reason]['reviewed'] += 1
+            by_reason[reason]['now_served'] += int(r['now_served'])
+    return dict(rows=rows, reviewed=len(rows), now_served=sum(1 for r in rows if r['now_served']),
+                outcomes=dict(collections.Counter(r['outcome'] for r in rows)),
+                by_base_reason={k: dict(v) for k, v in sorted(by_reason.items())})
+
+
 def summarise(rows):
     """Per failure class: of the rows judged WRONG / OK on the base run, what the re-run now does with them."""
     per_class = {}
@@ -186,7 +218,8 @@ def build(base_dir, rerun_dir, annotated_path):
     return dict(version=RERUN_VERSION, base=dict(dir=os.path.basename(base_dir), pipeline=base_pipe, code_sha=bm.get('pipeline_code_sha'), corpus=bm.get('pipeline_corpus')),
                 rerun=dict(dir=os.path.basename(rerun_dir), pipeline=rerun_pipe, code_sha=rm.get('pipeline_code_sha'), corpus=rm.get('pipeline_corpus')),
                 annotated=dict(path=os.path.basename(annotated_path) if annotated_path else None, rows=len(annotated), served_rows=len(rows)),
-                coverage=dict(base=base_cov, rerun=rerun_cov), rescue_rows=rows, rescue=summarise(rows))
+                coverage=dict(base=base_cov, rerun=rerun_cov), rescue_rows=rows, rescue=summarise(rows),
+                withheld=recovered(annotated, rerun_dir, rerun_pipe))
 
 
 def render_md(d):
@@ -214,7 +247,17 @@ def render_md(d):
         wf = f"{w['no_longer_served_as_before']} / {w['n']} = {w['rate']:.3f} [{w['lo']:.3f}, {w['hi']:.3f}]" if w['n'] else '— (n = 0)'
         kf = f"{k['no_longer_served_as_before']} / {k['n']} = {k['rate']:.3f} [{k['lo']:.3f}, {k['hi']:.3f}]" if k['n'] else '— (n = 0)'
         o.append(f"| {cls} | {w['n']} | {wf} | {k['n']} | {kf} |")
-    o += ['', f"Row outcomes overall: {d['rescue']['_all']['outcomes']}\n",
+    w = d.get('withheld') or {}
+    if w.get('reviewed'):
+        o += ['', f"Row outcomes overall: {d['rescue']['_all']['outcomes']}\n",
+              '## 2b. Over-withholding — the regions the base build REFUSED\n',
+              'Withholding is safe but not free. Of the withheld regions the audit reviewed on the base run, these are now served by the re-run:\n',
+              f"**{w['now_served']} of {w['reviewed']} reviewed withheld regions are served again** ({w['outcomes']}).\n",
+              '| base withhold reason | reviewed | now served again |', '|---|---|---|']
+        for reason, c in w['by_base_reason'].items():
+            o.append(f"| `{reason}` | {c['reviewed']} | {c['now_served']} |")
+        o.append('')
+    o += ['', f"Row outcomes overall: {d['rescue']['_all']['outcomes']}" if not w.get('reviewed') else '',
           '## 3. What still needs a fresh judgement\n',
           'Rows served with CHANGED text are new claims: they carry no verdict yet and must be annotated before the re-run can be scored on the same footing as the base run.\n']
     changed = [r for r in d['rescue_rows'] if r['outcome'] == 'still_trusted_changed']
