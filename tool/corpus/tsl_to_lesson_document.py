@@ -288,7 +288,8 @@ def chapter_label(m):
 def clean_toc_title(raw):
     """TOC titles carry dot leaders and a trailing page number; both are furniture, not title text."""
     t = re.sub(r'[.\u2026]{2,}', ' ', raw)
-    t = re.sub(r'\s+\d{1,3}\s*$', '', t)
+    # the leader may be a single dot glued to the page number («… THẾ GIỚI .93»)
+    t = re.sub(r'[\s.\u2026]*\d{1,3}\s*$', '', t)
     return re.sub(r'\s+', ' ', t).strip(' .\u2026-–:')
 
 
@@ -397,24 +398,41 @@ def derive_comparison(tsl):
 
 
 # ------------------------------------------------------------------ tutor script (PROTOTYPE, Bài 17 only)
+def block_key(block_id):
+    """`<book>:pNNN:<pipeline>:<order>` → `<book>:pNNN:<order>`.
+
+    Round 4: a TSL block id embeds the PIPELINE NAME, so every id written down by hand (the Bài 17 tutor
+    script below) stopped resolving the moment the lesson was rebuilt as `tc2-p2` — the script vanished
+    with the message «TSL thiếu block», which blamed withholding for what was really a naming mismatch.
+    Keys are compared without the pipeline segment; the id carried in the output is still the real one."""
+    parts = (block_id or '').split(':')
+    return ':'.join(parts[:2] + parts[3:]) if len(parts) >= 4 else block_id
+
+
 def tutor_script_bai17(tsl, by_id):
     """Hand-written script for KHTN 6 Bài 17 — `prototype`. Prompts are VERBATIM TSL blocks (by id);
     everything else (SAM's words, acceptable patterns, hints, scaffold) is the slice author's, NOT the
-    SGV, NOT the Pedagogy Runtime. Any other TSL ⇒ None (no invented script)."""
+    SGV, NOT the Pedagogy Runtime. Any other TSL ⇒ None (no invented script).
+
+    Blocks are looked up pipeline-agnostically (see block_key), so a versioned re-run keeps the script
+    when — and only when — every block it quotes is still TRUSTED."""
     B = '06-sgk-khoa-hoc-tu-nhien-6:'
     need = {
-        'principle': B + 'p061:tc2-p1:016',
-        'q_salt': B + 'p063:tc2-p1:011',
-        'q_funnel': B + 'p063:tc2-p1:022',
-        'q_sand': B + 'p063:tc2-p1:012',
-        'summary': B + 'p064:tc2-p1:003',
-        'co_can': B + 'p063:tc2-p1:005',
+        'principle': B + 'p061:016',
+        'q_salt': B + 'p063:011',
+        'q_funnel': B + 'p063:022',
+        'q_sand': B + 'p063:012',
+        'summary': B + 'p064:003',
+        'co_can': B + 'p063:005',
     }
     if tsl.get('book') != '06-sgk-khoa-hoc-tu-nhien-6' or tsl.get('lesson') != 17:
         return None
-    if any(k not in by_id for k in need.values()):
-        print('  ! TSL thiếu block cho kịch bản Bài 17 — không sinh tutorScript', file=sys.stderr)
+    by_key = {block_key(k): v for k, v in by_id.items()}
+    missing = [k for k, v in need.items() if v not in by_key]
+    if missing:
+        print(f'  ! TSL thiếu block cho kịch bản Bài 17 ({", ".join(missing)}) — không sinh tutorScript', file=sys.stderr)
         return None
+    need = {k: by_key[v]['id'] for k, v in need.items()}   # back to the REAL ids: they are emitted as provenance
     q = lambda k: by_id[need[k]]['text']  # noqa: E731
     return {
         'samMode': 'prototypeScripted',
@@ -738,8 +756,10 @@ def render_crops(tsl, out_dir, dpi=150):
         if not figure_kept(f):
             continue
         rel = f'crops/{book}-p{f["page"]:03d}-{f["id"].split(":")[-1]}.png'
-        # a figure's own caption and labels belong to the figure — they never clip its padding
-        own = {f.get('caption'), f.get('id')} | set(f.get('labels') or [])
+        # a figure's own caption belongs to the figure — it never clips its padding. (The TSL stores
+        # `labels` as a COUNT, not a list, so figure labels cannot be excluded by id; they sit inside the
+        # picture bbox anyway, which no side test can turn into a neighbour.)
+        own = {f.get('caption'), f.get('id')}
         nbs = [bb for bid, bb in nb_by_page.get(f['page'], []) if bid not in own]
         wpx, hpx = crop_png(pdf, f['page'], f['bbox'], os.path.join(out_dir, rel), dpi, pads=crop_pads(f['bbox'], nbs))
         out[f['id']] = {'crop': rel, 'aspect': round(wpx / hpx, 4)}

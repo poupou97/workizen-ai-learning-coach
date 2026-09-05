@@ -134,7 +134,7 @@ class ChapterChuDeTests(unittest.TestCase):
 
     TOC_CHU_DE = ('MỤC LỤC TRANG LỜI NÓI ĐẦU .. 3 '
                   'CHỦ ĐỀ 1. TIÊU ĐỀ CHỦ ĐỀ MỘT ..... ... 5 Bài 1. Tiêu đề mẫu một 5 Bài 2. Tiêu đề mẫu hai 9 '
-                  'CHỦ ĐẾ 2. TIÊU ĐỀ CHỦ ĐỀ HAI .. 25 Bài 3. Tiêu đề mẫu ba 25 ')
+                  'CHỦ ĐẾ 2. TIÊU ĐỀ CHỦ ĐỀ HAI .25 Bài 3. Tiêu đề mẫu ba 25 ')
     TOC_CHUONG = ('MỤC LỤC Hướng dẫn sử dụng sách 2 '
                   'CHƯƠNG I - TIÊU ĐỀ CHƯƠNG MỘT Bài 1. Tiêu đề mẫu một 7 Bài 2. Tiêu đề mẫu hai 11 '
                   'CHƯƠNG II - TIÊU ĐỀ CHƯƠNG HAI Bài 3. Tiêu đề mẫu ba 28 ')
@@ -156,6 +156,10 @@ class ChapterChuDeTests(unittest.TestCase):
     def test_the_tone_slipped_banner_is_still_a_chapter(self):
         # LS&ĐL 5's own TOC prints «CHỦ ĐẾ 6» — the same display-font slip as «BÃI»
         self.assertEqual(self.chapters(self.TOC_CHU_DE)[1]['label'], 'Chủ đề 2')
+
+    def test_a_single_dot_leader_glued_to_the_page_number_is_still_stripped(self):
+        # LS&ĐL 5 prints «CHỦ ĐỀ 5. TÌM HIỂU THẾ GIỚI .93 Bài 22.» — the page number must not enter the title
+        self.assertEqual(self.chapters(self.TOC_CHU_DE)[1]['title'], 'TIÊU ĐỀ CHỦ ĐỀ HAI')
 
     def test_chuong_books_are_unchanged(self):
         ch = self.chapters(self.TOC_CHUONG)
