@@ -107,9 +107,15 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     final fp = FractionProblem.parse(e.expr);
     final raw = _ctrl.text.trim();
     if (raw.isEmpty) return;
-    // fp == null ⇒ máy KHÔNG đọc được dạng bài ⇒ không dám chấm (fail closed).
-    final ok = fp?.checkAnswer(raw);
-    if (ok == null) return;
+    // ⭐ ROUND 4 (strict default, A-runtime R4.2): chấm bằng ĐÚNG validator đã
+    // đăng ký — `FractionCheckValidator` bọc chính `FractionProblem.checkAnswer`
+    // mà màn này vẫn dùng. Đi qua `grade()` là đường DUY NHẤT mint được dấu, nên
+    // kết quả chấm và dấu không thể lệch nhau.
+    // fp == null ⇒ máy KHÔNG đọc được dạng bài ⇒ không dám chấm (fail closed);
+    // validator chưa đăng ký ⇒ `grade` trả null ⇒ cũng không phát sự kiện nào.
+    final graded = fp == null ? null : FractionCheckValidator(fp).grade(raw);
+    if (graded == null) return;
+    final ok = graded.correct;
     final skillCaseId = e.skillCaseId!; // _caseUnknown đã loại null phía trên
     setState(() {
       _answers.add(AssessmentAnswer(expr: e.expr, raw: raw, correct: ok));
@@ -135,11 +141,10 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         lessonNo: widget.learningContext?.sourceDocumentId == e.book
             ? widget.learningContext?.lessonNo
             : null,
-        // ⭐ ROUND 4 (strict default, A-runtime R4.2): câu trả lời được chấm
-        // bằng chính `FractionProblem.checkAnswer` ⇒ đóng dấu validator đã
-        // đăng ký `fraction-check-v1`; không dấu thì từ round 4 câu trả lời
-        // đọc là «ghi nhận trước hợp đồng mới» và không vào mastery.
-        validation: FractionCheckValidator(fp!).validation,
+        // Dấu do CHÍNH lần chấm ở trên mint ra (không tự viết tay): thiếu dấu
+        // thì từ round 4 câu trả lời đọc là «ghi nhận trước hợp đồng mới» và
+        // không vào mastery.
+        validation: graded.validation,
       ));
       _ctrl.clear();
       _i++;

@@ -12,6 +12,7 @@ import '../../core/store/learner_profile.dart';
 import '../../core/store/learner_store.dart';
 import '../../core/store/timetable.dart';
 import '../learning_session/slice_flow.dart' show masteryFromStore;
+import '../../core/curriculum/fraction_problem.dart';
 import '../../core/curriculum/pedagogical_boundary.dart';
 import '../../core/curriculum/skill_case.dart';
 import '../../core/student/concept_summary.dart';
@@ -102,6 +103,26 @@ class DemoDomain {
   final List<SkillCase> cases;
 }
 
+/// Một lần làm bài MẪU của domain demo: MỘT biểu thức phân số có thật +
+/// MỘT đáp án có thật. Không trường `correct` — «đúng» là kết luận của
+/// `fraction-check-v1`, không phải dữ liệu khai sẵn.
+class _DemoAttempt {
+  const _DemoAttempt(this.expr, this.answer);
+  final String expr;
+  final String answer;
+}
+
+/// Bài mẫu theo ca. Cặp mẫu số ở đây thật sự CHIA HẾT cho nhau (2|4, 3|6,
+/// 5|10) nên `fractionSumCase` tự phân về `denominator-divisible` — ca không
+/// được gán tay. Đáp án là dạng chưa rút gọn mà SGK Toán 5 chấp nhận.
+const Map<String, List<_DemoAttempt>> _demoAttempts = {
+  'denominator-divisible': [
+    _DemoAttempt('1/2 + 1/4', '6/8'),
+    _DemoAttempt('1/3 + 1/6', '9/18'),
+    _DemoAttempt('2/5 + 1/10', '25/50'),
+  ],
+};
+
 /// Fixture "Minh, lớp 5, giữa Bài 6" — đúng golden scenario của repo:
 /// vững ca chia-hết (lớp 4), CHƯA GẶP ca không-chia-hết ⇒ caseTransitionGap.
 DemoDomain buildDemoDomain({DateTime? now}) {
@@ -109,20 +130,29 @@ DemoDomain buildDemoDomain({DateTime? now}) {
   const p = BktParams.freeResponse;
   EvidenceLog log(String caseId, int n, Duration age) {
     var l = EvidenceLog.empty(caseId);
+    final attempts = _demoAttempts[caseId] ?? const [];
     for (var i = 0; i < n; i++) {
+      // ⭐⭐ ROUND 4 (strict default, A-runtime R4.2–R4.4). Fixture demo KHÔNG
+      // được tự viết dấu validator: `EvidenceValidation(...)` gõ tay là một
+      // dấu BỊA — đúng thứ hợp đồng WAL-210 cấm. Ở đây mỗi sự kiện mẫu là
+      // MỘT bài phân số THẬT + MỘT đáp án THẬT, chấm bằng chính
+      // `fraction-check-v1` qua `grade()` — đường DUY NHẤT mint được dấu.
+      // `correct` lấy từ kết quả chấm, không hard-code `true`: gõ sai một đáp
+      // án thì fixture tụt thật và test đổ, đúng như mong muốn.
+      // Không có bài mẫu cho ca này ⇒ KHÔNG bịa một lần làm được: fixture
+      // dừng ở đó (fail closed) thay vì phát một sự kiện không ai chấm.
+      if (attempts.isEmpty) break;
+      final a = attempts[i % attempts.length];
+      final fp = FractionProblem.parse(a.expr);
+      final graded = fp == null ? null : FractionCheckValidator(fp).grade(a.answer);
       l = l.append(LearningEvent(
         eventId: 'demo:$caseId:$i',
-        skillCaseId: caseId,
+        // Ca lấy từ CHÍNH bài toán (phân tích cặp mẫu số), không gán tay.
+        skillCaseId: fractionSumCase(a.expr) ?? caseId,
         kind: EvidenceKind.independentAttempt,
-        correct: true,
+        correct: graded?.correct,
         at: t.subtract(age).add(Duration(minutes: i)),
-        // ⭐ ROUND 4 (strict default, A-runtime R4.2–R4.4): các sự kiện MẪU
-        // này mô phỏng câu trả lời Deep (phân số) mà `fraction-check-v1`
-        // chấm — đóng đúng dấu của validator đó để fixture đi cùng luật đọc
-        // nghiêm ngặt như dữ liệu thật. DEMO ≠ dữ liệu học sinh: domain này
-        // chỉ dựng cho màn demo/camera-demo/Tonight-demo, không vào kho.
-        validation: const EvidenceValidation(
-            validatorId: 'fraction-check-v1', validatorVersion: '1'),
+        validation: graded?.validation,
       ));
     }
     return l;
