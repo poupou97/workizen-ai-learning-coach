@@ -24,6 +24,8 @@ class SourceRef {
     this.blockId,
     this.extraction,
     this.ocrConf,
+    this.pipeline,
+    this.agreementScore,
   }) : assert(bbox.length == 4, 'khung phải đủ 4 số');
 
   final String book;
@@ -35,6 +37,13 @@ class SourceRef {
   final String? blockId;
   final String? extraction;
   final double? ocrConf;
+
+  /// Round 3 (A1): pipeline đã sinh block (`tc2-p1`); `null` ⇒ không rõ.
+  final String? pipeline;
+
+  /// Round 3 (A1): mức đồng thuận chữ giữa hai stack (TSL `text_sim`, đưa
+  /// về 0..1). `null` ⇒ không đo. Chỉ để đối chiếu, không để quyết định.
+  final double? agreementScore;
 
   static SourceRef? fromJson(Object? v) {
     if (v is! Map) return null;
@@ -52,6 +61,8 @@ class SourceRef {
       blockId: v['blockId'] as String?,
       extraction: v['extraction'] as String?,
       ocrConf: (v['ocrConf'] as num?)?.toDouble(),
+      pipeline: v['pipeline'] as String?,
+      agreementScore: (v['agreementScore'] as num?)?.toDouble(),
     );
   }
 
@@ -63,6 +74,66 @@ class SourceRef {
     if (blockId != null) 'blockId': blockId,
     if (extraction != null) 'extraction': extraction,
     if (ocrConf != null) 'ocrConf': ocrConf,
+    if (pipeline != null) 'pipeline': pipeline,
+    if (agreementScore != null) 'agreementScore': agreementScore,
+  };
+}
+
+/// Round 3 (A1) — QUAN HỆ của một block với phần còn lại của trang/bài, bắc
+/// cầu nguyên trạng từ TSL (`heading_path`, `refers_figure`, `caption` của
+/// figure, `order`, `enumerator_restored`). Thiếu ⇒ rỗng: đây là siêu dữ liệu
+/// dẫn đường, KHÔNG phải trust — không có nó tài liệu vẫn parse.
+class BlockRelations {
+  const BlockRelations({
+    this.headingPath = const [],
+    this.refersFigure = false,
+    this.captionOf,
+    this.order,
+    this.enumeratorRestored = false,
+  });
+
+  static const empty = BlockRelations();
+
+  /// «Bài 17 › TÁCH CHẤT KHỎI HỖN HỢP › · Nguyên tắc tách chất».
+  final List<String> headingPath;
+
+  /// Chữ của block nhắc tới một hình («Hình 17.2…»).
+  final bool refersFigure;
+
+  /// Block là CAPTION của figure có id này (nghịch đảo `figure.caption`).
+  final String? captionOf;
+
+  /// Thứ tự đọc trong trang theo pipeline.
+  final int? order;
+  final bool enumeratorRestored;
+
+  bool get isEmpty =>
+      headingPath.isEmpty &&
+      !refersFigure &&
+      captionOf == null &&
+      order == null &&
+      !enumeratorRestored;
+
+  static BlockRelations fromJson(Object? v) {
+    if (v is! Map) return empty;
+    return BlockRelations(
+      headingPath: [
+        for (final h in (v['headingPath'] as List? ?? const []))
+          if (h is String) h,
+      ],
+      refersFigure: v['refersFigure'] == true,
+      captionOf: v['captionOf'] as String?,
+      order: (v['order'] as num?)?.toInt(),
+      enumeratorRestored: v['enumeratorRestored'] == true,
+    );
+  }
+
+  Map<String, Object?> toJson() => {
+    if (headingPath.isNotEmpty) 'headingPath': headingPath,
+    if (refersFigure) 'refersFigure': true,
+    if (captionOf != null) 'captionOf': captionOf,
+    if (order != null) 'order': order,
+    if (enumeratorRestored) 'enumeratorRestored': true,
   };
 }
 
@@ -86,6 +157,9 @@ sealed class LessonBlock {
     required this.sourceRef,
     required this.trust,
     this.roleConfidence,
+    this.sourceRole,
+    this.roleMethod,
+    this.relations = BlockRelations.empty,
   });
 
   final String id;
@@ -96,6 +170,17 @@ sealed class LessonBlock {
   /// chưa đủ tin để làm đề; UI chỉ dùng để vẽ, không để chấm.
   final double? roleConfidence;
 
+  /// Round 3 (A1): vai trò NGUYÊN VĂN pipeline gán (`body`, `sidebar`,
+  /// `stage_label`…) — giữ để kiểm vai trò được, kể cả khi mô hình tiêu thụ
+  /// gộp nó vào một loại block khác. `null` ⇒ fixture cũ / mẫu.
+  final String? sourceRole;
+
+  /// Round 3 (A1): cách gán vai trò (`lexicon`, `geometry`, `native`…).
+  final String? roleMethod;
+
+  /// Round 3 (A1): quan hệ với trang/bài (heading path, hình, thứ tự).
+  final BlockRelations relations;
+
   Map<String, Object?> toJson();
 
   Map<String, Object?> _base(String type) => {
@@ -104,6 +189,9 @@ sealed class LessonBlock {
     'sourceRef': sourceRef.toJson(),
     'trust': trust.name,
     if (roleConfidence != null) 'roleConfidence': roleConfidence,
+    if (sourceRole != null) 'sourceRole': sourceRole,
+    if (roleMethod != null) 'roleMethod': roleMethod,
+    if (!relations.isEmpty) 'relations': relations.toJson(),
   };
 
   static LessonBlock? fromJson(Map<String, Object?> j) {
@@ -111,7 +199,13 @@ sealed class LessonBlock {
     final ref = SourceRef.fromJson(j['sourceRef']);
     final trust = ContentTrust.parse(j['trust']);
     if (id is! String || ref == null || trust == null) return null;
+    // ⭐⭐ WITHHELD ≠ TRUSTED: trust `withheld` chỉ được đứng trên block
+    // KHÔNG CÓ CHỮ. Block chữ mà khai `withheld` ⇒ tài liệu bị từ chối.
+    if (!trust.mayCarryText && j['type'] != 'withheld') return null;
     final conf = (j['roleConfidence'] as num?)?.toDouble();
+    final role = j['sourceRole'] is String ? j['sourceRole'] as String : null;
+    final method = j['roleMethod'] is String ? j['roleMethod'] as String : null;
+    final rel = BlockRelations.fromJson(j['relations']);
     String? text() => j['text'] is String ? j['text'] as String : null;
     switch (j['type']) {
       case 'heading':
@@ -122,6 +216,9 @@ sealed class LessonBlock {
           sourceRef: ref,
           trust: trust,
           roleConfidence: conf,
+          sourceRole: role,
+          roleMethod: method,
+          relations: rel,
           text: t,
           level: ((j['level'] as num?)?.toInt() ?? 1).clamp(1, 3),
         );
@@ -133,6 +230,9 @@ sealed class LessonBlock {
           sourceRef: ref,
           trust: trust,
           roleConfidence: conf,
+          sourceRole: role,
+          roleMethod: method,
+          relations: rel,
           text: t,
         );
       case 'image':
@@ -142,6 +242,8 @@ sealed class LessonBlock {
           id: id,
           sourceRef: ref,
           trust: trust,
+          sourceRole: role,
+          relations: rel,
           crop: crop,
           captionBlockId: j['captionBlockId'] as String?,
           labels: (j['labels'] as num?)?.toInt() ?? 0,
@@ -155,6 +257,9 @@ sealed class LessonBlock {
           sourceRef: ref,
           trust: trust,
           roleConfidence: conf,
+          sourceRole: role,
+          roleMethod: method,
+          relations: rel,
           text: t,
           refersFigure: j['refersFigure'] == true,
         );
@@ -170,6 +275,9 @@ sealed class LessonBlock {
           sourceRef: ref,
           trust: trust,
           roleConfidence: conf,
+          sourceRole: role,
+          roleMethod: method,
+          relations: rel,
           rows: rows,
           safe: j['safe'] == true,
           headerRows: (j['headerRows'] as num?)?.toInt() ?? 0,
@@ -182,6 +290,9 @@ sealed class LessonBlock {
           sourceRef: ref,
           trust: trust,
           roleConfidence: conf,
+          sourceRole: role,
+          roleMethod: method,
+          relations: rel,
           text: t,
         );
       case 'activity':
@@ -193,18 +304,36 @@ sealed class LessonBlock {
           sourceRef: ref,
           trust: trust,
           roleConfidence: conf,
+          sourceRole: role,
+          roleMethod: method,
+          relations: rel,
           kind: kind,
           text: t,
         );
       case 'withheld':
+        // `reasons[]` (cầu A1) hoặc `reason` «a,b» (fixture cũ) — không có
+        // lý do nào ⇒ không block. Chuỗi rỗng trong danh sách bị bỏ.
+        final reasons = [
+          for (final r in (j['reasons'] as List? ?? const []))
+            if (r is String && r.trim().isNotEmpty) r.trim(),
+        ];
         final reason = j['reason'];
-        if (reason is! String || reason.isEmpty) return null;
+        if (reasons.isEmpty && reason is String && reason.trim().isNotEmpty) {
+          reasons.addAll(
+            reason.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty),
+          );
+        }
+        if (reasons.isEmpty) return null;
+        final status = j['status'];
         // ⭐ Cố ý KHÔNG đọc `text` dù JSON có — bị giữ lại là bị giữ lại.
         return WithheldBlock(
           id: id,
           sourceRef: ref,
           trust: trust,
-          reason: reason,
+          sourceRole: role,
+          relations: rel,
+          reasons: reasons,
+          status: status is String && status.isNotEmpty ? status : null,
           crop: j['crop'] as String?,
         );
       case 'sourceRef':
@@ -223,6 +352,9 @@ final class HeadingBlock extends LessonBlock {
     required super.sourceRef,
     required super.trust,
     super.roleConfidence,
+    super.sourceRole,
+    super.roleMethod,
+    super.relations,
     required this.text,
     this.level = 1,
   });
@@ -243,6 +375,9 @@ final class ParagraphBlock extends LessonBlock {
     required super.sourceRef,
     required super.trust,
     super.roleConfidence,
+    super.sourceRole,
+    super.roleMethod,
+    super.relations,
     required this.text,
   });
   final String text;
@@ -258,6 +393,8 @@ final class ImageBlock extends LessonBlock {
     required super.id,
     required super.sourceRef,
     required super.trust,
+    super.sourceRole,
+    super.relations,
     required this.crop,
     this.captionBlockId,
     this.labels = 0,
@@ -287,6 +424,9 @@ final class CaptionBlock extends LessonBlock {
     required super.sourceRef,
     required super.trust,
     super.roleConfidence,
+    super.sourceRole,
+    super.roleMethod,
+    super.relations,
     required this.text,
     this.refersFigure = false,
   });
@@ -309,6 +449,9 @@ final class TableBlock extends LessonBlock {
     required super.sourceRef,
     required super.trust,
     super.roleConfidence,
+    super.sourceRole,
+    super.roleMethod,
+    super.relations,
     required this.rows,
     required this.safe,
     this.headerRows = 0,
@@ -332,6 +475,9 @@ final class QuestionBlock extends LessonBlock {
     required super.sourceRef,
     required super.trust,
     super.roleConfidence,
+    super.sourceRole,
+    super.roleMethod,
+    super.relations,
     required this.text,
   });
   final String text;
@@ -346,6 +492,9 @@ final class ActivityBlock extends LessonBlock {
     required super.sourceRef,
     required super.trust,
     super.roleConfidence,
+    super.sourceRole,
+    super.roleMethod,
+    super.relations,
     required this.kind,
     required this.text,
   });
@@ -367,16 +516,30 @@ final class WithheldBlock extends LessonBlock {
     required super.id,
     required super.sourceRef,
     required super.trust,
-    required this.reason,
+    super.sourceRole,
+    super.relations,
+    required this.reasons,
+    this.status,
     this.crop,
   });
-  final String reason;
+
+  /// Mã lý do của pipeline (`page_feature:diagram`, `math_guard`,
+  /// `unknown_role:footnote`…) — nguyên trạng, không dịch, không gộp.
+  final List<String> reasons;
+
+  /// `WITHHELD` / `CONFLICT` theo TSL; `null` ⇒ fixture cũ / mẫu.
+  final String? status;
   final String? crop;
+
+  /// Dạng chuỗi «a,b» — giữ cho UI cũ (`withheld_card.dart`).
+  String get reason => reasons.join(',');
 
   @override
   Map<String, Object?> toJson() => {
     ..._base('withheld'),
     'reason': reason,
+    'reasons': reasons,
+    if (status != null) 'status': status,
     if (crop != null) 'crop': crop,
   };
 }
@@ -440,6 +603,61 @@ class ChapterRef {
   };
 }
 
+/// Round 3 (A1) — RANH GIỚI BÀI theo pipeline (TSL `boundary`): trang PDF
+/// đầu/cuối, cách gắn trang vào bài và độ tin của cách gắn. Thiếu ⇒ `null`
+/// (fixture cũ / mẫu); có mà thiếu trang ⇒ tài liệu bị từ chối.
+class LessonBoundary {
+  const LessonBoundary({
+    required this.pageStart,
+    required this.pageEnd,
+    required this.confidence,
+    this.headerFound = false,
+    this.source,
+    this.attachMethods = const {},
+  });
+
+  final int pageStart, pageEnd;
+  final double confidence;
+  final bool headerFound;
+
+  /// `header` / `toc` / `both`.
+  final String? source;
+
+  /// «header: 1, continuation: 3…» — đếm theo cách gắn từng trang.
+  final Map<String, int> attachMethods;
+
+  static LessonBoundary? fromJson(Object? v) {
+    if (v is! Map) return null;
+    final s = v['pageStart'], e = v['pageEnd'], c = v['confidence'];
+    if (s is! num || e is! num || c is! num) return null;
+    final am = <String, int>{};
+    if (v['attachMethods'] is Map) {
+      for (final en in (v['attachMethods'] as Map).entries) {
+        if (en.key is String && en.value is num) {
+          am[en.key as String] = (en.value as num).toInt();
+        }
+      }
+    }
+    return LessonBoundary(
+      pageStart: s.toInt(),
+      pageEnd: e.toInt(),
+      confidence: c.toDouble(),
+      headerFound: v['headerFound'] == true,
+      source: v['source'] as String?,
+      attachMethods: am,
+    );
+  }
+
+  Map<String, Object?> toJson() => {
+    'pageStart': pageStart,
+    'pageEnd': pageEnd,
+    'confidence': confidence,
+    'headerFound': headerFound,
+    if (source != null) 'source': source,
+    if (attachMethods.isNotEmpty) 'attachMethods': attachMethods,
+  };
+}
+
 class LessonProvenance {
   const LessonProvenance({
     required this.trust,
@@ -454,6 +672,13 @@ class LessonProvenance {
     this.sdmVersion,
     this.boundaryConfidence,
     this.tslPath,
+    this.boundary,
+    this.pipelineVersion,
+    this.auditStatus = AuditStatus.notAudited,
+    this.auditRef,
+    this.sourceHash,
+    this.sourceability,
+    this.answerKeysIncluded,
   });
 
   final ContentTrust trust;
@@ -470,6 +695,29 @@ class LessonProvenance {
   /// tưởng crop trang là tài sản phát hành được.
   final String distribution;
 
+  /// Round 3 (A1): ranh giới bài theo pipeline; `null` ⇒ fixture cũ / mẫu.
+  final LessonBoundary? boundary;
+
+  /// Round 3 (A1): «tc2-p1/sdm-v2» — phiên bản pipeline + mô hình.
+  final String? pipelineVersion;
+
+  /// Round 3 (A2): đã đi qua kiểm-tin-giả tới đâu (không có giá trị «đạt»).
+  final AuditStatus auditStatus;
+
+  /// Tài liệu kết quả audit mà `auditStatus` trỏ tới (đường dẫn trong repo).
+  final String? auditRef;
+
+  /// sha256 của TSL nguồn — hai lần bắc cầu cùng TSL ⇒ cùng tài liệu.
+  final String? sourceHash;
+
+  /// `FULL` / `PARTIAL` theo TSL.
+  final String? sourceability;
+
+  /// TSL khai có khoá đáp án SGV không. `true` ⇒ tài liệu BỊ TỪ CHỐI ở
+  /// `LessonDocument.fromJson` (đáp án SGV không được tới trẻ). `null` ⇒
+  /// fixture cũ / mẫu không khai.
+  final bool? answerKeysIncluded;
+
   static LessonProvenance? fromJson(Object? v) {
     if (v is! Map) return null;
     final trust = ContentTrust.parse(v['trust']);
@@ -479,6 +727,17 @@ class LessonProvenance {
         dist = v['distribution'];
     if (trust == null || book is! String || s is! num || e is! num) return null;
     if (gen is! String || pipe is! String || dist is! String) return null;
+    // Trust của cả tài liệu không bao giờ là `withheld`.
+    if (!trust.mayCarryText) return null;
+    LessonBoundary? boundary;
+    if (v['boundary'] != null) {
+      boundary = LessonBoundary.fromJson(v['boundary']);
+      if (boundary == null) return null; // có mà hỏng ⇒ từ chối
+    }
+    final audit = AuditStatus.parse(v['auditStatus']);
+    if (audit == null) return null;
+    final ak = v['answerKeysIncluded'];
+    if (ak != null && ak is! bool) return null;
     return LessonProvenance(
       trust: trust,
       book: book,
@@ -489,9 +748,17 @@ class LessonProvenance {
       generator: gen,
       sourcePipeline: pipe,
       sdmVersion: v['sdmVersion'] as String?,
-      boundaryConfidence: (v['boundaryConfidence'] as num?)?.toDouble(),
+      boundaryConfidence:
+          (v['boundaryConfidence'] as num?)?.toDouble() ?? boundary?.confidence,
       tslPath: v['tslPath'] as String?,
       distribution: dist,
+      boundary: boundary,
+      pipelineVersion: v['pipelineVersion'] as String?,
+      auditStatus: audit,
+      auditRef: v['auditRef'] as String?,
+      sourceHash: v['sourceHash'] as String?,
+      sourceability: v['sourceability'] as String?,
+      answerKeysIncluded: ak as bool?,
     );
   }
 
@@ -508,6 +775,13 @@ class LessonProvenance {
     if (boundaryConfidence != null) 'boundaryConfidence': boundaryConfidence,
     if (tslPath != null) 'tslPath': tslPath,
     'distribution': distribution,
+    if (boundary != null) 'boundary': boundary!.toJson(),
+    if (pipelineVersion != null) 'pipelineVersion': pipelineVersion,
+    'auditStatus': auditStatus.name,
+    if (auditRef != null) 'auditRef': auditRef,
+    if (sourceHash != null) 'sourceHash': sourceHash,
+    if (sourceability != null) 'sourceability': sourceability,
+    if (answerKeysIncluded != null) 'answerKeysIncluded': answerKeysIncluded,
   };
 }
 
@@ -546,6 +820,7 @@ class LessonDocument {
     this.semantic = const [],
     this.tutorScript,
     this.evidencePolicy = EvidencePolicy.none,
+    this.licence = ContentLicence.internalResearchOnly,
     this.assetBase = '',
   });
 
@@ -564,6 +839,9 @@ class LessonDocument {
   final List<ChapterRef> chapters;
   final LessonProvenance provenance;
   final EvidencePolicy evidencePolicy;
+
+  /// Round 3 (A1): giấy phép phân phối — TÁCH khỏi trust, chỉ một giá trị.
+  final ContentLicence licence;
   final List<LessonBlock> blocks;
   final List<SemanticData> semantic;
   final TutorScript? tutorScript;
@@ -575,6 +853,16 @@ class LessonDocument {
   ContentTrust get trust => provenance.trust;
   bool get isFixture => trust.requiresFixtureChip;
   String get slotKey => '$book#$lessonNo';
+
+  /// Round 3: số block NHÌN THẤY theo từng giá trị trust — máy đếm, để báo
+  /// cáo «trustedStructuredLesson / withheld / …» không gộp.
+  Map<ContentTrust, int> get blockCountByTrust {
+    final m = <ContentTrust, int>{};
+    for (final b in blocks) {
+      m.update(b.trust, (n) => n + 1, ifAbsent: () => 1);
+    }
+    return m;
+  }
 
   /// «HỖN HỢP. TÁCH CHẤT…» → «Hỗn hợp. Tách chất…»: viết hoa đầu chuỗi và
   /// sau dấu kết câu (Nokia n1 D1: «Hỗn hợp. tách chất» — chữ thường sau «.»).
@@ -720,6 +1008,10 @@ class LessonDocument {
     final prov = LessonProvenance.fromJson(j['provenance']);
     final policy = EvidencePolicy.parse(j['evidencePolicy']);
     if (prov == null || policy == null || prov.book != book) return null;
+    // ⭐ Khoá đáp án SGV không bao giờ tới trẻ qua tài liệu này.
+    if (prov.answerKeysIncluded == true) return null;
+    final licence = ContentLicence.parse(j['licence']);
+    if (licence == null) return null;
     final blocks = <LessonBlock>[];
     for (final b in (j['blocks'] as List? ?? const []).whereType<Map>()) {
       final blk = LessonBlock.fromJson(b.cast<String, Object?>());
@@ -758,6 +1050,7 @@ class LessonDocument {
       chapters: chapters,
       provenance: prov,
       evidencePolicy: policy,
+      licence: licence,
       blocks: blocks,
       semantic: semantic,
       tutorScript: script,
@@ -777,6 +1070,7 @@ class LessonDocument {
     'chapters': [for (final c in chapters) c.toJson()],
     'provenance': provenance.toJson(),
     'evidencePolicy': evidencePolicy.name,
+    'licence': licence.name,
     'blocks': [for (final b in blocks) b.toJson()],
     'semantic': [for (final s in semantic) s.toJson()],
     if (tutorScript != null) 'tutorScript': tutorScript!.toJson(),

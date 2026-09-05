@@ -24,6 +24,18 @@ void main() {
         fixtureChipLabel(ContentTrust.fixtureFromTrustedCorpus),
         contains('nội bộ'),
       );
+      // Round 3 (A1): nguồn có cấu trúc vẫn phải nói «chưa kiểm định» —
+      // gỡ chữ này cần HAI quyết định Founder (ngưỡng audit + giấy phép).
+      expect(
+        fixtureChipLabel(ContentTrust.trustedStructuredLesson),
+        contains('chưa kiểm định'),
+      );
+      expect(
+        ContentTrust.trustedStructuredLesson.isProductionTruth,
+        isFalse,
+        reason: 'đột biến coi TSL là sự thật sản phẩm ⇒ đỏ',
+      );
+      expect(ContentTrust.withheld.mayCarryText, isFalse);
     },
   );
 
@@ -37,11 +49,20 @@ void main() {
   });
 
   test(
-    '⭐⭐ EvidencePolicy và SamMode chỉ có MỘT giá trị — không có cửa bật',
+    '⭐⭐ EvidencePolicy chỉ có MỘT giá trị — không có cửa bật; SamMode có '
+    'đúng hai nhãn, cả hai đều nói rõ tình trạng (Round 3 A-runtime hand-off)',
     () {
       expect(EvidencePolicy.values, [EvidencePolicy.none]);
-      expect(SamMode.values, [SamMode.prototypeScripted]);
+      expect(SamMode.values, [
+        SamMode.prototypeScripted,
+        SamMode.runtimeGuided,
+      ]);
       expect(SamMode.prototypeScripted.childLabel, 'SAM (kịch bản thử nghiệm)');
+      expect(SamMode.runtimeGuided.childLabel, 'SAM (runtime có kiểm)');
+      expect(SamMode.parse('runtimeGuided'), SamMode.runtimeGuided);
+      expect(SamMode.parse('prototypeScripted'), SamMode.prototypeScripted);
+      expect(SamMode.parse('live'), isNull);
+      expect(SamMode.parse(null), isNull);
     },
   );
 
