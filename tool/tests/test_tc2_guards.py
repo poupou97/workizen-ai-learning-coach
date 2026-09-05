@@ -62,9 +62,10 @@ class ToneAgreementTests(unittest.TestCase):
         self.assertEqual(d, [('lăng', 'lặng')])
 
     def test_a_different_word_is_not_a_tone_disagreement(self):
-        # «lọc»→«lộc» is a tone slip (same stripped key); «phễu»→«phẫu» too; but a substituted word with another key is a text
-        # disagreement for the text gate, not a tone one
-        self.assertEqual(tc2_sdm.tone_disagreements('giấy lọc và phễu', ['giấy lộc và phẫu']), [('lọc', 'lộc'), ('phễu', 'phẫu')])
+        # «lọc»→«lộc» is a tone slip (same stripped key «loc»). «phễu»→«phẫu» changes the base vowel (ê→â: keys «pheu»
+        # ≠ «phau»), so it is NOT a tone disagreement — and it passes the 92 % text gate too: a recorded limitation
+        # (Bài 17 «phẫu lọc» stays trusted when both stacks read it). A substituted word is the text gate's business.
+        self.assertEqual(tc2_sdm.tone_disagreements('giấy lọc và phễu', ['giấy lộc và phẫu']), [('lọc', 'lộc')])
         self.assertEqual(tc2_sdm.tone_disagreements('giấy lọc', ['giấy bọc']), [])
 
     def test_nothing_is_repaired(self):

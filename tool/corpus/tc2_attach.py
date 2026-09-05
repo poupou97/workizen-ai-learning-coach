@@ -48,6 +48,13 @@ DIGITS = re.compile(r'^\d{1,3}$')
 THEME = re.compile(r'^\s*(CHỦ ĐỀ|Chủ đề|CHƯƠNG|Chương|PHẦN|Phần)\s+([IVX]+|\d+)\b')
 FRONT = re.compile(r'^\s*(MỤC LỤC|Mục lục|LỜI NÓI ĐẦU|Lời nói đầu|HƯỚNG DẪN SỬ DỤNG|Hướng dẫn sử dụng|BẢNG TRA CỨU|Bảng tra cứu|GIẢI THÍCH THUẬT NGỮ|Giải thích thuật ngữ|PHỤ LỤC|Phụ lục|BẢNG THUẬT NGỮ|TÀI LIỆU THAM KHẢO|Tài liệu tham khảo)')
 BACK = re.compile(r'^\s*(BẢNG TRA CỨU|Bảng tra cứu|GIẢI THÍCH THUẬT NGỮ|Giải thích thuật ngữ|PHỤ LỤC|Phụ lục|BẢNG THUẬT NGỮ|TÀI LIỆU THAM KHẢO|Tài liệu tham khảo)')
+# Round 4 (failure class 4: lesson attachment / identity). The audit's 8 of 11 wrong attachments were the BACK COVER
+# (publisher's book list, ISBN, barcode, price, website) attached to a book's last lesson: nothing above marked it as
+# end matter. A cover is recognised by its furniture, never by position alone; two independent marks are required.
+COVER_MARKS = (re.compile(r'\bISBN\b'), re.compile(r'\bWebsite\s*:', re.IGNORECASE), re.compile(r'^\s*Giá\s*:', re.IGNORECASE),
+               re.compile(r'\bBỘ SÁCH GIÁO KHOA\b'), re.compile(r'\bHUÂN CHƯƠNG\b|\bHUÀN CHƯƠNG\b'), re.compile(r'\bNHÀ XUẤT BẢN GIÁO DỤC\b'),
+               re.compile(r'^\s*9\s?7\d{4}\s?\d{6}\s*$'))    # EAN-13 barcode digits
+COVER_MIN_MARKS = 2
 
 
 def upper_ratio(t):
@@ -97,6 +104,10 @@ def page_info(book, page, n_pages=None):
             info['printed'] = int(t)
     top = sorted(lines, key=lambda l: l['y'])[:8]
     big_top = [l for l in top if l['h'] >= 1.2 * med]
+    marks = sum(1 for rx in COVER_MARKS if any(rx.search(l['text'].strip()) for l in lines))
+    if marks >= COVER_MIN_MARKS and (info['_tail'] or page <= 3):
+        info['kind'] = 'back_cover' if info['_tail'] else 'front_cover'; info['cover_marks'] = marks
+        return info
     if any(FRONT.match(l['text'].strip()) for l in top):
         is_back = any(BACK.match(l['text'].strip()) for l in big_top)
         # back matter only counts in the last 12 % of the book (a "Tài liệu tham khảo" line inside a lesson is not the end of the book)
@@ -159,21 +170,52 @@ def page_info(book, page, n_pages=None):
     return info
 
 
+def _systematic_toc_offset(pages, infos, toc, off, min_headers=5, min_share=0.6):
+    """Median of (printed page of a detected header − TOC pageStart) over plausible headers when ≥ min_headers carry a
+    TOC start and ≥ min_share of them agree on one non-zero value; 0 otherwise. Plausible = the sequence rule alone
+    (first header, or current + 1 … current + 4)."""
+    diffs = []
+    current = None
+    for p in pages:
+        info = infos[p]
+        h = info.get('header')
+        if info['kind'] != 'page' or not h or h.get('number') is None:
+            continue
+        n = h['number']
+        if current is not None and not (current < n <= current + 4):
+            continue
+        printed = info['printed'] if info['printed'] is not None else (p - off if off is not None else None)
+        if printed is not None and toc.get(n, {}).get('pageStart') is not None:
+            diffs.append(printed - toc[n]['pageStart'])
+        current = n
+    if len(diffs) < min_headers:
+        return 0
+    best, cnt = Counter(diffs).most_common(1)[0]
+    return best if best != 0 and cnt / len(diffs) >= min_share else 0
+
+
 def attach_book(book, pipeline='tc2-p1', write=True):
     docs = {d['sourceDocumentId']: d for d in json.load(open(CURR))['documents']}
     meta = docs.get(book, {})
     toc = {l['number']: l for l in meta.get('lessons', []) if l.get('number') is not None}
     off = printed_offset(book)
     pages = sorted(int(re.search(r'p(\d+)\.json', f).group(1)) for f in glob.glob(f'{OCR}/{book}/p*.json'))
+    infos = {p: page_info(book, p, len(pages)) for p in pages}
+    # Round 4: systematic TOC offset. Some books print the lesson badge N pages before the TOC's pageStart (TV5 tập
+    # một/hai, TV2, TV4: −2 on 17–19 of ~25 lessons). Measured per book from the headers themselves (first pass,
+    # sequence rule only): when ≥ 5 headers carry a TOC start and ≥ 60 % share the same non-zero difference, every TOC
+    # start is shifted by it before it confirms a header — the header is the printed truth, the TOC a cross-check.
+    toc_offset = _systematic_toc_offset(pages, infos, toc, off)
+    toc_start = {n: (l['pageStart'] + toc_offset) for n, l in toc.items() if l.get('pageStart') is not None}
     out_pages, headers, rejected = [], [], []
     current, conf, seen_first, ended = None, 0.0, False, False
     for p in pages:
-        info = page_info(book, p, len(pages)); info.pop('_tail', None)
+        info = infos[p]; info.pop('_tail', None)
         printed = info['printed'] if info['printed'] is not None else (p - off if off is not None else None)
         rec = dict(page=p, printed=printed, kind=info['kind'], lesson=None, method='none', confidence=0.0, header=info['header'], theme=info['theme'], prev_lesson=current, continues=info['continuation'])
-        if info['kind'] in ('front_matter', 'toc', 'empty'):
+        if info['kind'] in ('front_matter', 'toc', 'empty', 'front_cover'):
             out_pages.append(rec); continue
-        if info['kind'] == 'back_matter':
+        if info['kind'] in ('back_matter', 'back_cover'):
             ended = True; current = None; out_pages.append(rec); continue
         if ended:
             rec['kind'] = 'back_matter'; out_pages.append(rec); continue
@@ -190,7 +232,7 @@ def attach_book(book, pipeline='tc2-p1', write=True):
                 h = None
         if h:
             n = h['number']
-            toc_ok = n in toc and toc[n].get('pageStart') is not None and printed is not None and abs(toc[n]['pageStart'] - printed) <= 1
+            toc_ok = n in toc_start and printed is not None and abs(toc_start[n] - printed) <= 1
             accept = False; c = 0.0
             if toc_ok:
                 accept, c = True, 0.95
@@ -211,6 +253,18 @@ def attach_book(book, pipeline='tc2-p1', write=True):
             out_pages.append(rec); continue
         if info['kind'] == 'theme_opener':
             current = None; out_pages.append(rec); continue
+        # Round 4: TOC-range fallback — no header on this page, but the (offset-corrected) TOC says a LATER lesson
+        # starts here or started on a previous page that carried no detectable header (Tin học 6 p21, Toán 9 p29,
+        # Toán 12 p20, Vật lí 11 p105, SGV Toán 4 p54 on the gold set): switch to that lesson at 0.6 confidence,
+        # method `toc_range`, never backwards, never across a lesson the headers already passed.
+        if printed is not None and toc_start:
+            due = [n for n, s in toc_start.items() if s <= printed and (current is None or n > current) and n not in {hh['number'] for hh in headers}]
+            if due and (current is None or max(due) <= current + 4):
+                n = max(due)
+                if current is None or n > current:
+                    current, conf, seen_first = n, 0.6, True
+                    headers.append(dict(number=n, title=toc[n].get('title'), page_pdf=p, page_printed=printed, source='toc_range', confidence=0.6, form=None))
+                    rec.update(lesson=n, method='toc_range', confidence=0.6); out_pages.append(rec); continue
         if current is not None:
             rec.update(lesson=current, method='continuation', confidence=round(conf, 2))
         out_pages.append(rec)
@@ -222,7 +276,7 @@ def attach_book(book, pipeline='tc2-p1', write=True):
     lessons = [by_n[n] for n in sorted(by_n)]
     canonical = meta.get('lessonCount') or len(toc)
     toc_ranged = sum(1 for l in toc.values() if l.get('pageStart') is not None)
-    counts = dict(canonical_lesson_count=canonical, toc_lessons=len(toc), toc_ranged=toc_ranged, header_detected=len(headers), header_confirmed_by_toc=sum(1 for h in headers if h['source'] == 'both'),
+    counts = dict(canonical_lesson_count=canonical, toc_lessons=len(toc), toc_ranged=toc_ranged, header_detected=sum(1 for h in headers if h['source'] != 'toc_range'), toc_range_fallbacks=sum(1 for h in headers if h['source'] == 'toc_range'), toc_offset=toc_offset, header_confirmed_by_toc=sum(1 for h in headers if h['source'] == 'both'),
                   header_only=sum(1 for h in headers if h['source'] == 'header'), repaired_ranged=len(lessons), beyond_canonical=sum(1 for n in by_n if n > canonical), max_lesson_number=max(by_n) if by_n else None,
                   rejected_headers=len(rejected), pages=len(pages), pages_with_lesson=sum(1 for r in out_pages if r['lesson'] is not None), pages_no_lesson=sum(1 for r in out_pages if r['lesson'] is None),
                   page_kinds=dict(Counter(r['kind'] for r in out_pages)), printed_offset=off, structure_status=meta.get('structureStatus'))
