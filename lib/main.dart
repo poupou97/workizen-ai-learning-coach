@@ -50,6 +50,7 @@ import 'features/subjects/subjects_screen.dart';
 import 'features/subjects/subject_home_screen.dart';
 import 'features/mission/mission_data.dart';
 import 'features/onboarding/onboarding_screen.dart';
+import 'app/boot_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -455,7 +456,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
 
   Widget _homeChild() => _loading
             ? (_splashQuote == null
-                ? const Scaffold(body: SizedBox.shrink())
+                // ROUND 3 B5 (audit O1): khung trắng lúc chờ hồ sơ ⇒ màn
+                // khởi động có nhãn hiệu, nói thật «đang mở».
+                ? const BootScreen(note: 'Đang mở hồ sơ của con…')
                 : SplashQuoteScreen(quote: _splashQuote!))
             : _profile == null
                 ? OnboardingScreen(onDone: _onboarded)
@@ -464,7 +467,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                     builder: (context, snap) {
                       final data = snap.data;
                       if (data == null) {
-                        return const Scaffold(body: SizedBox.shrink());
+                        // ROUND 3 B5 (audit O1): chờ mission tính từ kho —
+                        // vẫn là màn khởi động, không phải khung trắng.
+                        return const BootScreen(note: 'Đang xem hôm nay học gì…');
                       }
                       final ocr = widget.ocr;
                       return MissionCenterScreen(

@@ -42,4 +42,23 @@ void main() {
     expect(find.textContaining('có gợi ý nhỏ'), findsOneWidget,
         reason: '⭐ đột biến label luôn-TỰ-LÀM ⇒ đỏ');
   });
+
+  testWidgets('ROUND 3 B5: mã môn «khtn» hiện thành «Khoa học tự nhiên»',
+      (t) async {
+    final store = JsonlLearnerStore();
+    await store.appendSession(LearningSession(
+      sessionId: 'k1',
+      learnerId: 'l',
+      subjectId: 'khtn',
+      startedAt: DateTime(2026, 9, 5, 10),
+      trigger: SessionTrigger.manual,
+      events: const [],
+    ));
+    await t.pumpWidget(
+        MaterialApp(home: SessionsScreen(profile: _p, store: store)));
+    await t.pumpAndSettle();
+    expect(find.textContaining('Khoa học tự nhiên'), findsOneWidget);
+    expect(find.textContaining('· khtn'), findsNothing,
+        reason: 'mã nội bộ không lọt ra màn khi có tên chắc');
+  });
 }

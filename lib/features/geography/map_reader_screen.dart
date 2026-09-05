@@ -185,7 +185,7 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
                   const SizedBox(height: WalSpacing.md),
                   _primary('Con đã chỉ được trên bản đồ ✅', _finish),
                   const SizedBox(height: WalSpacing.md),
-                  Text('Nguồn: SGK ${m.subject} 5 · tr. ${m.page}',
+                  Text(_sourceLine(m, ctx: widget.learningContext),
                       style: const TextStyle(
                           fontSize: WalType.secondary,
                           color: WalColors.inkSoft)),
@@ -193,6 +193,17 @@ class _MapReaderScreenState extends State<MapReaderScreen> {
         ),
       ),
     );
+  }
+
+  /// ROUND 3 B5 (audit 05 §1 «hard-coded grade 5»): lớp suy từ MÃ SÁCH của
+  /// chính bản đồ (`05-sgk-…` ⇒ 5), không phải hằng; không suy được thì lấy
+  /// lớp trong context; không có nữa thì KHÔNG in số lớp. Trang in `null` ⇒
+  /// không in «tr. null».
+  static String _sourceLine(DiaMap m, {LearningContext? ctx}) {
+    final fromId = int.tryParse(m.book.length >= 2 ? m.book.substring(0, 2) : '');
+    final grade = fromId ?? ctx?.grade;
+    final book = grade == null ? 'SGK ${m.subject}' : 'SGK ${m.subject} $grade';
+    return m.page == null ? 'Nguồn: $book' : 'Nguồn: $book · tr. ${m.page}';
   }
 
   Widget _primary(String label, VoidCallback onPressed) => SizedBox(
