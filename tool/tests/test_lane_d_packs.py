@@ -225,6 +225,29 @@ class DeltaAuditTests(unittest.TestCase):
         self.assertAlmostEqual(d['newFlagPrecisionValue'], 1.0,
                                msg='a newly-flagged row is CORRECT when the page really is another lesson')
 
+    def test_a_page_with_no_lesson_badge_is_unjudgeable_not_a_disagreement(self):
+        """A page in the middle of a lesson prints no badge. Scoring that as "the page is a
+        different lesson" would manufacture precision the method never measured."""
+        sample = os.path.join(self.tmp, 's.json'); answers = os.path.join(self.tmp, 'a.json')
+        json.dump({'rows': [
+            dict(id='r1', grade=5, family='f', book='b', lesson=7, page=30, note='', pagePdf=31,
+                 reasonBefore='range_mismatch', reasonAfter='range_ok', direction='restored'),
+            dict(id='r2', grade=5, family='f', book='b', lesson=9, page=40, note='', pagePdf=41,
+                 reasonBefore='range_mismatch', reasonAfter='range_ok', direction='restored'),
+        ]}, open(sample, 'w', encoding='utf-8'))
+        json.dump({'protocol': 'test', 'readings': [
+            {'id': 'r1', 'printedLesson': 7, 'unreadable': False},
+            {'id': 'r2', 'printedLesson': None, 'unreadable': False},   # mid-lesson page, no badge
+        ]}, open(answers, 'w', encoding='utf-8'))
+        out = os.path.join(self.tmp, 'v.json')
+        pack_delta_audit.cmd_verdicts(type('A', (), dict(sample=sample, answers=answers, out=out, md=''))())
+        d = json.load(open(out, encoding='utf-8'))
+        self.assertEqual(d['counts']['no-badge-unjudgeable'], 1)
+        self.assertEqual(d['counts'].get('restored-wrong', 0), 0)
+        self.assertAlmostEqual(d['restorePrecisionValue'], 1.0)          # 1/1 judgeable
+        self.assertIn('1 / 2', d['restorePrecisionWorstCase'])           # the harsh reading, reported beside
+        self.assertEqual(d['unjudgeableByDirection'], {'restored': 1})
+
 
 if __name__ == '__main__':
     unittest.main()

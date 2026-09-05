@@ -23,13 +23,21 @@ Method: render the top strip of the printed page (where the lesson badge sits),
 judge the printed lesson number from the render **without** seeing the claimed
 lesson, then join. `verdicts` reports, per direction:
 
-    restored-correct   mismatch → ok  and the page really is that lesson
-    restored-wrong     mismatch → ok  but the page is a different lesson
-    flagged-correct    ok → mismatch  and the page really is a different lesson
-    flagged-wrong      ok → mismatch  but the page really is that lesson
+    restored-correct       mismatch → ok  and the page really is that lesson
+    restored-wrong         mismatch → ok  but the page is a different lesson
+    flagged-correct        ok → mismatch  and the page really is a different lesson
+    flagged-wrong          ok → mismatch  but the page really is that lesson
+    no-badge-unjudgeable   the page prints no lesson badge at all
 
 which is the same restored / falsely-restored shape as the legacy scoreboard's
 RESTORE PRECISION, applied to a flag rather than to a block.
+
+**The protocol's limit, stated where it cannot be missed.** A page in the MIDDLE of a
+lesson prints no badge, so "no badge" does not mean "a different lesson". Such rows are
+`no-badge-unjudgeable` and are excluded from both precisions rather than scored as
+disagreements — a precision computed over rows the method cannot see is a precision
+that was never measured. `restorePrecisionWorstCase` reports the harshest alternative
+(every unjudgeable row counted against the change) beside the headline, never instead.
 
     pack_delta_audit.py rows   --old DIR --new DIR --out FILE
     pack_delta_audit.py sheets --sample FILE --out-dir DIR [--per-sheet 5]
@@ -181,6 +189,11 @@ def cmd_verdicts(a):
         agrees = (printed is not None and printed == r['lesson'])
         if rd.get('unreadable'):
             verdict = 'unreadable'
+        elif printed is None:
+            # A page in the MIDDLE of a lesson prints no badge. "No badge" therefore does not
+            # mean "a different lesson" — the protocol simply cannot judge this row, and scoring
+            # it either way would invent a precision that was never measured.
+            verdict = 'no-badge-unjudgeable'
         elif r['direction'] == 'restored':
             verdict = 'restored-correct' if agrees else 'restored-wrong'
         elif r['direction'] == 'newly-flagged':
@@ -193,23 +206,36 @@ def cmd_verdicts(a):
                          direction=r['direction'], verdict=verdict, note=rd.get('note', '')))
     n_rest = counts['restored-correct'] + counts['restored-wrong']
     n_flag = counts['flagged-correct'] + counts['flagged-wrong']
+    # Sensitivity: the harshest reading, where an unbadged page counts against the change that
+    # touched it. Reported beside the headline, never in place of it.
+    unj = collections.Counter(r['direction'] for r in rows if r['verdict'] == 'no-badge-unjudgeable')
+    s_rest_n = n_rest + unj['restored']
+    s_flag_n = n_flag + unj['newly-flagged']
     out = {
         'schema': 'lane-d-pack-delta-audit-v1/verdicts',
         'sample': os.path.abspath(a.sample), 'answers': os.path.abspath(a.answers),
         'protocol': answers.get('protocol', ''),
+        'protocolLimit': 'a page in the middle of a lesson prints no lesson badge, so a row whose page '
+                         'shows none is UNJUDGEABLE by this protocol — it is excluded from both precisions '
+                         'and counted as no-badge-unjudgeable, never scored as a disagreement',
         'counts': dict(counts),
+        'unjudgeableByDirection': dict(unj),
         'restorePrecision': common.fmt_rate(counts['restored-correct'], n_rest) if n_rest else '— (n = 0)',
         'restorePrecisionValue': (counts['restored-correct'] / n_rest) if n_rest else None,
         'newFlagPrecision': common.fmt_rate(counts['flagged-correct'], n_flag) if n_flag else '— (n = 0)',
         'newFlagPrecisionValue': (counts['flagged-correct'] / n_flag) if n_flag else None,
+        'restorePrecisionWorstCase': common.fmt_rate(counts['restored-correct'], s_rest_n) if s_rest_n else '— (n = 0)',
+        'newFlagPrecisionWorstCase': common.fmt_rate(counts['flagged-correct'], s_flag_n) if s_flag_n else '— (n = 0)',
         'rows': rows,
     }
     common.dump_json(out, a.out)
     print(f'verdicts → {a.out}')
     for k, v in sorted(counts.items()):
         print(f'  {k:18s} {v}')
-    print(f'  restore precision (flag level): {out["restorePrecision"]}')
-    print(f'  new-flag precision:             {out["newFlagPrecision"]}')
+    print(f'  restore precision (flag level): {out["restorePrecision"]}   worst case {out["restorePrecisionWorstCase"]}')
+    print(f'  new-flag precision:             {out["newFlagPrecision"]}   worst case {out["newFlagPrecisionWorstCase"]}')
+    if unj:
+        print(f'  unjudgeable (page prints no lesson badge): {dict(unj)} — excluded from both, never scored as a disagreement')
     if a.md:
         L = ['| id | family | printed page | lesson claimed | lesson printed | direction | verdict |', '|---|---|---|---|---|---|---|']
         for r in rows:
