@@ -127,8 +127,9 @@ def accepted_header_starts(toc_start, header_lessons):
 
 
 def systematic_toc_offset(toc_start, header_lessons, min_headers=5, min_share=0.6):
-    """Round 4 (audit: TV5 pageStart is 2 printed pages AFTER the page that carries the lesson badge — the pipeline
-    measured −2 on 17–19 of ~25 headers in TV5 tập một/hai, TV2, TV4). When ≥ min_headers accepted headers (confidence
+    """Round 4 (audit: some books print the lesson badge N printed pages BEFORE the TOC's pageStart; measured on 42
+    books the pipeline finds it in 3 — TV5 tập hai, TV2 tập một, TV2 tập hai — always −2, and not in TV5 tập một or
+    TV4 tập một, whose headers agree with their TOC). When ≥ min_headers accepted headers (confidence
     ≥ HEADER_MIN_CONF, source header/both) have a TOC start and ≥ min_share of them share one non-zero
     (header − TOC) difference, that difference is the book's TOC offset; 0 otherwise."""
     diffs = []

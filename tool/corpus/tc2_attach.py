@@ -206,10 +206,12 @@ def attach_book(book, pipeline='tc2-p1', write=True):
     off = printed_offset(book)
     pages = sorted(int(re.search(r'p(\d+)\.json', f).group(1)) for f in glob.glob(f'{OCR}/{book}/p*.json'))
     infos = {p: page_info(book, p, len(pages)) for p in pages}
-    # Round 4: systematic TOC offset. Some books print the lesson badge N pages before the TOC's pageStart (TV5 tập
-    # một/hai, TV2, TV4: −2 on 17–19 of ~25 lessons). Measured per book from the headers themselves (first pass,
-    # sequence rule only): when ≥ 5 headers carry a TOC start and ≥ 60 % share the same non-zero difference, every TOC
-    # start is shifted by it before it confirms a header — the header is the printed truth, the TOC a cross-check.
+    # Round 4: systematic TOC offset. Some books print the lesson badge N printed pages BEFORE the TOC's pageStart.
+    # Measured per book from the headers themselves (first pass, sequence rule only): when ≥ 5 headers carry a TOC
+    # start and ≥ 60 % share the same non-zero difference, every TOC start is shifted by it before it confirms a
+    # header — the header is the printed truth, the TOC a cross-check. Measured on 42 books: it fires on 3 of them,
+    # all −2 (TV5 tập hai, TV2 tập một, TV2 tập hai) and NOT on TV5 tập một or TV4 tập một, whose headers agree with
+    # their TOC. The rule follows the evidence in the book at hand; it is not a per-series assumption.
     toc_offset = _systematic_toc_offset(pages, infos, toc, off)
     toc_start = {n: (l['pageStart'] + toc_offset) for n, l in toc.items() if l.get('pageStart') is not None}
     out_pages, headers, rejected = [], [], []
