@@ -14,11 +14,14 @@ import 'package:flutter/material.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/agenda/learning_agenda.dart';
 import '../../core/intent/next_lesson.dart';
+import '../../core/lesson_model/lesson_document.dart';
+import '../../core/lesson_model/next_action.dart';
 import '../../core/stories/stories_store.dart';
 import '../../core/store/learner_profile.dart';
 import '../camera/camera_demo_flow.dart';
 import '../parent/parent_tonight_screen.dart';
 import 'mission_data.dart';
+import '../subjects/subject_display.dart';
 
 class MissionCenterScreen extends StatelessWidget {
   const MissionCenterScreen({
@@ -40,6 +43,8 @@ class MissionCenterScreen extends StatelessWidget {
     this.onOpenStory,
     this.bookRecommendation,
     this.onStartRecommendation,
+    this.workspaceLesson,
+    this.onOpenWorkspaceLesson,
   });
 
   final MissionData data;
@@ -89,6 +94,15 @@ class MissionCenterScreen extends StatelessWidget {
   /// ĐÚNG sách/bài/ý định — KHÔNG hỏi lại (SAM đã hỏi xong ở Home rồi).
   final void Function(HomeRecommendation)? onStartRecommendation;
 
+  /// ⭐ ROUND 3 B1 — bài có Lesson Workspace (ba cách học) của ĐÚNG lớp này,
+  /// từ `WorkspaceCatalog`. `null` ⇒ không có thẻ (không bịa). Thẻ nói rõ đây
+  /// là bản thử nghiệm; nó KHÔNG thay thẻ «Việc SAM đề xuất» (hợp đồng G2
+  /// của Track A giữ nguyên) — chỉ làm sản phẩm NHÌN THẤY được từ Home.
+  final LessonDocument? workspaceLesson;
+  final void Function(LessonDocument)? onOpenWorkspaceLesson;
+
+  static const workspaceCardKey = Key('home-workspace-card');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,6 +118,10 @@ class MissionCenterScreen extends StatelessWidget {
             _intentChips(),
             const SizedBox(height: WalSpacing.md),
             _nextActionCard(),
+            if (workspaceLesson != null) ...[
+              const SizedBox(height: WalSpacing.sm),
+              _workspaceCard(workspaceLesson!),
+            ],
             if (data.upcomingSubjects.isNotEmpty) ...[
               const SizedBox(height: WalSpacing.sm),
               _upcomingRow(),
@@ -246,16 +264,26 @@ class MissionCenterScreen extends StatelessWidget {
             ? data.nextActionTitle
             : _agendaTitle(data.agenda!.kind));
     // ⭐ reason đến từ resolver (agenda hoặc HomeRecommendation) — hiển thị
-    // NGUYÊN VĂN, UI không suy diễn thêm.
-    final reason =
-        rec != null ? rec.reason : (data.agenda?.reason ?? data.decision.reason);
+    // NGUYÊN VĂN, UI không suy diễn thêm. Lớp chỉ có đường Scale (WAL-210
+    // G2): lý do do buildMissionFromStore viết từ con số thật của pack.
+    final reason = rec != null
+        ? rec.reason
+        : (data.agenda?.reason ??
+            data.nextActionReason ??
+            data.decision.reason);
     final showButton =
         rec != null || data.agenda?.kind != AgendaActionKind.rest;
+    // ⭐ WAL-210 G2: không agenda + có bài Scale ⇒ «Bắt đầu» mở MÔN HỌC (giá
+    // sách), KHÔNG mở camera — camera là đường của nội dung Deep (chip 📷 +
+    // nút «Chụp bài tập» vẫn giữ nguyên cho nó).
     final onPressed = rec != null
         ? (onStartRecommendation == null
             ? null
             : () => onStartRecommendation!(rec))
-        : (_startForAgenda() ?? onStartHomework ?? () {});
+        : (_startForAgenda() ??
+            (data.scaleLessonCount > 0 ? onOpenSubjects : null) ??
+            onStartHomework ??
+            () {});
     return Container(
       padding: const EdgeInsets.all(WalSpacing.lg),
       decoration: BoxDecoration(
@@ -298,6 +326,67 @@ class MissionCenterScreen extends StatelessWidget {
             ),
           ),
         ],
+      ]),
+    );
+  }
+
+  /// ROUND 3 B1 — thẻ «Bài học SAM»: một bài, ba cách học, từ Home một chạm.
+  /// Mọi chữ đọc từ tài liệu bài (tên, chương, trang); nhãn thử nghiệm bắt
+  /// buộc vì `doc.isFixture`.
+  Widget _workspaceCard(LessonDocument doc) {
+    final where = doc.chapter == null
+        ? doc.pageRangeLine
+        : '${doc.chapter!.label} · ${doc.pageRangeLine}';
+    return Container(
+      key: MissionCenterScreen.workspaceCardKey,
+      padding: const EdgeInsets.all(WalSpacing.lg),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+          border: Border.all(color: WalColors.primary500.withValues(alpha: 0.35))),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+            doc.isFixture
+                ? 'BÀI HỌC SAM · BẢN THỬ NGHIỆM'
+                : 'BÀI HỌC SAM',
+            style: const TextStyle(
+                fontSize: WalType.secondary,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.1,
+                color: WalColors.inkSoft)),
+        const SizedBox(height: 4),
+        Text('✨ ${doc.lessonLabel}',
+            style: const TextStyle(
+                fontSize: WalType.title,
+                fontWeight: FontWeight.w700,
+                color: WalColors.primaryText)),
+        const SizedBox(height: 2),
+        Text(where,
+            style: const TextStyle(
+                fontSize: WalType.secondary, color: WalColors.inkSoft)),
+        const SizedBox(height: WalSpacing.sm),
+        Text(
+            [for (final v in WorkspaceView.values) '${v.icon} ${v.label}']
+                .join('  ·  '),
+            style: const TextStyle(
+                fontSize: WalType.body, color: WalColors.ink, height: 1.4)),
+        const SizedBox(height: WalSpacing.md),
+        SizedBox(
+          height: WalSpacing.minTouch,
+          child: FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: WalColors.primary500,
+                shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(WalSpacing.radiusButton))),
+            onPressed: onOpenWorkspaceLesson == null
+                ? null
+                : () => onOpenWorkspaceLesson!(doc),
+            child: const Text('Mở bài học',
+                style: TextStyle(
+                    fontSize: WalType.body, fontWeight: FontWeight.w700)),
+          ),
+        ),
       ]),
     );
   }
@@ -423,7 +512,7 @@ class MissionCenterScreen extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: WalColors.ink)),
             const SizedBox(height: 2),
-            Text(st.sourceLine,
+            Text(storySourceLine(sourceDocumentId: st.sourceDocumentId, pagePdf: st.pagePdf),
                 style: const TextStyle(
                     fontSize: WalType.secondary, color: WalColors.inkSoft)),
           ]),

@@ -1,0 +1,251 @@
+{
+  "schema": "wal-evidence-manifest-v1",
+  "round": "round3-iter3",
+  "generatedAt": "2026-09-05T09:22:59.258556+00:00",
+  "git": {
+    "sha": "a0f1da380daf126544434974ba9462e67dfda1fd",
+    "branch": "integration/round3-2026-09-05",
+    "dirty": true
+  },
+  "apk": {
+    "file": "build/app/outputs/flutter-apk/app-debug.apk",
+    "sha256": "927487acfbeece38c5818a35bcad96b52e12aed541a64d0b8d250225f6364ddf",
+    "bytes": 261463991
+  },
+  "packs": [
+    {
+      "file": "lesson-index-g1.json",
+      "sha256": "7fbf8523beadca7f76a9a52130886e19b37006ba106f0a223f187954b06b8fb8",
+      "packVersion": "g1-20260905T0437Z-07a24504",
+      "contentHash": "d17e5771cd4c414f55130e42cb84ef531d1676446e75176cbbdc29b4224464bc",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g10.json",
+      "sha256": "ebc710ddf63196f3b2fc9b7164ed0f8cb9b0ae3c616fed64a67076f4bcda4df9",
+      "packVersion": "g10-20260905T0437Z-07a24504",
+      "contentHash": "463a97fa9a8b19d3675eaf50ff2091232a16c12ca96edc56840dc0907688e321",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g11.json",
+      "sha256": "05ded31ee311242987c74326478b4f6f09e85f039533cbea08ed16211fd43bfa",
+      "packVersion": "g11-20260905T0437Z-07a24504",
+      "contentHash": "44d3e5bdf9a2a5288720fb67d026541d413a4ab70be8b646d11868898efca075",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g12.json",
+      "sha256": "eac127a867f25f95461ceb068533c0f1030b9012eed245529a035435d730a03b",
+      "packVersion": "g12-20260905T0437Z-07a24504",
+      "contentHash": "53d72fed07e092ef385fc9b378d4eddf2535d880d1b0b298eae8c780cfcc6c40",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g2.json",
+      "sha256": "960bdd44a232a1dc90c8fca16446f997329e71da2888880890aa72b4af6476cc",
+      "packVersion": "g2-20260905T0437Z-07a24504",
+      "contentHash": "d2ec6283ac45383de7cb8dc1e6a4859e8cf232ba195a36550d9d78a8eb3d9659",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g3.json",
+      "sha256": "e41e43195b2d8cfa101e98a20bdb1577326bfac07e3b7b7cb7182ddc9288e0de",
+      "packVersion": "g3-20260905T0437Z-07a24504",
+      "contentHash": "ed7882ab5def086cc2467b5fae4cca948796c343541157885ec9d861d27bac80",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g4.json",
+      "sha256": "21afc9d177f97885f3b4bcbe1f5c503106c3f3885c2e2ba2bd6b6223c2e06c75",
+      "packVersion": "g4-20260905T0437Z-07a24504",
+      "contentHash": "dd96716ce0537e366a788630c05c78b1a005eedcf9fbe0427d05e7751cc6652b",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g5.json",
+      "sha256": "b01467a96d504e691822c75930936bca77708612815973ec5f96651e32ab1212",
+      "packVersion": "g5-20260905T0437Z-07a24504",
+      "contentHash": "a3244d3cfe4138342235c98e60f5159e4b92c5f34e84f54cf4ce90f9c9d174a6",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g6.json",
+      "sha256": "eeb9422c2489790440b7570784439539d8ab48fd885ce6c9a6001e56356a2929",
+      "packVersion": "g6-20260905T0437Z-07a24504",
+      "contentHash": "846ccc69fa88a319197e08d8c0d84d5ea02b8f3f68798bbe48ddeabe6e4e5772",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g7.json",
+      "sha256": "afb72e42061150bcec64e2085f9acf2f484ede2905cbc37b6080f25847717b5e",
+      "packVersion": "g7-20260905T0437Z-07a24504",
+      "contentHash": "d4a11e89297a08779702805ba1d7e7b7c9dfda12b2fc8b1eb9189c71f5c96e98",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g8.json",
+      "sha256": "d389198f32782a5b931c680b7355c0d1336ed4886875154664b33d7d0d82f968",
+      "packVersion": "g8-20260905T0437Z-07a24504",
+      "contentHash": "d5843ed818ae78518c4b211500c370024867fde11a57fa991c2b20f3624f3b14",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g9.json",
+      "sha256": "cf7cc454c9b720c9f7b472fa1643df529602dc0736e358cd92775722fa78a622",
+      "packVersion": "g9-20260905T0437Z-07a24504",
+      "contentHash": "d5ddc1e7569b000b450442e69a7d0dd5212d1f24d718a3589ca7ae957ba4d2a8",
+      "experimental": false,
+      "provenance": true
+    }
+  ],
+  "fixture": {
+    "file": "lesson-06-sgk-khoa-hoc-tu-nhien-6-b17.json",
+    "sha256": "287a20fc1d084f48d6cb7910cca50ec532b53731ece437de7af98ded56d4bd59",
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "lesson": 17,
+    "trust": "trustedStructuredLesson",
+    "sourcePipeline": "tc2-p1",
+    "generator": "tool/corpus/tsl_to_lesson_document.py@v1",
+    "blocks": 73,
+    "semantic": 3,
+    "tutorSteps": 5
+  },
+  "device": {
+    "serial": "192.168.1.3:5555",
+    "model": null,
+    "androidRelease": null,
+    "sdk": null,
+    "reachable": false
+  },
+  "declaredDevice": "Nokia 6.1 · 192.168.1.3:5555 · learner «Na · Lớp 6»",
+  "frames": [
+    {
+      "file": "round3-3-01-home.png",
+      "sha256": "4a41207d64f1ff9b8a5c367fcbbaf574262f91ac1852a648ac8a0d0f2cefa95c",
+      "bytes": 213905,
+      "mtime": "2026-09-05T09:22:29.177623+00:00"
+    },
+    {
+      "file": "round3-3-02-home-card.png",
+      "sha256": "1e6f8905c774316a4b4dc8dd54d840cd3d46e1e6a18e83f602d9d14604e98471",
+      "bytes": 186109,
+      "mtime": "2026-09-05T09:22:29.178653+00:00"
+    },
+    {
+      "file": "round3-3-02-open-bai17.png",
+      "sha256": "4a41207d64f1ff9b8a5c367fcbbaf574262f91ac1852a648ac8a0d0f2cefa95c",
+      "bytes": 213905,
+      "mtime": "2026-09-05T09:22:29.179771+00:00"
+    },
+    {
+      "file": "round3-3-03-workspace-picker.png",
+      "sha256": "a0d83df41c8a80915c07ccffdfbe978d46c7238805194c47aea9d29a44556b45",
+      "bytes": 294827,
+      "mtime": "2026-09-05T09:22:29.181298+00:00"
+    },
+    {
+      "file": "round3-3-04-tutor-start.png",
+      "sha256": "ecd92d13d7bd66472aa526e9021a63b0a7d6fd6fd367e6a04428a2ddd6292c9d",
+      "bytes": 365649,
+      "mtime": "2026-09-05T09:22:29.183074+00:00"
+    },
+    {
+      "file": "round3-3-05-visual.png",
+      "sha256": "53e7f694239c9b7590d281662482052f05c6a9cc1e51d386db49128db49cd966",
+      "bytes": 261807,
+      "mtime": "2026-09-05T09:22:29.184510+00:00"
+    }
+  ],
+  "iterations": [
+    {
+      "iter": 3,
+      "build": "a0f1da3",
+      "steps": [
+        {
+          "step": "01",
+          "expect": "Launch integrated build → Home: honest card «Có 4 bài để học ở Môn học» + «BÀI HỌC SAM · BẢN THỬ NGHIỆM» card",
+          "result": "PASS",
+          "note": "coordinator walk 16:19; branded launch window seen, then Home",
+          "frames": [
+            "round3-3-01-home.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "02",
+          "expect": "Home card Bài 17 shows Chương IV · trang 60–63 · Đọc/Trực quan/Học với SAM; «Bạn có biết?» source uses child-facing name",
+          "result": "PASS",
+          "note": "tap on the title did nothing (not a target); «Mở bài học» button opens",
+          "frames": [
+            "round3-3-02-home-card.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "03",
+          "expect": "Lesson Workspace first-open picker: breadcrumb, trust chip with ⓘ, three cards with real counts, «SAM đề xuất cách này — vì sao?» with a state-based reason",
+          "result": "PASS",
+          "note": "",
+          "frames": [
+            "round3-3-03-workspace-picker.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "04",
+          "expect": "Học với SAM: header states runtime-checked steps (5/17) vs prototype; first step labelled «SAM (runtime có kiểm)» with a SÁCH VIẾT quote",
+          "result": "PASS",
+          "note": "5/17 on the bridge fixture (Lane B measured 5/12 on the pre-bridge fixture)",
+          "frames": [
+            "round3-3-04-tutor-start.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "05",
+          "expect": "Trực quan tab opens from the segmented control",
+          "result": "OBSERVED",
+          "note": "frame captured, content not walked further",
+          "frames": [
+            "round3-3-05-visual.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "frames": 6,
+    "steps": {
+      "PASS": 4,
+      "FAIL": 0,
+      "SKIP": 0,
+      "UNVERIFIED": 0,
+      "OTHER": 1
+    },
+    "downgraded": 0
+  },
+  "retentionRules": [
+    "no lock-screen / personal-notification frames",
+    "no raw PDF pages; SGK crops inside frames are internal (Founder D4)",
+    "a PASS without an existing frame is downgraded to UNVERIFIED"
+  ],
+  "warnings": []
+}

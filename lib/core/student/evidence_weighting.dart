@@ -88,6 +88,10 @@ abstract class EvidenceWeightingPolicy {
 class ConservativeBktPolicy implements EvidenceWeightingPolicy {
   const ConservativeBktPolicy();
 
+  /// ⭐ Round 3 (A3): `true` ⇒ chỉ sự kiện mang dấu validator ĐƯỢC ĐĂNG KÝ
+  /// cấp năng lực mới đẩy belief — xem [ValidatedOnlyBktPolicy].
+  bool get requireValidation => false;
+
   @override
   String get policyId => 'conservative-bkt-v1';
 
@@ -112,6 +116,12 @@ class ConservativeBktPolicy implements EvidenceWeightingPolicy {
         if (e.correct == null || guess == null) {
           // Không chấm được / không biết dạng ⇒ không claim gì. UNKNOWN không
           // bao giờ thành FAILED.
+          return EvidenceUpdate.noOp;
+        }
+        // ⭐⭐ Round 3 (Founder A3): dấu validator LẠ / không cấp năng lực ⇒
+        // không claim gì (RETRIEVED ≠ PERMITTED áp cho cả validator).
+        if (e.hasRejectedValidation) return EvidenceUpdate.noOp;
+        if (requireValidation && !e.hasApprovedValidation) {
           return EvidenceUpdate.noOp;
         }
         return EvidenceUpdate(
@@ -145,8 +155,30 @@ class ConservativeBktPolicy implements EvidenceWeightingPolicy {
         // Kết quả chốt của cả bài — TRÙNG với lần thử cuối đã ghi. Chấm cả
         // hai là đếm đôi cùng một bằng chứng. Giữ để báo cáo, không để chấm.
         return EvidenceUpdate.noOp;
+
+      case EvidenceKind.participation:
+        // ⭐⭐ D1: tự báo / hoàn thành KHÔNG CHẤM ⇒ không claim gì về năng lực,
+        // không `learn`, không đếm. Cùng kết cục với independentAttempt +
+        // correct == null trước đây — BKT không đổi.
+        return EvidenceUpdate.noOp;
     }
   }
+}
+
+/// ⭐⭐ WAL-210 round 3 (Founder A3) — luật SIẾT: mastery CHỈ từ sự kiện mang
+/// dấu validator được đăng ký (`hasApprovedValidation`). Sự kiện có chấm
+/// nhưng không dấu (dữ liệu trước hợp đồng, emitter chưa đóng dấu) ⇒ noOp.
+/// Là policy THAY ĐƯỢC (ADR-004): đổi luật = replay, không migration. Chưa là
+/// mặc định — bật mặc định là quyết định Founder (mất «Tự làm được» của toàn
+/// bộ lịch sử trước hợp đồng); xem ROUND3-RUNTIME-CONTRACTS.md §A3.
+class ValidatedOnlyBktPolicy extends ConservativeBktPolicy {
+  const ValidatedOnlyBktPolicy();
+
+  @override
+  bool get requireValidation => true;
+
+  @override
+  String get policyId => 'validated-only-bkt-v1';
 }
 
 /// ⭐⭐ Mastery là **giá trị suy ra** = replay log thô qua một policy.

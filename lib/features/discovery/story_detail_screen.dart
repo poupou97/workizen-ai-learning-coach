@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/stories/stories_store.dart';
 import 'person_detail_screen.dart';
+import '../subjects/subject_display.dart';
 
 const storyTypeLabel = {
   'PERSON': 'Danh nhân',
@@ -81,7 +82,7 @@ class StoryDetailScreen extends StatelessWidget {
                     ]),
               ),
               const SizedBox(height: WalSpacing.sm),
-              Text(item.sourceLine,
+              Text(storySourceLine(sourceDocumentId: item.sourceDocumentId, pagePdf: item.pagePdf),
                   style: const TextStyle(
                       fontSize: WalType.secondary,
                       fontWeight: FontWeight.w600,

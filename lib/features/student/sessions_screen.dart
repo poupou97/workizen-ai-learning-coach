@@ -10,6 +10,7 @@ import '../../core/store/learner_profile.dart';
 import '../../core/store/learner_store.dart';
 import '../../core/store/learning_session.dart';
 import '../../core/student/mastery.dart';
+import '../subjects/subject_display.dart';
 
 String supportLabel(SupportLevel s) => switch (s) {
       SupportLevel.none => 'TỰ LÀM trọn vẹn',
@@ -89,7 +90,8 @@ class _SessionsScreenState extends State<SessionsScreen> {
             borderRadius: BorderRadius.circular(WalSpacing.radiusChip)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(
-              '${s.startedAt.day}/${s.startedAt.month} · ${s.subjectId}'
+              // ROUND 3 B5: tên môn trẻ đọc, không phải mã («khtn»).
+              '${s.startedAt.day}/${s.startedAt.month} · ${subjectDisplayName(s.subjectId)}'
               ' · ${s.mode == SessionMode.assess ? 'KIỂM TRA' : 'học'}',
               style: const TextStyle(
                   fontSize: WalType.body,

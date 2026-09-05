@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/stories/stories_store.dart';
+import '../subjects/subject_display.dart';
 
 class SplashQuoteScreen extends StatelessWidget {
   const SplashQuoteScreen({super.key, required this.quote});
@@ -35,7 +36,7 @@ class SplashQuoteScreen extends StatelessWidget {
                             fontSize: WalType.body,
                             color: WalColors.primaryText)),
                   const SizedBox(height: WalSpacing.xs),
-                  Text(quote.sourceLine,
+                  Text(storySourceLine(sourceDocumentId: quote.sourceDocumentId, pagePdf: quote.pagePdf),
                       style: const TextStyle(
                           fontSize: WalType.secondary,
                           color: WalColors.inkSoft)),

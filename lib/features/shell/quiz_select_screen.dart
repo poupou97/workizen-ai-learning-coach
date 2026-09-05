@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
+import '../../core/student/evidence_ids.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../../core/tutor/learning_activity.dart';
@@ -47,6 +48,9 @@ class QuizSelectScreen extends StatefulWidget {
 }
 
 class _QuizSelectScreenState extends State<QuizSelectScreen> {
+  // ⭐ WAL-210 (audit C1): token PHIÊN sinh một lần lúc mở màn — mở lại
+  // cùng bài là phiên khác, id khác (đồng hồ máy, không ăn nhịp `now`).
+  final String _token = newEvidenceSessionToken(DateTime.now());
   final List<LearningEvent> _events = [];
   int? _picked;
   bool _hintShown = false;
@@ -59,7 +63,8 @@ class _QuizSelectScreenState extends State<QuizSelectScreen> {
 
   void _emit(EvidenceKind kind, bool? correct) {
     _events.add(LearningEvent(
-      eventId: '${a.activityId}#${_seq++}',
+      eventId: evidenceEventId(
+          exerciseId: a.activityId, sessionToken: _token, seq: _seq++),
       skillCaseId: a.skillCaseId ?? a.conceptId,
       kind: kind,
       correct: correct,
@@ -76,8 +81,9 @@ class _QuizSelectScreenState extends State<QuizSelectScreen> {
     if (_done) return;
     setState(() => _picked = i);
     if (!a.gradable) {
-      // Chưa biết đáp án ⇒ ghi nhận đã làm, KHÔNG chấm, KHÔNG kết luận.
-      _emit(EvidenceKind.independentAttempt, null);
+      // Chưa biết đáp án ⇒ ghi nhận đã làm (participation — D1), KHÔNG chấm,
+      // KHÔNG kết luận, KHÔNG «tự làm được».
+      _emit(EvidenceKind.participation, null);
       setState(() => _done = true);
       widget.onFinished?.call(_events);
       return;

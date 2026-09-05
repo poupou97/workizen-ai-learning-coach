@@ -113,6 +113,8 @@ void main() {
             eventId: 'e1',
             skillCaseId: 'denominator-non-divisible',
             kind: EvidenceKind.independentAttempt,
+            // WAL-210 D1: «Tự làm được» chỉ từ tự làm ĐÃ CHẤM đúng.
+            correct: true,
             at: DateTime(2026, 9, 4),
             sourceDocumentId: '05-sgk-toan-5-tap-mot',
             lessonNo: 6,

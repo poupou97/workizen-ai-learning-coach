@@ -1,0 +1,331 @@
+{
+  "round": "round3",
+  "device": "Nokia 6.1 (192.168.1.3:5555, WiFi adb) · learner «Na · Lớp 6» · portrait · package ai.workizen.learningcoach",
+  "protocol": "read-only focus/power check before every input; no wake/unlock/swipe on lock; notification shade collapsed once via `cmd statusbar collapse` (service call, no touch) — its frame was deleted (personal notifications)",
+  "iterations": [
+    {
+      "iter": 1,
+      "build": {
+        "gitSha": "3409527",
+        "apkSha256": "c1091bc0d22135d8c83cfe13477d435abc6ac2d666830bebf877609034bbf8db",
+        "note": "B1–B5 stages 1–5 before the Lane A-runtime merge; prototype next-action rule (visual-first)"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "Launch → Home «Chào Na!»; boot screen instead of a blank frame",
+          "result": "PASS",
+          "frames": [
+            "round3-1-01-home.png"
+          ],
+          "note": "first capture was the Founder's notification shade (deleted); shade collapsed via cmd statusbar collapse, app already in front"
+        },
+        {
+          "step": "02",
+          "expect": "Home card «BÀI HỌC SAM · BẢN THỬ NGHIỆM» — Bài 17, Chương IV, trang 60–63, three ways, «Mở bài học»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-02-home-card.png"
+          ],
+          "defects": [
+            "D-R3-01 «Bạn có biết?» prints raw id 06-sgk-ngu-van-6-tap-mot · trang 26"
+          ]
+        },
+        {
+          "step": "03",
+          "expect": "«Mở bài học» → Workspace first open = «Vào bài học» picker: breadcrumb, compact chip ⓘ, three tabs, SAM question, three cards with counts, proposed card with reason",
+          "result": "PASS",
+          "frames": [
+            "round3-1-03-workspace-picker.png"
+          ],
+          "note": "build 1 proposes Trực quan (prototype rule); build 2 proposes Đọc (Founder A8)"
+        },
+        {
+          "step": "04",
+          "expect": "Tap chip → «Nguồn & độ tin» sheet: trust level, semantic rules, scripted SAM, no evidence, six boundary claims",
+          "result": "PASS",
+          "frames": [
+            "round3-1-04-trust-sheet.png"
+          ]
+        },
+        {
+          "step": "05",
+          "expect": "Pick proposed card → Trực quan: shape tabs, instance chooser 1·/2·, overview strip 1→2→3, subtitle «3 bước · SGK KHTN 6 · trang 61 · chữ sách, SAM chỉ xếp lại»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-05-visual-process.png"
+          ]
+        },
+        {
+          "step": "06",
+          "expect": "Instance 2 → step 1 withheld placeholder (grey, page 62), step 2 verbatim",
+          "result": "PASS",
+          "frames": [
+            "round3-1-06-visual-withheld-step.png"
+          ]
+        },
+        {
+          "step": "07",
+          "expect": "⚖️ Bảng so sánh → 4 rows Lọc/Lắng/Cô cạn/Chiết × Dùng để tách, subtitle «4 cách · trang 63»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-07-visual-comparison.png"
+          ]
+        },
+        {
+          "step": "08",
+          "expect": "📖 Đọc top: page chips 60·61·62·63, font control, «trang 60» divider, 🎯 MỤC TIÊU",
+          "result": "PASS",
+          "frames": [
+            "round3-1-08-read-top.png"
+          ],
+          "defects": [
+            "D-R3-03 proposal reason clipped at 3 lines mid-quote (fixed 297687e)"
+          ]
+        },
+        {
+          "step": "09",
+          "expect": "Hình 17.1: two crops in one row as on the page",
+          "result": "PASS",
+          "frames": [
+            "round3-1-09-read-figure-row.png"
+          ],
+          "defects": [
+            "D-R3-05 left crop bleeds a text line (TSL figure bbox; pipeline, not UI)"
+          ]
+        },
+        {
+          "step": "10",
+          "expect": "Caption group under the row («Hình 17.1» bold), reading order continues",
+          "result": "PASS",
+          "frames": [
+            "round3-1-10-read-captions-page61.png"
+          ]
+        },
+        {
+          "step": "11",
+          "expect": "Page 61: Hình 17.2 + source line, withheld card, question box",
+          "result": "PASS",
+          "frames": [
+            "round3-1-11-read-page61-withheld.png"
+          ],
+          "defects": [
+            "D-R3-07 withheld card shows machine code (page_feature:diagram) (fixed 297687e)"
+          ]
+        },
+        {
+          "step": "12",
+          "expect": "🦉 Học với SAM: header label, phase strip «Giải thích» active, explain bubble + SÁCH VIẾT",
+          "result": "PASS",
+          "frames": [
+            "round3-1-12-tutor-explain.png"
+          ],
+          "defects": [
+            "D-R3-08 sixth phase «Tiếp» off-screen on 360dp (fixed 297687e)"
+          ]
+        },
+        {
+          "step": "13",
+          "expect": "«Tiếp ▸» reachable under the SÁCH VIẾT card",
+          "result": "PASS",
+          "frames": [
+            "round3-1-13-tutor-tiep.png"
+          ]
+        },
+        {
+          "step": "14",
+          "expect": "Q1 verbatim + «Câu 1/3» + options A/B/C/D + «Gợi ý cho tớ (1/2)»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-14-tutor-q1.png"
+          ]
+        },
+        {
+          "step": "15",
+          "expect": "Tap B «Cô cạn» → matched feedback + SÁCH VIẾT trang 62 → Q2 «Câu 2/3» free text",
+          "result": "PASS",
+          "frames": [
+            "round3-1-15-tutor-matched-q2.png"
+          ]
+        },
+        {
+          "step": "16",
+          "expect": "Type ASCII (unmatched) → keyboard does not hide field/Gửi; next-action card hidden while keyboard up",
+          "result": "PASS",
+          "frames": [
+            "round3-1-16-tutor-free-text-hint.png"
+          ],
+          "note": "adb input text cannot carry diacritics ⇒ deliberately unmatched path"
+        },
+        {
+          "step": "17",
+          "expect": "Gửi → hint 1 (lavender, no shame) «Gợi ý cho tớ (2/2)»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-17-tutor-hint1.png"
+          ]
+        },
+        {
+          "step": "18",
+          "expect": "Hint 2 → «SAM đã gợi ý hết rồi — con cứ trả lời thử nhé»",
+          "result": "PASS",
+          "frames": [
+            "round3-1-18-tutor-hint2.png"
+          ]
+        },
+        {
+          "step": "19",
+          "expect": "Second unmatched answer → scaffold, then Q3 «Câu 3/3» A/B/C",
+          "result": "PASS",
+          "frames": [
+            "round3-1-19-tutor-scaffold-q3.png",
+            "round3-1-20-tutor-scaffold-q3.png"
+          ],
+          "note": "keyevent ENTER inserts a newline in the 3-line field (send via Gửi)"
+        },
+        {
+          "step": "20",
+          "expect": "Q3 option A → matched feedback + SÁCH VIẾT",
+          "result": "PASS",
+          "frames": [
+            "round3-1-21-tutor-end-card.png"
+          ]
+        },
+        {
+          "step": "21",
+          "expect": "End card: «Con đã đi qua 3/3 câu hỏi của sách cùng SAM» + participation wording + «Đọc lại phần Em đã học» + Về mục lục",
+          "result": "PASS",
+          "frames": [
+            "round3-1-22-tutor-end-card-full.png"
+          ]
+        },
+        {
+          "step": "22",
+          "expect": "«Đọc lại…» → Smart Book anchored on 📌 Em đã học",
+          "result": "PASS",
+          "frames": [
+            "round3-1-23-read-anchored-em-da-hoc.png"
+          ],
+          "defects": [
+            "D-R3-10 badge clipped at the top edge (fixed 08af1bf)"
+          ]
+        },
+        {
+          "step": "23",
+          "expect": "Header ← → Home (opened from the Home card)",
+          "result": "PASS",
+          "frames": [
+            "round3-1-24-back-home.png"
+          ]
+        },
+        {
+          "step": "24",
+          "expect": "Home «…» → Thêm menu",
+          "result": "PASS",
+          "frames": [
+            "round3-1-25-home-more-menu.png"
+          ]
+        },
+        {
+          "step": "25",
+          "expect": "Các phiên học: still exactly one session (5/9 · Khoa học tự nhiên · học — the round-2 audit session) — nothing from the workspace journey; subject shown by name not id",
+          "result": "PASS",
+          "frames": [
+            "round3-1-26-sessions-unchanged.png"
+          ]
+        }
+      ]
+    },
+    {
+      "iter": 2,
+      "build": {
+        "gitSha": "08af1bf",
+        "apkSha256": "c27e8dff0a25f447be6e6efcc60d2b3aae2c70b2a1175622581995fd2d3f18d7",
+        "note": "with Lane A-runtime #69 merged: Founder A8 proposal order, per-step runtime labels, hint rewrite, n1 fixes D-R3-03/07/08/10"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "Launch → boot → Home",
+          "result": "PASS",
+          "frames": [
+            "round3-2-01-home.png",
+            "round3-2-02-home-loaded.png"
+          ],
+          "note": "first frame (7 s after launch) is the WHITE native launch window, not the Flutter BootScreen ⇒ drawables branded in e3e9e9e (not yet installed on the Nokia)"
+        },
+        {
+          "step": "03",
+          "expect": "«Mở bài học» → picker proposes Đọc (Founder A8, R2) with reason",
+          "result": "PASS",
+          "frames": [
+            "round3-2-03-workspace-picker-founder-order.png"
+          ]
+        },
+        {
+          "step": "05a",
+          "expect": "Đọc card → Smart Book; proposal card = Trực quan (R3), full reason (D-R3-03 verified)",
+          "result": "PASS",
+          "frames": [
+            "round3-2-04-read-next-visual.png"
+          ]
+        },
+        {
+          "step": "05b",
+          "expect": "«Trực quan» button → Visual; proposal card = Học với SAM quoting Q1 (R4)",
+          "result": "PASS",
+          "frames": [
+            "round3-2-05-visual-next-tutor.png",
+            "round3-2-05b-visual-recheck.png"
+          ],
+          "note": "view already scrolled ~600 px — the Founder had picked up the phone"
+        },
+        {
+          "step": "13-15",
+          "expect": "tutor loop on build 2",
+          "result": "OBSERVED",
+          "frames": [
+            "round3-2-05c-visual-after-scroll-up.png"
+          ],
+          "note": "walked by the Founder by hand: «Lọc» → hint (label kịch bản thử nghiệm) → «Cô cạn» → matched; proposal R5 «Về mục lục»; all agent input stopped here"
+        },
+        {
+          "step": "11",
+          "expect": "withheld card without machine code (D-R3-07)",
+          "result": "SKIP",
+          "note": "not captured on device in iteration 2 (Founder holding the phone); widget-tested"
+        },
+        {
+          "step": "13",
+          "expect": "explain bubble labelled «SAM (runtime có kiểm)» + runtime line + six phases visible (D-R3-08)",
+          "result": "SKIP",
+          "note": "not captured on device; tutor_view_test covers label + phases"
+        },
+        {
+          "step": "20",
+          "expect": "anchor lands with the badge fully visible (D-R3-10)",
+          "result": "SKIP",
+          "note": "not captured on device; widget-tested"
+        },
+        {
+          "step": "22",
+          "expect": "Book screen: lesson ranges + TOC footnote",
+          "result": "SKIP",
+          "note": "not walked; book_and_chapter_test covers it (real fixture)"
+        },
+        {
+          "step": "23",
+          "expect": "Chapter row «Đã xem (phiên này)»",
+          "result": "SKIP",
+          "note": "not walked"
+        },
+        {
+          "step": "25",
+          "expect": "Sessions unchanged after build-2 journey",
+          "result": "SKIP",
+          "note": "not walked in iteration 2; iteration 1 frame stands"
+        }
+      ]
+    }
+  ]
+}

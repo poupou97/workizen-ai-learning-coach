@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/stories/stories_store.dart';
 import 'story_detail_screen.dart';
+import '../subjects/subject_display.dart';
 
 class PersonDetailScreen extends StatelessWidget {
   const PersonDetailScreen(
@@ -77,7 +78,7 @@ class PersonDetailScreen extends StatelessWidget {
                                   fontSize: WalType.body,
                                   fontWeight: FontWeight.w600,
                                   color: WalColors.ink)),
-                          subtitle: Text(i.sourceLine,
+                          subtitle: Text(storySourceLine(sourceDocumentId: i.sourceDocumentId, pagePdf: i.pagePdf),
                               style: const TextStyle(
                                   fontSize: WalType.secondary,
                                   color: WalColors.inkSoft)),

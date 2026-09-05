@@ -141,8 +141,7 @@ class SubjectHomeScreen extends StatelessWidget {
                 // WAL-133: hình SGK đã crop của MÔN NÀY — chỉ hiện khi có
                 // asset thật kèm đủ provenance (tầng parse đã loại thứ không
                 // chứng minh được), nên tile này không bao giờ mở ra màn rỗng.
-                if (index.sourceAssetsFor(subject).isNotEmpty)
-                  _sourceAssetsTile(context),
+                if (_sourceAssets.isNotEmpty) _sourceAssetsTile(context),
                 for (final b in books) ...[
                   if (book == null && (b.volume != null || books.length > 1))
                     Padding(
@@ -245,7 +244,8 @@ class SubjectHomeScreen extends StatelessWidget {
     return low.isEmpty ? low : low[0].toUpperCase() + low.substring(1);
   }
 
-  void _openExercise(BuildContext context, LessonRef l, CorpusExercise e) {
+  void _openExercise(BuildContext context, LessonRef l, CorpusExercise e,
+      LearningContext ctx) {
     // Sách là NGUỒN TIN: bài tập in trong SGK ⇒ sourceStated, có trang.
     final problem = CanonicalProblem.fromCurriculum(
       exerciseLabel: 'b${l.no}',
@@ -260,8 +260,13 @@ class SubjectHomeScreen extends StatelessWidget {
         pageStart: e.page,
       ),
     );
+    // ⭐ WAL-210 (audit C7): bài tập mở TỪ một bài trong pack ⇒ Tutor stamp
+    // đúng sách + bài lên evidence. Đường camera KHÔNG đi qua đây (ctx null).
     openCanonicalProblem(context,
-        problem: problem, profile: profile, store: store);
+        problem: problem,
+        profile: profile,
+        store: store,
+        learningContext: ctx);
   }
 
   Widget _experimentsTile(BuildContext context) {
@@ -309,7 +314,9 @@ class SubjectHomeScreen extends StatelessWidget {
                               grade: profile.grade,
                               subject: subject,
                               sourceDocumentId: ex.book,
-                              lessonNo: ex.lesson));
+                              lessonNo: ex.lesson,
+                              // WAL-210: version của ĐÚNG pack đang mở.
+                              knowledgeModelVersion: index.packVersion));
                     },
                   ),
               ]),
@@ -320,8 +327,29 @@ class SubjectHomeScreen extends StatelessWidget {
     );
   }
 
+  /// ROUND 3 B5 (audit 05 §1: Toán 6 «Hình trong sách» từng hiện hình của
+  /// Toán 5): tầng lõi (`LessonIndex.sourceAssetsFor`, PR #69 mục #7) đã bỏ
+  /// hình không thuộc lớp; UI chỉ còn thu hẹp về CUỐN đang mở. Rỗng ⇒ tile
+  /// không hiện, không mở ra màn sai lớp.
+  List<IndexedSourceAsset> get _sourceAssets {
+    final all = index.sourceAssetsFor(subject);
+    final b = book;
+    if (b == null) return all;
+    return [
+      for (final a in all)
+        if (a.sourceDocumentId == b.sourceDocumentId) a,
+    ];
+  }
+
+  Map<String, String> get _bookTitles => {
+        for (final b in index.books)
+          b.sourceDocumentId: b.volumeLabel == null
+              ? b.title
+              : '${b.title} · ${b.volumeLabel}',
+      };
+
   Widget _sourceAssetsTile(BuildContext context) {
-    final assets = index.sourceAssetsFor(subject);
+    final assets = _sourceAssets;
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),
       child: Material(
@@ -339,8 +367,10 @@ class SubjectHomeScreen extends StatelessWidget {
           trailing:
               const Icon(Icons.chevron_right, color: WalColors.primaryText),
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) =>
-                  SourceGalleryScreen(subject: subject, assets: assets))),
+              builder: (_) => SourceGalleryScreen(
+                  subject: subject,
+                  assets: assets,
+                  bookTitles: _bookTitles))),
         ),
       ),
     );
@@ -368,6 +398,17 @@ class SubjectHomeScreen extends StatelessWidget {
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => MapReaderScreen(
                     map: maps.first,
+                    // ⭐ WAL-210: Map reader từng là surface DUY NHẤT không
+                    // nhận context — nay cùng một đường như các màn khác.
+                    // Ý định CHƯA BIẾT (mở từ tile môn, không qua bộ chọn)
+                    // ⇒ giữ null thật lòng.
+                    learningContext: LearningContext(
+                        learnerId: profile.learnerId,
+                        grade: profile.grade,
+                        subject: subject,
+                        sourceDocumentId: maps.first.book,
+                        lessonNo: maps.first.lesson,
+                        knowledgeModelVersion: index.packVersion),
                     onFinished: (events) => recordSession(
                         store: store,
                         learnerId: profile.learnerId,
@@ -645,7 +686,7 @@ class SubjectHomeScreen extends StatelessWidget {
       switch (a) {
         ExerciseActivity(:final items) => (
             '🧮 Làm bài tập',
-            () => _openExercise(context, l, items.first)
+            () => _openExercise(context, l, items.first, ctx)
           ),
         ReadingActivity(:final reading) => (
             '📖 Đọc bài',
@@ -677,7 +718,10 @@ class SubjectHomeScreen extends StatelessWidget {
         subject: subject,
         sourceDocumentId: b.sourceDocumentId,
         lessonNo: l.no,
-        intent: intent);
+        intent: intent,
+        // WAL-210: version của ĐÚNG pack đang mở — emitter Scale đóng nó
+        // lên evidence thay cho hằng Toán 5.
+        knowledgeModelVersion: index.packVersion);
 
     // Tra cứu mà bài không có nguồn nào ⇒ «Nguồn bài học» của chương trình.
     if (intent == LearningIntent.lookup && ordered.isEmpty) {
@@ -691,7 +735,11 @@ class SubjectHomeScreen extends StatelessWidget {
     }
     // Nhiều việc trong cùng một ý định ⇒ để trẻ chọn việc, KHÔNG tự chọn hộ.
     final actions = [
-      for (final a in ordered) _activityAction(context, l, a, ctx),
+      for (final a in ordered)
+        (
+          _distinctLabel(a, ordered, _activityAction(context, l, a, ctx).$1),
+          _activityAction(context, l, a, ctx).$2
+        ),
       if (intent == LearningIntent.lookup && c != null)
         ('📖 Nguồn bài học', () => _openSourceInfo(context, c)),
     ];
@@ -732,6 +780,30 @@ class SubjectHomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// ⭐ WAL-210 item G1 (audit 05 «identical “📖 Đọc bài” rows»): một bài có
+  /// NHIỀU bài đọc thì mỗi dòng phải nói được nó là bài đọc NÀO — bằng thứ
+  /// có thật trong pack (trang in + câu hỏi đầu), KHÔNG bịa tên. Chỉ một bài
+  /// đọc ⇒ nhãn giữ nguyên «📖 Đọc bài» (không thêm chữ khi không cần).
+  static String _distinctLabel(
+      LessonActivity a, List<LessonActivity> siblings, String base) {
+    if (a is! ReadingActivity) return base;
+    if (siblings.whereType<ReadingActivity>().length < 2) return base;
+    final r = a.reading;
+    final parts = <String>[
+      if (r.page != null) 'trang ${r.page}',
+      if (r.questions.isNotEmpty) _snippet(r.questions.first.prompt),
+    ];
+    return parts.isEmpty ? base : '$base · ${parts.join(' — ')}';
+  }
+
+  /// Vài chữ đầu của câu hỏi, cắt ở ranh giới từ — đủ nhận ra, không tràn dòng.
+  static String _snippet(String s, {int max = 36}) {
+    final t = s.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (t.length <= max) return t;
+    final cut = t.lastIndexOf(' ', max);
+    return '${t.substring(0, cut > 12 ? cut : max)}…';
   }
 
   /// WAL-141 #17 — «Nguồn bài học» từ Subject Home: các cách trong chương

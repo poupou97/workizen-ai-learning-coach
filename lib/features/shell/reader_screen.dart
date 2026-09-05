@@ -9,8 +9,12 @@
 ///   phát LearningEvent nào (UNOBSERVED không bao giờ thành MASTERED).
 /// - Đáp án truy về đoạn văn; bài chưa biết đáp án ⇒ KHÔNG chấm (UNKNOWN ≠ SAI).
 /// - WAL-113 B1: câu hỏi MỞ (SGK TV5 KHÔNG in đáp án — corpus thật): trẻ trả
-///   lời bằng lời rồi tự xác nhận; Reader ghi ATTEMPT correct=null — không bịa
-///   options, không chấm, không biến UNKNOWN thành ĐÚNG.
+///   lời bằng lời rồi tự xác nhận; Reader ghi PARTICIPATION (WAL-210 / Founder
+///   D1: tự báo ≠ bằng chứng năng lực) — không bịa options, không chấm, không
+///   biến UNKNOWN thành ĐÚNG, không biến một nút bấm thành «tự làm được».
+/// - WAL-210 lineage: mọi sự kiện mang sách + bài từ `LearningContext` và
+///   `knowledgeVersion` = `packVersion` của pack (rơi về hằng cũ khi pack chưa
+///   khai provenance).
 /// - Không %, không điểm; provenance hiển thị đúng LOẠI hỗ trợ nguồn.
 library;
 
@@ -21,6 +25,7 @@ import '../../app/theme/wal_tokens.dart';
 import '../../core/context/learning_context.dart';
 import '../../core/intent/learning_intent.dart';
 import '../../core/knowledge/slice_curriculum.dart' show knowledgeModelVersion;
+import '../../core/student/evidence_ids.dart';
 import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../../core/tutor/learning_activity.dart';
@@ -56,6 +61,9 @@ class ReaderScreen extends StatefulWidget {
 }
 
 class _ReaderScreenState extends State<ReaderScreen> {
+  // ⭐ WAL-210 (audit C1): token PHIÊN sinh một lần lúc mở màn — mở lại
+  // cùng bài là phiên khác, id khác (đồng hồ máy, không ăn nhịp `now`).
+  final String _token = newEvidenceSessionToken(DateTime.now());
   final List<LearningEvent> _events = [];
   bool _read = false; // trẻ đã tự xác nhận đọc xong đoạn văn
   int? _picked;
@@ -79,7 +87,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
     // đều qua đây, không hở chỗ nào.
     if (widget.learningContext.intent == LearningIntent.lookup) return;
     _events.add(LearningEvent(
-      eventId: '${a.activityId}#${_seq++}',
+      eventId: evidenceEventId(
+          exerciseId: a.activityId, sessionToken: _token, seq: _seq++),
       skillCaseId: a.skillCaseId ?? a.conceptId,
       kind: kind,
       correct: correct,
@@ -89,7 +98,14 @@ class _ReaderScreenState extends State<ReaderScreen> {
       support: _hintShown ? SupportLevel.hint : SupportLevel.none,
       policyId: 'reader-v1',
       priorEventId: _events.isEmpty ? null : _events.last.eventId,
-      knowledgeVersion: knowledgeModelVersion, // WAL-114
+      // WAL-114 + WAL-210: version của ĐÚNG pack đang mở; hằng cũ chỉ khi
+      // pack chưa khai provenance.
+      knowledgeVersion:
+          widget.learningContext.knowledgeModelVersion ?? knowledgeModelVersion,
+      // ⭐⭐ WAL-210 (audit C7): lineage sách + bài — không có nó Learning Map
+      // nói «Chưa học» với bài trẻ vừa đọc xong.
+      sourceDocumentId: widget.learningContext.sourceDocumentId,
+      lessonNo: widget.learningContext.lessonNo,
     ));
   }
 
@@ -99,11 +115,12 @@ class _ReaderScreenState extends State<ReaderScreen> {
     setState(() => _read = true);
   }
 
-  /// Câu hỏi MỞ: trẻ trả lời BẰNG LỜI rồi tự xác nhận ⇒ ghi ATTEMPT với
-  /// correct=null — UNKNOWN không bao giờ thành ĐÚNG hay SAI (doctrine).
+  /// Câu hỏi MỞ: trẻ trả lời BẰNG LỜI rồi tự xác nhận ⇒ PARTICIPATION,
+  /// correct=null — UNKNOWN không bao giờ thành ĐÚNG hay SAI, và tự báo không
+  /// bao giờ thành «tự làm được» (Founder D1).
   void _answeredOpen() {
     if (_done) return;
-    _emit(EvidenceKind.independentAttempt, null);
+    _emit(EvidenceKind.participation, null);
     setState(() => _done = true);
     widget.onFinished?.call(_events);
   }
@@ -112,7 +129,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
     if (_done) return;
     setState(() => _picked = i);
     if (!a.gradable) {
-      _emit(EvidenceKind.independentAttempt, null);
+      // Chọn mà không có chìa khoá ⇒ không chấm ⇒ chỉ là tham gia (D1).
+      _emit(EvidenceKind.participation, null);
       setState(() => _done = true);
       widget.onFinished?.call(_events);
       return;

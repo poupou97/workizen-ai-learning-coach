@@ -22,6 +22,7 @@ class LearningContext {
     this.sourceDocumentId,
     this.lessonNo,
     this.intent,
+    this.knowledgeModelVersion,
   });
 
   final String learnerId;
@@ -41,6 +42,14 @@ class LearningContext {
   /// Validator: tra cứu sinh Trace, không sinh Evidence.
   final LearningIntent? intent;
 
+  /// ⭐ WAL-210 (audit B.6 §4) — PHIÊN BẢN MODEL TRI THỨC của đường Scale:
+  /// `packVersion` từ `buildProvenance` của chính pack đang mở
+  /// (`LessonIndex.packVersion`). `null` = pack không khai provenance (pack
+  /// cũ) ⇒ emitter rơi về hằng cũ và nói rõ điều đó trong dữ liệu. Trước
+  /// đây hằng `slice-toan5-b6-v1+qmap-v1` (Toán 5) bị đóng lên cả evidence
+  /// Tiếng Việt/Sử/Địa — một version tag không nói về nội dung nó gắn vào.
+  final String? knowledgeModelVersion;
+
   bool get hasLesson => sourceDocumentId != null && lessonNo != null;
 
   LearningContext withSubject(String subject) => LearningContext(
@@ -49,7 +58,8 @@ class LearningContext {
       subject: subject,
       sourceDocumentId: sourceDocumentId,
       lessonNo: lessonNo,
-      intent: intent);
+      intent: intent,
+      knowledgeModelVersion: knowledgeModelVersion);
 
   LearningContext withLesson({
     required String sourceDocumentId,
@@ -62,5 +72,6 @@ class LearningContext {
           subject: subject,
           sourceDocumentId: sourceDocumentId,
           lessonNo: lessonNo,
-          intent: intent);
+          intent: intent,
+          knowledgeModelVersion: knowledgeModelVersion);
 }

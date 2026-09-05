@@ -11,6 +11,7 @@ library;
 
 import '../intent/learning_intent.dart';
 import '../pedagogy/pedagogy_model.dart' show TeachingAct;
+import 'evidence_validation.dart';
 import 'learning_evidence.dart';
 import 'mastery.dart';
 import '../context/learning_context.dart';
@@ -55,6 +56,12 @@ class CandidateEvidence {
 ///
 /// KHÔNG chấm đúng/sai ở đây: `correct` luôn `null` cho dạng bằng chứng quan
 /// sát/giải thích tự do (UNKNOWN ≠ SAI, bất biến đã có từ trước).
+///
+/// ⭐⭐ WAL-210 — Founder D1: [CandidateEvidence] KHÔNG có trường chấm điểm,
+/// nên mọi claim qua cửa này là **chưa được kiểm chứng** ⇒ loại sự kiện là
+/// [EvidenceKind.participation] — không phải `independentAttempt` (audit C6:
+/// trước đây `support = workedStep` vẫn thành «tự làm»). Khi nào có hợp đồng
+/// ValidatedEvidence (Founder quyết) mới có đường lên bằng chứng năng lực.
 LearningEvent? validateCandidateEvidence(
   CandidateEvidence c, {
   required LearningContext context,
@@ -67,7 +74,7 @@ LearningEvent? validateCandidateEvidence(
   return LearningEvent(
     eventId: eventId,
     skillCaseId: c.skillCaseId,
-    kind: EvidenceKind.independentAttempt,
+    kind: EvidenceKind.participation,
     correct: null,
     exerciseId: c.exerciseId,
     conceptIds: c.conceptIds,
@@ -79,5 +86,10 @@ LearningEvent? validateCandidateEvidence(
     lessonNo: context.lessonNo,
     act: c.act,
     learnerText: c.learnerText,
+    // ⭐⭐ Round 3 (A3): cửa này là validator ĐÃ ĐĂNG KÝ nhưng chỉ cấp
+    // PARTICIPATION (`grantsCompetence: false`) — dấu ghi lại «ai đã cho
+    // qua», không phải «ai đã chấm đúng».
+    validation: const EvidenceValidation(
+        validatorId: 'candidate-gate-v1', validatorVersion: '1'),
   );
 }

@@ -13,16 +13,25 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
-import '../../core/assets/learning_asset.dart';
 import '../shell/learning_asset_image.dart';
 import 'lesson_index.dart';
+import 'subject_display.dart';
 
 class SourceGalleryScreen extends StatelessWidget {
-  const SourceGalleryScreen(
-      {super.key, required this.subject, required this.assets});
+  const SourceGalleryScreen({
+    super.key,
+    required this.subject,
+    required this.assets,
+    this.bookTitles = const {},
+  });
 
   final String subject;
   final List<IndexedSourceAsset> assets;
+
+  /// ROUND 3 B5: mã sách → tên sách trong mục lục pack, để dòng nguồn đọc là
+  /// «SGK Toán 6 · trang 22» thay vì «06-sgk-toan-6-tap-mot · trang 22».
+  /// Không có tên ⇒ giữ mã (thật, không bịa).
+  final Map<String, String> bookTitles;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -106,7 +115,11 @@ class SourceGalleryScreen extends StatelessWidget {
           ),
         ],
         const SizedBox(height: WalSpacing.sm),
-        Text(sourceLineOf(asset) ?? '',
+        Text(
+            childSourceLine(
+                sourceDocumentId: a.sourceDocumentId,
+                pagePrinted: a.pagePrinted,
+                bookTitles: bookTitles),
             style: const TextStyle(
                 fontSize: WalType.secondary, color: WalColors.inkSoft)),
       ]),

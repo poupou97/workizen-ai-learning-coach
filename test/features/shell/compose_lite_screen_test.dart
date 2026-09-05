@@ -118,8 +118,12 @@ void main() {
     await tester.tap(find.text('Nộp bản sửa'));
     await tester.pumpAndSettle();
 
+    // ⭐⭐ WAL-210 Founder D1: nộp nháp = tự báo hoàn thành (participation),
+    // KHÔNG phải independentAttempt — không ai chấm nháp này.
     final draft =
-        out.firstWhere((e) => e.kind == EvidenceKind.independentAttempt);
+        out.firstWhere((e) => e.kind == EvidenceKind.participation);
+    expect(out.any((e) => e.kind == EvidenceKind.independentAttempt), isFalse,
+        reason: '⭐⭐ đột biến ghi nháp thành independentAttempt ⇒ đỏ (audit C6)');
     final revision =
         out.firstWhere((e) => e.kind == EvidenceKind.guidedAttempt);
     expect(draft.support, SupportLevel.none);

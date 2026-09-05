@@ -20,6 +20,7 @@ import '../../core/student/learning_evidence.dart';
 import '../../core/student/mastery.dart';
 import '../../core/adaptive/review_priority.dart';
 import '../../core/student/review_schedule.dart';
+import '../subjects/lesson_index.dart';
 
 /// Một mục ôn — tên hiển thị + độ khẩn (sự việc từ lịch) + MỨC ƯU TIÊN và
 /// CÂU CHỮ do resolver quyết (WAL-164 / Founder D2).
@@ -55,10 +56,21 @@ class MissionData {
     required this.unobservedCaseNames,
     this.agenda,
     this.upcomingSubjects = const [],
+    this.scaleLessonCount = 0,
+    this.nextActionReason,
   });
 
   final String studentName;
   final AdaptiveDecision decision;
+
+  /// ⭐ WAL-210 item G2 — số bài mở được từ SGK (đường Scale) khi lớp này
+  /// KHÔNG có chương trình sư phạm (Deep). `> 0` ⇒ thẻ Home nói con số thật
+  /// và «Bắt đầu» mở Môn học, không mở camera. `0` = không biết / không có.
+  final int scaleLessonCount;
+
+  /// Lý do trẻ đọc được cho thẻ khi KHÔNG có agenda lẫn decision đáng nói
+  /// (lớp chỉ có đường Scale). `null` ⇒ UI dùng `decision.reason` như cũ.
+  final String? nextActionReason;
 
   /// WAL-138 — «Việc SAM đề xuất» qua resolveAgenda (WAL-102): REST là
   /// first-class. `null` = đường demo/fixture cũ ⇒ UI rơi về decision card.
@@ -195,15 +207,22 @@ MissionData buildDemoMission({DateTime? now}) {
 ///
 /// Grade ngoài phạm vi slice ⇒ fail closed: nói thẳng «chưa có nội dung»,
 /// KHÔNG mượn nội dung lớp 5 dạy lớp khác.
+///
+/// ⭐ WAL-210 item G2: [index] = mục lục pack của lớp (`null` khi chưa nạp).
+/// Lớp KHÔNG có chương trình Deep nhưng CÓ bài mở được từ SGK ⇒ thẻ nói
+/// «Có N bài để học ở Môn học» với N THẬT từ pack — trước đây nói «chưa có
+/// nội dung» rồi «Bắt đầu» mở camera, dù KHTN 6 mở được từ giá sách.
 Future<MissionData> buildMissionFromStore({
   required LearnerProfile profile,
   required LearnerStore store,
   DateTime? now,
+  LessonIndex? index,
 }) async {
   final t = now ?? DateTime.now();
   final all = curriculaForLearner(profile);
   final c = all.length == 1 ? all.single : null;
   if (c == null) {
+    final scaleCount = index?.openableLessonCount ?? 0;
     final stage = LearningStage(
       grade: profile.grade,
       bookSeries: profile.bookSeries ?? 'chua-ro',
@@ -222,8 +241,15 @@ Future<MissionData> buildMissionFromStore({
     return MissionData(
       studentName: profile.displayName,
       decision: d,
-      nextActionTitle:
-          'SAM chưa có nội dung lớp ${profile.grade} — sắp có nhé',
+      nextActionTitle: scaleCount > 0
+          ? 'Có $scaleCount bài để học ở Môn học'
+          : 'SAM chưa có nội dung lớp ${profile.grade} — sắp có nhé',
+      nextActionReason: scaleCount > 0
+          ? 'SAM chưa có bài dạy riêng cho lớp ${profile.grade}, nhưng con '
+              'mở được $scaleCount bài từ sách giáo khoa — đọc, làm thí '
+              'nghiệm, viết. Vào Môn học nhé.'
+          : null,
+      scaleLessonCount: scaleCount,
       reviews: const [],
       unobservedCaseNames: const [],
     );

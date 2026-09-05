@@ -1,0 +1,441 @@
+{
+ "04-sgk-khoa-hoc-4 05-sgk-khoa-hoc-5 06-sgk-khoa-hoc-tu-nhien-6 07-sgk-khoa-hoc-tu-nhien-7 08-sgk-khoa-hoc-tu-nhien-8 09-sgk-khoa-hoc-tu-nhien-9": {
+  "note": "stray directory name (zsh word-split artefact), skipped"
+ },
+ "04-sgk-khoa-hoc-4": {
+  "pages": 126,
+  "trusted_pages": 49,
+  "trusted_page_share": 0.389,
+  "tableLike_pages": 34,
+  "pages_with_marginal_cuts": 66,
+  "blocks": {
+   "trusted": 1129,
+   "untrusted": 1276
+  },
+  "trusted_block_share": 0.469,
+  "trusted_roles": {
+   "question": 277,
+   "body": 409,
+   "heading": 80,
+   "caption": 143,
+   "sidebar": 117,
+   "pageNumber": 103
+  },
+  "units_layout": {
+   "HEADING": 80,
+   "PASSAGE": 105,
+   "QUESTION": 277
+  },
+  "units_layout_dropped": {
+   "passage_too_short": 225,
+   "sidebar": 117,
+   "pageNumber": 103,
+   "untrusted_block": 213,
+   "tableLike_page": 34,
+   "caption": 143
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "ACTIVITY": 11,
+   "EXERCISE": 347,
+   "EXPERIMENT": 1,
+   "OBSERVATION": 12,
+   "NOTE": 14
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ },
+ "05-sgk-khoa-hoc-5": {
+  "pages": 114,
+  "trusted_pages": 48,
+  "trusted_page_share": 0.421,
+  "tableLike_pages": 31,
+  "pages_with_marginal_cuts": 53,
+  "blocks": {
+   "trusted": 1027,
+   "untrusted": 1256
+  },
+  "trusted_block_share": 0.45,
+  "trusted_roles": {
+   "question": 200,
+   "body": 388,
+   "heading": 127,
+   "caption": 114,
+   "pageNumber": 98,
+   "sidebar": 100
+  },
+  "units_layout": {
+   "HEADING": 127,
+   "PASSAGE": 109,
+   "QUESTION": 200
+  },
+  "units_layout_dropped": {
+   "passage_too_short": 197,
+   "pageNumber": 98,
+   "sidebar": 100,
+   "tableLike_page": 31,
+   "caption": 114,
+   "untrusted_block": 224
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "ACTIVITY": 9,
+   "EXERCISE": 269,
+   "EXPERIMENT": 4,
+   "OBSERVATION": 5,
+   "NOTE": 15
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ },
+ "05-sgk-lich-su-va-dia-li-5": {
+  "pages": 123,
+  "trusted_pages": 46,
+  "trusted_page_share": 0.374,
+  "tableLike_pages": 32,
+  "pages_with_marginal_cuts": 69,
+  "blocks": {
+   "untrusted": 1416,
+   "trusted": 1091
+  },
+  "trusted_block_share": 0.435,
+  "trusted_roles": {
+   "heading": 250,
+   "body": 490,
+   "question": 88,
+   "caption": 75,
+   "pageNumber": 98,
+   "sidebar": 90
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "ACTIVITY": 74,
+   "EXERCISE": 158,
+   "NOTE": 35
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ },
+ "05-sgk-tieng-viet-5-tap-hai": {
+  "pages": 162,
+  "trusted_pages": 95,
+  "trusted_page_share": 0.586,
+  "tableLike_pages": 17,
+  "pages_with_marginal_cuts": 57,
+  "blocks": {
+   "untrusted": 911,
+   "trusted": 1670
+  },
+  "trusted_block_share": 0.647,
+  "trusted_roles": {
+   "body": 679,
+   "heading": 191,
+   "pageNumber": 148,
+   "question": 496,
+   "caption": 46,
+   "sidebar": 84,
+   "footnote": 26
+  }
+ },
+ "05-sgk-toan-5-tap-mot": {
+  "pages": 142,
+  "trusted_pages": 21,
+  "trusted_page_share": 0.148,
+  "tableLike_pages": 114,
+  "pages_with_marginal_cuts": 81,
+  "blocks": {
+   "untrusted": 3499,
+   "trusted": 286
+  },
+  "trusted_block_share": 0.076,
+  "trusted_roles": {
+   "body": 135,
+   "question": 35,
+   "pageNumber": 41,
+   "sidebar": 31,
+   "heading": 37,
+   "caption": 7
+  }
+ },
+ "06-sgk-khoa-hoc-tu-nhien-6": {
+  "pages": 198,
+  "trusted_pages": 56,
+  "trusted_page_share": 0.283,
+  "tableLike_pages": 73,
+  "pages_with_marginal_cuts": 117,
+  "blocks": {
+   "trusted": 1596,
+   "untrusted": 2463
+  },
+  "trusted_block_share": 0.393,
+  "trusted_roles": {
+   "body": 648,
+   "sidebar": 238,
+   "caption": 146,
+   "question": 270,
+   "heading": 158,
+   "pageNumber": 129,
+   "footnote": 7
+  },
+  "units_layout": {
+   "HEADING": 158,
+   "PASSAGE": 223,
+   "QUESTION": 270
+  },
+  "units_layout_dropped": {
+   "pageNumber": 129,
+   "passage_too_short": 266,
+   "sidebar": 238,
+   "tableLike_page": 73,
+   "caption": 146,
+   "untrusted_block": 529,
+   "footnote": 7
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "ACTIVITY": 17,
+   "EXPERIMENT": 17,
+   "NOTE": 43,
+   "EXERCISE": 402,
+   "OBSERVATION": 18
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ },
+ "07-sgk-khoa-hoc-tu-nhien-7": {
+  "pages": 182,
+  "trusted_pages": 84,
+  "trusted_page_share": 0.462,
+  "tableLike_pages": 53,
+  "pages_with_marginal_cuts": 82,
+  "blocks": {
+   "trusted": 1699,
+   "untrusted": 2156
+  },
+  "trusted_block_share": 0.441,
+  "trusted_roles": {
+   "body": 676,
+   "heading": 265,
+   "question": 285,
+   "sidebar": 166,
+   "caption": 154,
+   "pageNumber": 143,
+   "footnote": 10
+  },
+  "units_layout": {
+   "HEADING": 265,
+   "PASSAGE": 239,
+   "QUESTION": 285
+  },
+  "units_layout_dropped": {
+   "sidebar": 166,
+   "passage_too_short": 256,
+   "pageNumber": 143,
+   "footnote": 10,
+   "tableLike_page": 53,
+   "untrusted_block": 444,
+   "caption": 154
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "EXERCISE": 396,
+   "ACTIVITY": 13,
+   "EXPERIMENT": 24,
+   "OBSERVATION": 6
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ },
+ "08-sgk-khoa-hoc-tu-nhien-8": {
+  "pages": 199,
+  "trusted_pages": 88,
+  "trusted_page_share": 0.442,
+  "tableLike_pages": 53,
+  "pages_with_marginal_cuts": 96,
+  "blocks": {
+   "trusted": 1917,
+   "untrusted": 2422
+  },
+  "trusted_block_share": 0.442,
+  "trusted_roles": {
+   "body": 794,
+   "sidebar": 157,
+   "caption": 190,
+   "question": 331,
+   "pageNumber": 158,
+   "heading": 282,
+   "footnote": 5
+  },
+  "units_layout": {
+   "HEADING": 282,
+   "PASSAGE": 337,
+   "QUESTION": 331
+  },
+  "units_layout_dropped": {
+   "tableLike_page": 53,
+   "passage_too_short": 293,
+   "pageNumber": 158,
+   "sidebar": 157,
+   "untrusted_block": 517,
+   "caption": 190,
+   "footnote": 5
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "EXPERIMENT": 27,
+   "EXERCISE": 488,
+   "ACTIVITY": 6,
+   "OBSERVATION": 4
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ },
+ "09-sgk-khoa-hoc-tu-nhien-9": {
+  "pages": 230,
+  "trusted_pages": 72,
+  "trusted_page_share": 0.313,
+  "tableLike_pages": 52,
+  "pages_with_marginal_cuts": 150,
+  "blocks": {
+   "trusted": 2252,
+   "untrusted": 2725
+  },
+  "trusted_block_share": 0.452,
+  "trusted_roles": {
+   "question": 410,
+   "body": 940,
+   "sidebar": 194,
+   "heading": 342,
+   "pageNumber": 180,
+   "footnote": 8,
+   "caption": 178
+  },
+  "units_layout": {
+   "HEADING": 342,
+   "PASSAGE": 356,
+   "QUESTION": 410
+  },
+  "units_layout_dropped": {
+   "pageNumber": 180,
+   "passage_too_short": 356,
+   "untrusted_block": 969,
+   "sidebar": 194,
+   "tableLike_page": 52,
+   "caption": 178,
+   "footnote": 8
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "EXERCISE": 580,
+   "ACTIVITY": 6,
+   "OBSERVATION": 8,
+   "EXPERIMENT": 15
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ },
+ "09-sgk-ngu-van-9-tap-mot": {
+  "pages": 154,
+  "trusted_pages": 89,
+  "trusted_page_share": 0.578,
+  "tableLike_pages": 10,
+  "pages_with_marginal_cuts": 59,
+  "blocks": {
+   "trusted": 1259,
+   "untrusted": 1011
+  },
+  "trusted_block_share": 0.555,
+  "trusted_roles": {
+   "question": 200,
+   "heading": 162,
+   "body": 604,
+   "pageNumber": 149,
+   "footnote": 71,
+   "sidebar": 62,
+   "caption": 11
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "ACTIVITY": 71,
+   "CONCEPT_EXPLANATION": 5,
+   "EXERCISE": 141,
+   "NOTE": 1
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ },
+ "09-sgk-tin-hoc-9": {
+  "pages": 94,
+  "trusted_pages": 22,
+  "trusted_page_share": 0.234,
+  "tableLike_pages": 30,
+  "pages_with_marginal_cuts": 69,
+  "blocks": {
+   "trusted": 962,
+   "untrusted": 1964
+  },
+  "trusted_block_share": 0.329,
+  "trusted_roles": {
+   "question": 115,
+   "body": 442,
+   "heading": 153,
+   "caption": 56,
+   "sidebar": 117,
+   "pageNumber": 69,
+   "footnote": 10
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "EXERCISE": 142,
+   "ACTIVITY": 56
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ },
+ "10-sgk-dia-li-10": {
+  "pages": 118,
+  "trusted_pages": 37,
+  "trusted_page_share": 0.314,
+  "tableLike_pages": 46,
+  "pages_with_marginal_cuts": 76,
+  "blocks": {
+   "trusted": 744,
+   "untrusted": 2596
+  },
+  "trusted_block_share": 0.223,
+  "trusted_roles": {
+   "heading": 157,
+   "body": 346,
+   "question": 87,
+   "caption": 23,
+   "sidebar": 61,
+   "pageNumber": 70
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "ACTIVITY": 11,
+   "NOTE": 48,
+   "EXERCISE": 183
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ },
+ "10-sgk-vat-li-10": {
+  "pages": 142,
+  "trusted_pages": 44,
+  "trusted_page_share": 0.31,
+  "tableLike_pages": 46,
+  "pages_with_marginal_cuts": 91,
+  "blocks": {
+   "trusted": 1464,
+   "untrusted": 2226
+  },
+  "trusted_block_share": 0.397,
+  "trusted_roles": {
+   "heading": 269,
+   "pageNumber": 126,
+   "body": 459,
+   "question": 266,
+   "sidebar": 198,
+   "caption": 142,
+   "footnote": 4
+  },
+  "units_k12": {
+   "SECTION_TEXT": 1,
+   "ACTIVITY": 16,
+   "NOTE": 19,
+   "EXERCISE": 556
+  },
+  "units_k12_extractor": "generic-gdpt2018-v1"
+ }
+}

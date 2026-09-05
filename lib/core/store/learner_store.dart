@@ -28,7 +28,12 @@ abstract class LearnerStore {
   Future<LearnerProfile?> profile(String learnerId);
 
   /// Append-only: một phiên ghi MỘT LẦN (§6 — không nhân bản cho view).
-  Future<void> appendSession(LearningSession s);
+  ///
+  /// ⭐ WAL-210 (audit C3) — IDEMPOTENT theo `sessionId`: cùng một phiên ghi
+  /// lần thứ hai (callback `onFinished` bắn hai lần, thử lại sau lỗi) là
+  /// no-op và trả `false`. Trước đây lần thứ hai nhân đôi `evidenceCount`
+  /// của một lần làm thật. Trả `true` khi phiên thật sự được thêm.
+  Future<bool> appendSession(LearningSession s);
 
   /// Truy vấn = PHÉP CHIẾU trên cùng một kho.
   Future<List<LearningSession>> sessions({
@@ -135,8 +140,15 @@ class JsonlLearnerStore implements LearnerStore {
   }
 
   @override
-  Future<void> appendSession(LearningSession s) async {
+  Future<bool> appendSession(LearningSession s) async {
+    // Quét thẳng các dòng đã có (kể cả dòng nạp từ đĩa) thay vì giữ một
+    // tập id riêng: không có trạng thái thứ hai để lệch với `deleteLearner`.
+    // Kho ~1.000 phiên/năm — quét là rẻ.
+    for (final r in _records('session')) {
+      if (r['sessionId'] == s.sessionId) return false;
+    }
     _lines.add(jsonEncode({'type': 'session', ...s.toJson()}));
+    return true;
   }
 
   @override

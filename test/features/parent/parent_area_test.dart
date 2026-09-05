@@ -132,6 +132,8 @@ void main() {
           eventId: 'a2',
           skillCaseId: 'khtn-thi-nghiem',
           kind: EvidenceKind.independentAttempt,
+          // WAL-210 D1: câu «Con đã tự làm được» chỉ từ tự làm ĐÃ CHẤM đúng.
+          correct: true,
           at: DateTime(2026, 9, 4),
           sourceDocumentId: '05-sgk-khoa-hoc-5',
           lessonNo: 1,

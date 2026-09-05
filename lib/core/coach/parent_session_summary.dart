@@ -70,6 +70,10 @@ String parentLineFor(RecentLessonTouch t, {String? lessonTitle}) {
     LearningMapState.independentEvidence => 'Con đã tự làm được $name.',
     LearningMapState.engaged =>
       'Con đã học cùng SAM ở $name — chưa có lần nào tự làm được ghi lại.',
+    // ⭐⭐ D1: tự báo/hoàn thành ⇒ câu HOÀN THÀNH, nói rõ không chấm — không
+    // bao giờ «tự làm được» từ một nút bấm.
+    LearningMapState.participation =>
+      'Con đã học $name — con tự báo đã làm xong; SAM không chấm phần này.',
     // unseen không thể xảy ra ở đây: touch chỉ tồn tại khi CÓ event khớp.
     LearningMapState.unseen => '',
   };

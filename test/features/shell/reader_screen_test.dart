@@ -146,6 +146,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(out.single.correct, isNull,
         reason: 'UNKNOWN không bao giờ thành SAI (cũng không thành ĐÚNG)');
+    expect(out.single.kind, EvidenceKind.participation,
+        reason: 'WAL-210 D1: chọn mà không có chìa khoá = tham gia, không phải '
+            'bằng chứng tự làm');
     expect(find.textContaining('chưa có đáp án'), findsOneWidget);
   });
 
@@ -183,15 +186,18 @@ void main() {
     expect(find.text('Con đã trả lời xong 🗣'), findsOneWidget);
   });
 
-  testWidgets('⭐ WAL-113: trả lời MỞ ⇒ MỘT attempt correct=null — UNKNOWN '
-      'không thành ĐÚNG hay SAI', (tester) async {
+  testWidgets('⭐ WAL-113/WAL-210: trả lời MỞ ⇒ MỘT participation correct=null — '
+      'UNKNOWN không thành ĐÚNG hay SAI, tự báo không thành «tự làm»',
+      (tester) async {
     List<LearningEvent> out = const [];
     await _pump(tester, openReading, onFinished: (e) => out = e);
     await tester.tap(find.text('Con đọc xong rồi 📖'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Con đã trả lời xong 🗣'));
     await tester.pumpAndSettle();
-    expect(out.single.kind, EvidenceKind.independentAttempt);
+    expect(out.single.kind, EvidenceKind.participation,
+        reason: '⭐⭐ Founder D1: «Con đã trả lời xong» là tự báo hoàn thành — '
+            'đột biến ghi independentAttempt ⇒ đỏ (audit C6)');
     expect(out.single.correct, isNull,
         reason: '⭐ đột biến ghi correct=true cho câu mở ⇒ test này đỏ');
     expect(out.single.support, SupportLevel.none);
