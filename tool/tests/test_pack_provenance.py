@@ -19,6 +19,13 @@ import pack_provenance as pp  # noqa: E402
 BUILDER = os.path.join(HERE, '..', 'ui', 'build_lesson_index.py')
 
 
+def _main(argv):
+    """Run the CLI silently — its FAIL/OK lines are the thing under test, not log noise."""
+    import contextlib, io
+    with contextlib.redirect_stdout(io.StringIO()):
+        return pp.main(argv)
+
+
 def default_pack():
     return dict(grade=6, version='lesson-index-v2',
                 subjects={'KHTN': [dict(sourceDocumentId='06-sgk-khoa-hoc-tu-nhien-6', volume=None,
@@ -113,19 +120,19 @@ class VerifyTests(unittest.TestCase):
     def test_good_default_pack_verifies(self):
         p = self._write(pp.stamp(default_pack(), 6, pp.read_flags({}), BUILDER))
         self.assertEqual(pp.verify_file(p), [])
-        self.assertEqual(pp.main(['verify', p]), 0)
+        self.assertEqual(_main(['verify', p]), 0)
 
     def test_missing_manifest_fails(self):
         p = self._write(default_pack())
         self.assertEqual(pp.verify_file(p), ['missing buildProvenance'])
-        self.assertEqual(pp.main(['verify', p]), 1)
+        self.assertEqual(_main(['verify', p]), 1)
 
     def test_tampered_content_fails_hash(self):
         pack = pp.stamp(default_pack(), 6, pp.read_flags({}), BUILDER)
         pack['khoaExperiments'][0]['title'] = 'edited after build'
         p = self._write(pack)
         self.assertTrue(any('contentHash mismatch' in x for x in pp.verify_file(p)))
-        self.assertEqual(pp.main(['verify', p]), 1)
+        self.assertEqual(_main(['verify', p]), 1)
 
     def test_experimental_pack_fails_default_check(self):
         pack = default_pack()
@@ -136,7 +143,7 @@ class VerifyTests(unittest.TestCase):
         self.assertTrue(any('experimental' in x for x in problems))
         self.assertTrue(any('pattern-router' in x for x in problems))
         self.assertTrue(any('PATTERN_ROUTER=1' in x for x in problems))
-        self.assertEqual(pp.main(['verify', p]), 1)
+        self.assertEqual(_main(['verify', p]), 1)
         # the same file passes when default-build assertions are not required (hash still checked)
         self.assertEqual(pp.verify_file(p, require_default=False), [])
 
@@ -156,8 +163,8 @@ class VerifyTests(unittest.TestCase):
         self.assertTrue(any('!= expected 7' in x for x in pp.verify_file(p)))
 
     def test_usage_exit_code(self):
-        self.assertEqual(pp.main([]), 2)
-        self.assertEqual(pp.main(['verify']), 2)
+        self.assertEqual(_main([]), 2)
+        self.assertEqual(_main(['verify']), 2)
 
 
 if __name__ == '__main__':

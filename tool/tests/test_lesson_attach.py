@@ -143,9 +143,13 @@ class AttachTests(unittest.TestCase):
         self.assertEqual(b.attach(5, pdf_page=6)['reason'], la.ATTACHED)
 
     def test_positive_header_disagreement_withholds_never_moves(self):
-        # KHTN 8 p100: TOC Bài 22-shape lesson 6 (start 28), header says Bài 7 — not canonical → withheld
-        b = la.BookAttach('khtn8', TRUNCATED, header_pages={30: dict(lesson=7, method='header')}, header_lessons=[H(7, 29)])
-        r = b.attach(29, pdf_page=30)
+        # KHTN 8 shape: last TOC lesson 6 starts 28; a Bài 7 header (non-canonical) found at printed 30.
+        # Page 30 is AT the header → beyond the terminated range; page 28 whose page-level record says
+        # Bài 7 (a header-page record on the previous page, e.g. a two-lesson page) → positive disagreement.
+        b = la.BookAttach('khtn8', TRUNCATED, header_pages={29: dict(lesson=7, method='header'), 31: dict(lesson=7, method='header')}, header_lessons=[H(7, 30)])
+        r = b.attach(30, pdf_page=31)
+        self.assertIsNone(r['lesson']); self.assertEqual(r['reason'], la.BEYOND_HEADER_END); self.assertEqual(r['header_lesson'], 7)
+        r = b.attach(28, pdf_page=29)
         self.assertIsNone(r['lesson']); self.assertEqual(r['reason'], la.HEADER_DISAGREES); self.assertEqual(r['header_lesson'], 7)
         # canonical header lesson whose start lies at/after the TOC lesson's start → positive disagreement
         b2 = la.BookAttach('x', TRUNCATED, header_pages={19: dict(lesson=4, method='header')}, header_lessons=[H(4, 18)])
@@ -211,9 +215,11 @@ class RegistryTests(unittest.TestCase):
         json.dump(dict(counts=dict(printed_offset=1),
                        pages=[dict(page=11, lesson=2, method='continuation', kind='page')],
                        lessons=[dict(number=1, page_printed=5, page_pdf=6, source='both', confidence=0.95),
-                                dict(number=2, page_printed=2, page_pdf=9, source='header', confidence=0.85)]),
+                                dict(number=2, page_printed=2, page_pdf=9, source='header', confidence=0.85),
+                                dict(number=3, page_printed=3, page_pdf=14, source='header', confidence=0.85)]),
                   open(os.path.join(d, 'b1.json'), 'w'))
         self.assertEqual(la.load_header_data('b1', d)[1][1]['page_printed'], 8)
+        # without the Bài 3 header the hole after Bài 2 would keep page 10 ambiguous (successor_unranged)
         reg = la.AttachRegistry([dict(sourceDocumentId='b1', lessons=HOLEY)], attach_dir=d)
         r = reg.attach('khoaExperiments', 'b1', 10, 11)
         self.assertEqual((r['lesson'], r['reason']), (2, la.ATTACHED_REPAIRED))
