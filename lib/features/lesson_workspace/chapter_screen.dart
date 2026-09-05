@@ -10,6 +10,7 @@ import 'package:flutter/scheduler.dart' show SchedulerBinding, SchedulerPhase;
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
+import '../../core/lesson_model/next_action.dart' show WorkspaceView;
 import '../subjects/lesson_index.dart';
 import 'lesson_workspace_screen.dart';
 import 'widgets/fixture_chip.dart';
@@ -71,6 +72,23 @@ class _ChapterScreenState extends State<ChapterScreen> {
 
   LessonDocument? _docFor(int no) =>
       widget.docs.where((d) => d.lessonNo == no).firstOrNull;
+
+  /// ROUND 4 — trạng thái bài bằng lời trẻ, chỉ từ TRACE (đã mở cách nào
+  /// trong phiên), không sao/%/«đã học»: «3 cách học · Chưa xem» hoặc «Đã xem
+  /// (phiên này): Đọc · Trực quan».
+  String _lessonState(LessonDocument doc) {
+    final seen = widget.trace.viewsFor(doc.slotKey);
+    final ways = WorkspaceView.values.length;
+    if (!widget.trace.opened(doc.slotKey)) {
+      return '$ways cách học · ${widget.trace.childLabel(doc.slotKey)}';
+    }
+    if (seen.isEmpty) return widget.trace.childLabel(doc.slotKey);
+    final names = [
+      for (final v in WorkspaceView.values)
+        if (seen.contains(v)) v.label,
+    ];
+    return '${widget.trace.childLabel(doc.slotKey)}: ${names.join(' · ')}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +172,11 @@ class _ChapterScreenState extends State<ChapterScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),
       child: Material(
-        color: doc != null ? Colors.white : WalColors.surfaceLavender,
+        // ⭐ ROUND 4 (lỗi nhìn thấy trên Nokia): nền tím oải hương là NHẤN
+        // MẠNH — Home dùng nó cho thẻ chính. Ở đây nó đang tô cho bài KHÔNG
+        // có Bài học SAM, còn bài CÓ thì trắng: ngược hẳn. Một vốn từ màu cho
+        // cả hành trình ⇒ có Bài học SAM = nền nhấn.
+        color: doc != null ? WalColors.surfaceLavender : Colors.white,
         borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
         child: ListTile(
           minVerticalPadding: WalSpacing.sm,
@@ -168,9 +190,8 @@ class _ChapterScreenState extends State<ChapterScreen> {
           ),
           subtitle: Text(
             doc != null
-                ? '✨ Bài học SAM · Đọc · Trực quan · Học với SAM · '
-                      '${widget.trace.childLabel(doc.slotKey)}'
-                : 'Chưa có Bài học SAM — mở mục lục hiện tại',
+                ? '✨ Bài học SAM · ${_lessonState(doc)}'
+                : 'Chưa có Bài học SAM — mở trong Môn học',
             style: TextStyle(
               fontSize: WalType.secondary,
               color: opened ? WalColors.primaryText : WalColors.inkSoft,

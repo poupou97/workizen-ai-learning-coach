@@ -28,11 +28,13 @@ void main() {
     expect(find.textContaining('[MẪU] Bài này nói về'), findsOneWidget);
     // A7.2 — nhãn THEO BƯỚC: bước giải thích có block nguồn ⇒ runtime kiểm.
     expect(find.text('SAM (runtime có kiểm)'), findsOneWidget);
+    // ROUND 4: dòng runtime bằng lời trẻ, con số giữ nguyên.
     expect(
-      find.textContaining('Runtime kiểm được 4/12 bước'),
+      find.textContaining('kiểm 4/12 bước'),
       findsOneWidget,
       reason: 'PEDAGOGY REALITY nhìn thấy: 4 runtimeGuided / 8 prototype',
     );
+    expect(find.byKey(const Key('tutor-label-legend')), findsOneWidget);
     expect(find.text('SÁCH VIẾT'), findsOneWidget, reason: 'trích block nguồn');
     await t.tap(find.text('Tiếp ▸'));
     await t.pumpAndSettle();
@@ -55,12 +57,15 @@ void main() {
     final loc = find.widgetWithText(FilledButton, 'Lọc');
     await t.tap(loc);
     await t.pumpAndSettle();
-    expect(find.textContaining('Gợi ý 1'), findsOneWidget);
+    // ROUND 4: bong bóng gợi ý mang nhãn bậc «Gợi ý 1/2» + chữ gợi ý.
+    expect(find.textContaining('Gợi ý 1'), findsWidgets);
+    expect(find.text('Gợi ý 1/2'), findsOneWidget);
     // gợi ý vẫn là kịch bản (HINT_UNSOURCED) ⇒ nhãn kịch bản, không giả
     expect(find.text('SAM (kịch bản thử nghiệm)'), findsWidgets);
     await t.tap(loc);
     await t.pumpAndSettle();
-    expect(find.textContaining('Gợi ý 2'), findsOneWidget);
+    expect(find.textContaining('Gợi ý 2'), findsWidgets);
+    expect(find.text('Gợi ý 2/2'), findsOneWidget);
     await t.tap(loc);
     await t.pumpAndSettle();
     expect(find.textContaining('Chưa khớp, không sao'), findsOneWidget);

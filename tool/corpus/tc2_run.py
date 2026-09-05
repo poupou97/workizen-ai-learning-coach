@@ -28,6 +28,7 @@ Usage (bake-off venv python for docling; system python3 is enough for --fast / -
   .venv-bakeoff/bin/python tool/corpus/tc2_run.py --pipeline tc2-p1 --pages P.json --workers 2   # docling, spawns shards
   python3 tool/corpus/tc2_run.py --pipeline tc2-p1 --pages P.json --manifest
   python3 tool/corpus/tc2_run.py --pipeline tc2-p1 --make-pages slice   # → pages-slice.json (all OCR pages of the 6 SGK books)
+  python3 tool/corpus/tc2_run.py --pipeline tc2-p2 --make-pages 06-sgk-khoa-hoc-tu-nhien-6:61-64 --out DIR   # one bounded batch
 """
 import argparse
 import glob
@@ -41,9 +42,10 @@ import tempfile
 import time
 from datetime import datetime, timezone
 
-ROOT = os.environ.get('TC_ROOT', '/Users/alexnguyen/projects/workizen-ai-learning-coach')
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import tc2_paths  # noqa: E402
+ROOT = tc2_paths.ROOT
 OCR = f'{ROOT}/poc-out/graph/ocr-body'
 PDF = f'{ROOT}/poc-out/pdf'
 SLICE_BOOKS = ['04-sgk-khoa-hoc-4', '05-sgk-khoa-hoc-5', '06-sgk-khoa-hoc-tu-nhien-6', '07-sgk-khoa-hoc-tu-nhien-7', '08-sgk-khoa-hoc-tu-nhien-8', '09-sgk-khoa-hoc-tu-nhien-9']
@@ -52,7 +54,7 @@ DOCLING_OPTS = dict(lang=['vi-VT', 'en-US'], recognition='accurate', force_full_
 
 
 def outdir(pipeline):
-    return f'{ROOT}/poc-out/trusted-corpus/tc-v2/{pipeline}'
+    return tc2_paths.out_root(pipeline)
 
 
 def pdf_path(book):
@@ -64,7 +66,13 @@ def pdf_path(book):
 
 
 def raw_path(pipeline, cand, book, page):
-    return f'{outdir(pipeline)}/bakeoff/raw/{cand}/{book}-p{page:03d}.json'
+    return tc2_paths.own_raw_path(cand, book, page, pipeline)
+
+
+def raw_exists(pipeline, cand, book, page, reuse=True):
+    """True when a usable raw file exists for this page — in this run's root or, with reuse, in an earlier
+    pipeline version (tc2_paths fallback chain)."""
+    return tc2_paths.raw_path(cand, book, page, pipeline, allow_fallback=reuse)[0] is not None
 
 
 def write_raw(pipeline, cand, book, page, seconds, result, err=None):
@@ -78,23 +86,40 @@ def write_raw(pipeline, cand, book, page, seconds, result, err=None):
 
 # ---------------------------------------------------------------- page lists
 def make_pages(kind, pipeline):
+    """`slice` = the six science SGK books. Round 4 (Lane D asked for a bounded, arbitrary batch):
+    `<book>` = every OCR page of one book, `<book>:FROM-TO` = a PDF page range of one book. The file is
+    named after the request so two batches never overwrite each other."""
+    lo = hi = None
     if kind == 'slice':
-        books = SLICE_BOOKS
+        books, name = SLICE_BOOKS, 'slice'
     else:
-        raise SystemExit('kinds: slice')
+        book, _, rng = kind.partition(':')
+        if not os.path.isdir(f'{OCR}/{book}'):
+            raise SystemExit(f'kinds: slice | <book> | <book>:FROM-TO   (no OCR pages for book {book!r})')
+        if rng:
+            m = re.fullmatch(r'(\d+)-(\d+)', rng)
+            if not m:
+                raise SystemExit('page range must be FROM-TO in PDF pages, e.g. 06-sgk-khoa-hoc-tu-nhien-6:61-64')
+            lo, hi = int(m.group(1)), int(m.group(2))
+        books, name = [book], kind.replace(':', '-')
     pages = []
     for b in books:
         for f in sorted(glob.glob(f'{OCR}/{b}/p*.json')):
-            pages.append(dict(book=b, page=int(re.search(r'p(\d+)\.json', f).group(1))))
+            n = int(re.search(r'p(\d+)\.json', f).group(1))
+            if lo is not None and not (lo <= n <= hi):
+                continue
+            pages.append(dict(book=b, page=n))
+    if not pages:
+        raise SystemExit(f'no pages for {kind!r}')
     os.makedirs(outdir(pipeline), exist_ok=True)
-    out = f'{outdir(pipeline)}/pages-{kind}.json'
+    out = f'{outdir(pipeline)}/pages-{name}.json'
     json.dump(pages, open(out, 'w'))
     print(len(pages), 'pages →', out)
     return out
 
 
 # ---------------------------------------------------------------- fast candidates
-def run_fast(pipeline, pages, force=False):
+def run_fast(pipeline, pages, force=False, reuse=True):
     import layout_extract
     n = 0
     t0 = time.time()
@@ -103,14 +128,14 @@ def run_fast(pipeline, pages, force=False):
         ocr = f'{OCR}/{book}/p{page:03d}.json'
         if not os.path.exists(ocr):
             continue
-        if force or not os.path.exists(raw_path(pipeline, 'current-xycut', book, page)):
+        if force or not raw_exists(pipeline, 'current-xycut', book, page, reuse):
             t = time.time()
             try:
                 res = layout_extract.extract_page(book, ocr); err = None
             except Exception as e:  # pragma: no cover
                 res = None; err = repr(e)
             write_raw(pipeline, 'current-xycut', book, page, time.time() - t, res, err)
-        if force or not os.path.exists(raw_path(pipeline, 'current-naive', book, page)):
+        if force or not raw_exists(pipeline, 'current-naive', book, page, reuse):
             t = time.time()
             j = json.load(open(ocr))
             write_raw(pipeline, 'current-naive', book, page, time.time() - t, dict(lines=j['lines'], extraction_method=j.get('extraction_method')))
@@ -131,7 +156,7 @@ def make_converter():
     return DocumentConverter(format_options={InputFormat.PDF: PdfFormatOption(pipeline_options=opts)})
 
 
-def run_docling(pipeline, pages, shard, nshards, force=False):
+def run_docling(pipeline, pages, shard, nshards, force=False, reuse=True):
     import fitz
     conv = make_converter()
     logd = f'{outdir(pipeline)}/logs'; os.makedirs(logd, exist_ok=True)
@@ -142,7 +167,7 @@ def run_docling(pipeline, pages, shard, nshards, force=False):
     for p in mine:
         book, page = p['book'], int(p['page'])
         out = raw_path(pipeline, 'docling-ocrmac', book, page)
-        if os.path.exists(out) and not force:
+        if raw_exists(pipeline, 'docling-ocrmac', book, page, reuse) and not force:
             skipped += 1; continue
         src = pdf_path(book)
         if not src:
@@ -217,12 +242,12 @@ def manifest(pipeline, pages_files):
             book, page = p['book'], int(p['page']); total += 1
             st = {}
             for cand in m['candidates']:
-                rp = raw_path(pipeline, cand, book, page)
-                if os.path.exists(rp):
+                rp, src = tc2_paths.raw_path(cand, book, page, pipeline)
+                if rp is not None:
                     try:
                         r = json.load(open(rp))
-                        st[cand] = 'error' if r.get('error') else 'ok'
-                        if cand == 'docling-ocrmac' and not r.get('error') and r.get('seconds') is not None:
+                        st[cand] = 'error' if r.get('error') else ('ok' if src == pipeline else f'ok:{src}')
+                        if cand == 'docling-ocrmac' and not r.get('error') and r.get('seconds') is not None and src == pipeline:
                             secs.append(r['seconds'])
                     except Exception:
                         st[cand] = 'corrupt'
@@ -231,10 +256,11 @@ def manifest(pipeline, pages_files):
             status.setdefault(book, {})[f'p{page:03d}'] = st
     secs.sort()
     m['pages'] = status
-    m['summary'] = dict(pages=total, docling_ok=sum(1 for b in status.values() for s in b.values() if s.get('docling-ocrmac') == 'ok'),
+    m['summary'] = dict(pages=total, docling_ok=sum(1 for b in status.values() for s in b.values() if (s.get('docling-ocrmac') or '').startswith('ok')),
+                        docling_reused=sum(1 for b in status.values() for s in b.values() if (s.get('docling-ocrmac') or '').startswith('ok:')),
                         docling_error=sum(1 for b in status.values() for s in b.values() if s.get('docling-ocrmac') == 'error'),
                         docling_missing=sum(1 for b in status.values() for s in b.values() if s.get('docling-ocrmac') == 'missing'),
-                        xycut_ok=sum(1 for b in status.values() for s in b.values() if s.get('current-xycut') == 'ok'),
+                        xycut_ok=sum(1 for b in status.values() for s in b.values() if (s.get('current-xycut') or '').startswith('ok')),
                         docling_sec_median=(secs[len(secs) // 2] if secs else None), docling_sec_p90=(secs[int(0.9 * len(secs))] if secs else None),
                         docling_sec_total=round(sum(secs), 1), docling_sec_mean=(round(sum(secs) / len(secs), 3) if secs else None))
     # storage
@@ -252,18 +278,23 @@ def main():
     ap.add_argument('--pipeline', default='tc2-p1'); ap.add_argument('--pages', action='append', default=[])
     ap.add_argument('--make-pages', default=None); ap.add_argument('--fast', action='store_true'); ap.add_argument('--workers', type=int, default=0)
     ap.add_argument('--shard', type=int, default=None); ap.add_argument('--nshards', type=int, default=1); ap.add_argument('--manifest', action='store_true'); ap.add_argument('--force', action='store_true')
+    ap.add_argument('--out', default=None, help='pipeline output root (default poc-out/trusted-corpus/tc-v2/<pipeline>; env TC2_OUT_ROOT)')
+    ap.add_argument('--no-reuse-raw', action='store_true', help='do not reuse raw candidate files of earlier pipeline versions')
     a = ap.parse_args()
+    if a.out:
+        tc2_paths.set_out_root(a.out)
+    reuse = not a.no_reuse_raw
     if a.make_pages:
         make_pages(a.make_pages, a.pipeline); return
     pages = [p for pf in a.pages for p in json.load(open(pf))]
     if a.fast:
-        run_fast(a.pipeline, pages, a.force)
+        run_fast(a.pipeline, pages, a.force, reuse)
     if a.shard is not None:
-        run_docling(a.pipeline, pages, a.shard, a.nshards, a.force); return
+        run_docling(a.pipeline, pages, a.shard, a.nshards, a.force, reuse); return
     if a.workers:
         procs = []
         for i in range(a.workers):
-            cmd = [sys.executable, os.path.abspath(__file__), '--pipeline', a.pipeline, '--shard', str(i), '--nshards', str(a.workers)] + [x for pf in a.pages for x in ('--pages', pf)] + (['--force'] if a.force else [])
+            cmd = [sys.executable, os.path.abspath(__file__), '--pipeline', a.pipeline, '--shard', str(i), '--nshards', str(a.workers)] + [x for pf in a.pages for x in ('--pages', pf)] + (['--force'] if a.force else []) + (['--out', a.out] if a.out else []) + (['--no-reuse-raw'] if a.no_reuse_raw else [])
             procs.append(subprocess.Popen(cmd))
         rc = [p.wait() for p in procs]
         print('workers exit codes', rc)

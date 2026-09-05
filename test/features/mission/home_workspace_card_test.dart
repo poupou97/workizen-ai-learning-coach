@@ -28,6 +28,10 @@ void main() {
   ) async {
     final doc = loadSyntheticDoc();
     LessonDocument? opened;
+    // ROUND 4: hai thẻ xếp dọc — màn cao để ListView dựng cả hai.
+    t.view.physicalSize = const Size(1080, 5000);
+    t.view.devicePixelRatio = 2.75;
+    addTearDown(t.view.reset);
     await t.pumpWidget(
       fixtureHost(
         MissionCenterScreen(
@@ -41,12 +45,18 @@ void main() {
     await t.pumpAndSettle();
     expect(find.byKey(MissionCenterScreen.workspaceCardKey), findsOneWidget);
     expect(find.text('BÀI HỌC SAM · BẢN THỬ NGHIỆM'), findsOneWidget);
-    expect(find.textContaining('Bài 17 · Tách chất'), findsOneWidget);
+    // ROUND 4: dòng SAM đầu Home cũng nêu tên bài ⇒ tìm TRONG thẻ.
+    final inCard = find.descendant(
+      of: find.byKey(MissionCenterScreen.workspaceCardKey),
+      matching: find.textContaining('Bài 17 · Tách chất'),
+    );
+    expect(inCard, findsOneWidget);
     expect(find.textContaining('Chương IV'), findsOneWidget);
     expect(find.textContaining('trang 60–63'), findsOneWidget);
     expect(find.textContaining('Học với SAM'), findsOneWidget);
-    // thẻ G2 của Track A vẫn còn nguyên
-    expect(find.text('Bắt đầu'), findsOneWidget);
+    // thẻ G2 của Track A vẫn còn — ROUND 4: đứng sau như «CÒN CÓ THỂ MỞ»
+    expect(find.byKey(MissionCenterScreen.secondaryCardKey), findsOneWidget);
+    expect(find.text('Vào Môn học ▸'), findsOneWidget);
     await t.ensureVisible(find.text('Mở bài học'));
     await t.pumpAndSettle();
     await t.tap(find.text('Mở bài học'));

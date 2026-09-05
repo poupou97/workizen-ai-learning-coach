@@ -7,11 +7,17 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/adaptive/multi_skill_diagnosis.dart';
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/core/curriculum/exercise_skill_map.dart';
 import 'package:learning_coach/core/knowledge/provenance.dart';
 import 'package:learning_coach/core/student/evidence_weighting.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
+
+/// ROUND 4 (strict default): sự kiện CÓ CHẤM trong test này mô phỏng đường
+/// Deep (TutorSession) — mang dấu `fraction-check-v1` như emitter thật.
+const _r4Stamp =
+    EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
 
 void main() {
   const p = BktParams.freeResponse;
@@ -44,7 +50,7 @@ void main() {
     // Sự kiện lịch sử được SINH RA và LƯU khi mapV1 còn hiệu lực —
     // attributeEvidence NƯỚNG mapping vào sự kiện tại thời điểm ghi.
     final historical = attributeEvidence(
-        map: mapV1, correct: true, independent: true, at: t0);
+        map: mapV1, correct: true, independent: true, validation: _r4Stamp, at: t0);
     final log = EvidenceLog(
         skillCaseId: 'denominator-non-divisible',
         events: historical
@@ -67,9 +73,9 @@ void main() {
 
   test('lần làm MỚI dưới mapV2 sinh sự kiện mới, log cũ không bị đụng', () {
     final oldEvents = attributeEvidence(
-        map: mapV1, correct: true, independent: true, at: t0);
+        map: mapV1, correct: true, independent: true, validation: _r4Stamp, at: t0);
     final newEvents = attributeEvidence(
-        map: mapV2, correct: true, independent: true,
+        map: mapV2, correct: true, independent: true, validation: _r4Stamp,
         at: t0.add(const Duration(days: 30)));
     expect(newEvents.length, 3);
     expect(oldEvents.length, 2,
@@ -82,7 +88,7 @@ void main() {
     // hiểu biết mới về chương trình (ca mới phát hiện ⇒ coverage tụt);
     // BẰNG CHỨNG và belief theo ca thì KHÔNG.
     final events = attributeEvidence(
-        map: mapV1, correct: true, independent: true, at: t0);
+        map: mapV1, correct: true, independent: true, validation: _r4Stamp, at: t0);
     final log = EvidenceLog(
         skillCaseId: 'denominator-non-divisible',
         events: events
@@ -100,7 +106,7 @@ void main() {
     final first = attributeEvidence(
         map: mapV1, correct: false, independent: true, at: t0);
     final second = attributeEvidence(
-        map: mapV1, correct: true, independent: true,
+        map: mapV1, correct: true, independent: true, validation: _r4Stamp,
         at: t0.add(const Duration(minutes: 10)));
     final ids = {...first.map((e) => e.eventId), ...second.map((e) => e.eventId)};
     expect(ids.length, first.length + second.length,

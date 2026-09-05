@@ -26,6 +26,7 @@ import 'package:learning_coach/core/context/learning_context.dart';
 import 'package:learning_coach/core/intent/learning_intent.dart';
 import 'package:learning_coach/core/pedagogy/pedagogy_model.dart'
     show TeachingAct;
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/core/student/evidence_validator.dart';
 import 'package:learning_coach/core/student/evidence_weighting.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
@@ -181,17 +182,38 @@ void main() {
           isEmpty);
     });
 
-    test('bằng chứng tự làm ĐÃ CHẤM vẫn là bằng chứng (D1 không cấm đường Deep)',
-        () {
-      final ok = ev(EvidenceKind.independentAttempt, correct: true);
+    test('bằng chứng tự làm ĐÃ KIỂM (dấu validator) vẫn là bằng chứng — D1 '
+        'không cấm đường Deep; ROUND 4: KHÔNG dấu ⇒ historicalUnvalidated, '
+        'không «Tự làm được»', () {
+      final ok = LearningEvent(
+          eventId: 'ok',
+          skillCaseId: 'denominator-non-divisible',
+          kind: EvidenceKind.independentAttempt,
+          correct: true,
+          at: DateTime(2026, 9, 5),
+          sourceDocumentId: _ctx.sourceDocumentId,
+          lessonNo: _ctx.lessonNo,
+          validation: const EvidenceValidation(
+              validatorId: 'fraction-check-v1', validatorVersion: '1'));
       expect(ok.isValidatedIndependentSuccess, isTrue);
       expect(ok.isParticipation, isFalse);
+      expect(ok.readClass, EvidenceReadClass.validatedCompetence);
       expect(
           learningMapStateFor(
               sourceDocumentId: _ctx.sourceDocumentId!,
               lessonNo: _ctx.lessonNo!,
               allEvents: [ok]),
           LearningMapState.independentEvidence);
+      final unstamped = ev(EvidenceKind.independentAttempt, correct: true);
+      expect(unstamped.readClass, EvidenceReadClass.historicalUnvalidated);
+      expect(unstamped.isValidatedIndependentSuccess, isFalse);
+      expect(
+          learningMapStateFor(
+              sourceDocumentId: _ctx.sourceDocumentId!,
+              lessonNo: _ctx.lessonNo!,
+              allEvents: [unstamped]),
+          LearningMapState.engaged,
+          reason: 'ROUND 4: có chấm nhưng không dấu ⇒ không phải năng lực');
     });
 
     test('participation sống qua JSON (tên enum) — kho cũ đọc kind mới', () {

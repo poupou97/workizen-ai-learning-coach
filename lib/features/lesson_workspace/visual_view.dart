@@ -26,6 +26,7 @@ import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/semantic_data.dart';
+import 'views/timeline_view.dart';
 import 'widgets/source_sheet.dart';
 import 'widgets/trust_sheet.dart';
 
@@ -189,8 +190,11 @@ class _VisualViewState extends State<VisualView> {
                 const SizedBox(width: WalSpacing.sm),
                 const Expanded(
                   child: Text(
-                    'SAM chưa có sơ đồ cho bài này — con xem bảng tóm tắt, đọc '
-                    'sách hoặc học cùng SAM nhé.',
+                    // ROUND 4 §6.5 — fail closed nói VÌ SAO bằng lời trẻ.
+                    'SAM chưa có sơ đồ cho bài này. SAM chỉ vẽ sơ đồ khi sách '
+                    'viết rõ từng bước hoặc từng cách; bài này chưa có phần như '
+                    'vậy nên SAM không tự vẽ — con xem bảng tóm tắt, đọc sách '
+                    'hoặc học cùng SAM nhé.',
                     style: TextStyle(
                       fontSize: WalType.body,
                       color: WalColors.ink,
@@ -257,7 +261,13 @@ class _VisualViewState extends State<VisualView> {
         ProcessSemantic() => _process(s),
         ComparisonSemantic() => _comparison(s),
         ConceptMapSemantic() => _conceptMap(s),
-        TimelineSemantic() => _timeline(s),
+        // Round 4 (Lane C, Golden Slice #2): renderer Lịch sử — mốc + nguồn kể
+        // chuyện + thử xếp thứ tự (TimelineValidator), views/timeline_view.dart.
+        TimelineSemantic() => TimelineView(
+          doc: widget.doc,
+          semantic: s,
+          onOpenSource: _openSource,
+        ),
       },
       const SizedBox(height: WalSpacing.md),
       _why(s),
@@ -349,7 +359,7 @@ class _VisualViewState extends State<VisualView> {
                       onPressed: () =>
                           showTrustSheet(context, doc: widget.doc),
                       child: const Text(
-                        'ⓘ Nguồn & luật xếp',
+                        'ⓘ Nguồn & độ tin',
                         style: TextStyle(
                           fontSize: 13,
                           color: WalColors.primaryText,
@@ -386,6 +396,19 @@ class _VisualViewState extends State<VisualView> {
   Widget _process(ProcessSemantic s) => Column(
     children: [
       _processStrip(s),
+      // ROUND 4 §6.5 — chú giải + cách dùng, lời trẻ.
+      Padding(
+        padding: const EdgeInsets.only(top: WalSpacing.xs),
+        child: Text(
+          s.steps.any((st) => st.isWithheld)
+              ? 'Số tím = bước sách viết · số xám = bước SAM để trống (xem '
+                    'trong sách) · chạm một bước để tra cứu lời sách'
+              : 'Mỗi số là một bước sách viết · chạm một bước để tra cứu '
+                    'lời sách',
+          key: const Key('visual-legend'),
+          style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
+        ),
+      ),
       const SizedBox(height: WalSpacing.md),
       for (var i = 0; i < s.steps.length; i++) ...[
         _processNode(s.steps[i]),
@@ -482,16 +505,30 @@ class _VisualViewState extends State<VisualView> {
                   : null,
               borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
             ),
-            child: Text(
-              st.isWithheld
-                  ? 'Bước này SAM chưa đọc được — con xem trong sách '
-                        '(${_pageOf(st.sourceBlockId)}).'
-                  : st.text!,
-              style: TextStyle(
-                fontSize: WalType.body,
-                color: st.isWithheld ? WalColors.inkSoft : WalColors.ink,
-                height: 1.45,
-              ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    st.isWithheld
+                        ? 'Bước này SAM chưa đọc được — con xem trong sách '
+                              '(${_pageOf(st.sourceBlockId)}).'
+                        : st.text!,
+                    style: TextStyle(
+                      fontSize: WalType.body,
+                      color: st.isWithheld ? WalColors.inkSoft : WalColors.ink,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: WalSpacing.xs),
+                // dấu «chạm để tra cứu» — không phải nội dung
+                const Icon(
+                  Icons.menu_book_outlined,
+                  size: 18,
+                  color: WalColors.primaryText,
+                ),
+              ],
             ),
           ),
         ),
@@ -500,7 +537,21 @@ class _VisualViewState extends State<VisualView> {
   );
 
   // ── Comparison ──
-  Widget _comparison(ComparisonSemantic s) => Container(
+  Widget _comparison(ComparisonSemantic s) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      const Padding(
+        padding: EdgeInsets.only(bottom: WalSpacing.xs),
+        child: Text(
+          'Mỗi hàng là một cách sách nêu · chạm một hàng để tra cứu lời sách',
+          style: TextStyle(fontSize: 11, color: WalColors.inkSoft),
+        ),
+      ),
+      _comparisonTable(s),
+    ],
+  );
+
+  Widget _comparisonTable(ComparisonSemantic s) => Container(
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
@@ -686,68 +737,6 @@ class _VisualViewState extends State<VisualView> {
         ),
       );
 
-  // ── Timeline: trục dọc + mốc ──
-  Widget _timeline(TimelineSemantic s) => Column(
-    key: const Key('visual-timeline'),
-    children: [
-      for (var i = 0; i < s.events.length; i++)
-        InkWell(
-          onTap: () => _openSource(s.events[i].sourceBlockId),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  width: 28,
-                  child: CustomPaint(
-                    painter: _TimelinePainter(
-                      first: i == 0,
-                      last: i == s.events.length - 1,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: WalSpacing.sm),
-                Expanded(
-                  child: _card(
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          s.events[i].when,
-                          style: const TextStyle(
-                            fontSize: WalType.secondary,
-                            fontWeight: FontWeight.w700,
-                            color: WalColors.primaryText,
-                          ),
-                        ),
-                        Text(
-                          s.events[i].title,
-                          style: const TextStyle(
-                            fontSize: WalType.body,
-                            fontWeight: FontWeight.w600,
-                            color: WalColors.ink,
-                          ),
-                        ),
-                        if (s.events[i].text != null)
-                          Text(
-                            s.events[i].text!,
-                            style: const TextStyle(
-                              fontSize: WalType.secondary,
-                              color: WalColors.ink,
-                              height: 1.4,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-    ],
-  );
-
   // ── Bảng tóm tắt (fallback) ──
   Widget _summary(LessonDocument doc) {
     final blocks = VisualView.summaryBlocks(doc);
@@ -851,33 +840,4 @@ class _SpokePainter extends CustomPainter {
   @override
   bool shouldRepaint(_SpokePainter old) =>
       old.count != count || old.hubX != hubX || old.leafX != leafX;
-}
-
-/// Trục dọc + chấm mốc của dòng thời gian.
-class _TimelinePainter extends CustomPainter {
-  const _TimelinePainter({required this.first, required this.last});
-  final bool first, last;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final line = Paint()
-      ..color = WalColors.primary500.withValues(alpha: 0.5)
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    const x = 14.0;
-    const dotY = 22.0;
-    if (!first) canvas.drawLine(const Offset(x, 0), const Offset(x, dotY), line);
-    if (!last) {
-      canvas.drawLine(const Offset(x, dotY), Offset(x, size.height), line);
-    }
-    canvas.drawCircle(
-      const Offset(x, dotY),
-      7,
-      Paint()..color = WalColors.primary500,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_TimelinePainter old) =>
-      old.first != first || old.last != last;
 }
