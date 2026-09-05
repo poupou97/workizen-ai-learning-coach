@@ -8,7 +8,14 @@ Founder rules this report is written under: legacy content is **never** a truste
 reprocess from the ORIGINAL SOURCE · no mass reprocess · what the pipeline cannot process is
 **WITHHELD, never guessed** · every number carries its denominator (D5) · verbatim SGK stays internal (D4).
 
-Companions: [`LEGACY-REPROCESS-SCOREBOARD.md`](LEGACY-REPROCESS-SCOREBOARD.md) (standing counts),
+> ⚠️ **Operational state of this Mac:** the packs in the main checkout are still the OLD ones — they
+> stamp `capped-toc-v1`, fail verify 12/12, and still carry all 41 INFERRED expressions. Lane D built
+> and measured the corrected packs inside its own worktree and did not touch the main checkout. Until
+> this PR is merged and the packs rebuilt there, **no APK built on this Mac carries the round-5
+> corrections.** Details and the exact commands: [`ROUND5-LANE-D-EVIDENCE.md`](ROUND5-LANE-D-EVIDENCE.md).
+
+Companions: [`ROUND5-LANE-D-EVIDENCE.md`](ROUND5-LANE-D-EVIDENCE.md) (where every number comes from),
+[`LEGACY-REPROCESS-SCOREBOARD.md`](LEGACY-REPROCESS-SCOREBOARD.md) (standing counts),
 [`PIPELINE-REQUESTS-FROM-LEGACY.md`](PIPELINE-REQUESTS-FROM-LEGACY.md) (what this asks the pipeline lanes for),
 [`../DATA-ACCURACY-SCOREBOARD-LANE-D.md`](../DATA-ACCURACY-SCOREBOARD-LANE-D.md) (the five directions, BEFORE → AFTER),
 [`ROUND4-BATCH-1-REPORT.md`](ROUND4-BATCH-1-REPORT.md) (what this round inherits).
