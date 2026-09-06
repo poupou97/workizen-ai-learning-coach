@@ -12,9 +12,22 @@
 /// 3. NHỮNG CÁCH NÀO: lần đầu mở ⇒ màn «Vào bài học» ba thẻ (concept khung 3),
 ///    mỗi thẻ nói bài này có gì theo cách đó; ba tab vẫn luôn ở trên.
 /// 4./5. SAM ĐANG LÀM GÌ, VÌ SAO: thẻ được đề xuất mang lý do; sau khi vào
-///    View, thẻ «SAM đề xuất» giữ lý do + một nút.
-/// 6. LÀM GÌ TIẾP: nút trên thẻ đề xuất / thẻ kết của Tutor.
+///    View, một dòng «💡 SAM gợi ý: …» giữ ĐÍCH ĐẾN, chạm ⇒ lý do tại chỗ.
+/// 6. LÀM GÌ TIẾP: nút trong gợi ý đã mở / thẻ kết của Tutor.
 /// Chip thử nghiệm gọn một dòng, chạm ⇒ sheet «Nguồn & độ tin».
+///
+/// ROUND 6 · WS-D — **PHƯƠNG ÁN B ĐÃ ĐƯỢC FOUNDER CHỌN, ĐÃ THI HÀNH.**
+/// Vòng 5 dựng bốn cách trình bày cùng một `NextAction` từ một commit và đo
+/// trên Nokia 6.1: nội dung bài đầu tiên ở «Học với SAM» 820 px (card) →
+/// 712 px (B đang hé) → 634 px (B đã thu gọn); nhãn View 7 → 4. Vòng 6 gỡ cờ
+/// `--dart-define=WAL_ASSIST`, xoá ba phương án còn lại, và xoá luôn ba thứ
+/// bản đồ trùng lặp gọi tên: **CTA đổi View trên thẻ đề xuất** (lặp đúng cái
+/// tab ngay phía trên), **chân dung SAM ở chỗ SAM không nói**, và **hàng
+/// «Đã mở ● ○ ○» thường trực** (nay nằm trong trạng thái EXPANDED).
+///
+/// ⚠ Gợi ý vẫn là TRÌNH BÀY của Next Action — không có động cơ đề xuất thứ
+/// hai. `_proposal()` là nguồn duy nhất; `assist_layer` không đọc bài,
+/// không đọc trace (có test soi mã).
 ///
 /// Màn này KHÔNG nhận `LearnerStore` — theo cấu trúc, không ghi được gì.
 library;

@@ -1,26 +1,36 @@
-/// ROUND 5 · Lane B — LỚP TRỢ GIÚP NGỮ CẢNH của SAM (thay thẻ đề xuất thường trực).
+/// ROUND 6 · WS-D — LỚP TRỢ GIÚP NGỮ CẢNH của SAM: **PHƯƠNG ÁN B ĐÃ CHỌN**.
 ///
-/// PHẢN HỒI FOUNDER trên máy thật: workspace «lặp lại, tốn chiều dọc, quá nhiều
-/// hiện diện của cùng ba Learning View, thẻ đề xuất chiếm chỗ thường trực, CTA
-/// lặp lại điều hướng đã thấy». Đo được (`workspace_density_test`, khung Nokia
-/// 392.7×698.2 dp): chrome ghim 225 dp ở Đọc/Trực quan và **411 dp ở Học với
-/// SAM (58.9 % màn)**; ba tên View xuất hiện 6–7 lần trên MỘT màn.
+/// Vòng 5 dựng BỐN cách trình bày cùng một `NextAction` từ MỘT commit
+/// (`--dart-define=WAL_ASSIST=card|icon|peek|inlineTab`) và đo cả bốn trên
+/// Nokia 6.1 thật. **Founder chọn B.** Vòng 6 thi hành quyết định đó: bản
+/// dựng chỉ còn MỘT cách trình bày, cờ build đã gỡ, ba phương án kia đã xoá.
+/// Số đo lịch sử của A/B/C nằm ở `docs/design/TRACK-B-ROUND5-WORKSPACE-
+/// DUPLICATION.md` §5 và tái dựng được ở nhánh vòng 5 (`lane-b/round5-
+/// experience`, PR #87) — KHÔNG tái dựng được ở nhánh này, và đó là chủ ý.
+///
+/// B = MỘT dòng gọn mặc định + hai trạng thái nữa:
+///
+///   COLLAPSED  💡 trong hàng tiêu đề (0 dòng)          ← sau «Để sau»
+///   PEEK       «💡 SAM gợi ý: Xem Đọc →» (1 dòng)      ← MẶC ĐỊNH
+///   EXPANDED   vì sao + CTA + «Để sau» + «Đã mở …»     ← trẻ chạm mới mở
+///
+/// Đề xuất chuyển sang View KHÁC ⇒ hé lại một lần (việc của màn chứa, không
+/// phải của widget này).
 ///
 /// ⚠ ĐÂY LÀ TRÌNH BÀY, KHÔNG PHẢI ĐỘNG CƠ THỨ HAI. Lớp này nhận MỘT
 /// `NextAction` đã dựng sẵn (`Student State + Learning Context + Pedagogy
 /// Runtime → Next Action`) và không được phép tự nghĩ ra đề xuất: nó không
-/// nhận `LessonDocument`, không nhận trace, không tính gì. Có test cấm.
+/// nhận tài liệu bài, không nhận trace, không tính gì. Có test soi mã cấm.
+/// Dòng «Đã mở …» cũng đi vào đây dưới dạng MỘT CHUỖI đã dựng sẵn — lớp này
+/// không được tự hỏi trace xem trẻ đã mở gì.
 ///
 /// ⚠ KHÔNG GIẤU — hé dần. Thông tin chính (bài, View đang mở, nội dung) luôn
-/// thấy; ĐỀ XUẤT luôn có mặt ở dạng nhìn thấy được; LÝ DO mở theo yêu cầu.
-/// «AI-first» không được biến mất: mọi phương án đều phải trả lời được
-/// «ứng dụng biết mình đang ở đâu và đề xuất gì tiếp theo» — nên phương án
-/// chỉ-biểu-tượng vẫn mang nhãn trợ năng đầy đủ và một chấm báo khi có đề
-/// xuất mới, và ba phương án được đo bằng CÙNG một bộ số.
+/// thấy; ĐỀ XUẤT luôn có mặt ở dạng nhìn thấy được **ở cả ba View**; LÝ DO mở
+/// theo yêu cầu. Trạng thái thu gọn vẫn còn 💡 (lỗi D5 đo trên máy vòng 5:
+/// «Để sau» từng làm SAM biến mất hoàn toàn).
 ///
 /// ⚠ KỶ LUẬT LINH VẬT: 🦉/chân dung SAM dành cho lúc SAM THỰC SỰ nói (Học với
-/// SAM, bong bóng thoại, thẻ kết). Một GỢI Ý dùng 💡. Mục tiêu là SAM có mặt
-/// ĐÚNG LÚC hơn, không phải ít hơn.
+/// SAM, bong bóng thoại, thẻ kết). Một GỢI Ý dùng 💡.
 library;
 
 import 'package:flutter/material.dart';
@@ -28,61 +38,19 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/wal_tokens.dart';
 import '../../../core/lesson_model/next_action.dart';
 
-/// Bốn cách trình bày cùng một `NextAction` — chọn lúc build bằng
-/// `--dart-define=WAL_ASSIST=icon|peek|inlineTab` (mặc định `card` = bản vòng
-/// 4/5 đang chạy). Sản phẩm KHÔNG có nút đổi: so sánh A/B là việc của người
-/// dựng bản, không phải của trẻ.
-enum AssistPresentation {
-  /// HIỆN TẠI: thẻ mở sẵn, thường trực (chân dung + lý do + CTA + hàng «Đã mở»).
-  card,
-
-  /// A — chỉ biểu tượng 💡 ở đầu màn; chạm ⇒ bottom sheet có lý do + một CTA.
-  icon,
-
-  /// B — một dòng «💡 SAM gợi ý: Xem Trực quan →»; chạm ⇒ mở tại chỗ.
-  peek,
-
-  /// C — 💡 gắn ngay trên TAB đích; chạm huy hiệu ⇒ một dòng «vì sao».
-  inlineTab;
-
-  static const _flag = String.fromEnvironment('WAL_ASSIST', defaultValue: '');
-
-  /// CHỈ cho test và cho phép đo A/B trong cùng một lần chạy. Đường sản phẩm
-  /// là `--dart-define`; không có UI nào đặt được biến này.
-  @visibleForTesting
-  static AssistPresentation? debugOverride;
-
-  /// Phương án của bản build này.
-  static AssistPresentation get current => debugOverride ?? parse(_flag);
-
-  static AssistPresentation parse(String s) => switch (s.trim()) {
-    'icon' => AssistPresentation.icon,
-    'peek' => AssistPresentation.peek,
-    'inlineTab' || 'inline' => AssistPresentation.inlineTab,
-    _ => AssistPresentation.card,
-  };
-
-  String get flagName => switch (this) {
-    AssistPresentation.card => 'card',
-    AssistPresentation.icon => 'icon',
-    AssistPresentation.peek => 'peek',
-    AssistPresentation.inlineTab => 'inlineTab',
-  };
-}
-
 /// Ba trạng thái của lớp trợ giúp. Chuyển trạng thái là việc của màn chứa nó.
 enum AssistState {
   /// Chỉ dấu hiệu (💡) — vẫn NHÌN THẤY, không phải bị giấu.
   collapsed,
 
-  /// Một dòng nói rõ ĐI ĐÂU: «💡 SAM gợi ý: Xem Trực quan →».
+  /// Một dòng nói rõ ĐI ĐÂU: «💡 SAM gợi ý: Xem Trực quan →». MẶC ĐỊNH.
   peek,
 
-  /// Mở đủ: vì sao + một CTA + «Để sau».
+  /// Mở đủ: vì sao + một CTA + «Để sau» + dòng «Đã mở».
   expanded,
 }
 
-/// Chữ trẻ đọc — dùng chung cho cả bốn phương án nên không lệch giọng.
+/// Chữ trẻ đọc — một giọng duy nhất cho cả ba trạng thái.
 abstract final class AssistCopy {
   static const title = 'Gợi ý của SAM';
   static const dismiss = 'Để sau';
@@ -104,7 +72,7 @@ abstract final class AssistCopy {
   };
 }
 
-/// A — 💡 một mình. Đặt trong hàng đã có (không tốn dòng nào).
+/// COLLAPSED — 💡 một mình, đặt trong hàng tiêu đề đã có (không tốn dòng nào).
 class AssistIconButton extends StatelessWidget {
   const AssistIconButton({
     super.key,
@@ -157,8 +125,7 @@ class AssistIconButton extends StatelessWidget {
   );
 }
 
-/// B — dòng hé: «💡 SAM gợi ý: Xem Trực quan →», chạm mở tại chỗ.
-/// C dùng lại phần MỞ RỘNG của B, nên hai phương án chỉ khác chỗ đặt dấu hiệu.
+/// PEEK + EXPANDED — «💡 SAM gợi ý: Xem Trực quan →», chạm mở TẠI CHỖ.
 class AssistPeek extends StatelessWidget {
   const AssistPeek({
     super.key,
@@ -167,6 +134,7 @@ class AssistPeek extends StatelessWidget {
     required this.onToggle,
     required this.onGo,
     required this.onDismiss,
+    this.seenLine,
   });
 
   final NextAction action;
@@ -175,10 +143,18 @@ class AssistPeek extends StatelessWidget {
   final VoidCallback onGo;
   final VoidCallback onDismiss;
 
+  /// «Đã mở: ● Đọc ○ Trực quan ○ Học với SAM» — CHUỖI đã dựng sẵn bởi màn
+  /// chứa. Vòng 5 xếp dòng này vào nhóm «gộp được vào lớp trợ giúp» (bản đồ
+  /// trùng lặp §2 mục 11): nó là DẤU VẾT PHIÊN, không phải bằng chứng học,
+  /// nên chỉ hiện khi trẻ đã chủ động hỏi «vì sao».
+  /// `null` ⇒ không có gì để nói.
+  final String? seenLine;
+
   static const peekKey = Key('assist-peek');
   static const expandedKey = Key('assist-expanded');
   static const goKey = Key('assist-go');
   static const dismissKey = Key('assist-dismiss');
+  static const seenKey = Key('assist-seen-row');
 
   @override
   Widget build(BuildContext context) =>
@@ -275,6 +251,17 @@ class AssistPeek extends StatelessWidget {
             height: 1.35,
           ),
         ),
+        if (seenLine != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              seenLine!,
+              key: seenKey,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
+            ),
+          ),
         const SizedBox(height: WalSpacing.xs),
         Row(
           children: [
@@ -322,92 +309,3 @@ class AssistPeek extends StatelessWidget {
     ),
   );
 }
-
-/// A — nội dung của bottom sheet «Gợi ý của SAM».
-Future<void> showAssistSheet(
-  BuildContext context, {
-  required NextAction action,
-  required VoidCallback onGo,
-}) => showModalBottomSheet<void>(
-  context: context,
-  backgroundColor: Colors.white,
-  shape: const RoundedRectangleBorder(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(WalSpacing.lg)),
-  ),
-  builder: (ctx) => SafeArea(
-    child: Padding(
-      key: const Key('assist-sheet'),
-      padding: const EdgeInsets.all(WalSpacing.lg),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '💡 ${AssistCopy.title}',
-            style: TextStyle(
-              fontSize: WalType.title,
-              fontWeight: FontWeight.w700,
-              color: WalColors.ink,
-            ),
-          ),
-          const SizedBox(height: WalSpacing.sm),
-          Text(
-            action.reason,
-            style: const TextStyle(
-              fontSize: WalType.body,
-              color: WalColors.ink,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: WalSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: WalSpacing.minTouch,
-                  child: FilledButton(
-                    key: AssistPeek.goKey,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: WalColors.primary500,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          WalSpacing.radiusButton,
-                        ),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(ctx).pop();
-                      onGo();
-                    },
-                    child: Text(
-                      action.label,
-                      style: const TextStyle(
-                        fontSize: WalType.body,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: WalSpacing.sm),
-              SizedBox(
-                height: WalSpacing.minTouch,
-                child: TextButton(
-                  key: AssistPeek.dismissKey,
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text(
-                    AssistCopy.dismiss,
-                    style: TextStyle(
-                      fontSize: WalType.body,
-                      color: WalColors.primaryText,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  ),
-);
