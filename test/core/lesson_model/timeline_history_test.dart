@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/content_trust.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
+import 'package:learning_coach/core/lesson_model/repair_record.dart';
 import 'package:learning_coach/core/lesson_model/semantic_data.dart';
 import 'package:learning_coach/core/lesson_model/timeline_date.dart';
 import 'package:learning_coach/core/lesson_model/timeline_sources.dart';
@@ -169,44 +170,141 @@ void main() {
     });
   });
 
+  // ⭐⭐ ROUND 6 (WS-C) — TIỀN ĐỀ CŨ ĐÃ SAI, VÀ NÓ PHẢI SAI.
+  //
+  // Test này từng khẳng định «7 mốc từ một block tin được». Nó viết ra kì vọng
+  // của vòng 4/5, khi các mốc đến từ một fixture MẪU. Trên fixture THẬT hôm nay
+  // con số là **0 mốc**, và đó là hệ thống chạy ĐÚNG:
+  //
+  //   `p039:000` — block mang cả bảy mốc — bị giữ lại vì `agree_tones` («Bạch
+  //   Đằng» của stack chính vs «Bạch Đăng» của stack kiểm). Vòng 6 SỬA được nó:
+  //   một `ValidatedRepair` tất định, validator độc lập xác nhận. Nhưng NỐI ≠
+  //   TIN — một sửa chữa đã kiểm chứng KHÔNG tự động thành tin được, nên block
+  //   vẫn bị giữ lại, vẫn không có chữ, và **không dòng thời gian nào dựng được
+  //   từ nó**.
+  //
+  // Tiền lệ (Lane D, vòng 5): một test khẳng định «B6 có bài tập thật» đang GHIM
+  // KHUYẾT TẬT; tiền đề được sửa, cổng KHÔNG được nới. Ở đây cũng vậy — và test
+  // mới đáng giá hơn test cũ, vì nó không khẳng định «0 mốc» mà khẳng định **VÌ
+  // SAO**: block có mặt, bị giữ lại, mang sửa chữa đã kiểm chứng, và dòng thời
+  // gian không dựng được CHỪNG NÀO nó chưa được tin. Ai đó làm dòng thời gian
+  // hiện lại mà KHÔNG có quyết định tin của Founder ⇒ ĐỎ. Ai đó lặng lẽ phục vụ
+  // block ⇒ ĐỎ.
   group('fixture THẬT LS&ĐL 5 Bài 8 (chỉ khi máy có)', () {
     final f = File(historyRealPath);
-    test('7 mốc từ một block tin được, 3 nguồn (2 trọn vẹn), validator có, kịch bản 7 bước', () {
+
+    test('⭐⭐ block bảy mốc: CÓ MẶT, BỊ GIỮ LẠI, mang VALIDATED_REPAIR — và '
+        'không dòng thời gian nào dựng được khi nó chưa được tin', () {
       if (!f.existsSync()) {
         markTestSkipped('fixture thật chưa sinh trên máy này (poc-out)');
         return;
       }
       final d = _load(historyRealPath, FixtureSlot.realDir);
+      // danh tính bài học không đổi — đây vẫn là Golden #1
       expect(d.trust, ContentTrust.trustedStructuredLesson);
       expect(d.title, 'Đấu tranh giành độc lập thời kì Bắc thuộc');
       expect(d.provenance.boundary!.pageStart, 38);
       expect(d.provenance.boundary!.pageEnd, 41);
-      final tl = d.semantic.whereType<TimelineSemantic>().single;
-      expect(tl.events.length, 7);
-      expect(tl.events.map((e) => e.sourceBlockId).toSet().length, 1);
-      expect(tl.events.first.title, 'Hai Bà Trưng');
-      expect(tl.events.last.when, '938');
-      final v = TimelineValidator.forSemantic(tl)!;
-      expect(v.bookOrderIsChronological, isTrue);
-      expect(v.checkBefore('Bà Triệu', 'Phùng Hưng').ok, isTrue);
-      expect(v.checkPair('Khúc Thừa Dụ', '905').ok, isTrue);
+
+      // 1. block mang bảy mốc CÓ MẶT — không biến mất (bài học R13: giữ lại là
+      //    một quyết định kiểm được; biến mất thì không).
+      final ev = d.blockById('05-sgk-lich-su-va-dia-li-5:p039:tc2-p1:000');
+      expect(ev, isNotNull, reason: 'block bảy mốc không được rơi khỏi tài liệu');
+      expect(ev, isA<WithheldBlock>(),
+          reason: 'phục vụ block này cần quyết định tin của Founder');
+      final w = ev! as WithheldBlock;
+      expect(w.trust, ContentTrust.withheld);
+      expect(w.reasons, contains('agree_tones'));
+
+      // 2. nó MANG một sửa chữa đã được kiểm chứng — nhìn thấy được, đếm được.
+      expect(w.hasValidatedRepair, isTrue);
+      final r = w.repair!;
+      expect(r.disposition, RepairDisposition.validatedRepair);
+      expect(r.verdict, 'validated');
+      expect(r.method, 'lanec.tone-corroboration-v1');
+      expect(r.validatorId, 'lanec.history-text-validator-v1');
+      expect(r.changed, isFalse, reason: 'sửa DISPOSITION, không viết lại chữ');
+      // 3. …và KHÔNG tin được, KHÔNG phục vụ được.
+      expect(r.servable, isFalse);
+      expect(d.trustedRepairCount, 0);
+
+      // 4. KHÔNG chữ nào của nó đọc được — `WithheldBlock` không có trường chữ.
+      expect(
+        jsonEncode(w.toJson()).contains('Bạch Đằng'),
+        isFalse,
+        reason: 'giá trị đề xuất ở lại corpus, không bao giờ tới app',
+      );
+
+      // 5. ⭐ HỆ QUẢ, và đây là điều test này bảo vệ: không dòng thời gian nào.
+      //    Nếu mốc quay lại mà block vẫn chưa được tin ⇒ ai đó đã dựng dữ liệu
+      //    học từ một thứ chưa ai duyệt.
+      expect(
+        d.semantic.whereType<TimelineSemantic>(),
+        isEmpty,
+        reason: 'dòng thời gian chỉ được quay lại CÙNG một quyết định tin của '
+            'Founder cho block nguồn — xem PR #90, NỐI ≠ TIN',
+      );
+
+      // 6. và không block PHỤC VỤ nào mang dấu vết sửa chữa (bất biến của cầu).
+      for (final b in d.blocks) {
+        if (b is WithheldBlock) continue;
+        expect(
+          (b.toJson()).containsKey('repair'),
+          isFalse,
+          reason: '${b.id} được phục vụ mà mang sửa chữa ⇒ phục hồi chưa qua cổng',
+        );
+      }
+    });
+
+    test('kế toán sửa chữa của tài liệu nói thật: 6 vùng mang sửa chữa, 0 tin được', () {
+      if (!f.existsSync()) {
+        markTestSkipped('fixture thật chưa sinh trên máy này (poc-out)');
+        return;
+      }
+      final d = _load(historyRealPath, FixtureSlot.realDir);
+      final withRepair = d.validatedRepairs;
+      expect(withRepair, hasLength(6));
+      for (final b in withRepair) {
+        expect(b.trust, ContentTrust.withheld);
+        expect(b.repair!.servable, isFalse);
+      }
+      // `provenance.repair` là kế toán ở mức tài liệu; mô hình chưa phân tích nó,
+      // nên đọc thẳng JSON — con số phải khớp với thứ mô hình đếm được.
+      final raw = jsonDecode(f.readAsStringSync()) as Map;
+      final prov =
+          (raw['provenance'] as Map)['repair'] as Map<String, dynamic>;
+      expect(prov['trusted'], 0, reason: 'bất biến, không phải phép đo');
+      expect(prov['onBlocks'], withRepair.length);
+      expect(prov['productionTrustThreshold'], isNull);
+      // an toàn phiên bản fixture: bản ghi phải tự nói nó thuộc thế hệ nào
+      for (final k in [
+        'sourceTslSha256',
+        'projectedTslSha256',
+        'hashMethod',
+        'generator',
+        'generation',
+      ]) {
+        expect(prov[k], isNotNull, reason: 'thiếu $k ⇒ không chứng minh được lai lịch');
+      }
+    });
+
+    test('nguồn kể chuyện vẫn dựng được từ những block CÒN được phục vụ', () {
+      if (!f.existsSync()) {
+        markTestSkipped('fixture thật chưa sinh trên máy này (poc-out)');
+        return;
+      }
+      final d = _load(historyRealPath, FixtureSlot.realDir);
       final src = deriveStoryAttributions(d);
-      expect(src.length, 3);
-      expect(src.where((a) => a.complete).length, 2);
-      expect(src.map((a) => a.year), [2017, 2005, 2014]);
-      final s = d.tutorScript!;
-      expect(s.steps.length, 7);
-      _patternsCompile(s);
-      expect(answerMatches('40 – 43', s.asks.first.acceptable), isTrue);
-      expect(answerMatches('Bà Triệu', s.asks.elementAt(1).acceptable), isTrue);
-      // block nguồn của mọi bước tồn tại trong tài liệu
-      for (final st in s.steps) {
-        final id = switch (st) {
-          AskStep(:final promptBlockId) => promptBlockId,
-          ExplainStep(:final sourceBlockId) => sourceBlockId,
-          NextStep(:final anchorBlockId) => anchorBlockId,
-        };
-        expect(d.blockById(id!), isNotNull, reason: st.id);
+      // Không ghim một con số của vòng 4: khẳng định TÍNH CHẤT — mọi nguồn dựng
+      // được đều trỏ tới một block CÓ THẬT và CÒN được phục vụ trong tài liệu.
+      for (final a in src) {
+        final b = d.blockById(a.attributionBlockId);
+        expect(b, isNotNull, reason: a.attributionBlockId);
+        expect(
+          b,
+          isNot(isA<WithheldBlock>()),
+          reason: '${a.attributionBlockId}: không dựng nguồn từ vùng bị giữ lại',
+        );
       }
     });
   });
