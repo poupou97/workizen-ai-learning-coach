@@ -62,6 +62,65 @@ VisualSpec _spec(VisualSection s) =>
     VisualSpec(specVersion: VisualSpec.currentVersion, primary: s);
 
 void main() {
+  // ⭐ LUẬT 4 hợp đồng E1 (`03-VISUALSPEC-CONTRACT.md`): chip KHÔNG tuỳ chọn.
+  testWidgets('chip «bản thử nghiệm» hiện cho MỌI độ tin trừ sự thật sản phẩm',
+      (t) async {
+    for (final trust in ContentTrust.values) {
+      if (trust == ContentTrust.withheld) continue; // không đứng trên cả spec
+      final s = VisualSection(
+        id: 'sec',
+        family: 'process',
+        title: 'X',
+        titleProvenance: _ref(),
+        nodes: [_node('a', 'một'), _node('b', 'hai')],
+        ordering: const ['a', 'b'],
+        trust: trust,
+      );
+      await t.pumpWidget(_host(_spec(s)));
+      await t.pumpAndSettle();
+      final expected = fixtureChipLabel(trust);
+      if (expected == null) {
+        // `trustedCorpus` — sự thật sản phẩm, chưa tồn tại trong app hôm nay.
+        expect(find.byKey(VisualSpecView.trustChipKey), findsNothing);
+      } else {
+        expect(
+          find.byKey(VisualSpecView.trustChipKey),
+          findsOneWidget,
+          reason: 'thiếu chip cho ${trust.name}',
+        );
+        expect(find.text(expected), findsOneWidget);
+      }
+    }
+  });
+
+  test('KHÔNG có tham số nào để tắt chip', () {
+    final src = File(
+      'lib/features/lesson_workspace/visual_grammar/visual_spec_view.dart',
+    ).readAsStringSync();
+    for (final hole in ['showChip', 'hideChip', 'withChip', 'chipEnabled']) {
+      expect(src.contains(hole), isFalse, reason: 'đường tắt chip: $hole');
+    }
+  });
+
+  test('chip đọc độ tin YẾU NHẤT của cả spec, không của hình đang xem', () {
+    VisualSection at(String id, ContentTrust trust) => VisualSection(
+      id: id,
+      family: 'process',
+      title: id,
+      titleProvenance: _ref(),
+      nodes: [_node('a', 'một'), _node('b', 'hai')],
+      ordering: const ['a', 'b'],
+      trust: trust,
+    );
+    final spec = VisualSpec(
+      specVersion: VisualSpec.currentVersion,
+      primary: at('a', ContentTrust.trustedStructuredLesson),
+      secondary: [at('b', ContentTrust.prototype)],
+    );
+    // Một hình phụ yếu hơn KHÔNG được giấu mình sau hình chính mạnh hơn.
+    expect(spec.trust, ContentTrust.prototype);
+  });
+
   testWidgets('A1 không có spec ⇒ nói VÌ SAO, không vẽ gì', (t) async {
     await t.pumpWidget(_host(null));
     await t.pumpAndSettle();

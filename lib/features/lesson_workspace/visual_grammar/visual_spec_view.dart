@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/wal_tokens.dart';
+import '../../../core/lesson_model/content_trust.dart';
 import '../../../core/visual_spec/derivation_lexicon.dart';
 import '../../../core/visual_spec/visual_spec.dart';
 import 'visual_family_renderer.dart';
@@ -52,6 +53,7 @@ class VisualSpecView extends StatefulWidget {
   static const emptyKey = Key('visual-spec-empty');
   static const unsupportedKey = Key('visual-spec-unsupported');
   static const whyKey = Key('visual-spec-why');
+  static const trustChipKey = Key('visual-spec-trust-chip');
   static Key sectionTabKey(String id) => Key('visual-spec-tab-$id');
 
   @override
@@ -110,11 +112,40 @@ class _VisualSpecViewState extends State<VisualSpecView> {
                 ),
               ),
             ),
+          // ⭐ LUẬT 4 CỦA HỢP ĐỒNG E1: chip KHÔNG phải tuỳ chọn. Không có
+          // tham số nào để tắt, và nó đọc `spec.trust` — độ tin YẾU NHẤT của
+          // cả spec — nên không hình phụ nào «đẹp hơn» mà giấu được chip.
+          // Gỡ chip cần HAI quyết định Founder tách biệt (ngưỡng G1 + giấy
+          // phép D4); hôm nay `trustedCorpus` là bất khả thi theo cấu tạo.
+          _trustChip(spec.trust),
           const SizedBox(height: WalSpacing.sm),
           _body(current),
           const SizedBox(height: WalSpacing.md),
           _why(current),
         ],
+      ),
+    );
+  }
+
+  /// Chip «bản thử nghiệm». `trustedCorpus` (sự thật sản phẩm) là giá trị
+  /// DUY NHẤT không có chip — và nó chưa tồn tại trong app hôm nay.
+  Widget _trustChip(ContentTrust trust) {
+    final label = fixtureChipLabel(trust);
+    if (label == null) return const SizedBox.shrink();
+    return Container(
+      key: VisualSpecView.trustChipKey,
+      margin: const EdgeInsets.only(top: WalSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: WalSpacing.sm,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: WalColors.surface,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 12, color: WalColors.inkSoft),
       ),
     );
   }
