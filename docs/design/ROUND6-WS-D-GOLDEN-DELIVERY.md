@@ -324,8 +324,56 @@ Nhỏ, nhưng đây là **tên riêng lịch sử** trong một app cho trẻ.
 | `workspace_density_test.dart` | bỏ so A/B/C, ghim bất biến của B | Founder đã chọn |
 | `round5_visual_test.dart` D1 | ghim «ba View cùng chrome» thay cho «thẻ nằm trong vùng cuộn» | bản vá cũ không còn thứ để vá |
 | `round4_experience_test.dart` §6.7 | «Đã mở» chuyển vào EXPANDED | nội dung không đổi |
-| `no_machine_ids_test.dart` | trục thời gian hiện ra **khi và chỉ khi** bài có `TimelineSemantic` | nới thành «có cũng được» sẽ xanh cả khi app vẽ trục từ hư không |
+| `no_machine_ids_test.dart` | canh **tính trung thực**, không canh «bài có mốc hay không» — xem §7.1 | ghim theo `d.semantic` là **chưa đủ**: bơm một `TimelineSemantic` vào fixture thì app vẽ trục và test vẫn xanh |
 | **`test/core/lesson_model/timeline_history_test.dart`** | **KHÔNG ĐỤNG** | tệp của WS-C; nó chờ 7 mốc và tiêu đề cũ, nay **đỏ trên máy này**. Đó là **tín hiệu thật** thuộc về WS-C, không phải rác cần dọn. Nó **bỏ qua** trên bản sao sạch ⇒ **CI không ảnh hưởng**. |
+
+### 7.1 «Lát cắt nghiên cứu» — sửa TIỀN ĐỀ, không nới cổng
+
+Test này đi Home → Workspace → Trực quan rồi đòi lát cắt **mở thẳng vào Dòng thời gian**.
+Tiền đề ấy hình thành khi bảy mốc do **fixture MẪU** cấp. Nay không còn mốc, vì lý do
+trung thực: `p039:000` bị giữ lại với một `VALIDATED_REPAIR` **cố ý không** trở thành
+trusted.
+
+Sửa tiền đề, **không nới cổng và không cho bỏ qua**. Luật mới:
+
+> **Hễ còn một vùng ĐÃ SỬA mà CHƯA ĐƯỢC TIN, thì tuyệt đối không được có trục thời gian
+> — cả trong dữ liệu lẫn trên màn.**
+
+Điều kiện là **`VALIDATED_REPAIR` + `servable != true`**, đọc thẳng từ hiện vật đã phát,
+không phải từ «bài này có mốc không». Nhờ vậy test đỏ đúng lúc phải đỏ: **trục thời gian
+quay lại mà không có quyết định tin của Founder.**
+
+Phần cốt lõi của tệp — không lộ mã máy — **giữ nguyên** và vẫn là lý do nó tồn tại; nay
+nó chạy trên đường Đọc của bản thật, gồm cả sheet «Vì sao SAM để trống?».
+
+**KIỂM ĐỘT BIẾN (đã chạy, đã đi lại, fixture khôi phục đúng băm `a904d005…`):**
+
+| đột biến | kết quả |
+|---|---|
+| phục vụ `p039:000` thành `paragraph` có chữ | **ĐỎ** |
+| bơm một `TimelineSemantic` vào hiện vật | **ĐỎ** (`Expected: empty · Actual: [TimelineSemantic]`) |
+| gỡ hẳn fixture thật (đường bản sao sạch) | **XANH** — nhánh MẪU vẫn đi trọn lối cũ |
+
+**Một canary đã thử và ĐÃ BỎ, ghi lại để không ai dựng lại nó:** canh rò rỉ bằng từ khoá
+(«Bạch Đằng», «Ngô Quyền», «938») cho **ĐỎ GIẢ** — chính những chữ ấy nằm trong khối MỤC
+TIÊU BÀI được phục vụ hợp lệ («ví dụ: 179 TCN, 40, 248, 542, 938,…»). Thay bằng phép đếm
+**cấu trúc**: số `WithheldBlock` app dựng phải **bằng** số vùng giữ lại hiện vật khai —
+không vùng nào lặng lẽ thành chữ — cộng với «từ vựng pipeline không được lên màn».
+
+### 7.2 Phát hiện hệ thống: bộ test mang theo LẠC QUAN CỦA THỜI DỰNG SẴN
+
+Ba test, **ba tầng khác nhau**, cùng một lỗi loại:
+
+| test | tầng | tiền đề hình thành khi… |
+|---|---|---|
+| `lesson_index_test.dart` | pack | pack còn chở 41 biểu thức INFERRED |
+| `timeline_history_test.dart` | `lib/core` | bảy mốc do bản dựng cũ cấp |
+| `no_machine_ids_test.dart` | UI | bảy mốc do fixture MẪU cấp |
+
+Cả ba **bỏ qua hoặc xanh trên bản sao sạch**. Chỉ một **cây đã composed CÓ asset thật**
+mới phơi ra. Đó là một cách hỏng riêng, đáng đặt tên: dữ liệu dựng sẵn cấp nội dung mà dữ
+liệu thật — bị giữ lại một cách trung thực — không cấp, và test đông cứng cái nội dung ấy
+thành kì vọng.
 
 ---
 
@@ -380,6 +428,11 @@ trước khi điều tra hình thái là lặp lại đúng kết quả vòng 5 
 ## 9. TRẺ DÙNG ĐƯỢC GÌ HÔM NAY MÀ TRƯỚC VÒNG NÀY CHƯA DÙNG ĐƯỢC?
 
 **Hai điều, và chỉ hai.**
+
+**Nói thẳng cái giá trước: TRẺ MẤT TRỤC THỜI GIAN.** Trước vòng này, mở Trực quan ở bài
+LS&ĐL 5 Bài 8 là thấy một trục bảy mốc. Nay không còn mốc nào, vì khối mang cả bảy mốc
+bị giữ lại — đã sửa, đã kiểm, **vẫn chưa được tin**. Đó là giá nhìn thấy được của sự
+trung thực trong vòng này, và nó phải được gọi tên chứ không giấu sau «7 → 0 mốc».
 
 1. **Một bài Lịch sử THẬT.** Trước vòng này, mở LS&ĐL 5 Bài 8 là đọc 23 đoạn văn nhại
    mở đầu bằng `[MẪU]`. Nay là **34 khối chữ SGK thật** (trang 36–39) cộng **17 chỗ
