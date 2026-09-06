@@ -1,22 +1,36 @@
-# Per-round archive registry — identities of record
+# Per-round archive registry — identities of REVIEW SNAPSHOTS
 
-**Why this file exists.** On 2026-09-06 four of the five per-round Desktop archives
-**disappeared** — rounds 4, 5, 6-v1 and 6-v2 — while `~/Desktop/wal-evidence/` beside them was
-untouched. They were not in the Trash, not offloaded to iCloud (the container is an empty 2021
-leftover, Desktop is a local directory, no `.icloud` stubs), and not anywhere else under the home
-directory. **I cannot attribute a cause and will not speculate about one.**
+> **Semantics corrected 2026-09-06** (Founder task order 43). This file is a **provenance /
+> identity registry**, **not** a Desktop archive policy and **not** the project's source of record.
+> The canonical source of record is the **repository** — see
+> [`docs/governance/REPOSITORY-SOURCE-OF-RECORD.md`](../governance/REPOSITORY-SOURCE-OF-RECORD.md).
+>
+> Earlier text in this file called per-round Desktop archives «the archive of record». That was
+> wrong under the governance clarified on 2026-09-06. **Previous Desktop ZIPs were review
+> snapshots.** The wording is corrected; **no hash has been deleted and no history rewritten.**
 
-Two were rebuilt because their build inputs happened to still exist in a **session-scoped
-scratchpad that is wiped when the session rolls**. That is luck, not a process.
+## What this file is for
 
-**A rebuild restores the contents, not the identity.** A regenerated ZIP is never byte-identical —
-the manifest records build time and commit — so its hash cannot match what was published. Without
-this registry, a later reader comparing a rebuilt archive against a hash quoted in an old report
-would see a mismatch and reasonably conclude tampering.
+A review snapshot may be deleted by the Founder at any time after reading — that is expected. But
+a ZIP that is later **rebuilt is never byte-identical**: its manifest records build time and
+commit, so its hash cannot match what was published. Without a registry, a reader comparing a
+rebuilt archive against a hash quoted in an old report would see a mismatch and reasonably
+conclude tampering.
 
-**The ZIPs themselves cannot live in git**: they contain verbatim SGK page images, which are
-INTERNAL / RESEARCH ONLY under D4, and they are large. This registry holds their *identities* so
-that a loss costs the bytes and not the provenance.
+**So this file records identities, so that losing a review snapshot costs its bytes and not its
+provenance.** It does not make the ZIPs canonical, and nothing may depend on their continued
+existence.
+
+## What happened on 2026-09-06 — recorded, not hidden
+
+Four of the five per-round Desktop ZIPs (rounds 4, 5, 6-v1, 6-v2) disappeared while
+`~/Desktop/wal-evidence/` beside them was untouched. **The Founder subsequently confirmed they
+delete Desktop copies after reviewing them.** That is correct behaviour under the rule above and
+**cost the project no record** — see `ROUND4-7-CANONICAL-RECORD-AUDIT.md` for the evidence that
+the canonical knowledge was already in the repository.
+
+Two were rebuilt at the time from inputs that happened to still exist in a session-scoped
+scratchpad. **A rebuild restores contents, not identity.**
 
 | Round | Filename | Original sha256 | Files | Bytes | Status |
 |---|---|---|---|---|---|
@@ -28,15 +42,10 @@ that a loss costs the bytes and not the provenance.
 
 Every rebuild carries `manifests/REGENERATION-NOTE.md` naming the original's size and hash.
 
-## Founder decision needed
+## Status of this registry
 
-**Per-round Desktop archives are the archive of record (permanent rule, Part VII) and they are
-not backed up.** Two of five survived, by luck. Options:
-
-1. **Durable location** — keep archives outside `~/Desktop` in a backed-up or versioned store.
-2. **Registry only** — accept that ZIPs may be lost, and treat this file as the identity of
-   record. Cheap; loses the evidence bodies.
-3. **Both** — this registry regardless, plus a durable store.
-
-Until decided, **this registry is committed on every round close**, so a lost archive costs its
-bytes and not its identity.
+**No Founder decision is outstanding.** The question this file originally raised — *«where should
+archives of record live?»* — was answered by task order 43: **the repository is the record, and
+Desktop ZIPs are review copies.** The registry continues, in its corrected role: it is updated on
+every round close so a rebuilt or missing review snapshot can always be told apart from a tampered
+one.

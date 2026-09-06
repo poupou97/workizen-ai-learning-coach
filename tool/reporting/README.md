@@ -1,6 +1,13 @@
 # `tool/reporting` — per-round retrospective archives
 
-**One immutable ZIP per round, on the Founder's Desktop.** Written once, never overwritten,
+> **Semantics corrected 2026-09-06 (Founder task order 43): a round ZIP is a FOUNDER REVIEW
+> SNAPSHOT, not the archive of record.** The canonical record is the repository — see
+> `docs/governance/REPOSITORY-SOURCE-OF-RECORD.md`. The Founder deletes review copies after
+> reading them, which is expected. **Build the ZIP only after the round has been canonicalised
+> into the repo**, never as the close step itself, and never let a ZIP be the only place a
+> decision lives.
+
+**One review snapshot per round, on the Founder's Desktop.** Written once, never overwritten,
 self-contained, readable years later with no repository and no network.
 
 This directory holds the generator. It does **not** hold the archives — those live on the
