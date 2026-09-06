@@ -944,41 +944,69 @@ reading is a detection, not a correction**, and users never overwrite canonical 
 
 ---
 
-## 11.3 Does the round compose? — an integration check with nothing merged
+## 11.3 Does the round compose? — verified, with nothing merged
 
-Because merging is a Founder gate, the composition was verified in a **throw-away
-worktree** built from `integration/round5-2026-09-06` with all seven lane branches
-merged into it. No PR was touched, no branch was pushed, and the worktree is
-disposable. Gitignored assets (321 pack files, 24 fixtures) were synced from the main
-checkout first, so a missing-asset failure could not be mistaken for a defect.
+Because merging is a Founder gate, composition was verified in a **throw-away worktree**
+built from `integration/round5-2026-09-06` with all nine lane branches merged into it.
+No PR was touched, no branch pushed, and the worktree is disposable. Gitignored assets
+(321 pack files, 24 fixtures) were synced from the main checkout first, so a
+missing-asset failure could not be mistaken for a defect.
+
+**Final result — the round composes:**
 
 | Check | Result |
 |---|---|
-| Git merge, 7 lane branches | **0 conflicts** |
-| Python suite | **520 tests OK** (19 skipped) |
-| Dart suite | **1038 of 1039 pass**, 3 skipped |
-| `flutter analyze` | **10 errors, all in one file** |
+| Git merge, 9 lane branches | **0 conflicts** |
+| `flutter analyze` | **No issues found** |
+| Python suite | **623 tests OK** (19 skipped) |
+| Dart suite | **1061 tests, All tests passed** (3 skipped) |
 
-**One integration defect, and it is instructive.** Lane B's PR #87 is green alone;
-Lane E2's PR #86 is green alone; **composed, they do not compile.**
+Heads verified: A3 `569dad6` · C `d241fdc` · A1 `6652d58` · A2 `465d235` · D `0113019`
+· A4 `1733ff7` · E1 `ea6b0f8` · E2 `538715f` · B `6e5f6e7`.
 
-E2's §8 provenance fix made the field `required List<ComparisonValue> cells` and kept
-`values` as a **getter** for backward compatibility
-(`lib/core/lesson_model/semantic_data.dart:317-323`). That claim — «backward
-compatible, Lane B and Lane C compile unchanged» — is **true for every site that reads
-`values[i]`, and false for a site that constructs with `values:`**, because a getter is
-not a constructor parameter. Lane B's new `round5_visual_test.dart` is the repo's only
-such constructor, and it did not exist when E2 measured compatibility. Five sites,
-lines 210, 268, 310–312.
+### Three integration defects that no lane's CI could see
 
-Neither lane erred. **This is the defect class that per-lane CI structurally cannot
-see**, and it is the argument for running this composition check every round rather
-than trusting six green badges. Routed to Lane B, which owns `test/features/**`, with
-the instruction to pass a real `sourceBlockId` rather than add a convenience
-constructor — a shim in `lib/core` would re-open the very hole E2 closed.
+Getting there took three fixes, and the pattern across them is the finding.
 
-**Everything else in the round composes cleanly**, including four lanes touching
-`lib/core/lesson_model/` in the same round.
+**1 · Lane B × Lane E2 — a compatibility claim true for readers, false for
+constructors.** E2's §8 provenance fix made `cells` required and kept `values` as a
+**getter**. That covers every site that *reads* `values[i]` — genuinely true, and what
+E2 checked — but a getter is not a constructor parameter. Lane B's new round-5 test held
+the repo's only such constructors, and they did not exist when E2 measured. Fixed by
+building those sites through **`SemanticData.fromJson`**, so the test now exercises the
+same parser the real fixtures use and every cell inherits a checkable
+`ValueGrounding.inheritedFromEntity` — deliberately **not** by adding a `fromStrings`
+convenience to `lib/core`, which would have made an unsourced cell constructible again.
+
+**2 · Lane A4 × Lane A2 — a loader that silently returned less than it was asked for.**
+`verify.load_plugins()` registered by **module-import side effect**. Once A2's test
+legitimately called `registry.reset()`, the modules were already in `sys.modules`, so
+re-importing was a no-op and registration was never replayed. Minimal reproduction:
+`test_verify_signals` alone → 42 OK; `test_mathfix_plugin test_verify_signals` → FAILED.
+A4 then proved the old path directly rather than inferring it: **the old loader would
+have returned `signals = []`** — worse than the diagnosis. The lone `G.llm_semantic`
+survivor was the tell, being the one module first imported *inside* a test method.
+Fixed with an explicit idempotent `register()` per module and a `load_plugins` that
+**verifies its manifest against the registry afterwards and raises
+`RegistrationIncomplete`**, refusing a module that has no `register()`. A4 also widened
+the default to all five plugin modules, since the router names paths for `A.enumerator`
+and `B.page_furniture` that are worthless if those signals are silently absent.
+
+**3 · Lane E2 × Lane E1 — a guarantee that was nominal.** Covered in §11.2: two green
+field-name guards while every element carried lesson identity inside a *value*.
+
+**The pattern, and the recommendation.** None of the three was visible to the lane that
+owned it. Each was found either by composing the round or by a second lane adopting the
+same rule. Two of the three — the silent registry and the identity leak — are the same
+species as this round's headline data findings (**R13**'s disappearance with no reason
+code, and grounding **strengthening itself** through a file write): *a component quietly
+delivering something other than what it promised, with nothing checking.*
+
+**Recommendation: make the composition check standing procedure at the end of every
+round.** Nine green CI badges did not mean the round worked; running them together is
+what found out. It costs one throw-away worktree and roughly ten minutes.
+
+---
 
 ## 12. Round-5 pull requests — all open, none merged
 
