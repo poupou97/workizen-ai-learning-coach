@@ -218,10 +218,11 @@ ENUM = re.compile(r'^\s*(?:(?:HĐ|Bài|Bước|Câu)\s*\d+[.:]?|\d{1,2}[.)]|[a-h
 QHINT = layout_extract.QUESTION_HINT
 DIRECTIVE_ANY = layout_extract.DIRECTIVE_ANY
 # Phase B (WAL-215). A leading directive verb closed by a FULL STOP is not governing an object: it is a
-# label opening a remark, and the sentence after it is a statement, not a task. «Nhận xét. Trong Ví dụ 2,
-# ta thực hiện …» is a remark; «Nhận xét đặc điểm ảnh của vật …» — the same verb with its object — is a
-# real task, and both exist in this corpus. The distinguishing signal is the stop, not the word, which is
-# why this is keyed on punctuation and not on a list of remark words.
+# label opening a remark, and what follows the stop is a statement, not a task. The SAME verb written
+# without the stop, taking a noun phrase as its object, is a real instruction — and BOTH shapes occur in
+# this corpus, measured on the 54 gold pages (D4: characterised by form; the readings stay in the
+# git-excluded corpus). The distinguishing signal is therefore the punctuation, not the word, which is why
+# this is keyed on a stop and not on a list of remark words: a word-list veto demotes the instruction.
 LEAD_VERB_STOP = re.compile(r'^\s*(?:Em hãy|Hãy|Nêu|Cho biết|Giải thích|Vì sao|Tại sao|Quan sát|So sánh'
                             r'|Kể tên|Kể|Chọn|Tính|Viết|Đọc|Thảo luận|Trình bày|Mô tả|Xác định|Dự đoán'
                             r'|Liệt kê|Nhận xét|Phân loại|Sắp xếp|Điền|Nối|Tìm)\s*\.', re.IGNORECASE)
@@ -501,8 +502,9 @@ def assign_role(b, ctx):
         return 'sidebar', 'context', 0.85, ['inside labelled side box']
     # heading candidates
     # Phase B (WAL-215), P1. This rule used to carry `not ends with "?"`, so the extractor's OWN
-    # structural label was discarded in favour of the question lexicon and a section title phrased as a
-    # question («Khi nào thì … ?», Toán 7 p41 b03) was served to a child as a task. A question-form
+    # structural label was discarded in favour of the question lexicon, and a section title phrased as a
+    # question — the shape measured on `07-sgk-toan-7-tap-hai` p041 b03 — was served to a child as a
+    # task it was expected to answer (D4: the row is named by id, never by its reading). A question-form
     # section title is a HEADING under ROLE-DEFINITION-SPEC-v1 (QUESTION §exclusion), so the trailing
     # «?» no longer overrides the label. It still cannot rescue a task: an enumerated question keeps its
     # existing exclusion, and a title that OPENS with a directive verb is a task whatever it is labelled.
