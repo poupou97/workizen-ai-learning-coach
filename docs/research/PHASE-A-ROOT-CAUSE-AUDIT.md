@@ -207,8 +207,11 @@ the same sentence with **one space** between sign and digit — CER **0.0056**, 
 a dash only when it is adjacent to a digit, so the operator token is not extracted and
 `digits_wrong` fires. **Re-deriving the served string with that single space removed reproduces
 the gold token sequence exactly** — the difference is entirely in the tokeniser.
-A real segmentation split does exist on this block (the gold unit spans two SDM blocks) and the
-counterfactual confirms it causes a *role* error; it does not cause the teaching-critical verdict.
+A real segmentation split does exist on this block — the gold unit spans two SDM blocks, and the
+counterfactual shows the served role is a consequence of it: given the whole printed unit the role
+changes to one the teacher-text guard withholds, so the block would not be served at all. That is
+a segmentation finding, and it is **not** what produced the teaching-critical verdict, which is why
+the row is not counted in class 1.
 *Fix*: the tokeniser, or an explicit decision that a spacing difference around an operator is a
 display error and not a teaching-critical one.
 
