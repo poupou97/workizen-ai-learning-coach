@@ -52,8 +52,8 @@ Reproduce with `python3 tool/semantic/run_poc.py`.
 ### One lineage row, verbatim from the output
 
 ```json
-{ "visualElement": "evt:05-sgk-lich-su-va-dia-li-5|8|Hai Bà Trưng|40 - 43#t0",
-  "claim": "cl:37e8a8396a2114e2",
+{ "visualElement": "evt:Hai Bà Trưng|40 - 43#t0",
+  "claim": "cl:c8066b37d399020b",
   "claimStatus": "proposed",
   "support": "sourceStated",
   "derivation": "e1-prose-dated-events-v1",
@@ -69,6 +69,12 @@ Reproduce with `python3 tool/semantic/run_poc.py`.
 That is the whole §6 chain as data: **visual element → claim → status → derivation rule →
 source block → character span → page (both numberings) → bbox → trust → and an honest
 terminus saying no gate exists.**
+
+Note where this row lives: on the **lineage artefact**, not on the spec. The renderer receives
+`to_json()`, which carries no `book`, no `lesson`, no page and no subject at any depth — see
+`09-E2-RECONCILIATION.md` §1. The element id above is the reason that reconciliation matters: it
+used to read `evt:05-sgk-lich-su-va-dia-li-5|8|Hai Bà Trưng|40 - 43#t0`, so a renderer could have
+recovered the lesson by parsing a string, through a door that field-level guards do not watch.
 
 ---
 
