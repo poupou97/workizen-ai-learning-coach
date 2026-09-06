@@ -14,7 +14,13 @@ UNACCOUNTED, and `audit --strict` (the default) exits non-zero when a single reg
 This is a check that FAILS, not a warning: round 5's silent loss was invisible precisely because nothing
 failed.
 
-    ledger.py audit --batch-dir DIR --pipeline ID [--out FILE] [--md FILE] [--historical]
+    ledger.py audit --batch-dir DIR --pipeline ID [--population spec|all-tsl]
+                    [--out FILE] [--md FILE] [--historical]
+
+`--population` names WHICH lessons the run covers — `spec` (the audited selection in
+`batch-spec.json`, the default) or `all-tsl` (every lesson with a TSL in the batch dir). The
+two give different totals over the same batch, and a total without its population is not a
+metric. See `batch_lessons()`.
 
 `--historical` reports without failing, which is how a round-5 artefact is measured without pretending
 its numbers changed. Counts and reason codes only: block text stays in gitignored `poc-out/`.
@@ -165,11 +171,42 @@ def ledger_lesson(batch_dir, pipeline, book, lesson, demotions=()):
         rows=rows)
 
 
-def ledger_batch(batch_dir, pipeline, demotions=()):
+SPEC, ALL_TSL = 'spec', 'all-tsl'
+
+
+def batch_lessons(batch_dir, pipeline, population=SPEC):
+    """The (book, lesson) pairs a ledger run covers. TWO populations exist, and they differ.
+
+    `spec`    — the lessons named in `batch-spec.json`: the audited selection.
+    `all-tsl` — every lesson the pipeline produced a TSL for in this batch dir, which includes
+                the neighbouring lessons pulled in by a shared boundary page.
+
+    ROUND 7 · WS-M. Round 6 published totals from BOTH populations, in one report, with no way
+    to tell them apart: §7's «29 lesson ledgers · 1 878 input regions · 138 unaccounted → 0»
+    is `all-tsl` (14 + 11 + 4 lessons), while §9's withheld counts 135→144 · 124→147 · 30→37
+    are `spec` (6 + 6 + 2). Running the documented command reproduced the second pair and not
+    the first, because `ledger_batch` had no selector and always read the spec. Both sets of
+    numbers are correct; only the re-derivation path was ambiguous. The selector is the fix,
+    and `spec` stays the default so no existing invocation changes.
+    """
+    if population == ALL_TSL:
+        out = []
+        for path in sorted(glob.glob(
+                f'{batch_dir}/tcroot/poc-out/trusted-corpus/tc-v2/{pipeline}/lessons/*/*.tsl.json')):
+            tsl = _load(path) or {}
+            if tsl.get('lesson') is not None:
+                out.append((os.path.basename(os.path.dirname(path)), tsl['lesson']))
+        return out
+    if population != SPEC:
+        raise ValueError(f'unknown population {population!r}; expected {SPEC!r} or {ALL_TSL!r}')
     spec = _load(f'{batch_dir}/batch-spec.json', {}) or {}
+    return [(L['book'], L['lesson']) for L in spec.get('lessons', [])]
+
+
+def ledger_batch(batch_dir, pipeline, demotions=(), population=SPEC):
     lessons = []
-    for L in spec.get('lessons', []):
-        r = ledger_lesson(batch_dir, pipeline, L['book'], L['lesson'], demotions)
+    for book, lesson in batch_lessons(batch_dir, pipeline, population):
+        r = ledger_lesson(batch_dir, pipeline, book, lesson, demotions)
         if r:
             lessons.append(r)
     tot = {k: sum(l[k] for l in lessons) for k in
@@ -183,7 +220,7 @@ def ledger_batch(batch_dir, pipeline, demotions=()):
     inp, s, w, u = (tot['inputSourceRegions'], tot['served'], tot['withheld'], tot['unaccounted'])
     return dict(
         schema=SCHEMA, invariant=INVARIANT, batchDir=os.path.abspath(batch_dir), pipeline=pipeline,
-        lessons=len(lessons),
+        population=population, lessons=len(lessons),
         conserves=all(l['conserves'] for l in lessons) and u == 0,
         **tot,
         byReason=dict(by_reason), byUnreadClass=dict(by_class),
@@ -216,7 +253,7 @@ def cmd_audit(a):
     if a.demotions:
         d = _load(a.demotions, [])
         dem = d.get('blockIds', []) if isinstance(d, dict) else list(d)
-    out = ledger_batch(a.batch_dir, a.pipeline, dem)
+    out = ledger_batch(a.batch_dir, a.pipeline, dem, a.population)
     if out['demotedDownstream']:
         print(f"  note: {out['demotedDownstream']} region(s) DEMOTED downstream (served → withheld) — "
               f"reported apart from this workstream's own reclassification, never folded into it")
@@ -246,7 +283,9 @@ def cmd_audit(a):
             return 0
         print(f'  {msg}', file=sys.stderr)
         return 1
-    print('  CONSERVATION HOLDS — every input source region carries an explicit disposition.')
+    print(f"  CONSERVATION HOLDS over population={out['population']} "
+          f"({out['lessons']} lesson ledgers) — every input source region carries an explicit "
+          f"disposition.")
     return 0
 
 
@@ -261,6 +300,10 @@ def main(argv=None):
     s.add_argument('--demotions', default='',
                    help='JSON list (or {"blockIds": [...]}) of block ids a downstream stage moved out of '
                         'the served set; joined on (book, page, native index) so it works across generations')
+    s.add_argument('--population', choices=(SPEC, ALL_TSL), default=SPEC,
+                   help='which lessons the ledger covers: the audited batch-spec selection '
+                        '(default) or every lesson with a TSL in the batch dir. The totals differ; '
+                        'always quote the population beside the number')
     s.add_argument('--historical', action='store_true',
                    help='report an UNACCOUNTED count without failing (used to measure a historical artefact)')
     s.set_defaults(fn=cmd_audit)
