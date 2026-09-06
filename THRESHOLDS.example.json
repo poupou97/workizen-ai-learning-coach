@@ -1,0 +1,133 @@
+{
+  "_THIS_IS_NOT_A_PRODUCTION_FILE": "EXAMPLES ONLY. Every scenario below is an ILLUSTRATION written to make a question answerable, not an answer to it. None is a recommendation. Copying any of them to THRESHOLDS.json would set a production trust gate, which is a Founder-only act (G1).",
+  "_do_not_create": "THRESHOLDS.json. Round 5 Lane A3 is forbidden from creating it, from recommending a point on the curve, and from claiming any gate is met. While THRESHOLDS.json is absent the pipeline reports trusted = 0 and prints why — that is the system working, not a bug.",
+  "_schema": "lane-a3-thresholds-example-v1",
+  "_written": "2026-09-06",
+  "_written_by": "Round 5 · Lane A3 (role spec + trust-gate sensitivity), Founder order §8",
+  "_read_before_using": [
+    "docs/research/TRUST-GATE-SENSITIVITY.md — the method, the curve, and the questions a gate needs answered first",
+    "docs/research/ROLE-DEFINITION-SPEC-v1.md — several gates below key on a ROLE, and role is the class the two blind annotators disagree on (κ 0.423–0.713)",
+    "docs/research/METRIC-DENOMINATORS.md — D5. These scenarios are evaluated on the gold plane (54 pages / 643 learning blocks). They are NOT evaluated on 3,679 or 3,381 lessons and must never be quoted as if they were."
+  ],
+  "_how_a_gate_is_evaluated": "tool/corpus/thresholds/run.py replays each gate over frozen per-block evidence rows and reports coverage · correct served · wrong served · teaching-critical served · withheld · false withheld · restored · restore precision. It ranks nothing.",
+  "_guard_classes": {
+    "fidelity": "agree_text · agree_tones · agree_numbers · agree_order · math_guard · unit_guard · chem_guard · low_ocr_conf · line_structure — 'is the served string what the page prints?'. Waiving one is a genuine coverage/accuracy trade and shows up on the curve.",
+    "policy": "teacher_text · answer_leak · figure_text · figure_dependent · page_feature:* · box_boundary · role_conflict — 'may a child be shown this at all?'. The gold plane can only say whether such a block is a faithful copy; it CANNOT say whether serving it is allowed. Waiving one is not a fidelity trade and the curve must not be read as if it were.",
+    "structural": "empty_block · furniture · empty — waiving them serves nothing."
+  },
+
+  "scenarios": [
+    {
+      "name": "A · conservative-illustration",
+      "illustrates": "What if today's guards are kept AND a character-exact agreement floor plus a high role-confidence floor are added on top? The question it answers: how much coverage does 'tighter than today' still cost?",
+      "gate": {
+        "deny_guards": null,
+        "min_text_sim": 100.0,
+        "min_role_confidence": 0.9,
+        "max_tone_disagreements": 0,
+        "on_missing_signal": "deny"
+      }
+    },
+    {
+      "name": "B · tone-signal-illustration",
+      "illustrates": "What if Lane A1's Vietnamese third signal (lexicon) resolved tone disagreements, so `agree_tones` no longer had to withhold on its own? `agree_tones` is the single largest over-withholder measured on the gold plane. This scenario is a DEPENDENCY, not a decision: it is only reachable if that signal exists and its false-correction rate is measured.",
+      "gate": {
+        "deny_guards": ["agree_text", "agree_order", "agree_numbers", "math_guard", "unit_guard", "chem_guard", "low_ocr_conf", "line_structure", "role_conflict", "empty_block", "furniture", "box_boundary", "figure_dependent", "answer_leak", "teacher_text", "page_feature:color_heavy", "page_feature:diagram", "figure_text", "empty"],
+        "on_missing_signal": "deny"
+      }
+    },
+    {
+      "name": "C · balanced-illustration",
+      "illustrates": "What if the two OCR stacks disagreeing about TONES or about WORDING no longer withheld by themselves, but a numeric agreement floor replaced them? The point of the scenario is to show that replacing a categorical guard with a numeric floor is not free — it changes which blocks are refused, not only how many.",
+      "gate": {
+        "deny_guards": ["agree_order", "agree_numbers", "math_guard", "unit_guard", "chem_guard", "low_ocr_conf", "line_structure", "role_conflict", "empty_block", "furniture", "box_boundary", "figure_dependent", "answer_leak", "teacher_text", "page_feature:color_heavy", "page_feature:diagram", "figure_text", "empty"],
+        "min_text_sim": 95.0,
+        "on_missing_signal": "deny"
+      }
+    },
+    {
+      "name": "D · coverage-leaning-illustration",
+      "illustrates": "What if every DISPLAY-level agreement guard were waived and only the guards that protect numbers, formulas, units and reading order remained? This is the shape of a 'the child may see a tone slip, never a wrong number' policy. It is shown so its cost is visible, not because it is advisable.",
+      "gate": {
+        "deny_guards": ["agree_numbers", "math_guard", "unit_guard", "chem_guard", "line_structure", "role_conflict", "empty_block", "furniture", "box_boundary", "figure_dependent", "answer_leak", "teacher_text", "page_feature:color_heavy", "page_feature:diagram", "figure_text", "empty"],
+        "on_missing_signal": "deny"
+      }
+    },
+    {
+      "name": "E · policy-only-illustration (far end of the curve)",
+      "illustrates": "The end point: no fidelity guard at all, only the guards that answer 'may a child see this?'. Included so the curve has a measured right-hand edge. It serves everything the pipeline can read, wrong or right.",
+      "gate": {
+        "deny_guards": ["role_conflict", "empty_block", "furniture", "box_boundary", "figure_dependent", "answer_leak", "teacher_text", "page_feature:color_heavy", "page_feature:diagram", "figure_text", "empty"],
+        "on_missing_signal": "allow"
+      }
+    },
+    {
+      "name": "F · question-surface-illustration",
+      "illustrates": "A DIFFERENT gate from the reading gate: what a Short-Answer surface would consume. Only blocks the role layer calls a question, at high role confidence, never figure-dependent. TC-19 #3 asks for QUESTION precision >= 0.95 before any auto-labelled question is graded; the role-signal experiment measured 0.938 at n = 16 and the gold set measures trusted-QUESTION precision 0.903 (n = 72). This scenario exists to show that a product surface needs its own gate, and that role — the class with κ 0.423–0.713 — is the thing it keys on.",
+      "gate": {
+        "deny_guards": null,
+        "allow_roles": ["question"],
+        "min_role_confidence": 0.9,
+        "on_missing_signal": "deny"
+      }
+    },
+    {
+      "name": "G · teaching-critical-floor-illustration",
+      "illustrates": "What if the gate were expressed as a floor on the SIGNAL rather than on the guard set: keep only structural guards, but require character-exact two-stack agreement. It asks whether one numeric floor can replace a hand-built guard set — and the answer the numbers give is the point of the scenario.",
+      "gate": {
+        "deny_guards": ["empty_block", "furniture", "empty"],
+        "min_text_sim": 100.0,
+        "on_missing_signal": "deny"
+      }
+    }
+  ],
+
+  "_audit_plane_note": "The gold plane has a withheld side with ground truth, so it can measure RESTORE. The audit plane (the annotated false-trust samples) is almost entirely SERVED rows, so it can only answer the opposite question: what would this gate REMOVE from content the product ships today, and how much of what it removes is actually right? `restored` is meaningless there and reads 0.",
+  "audit_plane_scenarios": [
+    {
+      "name": "H · two-column-math-withhold-illustration",
+      "illustrates": "Round-3 measured false trust 0.804 on two-column pages vs 0.528 on single-column, and 0.878 on Toán. What would the product lose if every served row on a two-column page carrying math were withheld?",
+      "gate": {
+        "deny_guards": [],
+        "deny_where": [
+          {"field": "layout_family", "op": "eq", "value": "two_col"},
+          {"field": "has_math", "op": "is_true"}
+        ]
+      }
+    },
+    {
+      "name": "I · subject-withhold-illustration (Toán)",
+      "illustrates": "The bluntest possible gate: withhold a whole subject. Shown because it is the cheapest thing to implement and the most expensive thing to live with — it is here to be compared against, not adopted.",
+      "gate": {
+        "deny_guards": [],
+        "deny_where": [{"field": "subject", "op": "in", "value": ["Toán"]}]
+      }
+    },
+    {
+      "name": "J · multi-line-withhold-illustration",
+      "illustrates": "Reading-order errors were only judgeable on rows with two or more printed lines (round-3: 0.306 on 324 such rows). What if every multi-line served row were withheld?",
+      "gate": {
+        "deny_guards": [],
+        "deny_where": [{"field": "multi_line", "op": "is_true"}]
+      }
+    },
+    {
+      "name": "K · ocr-agreement-floor-illustration",
+      "illustrates": "The audit rows carry an OCR-line similarity pre-check. What would a floor on it remove — and how much of that is right? Note the honest limit: this signal was a HINT shown to the annotator, never a gate, and it is null on 76 of the 484 round-3 rows.",
+      "gate": {
+        "deny_guards": [],
+        "min_text_sim": 95.0,
+        "on_missing_signal": "allow"
+      }
+    }
+  ],
+
+  "_lesson_level_record_is_separate": "docs/research/legacy-reprocess/THRESHOLDS.example.json (Lane D) is a LESSON-level template with a single `max_false_trust_rate`. This file is BLOCK-level and orthogonal: a lesson gate consumes the output of a block gate. Neither is a decision; do not merge them without deciding which denominator each is measured on.",
+  "_what_is_still_missing_before_any_gate_can_be_set": [
+    "A denominator decision: the gold plane is 643 learning blocks on 54 pages, deliberately hard-selected. The shipped-content plane (3,334 served blocks) has no withheld side, so it cannot measure restore.",
+    "A cost asymmetry from the Founder: how many correct blocks withheld equal one wrong block served? Every point on the curve is an implicit answer to that question.",
+    "Whether display-only errors and teaching-critical errors go through the SAME gate. Round 3 measured them separately for exactly this reason (display-only false trust 0.293 vs teaching-critical 0.333 on the shipped sample).",
+    "Whether a policy guard (teacher_text, answer_leak) is ever waivable at all. The simulator can waive it; doctrine may not permit it.",
+    "The role definitions (ROLE-DEFINITION-SPEC-v1.md). Scenario F keys on a role, and role is the least reproducible class measured so far."
+  ]
+}
