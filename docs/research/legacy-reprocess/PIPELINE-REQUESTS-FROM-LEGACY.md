@@ -20,6 +20,121 @@ the result measured, so each item below is closed or left open **by measurement*
 | **R7c** | verse lines joined into prose *(new — uncovered by the R7b fix)* | **OPEN** |
 | R8 | block ids carried the wrong pipeline label | **CLOSED** |
 
+## ROUND 5 UPDATE (2026-09-06) — re-measured on `tc2-p2r`, and four new requests
+
+Batch 1 was re-run from the original source on the **current** build — PR #77's *final* head including
+its 14 post-review fixes, which is **not** the `cb60cde` the table above measures — and batch 2 added six
+lessons in five new failure classes. Status below is by measurement, from
+`tool/corpus/legacy/regression.py` (deterministic probes) and blind page-render audits.
+
+| # | status on `tc2-p2r` | evidence |
+|---|---|---|
+| **R1** | on `tc2-p2r`: **still open, and generalising**. On **`tc2-p3` (Lane A1 merged): CLOSED** | Before: pdf p121 still attached to Bài 73 with 8 imprint blocks served, and the class reproduced on a book never touched before — **Toán 4 tập một Bài 37** served its colophon (pdf p133, no printed page number) as trusted `body`/`heading`, including `Mã số: G1HH4T001h26` and the publisher's CEO. After A1's imprint rule: the probe flips to **FIXED** (p121 unattached, boundary 117–120), `tail-scan` on batch 2 goes **1/6 → 0/6**, and attachment rescue on batch 1 goes **5/8 → 8/8**. Lane A1 measured the mechanism at scale first (26 of 42 books; 42/42 detected after, 0 collateral); Lane D's independent probes agree on the fix and on its generalisation. Credit: Lane A1. |
+| **R2** | **STILL OPEN** on `tc2-p3` too | `05-sgk-toan-5-tap-mot:p022:*:002` = `10`, `:016` = `b) 10 +`, unchanged across all three builds |
+| **R3** | **STILL OPEN** | `…:p021:*:001` = `CỘNG, TRỪ HẠI PHẬN SỐ KHÁC MẪU SỐ`, role `heading`, confidence 0.88, unchanged |
+| **R5** | **OPEN, and now measurable** | a 20-block caption quota sample across four lessons: display 5/18 = 0.278, and **10 of 19 captions are DETACHED from their figure**. Seven of those are bare `Hình N` labels where **the page prints no caption text at all** — a text-only pipeline serving a figure number as content. Only one (`Hình 5.4`) is a proven chip/caption split. |
+| **R7c** | **PARTLY FIXED** | `1960d85` added a `line_structure` withhold and 7 regions now use it — but 3 long single-run body blocks are still served, and the blind restore audit judged one of them (a four-line stanza of the Bài 25 poem) served as **one prose run**. Withholding some verse is not withholding verse. |
+
+### R9 (new · P0) — `chem_guard` blocks a Physics section heading
+`09-sgk-khoa-hoc-tu-nhien-9` Bài 5: the section title `II – Định luật khúc xạ ánh sáng` is withheld by
+`chem_guard`. A chemistry guard firing on a physics heading is a pure over-withhold: the block carries no
+formula, no unit and no chemical name. **Request:** the chemistry guard should require a chemical token,
+not merely a science book; and a `heading`-role block with no numeric or symbolic content should not be
+reachable by a formula guard at all.
+
+### R10 (new · P0) — withholding one member of a structure serves a MUTILATED structure
+The Founder's evaluation-set defect 8, located exactly: **Toán 4 tập một Bài 37, pdf p130** serves options
+`A. 1 số chẵn`, `B. 2 số chẵn`, `C. 3 số chẵn` and withholds the fourth (`…:p130:*:014`, role `option`,
+reason `agree_order`). The served question is **wrong**, not smaller.
+
+Measured independently of the pipeline by `tool/corpus/legacy/orphan.py`:
+**9 mutilated structures in batch 2** (5 split enumerated runs, 3 split caption sets, 1 split option group)
+and **13 in the batch-1 holdout**; **12/139 = 0.086** of withheld regions orphan a sibling in batch 2,
+**12/126 = 0.095** in the holdout — the rate generalises.
+
+**Request:** a group-aware disposition — withhold the whole group or restore the whole group, never serve a
+partial one — for OPTION ⊂ QUESTION, caption ↔ figure, table rows and enumerated steps. Lane D's detector
+is deliberately independent, so it can keep scoring the fix from outside.
+
+**Status after Lane A1 merged (`tc2-p3`): NOT CLOSED on this path.** Lane A1 reports mutilated structures
+**7 → 0** on its gold set; Lane D measures **9 → 9** on the evaluation set and **13 → 13** on the holdout, and
+the option group above is **byte-identical** across the merge (served `A.`/`B.`/`C.`, withheld `…:p130:*:014`,
+`agree_order`). Both numbers are right about their own population: `tool/corpus/repair/groups.py` computes and
+repairs mutilated structures **inside `repair/run_gold.py`**, and neither `tc2_sdm.py` nor `tc2_tsl.py` imports
+the repair package — so the TSL a child's lesson is built from never calls it. The remaining request is
+exactly the wiring.
+
+*Note for whoever builds the grouping:* the TSL's `order` field is numbered **separately** for the served
+and withheld lists. On the page above the served options are `order` 11, 12, 13 and the withheld fourth is
+`order` 17. Group on the page-level index in the block id instead — Lane D's first implementation used
+`order` and walked straight past this defect.
+
+### R13 (new · P0) — a block the role layer drops must arrive as a WITHHELD region, not vanish
+Lane A2 found blocks dying at `tc2_sdm.py:276-277` as role `empty` / reason `empty_block` / evidence
+"no letters". The consequence for anyone measuring the pipeline is that **such a block reaches neither
+`blocks` nor `withheld` in the TSL** — it is outside `learning blocks = trusted + withheld`, so it is
+invisible to the served share, and invisible to the over-withhold rate, which reviews only regions
+that *were* withheld.
+
+Measured on the round-5 batches (`tool/corpus/legacy/silent_loss.py`):
+
+| batch | trusted | withheld | **silently lost** | digits | expressions | served share | corrected |
+|---|---|---|---|---|---|---|---|
+| batch 2 (evaluation set) | 232 | 135 | **27** | 17 | 8 | 0.632 | **0.589** |
+| batch 1 (holdout) | 196 | 124 | **55** | 21 | 10 | 0.613 | **0.523** |
+| — Toán 4 tập hai Bài 61 | 4 | 15 | **32** | 6 | 2 | 0.211 | **0.078** |
+
+The lost blocks are the printed exercises — `40 613 + 47 519`, `3 675 + 2 918`, `7 641 - 2 815`,
+`2 667 + 3 825`, `74 165: 5`, the flattened `3 7 + 11 12`, A2's own `7 8 2 8 7 - 2 8 5 8` — and on
+LS&ĐL 4 Bài 12 they are map and table figures (`0,6`, `1408`, `1010`), so this is not Toán-only.
+
+**Request:** (a) every block the role layer refuses should appear in `withheld` with a truthful reason,
+so a refusal can be audited like any other; (b) `empty_block` with evidence "no letters" is the wrong
+reason code for a block reading `7 8 2 8 7 - 2 8 5 8` — a digits-only block is not an empty one, and a
+reason code that misstates what was lost sends the next lane looking in the wrong file.
+
+### R14 (new · P1) — keep the line geometry one step longer, it is what the edge defects need
+`tc2_sdm.py:1060` reads OCR line geometry, spends it on one verse boolean at `:1110`, and discards it
+before the guards run (Lane A2). Lane D has an independent reason to want it kept: **both** defects in
+the round's single REPAIRED-stage restore sit at the *edges* of the bounding box — the Roman `II`
+mis-read as `I1` at the left edge, and a fragment of the page's diagonal watermark («…Ô C. SỐNG»)
+bleeding in at the right. Box geometry is exactly the evidence that would have caught them, and it is
+thrown away immediately before the place that could have used it.
+
+### R15 (new · P1) — the pack builder reads an unversioned, three-rounds-old artefact
+`tool/ui/lesson_attach.TC2_ATTACH_DEFAULT` hard-codes `poc-out/trusted-corpus/tc-v2/tc2-p1/attach`.
+Verified independently (`tool/corpus/legacy/attach_repro.py`): the stored files do **not** reproduce
+from current code — **950 of 6,176 page verdicts differ** across 38 books, 54 explained by the named
+end-matter rules and **896 unexplained**, 874 of those moving a page to a different lesson.
+
+Measured consequence today: **none.** Rebuilding all 12 packs against freshly regenerated attach
+leaves 207/207 activities unchanged and 12/12 `contentHash` identical; it moves the diagnosis only
+(repaired starts 17 → 18 and 0 → 1, grade-5 flagged rows 22 → 19). It is harmless by luck, not by
+design, and `buildProvenance` cannot say which attach a pack used.
+
+**Request (a provenance decision, not a code change Lane D should take alone):** either pin it —
+record the attach directory, its pipeline id and a hash of its contents in `buildProvenance`, and fail
+closed when it is absent — or regenerate per build and drop the default. Lane D recommends pinning and
+did not implement it, because it changes the pack manifest schema the Dart side parses.
+
+### R11 (new · P1) — over-withholding is now the larger pool, and its shape is «siblings»
+**19 of 30 reviewed withheld regions in batch 2 (0.633) are over-withheld**, up from 12/30 (0.400) in
+round 4. The pattern is consistently a sibling of a served block: an objective bullet refused while its
+sibling is served, a `Tiến hành` step refused while its `Chuẩn bị` is served, `26 000 + 9 015 × 6` refused
+while `78 060 : (10 − 7) + 300 045` is served. Several plain paragraphs and section titles are refused on
+`agree_tones` alone. **Request:** treat a guard that fires on one member of a homogeneous run and not on
+its neighbours as evidence about the guard, not about the block.
+
+### R12 (new · P1) — a restored region needs a fresh verdict, and the old one predicts it
+Of 6 regions this build serves again after `tc2-p1` withheld them, **RESTORE PRECISION is 3/6 = 0.500**.
+The split is not random: of the 4 the earlier audit had called **over-withheld**, 3 came back correct; of
+the 2 it had called **safe refusals, both came back wrong** (a stranded `G:` marker and the bare label
+`Tiến hành:` served as an `instruction` with its steps left outside the box). **Request:** when a guard is
+loosened, prefer the regions a review called over-withheld; a region a review called a safe refusal should
+need a positive signal before it is served again.
+
+---
+
 Overall on batch 1: derived false trust 0.365 → 0.297, attachment 0.108 → 0.034, role 0.216 → 0.125, at a
 coverage cost of 287 → 221 served blocks. Numbers and denominators in `ROUND4-BATCH-1-REPORT.md` §7.
 
