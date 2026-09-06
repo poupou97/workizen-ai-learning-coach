@@ -26,6 +26,12 @@ class Token:
     h: float
     conf: float
     index: int
+    engine: str = 'apple-vision-page-v1'
+    #: which observation produced this token. The whole-page pass is the default because it is
+    #: what `load_tokens` reads. A token recovered by `tool/corpus/recognition` from a crop
+    #: carries its own engine name instead, so a validator and a reviewer can both see that a
+    #: digit came from a second observation and not from the page pass — round 6 adds a
+    #: recogniser, and a recogniser that hides which pixels it read is not auditable.
 
     @property
     def x0(self):

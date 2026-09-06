@@ -68,7 +68,7 @@ class Candidate:
 def observation_of_token(t):
     return dict(kind='ocr_line', index=t.index, text=t.text,
                 bbox=[round(t.x, 6), round(t.y, 6), round(t.w, 6), round(t.h, 6)],
-                conf=t.conf)
+                conf=t.conf, engine=t.engine)
 
 
 def observation_of_bar(bar):

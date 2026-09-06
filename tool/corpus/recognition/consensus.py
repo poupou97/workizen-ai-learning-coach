@@ -119,6 +119,9 @@ class FractionReading:
     numerator: BoxReading
     denominator: BoxReading
     value: str = None
+    candidate: str = None      # what was refused, kept for the ledger. NEVER a value: a consumer
+    #   that reads `value` must never see a string this module declined to accept, and round 5's
+    #   two false corrections both looked like perfectly good strings.
     region_agreement_scale: float = None
     reason: str = ''
 
@@ -140,7 +143,7 @@ def read_fraction(region_key, num_lines, den_lines, region_lines,
         ok, scale = region_supports(region_lines, n.value, d.value)
         if not ok:
             return FractionReading(region_key, 'REGION_UNCONFIRMED', n, d,
-                                   value=f'{n.value}/{d.value}',
+                                   candidate=f'{n.value}/{d.value}',
                                    reason='the two halves were read but never seen stacked')
         return FractionReading(region_key, READ, n, d, value=f'{n.value}/{d.value}',
                                region_agreement_scale=scale)
