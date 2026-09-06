@@ -1,0 +1,12 @@
+# Round-5 CI status — read from GitHub on 2026-09-06T03:47:59Z by the archive builder
+# command: gh pr view <n> --json statusCheckRollup
+PR#79 Analyze & Test=SUCCESS
+PR#80 Analyze & Test=SUCCESS
+PR#81 Analyze & Test=SUCCESS
+PR#82 Analyze & Test=SUCCESS
+PR#83 Analyze & Test=SUCCESS
+PR#84 Analyze & Test=SUCCESS
+PR#85 Analyze & Test=SUCCESS
+PR#86 Analyze & Test=SUCCESS
+PR#87 Analyze & Test=SUCCESS
+PR#88 Analyze & Test=SUCCESS

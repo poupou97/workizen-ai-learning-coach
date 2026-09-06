@@ -1,0 +1,156 @@
+{
+  "schema": "wal-round-gate-results-v1",
+  "round": "06",
+  "closeDate": "2026-09-06",
+  "classification": "INTERNAL / RESEARCH ONLY - DO NOT PUBLISH (Founder rule D4)",
+  "note": "Assembled by the archive builder from ROUND6-CONSOLIDATED-REPORT-2026-09-06.md and the four workstream reports. Every value carries the source that produced it and a claim label. Nothing here is computed by this file; it is a machine-readable index into evidence that lives elsewhere in this archive.",
+  "gatesFixedBeforeTheRound": true,
+  "gatesSource": "docs/research/ROUND6-PLAN.md @ 1a75d24 (committed before any result)",
+  "tally": "4 PASS + 1 TRUTHFUL ZERO",
+  "gates": [
+    {
+      "id": "A",
+      "name": "ACCOUNTING",
+      "requirement": "Zero unexplained silent loss on Golden + holdout",
+      "verdict": "PASS",
+      "archiveBuilderVerdict": "PASS",
+      "label": "MEASURED (WS-A); exit path PROVEN by the archive builder",
+      "key": {
+        "unaccountedBefore": 138,
+        "unaccountedAfter": 0,
+        "lessonLedgers": 29,
+        "inputRegions": 1878,
+        "servedSetByteIdentical": true,
+        "servedCounts": {"batch2": 285, "batch1Holdout": 234, "goldenRun": 43},
+        "lostRegionsClassified": 82,
+        "excludedWithReason": 50,
+        "withheldWithTruthfulReason": 32,
+        "rootCause": "rule order in assign_role; 17 of 18 Docling FORMULA regions never reached role 'formula'",
+        "enforcement": "tool/corpus/accounting/ledger.py audit exits non-zero on any UNACCOUNTED region"
+      },
+      "evidence": ["reports/ws-a-truth-accounting/TRUTH-ACCOUNTING-ROUND6.md", "metrics/golden-slices.json", "evidence/structural-spot-checks.md#4"]
+    },
+    {
+      "id": "B",
+      "name": "RECOGNITION",
+      "requirement": "At least one previously unrecoverable OCR failure class materially improves at recognition level",
+      "verdict": "PASS",
+      "archiveBuilderVerdict": "PASS",
+      "label": "MEASURED (WS-B), hand-checked against the printed page",
+      "key": {
+        "namedDefectRecovered": "b) 3/10 + 5/21 - numerator 3 absent from the whole-page OCR entirely",
+        "golden2Bai61": {"unreadableRegions": 47, "recovered": 17, "correct": 17, "controlRegions": 38, "controlDisagreements": 0},
+        "holdout3": {"digitRecall": 0.181, "falseRecognitionRate": 0.049},
+        "devDigitRecall": 0.500,
+        "sdmDigitRecall": 0.403,
+        "blocksBlockedByDigitNotRead": {"before": 281, "after": 234, "deltaPct": -16.7},
+        "restoreDelta": {"before": 10, "after": 10, "delta": 0, "note": "the honest negative - a recovered digit is not a repaired block"},
+        "costPerRegionSeconds": 0.46,
+        "dependenciesAdded": 0,
+        "ohm": {"population": 22, "recovered": 0, "verdict": "FALSIFIED - the glyph is not in the engine's repertoire"}
+      },
+      "evidence": ["reports/ws-b-recognition/RECOGNITION-RECROP-RESULTS-2026-09-06.md", "reports/ws-b-recognition/RECOGNITION-FAILURE-CENSUS-2026-09-06.md"]
+    },
+    {
+      "id": "C",
+      "name": "REPAIR",
+      "requirement": "A ValidatedRepair crosses the production-shaped pipeline",
+      "verdict": "PASS",
+      "archiveBuilderVerdict": "PASS",
+      "label": "PROVEN - the archive builder parsed the shipped fixture directly",
+      "key": {
+        "validated": 9,
+        "crossed": 6,
+        "trusted": 0,
+        "violations": 0,
+        "demotions": 2,
+        "servedTextChanged": "none",
+        "fixtureSha256": "a904d0052aa9ff7d0516d99539ac7009d90b1868990a39f6b84da8d7dca91a91",
+        "fixtureBlocks": 52,
+        "fixtureWithheld": 17,
+        "fixtureSemantic": 0,
+        "fixtureTutorSteps": 0,
+        "repairBearingBlocks": 6,
+        "allDispositionsValidatedRepair": true,
+        "allServableFalse": true,
+        "anyRepairBearingBlockCarriesText": false,
+        "forbiddenValueKeysFound": 0,
+        "sharpCase": "p039:000 - all seven dated events - withheld, no text field, VALIDATED_REPAIR, servable false"
+      },
+      "evidence": ["reports/ws-c-repair-integration/REPAIR-INTEGRATION-ROUND6.md", "evidence/round6-artefacts/fixtures-real/lesson-05-sgk-lich-su-va-dia-li-5-b8.json", "evidence/structural-spot-checks.md#1"]
+    },
+    {
+      "id": "D",
+      "name": "TEACHING",
+      "requirement": "At least one real lesson honestly eligible for teaching, target >0. Do not lower trust/safety gates to achieve >0. A truthful zero is acceptable if evidence demands it.",
+      "verdict": "TRUTHFUL ZERO",
+      "archiveBuilderVerdict": "TRUTHFUL ZERO - correct under the gate's own terms",
+      "label": "MEASURED and structurally necessary",
+      "key": {
+        "eligibleForTeaching": 0,
+        "sourceTrust": "0 / 97",
+        "blockedOn": "no production trust threshold exists; setting one is a Founder gate",
+        "isThisAnEngineeringFailure": false,
+        "gatesLoweredToAvoidTheZero": 0,
+        "evidenceThatNoGateWasLowered": "the served set is byte-identical before and after the accounting fix; trusted:0 is asserted in code, not measured; the timeline was allowed to disappear rather than be served"
+      },
+      "evidence": ["11-FOUNDER-ACCEPTANCE-CARD.md#2", "06-PRODUCT-REALITY.md"]
+    },
+    {
+      "id": "E",
+      "name": "DEVICE",
+      "requirement": "At least one Golden lesson on a real device visibly consuming validated/repaired real data, traceable UI -> LessonDocument -> TSL -> ValidatedRepair -> Source",
+      "verdict": "PASS",
+      "archiveBuilderVerdict": "PASS",
+      "label": "OBSERVED on a real Nokia 6.1; frame hashes and fixture hash PROVEN by the archive builder",
+      "key": {
+        "device": "Nokia 6.1, Android 10, SDK 29",
+        "buildCommit": "eac69ea1ad37a6b343e162be9e55d82df7f6db7e",
+        "apkSha256": "7b2b2b79a5518a16b9c1605412ebc6064b14326325cdc2d52d1786289e1c1237",
+        "lesson": "LS&DL 5 Bai 8",
+        "learner": "Na (the Founder's own profile, preserved with adb install -r)",
+        "frames": 7,
+        "frameHashesVerified": "7 of 7",
+        "stepsPerManifest": {"PASS": 7, "FAIL": 1, "UNVERIFIED": 1, "downgraded": 1},
+        "stepsPerProse": {"PASS": 8, "FAIL": 1},
+        "discrepancyNote": "step 08 (the per-pixel idle check) produced no frame; the manifest's own retention rule downgraded it to UNVERIFIED. The archive reports the manifest tally.",
+        "theFail": "step 09 - the 17 gaps have no page crops (gap G1, returned to WS-C)",
+        "lineageVerdict": "PASS under --require-repair"
+      },
+      "evidence": ["manifests/round6-device-MANIFEST.json", "evidence/device-frame-verification.txt", "screenshots/", "08-DEVICE-EVIDENCE.md"]
+    }
+  ],
+  "notAGate_butMeasured": {
+    "canonicalLessonIdentity": {
+      "sourceRows": 3679,
+      "distinctCurrentKeys": 3240,
+      "trueDuplicates": 29,
+      "keyCollisions": 410,
+      "sourceVariants": 0,
+      "canonicalLessonCount": 3650,
+      "pageAnchored": 3359,
+      "unanchored": 291,
+      "booksContributingZeroRows": 63,
+      "booksWithParseableToc": 238,
+      "status": "MEASUREMENT, not an approved denominator. 3,679 remains HISTORICAL BASELINE ONLY pending four Founder rulings."
+    },
+    "compositionCI": {
+      "branches": 5,
+      "conflicts": 0,
+      "flutterAnalyze": "No issues found",
+      "pythonTests": 748,
+      "dartTests": 1084,
+      "realAssetsSynced": true,
+      "composedOnFirstAttempt": false,
+      "label": "MEASURED by the coordinator; NOT re-run by the archive builder"
+    },
+    "mergeStatus": {
+      "round6PRs": [89, 90, 91, 92, 93],
+      "allOpen": true,
+      "allCiGreen": true,
+      "merged": 0,
+      "alsoStillOpen": [73, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88],
+      "label": "PROVEN - GitHub API, 2026-09-06"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "schema": "wal-round-archive-spec-v1",
+  "round": "07",
+  "roundLabel": "Round 7 — TRUST GATE CALIBRATION + FIRST TRUSTED SLICE",
+  "closeDate": "2026-09-06",
+  "closeDateEvidence": "Consolidated report dated 2026-09-06; final round-7 commit 74d9db6 (composition CI) on 2026-09-06; PRs #94-#97 all opened and CI-green the same day; the calibration policy frozen 2026-09-06T06:41:54Z and both blind populations 06:47:21Z. No round-7 PR was merged and no threshold was activated, so no merge or activation date exists.",
+  "classification": "INTERNAL / RESEARCH ONLY - DO NOT PUBLISH. Contains 22 verbatim SGK page crops and a lesson fixture built from SGK text (Founder rule D4). The crops are additionally LICENSING-DISTRIBUTION BLOCKED: internal validation only, not distribution-ready.",
+  "rootDir": "ROUND-07",
+  "archiveNameTemplate": "HOC-CUNG-SAM-ROUND-{round}-{closeDate}.zip",
+
+  "requiredDocs": [
+    "00-START-HERE.md",
+    "01-ROUND-OBJECTIVE.md",
+    "02-PLAN-VS-ACTUAL.md",
+    "03-WORK-COMPLETED.md",
+    "04-FAILURES-AND-FALSIFICATIONS.md",
+    "05-METRICS-BEFORE-AFTER.md",
+    "06-PRODUCT-REALITY.md",
+    "07-TEST-CI-PR-EVIDENCE.md",
+    "08-DEVICE-EVIDENCE.md",
+    "09-ARCHITECTURE-DATA-CHANGES.md",
+    "10-OPEN-RISKS-BLOCKERS.md",
+    "11-FOUNDER-ACCEPTANCE-CARD.md",
+    "12-NEXT-ROUND-PLAN.md",
+    "13-REMAINING-ROADMAP.md",
+    "14-JIRA-CONFLUENCE-STATUS.md",
+    "15-FILE-MANIFEST.md"
+  ],
+  "generatedDocs": ["15-FILE-MANIFEST.md"],
+  "requiredDirs": ["evidence", "metrics", "screenshots", "reports", "manifests"],
+
+  "copy": [
+    { "dest": "reports", "src": "docs/research/ROUND7-CONSOLIDATED-REPORT-2026-09-06.md" },
+    { "dest": "reports", "src": "docs/research/ROUND7-PLAN.md" },
+    { "dest": "reports", "src": "docs/research/ROUND7-MERGE-DEBT-REAUDIT.md" },
+    { "dest": "reports", "src": "docs/research/ROUND7-HISTORICAL-CORRECTIONS.md" },
+
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND6-CONSOLIDATED-REPORT-2026-09-06.md" },
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND6-PLAN.md" },
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND6-MERGE-DEBT-AUDIT.md" },
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND5-ACCEPTANCE-CRITERIA.md" },
+
+    { "dest": "metrics", "src": "docs/research/METRIC-DENOMINATORS.md" },
+
+    { "dest": "manifests", "src": ".workforce.json", "rename": "workforce-config-repo-copy.json" }
+  ],
+
+  "excluded": [
+    { "what": "SGK PDF source", "path": "nguon-chi-thuc/", "size": "9.8 GB", "reason": "copyright; never committed, never archived" },
+    { "what": "all derived pipeline artefacts", "path": "poc-out/", "size": "14 GB", "reason": "derivative works of copyrighted source; gitignored" },
+    { "what": "round-7 artefact trees", "path": "poc-out/round7/", "size": "18 MB", "reason": "inventory only - see manifests/large-data-inventory.txt; reproduction instructions in 10-OPEN-RISKS-BLOCKERS.md section 6" },
+    { "what": "rounds 5-6 artefact trees, still referenced", "path": "poc-out/round5, poc-out/round6", "size": "341 MB + 150 MB", "reason": "inventory only" },
+    { "what": "device frames", "path": "-", "size": "0", "reason": "NONE EXIST - no device walk was performed. See screenshots/NO-DEVICE-FRAMES-THIS-ROUND.md" }
+  ]
+}

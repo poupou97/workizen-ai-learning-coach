@@ -1,0 +1,48 @@
+# Round-5 device frame verification — independently recomputed by the archive builder
+# generated 2026-09-06T03:48:22.662543+00:00
+# manifest: docs/design/track-b-evidence/round5/MANIFEST.json (schema wal-evidence-manifest-v1, generatedAt 2026-09-06T01:47:09.552967+00:00)
+# device: Nokia 6.1 · Android 10 (192.168.1.3:5555), học sinh «Na · Lớp 6», dọc, adb qua WiFi
+# APK sha256: e3b3b43399ad90d583685bd0058b4ff13efffb9235626cdbf141629ff626870e
+
+FRAME                                      REPO     DESKTOP  SHA256(repo)
+round5-1-01-home.png                       OK       SAME     0f0a4499af594ae47eb687b1558607c2
+round5-1-02-home-scrolled.png              OK       SAME     d834b98e53399eb08d72177e28e1cb87
+round5-1-03-read.png                       OK       SAME     79f0c7122d3e0917338bf95c3a6243b2
+round5-1-04-visual-process.png             OK       SAME     f590efb8e97b11f58421b995549e6010
+round5-1-05-visual-flow.png                OK       SAME     2bf519d115a66b46837cec49b6126b84
+round5-1-06-visual-flow-end.png            OK       SAME     4f1021a184760c0b3a77da754500491f
+round5-1-07-visual-mindmap.png             OK       SAME     e7e7dc8f76227a7d2496804e9dcdb4d6
+round5-1-08-visual-mindmap-hub.png         OK       SAME     63297010b382aa6b7c690431fb4579a5
+round5-1-09-visual-mindmap-hub-hidden.png  OK       SAME     ae46c17f763c55790bad7ce2dfda550a
+round5-1-10-mindmap-source-sheet.png       OK       SAME     cdf473a7e40048ade7e42d3d49e34ab4
+round5-1-11-figure-chip.png                OK       SAME     83d6a267adccf27b80b3de2c33920113
+round5-1-12-figure-chip-to-read.png        OK       SAME     7c383375356ee8656421718f57983d37
+round5-1-13-tutor.png                      OK       SAME     40900d97bacd26faf9e94613906cc369
+round5-1-14-home-research.png              OK       SAME     d8adb692fdf20a15cb9e6ab8640b67cf
+round5-1-15-research-timeline.png          OK       SAME     595846c7af49f06286402a2cfcb3e823
+round5-2-01-home.png                       OK       SAME     affb1aec85b5762b6438fda53d031608
+round5-2-02-picker.png                     OK       SAME     6b27381d247f697b0bd5f9479fe4df26
+round5-2-03-visual-top.png                 OK       SAME     5be41d6fddc6eedc7248edc4884285c1
+round5-2-04-mindmap-whole.png              OK       SAME     eea14b20a1ade88cb30e508c3e2aeace
+round5-2-05-shelf-search.png               OK       SAME     d75ce8f061ca650495a6cbeda0a11a42
+round5-2-06-shelf-sam-filter.png           OK       SAME     a4be6a73e9be2991acd2a81a428b51b6
+round5-2-07-book-tabs.png                  OK       SAME     de205168e2914d5eb253a7213cc15b7e
+round5-2-08-book-lessons-tab.png           OK       SAME     be2539c078d09c7a6167e71f92a7b8ea
+round5-2-09-book-lessons-b17.png           OK       SAME     ae68fca799e0936047277c8a78f5c3fe
+round5-3-01-book-lessons-filter.png        OK       SAME     5f688224468d9a911927771a867ff6b4
+round5-3-02-book-sam-only.png              OK       SAME     a2b2f1bd164198aa4988cbbdc3c93ca3
+round5-4-card-tutor.png                    OK       SAME     e2a57b655c330be106bc8cf129188101
+round5-4-card-visual.png                   OK       SAME     83ed2098dd35c4b8aa5d7b25a1a9022c
+round5-4-icon-sheet.png                    OK       SAME     157556a1c892aa86c68828ad21085dbc
+round5-4-icon-tutor.png                    OK       SAME     6343700ce3e714529e2f7f3fbe53986c
+round5-4-inline-expanded.png               OK       SAME     be297036fc6c5a7e345bea9a513d8fe4
+round5-4-inline-tutor.png                  OK       SAME     39a666c2d9a50d39c06e662b3f73bedb
+round5-4-peek-expanded.png                 OK       SAME     bf90121f1970c4fbc4c35241e8a25c15
+round5-4-peek-tutor.png                    OK       SAME     f2d5c9aa63a28c3bdcc531669f743d1b
+round5-5-inline-tutor-fixed.png            OK       SAME     accd2eafa8385a445144e978af811bb9
+round5-5-peek-collapsed-fixed.png          OK       SAME     26a667d3b810968b6b0e8bf4cac91eee
+
+TOTALS: frames in manifest=36  repo hash OK=36  mismatch=0  missing=0
+        ~/Desktop/wal-evidence: identical=36  differs=0  absent=0
+        steps: {"PASS": 28, "FAIL": 0, "SKIP": 0, "UNVERIFIED": 0, "OTHER": 0}   downgraded: 0
+        iterations recorded: 5

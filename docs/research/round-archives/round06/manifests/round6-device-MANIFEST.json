@@ -1,0 +1,303 @@
+{
+  "schema": "wal-evidence-manifest-v1",
+  "round": "round6-ws-d",
+  "generatedAt": "2026-09-06T04:30:13.992205+00:00",
+  "git": {
+    "sha": "eac69ea1ad37a6b343e162be9e55d82df7f6db7e",
+    "branch": "ws-d/round6-golden-delivery",
+    "dirty": false
+  },
+  "apk": {
+    "file": "build/app/outputs/flutter-apk/app-debug.apk",
+    "sha256": "7b2b2b79a5518a16b9c1605412ebc6064b14326325cdc2d52d1786289e1c1237",
+    "bytes": 245952191
+  },
+  "packs": [
+    {
+      "file": "lesson-index-g1.json",
+      "sha256": "0452fa58b928d8682313f137354d478c8123f33aa416c6f0c64101124048bfb2",
+      "packVersion": "g1-20260906T0424Z-eac69ea1",
+      "contentHash": "d17e5771cd4c414f55130e42cb84ef531d1676446e75176cbbdc29b4224464bc",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g10.json",
+      "sha256": "958bb4d5dafbb0a6b4aa173e4fff2f3a4c2c5503196dc5a79cae3ae841807813",
+      "packVersion": "g10-20260906T0424Z-eac69ea1",
+      "contentHash": "463a97fa9a8b19d3675eaf50ff2091232a16c12ca96edc56840dc0907688e321",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g11.json",
+      "sha256": "e4615d88ed25b61012970b8f10a8c71c5333930f41dbcdc5e8b7cdb9a24be924",
+      "packVersion": "g11-20260906T0424Z-eac69ea1",
+      "contentHash": "44d3e5bdf9a2a5288720fb67d026541d413a4ab70be8b646d11868898efca075",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g12.json",
+      "sha256": "f60f94c4e2dfc89c5fdd30c4079097fc661ef2b6befeacabe4570912be6bc3b1",
+      "packVersion": "g12-20260906T0424Z-eac69ea1",
+      "contentHash": "53d72fed07e092ef385fc9b378d4eddf2535d880d1b0b298eae8c780cfcc6c40",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g2.json",
+      "sha256": "a127e7a7e6bcb3da103450317a3f69b6e3ead57c49dd6dab2a537e092736a02b",
+      "packVersion": "g2-20260906T0424Z-eac69ea1",
+      "contentHash": "d2ec6283ac45383de7cb8dc1e6a4859e8cf232ba195a36550d9d78a8eb3d9659",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g3.json",
+      "sha256": "646839d095a8c04d2cd31ac1959081dc2a7e9cc52de6de638392fbd2d9262fb5",
+      "packVersion": "g3-20260906T0424Z-eac69ea1",
+      "contentHash": "ed7882ab5def086cc2467b5fae4cca948796c343541157885ec9d861d27bac80",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g4.json",
+      "sha256": "309ef22ba3a5be14e55237f1e9d4ffa69d937617ba33d5dddbfed253d1908a5c",
+      "packVersion": "g4-20260906T0424Z-eac69ea1",
+      "contentHash": "f7f69b935a4cec087d3e75a5c3b6c60702dbdac393ab3fd703dd4d191fd8a528",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g5.json",
+      "sha256": "34f16e9a2f4e98afc53313b8e95a5dc85b03729d966c414baefbe8e5ac5b61e4",
+      "packVersion": "g5-20260906T0424Z-eac69ea1",
+      "contentHash": "f345f2359fc20151cf09173e3b4e10f085f1d5d6390d7020829e72df6166784f",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g6.json",
+      "sha256": "3185fdeb07b71aa342e08bfe3edae45efd7668660e2a79a1e5beba48ac65f55a",
+      "packVersion": "g6-20260906T0424Z-eac69ea1",
+      "contentHash": "846ccc69fa88a319197e08d8c0d84d5ea02b8f3f68798bbe48ddeabe6e4e5772",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g7.json",
+      "sha256": "431cde19e1343500433ee16772c94df55574bbb921e8ce6c3e81724d3b0052dc",
+      "packVersion": "g7-20260906T0424Z-eac69ea1",
+      "contentHash": "d4a11e89297a08779702805ba1d7e7b7c9dfda12b2fc8b1eb9189c71f5c96e98",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g8.json",
+      "sha256": "c6cf381082e577977526ba792744ebaa4259cf806b1e742f1b34007961b3bed2",
+      "packVersion": "g8-20260906T0424Z-eac69ea1",
+      "contentHash": "d5843ed818ae78518c4b211500c370024867fde11a57fa991c2b20f3624f3b14",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g9.json",
+      "sha256": "b1c45a1ca3d285e64cf6c14236c1d0752e6596ed0ffb617da6105cc27eecc435",
+      "packVersion": "g9-20260906T0424Z-eac69ea1",
+      "contentHash": "d5ddc1e7569b000b450442e69a7d0dd5212d1f24d718a3589ca7ae957ba4d2a8",
+      "experimental": false,
+      "provenance": true
+    }
+  ],
+  "fixture": {
+    "file": "lesson-05-sgk-lich-su-va-dia-li-5-b8.json",
+    "sha256": "a904d0052aa9ff7d0516d99539ac7009d90b1868990a39f6b84da8d7dca91a91",
+    "book": "05-sgk-lich-su-va-dia-li-5",
+    "lesson": 8,
+    "trust": "trustedStructuredLesson",
+    "sourcePipeline": "tc2-p1",
+    "generator": "tool/corpus/tsl_to_lesson_document.py@v1",
+    "blocks": 52,
+    "semantic": 0,
+    "tutorSteps": 0
+  },
+  "device": {
+    "serial": "192.168.1.3:5555",
+    "model": "Nokia 6.1",
+    "androidRelease": "10",
+    "sdk": "29",
+    "reachable": true
+  },
+  "declaredDevice": "Nokia 6.1 (192.168.1.3:5555) · Android 10 / SDK 29 · ai.workizen.learningcoach",
+  "frames": [
+    {
+      "file": "round6-01-home.png",
+      "sha256": "6306f4c04d8a554d93a1998fbe8d7c408b31365c06c3f1e36ed4cb520c96f32b",
+      "bytes": 257117,
+      "mtime": "2026-09-06T04:26:56.455700+00:00"
+    },
+    {
+      "file": "round6-02-home-research.png",
+      "sha256": "55995d3208168d025feaefa8a6f55008b797515ee269d44b9affa67c2b3dac14",
+      "bytes": 205962,
+      "mtime": "2026-09-06T04:27:16.188330+00:00"
+    },
+    {
+      "file": "round6-03-picker.png",
+      "sha256": "4459e6cbae2139971ecd14f536bd8af268befe3c6491bc929cf987633a46d84a",
+      "bytes": 298552,
+      "mtime": "2026-09-06T04:27:38.091204+00:00"
+    },
+    {
+      "file": "round6-04-read-peek.png",
+      "sha256": "90702ff15028a82f0cae9a1e581bb1fc31578457dd4e29ec9f0a08ccdc1469fa",
+      "bytes": 242359,
+      "mtime": "2026-09-06T04:27:59.904980+00:00"
+    },
+    {
+      "file": "round6-05-read-expanded.png",
+      "sha256": "7b25ab210198819f34f1aa8f454d916d45121028e5436dff8f903df070b6b0d6",
+      "bytes": 237693,
+      "mtime": "2026-09-06T04:28:25.802743+00:00"
+    },
+    {
+      "file": "round6-06-read-collapsed.png",
+      "sha256": "70b2aa303ebdf044e1f04071ac8c9ff3e7e99a48599a69b26e321c73293ccdc9",
+      "bytes": 259963,
+      "mtime": "2026-09-06T04:28:47.548878+00:00"
+    },
+    {
+      "file": "round6-07-tutor.png",
+      "sha256": "7a27eb8ea6f80815b6aed1a9f38b2a2555724f2bd62594992b3a52efde2dc309",
+      "bytes": 182713,
+      "mtime": "2026-09-06T04:28:53.338197+00:00"
+    }
+  ],
+  "iterations": [
+    {
+      "iter": 1,
+      "build": {
+        "gitSha": "eac69ea1ad37a6b343e162be9e55d82df7f6db7e",
+        "branch": "ws-d/round6-golden-delivery",
+        "packs": "rebuilt 2026-09-06 · verify 12/12 OK · 41 toanExercises disappeared"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "Home «Chào Na!» — hồ sơ Founder giữ nguyên (cài bằng -r)",
+          "result": "PASS",
+          "note": "học sinh Na · bài hôm nay vẫn là KHTN 6 Bài 17",
+          "frames": [
+            "round6-01-home.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "02",
+          "expect": "Thẻ LÁT CẮT NGHIÊN CỨU · Bài 8 với tiêu đề THẬT từ mục lục in, trang 36–39",
+          "result": "PASS",
+          "note": "«Đấu tranh giành độc lập thời kì bắc thuộc» — trước vòng này fixture thật chưa tồn tại nên app rơi về bản MẪU",
+          "frames": [
+            "round6-02-home-research.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "03",
+          "expect": "Màn «Vào bài học»: MỘT bộ tên cho ba View; ba thẻ đếm từ chính bài; chip thử nghiệm",
+          "result": "PASS",
+          "note": "Đọc «18 đoạn · 3 câu hỏi trong sách · 17 chỗ SAM để trống»; Trực quan «Chưa có sơ đồ cho bài này»; Học với SAM «Chưa có kịch bản cho bài này» — ba số 0 trung thực",
+          "frames": [
+            "round6-03-picker.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "04",
+          "expect": "PHƯƠNG ÁN B · PEEK: một dòng «💡 SAM gợi ý: …», không thẻ đề xuất, không chân dung, không CTA lặp",
+          "result": "PASS",
+          "note": "chữ SGK thật hiện ngay: BÀI 8 · mục tiêu «179 TCN, 40, 248, 542, 938»; một chỗ SAM để trống ngay khối đầu",
+          "frames": [
+            "round6-04-read-peek.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "05",
+          "expect": "PHƯƠNG ÁN B · EXPANDED: vì sao + «Đã mở ● ○ ○» + CTA + «Để sau», mở TẠI CHỖ",
+          "result": "PASS",
+          "note": "hàng «Đã mở» nay nằm trong trạng thái mở, không thường trực",
+          "frames": [
+            "round6-05-read-expanded.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "06",
+          "expect": "PHƯƠNG ÁN B · COLLAPSED: 💡 lên hàng tiêu đề, KHÔNG biến mất (lỗi D5 vòng 5)",
+          "result": "PASS",
+          "note": "nội dung bài lên cao ~146 px so với trạng thái hé",
+          "frames": [
+            "round6-06-read-collapsed.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "07",
+          "expect": "«Học với SAM» nói thật là chưa có kịch bản; phần ghim BẰNG với hai View kia",
+          "result": "PASS",
+          "note": "không còn thẻ đề xuất ghim riêng ở màn này — đúng điều Founder gọi là tốn chiều dọc",
+          "frames": [
+            "round6-07-tutor.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "08",
+          "expect": "kiểm tĩnh từng điểm ảnh: máy không có ai đang dùng",
+          "result": "UNVERIFIED (missing frame)",
+          "note": "0 / 2 073 600 điểm ảnh khác nhau qua 6 giây",
+          "frames": [],
+          "missingFrames": [],
+          "downgraded": true
+        },
+        {
+          "step": "09",
+          "expect": "17 chỗ SAM để trống có ẢNH CẮT TRANG",
+          "result": "FAIL",
+          "note": "KHOẢNG TRỐNG G1 — tài liệu WS-C dựng không có ảnh cắt, nên chỗ trống chỉ có lời giải thích + số trang. Trả về WS-C, không tự vá.",
+          "frames": [
+            "round6-04-read-peek.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "frames": 7,
+    "steps": {
+      "PASS": 7,
+      "FAIL": 1,
+      "SKIP": 0,
+      "UNVERIFIED": 1,
+      "OTHER": 0
+    },
+    "downgraded": 1
+  },
+  "retentionRules": [
+    "no lock-screen / personal-notification frames",
+    "no raw PDF pages; SGK crops inside frames are internal (Founder D4)",
+    "a PASS without an existing frame is downgraded to UNVERIFIED"
+  ],
+  "warnings": []
+}

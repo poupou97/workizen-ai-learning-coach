@@ -21,6 +21,20 @@ conclude tampering.
 provenance.** It does not make the ZIPs canonical, and nothing may depend on their continued
 existence.
 
+## Why the ZIPs themselves are not in Git — licensing, restored
+
+**The archives cannot live in the repository**: they contain verbatim SGK page images and device
+frames, which are **INTERNAL / RESEARCH ONLY under D4** — and round 7's 22 page crops are
+additionally **LICENSING-DISTRIBUTION BLOCKED**. They are also large. *TECHNICALLY POSSIBLE !=
+DISTRIBUTION RIGHT.*
+
+This classification is required to sit beside the artefacts it classifies by Founder task order 43
+§4 («licensing/distribution classification» · «the reason the evidence body is not in Git»). It
+was present in this file's first version, was dropped in the 2026-09-06 semantics rewrite, and is
+restored here. The documents from inside those archives that **are** D4-safe were canonicalised
+separately — see [`round-archives/`](round-archives/README.md), which lists file by file what was
+excluded and why.
+
 ## What happened on 2026-09-06 — recorded, not hidden
 
 Four of the five per-round Desktop ZIPs (rounds 4, 5, 6-v1, 6-v2) disappeared while

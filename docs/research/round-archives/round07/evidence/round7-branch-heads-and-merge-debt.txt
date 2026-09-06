@@ -1,0 +1,25 @@
+# Round-7 branch heads, resolved from origin on 2026-09-06T07:52:41Z
+# Compared against §10.1 of ROUND7-CONSOLIDATED-REPORT-2026-09-06.md
+
+BRANCH                                 RESOLVED   REPORTED   MATCH
+ws-m/round7-metric-truth               a6cae3b    a6cae3b    YES
+ws-t/round7-trust-calibration          5e706c9    5e706c9    YES
+ws-r/round7-debt                       7d37521    7d37521    YES
+ws-s/round7-structured-gap             36e4c50    36e4c50    YES
+
+integration/round7-2026-09-06 head: 74d9db6
+integration/round6-2026-09-06 head: d5a9946
+integration/round5-2026-09-06 head: bab657a
+main head:                          61dbfdb
+
+# The merge-debt stack, measured
+main..integration/round4 : 73 commits
+main..integration/round5 : 89 commits
+main..integration/round6 : 208 commits
+main..integration/round7 : 259 commits
+#73 ancestor of #79?      : YES
+main ancestor of #79?     : YES
+delta #73->#79            : 16 commits, files: 3
+    docs/research/ROUND5-AUDIT-97-EVALUATION-SET.md
+    docs/research/ROUND5-CONSOLIDATED-REPORT-2026-09-06.md
+    docs/research/ROUND5-PLAN.md

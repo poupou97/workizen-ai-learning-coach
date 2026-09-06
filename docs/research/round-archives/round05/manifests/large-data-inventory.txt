@@ -1,0 +1,49 @@
+# Large / external data NOT included in this archive — inventory only
+# generated 2026-09-06T04:01:49Z by the archive builder
+#
+# Rule: the SGK corpus and every derivative of it are copyright-restricted and gitignored.
+# This archive records path, size, version and reproduction instructions — never the bytes.
+
+## Top-level
+9.8G	nguon-chi-thuc
+ 14G	poc-out
+341M	poc-out/round5
+
+## poc-out/round5 — the round's own artefact tree (sizes)
+1.7M	poc-out/round5/lane-a3
+8.4M	poc-out/round5/lane-c
+171M	poc-out/round5/legacy
+ 19M	poc-out/round5/lexicon
+4.0K	poc-out/round5/lexicon-build.log
+5.0M	poc-out/round5/lexicon-smoke
+1.2M	poc-out/round5/mathfix
+121M	poc-out/round5/pipeline
+1.9M	poc-out/round5/semantic
+ 11M	poc-out/round5/verify
+
+## poc-out/round5/legacy — Lane D snapshots and batches
+5.4M	poc-out/round5/legacy/after
+ 40K	poc-out/round5/legacy/after-a1
+104K	poc-out/round5/legacy/after-inferred-fix
+ 68K	poc-out/round5/legacy/attach-log
+ 34M	poc-out/round5/legacy/batch-1-round5
+ 34M	poc-out/round5/legacy/batch-1-round5-repaired
+ 60M	poc-out/round5/legacy/batch-2
+ 34M	poc-out/round5/legacy/batch-2-repaired
+ 12K	poc-out/round5/legacy/orphan
+648K	poc-out/round5/legacy/packs-before-a1
+652K	poc-out/round5/legacy/packs-before-inferred-fix
+652K	poc-out/round5/legacy/packs-before-round5
+1.6M	poc-out/round5/legacy/provenance
+ 48K	poc-out/round5/legacy/regression
+
+## Snapshot integrity files present (Lane D discipline)
+poc-out/round5/legacy/packs-before-a1/BASELINE-METRICS.json
+poc-out/round5/legacy/packs-before-a1/README.md
+poc-out/round5/legacy/packs-before-a1/SHA256SUMS
+poc-out/round5/legacy/packs-before-inferred-fix/BASELINE-METRICS.json
+poc-out/round5/legacy/packs-before-inferred-fix/README.md
+poc-out/round5/legacy/packs-before-inferred-fix/SHA256SUMS
+poc-out/round5/legacy/packs-before-round5/BASELINE-METRICS.json
+poc-out/round5/legacy/packs-before-round5/README.md
+poc-out/round5/legacy/packs-before-round5/SHA256SUMS
