@@ -224,19 +224,65 @@ nào trong lớp này được nói đây là chương trình Bộ GD&ĐT.
 
 ---
 
+## H. §13 — ONE NEXT ACTION CÓ LÝ DO — **EXISTS**
+
+`reason` là trường hạng nhất suốt cả chuỗi: `lesson_next_action.dart:115` →
+`learning_agenda.dart:141` → `MissionData.reason:47`, và
+`mission_data.dart:30` ghi rõ «UI KHÔNG tự suy từ một câu sai: nó hiển thị
+`reason` mà resolver đưa». Không cần dựng mới.
+
+Việc còn thiếu: khi TKB góp phần vào gợi ý, `reason` phải NÓI RA điều đó
+(«hôm nay có tiết KHTN»), thay vì đưa ra một câu không truy nguyên được. Thuộc
+phần tích hợp Home (§12).
+
+---
+
+## §8 UX — [A] TẠO TỰ ĐỘNG / [B] TỰ SẮP / [C] BỎ QUA — **XONG**
+
+Màn TKB nay có thẻ «THỜI KHOÁ BIỂU GỢI Ý» với:
+
+- **[A]** «Tạo tự động» — sinh từ môn thật của lớp, ghi **mã** môn
+- **[B]** chip thêm/xoá từng tiết như cũ · «Tạo lại» đổi phương án (§11)
+- **[C]** không bấm gì cả — rỗng vẫn là trạng thái hợp lệ (F13 giữ nguyên)
+- «Xoá hết» có hỏi lại, và nói rõ **không đụng tới những gì con đã học**
+
+Lời trên màn, đúng chỗ phụ huynh đọc:
+
+> «Đây là GỢI Ý để sửa cho nhanh — không phải thời khoá biểu chuẩn của trường
+> hay của Bộ GD&ĐT.»
+
+9 test giữ màn này, trong đó có: nhãn §10 phải còn, sinh ra phải là **mã** môn
+(bẫy WAL-176), và **tạo TKB không tạo phiên học nào** (§14).
+
+---
+
 ## CÒN LẠI
 
 | Mục | Trạng thái |
 |---|---|
-| H. Multi-profile device test (§15) | CHƯA — chạy sau khi Home/SAM đáp |
-| I. Home + timetable integration (§12) | CHƯA — nhánh `round7/multi-subject-home` đang bay |
-| J. BEFORE/AFTER screenshots | CHƯA |
-| K. Founder Acceptance Card | CHƯA |
-| Sửa C-2 (tất định nhãn) | ✅ XONG |
-| Sửa C-1 (đảo lớp) | CHƯA — chờ Founder chốt |
-| §8 UX [A] tạo tự động / [B] tự sắp / [C] bỏ qua | CHƯA |
+| A. Profile isolation audit | ✅ **PARTIAL** — có test giữ |
+| B. Bảng sở hữu | ✅ |
+| C. Hardcoded findings | ✅ (C-1 chờ Founder chốt) |
+| D. Kiến trúc TKB | ✅ EXISTS |
+| E. Concept TKB cũ | ✅ |
+| F. Lớp→Môn→Sách | ✅ |
+| G. Sinh TKB có ràng buộc | ✅ |
+| Sửa C-2 (tất định nhãn) | ✅ |
+| §8/§11 UX tạo & sửa TKB | ✅ |
+| §13 one next action + reason | ✅ EXISTS (thiếu quy nguồn TKB) |
+| H. Multi-profile device test (§15) | ⏳ chờ Home/SAM đáp |
+| I. Home + TKB integration (§12) | ⏳ nhánh `round7/multi-subject-home` |
+| J. BEFORE/AFTER screenshots | ⏳ |
+| K. Founder Acceptance Card | ⏳ |
+| Sửa C-1 (đảo lớp) | ⛔ **CHỜ FOUNDER CHỐT** |
 
-**Một điểm cần Founder chốt (C-1):** bỏ khái niệm «lát cắt nghiên cứu» để bài
-LS&ĐL 5 thuộc về học sinh lớp 5, đồng nghĩa Na (lớp 6) **không còn thấy nó**.
-Đó là mất một thẻ trên Home của máy demo, nhưng là cách duy nhất để Minh có bài
-thật — và để bỏ được câu «đây không phải bài của lớp con».
+Toàn bộ suite: **1192 pass · 1 skip · 0 fail**.
+
+---
+
+## MỘT ĐIỂM CẦN FOUNDER CHỐT (C-1)
+
+Bỏ khái niệm «lát cắt nghiên cứu» để bài LS&ĐL 5 thuộc về học sinh **lớp 5**,
+đồng nghĩa Na (lớp 6) **không còn thấy nó**. Đó là mất một thẻ trên Home của
+máy demo — nhưng là cách duy nhất để Minh có bài thật, và để bỏ được câu «đây
+không phải bài của lớp con» mà lệnh 50 §6 đã gạch.
