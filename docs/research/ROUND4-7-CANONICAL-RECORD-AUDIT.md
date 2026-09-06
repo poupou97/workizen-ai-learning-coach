@@ -33,7 +33,7 @@ session rolled before this audit ran, rounds 5–7 would have lost their accepta
 falsification registers, plan-vs-actual records and roadmaps. That is the exact hazard order 43
 was written to close, and it was live at the moment the order was issued.
 
-**Real GAPs found: 9.** Four are now closed in this PR; five remain and are named with what it
+**Real GAPs found: 10.** Four are closed in this PR; six remain and are named with what it
 would take to close them. **No PARTIAL was turned into DONE.**
 
 ---
@@ -80,10 +80,10 @@ row says so rather than scoring it as a miss.
 | Architecture conclusions | `ROUND4-CONSOLIDATED-REPORT:16`; `lane-c/06-HISTORY-ABSTRACTIONS.md` | `05a0927` · `9e17e7b` | **DONE** — document layer generalises, semantic layer does not | Yes | No | — |
 | Measured results | report + `PIPELINE-…` + `LEGACY-REPROCESS-SCOREBOARD.{md,json}` | `05a0927` · `1429fcf` · `0113019` | **DONE** — Wilson intervals throughout (FTR 0.0957 → 0.0734; coverage 439 → 354) | Partial | Yes | — |
 | Provenance | `ROUND4-BATCH-1-REPORT.md` §2; device manifests | `bea004c` · `b5be5c2` | **DONE** — tool versions, code shas, sha256 of all 62 outputs | Yes | Yes | Report itself records a provenance **bug**: «every pack built today stamped a rule it was not built with» |
-| Reproduction instructions | `PIPELINE-…` §11 «Stable CLI» | `1429fcf` | **PARTIAL** — 6-step runnable block, but rooted at `R=/Users/alexnguyen/projects/…` and reads `poc-out/` | No, not from a clean clone | Yes | **GAP-5** |
-| Licensing (D4) | order 32 §13; `ROUND4-PLAN.md:13`; `PIPELINE-…:9`; `lane-c/05:5` | `337ab56` · `2e42487` · `1429fcf` | **DONE** at plan and lane level | n/a | Yes | **GAP-6** — absent from the consolidated report, the document the Founder reads |
+| Reproduction instructions | `PIPELINE-…` §11 «Stable CLI» | `1429fcf` | **PARTIAL** — 6-step runnable block, but rooted at `R=/Users/alexnguyen/projects/…` and reads `poc-out/` | No, not from a clean clone | Yes | **GAP-7** |
+| Licensing (D4) | order 32 §13; `ROUND4-PLAN.md:13`; `PIPELINE-…:9`; `lane-c/05:5` | `337ab56` · `2e42487` · `1429fcf` | **DONE** at plan and lane level | n/a | Yes | **GAP-8** — absent from the consolidated report, the document the Founder reads |
 | Known limitations | `PIPELINE-…` §10; `ROUND4-BATCH-1-REPORT.md` §12; `LEGACY-…SCOREBOARD.md` «What this scoreboard does not say» | `1429fcf` · `bea004c` · `0113019` | **DONE** | n/a | No | — |
-| Round verdict | order 33 line 4: «**Founder ACCEPT Round 4.**» | `337ab56` | **DONE — but recorded outside round 4** | n/a | No | **GAP-7** — no round-4 artefact records its own acceptance; the report still ends «READY FOR FOUNDER REVIEW» |
+| Round verdict | order 33 line 4: «**Founder ACCEPT Round 4.**» | `337ab56` | **DONE — but recorded outside round 4** | n/a | No | **GAP-9** — no round-4 artefact records its own acceptance; the report still ends «READY FOR FOUNDER REVIEW» |
 | Negative / FALSIFIED | `ROUND4-CONSOLIDATED-REPORT:16-19`; `lane-c/02-ASSUMPTION-LEDGER.md:30` | `05a0927` · `373c8b3` | **DONE** — A25 and A26 falsified; legacy rescue **PARTIAL**; ledger PROVEN 5 / FALSIFIED 14 / UNTESTED 4 | Yes | Partial | — |
 | Device evidence | `docs/design/track-b-evidence/round4/` (32 frames + manifest); `docs/research/lane-c/evidence/round4-device/` | `2f4a9cd` · `b5be5c2` | **DONE** — frames committed; Lane C walk honestly `QUEUED` (device locked), 0 PASS claimed | Yes | No | — |
 | Archive documents | — | — | **FAILED — not recoverable** | No | — | Pre-format `ROUND4-REPORT` ZIP ×2, `bf0d27a9…`. No content directory ever existed. **Contents were repo documents; nothing unique lost** |
@@ -96,14 +96,14 @@ row says so rather than scoring it as a miss.
 | Research plan | `docs/research/ROUND5-PLAN.md` | `c92c08e` | **DONE** — lane ownership + standing limits (no trust threshold, no mass reprocess, no unrestricted LLM) | n/a | No | — |
 | Task order (authority) | `docs/founder-orders/33-…-round-5.md`, §16 at line 552 | `337ab56` | **DONE** — full verbatim text | n/a | No | — |
 | Founder decisions | orders 33 · 34 · 35 · 36; D3/D4/D5 in `FALSE-TRUST-AUDIT-PROTOCOL.md:5`, `METRIC-DENOMINATORS.md:3,52` | `337ab56` · `7405e46` · `62679a1` | **DONE** — incl. «STOP treating flattened OCR text as canonical» | n/a | No | — |
-| Acceptance criteria | order 33 §16 **and** `docs/research/ROUND5-ACCEPTANCE-CRITERIA.md` | `337ab56` · `8ae8b9a` | **DONE ×2 — reconstruction verified byte-equal to the order after whitespace normalisation** | n/a | No | **GAP-9** — the reconstruction's own rationale («the criteria had only ever existed in the conversation») is now **stale**: it was written at 11:19, the orders landed at 15:21 the same day |
+| Acceptance criteria | order 33 §16 **and** `docs/research/ROUND5-ACCEPTANCE-CRITERIA.md` | `337ab56` · `8ae8b9a` | **DONE ×2 — reconstruction verified byte-equal to the order after whitespace normalisation** | n/a | No | **GAP-10** — the reconstruction's own rationale («the criteria had only ever existed in the conversation») is now **stale**: it was written at 11:19, the orders landed at 15:21 the same day |
 | Methodology | `FALSE-TRUST-AUDIT-PROTOCOL.md` §1–§5; `DATA-ACCURACY-FRAMEWORK.md`; `METRIC-DENOMINATORS.md`; `THIRD-SIGNAL-LAYER.md:78` | `7405e46` · `f2f8617` · `62679a1` · `831573a` | **DONE** — sampling design, ablation not assertion, D5 template («A number without all three parts is not reportable») | Yes | Yes | — |
 | Gates | `TRUST-GATE-SENSITIVITY.md:303` | `3a160fd` | **DONE, as a stated absence** — «It sets no acceptance threshold… `test_thresholds.py` asserts the repository has none» | Yes | Yes | Semantic-yield gate **proposed, not built** |
 | Threshold definitions | `THIRD-SIGNAL-LAYER.md:112` (arbitration, numeric); `FALSE-TRUST-AUDIT-PROTOCOL.md:72` (bars, PROPOSED) | `831573a` · `7405e46` | **DONE** — every arbitration constant named; production trust bar **absent by design** | Yes | Yes | — |
 | Architecture conclusions | `ROUND5-CONSOLIDATED-REPORT:274` §8.1; `THIRD-SIGNAL-LAYER.md:19`; report §11.4 | `bab657a` · `831573a` | **DONE** — «**REPAIR is built and NOT CONNECTED**»; the two «independent» stacks share an OCR engine; 6 primitives carried 224 lessons | Partial | Yes | — |
 | Measured results | report §2–§11; `DATA-ACCURACY-SCOREBOARD-LANE-D.md`; `ACCURACY-RECOVERY-RESULT.md`; `VIETNAMESE-REPAIR-RESULT.md` | `bab657a` · `2798adb` · `1733ff7` · `6652d58` | **DONE** — false trust 0.619 → 0.318; teaching-critical 0.476 → 0.100; over-withhold 0.400 → **0.633** | Partial | Yes | — |
 | Provenance | `DATA-ACCURACY-SCOREBOARD-LANE-D.md:93` §2a | `2798adb` | **DONE — and the finding is a provenance failure**: «950 of 6,176 page verdicts differ… **896 unexplained**» | Yes | Yes | — |
-| Reproduction instructions | four «Reproduce» sections: `ACCURACY-RECOVERY-RESULT.md:503`, `VIETNAMESE-REPAIR-RESULT.md:279`, `TRUST-GATE-SENSITIVITY.md:274`, `FALSE-TRUST-AUDIT-PROTOCOL.md:84` | `1733ff7` · `6652d58` · `3a160fd` · `7405e46` | **PARTIAL** — commands committed, **every input under gitignored `poc-out/`** | No, not from a clean clone | Yes | **GAP-5.** Counter-example proving it is soluble: `tool/corpus/tc_gold/` (54 annotated pages) **is** committed, and the report says so |
+| Reproduction instructions | four «Reproduce» sections: `ACCURACY-RECOVERY-RESULT.md:503`, `VIETNAMESE-REPAIR-RESULT.md:279`, `TRUST-GATE-SENSITIVITY.md:274`, `FALSE-TRUST-AUDIT-PROTOCOL.md:84` | `1733ff7` · `6652d58` · `3a160fd` · `7405e46` | **PARTIAL** — commands committed, **every input under gitignored `poc-out/`** | No, not from a clean clone | Yes | **GAP-7.** Counter-example proving it is soluble: `tool/corpus/tc_gold/` (54 annotated pages) **is** committed, and the report says so |
 | Licensing (D4) | `METRIC-DENOMINATORS.md:50-57`, + 6 restatements | `62679a1` | **DONE** — and D4 is *the stated reason* the reproduction inputs are absent | n/a | Yes | — |
 | Known limitations | 6 dedicated sections incl. `FALSE-TRUST-AUDIT-RESULT:253` «what a second annotator should re-check first» | `9c211bd` etc. | **DONE** | n/a | Yes | — |
 | Round verdict | `ROUND5-ACCEPTANCE-CRITERIA.md:25` — «**8 PASS · 1 PARTIAL · 1 FAIL**», with a coordinator self-correction | `8ae8b9a` | **PARTIAL** — the *grade* is canonical; **no Founder acceptance of round 5 exists anywhere.** Round 6 opened on round-5 evidence without a verdict statement | n/a | No | Recorded as fact, not scored as loss: the verdict was **never issued**, so nothing is missing from the repo |
@@ -115,7 +115,7 @@ row says so rather than scoring it as a miss.
 
 | DOCUMENT / DECISION | CANONICAL REPO PATH | COMMIT | STATUS | REPRO? | EXT-EV? | GAP? |
 |---|---|---|---|---|---|---|
-| Consolidated report | `docs/research/ROUND6-CONSOLIDATED-REPORT-2026-09-06.md` | `d5a9946` | **DONE** — 16 sections, gates graded | **No — 0 commands, 0 `tool/` refs, 0 `poc-out` refs** | Yes | **GAP-4** — cites only 3 of its own workstream documents; no path from report to evidence for gates B, C or E |
+| Consolidated report | `docs/research/ROUND6-CONSOLIDATED-REPORT-2026-09-06.md` | `d5a9946` | **DONE** — 16 sections, gates graded | **No — 0 commands, 0 `tool/` refs, 0 `poc-out` refs** | Yes | **GAP-6** — cites only 3 of its own workstream documents; no path from report to evidence for gates B, C or E |
 | Research plan | `docs/research/ROUND6-PLAN.md` | `51711c0` | **DONE** — gates fixed *before* the round; carries the golden-delivery addendum with coordinator verification the order lacks | n/a | No | — |
 | Task orders | `docs/founder-orders/39` · `40` · `41` | `337ab56` | **DONE** — round-6 master, golden-delivery decision, close decision | n/a | No | — |
 | Founder decisions | order 39 §Workspace UX (OPTION B); order 40 (Golden #1/#2/regression) | `337ab56` | **DONE** — «*do NOT claim Math structure reaches child until that path actually exists*» | n/a | No | The consolidated report never cites order 40 or 41 |
@@ -126,8 +126,8 @@ row says so rather than scoring it as a miss.
 | Architecture conclusions | `report:275`; `TRUTH-ACCOUNTING-ROUND6.md:134`; `REPAIR-INTEGRATION-ROUND6.md:25-37` | `d5a9946` · `1df09c7` · `f2ce138` | **DONE** — «detect, account, recognise, repair, validate and carry — and it may not *serve*»; `role.value == 'formula'` occurred **once in 1,655 blocks** | Yes | Yes | — |
 | Measured results | `TRUTH-ACCOUNTING-ROUND6.md:435`; `REPAIR-INTEGRATION-ROUND6.md:8`; `RECOGNITION-RECROP-RESULTS` §3 | `1df09c7` · `f2ce138` · `371b6b0` | **DONE** — 1,878 regions · UNACCOUNTED 138 → 0; 9 validated repairs, **0 trusted**; digit recall 0.500 / 0.403 / 0.061 / 0.038 / 0.181 | Partial | Yes | — |
 | Provenance | `REPAIR-INTEGRATION-ROUND6.md:156-166` — the eleven-field chain **and** `hashMethod`, «because `shasum -a 256` on the file does not reproduce these numbers» | `f2ce138` | **DONE — the best provenance record in the repo** | Yes | Yes | — |
-| Reproduction instructions | `REPAIR-INTEGRATION-ROUND6.md:145`; `RECOGNITION-FAILURE-CENSUS:147`; `RECOGNITION-RECROP-RESULTS:456`; `TRUTH-ACCOUNTING-ROUND6.md:325` | `f2ce138` · `9ee4fe2` · `371b6b0` · `1df09c7` | **PARTIAL** — present in workstream docs; **the golden-slice runner that produced the headline 138 → 0 has no committed command line** | Partial | Yes | **GAP-5** |
-| Licensing (D4) | `REPAIR-INTEGRATION-ROUND6.md:135`; `ROUND6-WS-D-GOLDEN-DELIVERY.md:256`; `report:325` | `f2ce138` · `eeb38c1` · `d5a9946` | **PARTIAL** | n/a | Yes | **GAP-6** — round 6 produced the SGK crops and **never classified them**; the round-**7** report is the first to say LICENSING-DISTRIBUTION BLOCKED. Orders 40 and 41 carry no licensing statement at all |
+| Reproduction instructions | `REPAIR-INTEGRATION-ROUND6.md:145`; `RECOGNITION-FAILURE-CENSUS:147`; `RECOGNITION-RECROP-RESULTS:456`; `TRUTH-ACCOUNTING-ROUND6.md:325` | `f2ce138` · `9ee4fe2` · `371b6b0` · `1df09c7` | **PARTIAL** — present in workstream docs; **the golden-slice runner that produced the headline 138 → 0 has no committed command line** | Partial | Yes | **GAP-7** |
+| Licensing (D4) | `REPAIR-INTEGRATION-ROUND6.md:135`; `ROUND6-WS-D-GOLDEN-DELIVERY.md:256`; `report:325` | `f2ce138` · `eeb38c1` · `d5a9946` | **PARTIAL** | n/a | Yes | **GAP-8** — round 6 produced the SGK crops and **never classified them**; the round-**7** report is the first to say LICENSING-DISTRIBUTION BLOCKED. Orders 40 and 41 carry no licensing statement at all |
 | Known limitations | `report:130` STILL HYPOTHESIS · `:189` regressions; `RECOGNITION-FAILURE-CENSUS:110` «classes this census cannot observe» | `d5a9946` · `9ee4fe2` | **DONE** — incl. «inventing [table ground truth] to fill a census row would be worse than the gap» | n/a | Yes | — |
 | Round verdict | `docs/founder-orders/41-…:3,10-25` — «**ROUND 6 IS ACCEPTED AS CLOSED**», A PASS · B PASS · C PASS · D TRUTHFUL ZERO · E PASS | `337ab56` | **DONE** — Founder-issued, and it matches the coordinator's independent grade | n/a | No | Chain of authority terminates in a session transcript that is not in the repo and is not hashed |
 | Negative / FALSIFIED | `report:114-127` «FALSIFIED — including three of my own statements» (11 items) | `d5a9946` | **DONE** — Ω unreachable 0/22 at every scale; CodeFormulaV2 rejected on measurement; «**Nothing was promoted from PARTIAL to DONE**» | Partial | Yes | — |
@@ -140,30 +140,30 @@ row says so rather than scoring it as a miss.
 
 | DOCUMENT / DECISION | CANONICAL REPO PATH | COMMIT | STATUS | REPRO? | EXT-EV? | GAP? |
 |---|---|---|---|---|---|---|
-| Consolidated report | `docs/research/ROUND7-CONSOLIDATED-REPORT-2026-09-06.md` | `74d9db6` | **DONE** — gates graded, four workstreams summarised, **branch heads recorded** (`WS-M a6cae3b · WS-T 5e706c9 · WS-R 7d37521 · WS-S 36e4c50`) | **No — 0 commands** | Yes | The heads make the unmerged work *locatable*; this is what keeps GAP-3 from being a loss |
-| Research plan | `docs/research/ROUND7-PLAN.md` | `1e31512` | **DONE** — five gates fixed before the round; «NO THRESHOLD THEATRE» | n/a | No | **GAP-3** — all four of its named deliverable paths dangle on this branch |
+| Consolidated report | `docs/research/ROUND7-CONSOLIDATED-REPORT-2026-09-06.md` | `74d9db6` | **DONE** — gates graded, four workstreams summarised, **branch heads recorded** (`WS-M a6cae3b · WS-T 5e706c9 · WS-R 7d37521 · WS-S 36e4c50`) | **No — 0 commands** | Yes | The heads make the unmerged work *locatable*; this is what keeps GAP-5 from being a loss |
+| Research plan | `docs/research/ROUND7-PLAN.md` | `1e31512` | **DONE** — five gates fixed before the round; «NO THRESHOLD THEATRE» | n/a | No | **GAP-5** — all four of its named deliverable paths dangle on this branch |
 | Task orders | `docs/founder-orders/41` · `42` · `43` | `337ab56` · `79984f9` | **DONE** — round-7 preparation, title fidelity, closeout | n/a | No | — |
 | Founder decisions | order 42 (preserve source verbatim); order 43 (repository = source of record; no round 8; no activation) | `337ab56` · `79984f9` | **DONE** | n/a | No | — |
 | Acceptance criteria | `ROUND7-PLAN.md` gates A–E, graded `report:28-38` | `1e31512` · `74d9db6` | **DONE** — **4 PASS · 1 PREPARED, UNACTIVATED**; D «not attemptable this round» | n/a | Yes | — |
-| Methodology | `TRUST-CALIBRATION-BLIND-PROTOCOL-v1.md` | `be41f55` | **DONE** — the round's richest methodology: contamination rule, 44 books excluded, seed `20260906`, BLIND-CORE 2,536 / BLIND-TEACHING 1,770, sealed key, both-sides auditing | Yes | Yes | **canonical (unmerged: `ws-t`)** — **GAP-3** |
+| Methodology | `TRUST-CALIBRATION-BLIND-PROTOCOL-v1.md` | `be41f55` | **DONE** — the round's richest methodology: contamination rule, 44 books excluded, seed `20260906`, BLIND-CORE 2,536 / BLIND-TEACHING 1,770, sealed key, both-sides auditing | Yes | Yes | **canonical (unmerged: `ws-t`)** — **GAP-5** |
 | Gates | `report:28-38`; freeze chain §2 | `74d9db6` | **DONE** | Partial | Yes | The `freeze.py verify` tool the report cites is **absent from the branch that cites it** |
-| Threshold definitions | `TRUST-CALIBRATION-POLICY-v1.md` | `5e706c9` | **DONE** — six bounds with Wilson uppers; BOUND-4 the only passable one, at «45 % of lessons carrying a teaching-critical error», **not recommended** | Yes | Yes | **canonical (unmerged: `ws-t`).** Integration carries BOUND-2/4/5 headlines only; BOUND-0/1/3 and every interval are unmerged-only — **GAP-3** |
+| Threshold definitions | `TRUST-CALIBRATION-POLICY-v1.md` | `5e706c9` | **DONE** — six bounds with Wilson uppers; BOUND-4 the only passable one, at «45 % of lessons carrying a teaching-critical error», **not recommended** | Yes | Yes | **canonical (unmerged: `ws-t`).** Integration carries BOUND-2/4/5 headlines only; BOUND-0/1/3 and every interval are unmerged-only — **GAP-5** |
 | Architecture conclusions | `report:244-248` — «**Calibration is finished and it is not the answer**» | `74d9db6` | **DONE** | n/a | No | — |
-| Measured results | `report`; `METRIC-REGISTRY-ROUND7.md` (18 metrics, 18/18 re-derive); `STRUCTURED-GAP-ROUND7.md`; `ROUND6-DEBT-TRIAGE.md` | `74d9db6` · `a6cae3b` · `36e4c50` · `7d37521` | **DONE** — headlines canonical, derivations unmerged | Yes on `ws-*` | Yes | **GAP-3** |
-| Provenance | freeze chain in `report:56-58`; `tool/corpus/thresholds/frozen/` | `74d9db6` · `5e706c9` | **PARTIAL** — integration truncates all three frozen hashes to **8 hex characters**; the full 64-hex values and `LEDGER.jsonl` are on `ws-t` | Yes on `ws-t` | Yes | An 8-hex prefix is not a verifiable provenance record — **GAP-3** |
-| Reproduction instructions | runbooks in the four `ws-*` documents | `a6cae3b` · `5e706c9` · `36e4c50` · `7d37521` | **PARTIAL** — **zero commands in all five round-7 documents on the integration branch** | No, from integration | Yes | **GAP-3 + GAP-5** |
+| Measured results | `report`; `METRIC-REGISTRY-ROUND7.md` (18 metrics, 18/18 re-derive); `STRUCTURED-GAP-ROUND7.md`; `ROUND6-DEBT-TRIAGE.md` | `74d9db6` · `a6cae3b` · `36e4c50` · `7d37521` | **DONE** — headlines canonical, derivations unmerged | Yes on `ws-*` | Yes | **GAP-5** |
+| Provenance | freeze chain in `report:56-58`; `tool/corpus/thresholds/frozen/` | `74d9db6` · `5e706c9` | **PARTIAL** — integration truncates all three frozen hashes to **8 hex characters**; the full 64-hex values and `LEDGER.jsonl` are on `ws-t` | Yes on `ws-t` | Yes | An 8-hex prefix is not a verifiable provenance record — **GAP-5** |
+| Reproduction instructions | runbooks in the four `ws-*` documents | `a6cae3b` · `5e706c9` · `36e4c50` · `7d37521` | **PARTIAL** — **zero commands in all five round-7 documents on the integration branch** | No, from integration | Yes | **GAP-5 + GAP-7** |
 | Licensing (D4) | `report:85` — «**LICENSING-DISTRIBUTION BLOCKED.** … *TECHNICALLY POSSIBLE != DISTRIBUTION RIGHT*»; `:153`; order 42:13 | `74d9db6` · `337ab56` | **DONE — the strongest licensing record of any round** | n/a | Yes | — |
-| Known limitations | `report` §STILL HYPOTHESIS; blind protocol «Disjointness… is **argued** and **not proven**. This is the weakest link in the blindness claim» | `74d9db6` · `be41f55` | **DONE** — but the self-declared weakness is unmerged-only | n/a | Yes | **GAP-3** |
+| Known limitations | `report` §STILL HYPOTHESIS; blind protocol «Disjointness… is **argued** and **not proven**. This is the weakest link in the blindness claim» | `74d9db6` · `be41f55` | **DONE** — but the self-declared weakness is unmerged-only | n/a | Yes | **GAP-5** |
 | Round verdict | order 43:6-11 — «Round 7 được ACCEPTED… **CALIBRATION IS FINISHED. THE NEXT BOTTLENECK IS RECOGNITION + ROLE DISAMBIGUATION**» | `79984f9` | **DONE** | n/a | No | The report carries the substance in its own words and ends «READY FOR FOUNDER REVIEW» — pre-acceptance. `eligible = 0` appears in the plan and orders but **not once in the report** |
 | Negative / FALSIFIED | `ROUND7-HISTORICAL-CORRECTIONS.md` C1–C5 | `2caafe5` | **DONE — the most valuable document of the round.** C1 falsifies round 6's «cheapest win on the board» — «a servable type is recommended for **ZERO** of the 118»; C2 a rate published without its denominator; C3 the same container-shape defect three times across three rounds; C5 resolves 3,679 / 3,381 as a **definition**, not a conflict | Yes | Partial | — |
 | Device evidence | `round07/NO-DEVICE-FRAMES-THIS-ROUND.md` | `8c88b0b` | **BLOCKED — correctly.** No device walk; the Nokia was in personal use. `report:84` «**HARDWARE UNVERIFIED**» | n/a | No | An *absence* is recorded as a document rather than as silence — the right pattern |
 | Merge-debt re-audit | `docs/research/ROUND7-MERGE-DEBT-REAUDIT.md` | `457a970` | **DONE** | Partial | No | — |
-| Archive registry | `docs/research/ARCHIVE-REGISTRY.md` | `79e199a` → **`c02a878`** | **DONE** — semantics corrected; **D4 classification restored by this audit** | n/a | Yes | **GAP-2b, CLOSED** |
+| Archive registry | `docs/research/ARCHIVE-REGISTRY.md` | `79e199a` → **`c02a878`** | **DONE** — semantics corrected; **D4 classification restored by this audit** | n/a | Yes | **GAP-3, CLOSED** |
 | **Archive documents (15)** | **`docs/research/round-archives/round07/`** | **`8c88b0b`** | **DONE — canonicalised by this audit** | Yes | No | **GAP-1, CLOSED.** Includes the archive builder's **independent** grading of the five gates, which agrees with the coordinator on all five — a second witness that existed nowhere in git |
 
 ---
 
-## GAP REGISTER — 9 real gaps
+## GAP REGISTER — 10 real gaps
 
 A **real GAP** is information that existed only in a ZIP, on the Desktop, in a scratchpad or in
 the chat — or a canonical claim the repository cannot support.
@@ -197,7 +197,7 @@ text and stay out under D4.
 packs, the fixture and every frame, plus the `retentionRules` block («*a PASS without an existing
 frame is downgraded to UNVERIFIED*»).
 
-**GAP-2b · `ARCHIVE-REGISTRY.md` lost its D4 classification.**
+**GAP-3 · `ARCHIVE-REGISTRY.md` lost its D4 classification.**
 *What was missing:* the sentence explaining that the ZIPs cannot be in Git because they carry
 verbatim SGK page images restricted under D4. Present in the file's first version; removed by the
 2026-09-06 semantics rewrite and not replaced, leaving five ZIP identities with **no licensing
@@ -205,7 +205,7 @@ classification and no stated reason for exclusion** — the two things order 43 
 *Done:* restored (`c02a878`), with round 7's crops marked LICENSING-DISTRIBUTION BLOCKED. No hash
 touched.
 
-**GAP-2c · `HOC-CUNG-SAM-ROUNDS-INDEX.md` — round verdicts for rounds 3–7 — was Desktop-only.**
+**GAP-4 · `HOC-CUNG-SAM-ROUNDS-INDEX.md` — round verdicts for rounds 3–7 — was Desktop-only.**
 *What was missing:* the per-round VERDICT · NORTH STAR · KEY RESULT · PRODUCT DELIVERY · MERGE
 STATUS · NEXT BOTTLENECK table, plus the **untruncated** round-4 ZIP hash
 (`bf0d27a929f6c7e377ea4cb0b5396f3760360ce1488217282ae61dd2cc4ccb22`, which `ARCHIVE-REGISTRY.md`
@@ -214,9 +214,9 @@ round verdicts to this Desktop path.
 *Done:* `docs/research/round-archives/ROUNDS-INDEX.md` (`8c88b0b`), with a prepended banner
 superseding its «per-round ZIPs are canonical» line. Original text left intact.
 
-### OPEN (5)
+### OPEN (6)
 
-**GAP-3 · Six round-7 documents are canonical only on unmerged branches.**
+**GAP-5 · Six round-7 documents are canonical only on unmerged branches.**
 `METRIC-REGISTRY-ROUND7.md` (`a6cae3b`) · `STRUCTURED-GAP-ROUND7.md` (`36e4c50`) ·
 `ROUND6-DEBT-TRIAGE.md` (`7d37521`, byte-identical on `ws-r` and `ws-s`) ·
 `TRUST-CALIBRATION-{POLICY,BLIND-PROTOCOL,ROUND7-REPORT}-v1.md` (`5e706c9`, `be41f55`) —
@@ -235,7 +235,7 @@ unmerged-only.
 «DO NOT MERGE», so this audit did not.
 *Done about it:* recorded here and routed to `MERGE-DEBT-RECONCILIATION-PLAN.md`.
 
-**GAP-4 · No consolidated report can reach its own evidence.**
+**GAP-6 · No consolidated report can reach its own evidence.**
 Machine-counted: ROUND4 report — 0 `tool/` refs, 0 `poc-out` refs, 0 commands. ROUND6 — 0 / 0 / 0.
 ROUND7 — 0 / 0 / 0, and one repo path. ROUND5 is the best at 12 `tool/` refs and still 0 commands.
 The round-6 report never names `REPAIR-INTEGRATION-ROUND6.md`, either `RECOGNITION-*` document, or
@@ -244,7 +244,7 @@ either `ROUND6-WS-D-*` document. A Founder reading only the report has no path t
 *Done about it:* recorded. Not fixed here: editing four consolidated reports is a documentation
 change to other lanes' primary artefacts, and this audit's remit was to measure, not rewrite.
 
-**GAP-5 · Reproduction instructions do not execute from a clean clone.**
+**GAP-7 · Reproduction instructions do not execute from a clean clone.**
 Every «Reproduce» section across rounds 4–7 reads inputs from gitignored `poc-out/` (14 GB) or from
 `/Users/alexnguyen/projects/…` absolute paths. This is **structural, and D4 is the cause** —
 committing the inputs is forbidden. Two consequences are unmitigated: no committed statement of the
@@ -256,7 +256,7 @@ committed, and the round-5 report says «*so a clean clone reproduces it*».
 layer yes** — and that is the fix worth making.
 *Done about it:* recorded, with the tc_gold precedent named.
 
-**GAP-6 · Licensing classification is missing from the documents that most need it.**
+**GAP-8 · Licensing classification is missing from the documents that most need it.**
 The round-4 consolidated report carries **no** D4 statement. Round 6 **produced** the SGK crops and
 never classified them — orders 40 and 41, which decide golden delivery and close the round, carry
 no licensing statement at all; the round-**7** report is the first to say
@@ -266,9 +266,9 @@ LICENSING-DISTRIBUTION BLOCKED.
 **enforced by test** (`lesson_document_test.dart:143` asserts `provenance.distribution` contains
 `D4`). The gap is placement, not existence.
 *May it be canonicalised?* Yes.
-*Done about it:* recorded; restored where it had regressed (GAP-2b).
+*Done about it:* recorded; restored where it had regressed (GAP-3).
 
-**GAP-7 · Round-4 and round-5 artefacts do not record their own adjudication.**
+**GAP-9 · Round-4 and round-5 artefacts do not record their own adjudication.**
 The round-4 verdict («Founder ACCEPT Round 4») lives only in the round-**5** order; the round-4
 report still ends «READY FOR FOUNDER REVIEW». A reader opening the round-4 folder would conclude
 the round was never adjudicated. **Round 5 has no Founder verdict at all** — round 6 opened on its
@@ -280,7 +280,7 @@ canonicalised because it was never issued** — that is a fact to record, not a 
 audit will not invent one.
 *Done about it:* recorded here as the canonical statement of both.
 
-**GAP-8 · Round-5 documents cite a gap that the founder-orders commit already closed.**
+**GAP-10 · Round-5 documents cite a gap that the founder-orders commit already closed.**
 `ROUND5-ACCEPTANCE-CRITERIA.md:3-7` says the §16 criteria «*had only ever existed in the
 conversation that issued them*». That was **true when written** — the file landed at 11:19:41,
 `docs/founder-orders/` at 15:21:49 the same day — and is **stale now**: order 33 §16 is committed
@@ -305,12 +305,12 @@ Order 43 §4 requires eight things for any evidence body kept out of Git.
 |---|---|---|---|
 | (a) manifest | **DONE** — `docs/ingest-manifests/` ×13, `trusted-corpus/MANIFEST.md`, `pre-autonomy-audit/MANIFEST.md` | **DONE for rounds 3–6** (round 6 by this PR); round 7 has none because no walk happened, recorded as a document | **DONE** — `ARCHIVE-REGISTRY.md` |
 | (b) provenance | **DONE** — per-script «source of truth» tables, `ingestionCommit` | **DONE** — git sha + branch + dirty flag + fixture generator + device `getprop` | **DONE** |
-| (c) hash / SHA | **GAP-5** — counts, no digests | **DONE** — APK, packs, fixture, per-frame sha256; `hashMethod` documented | **DONE** — original *and* rebuilt, all five |
+| (c) hash / SHA | **GAP-7** — counts, no digests | **DONE** — APK, packs, fixture, per-frame sha256; `hashMethod` documented | **DONE** — original *and* rebuilt, all five |
 | (d) source / status | **DONE** — `docStatus`, anomaly lists | **DONE** — PASS / FAIL / SKIP / UNVERIFIED / QUEUED / downgraded | **DONE** — LOST / REBUILT / ORIGINAL |
-| (e) reproduction | **PARTIAL** — strong in workstream docs, **absent from every consolidated report** (GAP-4) | **DONE** — `tool/evidence/retain.py` + adb checklists | **DONE** — `build_round_archive.py` + all three specs now committed |
-| (f) licensing classification | **DONE** — D4 defined, restated, enforced by test | **DONE** — `retentionRules` in every manifest | **DONE** — restored (GAP-2b) + `classification` in each spec |
-| (g) relation to report | **DONE** — MANIFEST tables + per-doc D4 lines | **DONE** — steps → expect → result | **DONE** — round verdicts now in-repo (GAP-2c) |
-| (h) reason not in Git | **DONE** — `.gitignore:1-16` gives three ranked reasons, copyright first | **DONE** — `retentionRules[1]` | **DONE** — restored (GAP-2b) |
+| (e) reproduction | **PARTIAL** — strong in workstream docs, **absent from every consolidated report** (GAP-6) | **DONE** — `tool/evidence/retain.py` + adb checklists | **DONE** — `build_round_archive.py` + all three specs now committed |
+| (f) licensing classification | **DONE** — D4 defined, restated, enforced by test | **DONE** — `retentionRules` in every manifest | **DONE** — restored (GAP-3) + `classification` in each spec |
+| (g) relation to report | **DONE** — MANIFEST tables + per-doc D4 lines | **DONE** — steps → expect → result | **DONE** — round verdicts now in-repo (GAP-4) |
+| (h) reason not in Git | **DONE** — `.gitignore:1-16` gives three ranked reasons, copyright first | **DONE** — `retentionRules[1]` | **DONE** — restored (GAP-3) |
 
 **Restricted evidence was not copied into Git to close any gap.** Excluded and stated: 7 round-6
 device frames · round-6/7 artefact trees (1.3 MB + 5.8 MB of lesson fixtures and packs) · all SGK
