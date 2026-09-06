@@ -89,6 +89,17 @@ POC_CASES = [
          observed='Trong vườn nhà em có cây ỗi và cây xoài.',
          span_correct='ổi', span_observed='ỗi',
          note='HARD by the Founder\'s framing; in fact «ỗi» is unattested in all 62,729 pages'),
+    # The sixth case is a REAL audit row, hand-judged and independently confirmed at 3× zoom, not a
+    # constructed sentence — and it is the only one where two independent defects sit at the two edges of
+    # one bounding box.
+    dict(id='F', kind='enumerator+watermark', subject='Khoa học tự nhiên 9', lesson='Bài 5',
+         heading_path=['Chương II. ÁNH SÁNG', 'Bài 5. Khúc xạ ánh sáng'], role='heading',
+         book='09-sgk-khoa-hoc-tu-nhien-9', page='p027',
+         correct='II – Định luật khúc xạ ánh sáng',
+         observed='I1 - Định luật khúc xạ ánh sáng, Ô C S ỐNG',
+         span_correct='II', span_observed='I1',
+         note='real audit row: a Roman numeral read as a digit AND a series-watermark fragment bled in. '
+              'Both stacks read the same faint strokes, so agreement is useless — the round\'s thesis'),
 ]
 
 
