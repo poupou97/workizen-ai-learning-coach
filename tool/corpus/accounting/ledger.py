@@ -75,14 +75,36 @@ def _other_lesson_ids(batch_dir, pipeline, book, lesson):
     return out
 
 
-def ledger_lesson(batch_dir, pipeline, book, lesson):
-    """The conservation ledger for one lesson. None when the lesson has no TSL in this batch."""
+def block_slot(bid):
+    """`book:pNNN:<pipeline>:NNN` → (book, page, native index), the part that is stable across pipelines.
+
+    A downstream stage (WS-C's repair projection) runs on its own generation of the same lesson, so its
+    block ids carry a different pipeline segment. The page and the native block index do not change, so
+    they are what a cross-generation join may use — never the whole id, and never text.
+    """
+    parts = (bid or '').split(':')
+    return (parts[0], parts[1], parts[-1]) if len(parts) >= 4 else (bid, '', '')
+
+
+def ledger_lesson(batch_dir, pipeline, book, lesson, demotions=()):
+    """The conservation ledger for one lesson. None when the lesson has no TSL in this batch.
+
+    `demotions` are block ids a DOWNSTREAM stage moved out of the served set — WS-C's repair projection
+    honouring a fail-closed ledger ruling, for instance. They are applied here and counted separately,
+    because two different things can move a served share in one round: an accounting fix that reclassifies
+    regions which were never accounted for, and a demotion that withdraws a region that WAS served.
+    Folding them into one number would hide both.
+    """
     tsl = _load(tsl_path(batch_dir, pipeline, book, lesson))
     if not tsl:
         return None
+    demoted_slots = {block_slot(x) for x in (demotions or ())}
     pages = set((tsl.get('boundary') or {}).get('pages') or [])
     served = {b['id'] for b in tsl.get('blocks', [])}
     withheld = {w['id'] for w in tsl.get('withheld', [])}
+    demoted = {i for i in served if block_slot(i) in demoted_slots}
+    served -= demoted
+    withheld |= demoted
     # Present only once the TSL itself conserves (the R13 fix). Absent on round-5 artefacts, which is
     # exactly the defect: the artefact could not say what it had excluded, so the ledger has to derive it.
     excluded_in_tsl = {x['id']: (x.get('reason') or 'excluded') for x in (tsl.get('excluded') or [])}
@@ -97,6 +119,8 @@ def ledger_lesson(batch_dir, pipeline, book, lesson):
             bid, role = b['id'], _role(b)
             if bid in served:
                 disp, reason = D.SERVED, 'served'
+            elif bid in demoted:
+                disp, reason = D.WITHHELD, 'withheld:demoted_downstream'
             elif bid in withheld:
                 disp, reason = D.WITHHELD, 'withheld'
             elif bid in excluded_in_tsl:
@@ -125,6 +149,7 @@ def ledger_lesson(batch_dir, pipeline, book, lesson):
     return dict(
         book=book, lesson=int(lesson), pages=sorted(pages),
         inputSourceRegions=inp, served=s, withheld=w, excludedWithReason=e, unaccounted=u,
+        demotedDownstream=len(demoted),
         conserves=(s + w + e + u == inp) and u == 0,
         excludedSource=('tsl.excluded' if excluded_in_tsl else 'derived-from-sdm'),
         byReason=dict(by_reason), byUnreadClass=dict(by_class),
@@ -140,16 +165,16 @@ def ledger_lesson(batch_dir, pipeline, book, lesson):
         rows=rows)
 
 
-def ledger_batch(batch_dir, pipeline):
+def ledger_batch(batch_dir, pipeline, demotions=()):
     spec = _load(f'{batch_dir}/batch-spec.json', {}) or {}
     lessons = []
     for L in spec.get('lessons', []):
-        r = ledger_lesson(batch_dir, pipeline, L['book'], L['lesson'])
+        r = ledger_lesson(batch_dir, pipeline, L['book'], L['lesson'], demotions)
         if r:
             lessons.append(r)
     tot = {k: sum(l[k] for l in lessons) for k in
            ('inputSourceRegions', 'served', 'withheld', 'excludedWithReason', 'unaccounted',
-            'excludedCarryingDigits', 'excludedCarryingAnExpression')}
+            'excludedCarryingDigits', 'excludedCarryingAnExpression', 'demotedDownstream')}
     by_reason, by_class, by_cbe = collections.Counter(), collections.Counter(), collections.Counter()
     for l in lessons:
         by_reason.update(l['byReason'])
@@ -187,7 +212,14 @@ def _md(out):
 
 
 def cmd_audit(a):
-    out = ledger_batch(a.batch_dir, a.pipeline)
+    dem = []
+    if a.demotions:
+        d = _load(a.demotions, [])
+        dem = d.get('blockIds', []) if isinstance(d, dict) else list(d)
+    out = ledger_batch(a.batch_dir, a.pipeline, dem)
+    if out['demotedDownstream']:
+        print(f"  note: {out['demotedDownstream']} region(s) DEMOTED downstream (served → withheld) — "
+              f"reported apart from this workstream's own reclassification, never folded into it")
     for r in out['perLesson']:
         print(f"  {r['book']} Bài {r['lesson']}: input {r['inputSourceRegions']} = served {r['served']} "
               f"+ withheld {r['withheld']} + excluded {r['excludedWithReason']} + UNACCOUNTED {r['unaccounted']}")
@@ -226,6 +258,9 @@ def main(argv=None):
     s.add_argument('--pipeline', required=True)
     s.add_argument('--out', default='')
     s.add_argument('--md', default='')
+    s.add_argument('--demotions', default='',
+                   help='JSON list (or {"blockIds": [...]}) of block ids a downstream stage moved out of '
+                        'the served set; joined on (book, page, native index) so it works across generations')
     s.add_argument('--historical', action='store_true',
                    help='report an UNACCOUNTED count without failing (used to measure a historical artefact)')
     s.set_defaults(fn=cmd_audit)

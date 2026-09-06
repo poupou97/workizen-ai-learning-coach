@@ -179,6 +179,29 @@ class LedgerTests(unittest.TestCase):
         r = self._write([self._blk(0, 'body', 'a')], [self._id(0)], [])
         self.assertEqual(r['inputSourceRegions'], 1)
 
+    def test_a_downstream_demotion_moves_a_region_without_breaking_conservation(self):
+        """WS-C's repair projection honours a fail-closed ledger ruling and withdraws a served block.
+        A demotion moves a region SERVED → WITHHELD; the population must not change, and the count is
+        reported apart from this workstream's own reclassification so the two are never folded."""
+        r = self._write([self._blk(0, 'body', 'a'), self._blk(1, 'body', 'b'), self._blk(2, 'body', 'c')],
+                        [self._id(0), self._id(1)], [self._id(2)])
+        self.assertEqual((r['served'], r['withheld'], r['demotedDownstream']), (2, 1, 0))
+        r2 = ledger.ledger_lesson(self.tmp, PIPE, BOOK, LES, demotions=[self._id(1)])
+        self.assertEqual((r2['served'], r2['withheld'], r2['demotedDownstream']), (1, 2, 1))
+        self.assertEqual(r2['inputSourceRegions'], r['inputSourceRegions'])
+        self.assertTrue(r2['conserves'])
+        self.assertEqual(r2['byReason']['withheld:demoted_downstream'], 1)
+
+    def test_a_demotion_joins_across_generations_on_page_and_block_index(self):
+        """WS-C runs on its own pipeline generation, so its block ids carry a different pipeline
+        segment. The join uses (book, page, native index) — never the whole id, never text."""
+        r = self._write([self._blk(0, 'body', 'a'), self._blk(1, 'body', 'b')], [self._id(0), self._id(1)], [])
+        other_generation = f'{BOOK}:p{PAGE:03d}:some-other-pipeline:001'
+        r2 = ledger.ledger_lesson(self.tmp, PIPE, BOOK, LES, demotions=[other_generation])
+        self.assertEqual(r2['demotedDownstream'], 1)
+        self.assertEqual((r2['served'], r2['withheld']), (1, 1))
+        self.assertTrue(r2['conserves'])
+
     def test_the_ledger_never_carries_block_text(self):
         """Corpus discipline: counts, ids and reason codes leave `poc-out/`; printed text does not."""
         r = self._write([self._blk(0, 'body', 'BÍ MẬT'), self._blk(1, 'empty', 'SECRET 1 + 1', ['SECRET 1 + 1'])],
