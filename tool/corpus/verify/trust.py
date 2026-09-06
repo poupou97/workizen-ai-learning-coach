@@ -41,6 +41,12 @@ TRUST_VERSION = 'trust-v2'
 #: case no production trust gate exists yet — round 4 measured Source Trust 0/97 for exactly that reason.
 SERVABLE = rmodel.Disposition.SERVABLE
 
+#: The Founder's two alias names, resolved through A1's own `ALIASES` map rather than redefined. They are
+#: *names for states that already exist*, so binding them here costs nothing and monkey-patching A1's class
+#: would cost correctness.
+RAW = rmodel.Disposition.canonical('RAW')
+CORRECTION_PROPOSED = rmodel.Disposition.canonical('CORRECTION_PROPOSED')
+
 
 # --------------------------------------------------------------------------- evidence
 @dataclass(frozen=True)
@@ -239,7 +245,7 @@ class TrustDecision:
         if self.candidates:
             if any(c.contradicting() for c in self.candidates):
                 return Disposition.CONFLICT, tuple(f'contradicted:{c.rule_id}' for c in self.candidates)
-            return Disposition.CORRECTION_PROPOSED, tuple(f'proposed:{c.rule_id}' for c in self.candidates)
+            return CORRECTION_PROPOSED, tuple(f'proposed:{c.rule_id}' for c in self.candidates)
 
         if self.anomalies:
             # detected, unexplained. NOT withheld-by-guard and NOT trusted: a third state, on purpose.

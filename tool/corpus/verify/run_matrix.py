@@ -145,7 +145,8 @@ def sdm_rows(limit=1200):
                 continue
             out.append(('S-sdm', b['id'], b['text'], (b.get('role') or {}).get('value'),
                         dict(guards=b.get('guards') or [], agreement=b.get('agreement') or {},
-                             ocr_conf=b.get('ocr_conf'))))
+                             ocr_conf=b.get('ocr_conf'),
+                             trust=(b.get('trust') or {}).get('status'))))
             if len(out) >= limit:
                 return out
     return out
@@ -180,6 +181,8 @@ def router_rates(policy='recall'):
         a['external'] += int('H.external' in rt.path)
         a['xcorpus'] += int('D.cross_corpus' in rt.path)
         a['cost'] += rt.cost
+        a[f'role:{role}'] += 1
+        a['trust:' + str(block.get('trust'))] += 1
         if rt.human:
             detail.append(rt.to_json())
     out = {}
@@ -192,7 +195,14 @@ def router_rates(policy='recall'):
                       cross_corpus_rate=round(a['xcorpus'] / n, 4),
                       mean_cost=round(a['cost'] / n, 1),
                       content_types={x.split(':', 1)[1]: v for x, v in a.items() if x.startswith('ctype:')},
-                      teaching={x.split(':', 1)[1]: v for x, v in a.items() if x.startswith('tc:')})
+                      teaching={x.split(':', 1)[1]: v for x, v in a.items() if x.startswith('tc:')},
+                      # Lane D R13: a block whose role is `empty` reaches neither `blocks` nor `withheld`
+                      # of the TSL and carries no reason code. A4's denominators are OCR lines and SDM
+                      # blocks, NOT the TSL, so this population is still visible here — counted so the
+                      # claim is checkable rather than asserted.
+                      roles={x.split(':', 1)[1]: v for x, v in a.items() if x.startswith('role:')},
+                      pipeline_trust={x.split(':', 1)[1]: v for x, v in a.items()
+                                      if x.startswith('trust:')})
     return out, detail
 
 

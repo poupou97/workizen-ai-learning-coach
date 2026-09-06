@@ -130,8 +130,16 @@ def disagreement_of(block):
     return 'none'
 
 
+#: Lane D measured this and it is used rather than re-derived (`docs/research/legacy-reprocess/`): of the
+#: regions it restored, **3 of 4** that the Founder's 97-row audit had labelled OVER-withheld came back
+#: **correct**, and **both** it had labelled SAFE refusals came back **wrong**. A blind human disposition
+#: label predicted the restore outcome, which makes it a routing input in its own right — and a cheap one,
+#: because it is already recorded.
+PRIOR_DISPOSITION = ('OVER', 'SAFE', None)
+
+
 def route(block_id, text, role=None, block=None, group=None, has_index=True, has_llm=True,
-          has_external=True, budget='normal'):
+          has_external=True, budget='normal', prior_disposition=None):
     """→ `Route`. Pure and cheap: no corpus access, no model call. Deciding *whether* to spend must not
     itself cost anything."""
     block = block or {}
@@ -183,6 +191,25 @@ def route(block_id, text, role=None, block=None, group=None, has_index=True, has
     else:
         skipped['H.external'] = why if not ok else ('budget' if budget != 'full' else
                                                     'not teaching-critical')
+
+    # ---- prior disposition: the cheapest signal in the router, because it is already written down.
+    if prior_disposition == 'OVER':
+        notes.append('prior audit says OVER-withheld: 3 of 4 such regions restored correctly (Lane D) — '
+                     'a restore path is warranted before an expensive signal is spent')
+    elif prior_disposition == 'SAFE':
+        notes.append('prior audit says SAFE refusal: both such regions restored WRONG (Lane D) — no '
+                     'restore without an actual repair AND an independent validator')
+        skipped['restore_without_repair'] = 'prior disposition SAFE'
+
+    # ---- silent loss: a block the role layer will drop reaches neither `blocks` nor `withheld` of the
+    # TSL and carries no reason code (Lane D, R13: 27/394 on the evaluation batch, 55/375 on the holdout,
+    # 32/51 on Toán 4 tập hai Bài 61, and the lost blocks are the printed arithmetic). It is not withheld,
+    # so no over-withhold review can ever see it. The router therefore treats it as teaching-critical when
+    # the text carries a STEM expression: those are exactly the ones that disappear.
+    if role in ('empty', None) and ctype == 'stem_expression':
+        tc = 'teaching_critical'
+        notes.append('role=empty with a numeric expression: this is the silent-loss population (Lane D '
+                     'R13), which no over-withhold review can see')
 
     # ---- human: the escalation rule, stated once.
     human, hreason = False, ''
