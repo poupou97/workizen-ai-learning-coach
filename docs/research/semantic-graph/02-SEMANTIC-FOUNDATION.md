@@ -1,6 +1,6 @@
 # Lane E1 · P0.1 — the minimal Semantic Foundation
 
-`tool/semantic/graph.py`. Research candidate; **no production migration**. 42 tests in
+`tool/semantic/graph.py`. Research candidate; **no production migration**. 44 tests in
 `tool/tests/test_semantic_foundation.py`.
 
 The chain, and where this module sits:

@@ -41,7 +41,7 @@ classification, not for generation.
 | `tool/semantic/discover_markers.py`, `probe_cues.py` | the DISCOVER step — every cue cites its measured lesson count |
 | `tool/semantic/census.py`, `gaps.py` | P0.3, §15, §17 |
 | `tool/semantic/run_poc.py` | the §27 checkpoint run |
-| `tool/tests/test_semantic_foundation.py` | 42 tests |
+| `tool/tests/test_semantic_foundation.py` | 44 tests |
 
 Outputs are corpus-derived and stay in the gitignored `poc-out/round5/semantic/` (Founder D4 — no
 verbatim SGK text or page crops in the repo).
