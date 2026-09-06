@@ -418,6 +418,7 @@ correctly by all three and lost at a block boundary; #12 is not a corruption.
 | file | what |
 |---|---|
 | `tool/corpus/audit/phase_a_rootcause.py` | the chain tracer and its four probes |
+| `tool/corpus/audit/phase_a_veto_probe.py` | the §5 before → after, rebuild against rebuild. **A measurement, not a change**: the three rules are applied by wrapping `assign_role` for one pass and restored afterwards, and nothing imports them |
 | `docs/research/PHASE-A-ROOT-CAUSE-AUDIT.md` | this report |
 
 ```
@@ -426,7 +427,12 @@ python3 tool/corpus/thresholds/evidence.py gold \
 python3 tool/corpus/audit/phase_a_rootcause.py \
     --evidence <ev.jsonl> --sdm poc-out/round4/pipeline/tc2-p2/sdm-gold \
     --out <census.json> --detail <local-only.json>                     # the 12, traced
+python3 tool/corpus/audit/phase_a_veto_probe.py \
+    --sdm poc-out/round4/pipeline/tc2-p2/sdm-gold                      # the verdict, measured
 ```
+
+The veto probe refuses to run when the baseline holds no as-question error, because a veto
+measured on a population with nothing to veto prints a flawless zero.
 
 The census carries ids, counts, classes and booleans. **Every reading goes to `--detail`, which is
 D4 and never enters git.** The measurement inputs (`poc-out/**`) are git-excluded by design.
