@@ -34,6 +34,11 @@ could not find §16 of the round-5 master order anywhere in the repository, beca
 existed only in the conversation that issued it. It had to mark the ten acceptance criteria
 **RECONSTRUCTED** and reason about what they probably were.
 
+*(Both facts are now historical: the orders were committed later the same day, and the
+reconstruction proved **byte-equal** to the real §16. That does not weaken the rule — it sharpens
+it. The reconstruction was right, and **no one could have known it was right**, which is the whole
+reason an order must be canonical when it arrives rather than reconstructed afterwards.)*
+
 **Forty-three Founder task orders existed nowhere durable until 2026-09-06.** Every report, plan,
 audit and correction for rounds 3–7 was committed. **The orders they answer to were not.** The
 authority had no home while the answers did. They are now at `docs/founder-orders/`, recovered

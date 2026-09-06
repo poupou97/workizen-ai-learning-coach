@@ -1,5 +1,22 @@
 # Round 5 — the Founder's §16 SUCCESS CRITERIA, committed for the record
 
+> **UPDATE, same day, 2026-09-06 — this file's own premise expired within hours.**
+>
+> When this was written (≈11:19) §16 existed nowhere in the repository, which is why the round-5
+> archive had to grade against **RECONSTRUCTED** criteria. At ≈15:21 the same day all 43 Founder
+> task orders were committed verbatim, and §16 is now canonical at
+> [`docs/founder-orders/33-master-task-order-học-cùng-sam-round-5.md`](../founder-orders/33-master-task-order-học-cùng-sam-round-5.md).
+>
+> **The reconstruction turned out to be byte-equal to the real §16.** That is a better outcome
+> than it sounds and a worse one: the reconstruction was accurate, and **nobody could have known
+> that at the time** — which is exactly the argument for canonicalising an order when it arrives,
+> not for trusting reconstruction.
+>
+> This paragraph exists because the claim «§16 had only ever existed in the conversation» had
+> already propagated into three other documents as a motivating example. **The rule it motivates
+> is unchanged and correct; its evidence is now historical.** Recorded rather than deleted — this
+> file is itself an instance of the failure it describes.
+
 **Why this file exists.** The round-5 retrospective archive could not find §16 anywhere in
 the repository and had to mark its ten criteria **RECONSTRUCTED**. The criteria had only
 ever existed in the conversation that issued them. That is the same hazard the workspace

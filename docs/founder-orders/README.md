@@ -7,7 +7,10 @@ them. So the *authority* that all of this work answers to had no durable home, w
 did.
 
 That is the same failure the round-5 retrospective archive hit when it could not find §16 anywhere
-in the repository and had to grade the round against **RECONSTRUCTED** criteria. It is also exactly
+in the repository and had to grade the round against **RECONSTRUCTED** criteria — a gap this
+directory closes: §16 is canonical at entry 33. The reconstruction later proved **byte-equal** to
+the real text, which is the point rather than a reprieve: it was right, and nobody could verify
+that until the order itself was committed. It is also exactly
 what the workspace `CLAUDE.md` warns about: doctrine that binds work but lives nowhere a later
 reader can check.
 
