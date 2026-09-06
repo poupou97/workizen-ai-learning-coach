@@ -301,15 +301,16 @@ was a figure label — the as-reported number was right for the wrong reason.
 
 The ledger publishes all three, on the Golden slices:
 
-| rate | before | after | reading |
-|---|---:|---:|---|
-| `servedShareAsReported` | 0.5714 | 0.5195 | of the regions the pipeline **classified**, what share did it serve? |
-| `servedShareOfLearningRegions` | 0.3704 | 0.5195 | of the regions that are learning content, what share reached a child? |
-| `servedShareOfAllInputRegions` | 0.1724 | 0.1724 | of **everything** extracted from the page, what share reached a child? |
+| rate | before | after (WS-A fix) | composed (× WS-C demotion) | reading |
+|---|---:|---:|---:|---|
+| `servedShareAsReported` | 0.5714 | 0.5195 | 0.4935 | of the regions the pipeline **classified**, what share did it serve? |
+| `servedShareOfLearningRegions` | 0.3704 | 0.5195 | 0.4935 | of the regions that are learning content, what share reached a child? |
+| `servedShareOfAllInputRegions` | 0.1724 | **0.1724** | 0.1638 | of **everything** extracted from the page, what share reached a child? |
 
-`servedShareOfAllInputRegions` is unchanged, as it must be: the numerator and the whole
-population are both untouched by the fix. The first two converge once nothing is unaccounted
-— which is what conservation *means*.
+`servedShareOfAllInputRegions` is **unchanged by the accounting fix**, as it must be: the
+numerator and the whole population are both untouched by a reclassification. It moves only in
+the composed column, because a demotion really does remove text from a child. The first two
+rates converge once nothing is unaccounted — which is what conservation *means*.
 
 **Standing rule reaffirmed:** every metric states its denominator; `3,679` canonical and
 `3,381` ranged are never collapsed. Note for the record: **3,381 is exactly the subset of the
