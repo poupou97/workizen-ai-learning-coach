@@ -145,9 +145,49 @@ Attribution matters because it decides what to build.
 |---|---|---|
 | Line geometry read, then discarded one step before the guards | `tool/corpus/tc2_sdm.py:1060`, spent on a verse boolean at `:1110` | The evidence a repair needs is thrown away before anything can use it |
 | Formula-labelled blocks die as `empty` for "no letters" | `tool/corpus/tc2_sdm.py:276-277` | **14 of 15** Docling formula blocks on the Toán pages, one carrying `7 8 2 8 7 - 2 8 5 8`. The reason code misstates what was lost. **4 validated math restores are blocked by `empty_block` alone** — half of A2's correct output held out by a role decision, not a math one |
-| A `FORMULA` role buys trust 0.95 and waives the math/unit/chem guards | `tool/corpus/tc2_sdm.py:290-291` | Latent: enabling Docling formula enrichment would silently mint trusted formulas. Regression tests ordered by Founder §4 **[PENDING — Lane A1/A3 confirmation]** |
+| ~~A `FORMULA` role buys trust 0.95 and waives the math/unit/chem guards~~ | was `tool/corpus/tc2_sdm.py:290-291` | **CLOSED — see §5.1** |
 | Bridge has no `formula` role | `tool/corpus/tsl_to_lesson_document.py:71-82` | A validated `MathExpression` cannot reach the app |
 | Provenance dropped on the pack path | `tool/ui/build_lesson_index.py:53,58,366` | 41 geometrically-rebuilt expressions marked `status: INFERRED` / `method: geometric-fraction-rebuild-v1` ship to g4 and g5 carrying only `['book','expr','page','skillCaseId']` — the "not verbatim" warning is stripped. **[PENDING — Lane D fix]** |
+
+
+### 5.1 Founder STEM §4 — the latent formula trust hole is closed, and verified
+
+Ordered in «FOUNDER DECISION — STEM STRUCTURED DATA» §4. Verified by the coordinator
+against Lane A1's branch, in production code **and** in tests — not taken on report.
+
+Before (`integration/round5-2026-09-06`, `tc2_sdm.py:290-291`):
+
+```python
+if b['role'] == 'FORMULA':
+    return 'formula', 'native', 0.95, ['docling formula']
+```
+
+A label bought confidence 0.95, and `role_guards` then waived the math/unit/chem
+guards for that role. The day Docling formula enrichment was switched on, formula
+recognition would have become trusted teaching content silently.
+
+After (`a1/round5-repair-framework`, `tc2_sdm.py:380-390`):
+
+```python
+structured = bool(b.get('formula_structured'))
+return ('formula', 'native', 0.95 if structured else 0.60,
+        ['docling formula'] + ([] if structured else ['structure NOT validated: label only']))
+```
+
+Four regression tests fix it in place (`tool/tests/test_repair_vi_defects.py`,
+`class FormulaTrustHole`): a label alone does not buy confidence; an unvalidated
+formula block is `WITHHELD` with reason `formula_unvalidated`; a formula label does
+not waive the math/unit/chem guards; and the exemption is **earned by a validated
+structure, not by a role name**. The test class states its own purpose: *"Dormant
+today (Docling formula enrichment is off, FORMULA recall 0.000) — these tests exist
+so that switching it on cannot silently turn formula recognition into trusted
+content."*
+
+**A convergence worth noting.** A1 gates the exemption on a `formula_structured`
+flag; A2, working independently in another worktree, sets `formula_structured`
+**only** from a validated structure. Two lanes arrived at the same contract from
+opposite ends without coordination. The hole is closed by construction rather than
+by luck, which is exactly what §4 asked for.
 
 ---
 
