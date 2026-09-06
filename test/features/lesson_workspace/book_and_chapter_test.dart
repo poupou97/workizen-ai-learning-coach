@@ -40,6 +40,11 @@ LessonIndex _idx() => LessonIndex.fromJsonString('''
 ''')!;
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   testWidgets(
     '⭐ giá sách: cuốn CÓ workspace mở BookScreen; cuốn khác giữ lối cũ',
     (t) async {
@@ -93,7 +98,28 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.textContaining('Chương IV · Hỗn hợp'), findsOneWidget);
+    // ROUND 7 · WS-R — TIỀN ĐỀ ĐÃ SỬA, KHÔNG PHẢI CỔNG BỊ NỚI.
+    // Trước: màn hạ chữ thường TOÀN CHUỖI rồi viết hoa lại ⇒ «Chương IV ·
+    // Hỗn hợp…». Luật ấy phá danh từ riêng («… thời kì Bắc thuộc» → «bắc
+    // thuộc», lỗi máy thật vòng 6), nên nay chỉ chuỗi KHÔNG CÓ MỘT CHỮ THƯỜNG
+    // NÀO mới được viết hoa lại. Tên chương của fixture MẪU mang chú thích
+    // «(mẫu)» — chữ thường — nên nó là chuỗi HỖN HỢP hoa/thường và được giữ
+    // NGUYÊN VĂN. Đó là hành vi fail-closed đúng: thà hiện chữ in hoa của
+    // sách còn hơn khẳng định sai rằng một danh từ riêng không phải danh từ
+    // riêng. Tên chương THẬT (OCR mục lục in) KHÔNG có chữ thường nào, nên
+    // vẫn được viết hoa lại — test fixture THẬT ở dưới ghim điều đó.
+    expect(
+      find.textContaining('Chương IV · HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP'),
+      findsOneWidget,
+    );
+    // và luật vẫn ÁP cho chuỗi in hoa thuần: chương I của fixture MẪU là
+    // «MỞ ĐẦU (mẫu)» ⇒ cũng hỗn hợp ⇒ nguyên văn. Không có chương nào của
+    // fixture mẫu bị viết hoa lại, và đó là điều đang được ghim.
+    // ⭐ ROUND 7 · WS-S — kỳ vọng PHỦ ĐỊNH: dạng ĐÃ HẠ CHỮ không được xuất
+    // hiện. Nó vẫn đúng nguyên văn dưới quyết định «giữ nguyên văn nguồn», và
+    // nó KHÔNG được «sửa» cùng các kỳ vọng khẳng định ở trên — viết hoa nó lên
+    // sẽ biến một canh gác thành một phép trùng lặp luôn đỏ.
+    expect(find.textContaining('Chương IV · Hỗn hợp'), findsNothing);
     expect(find.textContaining('bài · ✨ 1 bài học SAM'), findsOneWidget);
     // ROUND 3 B1/B5: dải số bài từ mục lục; tên chương OCR nói rõ nguồn.
     expect(find.textContaining('Bài 16–17 · '), findsOneWidget);
@@ -132,8 +158,8 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.textContaining('Bài 16 · Hỗn hợp'), findsOneWidget);
-    expect(find.textContaining('Bài 17 · Tách chất'), findsOneWidget);
+    expect(find.textContaining('Bài 16 · HỖN HỢP'), findsOneWidget);
+    expect(find.textContaining('Bài 17 · TÁCH CHẤT'), findsOneWidget);
     expect(
       find.textContaining('Bài 18'),
       findsNothing,
@@ -156,15 +182,15 @@ void main() {
           ).first,
         )
         .color!;
-    expect(rowColor('Bài 17 · Tách chất'), WalColors.surfaceLavender,
+    expect(rowColor('Bài 17 · TÁCH CHẤT'), WalColors.surfaceLavender,
         reason: 'bài CÓ Bài học SAM được nhấn');
-    expect(rowColor('Bài 16 · Hỗn hợp'), Colors.white,
+    expect(rowColor('Bài 16 · HỖN HỢP'), Colors.white,
         reason: 'bài chưa có Bài học SAM KHÔNG được nhấn hơn bài có');
 
-    await t.tap(find.textContaining('Bài 16 · Hỗn hợp'));
+    await t.tap(find.textContaining('Bài 16 · HỖN HỢP'));
     expect(legacyTaps, 1);
 
-    await t.tap(find.textContaining('Bài 17 · Tách chất'));
+    await t.tap(find.textContaining('Bài 17 · TÁCH CHẤT'));
     await t.pumpAndSettle();
     // ROUND 3 B1: lần đầu ⇒ màn «Vào bài học», thẻ đề xuất mang lý do.
     expect(find.byKey(const Key('mode-picker')), findsOneWidget);
@@ -273,7 +299,7 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.textContaining('Từ tề bào đền cơ thể'), findsOneWidget);
+    expect(find.textContaining('TỪ TỀ BÀO ĐỀN CƠ THỂ'), findsOneWidget);
   });
 
   // ── ROUND 5 B: hai tab «Chương | Bài học» (concept-chuong khung 3) ──
@@ -344,7 +370,7 @@ void main() {
     await t.ensureVisible(find.byKey(LessonRow.keyFor(17)));
     await t.tap(find.byKey(LessonRow.keyFor(17)));
     await t.pumpAndSettle();
-    expect(find.textContaining('Bài 17 · Tách chất'), findsWidgets);
+    expect(find.textContaining('Bài 17 · TÁCH CHẤT'), findsWidgets);
   });
 
   testWidgets('⭐ D3 (máy thật, lượt 2): tab «Bài học» có chip lọc CÙNG VỐN TỪ '

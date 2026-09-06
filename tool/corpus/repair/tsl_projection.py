@@ -499,7 +499,15 @@ def main(argv=None):
     ap.add_argument('--ledger', required=True, help='repair-ledger.jsonl from run_gold.py')
     ap.add_argument('--out', help='write the projected TSL here (default: report only)')
     ap.add_argument('--lesson-document', help='also emit the LessonDocument through the ONE bridge '
-                                              '(tool/corpus/tsl_to_lesson_document.py). No crops.')
+                                              '(tool/corpus/tsl_to_lesson_document.py), with page '
+                                              'crops beside it unless --no-crops.')
+    ap.add_argument('--no-crops', action='store_true',
+                    help='ROUND 7 · WS-R: crops used to be unconditionally absent here, and this is '
+                         'the ONLY path that stamps the full repair chain — so a repaired golden '
+                         'could have its lineage or its page crops, never both. Round 6 chose '
+                         'lineage and shipped 17 withheld regions that showed a child nothing. '
+                         'Crops are now the default; this flag is for a machine with no source PDF.')
+    ap.add_argument('--dpi', type=int, default=150, help='crop resolution')
     ap.add_argument('--subject', help='subject name for the document (else derived from the book id)')
     ap.add_argument('--grade', type=int, help='grade for the document (else derived from the book id)')
     ap.add_argument('--on-served-repair', default='refuse', choices=('refuse', 'withhold'))
@@ -527,9 +535,21 @@ def main(argv=None):
         if a.grade:
             meta['grade'] = a.grade
         src_rel = os.path.relpath(a.out or a.tsl)
+        # ROUND 7 · WS-R — crops are cut from the PROJECTED TSL (`out`), the same object the
+        # document is built from, so a crop can never belong to a different generation than the
+        # region it illustrates. They land beside the document because that is where
+        # `golden_delivery.py` and `fixture_lineage.py` (L5/L5b) look for them.
+        crop_map = {}
+        if not a.no_crops:
+            crop_dir = os.path.dirname(os.path.abspath(a.lesson_document)) or '.'
+            os.makedirs(crop_dir, exist_ok=True)
+            crop_map = bridge.render_crops(out, crop_dir, a.dpi)
+        # Subject/grade default to the curriculum structure (short book titles); explicit flags win.
+        book_meta = dict(bridge.book_meta_for(out['book']))
+        book_meta.update(meta)
         doc = bridge.convert(out, tsl_rel_path=src_rel,
-                             tsl_sha256=canonical_sha256(out), book_meta=meta,
-                             chapters=bridge.chapters_from_toc(out['book']))
+                             tsl_sha256=canonical_sha256(out), book_meta=book_meta,
+                             chapters=bridge.chapters_from_toc(out['book']), crops=crop_map)
         # The version chain the round-6 addendum requires, carried ON the document itself.
         doc['provenance']['repair']['sourceTslSha256'] = report['source_tsl_sha256']
         doc['provenance']['repair']['projectedTslSha256'] = report['projected_tsl_sha256']

@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/wal_tokens.dart';
 import '../../../core/lesson_model/lesson_document.dart';
+import '../../../core/display/lesson_title.dart';
 import '../../../core/lesson_model/semantic_data.dart';
 import '../../../core/lesson_model/timeline_date.dart';
 import '../../../core/lesson_model/timeline_sources.dart';
@@ -225,7 +226,7 @@ class _TimelineViewState extends State<TimelineView> {
     final a = _sources[i];
     final title = a.title == null
         ? 'Câu chuyện (SAM chưa thấy tiêu đề)'
-        : LessonDocument.titleCase(a.title!);
+        : displayTitle(a.title!);
     return InkWell(
       key: TimelineView.sourceKey(i),
       onTap: () => widget.onOpenSource(a.attributionBlockId),

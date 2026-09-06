@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/agenda/learning_agenda.dart';
+import '../../core/display/lesson_title.dart';
 import '../../core/intent/next_lesson.dart';
 import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/next_action.dart';
@@ -472,7 +473,7 @@ class MissionCenterScreen extends StatelessWidget {
                 letterSpacing: 1.1,
                 color: WalColors.inkSoft)),
         const SizedBox(height: 4),
-        Text('✨ ${doc.lessonLabel}',
+        Text('✨ ${displayLessonLabel(doc.lessonNo, doc.title)}',
             style: const TextStyle(
                 fontSize: WalType.title,
                 fontWeight: FontWeight.w700,
@@ -562,7 +563,9 @@ class MissionCenterScreen extends StatelessWidget {
   /// Câu SAM nói ở đầu Home — TẤT ĐỊNH từ dữ liệu, không bịa phút/%.
   String samTodayLine() {
     if (_workspaceIsPrimary) {
-      return 'Hôm nay mình học ${workspaceLesson!.lessonLabel} nhé — bài này '
+      return 'Hôm nay mình học '
+          '${displayLessonLabel(workspaceLesson!.lessonNo, workspaceLesson!.title)}'
+          ' nhé — bài này '
           'SAM đã xếp sẵn ba cách học từ sách. Bấm «Mở bài học» là vào.';
     }
     if (_effectiveRecommendation != null || data.agenda != null) {

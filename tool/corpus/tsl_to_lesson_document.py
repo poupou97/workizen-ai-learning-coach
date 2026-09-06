@@ -111,6 +111,60 @@ ROLE_MAP = {
 #: countable through its repair record.
 KNOWN_UNCARRIED_ROLES = {'formula': 'no_carrier:formula'}
 
+#: ⭐ ROUND 7 (workstream S) — STRUCTURAL GROUPS ON THE LESSON PATH, **BUILT AND NOT SWITCHED ON**.
+#:
+#: Round 5 defect 8: *withholding one option of a multiple-choice question leaves the SERVED question
+#: wrong, not merely smaller.* The Founder's ruling was that for a block with structural siblings the
+#: GROUP is the unit of disposition — serve all of it or none of it. `repair/groups.py` implemented
+#: that on the GOLD-PAGE path in round 5 (7 mutilated structures → 0). **It was never implemented on
+#: the lesson path**, which is the path a child actually reads, and rounds 5 and 6 both recorded the
+#: class as still open there.
+#:
+#: Measured here, over the 238 canonical TSLs (`tool/corpus/structured_gap_census.py`):
+#:   **31 mutilated structures are served today** — 29 `procedure_steps` (a LOWER BOUND) and
+#:   **2 of 2** `question_options`, i.e. every multiple-choice group in the corpus is mutilated.
+#: Enforcing the rule takes that to **0**, and costs **72 blocks** (11 833 → 11 761 served).
+#:
+#: Both switches default to **False**, and with both off the emitted document is BYTE-IDENTICAL to
+#: round 6's — asserted by `test_group_machinery_is_off_by_default`. Withholding 72 blocks a child
+#: reads today is a product decision of the same shape as round 6's lost timeline: it is the Founder's,
+#: not a lane's. `--group-rule` is the switch; this module will not throw it.
+GROUP_REASON = 'structural_group'
+GROUP_SENTINEL_TEXT = '\x01withheld\x01'   # never rendered, never emitted; see `structural_groups_of`
+
+
+def structural_groups_of(tsl):
+    """Structural groups for one TSL, from `repair/groups.py` — ONE definition of «a group» for the
+    gold path and the lesson path both. Imported lazily so the bridge keeps working in a tree where
+    the repair framework is absent.
+
+    A withheld TSL region carries `text: null`, and `groups.structural_groups` drops empty-text blocks;
+    without a placeholder every withheld sibling would be invisible to group formation, which is exactly
+    why defect 8 could not be seen here. The sentinel restores MEMBERSHIP without inventing text — it is
+    not a rendering, it never reaches a document, and `groups.ENUM_STEP` deliberately does not match it.
+    Consequence, stated once and carried into every number: `question_options` and `table_rows` are
+    decided by ROLE and are complete; `procedure_steps` is decided by an enumerator IN THE TEXT, which a
+    withheld region does not have, so a procedure whose missing step is withheld is NOT detected. Every
+    `procedure_steps` count is a lower bound, never an over-count."""
+    from repair import groups as _groups   # noqa: PLC0415 — optional dependency, see docstring
+
+    by_page, figs = {}, {}
+    for b in tsl.get('blocks') or ():
+        by_page.setdefault(b['page'], []).append(dict(
+            id=b['id'], order=b.get('order') or 0, text=b.get('text') or '',
+            role={'value': role_of(b)}))
+    for w in tsl.get('withheld') or ():
+        by_page.setdefault(w['page'], []).append(dict(
+            id=w['id'], order=w.get('order') or 0, text=GROUP_SENTINEL_TEXT,
+            role={'value': role_of(w)}))
+    for f in tsl.get('figures') or ():
+        figs.setdefault(f.get('page'), []).append(f)
+    out = []
+    for page, blocks in sorted(by_page.items()):
+        out.extend(_groups.structural_groups(dict(
+            book=tsl['book'], page=page, blocks=blocks, figures=figs.get(page) or [])))
+    return out
+
 #: A region-level repair projection may carry NONE of these. They are the ways a proposed value could
 #: ride into the document on a block a renderer walks.
 REPAIR_FORBIDDEN_KEYS = ('proposedValue', 'text', 'value', 'latex', 'textProjection', 'candidate',
@@ -648,7 +702,8 @@ def tutor_script_bai17(tsl, by_id):
 
 # ------------------------------------------------------------------ the pure conversion
 def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters=None, crops=None,
-            audit_status='notAudited', audit_ref=None, include_tutor_script=True):
+            audit_status='notAudited', audit_ref=None, include_tutor_script=True,
+            structural_groups=False, group_rule=False):
     """TSL dict → LessonDocument dict. Pure: no I/O, no clock. `crops` maps a figure/withheld id to
     {'crop': relative path, 'aspect': w/h|None}; absent ⇒ no crop path (figures then carry crop=None and
     are DROPPED, because an ImageBlock without a crop cannot render — counted in `blockCounts`)."""
@@ -714,6 +769,11 @@ def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters
             idx = next((i for i, t in enumerate(seq) if t[0] > f['page']), len(seq))
         seq.insert(idx, (f['page'], yc, f['bbox'][0], -1, image_block(book, f, c['crop'], c.get('aspect'))))
     blocks = [t[4] for t in seq]
+    # 3b. ROUND 7 (WS-S) — structural groups. Both switches default OFF; with both off this block is a
+    #     no-op and the document is byte-identical to round 6's.
+    group_stats = None
+    if structural_groups or group_rule:
+        blocks, group_stats = apply_structural_groups(book, tsl, blocks, enforce=group_rule)
     # 4. provenance line at the end of the lesson (generated text, not SGK)
     if printed:
         rng = f'trang {printed[0]}' if printed[0] == printed[-1] else f'trang {printed[0]}–{printed[-1]}'
@@ -793,6 +853,13 @@ def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters
                 'imagesKept': images_kept,
                 'imagesWithoutCrop': images_without_crop,
                 'figuresInTsl': len(tsl.get('figures') or []),
+                # ROUND 7 (WS-S): the key is ABSENT when the group machinery did not run — not present
+                # and null, and never a zero. «0 mutilated structures» is only ever a measurement when
+                # this key exists; its absence is the honest way to say the question was not asked. It
+                # is also what keeps the default document BYTE-IDENTICAL to round 6's: an added `null`
+                # would have been a silent schema change on a path a child reads, and
+                # `test_tsl_to_lesson_document` caught exactly that before this comment existed.
+                **({'structuralGroups': group_stats} if group_stats is not None else {}),
             },
         },
         'evidencePolicy': 'none',
@@ -831,6 +898,75 @@ def repair_summary(tsl, blocks):
     }
 
 
+def apply_structural_groups(book, tsl, blocks, enforce):
+    """Annotate every block with its structural group and, when `enforce`, apply «serve the whole group
+    or none of it». Returns `(blocks, stats)`.
+
+    The direction is FAIL-CLOSED AND ONE-WAY: a group with a withheld member has its served members
+    withheld. Nothing is ever restored — restoring a withheld member needs evidence for that member,
+    which is a trust decision and a Founder gate, and this bridge has no input for one. So this function
+    can only ever REDUCE what a child reads; there is no argument value that makes it serve more.
+
+    Annotation is provenance, not content: `relations.group` carries the group's id, kind, member count
+    and how many members are withheld. A reader (or a guard test) can therefore SEE that a served block
+    belongs to a mutilated structure without the app gaining any way to read the missing member."""
+    by_id = {b['id']: b for b in blocks}
+    tsl_by_id = {b['id']: b for b in tsl.get('blocks') or ()}
+    groups = structural_groups_of(tsl)
+    mutilated, withheld_by_rule = [], []
+
+    for g in groups:
+        members = [m for m in g['members'] if m in by_id]
+        if not members:
+            continue
+        served = [m for m in members if by_id[m]['type'] != 'withheld']
+        # `repair.groups.apply_group_rule` ignores a group with fewer than two present members except
+        # for `figure_caption`; the same bound is kept here so the two paths cannot disagree.
+        if len(members) < 2 and g['kind'] != 'figure_caption':
+            continue
+        n_withheld = len(members) - len(served)
+        if served and n_withheld:
+            mutilated.append(dict(groupId=g['group_id'], kind=g['kind'], members=len(members),
+                                  served=len(served), withheld=n_withheld))
+            if enforce:
+                for m in served:
+                    src = tsl_by_id.get(m)
+                    if src is None:            # a withheld region cannot be in `served`
+                        raise BridgeRefusal(f'group member {m} has no TSL record')
+                    rel = by_id[m].get('relations')
+                    repl = withheld_block(book, src, [f'{GROUP_REASON}:{g["kind"]}'],
+                                          status='WITHHELD', source_role=role_of(src))
+                    repl['relations'] = rel
+                    blocks[blocks.index(by_id[m])] = repl
+                    by_id[m] = repl
+                    withheld_by_rule.append(m)
+        # Annotate LAST, so `withheldMembers` describes the document that is actually emitted rather
+        # than the one that existed before the rule ran. A provenance field that reports a state the
+        # document no longer has is the shape round 5 caught in serialisation: a record that quietly
+        # says the content is better grounded than it is.
+        final_withheld = sum(1 for m in members if by_id[m]['type'] == 'withheld')
+        for m in members:
+            by_id[m].setdefault('relations', {})['group'] = {
+                'id': g['group_id'], 'kind': g['kind'],
+                'members': len(members), 'withheldMembers': final_withheld}
+
+    stats = {
+        'ruleApplied': bool(enforce),
+        'groups': len(groups),
+        'byKind': {k: sum(1 for g in groups if g['kind'] == k) for k in sorted({g['kind'] for g in groups})},
+        # BEFORE the rule — the defect as it stands. With `ruleApplied` true these are the structures the
+        # rule resolved, not structures that remain; `mutilatedRemaining` is the number that stays.
+        'mutilatedBeforeRule': len(mutilated),
+        'mutilated': mutilated,
+        'mutilatedRemaining': 0 if enforce else len(mutilated),
+        'blocksWithheldByRule': len(withheld_by_rule),
+        'note': 'procedure_steps is a LOWER BOUND: a withheld region carries no text, so an enumerated '
+                'step that is withheld cannot be recognised as a member. question_options and '
+                'table_rows are role-decided and complete.',
+    }
+    return blocks, stats
+
+
 def check_document(doc, tsl):
     """Post-conditions the bridge guarantees (also exercised by the tests)."""
     blocks = doc['blocks']
@@ -850,8 +986,15 @@ def check_document(doc, tsl):
         assert isinstance(b['sourceRef']['pagePdf'], int) and len(b['sourceRef']['bbox']) == 4
     n_withheld = sum(1 for b in blocks if b['type'] == 'withheld')
     counts = doc['provenance']['blockCounts']
+    # ROUND 7 (WS-S): the group rule withholds ALREADY-SERVABLE blocks, so the conservation identity
+    # gains a fourth term. It is read from the emitted stats, not recomputed, so a rule that withheld a
+    # block without recording it fails this assert instead of hiding inside a bigger number.
+    by_rule = ((counts.get('structuralGroups') or {}).get('blocksWithheldByRule') or 0)
     assert n_withheld == (len(tsl.get('withheld') or [])
-                          + counts['unknownRoleWithheld'] + counts.get('noCarrierWithheld', 0))
+                          + counts['unknownRoleWithheld'] + counts.get('noCarrierWithheld', 0)
+                          + by_rule), (
+        f'withheld conservation: {n_withheld} != tsl {len(tsl.get("withheld") or [])} + unknownRole '
+        f'{counts["unknownRoleWithheld"]} + noCarrier {counts.get("noCarrierWithheld", 0)} + rule {by_rule}')
     assert doc['licence'] == LICENCE and doc['provenance']['trust'] == TRUST_TSL
     assert doc['provenance']['answerKeysIncluded'] is False
     # verbatim: every trusted text block reproduces the TSL text unchanged
@@ -993,14 +1136,16 @@ def book_meta_for(book):
     return {'subject': cs.get('subject'), 'grade': cs.get('grade')}
 
 
-def build(tsl_path, out_dir, dpi=150, crops=True, audit_status='notAudited', audit_ref=None):
+def build(tsl_path, out_dir, dpi=150, crops=True, audit_status='notAudited', audit_ref=None,
+          structural_groups=False, group_rule=False):
     """The ONE path: TSL file → `<out_dir>/lesson-<book>-b<N>.json` (+ crops/). Returns the output path."""
     tsl = json.load(open(tsl_path, encoding='utf-8'))
     validate_tsl(tsl)
     crop_map = render_crops(tsl, out_dir, dpi) if crops else {}
     doc = convert(tsl, tsl_rel_path=os.path.relpath(tsl_path, ROOT), tsl_sha256=sha256_file(tsl_path),
                   book_meta=book_meta_for(tsl['book']), chapters=chapters_from_toc(tsl['book']), crops=crop_map,
-                  audit_status=audit_status, audit_ref=audit_ref)
+                  audit_status=audit_status, audit_ref=audit_ref,
+                  structural_groups=structural_groups, group_rule=group_rule)
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, f'lesson-{tsl["book"]}-b{tsl["lesson"]}.json')
     with open(out_path, 'w', encoding='utf-8') as f:
@@ -1023,9 +1168,16 @@ def main(argv=None):
     ap.add_argument('--no-crops', action='store_true')
     ap.add_argument('--audit-status', default='notAudited', choices=AUDIT_STATUSES)
     ap.add_argument('--audit-ref', default=None)
+    ap.add_argument('--structural-groups', action='store_true',
+                    help='annotate relations.group (provenance only — serves nothing new)')
+    ap.add_argument('--group-rule', action='store_true',
+                    help='ENFORCE «serve the whole structural group or none of it» (round 5 defect 8). '
+                         'WITHHOLDS MORE, never less. Off by default: switching it on removes blocks a '
+                         'child reads today, which is a Founder decision, not a lane\'s.')
     a = ap.parse_args(argv)
     try:
-        build(a.tsl, a.out, dpi=a.dpi, crops=not a.no_crops, audit_status=a.audit_status, audit_ref=a.audit_ref)
+        build(a.tsl, a.out, dpi=a.dpi, crops=not a.no_crops, audit_status=a.audit_status,
+              audit_ref=a.audit_ref, structural_groups=a.structural_groups, group_rule=a.group_rule)
     except BridgeRefusal as e:
         print(f'REFUSED: {e}', file=sys.stderr)
         return 2

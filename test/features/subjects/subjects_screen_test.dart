@@ -33,6 +33,11 @@ const _r4Stamp =
     EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   testWidgets('grid môn sinh từ data; thiếu index ⇒ nói thật', (t) async {
     await t.pumpWidget(MaterialApp(
         home: SubjectsScreen(
@@ -55,14 +60,15 @@ void main() {
             store: JsonlLearnerStore(),
             index: idx(),
             subject: 'Toán')));
-    expect(find.textContaining('Cộng, trừ hai phân số khác mẫu số'),
-        findsOneWidget, reason: 'title mined thật, đổi về câu thường');
+    expect(find.textContaining('CỘNG, TRỪ HAI PHÂN SỐ KHÁC MẪU SỐ'),
+        findsOneWidget,
+        reason: 'title mined thật, NGUYÊN VĂN nguồn (quyết định Founder vòng 7)');
     expect(find.textContaining('1 bài tập từ SGK'), findsOneWidget);
     expect(find.textContaining('SAM đang học bài này'), findsOneWidget,
         reason: 'bài 9 chưa có exercises — nói thật');
 
     // ⭐ WAL-175 — bấm bài ra bộ chọn Ý ĐỊNH, không phải danh sách việc.
-    await t.tap(find.textContaining('Cộng, trừ hai phân số'));
+    await t.tap(find.textContaining('CỘNG, TRỪ HAI PHÂN SỐ'));
     await t.pumpAndSettle();
     expect(find.text('Con muốn bắt đầu thế nào?'), findsOneWidget,
         reason: 'không có thời khoá biểu, không có bằng chứng ⇒ SAM HỎI, '
@@ -81,7 +87,7 @@ void main() {
     expect(find.textContaining('sách nói'), findsNothing);
     await t.tapAt(const Offset(400, 50)); // đóng sheet
     await t.pumpAndSettle();
-    await t.tap(find.textContaining('Cộng, trừ hai phân số'));
+    await t.tap(find.textContaining('CỘNG, TRỪ HAI PHÂN SỐ'));
     await t.pumpAndSettle();
     await t.tap(find.text('Con có bài tập'));
     await t.pumpAndSettle();

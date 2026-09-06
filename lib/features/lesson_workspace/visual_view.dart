@@ -33,6 +33,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
+import '../../core/display/lesson_title.dart';
 import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/semantic_data.dart';
 import 'views/mindmap_view.dart';
@@ -290,7 +291,7 @@ class _VisualViewState extends State<VisualView> {
       children: [
         if (!titleIsHub) ...[
           Text(
-            s.title,
+            displayTitle(s.title),
             style: const TextStyle(
               fontSize: WalType.title,
               fontWeight: FontWeight.w700,
@@ -503,7 +504,7 @@ class _VisualViewState extends State<VisualView> {
 
   /// Thực thể → nút nhánh; mỗi chiều so sánh → một dòng chữ SÁCH trong nút.
   Widget _comparisonMindmap(ComparisonSemantic s) => MindmapView(
-    hub: s.title,
+    hub: displayTitle(s.title),
     hubSourceBlockId: s.entities.first.sourceBlockId,
     onOpenSource: _openSource,
     nodes: [

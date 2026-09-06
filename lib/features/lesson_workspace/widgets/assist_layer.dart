@@ -36,7 +36,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/wal_tokens.dart';
-import '../../../core/lesson_model/next_action.dart';
+import '../../../core/agenda/lesson_next_action.dart';
 
 /// Ba trạng thái của lớp trợ giúp. Chuyển trạng thái là việc của màn chứa nó.
 enum AssistState {
@@ -57,12 +57,12 @@ abstract final class AssistCopy {
   static const why = 'Vì sao?';
 
   /// «💡 SAM gợi ý: Xem Trực quan» — nêu ĐÍCH ĐẾN, không chỉ nói «có gợi ý».
-  static String peekLine(NextAction a) => a.view == null
+  static String peekLine(LessonNextAction a) => a.view == null
       ? 'SAM gợi ý: ${a.label}'
       : 'SAM gợi ý: Xem ${a.view!.label}';
 
   /// Nhãn trợ năng: biểu tượng 💡 một mình KHÔNG đủ cho trình đọc màn hình.
-  static String semanticLabel(NextAction a, AssistState s) =>
+  static String semanticLabel(LessonNextAction a, AssistState s) =>
       '$title: ${a.view == null ? a.label : 'xem ${a.view!.label}'}'
       '${s == AssistState.expanded ? ' — đang mở' : ''}';
 
@@ -81,7 +81,7 @@ class AssistIconButton extends StatelessWidget {
     this.unseen = true,
   });
 
-  final NextAction action;
+  final LessonNextAction action;
   final VoidCallback onOpen;
 
   /// Chấm báo «có gợi ý con chưa xem» — để 💡 không thành đồ trang trí chết.
@@ -137,7 +137,7 @@ class AssistPeek extends StatelessWidget {
     this.seenLine,
   });
 
-  final NextAction action;
+  final LessonNextAction action;
   final AssistState state;
   final VoidCallback onToggle;
   final VoidCallback onGo;

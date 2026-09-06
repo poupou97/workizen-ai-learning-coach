@@ -112,10 +112,25 @@ def read(readings, min_agreeing=2):
 
 
 def validate(value, line_text):
-    """The independent check: PASS · FAIL · NOT_APPLICABLE. Never a generator."""
+    """The independent check: PASS · FAIL · NO_CANDIDATE · NOT_APPLICABLE. Never a generator.
+
+    ROUND 7 · WS-R — FOUR outcomes, not three. Round 6 reported «`si_expected_exponent` abstained
+    on all 171» from a field that could not tell two different things apart: `run` wrote
+    NOT_APPLICABLE whenever the recogniser produced NO CANDIDATE, whatever the line said. Re-derived
+    from the leaf rows of `exponent.json`: **6 of the 171 lines do state an SI prefix relation**, so
+    the validator is applicable on 6 and inapplicable on 165 — and on 5 of those 6 the recogniser
+    returned nothing to check (`STILL_BROKEN`), while the 6th is a NEGATIVE exponent the validator
+    declines by design. «Never fires» was true; «abstained» named the wrong cause.
+
+      NOT_APPLICABLE  the line states no SI prefix relation — nothing to check against
+      NO_CANDIDATE    it does, but the recogniser produced no reading — nothing to check
+      PASS / FAIL     both present, and they agree / disagree
+    """
     expected = SN.si_expected_exponent(line_text)
     if expected is None:
         return 'NOT_APPLICABLE', None
+    if value is None:
+        return 'NO_CANDIDATE', expected
     return ('PASS' if str(expected) == str(value) else 'FAIL'), expected
 
 
@@ -147,14 +162,18 @@ def run(findings, scales=SCALES, out_name='exponent'):
             r = results.get(f'{key}@{s:g}') or {}
             readings[s] = [(ln.get('text') or '') for ln in (r.get('lines') or [])]
         verdict, value, agreeing = read(readings)
-        vv, expected = validate(value, text) if value else ('NOT_APPLICABLE', None)
+        vv, expected = validate(value, text)
         rows.append(dict(key=key, book=book, page=page, line=text, matched=f.matched,
                          verdict=verdict, exponent=value, agreeing_scales=list(agreeing),
                          si_validator=vv, si_expected=expected,
+                         si_applicable=expected is not None,
                          readings={str(k): v for k, v in readings.items()}))
     payload = dict(findings=len(rows), scales=list(scales),
                    by_verdict=dict(Counter(r['verdict'] for r in rows)),
-                   by_validator=dict(Counter(r['si_validator'] for r in rows)), rows=rows)
+                   by_validator=dict(Counter(r['si_validator'] for r in rows)),
+                   # the denominator the validator's own rate must be read against
+                   si_applicable=sum(1 for r in rows if r['si_applicable']),
+                   rows=rows)
     os.makedirs(OUT, exist_ok=True)
     path = f'{OUT}/{out_name}.json'
     with open(path, 'w') as fh:
@@ -265,11 +284,13 @@ def rescore(path, out_name='exponent-guarded'):
                     sign = superscript_sign(mask, tok, fs[j])
             if sign is True:
                 verdict = 'REFUSED_SIGNED_EXPONENT'
-        vv, expected = validate(value, r['line']) if value else ('NOT_APPLICABLE', None)
+        vv, expected = validate(value, r['line'])
         rows.append(dict(r, verdict=verdict, exponent=value, agreeing_scales=list(agreeing),
-                         raster_sign=sign, si_validator=vv, si_expected=expected))
+                         raster_sign=sign, si_validator=vv, si_expected=expected,
+                         si_applicable=expected is not None))
     payload = dict(doc, rows=rows, by_verdict=dict(Counter(x['verdict'] for x in rows)),
                    by_validator=dict(Counter(x['si_validator'] for x in rows)),
+                   si_applicable=sum(1 for x in rows if x['si_applicable']),
                    guards=['per-line match', 'not-a-power-of-ten shape', 'raster superscript sign'])
     out = f'{OUT}/{out_name}.json'
     with open(out, 'w') as fh:
