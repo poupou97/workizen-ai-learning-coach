@@ -132,9 +132,16 @@ about *how well it was read*.
 | C1 | 36 | 3 | 0.083 | 0.139 |
 | C2 | 39 | 4 | **0.103** | 0.179 |
 
-A lesson is several pages. Re-derived a second way from the block rate under independence:
-`1 − (1 − 0.0213)^4 = 0.082` against 0.103 observed — the observed figure is *worse* than
-independence predicts, which is the expected direction, because errors cluster by page.
+A lesson is several pages, so a lesson figure is worse than either row.
+
+**A correction I made to my own first calculation, because the rule says re-derive before
+recording a disagreement.** I first compared the observed 0.103 against `1 − (1 − 0.0213)^4 =
+0.082`, using the median blocks-per-page, and wrote that the observed figure was worse than
+independence — evidence of clustering. Computing the expectation properly, over the actual
+per-page block counts rather than one median, gives **0.0975 against 0.1026 observed, on 39 pages
+carrying 4 events.** There is **no measurable clustering at this n**, and the disagreement I was
+about to record did not exist. The lesson-level probabilities in §6 still *assume* independence
+and are still labelled optimistic — but that label is now a stated assumption, not a measurement.
 
 ---
 

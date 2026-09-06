@@ -223,8 +223,9 @@ def min_n_for_upper_bound(bound, k=0, cap=200000):
 
 
 def lesson_clean_probability(block_rate, blocks_per_lesson):
-    """P(a lesson's trusted blocks contain no error) under independence. Independence is
-    OPTIMISTIC: errors cluster by page and by book, so the real figure is worse."""
+    """P(a lesson's trusted blocks contain no error) under an ASSUMPTION of independence.
+    Probably optimistic — but the reference plane has too few events to measure the clustering
+    that would make it so, and this workstream corrected itself once for claiming otherwise."""
     return (1.0 - block_rate) ** blocks_per_lesson
 
 

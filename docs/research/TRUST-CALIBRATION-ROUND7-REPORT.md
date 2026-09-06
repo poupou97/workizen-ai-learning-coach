@@ -62,9 +62,10 @@ re-derivable by a committed command.
   reference plane, at any coverage. The strictest principled stack reaches 0.0233 at 36 % of
   served; the best reaches 0.0213 at 53 %.
 - **The child-facing consequence.** At the best candidate's rate and the 30 trusted blocks a real
-  lesson delivered in round 6, `P(a lesson contains ≥ 1 teaching-critical error) ≈ 0.48`.
-  Measured at page level: 0.103, against 0.082 predicted under independence — **worse than
-  independence, because errors cluster.**
+  lesson delivered in round 6, `P(a lesson contains ≥ 1 teaching-critical error) ≈ 0.48`
+  **under an assumption of independence between blocks.** Measured at page level: 0.1026 observed
+  against 0.0975 expected under independence, on 39 pages carrying 4 events — **no measurable
+  clustering at this n.**
 - **No single false-trust number exists for this system.** The same quantity measures 0.073 ·
   0.090 · 0.365 · 0.650 · 0.727 across the five annotated populations, and the reference and audit
   planes **do not even agree on whether teaching-critical error is a subset of false trust.**
@@ -93,6 +94,13 @@ re-derivable by a committed command.
   90 %-clean-lesson promise requires (0.0035) is a factor of six, and the residual errors are
   invisible to every signal a threshold can read. **The blocker is recognition and role
   disambiguation, not calibration.**
+- **My own clustering claim, falsified by my own second derivation.** I first computed the
+  expected page incidence from the median blocks-per-page (0.082) and reported the observed 0.103
+  as evidence that errors cluster. Computing the expectation over the actual per-page counts gives
+  **0.0975 against 0.1026 observed** — the disagreement I was about to record did not exist. The
+  lesson-level probabilities remain labelled optimistic, but on the strength of an assumption,
+  not of a measurement. *Re-derive a number a second way before recording a disagreement* caught
+  this one inside the same round.
 - **My own first framing, corrected in place.** I began by treating Lane A3's trade-off curve as
   the object to pick a point on. It is a curve over *guard waivers* — an axis of loosening. A
   trust threshold moves along the opposite axis, restricting the already-served set. Reading the
@@ -121,7 +129,7 @@ re-derivable by a committed command.
 |---|---|
 | **PROVEN** | `trusted ⊆ served` for every implementable candidate; the ledger's order properties; the machinery's refusals |
 | **MEASURED** | every rate in §2, on the round-5 evidence rows, 643 rows / 54 hard pages |
-| **OBSERVED** | the clustering of teaching-critical errors by page (0.103 observed vs 0.082 under independence, n = 39 pages — wide interval, direction only) |
+| **OBSERVED** | page-level incidence 0.1026 (95 % upper 0.236) on 39 pages carrying 4 events — consistent with independence, and far too few events to detect clustering either way |
 | **INFERRED** | the audit sizes each bound requires; the lesson-level probabilities, which assume independence and are therefore optimistic |
 | **HYPOTHESIS** | corpus transfer; the 30-blocks-per-lesson figure; the value of the two missing clauses |
 | **UNKNOWN** | the 97-row set's internal denominators (referred to WS-M); over-withholding under any candidate; what a child does with a trusted block |

@@ -17,8 +17,10 @@ fixes the size of the blind audit that could demonstrate it.
     audit n    >= smallest n with wilson_upper(k, n) <= block_rate
 
 L = 30 is the planning figure, taken from round 6's Golden #1 delivery: one real lesson,
-**34 real SGK blocks**. Independence between blocks is assumed and is OPTIMISTIC — errors cluster
-by page and by book, so a real lesson is worse than this arithmetic says.
+**34 real SGK blocks**. Independence between blocks is ASSUMED. It is probably optimistic — errors
+plausibly cluster by page and by book — but that is an assumption, not a measurement: the
+reference plane's page-level incidence (0.1026 observed against 0.0975 expected under
+independence, 39 pages carrying 4 events) is far too thin to detect clustering either way.
 """
 import os
 import sys
