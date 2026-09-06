@@ -559,6 +559,72 @@ did not implement it, because it changes the pack manifest schema the Dart side 
 
 ---
 
+### 7.7 SILENT LOSS — the correction Lane A2 forced on Lane D's own coverage numbers
+
+Lane A2 (PR #84) reported that Docling formula-labelled blocks die at `tc2_sdm.py:276-277` as role
+`empty`, reason `empty_block`, evidence "no letters" — a **role** decision, not a math one. Checked
+on Lane D's batches the effect is larger than on A2's, and it lands on **Lane D's denominators**:
+
+> A block whose role is `empty` reaches **neither** `blocks` nor `withheld` of the Trusted
+> Structured Lesson.
+
+Every rate in this report is therefore blind to it. `learning blocks = trusted + withheld` has
+already dropped it, so the served share is computed over a base that shrank; and the over-withhold
+rate cannot see it at all, because it reviews only regions that **were** withheld. Withholding is a
+decision a lesson can be audited for. This is a disappearance, and it carries no reason code.
+
+`tool/corpus/legacy/silent_loss.py`, on the merged build:
+
+| batch | trusted | withheld | **silently lost** | of those, digits | expressions | served share as reported | **corrected** |
+|---|---|---|---|---|---|---|---|
+| batch 2 (evaluation set) | 232 | 135 | **27** | 17 | 8 | 0.632 | **0.589** |
+| batch 1 (holdout) | 196 | 124 | **55** | 21 | 10 | 0.613 | **0.523** |
+
+Per lesson the worst case is not a rounding matter:
+
+| lesson | trusted | withheld | silently lost | served share as reported | corrected |
+|---|---|---|---|---|---|
+| **Toán 4 tập hai Bài 61** | 4 | 15 | **32** | 0.211 | **0.078** |
+| Toán 4 tập một Bài 37 | 23 | 24 | 15 | 0.489 | 0.371 |
+| Toán 5 tập một Bài 6 | 12 | 13 | 9 | 0.480 | 0.353 |
+| LS&ĐL 4 Bài 12 | 24 | 22 | 8 | 0.522 | 0.444 |
+
+The lost blocks are the printed exercises: `40 613 + 47 519`, `3 675 + 2 918`, `7 641 - 2 815`,
+`62 748 - 35 261`, `2 667 + 3 825`, `74 165: 5`, the flattened `3 7 + 11 12`, and Lane A2's own
+`7 8 2 8 7 - 2 8 5 8`. On LS&ĐL 4 Bài 12 the silent losses are map and table figures (`0,6`,
+`1408`, `1010`) — this is not a Toán-only effect.
+
+**Every served-share figure elsewhere in this report and in the scoreboards is the "as reported"
+column.** They are not withdrawn — they are the correct answer to "of the blocks the pipeline
+classified, what share did it serve" — but they are *not* the answer to "of what was extracted from
+the page, what share reached a child", and until now nothing in Lane D distinguished the two.
+`silent_loss.py` and the corrected column are how that is stated from here.
+
+Filed for the pipeline lanes as **R13**: a block the role layer drops must arrive in the TSL as a
+withheld region with a truthful reason, not vanish. `empty_block` on a block reading `7 8 2 8 7 -
+2 8 5 8` also misstates what was lost.
+
+### 7.8 Two more of Lane A2's cautions, checked against this report
+
+**(a) `still_wrong` is not a lesser category for flattened formulas.** A flattened expression is
+wrong *before* the repair too, so a bad repair scores `false_correction = 0` while showing a child
+arithmetic the book does not contain; for `formula_flattened` the honest figure is
+`1 − correction_precision`. **Lane D never publishes a false-correction rate.** Its restore metric
+*is* a correction precision — correctly restored / all restored — so `1 − 0.500 = 0.500` of batch 1's
+restores and `1 − 0.000 = 1.000` of the REPAIRED-stage restore are already reported as harm. And
+none of the seven restored regions in this report is a formula row (five Vietnamese text regions, a
+section heading, a stage label, a Physics heading), so A2's caveat does not silently apply to any
+number here. If a formula row ever enters the restore population, this is the paragraph to re-read.
+
+**(c) geometry is discarded one step before the guards.** `tc2_sdm.py:1060` reads OCR line geometry,
+spends it on a single verse boolean at `:1110`, and drops it before the guards run. Lane D has an
+independent reason to want it kept: **both** defects in the one REPAIRED-stage restore (§7.5) are at
+the *edges* of the bounding box — a mis-OCR'd leading numeral and a trailing watermark bleed. Box
+geometry is exactly the evidence that would have caught them, and it is thrown away just before the
+place that could have used it.
+
+---
+
 ## 8. What is still not measured
 
 - **The REPAIRED stage.** No repairer ran; RESTORE PRECISION is measured on 6 guard-change restores,
@@ -572,6 +638,10 @@ did not implement it, because it changes the pack manifest schema the Dart side 
 - **Figure/caption is a quota sample of 20 blocks in four lessons**, and its headline (`figure_relation`
   0.526) depends on a rubric reading the annotator flagged. Both readings are in §2.4.
 - **12 lessons of 243 in scope, of 3,679 canonical.** Nothing here supports a claim about the corpus.
+- **The silent-loss correction (§7.7) is measured but not yet threaded through every rate.** The
+  false-trust, teaching-critical and over-withhold rates are per *served* or per *reviewed withheld*
+  block and are unaffected; the served-share and coverage figures are the "as reported" column
+  everywhere except §7.7, where both are given.
 - **Only 6 of the 12 are audited on the build that is now their latest.** Batch 1's six were audited
   on `tc2-p1`; their re-run on `tc2-p2r` carries 53 *transferred* verdicts (identical text, same
   region, origin stamped on every row) and 0 fresh ones. A transferred verdict is not an audit of the

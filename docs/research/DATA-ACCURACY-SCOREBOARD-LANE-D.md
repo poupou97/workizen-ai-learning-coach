@@ -75,6 +75,8 @@ on 54 gold pages / 643 blocks: coverage 0.551 → 0.577, FTR 0.0734 → 0.0701, 
 | **correct served** | ≈ 30 of 80 blocks | ≈ **163 of 239** blocks | point estimates |
 | **wrong served** | ≈ 50 of 80 blocks | ≈ **76 of 239** blocks | point estimates |
 | **withheld** | 0 (the product served everything) | **139 of 378 learning blocks = 0.368** | batch 2 |
+| **silently lost** (neither served nor withheld) | — | **27 of 394 extracted = 0.069** (batch 2) · **55 of 375 = 0.147** (holdout) | role `empty` blocks that never reach the TSL |
+| — served share, corrected for it | — | 0.632 → **0.589** (batch 2) · 0.613 → **0.523** (holdout) | see report §7.7 |
 | **false withheld (over-withheld)** | — | **19/30 = 0.633** [0.455, 0.781] | reviewed withheld regions |
 | — withheld regions that **orphan a sibling** | — | **12/139 = 0.086** [0.050, 0.145] | all withheld regions, batch 2 |
 | — same, independent holdout | — | **12/126 = 0.095** [0.055, 0.159] | batch 1 re-run, different lessons |
@@ -159,6 +161,13 @@ After merging Lane A1 (`tc2-p3`):
   ran there; that is a different fact from "no restores were correct".
 - The rates come from small samples judged by one annotator per side. The intervals are wide on
   purpose.
+- **Every served-share and coverage figure here is the "as reported" column.** A block the role layer
+  drops as `empty` reaches neither list in the TSL, so it is outside `trusted + withheld`; the
+  corrected column is in the row above and in report §7.7. The false-trust, teaching-critical and
+  over-withhold rates are per served or per reviewed-withheld block and are unaffected.
+- **Lane D publishes no false-correction rate.** Its restore metric is a correction precision, so the
+  harm figure is `1 − restore precision` and is already reported as such (Lane A2's caution about
+  `formula_flattened`). No restored region in this round is a formula row.
 - **A withheld block is not automatically a safe one.** Since round 5 a withhold that orphans a
   sibling is counted teaching-critical, so the "coverage cost" of a guard and its "error rate" are no
   longer separable in the way round 4 assumed.
