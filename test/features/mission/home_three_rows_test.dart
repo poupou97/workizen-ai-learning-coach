@@ -137,6 +137,39 @@ void main() {
       expect(chip.hasSamLesson, isTrue);
     });
 
+    test('⭐ BÌA SÁCH gắn cho môn TRÊN GIÁ, không chỉ môn có bài', () {
+      final chips = homeSubjectChips(
+        threads: const [],
+        shelf: const [
+          HomeShelfSubject(
+            subject: 'Toán',
+            listedLessons: 43,
+            openableLessons: 0,
+          ),
+        ],
+        learnerGrade: 6,
+        coverBySubject: const {'Toán': 'covers/06-sgk-toan-6-tap-mot.webp'},
+      );
+      // Lỗi thật đã gặp: chỉ nhánh dự-phòng được gán bìa, còn vòng lặp CHÍNH
+      // (môn trên giá) thì không — nên trên máy mọi ô đều rơi về chữ cái.
+      expect(chips.single.coverAsset, 'covers/06-sgk-toan-6-tap-mot.webp');
+    });
+
+    test('môn không có bìa trong pack ⇒ coverAsset null (không bịa)', () {
+      final chips = homeSubjectChips(
+        threads: const [],
+        shelf: const [
+          HomeShelfSubject(
+            subject: 'Toán',
+            listedLessons: 43,
+            openableLessons: 0,
+          ),
+        ],
+        learnerGrade: 6,
+      );
+      expect(chips.single.coverAsset, isNull);
+    });
+
     test('không môn nào ⇒ rỗng, không nổ', () {
       expect(
         homeSubjectChips(threads: const [], shelf: const [], learnerGrade: 6),

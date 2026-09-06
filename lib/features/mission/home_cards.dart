@@ -455,6 +455,7 @@ List<HomeSubjectChip> homeSubjectChips({
       HomeSubjectChip(
         subject: s.subject,
         hasSamLesson: withLesson.contains(s.subject),
+        coverAsset: coverBySubject[s.subject],
       ),
     );
   }
