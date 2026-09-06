@@ -21,12 +21,14 @@ trong chính phép truy vấn, và nay có regression test giữ.
 | History rò? | **KHÔNG** | cùng phép lọc trên |
 | Evidence rò? | **KHÔNG** | `evidenceFor(learnerId:)` |
 | Next Action rò? | **KHÔNG** | sinh từ `buildMissionFromStore(profile:, store:)` |
-| Home Smart Cards rò? | **KHÔNG** (thân bài) · **CÓ, một chỗ** (nhãn sách) | xem C-2 |
+| Home Smart Cards rò? | **KHÔNG** | thẻ sinh từ mission của đúng profile |
 | Timetable rò? | **KHÔNG** | `learner_store.dart:196` lọc `r['learnerId']` |
 
 Tại sao chưa phải PASS toàn phần: **hai khiếm khuyết ở tầng catalog/hiển thị**
-(C-1, C-2). Không cái nào làm tiến độ của trẻ này hiện dưới tên trẻ khác — thứ
-rò là **nhãn sách** và **quyền sở hữu bài theo lớp**.
+(C-1, C-2). **Không cái nào là rò dữ liệu học tập.** Không có tiến độ, lịch sử,
+bằng chứng hay gợi ý nào của trẻ này hiện được dưới tên trẻ khác — điều đó nay
+có test giữ. Thứ hỏng là **quyền sở hữu bài theo lớp** (C-1) và **tính tất định
+của nhãn hiển thị** (C-2).
 
 **Bằng chứng mới:** `test/core/store/profile_isolation_test.dart` — 9 test,
 đi qua `toJsonl → fromJsonl` (đúng đường `FileLearnerStore` chạy khi mở lại
@@ -49,7 +51,7 @@ trace persistence, nên test hỏi thẳng kho.
 | Next Action | **Profile** | suy từ mission của profile | ✅ |
 | Người học đang chọn | **Device** | `saveActiveLearner` | ✅ đúng chỗ |
 | PIN bố mẹ | **Device** | `learner_store.dart:236` ghi rõ «dữ liệu của MÁY» | ✅ đúng chỗ |
-| Tên sách hiển thị | **GLOBAL** ⚠️ | `subject_display.dart:59` | ❌ C-2 |
+| Tên sách hiển thị | **GLOBAL** ⚠️ | `subject_display.dart:59` | ❌ C-2 (nhãn, không phải dữ liệu trẻ) |
 | Fixture bài học | **GLOBAL** (cố ý) | `WorkspaceCatalog.shared` | ⚠️ C-1 |
 
 Bất biến §2 **DEVICE != USER** và **ACCOUNT != LEARNER** đứng vững: hai thứ
@@ -88,13 +90,27 @@ research slot, để bài thuộc về lớp của nó; Minh (lớp 5) nhận LS
 bài của mình, Na (lớp 6) không thấy nó nữa. Việc này cũng đóng luôn §6 của
 lệnh 50 (cấm hạ các môn khác xuống hạng «sách khác»).
 
-### C-2. `knownBookTitles` — **BUG (rò nhãn giữa hồ sơ)**
+### C-2. `knownBookTitles` — **BUG (hiển thị phụ thuộc thứ tự mở hồ sơ)**
 
-`subject_display.dart:59` là `Map` toàn cục; `main.dart:155` `addAll` tên sách
-của lớp đang mở và **không ai xoá khi đổi hồ sơ**. Mở Na (lớp 6) rồi đổi sang
-Minh (lớp 5): map vẫn giữ tên sách lớp 6. Không rò tiến độ, nhưng rò **danh
-mục lớp khác** — vi phạm tinh thần §1. Sửa: xoá map khi đổi profile, hoặc
-truyền `bookTitles` theo lời gọi (chỗ gọi đã nhận tham số ấy sẵn — `:69`).
+*Đã tự đính chính: bản đầu của tài liệu này gọi C-2 là «rò nhãn giữa hồ sơ».
+Tái dẫn cho thấy nhãn ấy quá nặng.* Map chứa `mã sách → tên sách` — metadata
+catalog công khai, **không phải dữ liệu của trẻ**. Nó không làm trẻ này thấy
+thứ gì thuộc về trẻ kia.
+
+Khiếm khuyết thật nằm chỗ khác và vẫn có thật: `subject_display.dart:59` là
+`Map` toàn cục, `main.dart:155` `addAll` tên sách của lớp đang mở, và **không
+ai xoá khi đổi hồ sơ**. «Kho khám phá» lại đọc từ `sam-stories.db` — kho của
+TOÀN corpus, không lọc theo lớp. Nên cùng một mẩu truyện, dưới hồ sơ Minh:
+
+- mở Na trước rồi đổi sang Minh → «Nguồn: **SGK Ngữ văn 6** · trang PDF 26»
+- mở thẳng Minh                → «Nguồn: **06-sgk-ngu-van-6-tap-mot** · trang PDF 26»
+
+Cùng màn hình, cùng hồ sơ, hai kết quả khác nhau tuỳ **thứ tự mở hồ sơ trong
+phiên**. Đó là lỗi tất định, và nó làm mọi phép tái hiện trên máy thật không
+đáng tin. Sửa: xoá map khi đổi hồ sơ (đã làm).
+
+Câu hỏi lớn hơn — «Kho khám phá» có nên đưa sách lớp 6 cho học sinh lớp 5 hay
+không — nằm ngoài lệnh 51, ghi lại để không mất.
 
 ### C-3. `khtn6_bai17.dart`, `WorkspaceCatalog.defaultSlots` — **GOLDEN FIXTURE** ✅
 
@@ -216,7 +232,8 @@ nào trong lớp này được nói đây là chương trình Bộ GD&ĐT.
 | I. Home + timetable integration (§12) | CHƯA — nhánh `round7/multi-subject-home` đang bay |
 | J. BEFORE/AFTER screenshots | CHƯA |
 | K. Founder Acceptance Card | CHƯA |
-| Sửa C-1 (đảo lớp) + C-2 (rò nhãn) | CHƯA — chờ Founder chốt hướng C-1 |
+| Sửa C-2 (tất định nhãn) | ✅ XONG |
+| Sửa C-1 (đảo lớp) | CHƯA — chờ Founder chốt |
 | §8 UX [A] tạo tự động / [B] tự sắp / [C] bỏ qua | CHƯA |
 
 **Một điểm cần Founder chốt (C-1):** bỏ khái niệm «lát cắt nghiên cứu» để bài
