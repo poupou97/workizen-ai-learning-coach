@@ -151,11 +151,15 @@ def build_book(book, pipeline='tc2-p1', write=True):
                                                  roles_trusted=dict(Counter(b['role']['value'] for b in L['blocks'])), figures=len(L['figures']),
                                                  excluded=excluded_regions, excluded_by_reason=dict(Counter(x['reason'] for x in L['excluded']))),
                    # Round 6 (WS-A, R13). The document states its own arithmetic, so a reader never has to
-                   # trust that nothing fell out between the page and this file.
+                   # trust that nothing fell out between the page and this file. This is a SELF-REPORT and
+                   # it is not the check: a builder cannot audit itself for what it never recorded. The
+                   # authority is `tool/corpus/accounting/ledger.py`, which recomputes the population from
+                   # the SDM pages independently of this file and exits non-zero on a difference.
                    conservation=dict(invariant='INPUT SOURCE REGIONS = SERVED + WITHHELD + EXCLUDED_WITH_REASON + defined non-learning regions',
                                      inputSourceRegions=trusted_learning + withheld_learning + excluded_regions,
                                      served=trusted_learning, withheld=withheld_learning,
-                                     excludedWithReason=excluded_regions, unaccounted=0, holds=True),
+                                     excludedWithReason=excluded_regions, unaccounted=0, holds=True,
+                                     selfReport=True, checkedBy='tool/corpus/accounting/ledger.py audit'),
                    blocks=L['blocks'], withheld=L['withheld'], excluded=L['excluded'], figures=L['figures'], hybridSmartBook=hsb, answer_keys_included=False)
         docs.append(doc)
     if write:
