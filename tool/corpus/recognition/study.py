@@ -63,6 +63,42 @@ def holdout_pages(n=24, seed=20260906):
     return sorted(pairs[:n])
 
 
+#: Books deliberately excluded from every holdout: they are what round 5 and this lane tuned on.
+DEV_BOOKS = frozenset({'04-sgk-toan-4-tap-hai', '05-sgk-toan-5-tap-mot'})
+
+
+def dense_holdout_pages(n=12, seed=20260906, min_regions=6, books=None):
+    """A holdout of pages that actually contain numeric printed fractions.
+
+    The unbiased all-grade sample measured first (`holdout_pages`) returns 0 recoveries out of 66
+    regions, and the contact sheet says why: on a random Toán page across grades 2-12 most
+    detected bar regions are **not numeric stacked fractions** — they are algebraic fractions
+    whose halves carry letters (out of scope by construction: a half is named only by a bare digit
+    run), column-arithmetic rules, table rules and illustration line art. Both numbers are
+    reported; neither replaces the other.
+
+    The selection rule is declared before the draw and is about the DETECTOR, not the recogniser:
+    a page qualifies when the raster detector finds at least `min_regions` bar regions, in a book
+    this lane never tuned on. Nothing about what the recogniser would say enters the choice.
+    """
+    from mathfix.inkmask import InkMask
+    books = books or [b for b in toan_books() if b not in DEV_BOOKS and int(b[:2]) <= 6]
+    pairs = [(b, p) for b in books for p in book_pages(b)]
+    random.Random(seed).shuffle(pairs)
+    out = []
+    for book, page in pairs:
+        if len(out) >= n:
+            break
+        try:
+            mask = InkMask.from_pdf(V.pdf_path(book), page, dpi=300)
+            tokens = load_tokens(book, page)
+            if len(D.find_fraction_regions(mask, tokens)) >= min_regions:
+                out.append((book, page))
+        except Exception:
+            continue
+    return sorted(out)
+
+
 def sdm_pages():
     """Every Toán page with an SDM, and the SDM this study reads for it.
 
@@ -127,8 +163,9 @@ def study_page(book, page, sdm_path=None, dpi=300, scales=V.DEFAULT_SCALES):
             # reviewer read to know a digit came from a crop and not from the page pass.
             n_box, d_box, _ = B.fraction_boxes(bar, mh)
             for box, val in ((n_box, fr.numerator.value), (d_box, fr.denominator.value)):
+                x0, y0, x1, y1 = tight_box(mask, box)
                 recovered_tokens.append(Token(
-                    text=val, x=box.x0, y=box.y0, w=box.x1 - box.x0, h=box.y1 - box.y0,
+                    text=val, x=x0, y=y0, w=x1 - x0, h=y1 - y0,
                     conf=1.0, index=next_index, engine='apple-vision-crop-v1'))
                 next_index += 1
 
@@ -139,6 +176,28 @@ def study_page(book, page, sdm_path=None, dpi=300, scales=V.DEFAULT_SCALES):
         out['blocks'] = block_projection(book, page, sdm_path, mask, tokens, regions,
                                          recovered_tokens, mh)
     return out
+
+
+def tight_box(mask, box):
+    """Shrink a crop box to the ink actually inside it.
+
+    A recovered digit must enter the pipeline as a token the size of a DIGIT, not the size of the
+    window it was read in. Measured on the 113-page SDM population with the crop box used as the
+    token box: `numerator_ambiguous` rose from 2 blocks to 27 and `prose_token_in_block` from 29 to
+    44, because an over-wide box reaches into the neighbouring fraction's strip and `detect`
+    correctly refuses a strip holding two digit candidates. The geometry has to be honest for the
+    reading to be usable.
+    """
+    px0, py0 = int(box.x0 * mask.width), int(box.y0 * mask.height)
+    px1, py1 = int(box.x1 * mask.width), int(box.y1 * mask.height)
+    ext = mask.ink_extent(px0, py0, px1, py1)
+    if ext is None:
+        return box.bbox
+    rows = [y for y in range(py0, py1) if mask.row_runs(y, ext[0], ext[1] + 1, min_len=1)]
+    if not rows:
+        return box.bbox
+    return (ext[0] / mask.width, rows[0] / mask.height,
+            (ext[1] + 1) / mask.width, (rows[-1] + 1) / mask.height)
 
 
 def _inside(bbox, x, y, pad=0.0):
@@ -251,6 +310,9 @@ if __name__ == '__main__':
     elif which == 'holdout':
         n = int(sys.argv[2]) if len(sys.argv) > 2 else 24
         run_pages(holdout_pages(n), 'holdout')
+    elif which == 'holdout2':
+        n = int(sys.argv[2]) if len(sys.argv) > 2 else 12
+        run_pages(dense_holdout_pages(n), 'holdout2')
     elif which == 'sdm':
         by = sdm_pages()
         run_pages(list(by), 'sdm', sdm_by_page=by)
