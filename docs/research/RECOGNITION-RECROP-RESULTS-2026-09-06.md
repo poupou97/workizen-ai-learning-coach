@@ -297,6 +297,77 @@ MinerU (Vietnamese OCR unusable) were **not re-run**; round 5's measurements sta
 
 ---
 
+## 7bis. The scale ladder is itself a measurable knob — and it moves the ceiling
+
+**MEASURED.** §8 names `INSUFFICIENT_AGREEMENT` (one scale read the half, no second confirmed it)
+as the largest addressable refusal group. Whether more scales convert those **without** buying
+false recognitions is a question with an answer, so the ladder was made an input
+(`RECOG_SCALES`) and the experiment was re-run at **eight** scales — 5, 7, 9, 11, 13, 16, 20, 25 —
+against the four used everywhere else in this document.
+
+| DEV, 16 pages, 204 regions | 4 scales | **8 scales** |
+|---|---|---|
+| recoveries | 44 | **62** (+41 %) |
+| recoverable fraction rate | 0.344 | **0.484** |
+| control regions reproduced | 37 / 76 | **49 / 76** |
+| **control disagreements** | **1** | **1** — the same one, and it is the *baseline* that is wrong |
+| `INSUFFICIENT_AGREEMENT` refusals | 32 | **9** |
+| `CONFLICT` refusals | 10 | **25** |
+| `UNREAD` refusals | 21 | **14** |
+
+**GOLDEN #2 · Bài 61 at eight scales: 27 recoveries, 27 of 27 correct** against the printed page
+(`sheet-bai61-8scales-recovered.png`), up from 17 of 17. **0 disagreements on 38 control regions.**
+Recoverable fraction rate on the Golden slice **0.362 → 0.574**.
+
+Two things are worth reading carefully in that table. The extra recall did **not** come out of the
+guard: `CONFLICT` refusals rose from 10 to 25, which is the rule working — more independent looks
+means more chances to disagree, and a disagreement always fails closed. And the control
+disagreement count did **not** move, so on this population the extra recall was not paid for in
+false recognitions.
+
+### And then the holdout said something different
+
+On DEV and on the Golden slice the extra recall looked free. **It is not.** HOLDOUT-3, re-run at
+eight scales and hand-checked tile by tile (`sheet-holdout3-8scales-all27.png`):
+
+| HOLDOUT-3, 14 pages, 212 regions | 4 scales | **8 scales** |
+|---|---|---|
+| recoveries | 23 | **27** (+17 %) |
+| recoverable fraction rate | 0.130 | **0.153** |
+| recoveries correct on hand-check | 22 / 23 | **24 / 27** |
+| control reproduced | 16 | 19 |
+| control disagreements | 2 | 2 — **the same two** |
+| readings produced | 41 | **48** |
+| **wrong readings** | **2** | **4** |
+| **FALSE RECOGNITION RATE** | **0.049** | **0.083** |
+
+**So the honest trade is +17 % recall for a ~70 % higher false-recognition rate**, and the
+populations disagree about it: DEV and Bài 61 saw no cost, the independent holdout did. **The
+holdout is the number to trust.** Four scales remains the configuration this document reports and
+recommends; eight scales is a measured option whose price is now known.
+
+**The two extra wrong readings are two named forms, and both have a fix that is not built.**
+
+* **A printed minus inside the numerator strip, dropped.** `06-sgk-toan-6-tap-hai` p17 prints
+  `−8/11`; the reading is `8/11`. This is round 5's `d) 20/18 − 2/5` failure exactly — *«the
+  printed «−» was dropped… by area 3.75 % of the block's glyph ink, under any ceiling one would
+  dare set»* — and round 5 already built the check that catches it, `ink-accounted-v1`, which
+  measures **the widest unbroken run of ink that no token accounts for.** This lane's consensus
+  rule does not run it. **Wiring an existing validator is the cheapest fix available and it is not
+  done.**
+* **An algebraic denominator read as a digit.** `08-sgk-toan-8-tap-hai` p22 prints
+  `5 / (x² − 1)` and `3 / (x² − x)`; the readings are `5/2` and `3/1`. The half crop returns more
+  than one line — a letter run *and* a bare digit — and the rule only looks for exactly one bare
+  digit run among them. The fix is one clause: **a half is read only when the crop holds a number
+  and nothing else.** Stated, tested against these two cases, and deliberately **not implemented
+  here**: HOLDOUT-3 has now been looked at, so a rule written from these errors would have to earn
+  a fresh holdout, and inventing that draw at the end of a round is how a holdout stops meaning
+  anything.
+
+Cost of eight scales: 24 crops per region instead of 12, ~0.9 s per region.
+
+---
+
 ## 8. Where the ceiling is now, and what would move it
 
 Of the 548 unreadable regions on the SDM population, the re-crop reads 142 and refuses 406:
@@ -369,8 +440,13 @@ readings.
   changes is context, framing and segmentation.
 
 ### STILL HYPOTHESIS
-* That more scales would convert the 97 `INSUFFICIENT_AGREEMENT` regions without raising the false
-  rate. Untested.
+* ~~That more scales would convert the `INSUFFICIENT_AGREEMENT` regions without raising the false
+  rate.~~ **TESTED, and half-refuted:** eight scales convert most of them (32 → 9 on DEV) and do
+  raise the holdout's false-recognition rate from 0.049 to 0.083 (§7bis).
+* That wiring round 5's `ink-accounted-v1` into the consensus rule would refuse the dropped-minus
+  reading. Not built.
+* That «a half crop must hold a number and nothing else» would refuse both algebraic-denominator
+  readings. Stated, not built, and it now owes a fresh holdout.
 * That a denominator ink-width check would have refused `3/(x²−x)`. Not built.
 * That the in-corpus template recogniser reaches Ω. Not built.
 * That the bigram diacritic candidates are real recognition failures. Unchecked against the page.
