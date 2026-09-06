@@ -70,8 +70,14 @@ ROMAN_BROKEN_TITLE = re.compile(r'^\s*(?P<head>[IVX]{1,3})(?P<digit>[0-9])\s+(?=
 # Ω read as a capital-plus-digit run. Shape only: the ohm sign is the only glyph in these books
 # that a recogniser turns into `S2`/`Q2`/`52` inside a unit context, and the context is what the
 # rule requires — an equals sign, a number, or an SI prefix immediately before.
-OHM_LOST = re.compile(r'(?<![A-Za-zÀ-ỹ])(?:[kKMm]?)(?:S2|Q2|52|92|S\)|\bS2\b)(?![A-Za-zÀ-ỹ])')
-OHM_CONTEXT = re.compile(r'(?:=|\d\s*0{3}|ôm|Ohm|ohm|điện trở|Điện trở|\bM[SQ]\b|\bk[SQ]\b)')
+#   MEASURED AND CORRECTED. The first version admitted `52` and `92` into the alternation and
+#   accepted a bare `=` as the unit context, and the crop probe on its first 60 findings returned
+#   `52 - 20 = ?` (Toán 1 tập hai p59), `52 + 3 = 55.` and `520 = 250` — ordinary arithmetic in
+#   primary maths books, 60 of 60 with no ohm anywhere. Reported rather than quietly fixed: it is
+#   the same failure round 5 named three times, committed here, and caught by the census probe
+#   rather than by review.
+OHM_LOST = re.compile(r'(?<![A-Za-zÀ-ỹ0-9])[kKMmµ]?[SQ]2(?![A-Za-zÀ-ỹ0-9])')
+OHM_CONTEXT = re.compile(r'(?:ôm|[Oo]hm|[Đđ]iện trở|\bM[SQ]\b|\bk[SQ]\b|\bmS\b|vôn kế|ampe)')
 
 # A subscript flattened onto the baseline: an element-shaped letter run glued to a digit. This is
 # NOT a chemistry test — `tc2_sdm.CHEM` already fires on this shape and round 5 measured >=40 of

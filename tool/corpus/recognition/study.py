@@ -99,6 +99,34 @@ def dense_holdout_pages(n=12, seed=20260906, min_regions=6, books=None):
     return sorted(out)
 
 
+def fraction_topic_pages(n=12, seed=20260906, books=None):
+    """A holdout of pages that TEACH fractions, in books this lane never tuned on.
+
+    The two earlier holdouts are both reported and both are near-zero, and the contact sheets say
+    the same thing twice: the population was wrong, not the recogniser. The unbiased all-grade
+    sample is dominated by algebraic fractions (out of scope: a half is named only by a bare digit
+    run) and by detector false positives; the «dense» sample, selected on `>= 6 detected bar
+    regions`, drew grades 1-3, where the dense bar regions are COLUMN-ARITHMETIC RULES — those
+    books teach no fractions at all. Selecting on the detector selected the detector's own errors.
+
+    So this holdout is selected on CONTENT, by a rule fixed before the draw: the page's own OCR
+    text contains «phân số». Nothing about the detector or the recogniser enters the choice.
+    """
+    books = books or [b for b in toan_books() if b not in DEV_BOOKS]
+    pairs = []
+    for book in books:
+        for page in book_pages(book):
+            try:
+                with open(f'{OCR_BODY}/{book}/p{page:03d}.json') as fh:
+                    doc = json.load(fh)
+            except Exception:
+                continue
+            if any('phân số' in (ln.get('text') or '').lower() for ln in doc.get('lines') or []):
+                pairs.append((book, page))
+    random.Random(seed).shuffle(pairs)
+    return sorted(pairs[:n])
+
+
 def sdm_pages():
     """Every Toán page with an SDM, and the SDM this study reads for it.
 
@@ -313,6 +341,9 @@ if __name__ == '__main__':
     elif which == 'holdout2':
         n = int(sys.argv[2]) if len(sys.argv) > 2 else 12
         run_pages(dense_holdout_pages(n), 'holdout2')
+    elif which == 'holdout3':
+        n = int(sys.argv[2]) if len(sys.argv) > 2 else 12
+        run_pages(fraction_topic_pages(n), 'holdout3')
     elif which == 'sdm':
         by = sdm_pages()
         run_pages(list(by), 'sdm', sdm_by_page=by)
