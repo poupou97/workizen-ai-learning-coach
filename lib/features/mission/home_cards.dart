@@ -251,8 +251,9 @@ HomeCard cardForThread(HomeLessonThread thread, {int? learnerGrade}) {
     detailLine: openedDetailLine(thread),
     // NGUYÊN VĂN nhãn của động cơ. Home không đặt tên việc tiếp theo.
     nextLabel: thread.next?.label ?? 'Mở bài học',
-    otherGradeNote:
-        otherGrade ? 'Sách lớp ${d.grade} · không phải sách lớp con' : null,
+    otherGradeNote: otherGrade
+        ? 'Sách lớp ${d.grade} · không phải sách lớp con'
+        : null,
     thread: thread,
   );
 }
@@ -266,9 +267,9 @@ HomeCard cardForThread(HomeLessonThread thread, {int? learnerGrade}) {
 HomeCard cardForShelfSubject(HomeShelfSubject s) {
   final detail = s.openableLessons > 0
       ? 'SAM chưa xếp sẵn bài nào ở môn này. Giá sách có '
-          '${s.openableLessons} bài con mở làm được.'
+            '${s.openableLessons} bài con mở làm được.'
       : 'SAM chưa xếp sẵn bài nào ở môn này. Giá sách mới có mục lục '
-          '${s.listedLessons} bài.';
+            '${s.listedLessons} bài.';
   return HomeCard(
     id: 'shelf:${s.subject}',
     subjectLine: s.subject,
@@ -306,22 +307,19 @@ HomeCardRow buildHomeCards({
     (card.otherGradeNote == null ? own : other).add(card);
   }
 
-  final rest = [
-    for (final s in shelf)
-      if (!seenSubjects.contains(s.subject)) s,
-  ]..sort((a, b) {
-      final byOpenable = b.openableLessons.compareTo(a.openableLessons);
-      if (byOpenable != 0) return byOpenable;
-      final byListed = b.listedLessons.compareTo(a.listedLessons);
-      if (byListed != 0) return byListed;
-      return a.subject.compareTo(b.subject);
-    });
+  final rest =
+      [
+        for (final s in shelf)
+          if (!seenSubjects.contains(s.subject)) s,
+      ]..sort((a, b) {
+        final byOpenable = b.openableLessons.compareTo(a.openableLessons);
+        if (byOpenable != 0) return byOpenable;
+        final byListed = b.listedLessons.compareTo(a.listedLessons);
+        if (byListed != 0) return byListed;
+        return a.subject.compareTo(b.subject);
+      });
 
-  final all = [
-    ...own,
-    ...other,
-    for (final s in rest) cardForShelfSubject(s),
-  ];
+  final all = [...own, ...other, for (final s in rest) cardForShelfSubject(s)];
   final shown = all.length <= limit ? all : all.sublist(0, limit);
   return HomeCardRow(cards: shown, totalSubjects: all.length);
 }
@@ -383,4 +381,170 @@ bool _less(List<int> a, List<int> b) {
     if (a[i] != b[i]) return a[i] < b[i];
   }
   return false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Concept «05 Home» — hai dải ngang còn lại. Ba dải có NGỮ NGHĨA KHÁC NHAU và
+// không được lẫn: SẮP TỚI = thời khoá biểu từ mai (xem `home_upcoming.dart`);
+// CÁC MÔN CỦA CON = cửa vào Giá sách; TIẾP TỤC HỌC = bài đang học DỞ.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// ⭐ «TIẾP TỤC HỌC» — bài trẻ đã mở nhưng CHƯA mở hết cách học.
+///
+/// «Đang học dở» là điều duy nhất ở đây đo được: trẻ đã mở ít nhất một cách
+/// học, và còn cách chưa mở. Nó KHÔNG nói trẻ hiểu tới đâu.
+///
+/// ⭐⭐ VÌ SAO KHÔNG CÓ PHẦN TRĂM. Concept vẽ «60%», «40%», «20%». Không có
+/// phép đo nào trong sản phẩm này sinh ra được những con số ấy: số cách học đã
+/// mở chia cho số cách học có KHÔNG phải mức hiểu bài — nó là tỉ lệ MỞ. Hiện
+/// một con số phần trăm bên cạnh chữ «học» là nói với trẻ và bố mẹ rằng SAM đo
+/// được sự hiểu, trong khi `OPENED != UNDERSTOOD`. Thẻ vì thế nói **đã mở gì
+/// và còn gì chưa mở** — cùng lượng thông tin, không mượn thẩm quyền.
+List<HomeLessonThread> continueLearning(
+  List<HomeLessonThread> threads, {
+  required int learnerGrade,
+}) => [
+  for (final t in threads)
+    // ⭐ Bài của LỚP KHÁC không bao giờ là «việc con đang học dở». Đo trên
+    // Nokia (lệnh 53): hồ sơ lớp 5 hiện thẻ «KHTN 6 · Bài 17», vì dải này
+    // nhận mọi bài trong catalog mà không lọc lớp.
+    if (t.doc.grade == learnerGrade &&
+        t.openedHere.isNotEmpty &&
+        t.openedHere.length < t.availableViews.length)
+      t,
+];
+
+/// Một ô trong dải «CÁC MÔN CỦA CON» — cửa vào Giá sách của môn ấy.
+///
+/// ⭐ Cố ý NGHÈO: tên môn và có/không có bài SAM xếp sẵn. Concept vẽ thêm nhãn
+/// «Tốt», «Ôn tập» dưới mỗi môn — đó là lời tuyên bố về NĂNG LỰC, và sản phẩm
+/// này chỉ được nói điều có bằng chứng. Order 50 §5 đã liệt kê nhãn cấm:
+/// ĐÃ HIỂU / 70% / GIỎI / MASTERED. «Tốt» thuộc đúng họ ấy.
+class HomeSubjectChip {
+  const HomeSubjectChip({
+    required this.subject,
+    required this.hasSamLesson,
+    this.coverAsset,
+  });
+
+  final String subject;
+
+  /// ⭐ BÌA SÁCH THẬT của môn (`assets/pack/covers/…`) — cùng ảnh Giá sách đang
+  /// dùng, không phải icon vẽ thêm. `null` = pack chưa có bìa cho môn này ⇒ ô
+  /// rơi về chữ cái đầu, KHÔNG bịa một hình khác.
+  final String? coverAsset;
+
+  /// Môn này có ít nhất một bài SAM đã xếp sẵn (khác với «có sách trên giá»).
+  final bool hasSamLesson;
+}
+
+/// Dải «CÁC MÔN CỦA CON»: MỌI môn trên giá sách của trẻ, theo thứ tự mục lục.
+///
+/// Gộp hai nguồn về một danh sách duy nhất, không lặp: môn có bài SAM xếp sẵn
+/// ([threads]) và môn chỉ có sách ([shelf]). Trẻ không cần biết hai nguồn ấy
+/// khác nhau — nhưng ô nào có bài thì nói được là có.
+List<HomeSubjectChip> homeSubjectChips({
+  required List<HomeLessonThread> threads,
+  required List<HomeShelfSubject> shelf,
+  required int learnerGrade,
+  Map<String, String> coverBySubject = const {},
+}) {
+  final withLesson = <String>{
+    for (final t in threads)
+      // Bài lớp KHÁC không làm cho môn của lớp NÀY thành «có bài».
+      if (t.doc.grade == learnerGrade) t.doc.subject,
+  };
+  final out = <HomeSubjectChip>[];
+  final seen = <String>{};
+  for (final s in shelf) {
+    if (!seen.add(s.subject)) continue;
+    out.add(
+      HomeSubjectChip(
+        subject: s.subject,
+        hasSamLesson: withLesson.contains(s.subject),
+        coverAsset: coverBySubject[s.subject],
+      ),
+    );
+  }
+  // Môn có bài SAM nhưng vắng mặt trên giá (mục lục chưa nạp) vẫn phải có ô.
+  for (final s in withLesson) {
+    if (seen.add(s)) {
+      out.add(
+        HomeSubjectChip(
+          subject: s,
+          hasSamLesson: true,
+          coverAsset: coverBySubject[s],
+        ),
+      );
+    }
+  }
+  return out;
+}
+
+/// ⭐ Lệnh 53 §2 — ẢNH ĐẠI DIỆN của MỘT BÀI, chọn TẤT ĐỊNH.
+///
+/// Ảnh phải đến từ CHÍNH bài ấy: `doc.blocks` chỉ chứa hình của bài này, nên
+/// không có đường nào để ảnh bài khác lọt vào.
+///
+/// ⭐⭐ LUẬT CHỌN (đo được, không «đẹp/xấu»), theo đúng thứ tự:
+///
+/// 1. LOẠI ảnh quá hẹp hoặc quá dẹt — `aspect` ngoài [minAspect, maxAspect].
+///    Ảnh dẹt như dải trang trí (aspect ~3.0) làm hero thì cắt mất nội dung;
+///    ảnh cao gầy thì nhồi vào thẻ ngang cũng vậy.
+/// 2. LOẠI ảnh quá nhỏ — diện tích bbox dưới [minArea] phần trang. Đây là cách
+///    đo «icon / logo / bảng con» mà KHÔNG cần đoán ngữ nghĩa: một hình chiếm
+///    dưới 2% trang không phải hình minh hoạ chính của bài.
+/// 3. Trong số còn lại, chọn DIỆN TÍCH LỚN NHẤT. Hoà thì ưu tiên hình CÓ CHÚ
+///    THÍCH ĐÁNH SỐ (`labels > 0`): sách đánh số lên hình khi hình mang nghĩa.
+/// 4. Vẫn hoà thì theo `id` tăng dần — để cùng một bài LUÔN cho cùng một ảnh,
+///    mọi lần chạy, mọi máy.
+///
+/// Không ảnh nào qua được ⇒ `null`, và thẻ vẽ dạng KHÔNG ẢNH. Không bịa hình.
+///
+/// ⚠ Ảnh crop là nội dung SGK: INTERNAL / RESEARCH ONLY. Chúng nằm ngoài git
+/// (`assets/fixtures/real/crops/`) và chỉ hiện trong app trên máy nghiên cứu —
+/// đúng như màn Đọc đang làm. Đây KHÔNG phải quyết định phát hành.
+class LessonHeroImage {
+  const LessonHeroImage({required this.asset, required this.aspect});
+
+  /// Đường dẫn asset đầy đủ, đã gắn `assetBase` của tài liệu.
+  final String asset;
+
+  /// width/height — để thẻ giữ chỗ đúng tỉ lệ, không kéo méo ảnh.
+  final double aspect;
+}
+
+/// Ảnh quá cao/quá dẹt không dùng làm hero được.
+const double kHeroMinAspect = 0.5;
+const double kHeroMaxAspect = 2.5;
+
+/// Dưới 2% diện tích trang ⇒ icon/bảng con, không phải hình của bài.
+const double kHeroMinArea = 0.02;
+
+LessonHeroImage? lessonHeroImage(LessonDocument doc) {
+  ({ImageBlock b, double area})? best;
+  for (final blk in doc.blocks) {
+    if (blk is! ImageBlock) continue;
+    final aspect = blk.aspect;
+    if (aspect == null) continue; // không biết tỉ lệ ⇒ không dám làm hero
+    if (aspect < kHeroMinAspect || aspect > kHeroMaxAspect) continue;
+    // `bbox` là hằng 4 số (assert trong SourceRef) — rộng × cao đã chuẩn hoá
+    // theo trang, nên diện tích là PHẦN TRANG mà hình chiếm.
+    final bbox = blk.sourceRef.bbox;
+    final area = bbox[2] * bbox[3];
+    if (area < kHeroMinArea) continue;
+    if (best == null ||
+        area > best.area ||
+        (area == best.area &&
+            (blk.labels > best.b.labels ||
+                (blk.labels == best.b.labels &&
+                    blk.id.compareTo(best.b.id) < 0)))) {
+      best = (b: blk, area: area);
+    }
+  }
+  if (best == null) return null;
+  return LessonHeroImage(
+    asset: '${doc.assetBase}${best.b.crop}',
+    aspect: best.b.aspect!,
+  );
 }
