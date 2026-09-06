@@ -48,6 +48,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 
 from repair import model, registry  # noqa: E402
 
+from . import _registration as _reg  # noqa: E402
 from . import paths  # noqa: E402
 from .trust import AnomalySignal, EvidenceRef  # noqa: E402
 
@@ -194,7 +195,6 @@ def install(store):
     return store
 
 
-@registry.signal(SIGNAL_ID)
 def external_signal(value, ctx):
     """Layer `H` as A1's registry sees it. Supports a proposal an authoritative lookup independently
     reached; **objects** when the lookup found the observed text confirmed; abstains otherwise — which is
@@ -219,7 +219,6 @@ def external_signal(value, ctx):
                         dict(reason='the recorded lookups do not bear on this proposal'))
 
 
-@registry.token_signal_provider('external.token-v1')
 def external_token_signal(observed, proposed, ctx):
     store = _STATE['store']
     if store is None or not isinstance(proposed, str):
@@ -235,7 +234,6 @@ def external_token_signal(observed, proposed, ctx):
     return None
 
 
-@registry.validator(FC_TONE, validator_id=VALIDATOR_ID)
 def external_validator(candidate, ctx):
     """External evidence **never validates alone** and never validates a source-bound question.
 
@@ -270,3 +268,15 @@ def external_validator(candidate, ctx):
                                               independent_sources=c.independent_sources(),
                                               authorities=c.authorities()),
                                   evidence=[e.to_json() for e in c.supporting()])
+
+
+# --------------------------------------------------------------------------- registration
+def register():
+    """Idempotent, and callable again after `registry.reset()`."""
+    return _reg.apply(
+        signals={SIGNAL_ID: external_signal},
+        token_providers={'external.token-v1': external_token_signal},
+        validators={(FC_TONE, VALIDATOR_ID): external_validator})
+
+
+register()

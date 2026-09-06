@@ -442,6 +442,50 @@ of those proposals still has to clear A1's independent-support rule before anyth
 
 ---
 
+## 8b · A composition defect this lane shipped, and what it says
+
+PR #88 was green alone and **broke the round when composed**: with all nine lane branches merged, the
+Python suite went 620 tests / 1 failure, and the failure was A4's.
+
+```
+python3 -m unittest test_verify_signals                       # 42 tests, OK
+python3 -m unittest test_mathfix_plugin test_verify_signals   # FAILED
+AssertionError: 'D.cross_corpus' not found in ['G.llm_semantic']
+```
+
+**Cause.** A4's plugins registered by **module-import side effect** — decorators at module level, and
+`load_plugins()` calling `importlib.import_module(...)`. A module is imported once. Lane A2's tests
+legitimately call `repair.registry.reset()`; after that the modules are still in `sys.modules`, so a
+re-import is a no-op and the registrations are never replayed. `load_plugins()` then returned
+`registry.describe()` **without ever asking whether it contained what was requested** — one signal of
+three, reported as success. (The only reason `G.llm_semantic` survived is that `verify.llm` happened to be
+first imported *after* the reset.)
+
+Reproduced directly:
+
+```
+OLD loader would have returned signals = []
+NEW loader returns              signals = ['A.enumerator', 'B.page_furniture', 'D.cross_corpus',
+                                           'D.section_sequence', 'G.llm_semantic', 'H.external']
+```
+
+**Why it is worth a section rather than a line.** A router configured for six signals could have run with
+one and still reported success. That is the same failure family as the two worst findings of this round —
+Lane D's R13, where a block disappears carrying no reason code, and a grounding step that strengthened
+itself through a file write. **A component that quietly delivers less than it was asked for is exactly
+what this lane's discipline is against, and A4 shipped one.**
+
+**Fix** (`verify/_registration.py`): every plugin module exposes an explicit, **idempotent** `register()`
+that reads the registry's live state before adding, so it survives a reset and a double call; and
+`load_plugins()` **verifies and fails loudly** — it checks every signal, provider, repairer and validator
+the modules claim against `registry.describe()` and raises `RegistrationIncomplete` instead of returning a
+partial dict. Three regression tests, one of which resets the registry deliberately and reloads.
+
+No measurement in this document changed: the engine run reproduces 4 candidates, 4 demotions, demotion
+precision 0.250, 0 false corrections.
+
+---
+
 ## 9 · What the Founder is asked to decide
 
 1. **Is external verification worth any budget at all?** Measured consult rate 0.000. A4's recommendation:

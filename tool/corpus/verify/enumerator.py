@@ -34,6 +34,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 import tc_score  # noqa: E402
 from repair import model, registry  # noqa: E402
 
+from . import _registration as _reg  # noqa: E402
 from . import index as ix, paths  # noqa: E402
 from .trust import AnomalySignal, EvidenceRef  # noqa: E402
 
@@ -167,7 +168,6 @@ def analyse(text):
     return (tok, fixed) if fixed and fixed != tok else None
 
 
-@registry.signal(SIGNAL_A)
 def enumerator_signal(value, ctx):
     obs = ctx.primary().value if ctx.primary() else ''
     if not isinstance(obs, str):
@@ -186,7 +186,6 @@ def enumerator_signal(value, ctx):
                              reason='the enumerator is malformed and this proposal does not fix it'))
 
 
-@registry.signal(SIGNAL_D)
 def sequence_signal(value, ctx):
     seq = _seq_for(ctx)
     got = analyse(ctx.primary().value if ctx.primary() else '')
@@ -204,7 +203,6 @@ def sequence_signal(value, ctx):
                              sequence=dict(seq.romans.most_common(6))))
 
 
-@registry.repairer(FC_ENUM, repairer_id=RULE)
 def propose_enumerator(ctx):
     """Layer A proposes; layer D is attached as independent corroboration when the book attests it."""
     if not ctx.primary():
@@ -238,7 +236,6 @@ def propose_enumerator(ctx):
         detected=dict(kind='malformed section enumerator', observed=tok, proposed=fixed))
 
 
-@registry.validator(FC_ENUM, validator_id=VALIDATOR_ID)
 def validate_enumerator(candidate, ctx):
     """Needs the book's own sequence — layer A may not validate itself."""
     if candidate.contradicting():
@@ -263,3 +260,15 @@ def anomalies_of(block_id, text, where=None):
                           reason=f'«{tok}» is not a well-formed enumerator', span=tok, observed=text,
                           confidence=0.8, severity='display',
                           context_supplied=dict(where=dict(where or {})))]
+
+
+# --------------------------------------------------------------------------- registration
+def register():
+    """Idempotent, and callable again after `registry.reset()`."""
+    return _reg.apply(
+        signals={SIGNAL_A: enumerator_signal, SIGNAL_D: sequence_signal},
+        repairers={(FC_ENUM, RULE): propose_enumerator},
+        validators={(FC_ENUM, VALIDATOR_ID): validate_enumerator})
+
+
+register()

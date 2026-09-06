@@ -48,6 +48,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 
 from repair import model, registry  # noqa: E402
 
+from . import _registration as _reg  # noqa: E402
 from . import index as ix  # noqa: E402
 from .trust import AnomalySignal, EvidenceRef  # noqa: E402
 
@@ -405,7 +406,6 @@ def install(verifier):
     return verifier
 
 
-@registry.signal(SIGNAL_ID)
 def cross_corpus_signal(value, ctx):
     """`D.cross_corpus` as A1's registry sees it: a reading ABOUT a proposed value.
 
@@ -436,7 +436,6 @@ def cross_corpus_signal(value, ctx):
                         dict(reason='the corpus does not attest this particular proposal'))
 
 
-@registry.token_signal_provider('xcorpus.token-v1')
 def token_signal(observed, proposed, ctx):
     """**The registration that matters most.** A1's repairer consults every registered token provider for
     every token it is about to change, and an `objects` reading from a provider **vetoes** the repair.
@@ -479,7 +478,6 @@ def token_signal(observed, proposed, ctx):
                              finding=hit.to_json()))
 
 
-@registry.block_signal_provider('xcorpus.block-v1')
 def block_signal(observed_text, proposed_text, ctx):
     """Per-block reading: does the corpus attest the whole proposed text, and does it attest the observed
     text as it stands? An objection here is the «do not touch this block» vote."""
@@ -499,7 +497,6 @@ def block_signal(observed_text, proposed_text, ctx):
                              findings=[f.to_json() for f in fs]))
 
 
-@registry.repairer(FC_TONE, repairer_id='xcorpus.context-v1')
 def propose(ctx):
     """DETECT + PROPOSE from cross-corpus context. Emits at most one candidate per block; a block whose
     findings are all anomalies emits nothing (the caller turns those into `SUSPECT` — a candidate is a
@@ -534,7 +531,6 @@ def propose(ctx):
                       anomalies_without_proposal=[f.to_json() for f in fs if not f.proposes]))
 
 
-@registry.validator(FC_TONE, validator_id=VALIDATOR_ID)
 def validate(candidate, ctx):
     """A validator that **refuses to validate its own layer**.
 
@@ -581,3 +577,18 @@ def anomalies_of(block_id, text, verifier, where=None, severity='unknown'):
                                  context_supplied=dict(context=f.context, where=dict(where or {})),
                                  evidence=tuple(f.supporting) + tuple(f.contradicting)))
     return out
+
+
+# --------------------------------------------------------------------------- registration
+def register():
+    """Idempotent, and callable again after `registry.reset()` — see `_registration.py` for why an
+    import side effect was not good enough."""
+    return _reg.apply(
+        signals={SIGNAL_ID: cross_corpus_signal},
+        token_providers={'xcorpus.token-v1': token_signal},
+        block_providers={'xcorpus.block-v1': block_signal},
+        repairers={(FC_TONE, 'xcorpus.context-v1'): propose},
+        validators={(FC_TONE, VALIDATOR_ID): validate})
+
+
+register()

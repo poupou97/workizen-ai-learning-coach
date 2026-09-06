@@ -64,6 +64,47 @@ class ReuseContractTests(unittest.TestCase):
         self.assertIn('xcorpus.token-v1', registry.providers()['token'])
         self.assertIn('xcorpus.block-v1', registry.providers()['block'])
 
+    def test_registration_survives_a_registry_reset(self):
+        """The bug this test exists for, reproduced deliberately.
+
+        A4's plugins used to register by module-import side effect. A module is imported once, so after
+        another lane's legitimate `registry.reset()` (Lane A2's tests do exactly this) a re-import was a
+        no-op and `load_plugins()` returned a **partial registry reporting success** — one signal of
+        three. That is the same silent-degradation family as a block that disappears with no reason code,
+        and it is what this lane's own discipline is against.
+        """
+        import verify
+        from repair import registry
+        snap = registry.snapshot()
+        try:
+            registry.reset()
+            self.assertEqual(registry.describe()['signals'], [])
+            d = verify.load_plugins()
+            for sid in ('D.cross_corpus', 'G.llm_semantic', 'H.external', 'A.enumerator',
+                        'D.section_sequence', 'B.page_furniture'):
+                self.assertIn(sid, d['signals'])
+            for pid in ('xcorpus.token-v1', 'llm.token-v1', 'external.token-v1'):
+                self.assertIn(pid, d['providers']['token'])
+            # and calling it twice more must stay a no-op rather than raising DuplicatePlugin
+            self.assertEqual(verify.load_plugins()['signals'], d['signals'])
+        finally:
+            registry.restore(snap)
+
+    def test_a_partial_registration_raises_instead_of_reporting_success(self):
+        """The half that turns the bug into an error: `load_plugins` verifies, it does not merely
+        describe."""
+        import verify
+        from verify import _registration as reg
+        with self.assertRaises(reg.RegistrationIncomplete):
+            reg.verify({'fake': dict(signals=['Z.not_registered'], token_providers=[],
+                                     block_providers=[], repairers=[], validators=[])})
+
+    def test_a_module_without_register_is_refused(self):
+        import verify
+        from verify import _registration as reg
+        with self.assertRaises(reg.RegistrationIncomplete):
+            verify.load_plugins(which=('trust',))       # a real module of ours with no register()
+
 
 # --------------------------------------------------------------------------- evidence
 class EvidenceTests(unittest.TestCase):

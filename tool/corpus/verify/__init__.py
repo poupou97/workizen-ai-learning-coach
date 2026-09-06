@@ -35,14 +35,35 @@ from . import paths, trust  # noqa: E402,F401
 VERIFY_VERSION = 'verify-v1'
 
 
-def load_plugins(which=('crosscorpus', 'llm', 'external')):
-    """Register A4's signals/repairers/validators into Lane A1's registry.
+#: Every plugin module A4 owns. `enumerator` and `furniture` are in the default set because the router
+#: paths that name them are worthless if they silently are not there.
+PLUGIN_MODULES = ('crosscorpus', 'enumerator', 'furniture', 'llm', 'external')
+
+
+def load_plugins(which=PLUGIN_MODULES):
+    """Register A4's signals/repairers/validators into Lane A1's registry, **and verify it worked**.
 
     Importing this package alone registers nothing — a consumer that only wants `TrustDecision` (Lane D
     reading a ledger, Lane B explaining trust to a child) pays no import cost and gets no plugins.
+
+    Two properties, both learned the hard way (see `_registration.py`):
+
+    * **Idempotent, and it survives `registry.reset()`.** Registration used to happen as an import side
+      effect, so once a module was in `sys.modules` a re-import was a no-op and a reset wiped the
+      registrations permanently. Each module now exposes an explicit `register()` that this calls.
+    * **It fails loudly.** Afterwards every signal, provider, repairer and validator the modules claim is
+      checked against `registry.describe()`, and a missing one raises `RegistrationIncomplete` instead of
+      returning a partial dict. A router configured for six signals must never run with one and report
+      success — that is the same silent-degradation family as a block that disappears with no reason code.
     """
     import importlib
-    from repair import registry
+    from . import _registration as _reg
+    manifests = {}
     for name in which:
-        importlib.import_module(f'{__name__}.{name}')
-    return registry.describe()
+        mod = importlib.import_module(f'{__name__}.{name}')
+        if not hasattr(mod, 'register'):
+            raise _reg.RegistrationIncomplete(
+                f'{__name__}.{name} has no register(); a plugin that registers only by import side '
+                f'effect cannot survive registry.reset()')
+        manifests[name] = mod.register()
+    return _reg.verify(manifests)

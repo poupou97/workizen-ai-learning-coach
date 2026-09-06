@@ -40,6 +40,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 import tc_score  # noqa: E402
 from repair import model, registry  # noqa: E402
 
+from . import _registration as _reg  # noqa: E402
 from . import index as ix, paths  # noqa: E402
 from .trust import AnomalySignal, EvidenceRef  # noqa: E402
 
@@ -242,7 +243,6 @@ def for_ctx(ctx):
     return _STATE['by_book'].get(book)
 
 
-@registry.signal(SIGNAL_ID)
 def furniture_signal(value, ctx):
     f = for_ctx(ctx)
     if f is None or not ctx.primary():
@@ -263,7 +263,6 @@ def furniture_signal(value, ctx):
                         dict(reason='no page furniture in this block'))
 
 
-@registry.repairer(FC_FURNITURE, repairer_id=RULE)
 def propose_furniture(ctx):
     """DELETION-only repair: the block minus a fragment the book prints on `pages` of its pages.
 
@@ -424,7 +423,6 @@ def validate_registry(books, ocr_root=None, per_book=60):
             for s, v in found.items()}
 
 
-@registry.repairer(FC_FURNITURE, repairer_id='furniture.known-series-v1')
 def propose_known(ctx):
     """DELETION-only repair against the publisher registry. Independent of any learned model, so it works
     on a book the pipeline has never seen — which is the whole point of a registry over a learner."""
@@ -464,3 +462,15 @@ def anomalies_of(block_id, text, furniture, where=None):
             span=p, observed=text, confidence=0.7, severity='display',
             context_supplied=dict(book=furniture.book, where=dict(where or {}))))
     return out
+
+
+# --------------------------------------------------------------------------- registration
+def register():
+    """Idempotent, and callable again after `registry.reset()`."""
+    return _reg.apply(
+        signals={SIGNAL_ID: furniture_signal},
+        repairers={(FC_FURNITURE, RULE): propose_furniture,
+                   (FC_FURNITURE, 'furniture.known-series-v1'): propose_known})
+
+
+register()

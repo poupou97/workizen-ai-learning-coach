@@ -41,6 +41,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 
 from repair import model, registry  # noqa: E402
 
+from . import _registration as _reg  # noqa: E402
 from . import paths  # noqa: E402
 from .trust import AnomalySignal, EvidenceRef  # noqa: E402
 
@@ -224,7 +225,6 @@ def install(verifier):
     return verifier
 
 
-@registry.signal(SIGNAL_ID)
 def llm_signal(value, ctx):
     """`G.llm_semantic` as a reading ABOUT a proposed value. Supports only when the model independently
     proposed the same replacement; objects when it proposed a *different* one (a disagreement is
@@ -253,7 +253,6 @@ def llm_signal(value, ctx):
                              anomalies=[a.to_json() for a in anomalies], meta=meta))
 
 
-@registry.token_signal_provider('llm.token-v1')
 def llm_token_signal(observed, proposed, ctx):
     """Consulted by A1's repairer for every token it is about to change. An LLM reading is one vote among
     the layers here and carries no privilege — it can support, it can veto, it can abstain, and it never
@@ -277,7 +276,6 @@ def llm_token_signal(observed, proposed, ctx):
                              anomalies=len(anomalies), meta=meta))
 
 
-@registry.validator(FC_TONE, validator_id=VALIDATOR_ID)
 def llm_validator(candidate, ctx):
     """**An LLM may never validate a repair an LLM proposed**, and it may never validate alone.
 
@@ -300,3 +298,15 @@ def _ctx_of(ctx):
     page = dict(ctx.page or {})
     return dict(subject=page.get('subject') or page.get('book'), lesson=page.get('lesson'),
                 heading=' > '.join(page.get('heading_path') or ()) or None, role=ctx.role)
+
+
+# --------------------------------------------------------------------------- registration
+def register():
+    """Idempotent, and callable again after `registry.reset()`."""
+    return _reg.apply(
+        signals={SIGNAL_ID: llm_signal},
+        token_providers={'llm.token-v1': llm_token_signal},
+        validators={(FC_TONE, VALIDATOR_ID): llm_validator})
+
+
+register()
