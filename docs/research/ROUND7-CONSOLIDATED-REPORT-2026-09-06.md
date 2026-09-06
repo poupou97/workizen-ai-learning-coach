@@ -107,6 +107,7 @@ waiver can manufacture trust. Property-tested.
 - **The real lever is the all-or-nothing sibling rule: 31 mutilated structures → 0**, at a cost of 72 blocks. Adding all three types removes **1 of 31**.
 - **The option letters «A.»–«D.» are restored *after* `agreement()` runs.** **The one part that identifies the answer is the part no agreement measurement covers.**
 - **Four published lesson denominators are one leaf population under four grouping keys** — 3,679 rows · 3,240 `(doc,no)` · 3,650 `(doc,no,pageStart,title)` · 3,381 with `pageStart`. Re-derived by me from the packs, independent of WS-A's CSV.
+- **PRESERVE SOURCE VERBATIM implemented and measured on the real population.** 2,623 titles / 2,382 unique; multi-word ALL-CAPS = **108**, the Founder's figure exactly. The candidate normalisation strips capitals from **107 of 107**; `displayTitle` changes **0 of 2,382**. Named casualties it would have caused, from the shipping pack: `ASEAN AND VIET NAM` → `Asean and viet nam`, `BÁC HÔ VỚI THIÊU NHI` → `Bác hô với thiêu nhi`, `… THẾ KỈ XX` → `… thế kỉ xx` — **an acronym, a person's name and a Roman numeral.** The activation precondition is **a function, not a promise**: `titlesLosingCapitals(transform, titles)` must return empty on the real population before any normalisation may be proposed. The cost is stated plainly: **«MỞ ĐẦU» now reads «MỞ ĐẦU» on screen.**
 - **Golden #1 regenerated with 17/17 crops**, 5 recovered image blocks, `validatedRepairs 9 · trusted 0 · 0 served blocks carrying a repair`, all eight lineage checks PASS.
 
 ---
@@ -179,6 +180,55 @@ numbers mean**. One consequence needs checking before anything leans on it: that
 `pack_wiring['toanExercises']` column was **0 for every candidate** — a column of zeroes that
 looked like absence of data and was absence of flattening. **Any candidate ranked or dismissed on
 that column was ranked on a wrong input.**
+
+---
+
+## 10.1 · Composition CI — the round composes
+
+Verified in a throw-away worktree from `integration/round7-2026-09-06`, all four workstream
+branches merged. **The Golden #1 fixture was REGENERATED inside the composed tree, never
+rsynced** — on the Founder's instruction and on WS-R's finding that rsyncing
+`assets/fixtures/` silently re-introduces the crop-less artefact whose lineage fields all read
+as current. Packs were rsynced (they are the verified rebuild: `verify` 12/12, `toanExercises` 0).
+
+| Check | Result |
+|---|---|
+| Git merge, 4 branches | **0 conflicts** |
+| Fixture regeneration inside the tree | **L5b 17/17 · VERDICT PASS · placed +22 crops** |
+| `flutter analyze` | **No issues found** |
+| Python suite | **866 tests OK** (18 skipped) |
+| Dart suite | **1106 tests — All tests passed** |
+
+Heads: WS-M `a6cae3b` · WS-T `5e706c9` · WS-R `7d37521` · WS-S `36e4c50`.
+
+**It did not compose on the first attempt, and the failure was the best possible one.** WS-M's
+anti-rot guard — *«a baselined finding that has disappeared must be removed in the same commit»*
+— fired on its first real encounter and **caught me**: I had repaired the two round-3 census
+defects that its baseline still asserted were live. We had worked in parallel.
+
+The resolution improved on both of our positions. WS-M had deliberately *not* repaired those
+scripts, reasoning that the census outputs were published and changing the code would change
+what a reader finds. It then verified my fix **behaviourally rather than by reading the diff**,
+withdrew the weaker half of its own argument — *«a live defect in a script that will run again
+is worse than a reproducibility gap in a dated artefact»* — and pointed out that a broken
+committed command is, by the round's own Gate A rule, a metric that **was never re-derivable**.
+
+But it kept the concern **as a live assertion rather than a note**: entries were **moved** to a
+new `REPAIRED_FINDINGS` record, not deleted, on the principle that **a repair is also a change
+to what old numbers mean.** Three new guards, all mutation-checked, make a repaired defect's
+return fail *by name*.
+
+**And that surfaced a consequence nobody had looked for:** the round-3 second-golden-lesson
+census had `pack_wiring['toanExercises'] = 0` **for every candidate** — a column of zeroes that
+looked like absence of data and was absence of flattening. **Any candidate ranked or dismissed
+on that column was ranked on a wrong input.** Round 7 does not lean on that ranking (the Founder
+chose the Golden lessons directly), but round 8 must not.
+
+**Two process failures recorded rather than tidied away**, both the same one: WS-M and, in round
+5, Lane E2 each destroyed uncommitted work with `git checkout --`. The mutation protocol's
+cp-backup rule exists for exactly this, and it has now been skipped twice. WS-M's second attempt
+also verified each mutation had actually landed before reading its result — **a mutation that
+«survives» because it never applied is not evidence.**
 
 ---
 
