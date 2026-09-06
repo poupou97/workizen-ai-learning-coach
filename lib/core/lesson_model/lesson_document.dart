@@ -84,6 +84,66 @@ class SourceRef {
 /// cầu nguyên trạng từ TSL (`heading_path`, `refers_figure`, `caption` của
 /// figure, `order`, `enumerator_restored`). Thiếu ⇒ rỗng: đây là siêu dữ liệu
 /// dẫn đường, KHÔNG phải trust — không có nó tài liệu vẫn parse.
+/// ⭐ ROUND 7 (WS-S) — MỘT NHÓM CẤU TRÚC, mang như XUẤT XỨ, không phải nội dung.
+///
+/// Lỗi số 8 của vòng 5: *giữ lại MỘT phương án của câu trắc nghiệm khiến câu
+/// ĐƯỢC PHỤC VỤ trở nên SAI, chứ không phải ngắn đi.* Nên với block có anh em
+/// cấu trúc (OPTION ⊂ QUESTION, chú thích ⊂ hình, hàng của bảng, bước của quy
+/// trình) thì NHÓM mới là đơn vị định đoạt. Một nhóm phục vụ thiếu thành viên
+/// là **cấu trúc bị cắt xén** — và đó là lỗi dạy học do chính cơ chế an toàn
+/// gây ra.
+///
+/// Kiểu này KHÔNG mở thêm đường nào cho chữ. Nó chỉ mang bốn con số: nhóm nào,
+/// loại gì, mấy thành viên, mấy thành viên bị giữ lại. Nhờ vậy app (và một test
+/// canh) **NHÌN THẤY và ĐẾM ĐƯỢC** rằng một block đang phục vụ thuộc một cấu
+/// trúc bị cắt xén, mà không hề có cách nào đọc thành viên còn thiếu — đúng
+/// khuôn `ValidatedRepair` của vòng 6: thấy được, đếm được, vẫn không đọc được.
+///
+/// `withheldMembers` mô tả TÀI LIỆU ĐANG CẦM, không phải một trạng thái trước
+/// đó. Vòng 5 đã bắt được đúng lỗi này ở khâu tuần tự hoá: một bản ghi lặng lẽ
+/// nói nội dung có nền tảng chắc hơn thực tế.
+class BlockGroup {
+  const BlockGroup({
+    required this.id,
+    required this.kind,
+    required this.members,
+    required this.withheldMembers,
+  });
+
+  final String id;
+
+  /// `question_options` · `figure_caption` · `table_rows` · `procedure_steps` —
+  /// NGUYÊN VĂN mã máy, không dịch, không gộp. Mã máy KHÔNG BAO GIỜ hiện cho trẻ.
+  final String kind;
+  final int members;
+  final int withheldMembers;
+
+  /// Nhóm này có thành viên bị giữ lại ⇒ nếu còn thành viên được phục vụ thì
+  /// cấu trúc đang BỊ CẮT XÉN.
+  bool get hasWithheldMember => withheldMembers > 0;
+  bool get isComplete => withheldMembers == 0;
+
+  /// Fail-closed: thiếu trường, sai kiểu, số âm, hoặc `withheldMembers` lớn hơn
+  /// `members` ⇒ `null`. Một nhóm khai bậy không được phép thành một nhóm lành.
+  static BlockGroup? fromJson(Object? v) {
+    if (v is! Map) return null;
+    final id = v['id'], kind = v['kind'];
+    final m = v['members'], w = v['withheldMembers'];
+    if (id is! String || id.isEmpty || kind is! String || kind.isEmpty) return null;
+    if (m is! num || w is! num) return null;
+    final mi = m.toInt(), wi = w.toInt();
+    if (mi < 1 || wi < 0 || wi > mi) return null;
+    return BlockGroup(id: id, kind: kind, members: mi, withheldMembers: wi);
+  }
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'kind': kind,
+    'members': members,
+    'withheldMembers': withheldMembers,
+  };
+}
+
 class BlockRelations {
   const BlockRelations({
     this.headingPath = const [],
@@ -91,6 +151,7 @@ class BlockRelations {
     this.captionOf,
     this.order,
     this.enumeratorRestored = false,
+    this.group,
   });
 
   static const empty = BlockRelations();
@@ -108,12 +169,19 @@ class BlockRelations {
   final int? order;
   final bool enumeratorRestored;
 
+  /// ⭐ Round 7 (WS-S): nhóm cấu trúc block này thuộc về. `null` ⇒ **chưa đo**,
+  /// KHÔNG phải «không thuộc nhóm nào» và KHÔNG phải «nhóm còn nguyên». Cầu nối
+  /// chỉ ghi trường này khi được bảo chạy máy đo nhóm; vắng mặt là cách nói thật
+  /// rằng câu hỏi chưa được đặt ra.
+  final BlockGroup? group;
+
   bool get isEmpty =>
       headingPath.isEmpty &&
       !refersFigure &&
       captionOf == null &&
       order == null &&
-      !enumeratorRestored;
+      !enumeratorRestored &&
+      group == null;
 
   static BlockRelations fromJson(Object? v) {
     if (v is! Map) return empty;
@@ -126,6 +194,7 @@ class BlockRelations {
       captionOf: v['captionOf'] as String?,
       order: (v['order'] as num?)?.toInt(),
       enumeratorRestored: v['enumeratorRestored'] == true,
+      group: BlockGroup.fromJson(v['group']),
     );
   }
 
@@ -135,6 +204,7 @@ class BlockRelations {
     if (captionOf != null) 'captionOf': captionOf,
     if (order != null) 'order': order,
     if (enumeratorRestored) 'enumeratorRestored': true,
+    if (group != null) 'group': group!.toJson(),
   };
 }
 
@@ -952,6 +1022,49 @@ class LessonDocument {
 
   /// Bất biến, không phải phép đo: KHÔNG sửa chữa nào ở đây là tin được.
   int get trustedRepairCount => 0;
+
+  /// ⭐ Round 7 (WS-S): các NHÓM CẤU TRÚC bài học này mang, theo thứ tự gặp.
+  /// Rỗng có HAI nghĩa khác nhau và tài liệu không được phép trộn chúng: pack
+  /// chưa hề đo nhóm (`hasGroupMeasurement == false`), hay pack đo rồi và bài
+  /// này không có nhóm nào. Luôn hỏi `hasGroupMeasurement` trước khi đọc số 0.
+  Map<String, BlockGroup> get structuralGroups {
+    final m = <String, BlockGroup>{};
+    for (final b in blocks) {
+      final g = b.relations.group;
+      if (g != null) m.putIfAbsent(g.id, () => g);
+    }
+    return m;
+  }
+
+  /// Pack có mang phép đo nhóm hay không. `false` ⇒ mọi con số nhóm bên dưới là
+  /// «chưa đo», không phải «bằng không».
+  bool get hasGroupMeasurement => blocks.any((b) => b.relations.group != null);
+
+  /// ⭐⭐ CẤU TRÚC BỊ CẮT XÉN: nhóm có ÍT NHẤT MỘT thành viên đang được phục vụ
+  /// và ít nhất một thành viên bị giữ lại. Đây là lỗi số 8 của vòng 5 — một lỗi
+  /// dạy học do chính cơ chế an toàn gây ra — nên nó phải ĐẾM ĐƯỢC ở tầng mô
+  /// hình, chứ không chỉ trong một script đo ngoài repo.
+  ///
+  /// Đếm được KHÔNG phải sửa được: mô hình không có cách nào lấy lại thành viên
+  /// bị giữ lại, và không được phép có. Việc quyết định phục vụ cả nhóm hay giữ
+  /// cả nhóm nằm ở cầu nối và ở cổng của Founder.
+  List<BlockGroup> get mutilatedGroups {
+    final served = <String, bool>{};
+    final byId = <String, BlockGroup>{};
+    for (final b in blocks) {
+      final g = b.relations.group;
+      if (g == null) continue;
+      byId.putIfAbsent(g.id, () => g);
+      served[g.id] = (served[g.id] ?? false) || b is! WithheldBlock;
+    }
+    return [
+      for (final e in byId.entries)
+        if (e.value.hasWithheldMember && (served[e.key] ?? false)) e.value,
+    ];
+  }
+
+  /// Bài học này có đang phục vụ một cấu trúc bị cắt xén không.
+  bool get hasMutilatedStructure => mutilatedGroups.isNotEmpty;
 
   ContentTrust get trust => provenance.trust;
   bool get isFixture => trust.requiresFixtureChip;
