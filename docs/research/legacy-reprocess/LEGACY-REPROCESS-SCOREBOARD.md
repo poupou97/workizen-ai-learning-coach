@@ -1,6 +1,6 @@
 # Legacy reprocess scoreboard — rounds 4 + 5 (Lane D)
 
-`legacy-scoreboard-v1` · generated 2026-09-06T01:28:37+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
+`legacy-scoreboard-v1` · generated 2026-09-06T01:40:56+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
 
 Legacy content is never a trusted teaching source. REPROCESSED ≠ TRUSTED: a reprocessed lesson is a *candidate* until it clears an independent audit against a threshold **the Founder sets**.
 
@@ -309,7 +309,7 @@ Withholding is not automatically safe. A withheld block that leaves a sibling st
 
 ### Restore — batch `round5/legacy/batch-2-repaired`
 
-Restore mechanism: guard change in the pipeline build — NOT a repair. No REPAIRED stage ran: the repair framework and the math repairer had not landed green.
+Restore mechanism: guard or attachment change in the pipeline build — NOT a text repair. Verified for this run: neither tc2_sdm.py nor tc2_tsl.py imports the repair package, so no repairer can reach the Trusted Structured Lesson a restore is measured on, whatever is merged.
 
 | measure | value | of what |
 |---|---|---|
@@ -365,7 +365,7 @@ Withholding is not automatically safe. A withheld block that leaves a sibling st
 
 ### Restore — batch `round5/legacy/batch-1-round5-repaired`
 
-Restore mechanism: guard change in the pipeline build — NOT a repair. No REPAIRED stage ran: the repair framework and the math repairer had not landed green.
+Restore mechanism: guard or attachment change in the pipeline build — NOT a text repair. Verified for this run: neither tc2_sdm.py nor tc2_tsl.py imports the repair package, so no repairer can reach the Trusted Structured Lesson a restore is measured on, whatever is merged.
 
 | measure | value | of what |
 |---|---|---|

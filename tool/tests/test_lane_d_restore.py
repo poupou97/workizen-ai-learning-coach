@@ -121,10 +121,15 @@ class RestoreRowsTests(unittest.TestCase):
         self.assertEqual(d['restoredWithUnresolvedBlock'], ['s1'])
 
     def test_the_mechanism_is_recorded_so_a_guard_restore_is_never_read_as_a_repair(self):
+        """And it is recorded by CHECKING, not by naming a branch: the earlier string asserted «the
+        repair framework had not landed green», which was true when written and stale hours later."""
         a = self._fixture([], {})
         restore.cmd_rows(a)
         d = json.load(open(self.out, encoding='utf-8'))
-        self.assertIn('NOT a repair', d['restoreMechanism'])
+        self.assertIn('NOT a text repair', d['restoreMechanism'])
+        self.assertIn('tc2_sdm.py', d['restoreMechanism'],
+                      'the claim must name what was inspected, so a reader can re-check it')
+        self.assertNotIn('landed green', d['restoreMechanism'])
 
 
 class RestorePrecisionTests(unittest.TestCase):

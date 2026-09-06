@@ -1,7 +1,7 @@
 {
  "version": "legacy-scoreboard-v1",
  "generated_by": "tool/corpus/legacy/scoreboard.py",
- "generated": "2026-09-06T01:28:37+00:00",
+ "generated": "2026-09-06T01:40:56+00:00",
  "legacy_roots": [
   "/Users/alexnguyen/projects/workizen-ai-learning-coach/poc-out/round4/legacy",
   "/Users/alexnguyen/projects/workizen-ai-learning-coach/poc-out/round5/legacy"
@@ -2606,7 +2606,7 @@
    "pipeline": "tc2-p3",
    "restore": {
     "ran": true,
-    "mechanism": "guard change in the pipeline build — NOT a repair. No REPAIRED stage ran: the repair framework and the math repairer had not landed green.",
+    "mechanism": "guard or attachment change in the pipeline build — NOT a text repair. Verified for this run: neither tc2_sdm.py nor tc2_tsl.py imports the repair package, so no repairer can reach the Trusted Structured Lesson a restore is measured on, whatever is merged.",
     "reviewedWithheldRegions": 30,
     "restored": 1,
     "falselyWithheldTotal": 19,
@@ -3093,7 +3093,7 @@
    "pipeline": "tc2-p3",
    "restore": {
     "ran": true,
-    "mechanism": "guard change in the pipeline build — NOT a repair. No REPAIRED stage ran: the repair framework and the math repairer had not landed green.",
+    "mechanism": "guard or attachment change in the pipeline build — NOT a text repair. Verified for this run: neither tc2_sdm.py nor tc2_tsl.py imports the repair package, so no repairer can reach the Trusted Structured Lesson a restore is measured on, whatever is merged.",
     "reviewedWithheldRegions": 30,
     "restored": 6,
     "falselyWithheldTotal": 12,

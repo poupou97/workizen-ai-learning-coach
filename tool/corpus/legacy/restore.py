@@ -2,12 +2,12 @@
 """Round 5 · Lane D — RESTORE PRECISION (Founder §9: "Add RESTORE PRECISION = correctly
 restored / all restored. Do not raise coverage with imprecise restores.").
 
-A **restore** is a region one build WITHHELD and a later build SERVES again. Round 5's
-restores come from guard improvements, not from a repairer — Lane A1's repair framework and
-Lane A2's math repairer had not landed green when this ran — so the REPAIRED stage is empty
-and this file measures the only restores that actually happened. It says so in every output;
-a restore by a loosened guard and a restore by a validated repair are not the same event and
-must never be summed.
+A **restore** is a region one build WITHHELD and a later build SERVES again. A restore by a
+loosened guard and a restore by a validated repair are not the same event and must never be
+summed, so every output records which one produced it — and records it by CHECKING rather than
+by asserting: `_mechanism()` asks whether the lesson-producing path can reach a repairer at all
+(does `tc2_sdm.py` / `tc2_tsl.py` import the repair package?) instead of naming a branch, which
+goes stale the moment someone merges.
 
 The measurement has two halves, and reporting only the first is how coverage gets raised
 dishonestly:
@@ -64,6 +64,33 @@ def _base_verdict(notes):
     return 'UNSURE'
 
 
+def _mechanism():
+    """What produced the restores in THIS run — checked, not assumed.
+
+    An earlier version of this string asserted «the repair framework had not landed green», which was
+    true on the day it was written and stale a few hours later. The durable question is not which
+    branch exists but whether a text repairer can reach the path that builds a lesson: if
+    `tc2_sdm.py` / `tc2_tsl.py` do not import the repair package, every restore in the output is a
+    guard or attachment change, whatever else is merged.
+    """
+    corpus = os.path.abspath(os.path.join(HERE, '..'))
+    wired = []
+    for mod in ('tc2_sdm.py', 'tc2_tsl.py'):
+        try:
+            src = open(os.path.join(corpus, mod), encoding='utf-8').read()
+        except OSError:
+            continue
+        if 'repair' in src and ('import repair' in src or 'from repair' in src):
+            wired.append(mod)
+    if wired:
+        return ('the lesson-producing path imports the repair package (' + ', '.join(wired) +
+                '), so a restore here may be a validated repair OR a guard change — check the '
+                'repair ledger before attributing it.')
+    return ('guard or attachment change in the pipeline build — NOT a text repair. Verified for this '
+            'run: neither tc2_sdm.py nor tc2_tsl.py imports the repair package, so no repairer can '
+            'reach the Trusted Structured Lesson a restore is measured on, whatever is merged.')
+
+
 def load_tsl_blocks(rerun_dir, pipeline, book, lesson):
     p = f'{rerun_dir}/tcroot/poc-out/trusted-corpus/tc-v2/{pipeline}/lessons/{book}/bai-{int(lesson):02d}.tsl.json'
     t = common.load_json(p) or {}
@@ -115,8 +142,7 @@ def cmd_rows(a):
         schema=SCHEMA + '/rows',
         delta=os.path.abspath(a.delta), annotated=os.path.abspath(a.annotated),
         rerunDir=os.path.abspath(a.rerun_dir), pipeline=a.pipeline,
-        restoreMechanism='guard change in the pipeline build — NOT a repair. No REPAIRED stage ran: '
-                         'the repair framework and the math repairer had not landed green.',
+        restoreMechanism=_mechanism(),
         reviewedWithheldRegions=len(rows),
         restored=len(restored),
         restoredByBaseRefusalVerdict=dict(by_base),
