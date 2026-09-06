@@ -694,6 +694,125 @@ deterministic validation — not more rules over text that was never captured.
 
 ---
 
+## 11.4 Semantic foundation + K-12 census (P0.1 / P0.3) — Lane E1
+
+**PR #85**, CI green, 285 tool tests OK. **Recommendation: GO WITH ARCHITECTURE
+CHANGE** — explicitly *not* GO (holdout precision and inter-annotator agreement are
+unmeasured, and `e1-definition-v1` over-fires: «68.8 % of lessons have a definition» is
+not credible), and explicitly *not* MORE EVIDENCE (the load-bearing claims were checked
+deterministically on real corpus data).
+
+### How few primitives suffice — the answer to «one language, 3,679 lessons»
+
+**6 primitives · 6 relations carried everything built across 224 lessons**, and 10
+visual families are projections of them. `isA` may collapse into `hasPart`, so possibly
+**5**. `Method`, `SkillCase`, `CurriculumEdge` and `ConceptMap` are **absent from the
+core** — nothing needed them to represent what a lesson *contains*.
+
+Verified rather than asserted: six compilers, and `compiler_audit()` records **at
+runtime** that every one read only `nodes` / `relations` / `claims`. PROCESS and
+TIMELINE compiled **from the same graph object across two subjects**.
+
+### Domain extensions — 3 of 7 proven, 3 refuted
+
+| Extension | Share of lessons | Verdict |
+|---|---|---|
+| **MATH_AST** | 66.3 % | necessary |
+| **LIT_TEXT** | 14.9 % | necessary |
+| **CHEM_REACTION** | 7.8 % | necessary |
+| History · Geography · Science | — | **refuted — needed none.** `Event` + `atTime` already carried LS&ĐL at **7/7** |
+
+**So `ToánGraph` / `HistoryGraph` / `ScienceGraph` are unnecessary.** What is genuinely
+per-domain is **notation and literary form, not subject** — a distinction that removes
+three planned subsystems.
+
+### The census — denominators kept separate throughout
+
+| Denominator | Count |
+|---|---|
+| canonical rows | **3,679** |
+| **distinct lesson keys** | **3,240** |
+| units-backed | 1,784 |
+| TSL-backed | 224 |
+
+Tiers: A 222 · B 368 · **C 1,384** · D 1,266.
+REPRESENTABLE **1,654 / 1,784** · EXTRACTABLE **220 / 224** (191 multi-family) ·
+VALIDATABLE **3 lessons / 1 family** · **LEARNER_READY 0**.
+
+COMPARISON, CONCEPT_MAP, QUANTITY and SPATIAL show **0 because no extractor exists** —
+emitted under `familiesWithNoExtractor` so the zero cannot be misread as «the corpus
+has none».
+
+### ⚠️ A challenge to the canonical denominator — Founder gate, not resolved
+
+`all-lessons.csv` has **3,679 rows but 3,240 distinct lesson keys**: **154 keys are
+duplicated across 439 rows.** The Founder's standing rule (2026-09-05) is that 3,679
+canonical and 3,381 ranged are never collapsed. This finding does not collapse them —
+it questions whether **3,679 is a lesson count or a row count.** Reported, **not
+fixed**, and flagged here because every «/ 3,679» figure in every round depends on the
+answer.
+
+### Exception clusters — one pipeline problem, one grammar problem, a long tail
+
+- **NO_SOURCE_AT_ALL — 1,384 lessons (42.7 %). No grammar change moves this.** It is a
+  source-pipeline problem wearing a semantics costume.
+- **NEEDS_MATH_AST — 1,096 (33.8 %).** One extension worth **9×** everything else, and
+  blocked on two verified bridge defects.
+- Ranks 3–7 together: 235.
+
+### Source-structure gaps — what the corpus does not currently carry
+
+**1,642 questions and 4 option blocks.** **20 table blocks and 0 with cells.** **0
+blocks retaining fraction or exponent shape.** 3,864 figures, 33.6 % with a caption,
+465 orphan «Hình N.M» labels. And **Ngữ văn / Tiếng Việt — the subjects where verse
+matters — have no TSL at all, so they have never been measured.**
+
+### Four findings worth the Founder's time
+
+1. **The surface grammar decides generalisation, not rule quality.** Enumeration is a
+   nearly closed form — **7 of 10 forms, coverage 0.992** — which is why PROCESS reaches
+   **104 / 224** lessons. Date is wide open — **3 of 12 forms, 0.140**; LS&ĐL uses all
+   twelve at 0.131, Địa lí 0.003 — which is **exactly** why TIMELINE reaches **3 / 224**.
+   This generalises Lane C's «Bài-8 shape, not a History rule» **at 47× scale**, and
+   E2's 6/54 sequence result sits on the same curve. `forms.py` runs in seconds.
+   **Standing rule from here: count the real forms before writing a rule.**
+2. **A pipeline rebuild can delete a visual family with no rule at fault.** 4 of 28
+   LS&ĐL lessons **lost** a family and **none gained** — while `tc2-r5` had *more*
+   trusted blocks. Accuracy work can silently destroy semantic yield. **Round 5 needs a
+   semantic-yield gate**, and nothing currently has one.
+3. **One tone slip deletes a family.** «Tiền hành» for «Tiến hành» → **0 Steps instead
+   of 5.** The distance between a working visual lesson and none is one diacritic.
+4. The duplicate-key finding above.
+
+### Cross-lane: a leak that two independent guards both missed
+
+E1 **adopted E2's identity constraint in full** — lesson identity left the
+renderer-facing spec. Writing the guard test then found something neither lane had
+seen: **element ids embedded the book and lesson number**, so a renderer could have
+branched on lesson identity by *parsing a string* while every field-name guard stayed
+green. **A field-name guard does not catch identity inside a value.** Routed back to
+E2 to run the same check.
+
+Also adopted and credited: **A2's no-`from_<presentation>` rule**, and **E2's
+serialisation-laundering finding** — grounding strength is now ordered on four axes and
+`from_json` is deliberately non-lenient, so a round trip cannot strengthen evidence.
+Grounding integrity **0.952 → 1.000** across **4,681 spans**, with **226 real failures**
+found and fixed — including «hình 1a» matching only «hình 1» at scale.
+
+Five near-verbatim SGK test fixtures were replaced with invented text (D4). **No LLM
+was called anywhere in this lane.**
+
+### What E1 says must change, all of it outside the ontology
+
+claim-bearing `SemanticData` (today the base carries **no `Provenance`**, so
+`citableAsTextbookFact` is undecidable for everything on Trực quan) · a bridge carrier
+for validated structured nodes **plus a per-block failure mode** · the four subtypes
+move to the visual side · a **semantic-yield gate** · and `khtn6_bai17.dart`'s 122
+hardcoded `const` lines become versioned data + compiled artefacts + a ~10-row rule
+registry + a small curated overlay.
+
+---
+
 ## 11.3 Does the round compose? — an integration check with nothing merged
 
 Because merging is a Founder gate, the composition was verified in a **throw-away
@@ -740,10 +859,10 @@ constructor — a shim in `lib/core` would re-open the very hole E2 closed.
 | #82 | `lane-d/round5-legacy-packs` | Lane D packs + legacy reprocess | PASS |
 | #83 | `a1/round5-repair-framework` | A1 repair framework | PASS |
 | #84 | `a2/round5-math-formula-accuracy` | A2 math / formula / number | PASS |
-
+| #85 | `e1/round5-semantic-foundation` | E1 semantic foundation + K-12 census | PASS |
 | #86 | `e2/round5-visualspec-renderer` | E2 VisualSpec + cross-subject renderer | PASS |
 | #87 | `lane-b/round5-experience` | B experience + workspace UX + Visual | PASS |
 
-Lanes still running: A4 (`a4/round5-multi-signal-verification`) and E1.
+Still running: A4 (`a4/round5-multi-signal-verification`).
 
 **No standing merge authority. READY FOR FOUNDER REVIEW.**
