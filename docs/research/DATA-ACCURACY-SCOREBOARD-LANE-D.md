@@ -33,18 +33,26 @@ the other's place is a denominator error (D5).
 Founder: *not just* `FALSE TRUST ↓`, but **FALSE TRUST ↓ · TEACHING-CRITICAL ↓ · CORRECT SERVED ↑ ·
 OVER-WITHHOLD ↓ · RESTORE PRECISION ↑** — at once.
 
-| direction | BEFORE | AFTER | moved | denominator |
+| direction | BEFORE | NEW (`tc2-p2`) | **REPAIRED (`tc2-p3`, A1 merged)** | denominator |
 |---|---|---|---|---|
-| **FALSE TRUST ↓** | OLD product **0.619** [0.468, 0.750] | NEW **0.318** [0.218, 0.438] | ✅ | 42 / 66 judged served blocks, batch 2 |
-| — same measure, vs round 4 | round 4 batch 1 `tc2-p2` **0.297** | batch 2 **0.318** | ➖ flat, on a harder batch | different lessons; not a paired comparison |
-| **TEACHING-CRITICAL ↓** | OLD **0.476** [0.283, 0.676] | NEW **0.100** [0.043, 0.214] | ✅ | 21 / 50 judged, batch 2 |
-| **CORRECT SERVED ↑** | OLD 80 blocks, ≈ 30 correct | NEW 239 blocks, ≈ 163 correct | ✅ in blocks | point estimates from the rates above |
-| — served share | OLD served everything it had | NEW **239 of 378 = 63 %** | ➖ | learning blocks, batch 2 |
-| **OVER-WITHHOLD ↓** | round 4 **12/30 = 0.400** | round 5 **19/30 = 0.633** [0.455, 0.781] | ❌ **worse** | reviewed withheld regions |
-| **RESTORE PRECISION ↑** | not measured | **3/6 = 0.500** [0.188, 0.812] | ⚠️ first reading, n = 6 | guard-change restores; no repairer ran |
+| **FALSE TRUST ↓** | OLD product **0.619** [0.468, 0.750] | **0.318** [0.218, 0.438] ✅ | **10/13 = 0.769** of batch 1's false-trust rows no longer served as before (was 7/13) | 42 / 66 judged served blocks, batch 2 · 13 rows, batch 1 |
+| — same measure, vs round 4 | round 4 `tc2-p2` **0.297** | batch 2 **0.318** ➖ | — | different lessons; not a paired comparison |
+| **TEACHING-CRITICAL ↓** | OLD **0.476** [0.283, 0.676] | **0.100** [0.043, 0.214] ✅ | 2/5 rows closed; mutilated structures **unchanged** | 21 / 50 judged, batch 2 |
+| **CORRECT SERVED ↑** | OLD 80 blocks, ≈ 30 correct | 239 blocks, ≈ 163 correct ✅ | **232** — −8 colophon, +1 guard fix; **no served text changed** | batch 2 |
+| — served share | OLD served everything it had | **239 of 378 = 63 %** | 232 of 367 = 63 % | learning blocks, batch 2 |
+| **OVER-WITHHOLD ↓** | round 4 **12/30 = 0.400** | **19/30 = 0.633** [0.455, 0.781] ❌ | 19/30 unchanged; 1 of the 19 restored | reviewed withheld regions |
+| **RESTORE PRECISION ↑** | not measured | **3/6 = 0.500** [0.188, 0.812] ⚠️ | 3/6 transferred · the one NEW restore **0/1, wrong** | guard-change restores; no text repairer reached this path |
+| **ATTACHMENT** (added — the class A1 closed) | OLD 2/43 = 0.046 | 5/8 = 0.625 rescued | **8/8 = 1.000 rescued** ✅ | batch 1 attachment-WRONG rows |
 
-**Two of five moved the wrong way.** On the Founder's own criterion this is not a good round: the
-build lowers false trust mainly by refusing more, and two thirds of what it refuses is clean text.
+**Before the merge, two of five moved the wrong way.** After it, **attachment closed completely and
+nothing else moved**: the merged build changed no served text on either batch, because Lane A1's
+Vietnamese repairers and its structural-group rule live in `repair/run_gold.py` and are not imported
+by `tc2_sdm.py` or `tc2_tsl.py`. What reached the lesson-producing path is two guard/attach fixes.
+
+**The two lanes' figures are both right about their own population and must not be summed.** Lane A1
+on 54 gold pages / 643 blocks: coverage 0.551 → 0.577, FTR 0.0734 → 0.0701, mutilated structures
+7 → 0, 28 restored at restore precision 0.852. Lane D on six legacy lessons: mutilated structures
+9 → 9, one restore at precision 0/1. The difference is not disagreement — it is *where the code runs*.
 
 ---
 
@@ -80,6 +88,24 @@ build lowers false trust mainly by refusing more, and two thirds of what it refu
 
 ---
 
+## 2a. Provenance of the artefacts these numbers rest on
+
+| question | answer |
+|---|---|
+| does the stored `tc2-p1` attach artefact reproduce from current code? | **No** — 950 of 6,176 page verdicts differ across 38 books (15.4 %); 54 explained by the named end-matter rules, **896 unexplained**, 874 of those moving a page to a different lesson |
+| do the batch OLD/NEW comparisons in this report use it? | **No.** `run_batch.py` regenerates attach into the batch's shadow root as step 1 |
+| does the pack rebuild use it? | **Yes** — `lesson_attach.TC2_ATTACH_DEFAULT` hard-codes `poc-out/trusted-corpus/tc-v2/tc2-p1/attach` |
+| does that change what ships? | **No** — rebuilding all 12 packs against freshly regenerated attach leaves **207/207 activities unchanged and 12/12 contentHash identical**. It moves the *diagnosis* only (repaired starts 17 → 18 and 0 → 1; grade-5 flagged rows 22 → 19) |
+
+The stored files are `tc2-p1`, written by round-3-era code, and read as current by a hard-coded path
+three rounds later. It is harmless today by luck, not by design, and `buildProvenance` cannot say
+which attach a pack used. **Provenance decision for the Founder:** pin it (record the attach dir, its
+pipeline id and a content hash in `buildProvenance`, fail closed when absent) or regenerate per build
+and drop the default. Lane D recommends pinning and did not implement it — it changes the pack
+manifest schema the Dart side parses.
+
+---
+
 ## 3. The shipped surface (packs), BEFORE → AFTER
 
 | metric | BEFORE | AFTER | note |
@@ -109,6 +135,16 @@ caught serving `2/5 + 1/4` for the printed `2/5 − 1/4`.
 | R7c verse joined into prose | CHANGED | **PARTIAL** — 7 regions withheld by `line_structure`, 1 stanza still served joined |
 | defect 6 on the **shipped packs** | not asked | **ABSENT** |
 | defect 8 orphaned siblings | not measured | **9** structures (batch 2) · **13** (holdout) |
+
+After merging Lane A1 (`tc2-p3`):
+
+| defect | `tc2-p2r` | **`tc2-p3` (A1 merged)** |
+|---|---|---|
+| R1 imprint page served as the last lesson's body | PRESENT | **FIXED** — p121 unattached; the class also closed on the second book (tail-scan 1/6 → **0/6**) |
+| R2 fraction fragment · R3 tone-slipped title | PRESENT | **PRESENT** — unchanged |
+| R7c verse joined into prose | PARTIAL | **PARTIAL** — unchanged |
+| defect 8 orphaned siblings | 9 · 13 | **9 · 13 — unchanged**; the Founder's own option group is byte-identical |
+| `chem_guard` false positive | 1 region withheld | **released — and the released block is wrong** (`II` → `I1`, watermark spliced) |
 
 ---
 

@@ -27,17 +27,20 @@ Companions: [`ROUND5-LANE-D-EVIDENCE.md`](ROUND5-LANE-D-EVIDENCE.md) (where ever
 The Founder judges this round on five directions **at once**. A batch that only lowers false trust
 while withholding more is not a good result.
 
-| direction | round 4 (batch 1, `tc2-p2`) | round 5 (batch 2, six new lessons) | reading |
+| direction | round 4 (batch 1, `tc2-p2`) | round 5 NEW (batch 2, six new lessons) | round 5 **REPAIRED** (Lane A1 merged) |
 |---|---|---|---|
-| **FALSE TRUST ↓** | 0.297 [0.199, 0.418] | **0.318** [0.218, 0.438] vs OLD **0.619** | ✅ vs the product it replaces; **flat** vs round 4 on a harder batch |
-| **TEACHING-CRITICAL ↓** | 0.176 [0.062, 0.410] | **0.100** [0.043, 0.214] vs OLD 0.476 | ✅ |
-| **CORRECT SERVED ↑** | 221 blocks served, ≈ 155 correct | **239 served, ≈ 163 correct** (of 378 learning blocks) | ✅ in blocks; the share served is 63 % |
-| **OVER-WITHHOLD ↓** | 12/30 = 0.400 | **19/30 = 0.633** [0.455, 0.781] | ❌ **worse** — the round's clearest failure |
-| **RESTORE PRECISION ↑** | not measured | **3/6 = 0.500** [0.188, 0.812] | ⚠️ first measurement; half the restores are wrong |
+| **FALSE TRUST ↓** | 0.297 [0.199, 0.418] | **0.318** [0.218, 0.438] vs OLD **0.619** | **10/13 = 0.769** of batch 1's false-trust rows no longer served as before (was 7/13) |
+| **TEACHING-CRITICAL ↓** | 0.176 [0.062, 0.410] | **0.100** [0.043, 0.214] vs OLD 0.476 | 2/5 rows closed; **9 and 13 mutilated structures unchanged** |
+| **CORRECT SERVED ↑** | 221 served, ≈ 155 correct | **239 served**, ≈ 163 correct (63 % of learning blocks) | 232 served — **−8 colophon, +1 guard fix**; no served text changed |
+| **OVER-WITHHOLD ↓** | 12/30 = 0.400 | **19/30 = 0.633** [0.455, 0.781] | 19/30 unchanged; 1 of the 19 restored |
+| **RESTORE PRECISION ↑** | not measured | **3/6 = 0.500** [0.188, 0.812] | 3/6 = 0.500 (transferred) · the one NEW restore is **0/1 — wrong** |
+| **ATTACHMENT** (added) | 5/8 = 0.625 rescued | 8/8 pending | **8/8 = 1.000 — every attachment defect closed** |
 
-Two of five moved the wrong way or barely moved. **This is not a good round on the Founder's own
-criterion, and the reason is one mechanism**: the build refuses far more than it repairs, and when
-it does hand something back, it is right half the time.
+Two of five moved the wrong way before Lane A1 merged. **After the merge, attachment is closed
+completely and nothing else moved**: the merged build changed **no served text at all** on either
+batch, because Lane A1's Vietnamese repairers and group rule live in their repair harness and are not
+yet wired into the path that produces a lesson. What reached the pipeline is two guard/attach fixes,
+and they are worth having — §8 measures exactly what each did.
 
 ---
 
@@ -419,12 +422,144 @@ are mutilated by their own safety mechanism — a multiple-choice missing an opt
 with a hole, a caption split from its figure. Those are teaching-critical errors *caused by the
 guard*, and until this round they were counted as safe.
 
+**After Lane A1 merged, one class closed completely and nothing else moved.** Attachment went to
+8/8 rescued and the imprint mechanism is gone from both books; served text changed nowhere, mutilated
+structures did not fall, and the single new restore is wrong. The round's remaining failures —
+over-withholding at 0.633, mutilated structures at 9 and 13, R2/R3 open, verse partial — are all
+still open on the path that produces a lesson.
+
 **Reprocessing made the legacy corpus safer and smaller again. It still did not make it teachable.**
 0 lessons trusted, 0 eligible for teaching, and the pipeline cannot raise either.
 
 ---
 
-## 7. What is still not measured
+## 7. The REPAIRED stage — Lane A1 merged, and scored from outside
+
+Lane A1's PR #83 went CI-green and was merged into this branch (conflict-free; 341 Python tests
+green). Both batches were re-run from the ORIGINAL SOURCE on the merged build (`tc2-p3`), and every
+Lane D instrument was re-pointed at it. Lane D changed no pipeline rule; it measured one.
+
+### 7.1 What actually reached the lesson-producing path
+
+| batch | trusted | withheld | pages dropped | **served text changed on kept pages** |
+|---|---|---|---|---|
+| batch 2 (evaluation set) | 239 → **232** | 139 → 135 | Bài 37: pdf p133 (carried 8 trusted blocks) | **0** |
+| batch 1 (holdout) | 219 → **196** | 126 → 124 | Bài 73: pdf p121 (carried 23 trusted blocks) | **0** |
+
+**Every block of the coverage drop is end matter.** Batch 1 loses exactly 23 blocks and exactly 23
+of them sat on the imprint page; batch 2 loses 8, all on the colophon, and gains 1. This is a
+coverage drop that is a correctness gain, and it is classified that way.
+
+**No served text changed anywhere.** That is the finding about scope: Lane A1's Vietnamese repairers
+(`repair/vi/**`, precision 1.000 on their gold) and its structural-group rule (`repair/groups.py`)
+are exercised by `repair/run_gold.py` and are **not imported by `tc2_sdm.py` or `tc2_tsl.py`**. So on
+the legacy corpus the REPAIRED stage delivered two guard/attach fixes and zero text repairs. Lane A1's
+own numbers are not wrong — they are measured in a harness this path does not call yet.
+
+### 7.2 R1 — closed, and closed as a class
+
+| | `tc2-p2r` | **`tc2-p3` (merged)** |
+|---|---|---|
+| R1 probe, Toán 4 tập hai Bài 73 | PRESENT — p121 attached, 8 imprint blocks served | **FIXED** — p121 no longer attached (boundary now 117–120) |
+| tail-scan, batch 2 (a different book) | 1 of 6 lessons served imprint text | **0 of 6** — Toán 4 tập một Bài 37 now ends at p132 |
+| attachment rescue, batch 1 vs `tc2-p1` | 5/8 = 0.625 | **8/8 = 1.000** |
+
+Lane A1 measured the mechanism at scale first (26 of 42 books attaching their colophon; 42/42 detected
+after, 0 collateral). Lane D's independent probes agree on both the fix and its generalisation to a
+book Lane D had raised and Lane A1 had not.
+
+Round 4's own attachment number is now visibly stale: it was 0.034 against a build that still served
+this page. The class is credited to Lane A1.
+
+### 7.3 R2, R3, R7c — unchanged
+
+`b) 10 +` still served · the Toán 5 Bài 6 title still `CỘNG, TRỪ HẠI PHẬN SỐ KHÁC MẪU SỐ` · verse
+still PARTIAL (7 regions withheld by `line_structure`, 3 long single-run bodies still served, one of
+them judged a flattened stanza). These are Lane A2 / third-signal work and no repairer reached them.
+
+### 7.4 Defect 8 — **not closed on this path**, and the exact case survives
+
+Lane A1 reports mutilated structures **7 → 0** on its gold set. On the legacy batches, Lane D's
+independent detector measures them **unchanged**:
+
+| | before | after merge |
+|---|---|---|
+| batch 2 (evaluation set) | 9 structures · 12/139 = 0.086 | **9 structures · 12/135 = 0.089** |
+| batch 1 (holdout) | 13 structures · 12/126 = 0.095 | **13 structures · 12/124 = 0.097** |
+
+The Founder's own example is byte-identical across the merge — Toán 4 tập một Bài 37, pdf p130:
+
+| | `tc2-p2` | `tc2-p3` |
+|---|---|---|
+| served | `A. 1 số chẵn` · `B. 2 số chẵn` · `C. 3 số chẵn` | **identical** |
+| withheld | `…:p130:*:014`, role `option`, `agree_order` | **identical** |
+
+Both numbers are right about their own population. `repair/groups.py` computes and repairs mutilated
+structures **inside the repair run**; the TSL a child's lesson is built from never calls it. Reporting
+`7 → 0` and `9 → 9` as one figure would be the error; the request is to wire the group rule into the
+disposition that produces the TSL (**R10**, already filed, now with a before/after that shows it has
+not landed there).
+
+### 7.5 `chem_guard` — the guard is fixed and the restore is still wrong
+
+The one region the merged build newly serves on batch 2 is the Physics section heading
+`09-sgk-khoa-hoc-tu-nhien-9:p027:*:023`, previously withheld by `chem_guard` — a guard Lane A1
+measured at precision 0/5. Serving it is the right *decision*. Judged blind from the page render, the
+*content* is not servable:
+
+- printed `II – Định luật khúc xạ ánh sáng`, served **`I1 - Định luật khúc xạ ánh sáng Ô C. SỐNG`**
+- the Roman `II` is served as `I1`, and `Ô C. SỐNG` is a fragment of the page's diagonal watermark
+  «KẾT NỐI TRI THỨC / VỚI CUỘC SỐNG» pulled in at the box's right edge.
+
+**RESTORE PRECISION for the REPAIRED stage on batch 2: 0 / 1** — one observation, not a rate
+[0.000, 0.793]. Both defects sit at the *edges* of the bounding box, which points at box geometry
+rather than at the parser. This is the Founder's warning observed in a single row: **fixing a guard's
+precision does not make the block it releases servable**, and coverage bought this way is coverage
+bought with a wrong claim.
+
+Batch 1's six restores are byte-identical to the pre-merge build (verified per row), so their verdicts
+transfer under the strict rule and **RESTORE PRECISION stays 3 / 6 = 0.500** [0.188, 0.812].
+
+### 7.6 Provenance — the stored attach artefact does **not** reproduce, and it does **not** matter yet
+
+Lane A1 reported that stored attach files do not reproduce from their own code. Verified
+independently on Lane D's own copies, regenerating all 38 stored `tc2-p1` attach files from current
+code into a scratch root (`tool/corpus/legacy/attach_repro.py`):
+
+| | value |
+|---|---|
+| page verdicts compared | **6,176** across 38 books |
+| differing | **950 (15.4 %)** |
+| explained by a named end-matter rule (round-4 cover, round-5 imprint) | 54 |
+| **unexplained** | **896** — of which **874 move a page to a different lesson** |
+| unexplained transitions | `page → page` 874 · `back_matter → imprint` 11 · `back_matter → back_cover` 11 |
+
+The framing that matters: this is **not** drift within one version. The stored files are `tc2-p1`,
+written by round-3-era code, and `tool/ui/lesson_attach.TC2_ATTACH_DEFAULT` **hard-codes that path**.
+Round 4 noticed and added a `WAL_TC2_ATTACH_DIR` override but left the default pinned, so the pack
+builder reads round-3 page verdicts as if current. Lane D's whole method is *snapshot → the old
+baseline stays reproducible → compare*, so this is the one artefact that could have invalidated it.
+
+**Did it? No — measured, not assumed.**
+
+- **The batch comparisons never touch it.** `run_batch.py` runs `tc2_attach` itself into the shadow
+  root as step 1, so every OLD/NEW number in this report comes from attach regenerated at run time.
+- **The pack rebuild does read it.** Rebuilding all 12 packs with `WAL_TC2_ATTACH_DIR` pointed at
+  freshly regenerated attach gives **207 / 207 activities unchanged and 12 / 12 `contentHash`
+  identical**. The stale artefact moves the *diagnosis* — header-repaired starts 17 → 18 on LS&ĐL 5,
+  0 → 1 on TV5 tập hai, flagged rows on grade 5 from 22 → 19 — and the *content* by zero.
+
+**The provenance decision, for the Founder.** The pack builder reads an unversioned, hard-coded path
+to a three-rounds-old artefact whose contents it does not record. Today that is harmless; it is
+harmless by luck, not by design, and the pack's `buildProvenance` cannot currently tell you which
+attach it used. Either (a) pin it: record the attach directory, its pipeline id and a hash of its
+contents in `buildProvenance`, and fail the build if it is absent; or (b) regenerate it per build and
+drop the default. Lane D recommends (a) — a build that reads an artefact should say which one — and
+did not implement it, because it changes the pack manifest schema the Dart side parses.
+
+---
+
+## 8. What is still not measured
 
 - **The REPAIRED stage.** No repairer ran; RESTORE PRECISION is measured on 6 guard-change restores,
   n = 6, interval [0.188, 0.812]. It is a first reading, not a rate.

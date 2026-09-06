@@ -1,6 +1,6 @@
 # Legacy reprocess scoreboard — rounds 4 + 5 (Lane D)
 
-`legacy-scoreboard-v1` · generated 2026-09-05T16:44:36+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
+`legacy-scoreboard-v1` · generated 2026-09-06T01:28:37+00:00 · source registry `legacy-registry-v1` (aeca24300b8f) · **measurement only — no threshold, no PASS/FAIL**
 
 Legacy content is never a trusted teaching source. REPROCESSED ≠ TRUSTED: a reprocessed lesson is a *candidate* until it clears an independent audit against a threshold **the Founder sets**.
 
@@ -21,7 +21,7 @@ Legacy content is never a trusted teaching source. REPROCESSED ≠ TRUSTED: a re
 | pending | **231** | in scope, in no batch yet |
 | reprocessed (from original source) | **12** | of 243 in scope = 4.9% |
 | independently audited (any build) | **12** | of 12 reprocessed |
-| — of those, audited on the build that is now its latest | **6** | a lesson re-run on a newer build carries *transferred* verdicts, and a transferred verdict is not an audit of the build it is attached to |
+| — of those, audited on the build that is now its latest | **0** | a lesson re-run on a newer build carries *transferred* verdicts, and a transferred verdict is not an audit of the build it is attached to |
 | trusted | **0** | no Founder threshold record at docs/research/legacy-reprocess/THRESHOLDS.json — `trusted` and `eligible for teaching` stay 0 by definition |
 | partial (some blocks served, some withheld) | **12** | of 12 reprocessed |
 | withheld (nothing servable) | **0** | of 12 reprocessed |
@@ -252,6 +252,118 @@ Withholding is not automatically safe. A withheld block that leaves a sibling st
 
 
 ### Restore — batch `round5/legacy/batch-1-round5`
+
+Restore mechanism: guard change in the pipeline build — NOT a repair. No REPAIRED stage ran: the repair framework and the math repairer had not landed green.
+
+| measure | value | of what |
+|---|---|---|
+| reviewed withheld regions | 30 | the withheld regions the earlier audit reviewed |
+| **restored** | **6** | of those, served again by this build |
+| falsely withheld (earlier audit) | 12 | reviewed regions judged OVER-withheld |
+| **falsely-withheld recovered** | **4** | 4 / 12 = 0.333 [0.138, 0.609] |
+| restored that the earlier audit called a SAFE refusal | 2 | the dangerous direction — judged fresh, never inherited |
+| **RESTORE PRECISION** | **3 / 6 = 0.500 [0.188, 0.812]** | correctly restored / all restored, from a fresh blind judgement of what is served NOW |
+| — fresh verdicts | {'CORRECT': 3, 'WRONG': 3} | UNSURE excluded from the precision and counted beside |
+| falsely-withheld recovered AND correct | 3 | the only cell that means coverage went up without a new wrong claim |
+
+
+## Batch `round5/legacy/batch-2-repaired` (spec `batch-2`) — pipeline `tc2-p3` (34 pages, code 19a41acad7f0e549040cad04aad58fa4457d3081)
+
+| lesson | risk | state | learning blocks | trusted | withheld | withheld reasons | audited rows |
+|---|---|---|---|---|---|---|---|
+| LS&ĐL 4 Bài 12 | lsdl, two_col, figure_caption, order_suspect | **PARTIAL** | 46 | 24 | 22 | {'agree_order': 4, 'agree_tones': 9, 'figure_dependent': 5, 'agree_text': 4, 'agree_numbers': 1} | 0 served + 0 withheld |
+| LS&ĐL 5 Bài 9 | lsdl, prose_dated_events, figure_caption, order_suspect | **PARTIAL** | 54 | 35 | 19 | {'agree_tones': 10, 'box_boundary': 3, 'agree_text': 7} | 0 served + 0 withheld |
+| Khoa học 4 Bài 6 | khoa, two_col, figure_caption, order_suspect | **PARTIAL** | 55 | 33 | 22 | {'agree_text': 5, 'agree_tones': 5, 'figure_dependent': 9, 'agree_order': 1, 'math_guard': 2, 'page_feature:diagram': 1} | 0 served + 0 withheld |
+| KHTN 9 Bài 5 | khtn, two_col, formula, figure_caption, order_suspect | **PARTIAL** | 105 | 75 | 30 | {'page_feature:diagram': 1, 'agree_tones': 8, 'agree_text': 8, 'figure_dependent': 3, 'box_boundary': 1, 'agree_order': 4, 'answer_leak': 3, 'agree_numbers': 2} | 0 served + 0 withheld |
+| Toán 4 tập một Bài 37 | toan, two_col, formula, attachment_suspect, last_lesson_of_book | **PARTIAL** | 47 | 23 | 24 | {'agree_order': 6, 'agree_numbers': 2, 'agree_text': 6, 'agree_tones': 4, 'page_feature:diagram': 4, 'math_guard': 4, 'unit_guard': 2} | 0 served + 0 withheld |
+| Tiếng Việt 5 tập một Bài 5 | tv5, poem, two_col, color_heavy, order_suspect, attachment_suspect | **PARTIAL** | 60 | 42 | 18 | {'agree_order': 2, 'page_feature:color_heavy': 9, 'agree_text': 7, 'line_structure': 6, 'agree_tones': 3} | 0 served + 0 withheld |
+
+### OLD vs NEW false trust per failure class — batch `round5/legacy/batch-2-repaired`
+
+rate = WRONG / (OK + WRONG) among **served** rows (what the side actually showed a child), Wilson 95 % · NA / UNSURE excluded and counted beside · no threshold applied.
+
+OLD = not re-sampled for this batch — the product side is unchanged, see the batch it re-runs · NEW = 0 served blocks of the new Trusted Structured Lessons (+ 0 withheld regions reviewed separately). The two sides are different block sets — the comparable quantity is *the share of what each side served that is wrong*.
+
+| failure class | basis | OLD | NEW |
+|---|---|---|---|
+| display | verdict field | — (n = 0) | — (n = 0) |
+| teaching_critical | verdict field | — (n = 0) | — (n = 0) |
+| reading_order | verdict field | — (n = 0) | — (n = 0) |
+| role | verdict field | — (n = 0) | — (n = 0) |
+| attachment | verdict field | — (n = 0) | — (n = 0) |
+| formula_number_unit | annotator tag / all judged | — (n = 0) | — (n = 0) |
+| formula_number_unit (rows where the class applies) | annotator tag / applicable | — (n = 0) | — (n = 0) |
+| figure_caption | annotator tag / all judged | — (n = 0) | — (n = 0) |
+| figure_caption (rows where the class applies) | annotator tag / applicable | — (n = 0) | — (n = 0) |
+
+### False withheld — batch `round5/legacy/batch-2-repaired`
+
+Withholding is not automatically safe. A withheld block that leaves a sibling stranded — one option of a multiple-choice, a caption cut from its figure, a hole in an enumerated run — makes what IS served wrong, not merely smaller, and is counted **teaching-critical** (`tool/corpus/legacy/orphan.py`).
+
+| measure | value |
+|---|---|
+| structures mutilated by withholding | **9** |
+| kinds | {'SPLIT_ENUMERATED_RUN': 5, 'SPLIT_CAPTION_SET': 3, 'SPLIT_OPTION_GROUP': 1} |
+| **withheld regions that orphan a sibling** | **12 / 135 = 0.089 [0.052, 0.149]** |
+
+
+### Restore — batch `round5/legacy/batch-2-repaired`
+
+Restore mechanism: guard change in the pipeline build — NOT a repair. No REPAIRED stage ran: the repair framework and the math repairer had not landed green.
+
+| measure | value | of what |
+|---|---|---|
+| reviewed withheld regions | 30 | the withheld regions the earlier audit reviewed |
+| **restored** | **1** | of those, served again by this build |
+| falsely withheld (earlier audit) | 19 | reviewed regions judged OVER-withheld |
+| **falsely-withheld recovered** | **1** | 1 / 19 = 0.053 [0.009, 0.246] |
+| restored that the earlier audit called a SAFE refusal | 0 | the dangerous direction — judged fresh, never inherited |
+| **RESTORE PRECISION** | **0 / 1 = 0.000 [0.000, 0.793]** | correctly restored / all restored, from a fresh blind judgement of what is served NOW |
+| — fresh verdicts | {'WRONG': 1} | UNSURE excluded from the precision and counted beside |
+| falsely-withheld recovered AND correct | 0 | the only cell that means coverage went up without a new wrong claim |
+
+
+## Batch `round5/legacy/batch-1-round5-repaired` (spec `batch-1`) — pipeline `tc2-p3` (37 pages, code 19a41acad7f0e549040cad04aad58fa4457d3081)
+
+| lesson | risk | state | learning blocks | trusted | withheld | withheld reasons | audited rows |
+|---|---|---|---|---|---|---|---|
+| Toán 4 tập hai Bài 61 | toan, two_col, formula, order_suspect | **PARTIAL** | 19 | 4 | 15 | {'agree_text': 7, 'agree_order': 5, 'agree_numbers': 3, 'math_guard': 1, 'formula_unvalidated': 1} | 0 served + 0 withheld |
+| Toán 4 tập hai Bài 73 | toan, two_col, formula, attachment_suspect, geometry_rebuilt_expr | **PARTIAL** | 39 | 16 | 23 | {'agree_text': 11, 'agree_order': 7, 'agree_tones': 3, 'agree_numbers': 2} | 0 served + 0 withheld |
+| Toán 5 tập một Bài 6 | toan, two_col, formula, geometry_rebuilt_expr | **PARTIAL** | 25 | 12 | 13 | {'math_guard': 3, 'agree_text': 10, 'low_ocr_conf': 1, 'agree_tones': 2, 'agree_numbers': 1} | 0 served + 0 withheld |
+| Tiếng Việt 5 tập một Bài 25 | tv5, two_col, order_suspect, attachment_suspect | **PARTIAL** | 85 | 59 | 26 | {'agree_order': 6, 'agree_text': 5, 'line_structure': 7, 'page_feature:diagram': 8, 'page_feature:color_heavy': 1, 'agree_tones': 5} | 0 served + 0 withheld |
+| Tiếng Việt 5 tập hai Bài 1 | tv5, two_col, attachment_suspect, role_suspect | **PARTIAL** | 57 | 40 | 17 | {'agree_text': 1, 'agree_order': 8, 'page_feature:color_heavy': 1, 'agree_tones': 7} | 0 served + 0 withheld |
+| KHTN 6 Bài 11 | khtn, two_col, figure_caption, role_suspect | **PARTIAL** | 95 | 65 | 30 | {'agree_order': 9, 'agree_numbers': 1, 'agree_tones': 12, 'agree_text': 7, 'figure_dependent': 1} | 0 served + 0 withheld |
+
+### OLD vs NEW false trust per failure class — batch `round5/legacy/batch-1-round5-repaired`
+
+rate = WRONG / (OK + WRONG) among **served** rows (what the side actually showed a child), Wilson 95 % · NA / UNSURE excluded and counted beside · no threshold applied.
+
+OLD = not re-sampled for this batch — the product side is unchanged, see the batch it re-runs · NEW = 0 served blocks of the new Trusted Structured Lessons (+ 0 withheld regions reviewed separately). The two sides are different block sets — the comparable quantity is *the share of what each side served that is wrong*.
+
+| failure class | basis | OLD | NEW |
+|---|---|---|---|
+| display | verdict field | — (n = 0) | — (n = 0) |
+| teaching_critical | verdict field | — (n = 0) | — (n = 0) |
+| reading_order | verdict field | — (n = 0) | — (n = 0) |
+| role | verdict field | — (n = 0) | — (n = 0) |
+| attachment | verdict field | — (n = 0) | — (n = 0) |
+| formula_number_unit | annotator tag / all judged | — (n = 0) | — (n = 0) |
+| formula_number_unit (rows where the class applies) | annotator tag / applicable | — (n = 0) | — (n = 0) |
+| figure_caption | annotator tag / all judged | — (n = 0) | — (n = 0) |
+| figure_caption (rows where the class applies) | annotator tag / applicable | — (n = 0) | — (n = 0) |
+
+### False withheld — batch `round5/legacy/batch-1-round5-repaired`
+
+Withholding is not automatically safe. A withheld block that leaves a sibling stranded — one option of a multiple-choice, a caption cut from its figure, a hole in an enumerated run — makes what IS served wrong, not merely smaller, and is counted **teaching-critical** (`tool/corpus/legacy/orphan.py`).
+
+| measure | value |
+|---|---|
+| structures mutilated by withholding | **13** |
+| kinds | {'SPLIT_OPTION_GROUP': 1, 'OPTIONS_WITHOUT_QUESTION': 1, 'SPLIT_ENUMERATED_RUN': 5, 'SPLIT_CAPTION_SET': 6} |
+| **withheld regions that orphan a sibling** | **12 / 124 = 0.097 [0.056, 0.162]** |
+
+
+### Restore — batch `round5/legacy/batch-1-round5-repaired`
 
 Restore mechanism: guard change in the pipeline build — NOT a repair. No REPAIRED stage ran: the repair framework and the math repairer had not landed green.
 
