@@ -51,12 +51,6 @@ from repair import groups as repair_groups  # noqa: E402
 
 DEFAULT_LESSONS = os.path.join(ROOT, 'poc-out', 'trusted-corpus', 'tc-v2', 'tc2-p1', 'lessons')
 
-#: A withheld TSL region carries `text: null`. `groups.structural_groups` drops empty-text blocks,
-#: which would make every withheld sibling invisible to group formation — the precise reason defect 8
-#: is unmeasurable on the lesson path today. The sentinel restores membership WITHOUT inventing text:
-#: it is not a rendering, it never leaves this module, and `ENUM_STEP` deliberately does not match it.
-WITHHELD_SENTINEL = '\x01WITHHELD\x01'
-
 #: Round-5 defect 6 (imprint / back matter leaking into a lesson), as a text test on the leaf record.
 #: Deliberately literal: this is a detector for reporting, not a filter anything depends on.
 IMPRINT_LEAD = re.compile(r'^\s*(Trình bày bìa|Chịu trách nhiệm|Biên tập viên|Thiết kế sách|'
@@ -87,32 +81,10 @@ def tsl_paths(root):
 
 # ----------------------------------------------------------------- group formation on the lesson path
 def groups_for_lesson(tsl):
-    """Structural groups for every page of one TSL, via `repair.groups.structural_groups`.
-
-    LIMITATION, stated where it is created: withheld regions get `WITHHELD_SENTINEL` for text so they
-    take part in group formation. `question_options` and `table_rows` are decided by ROLE and are
-    therefore complete. `procedure_steps` is decided by an ENUMERATOR IN THE TEXT, which a withheld
-    region does not have — so a procedure whose missing step is withheld is NOT detected here. Every
-    `procedure_steps` number below is a LOWER BOUND.
-    """
-    by_page = collections.defaultdict(list)
-    for b in tsl.get('blocks') or ():
-        by_page[b['page']].append(dict(
-            id=b['id'], order=b.get('order') or 0, text=b.get('text') or '',
-            role={'value': role_of(b)}))
-    for w in tsl.get('withheld') or ():
-        by_page[w['page']].append(dict(
-            id=w['id'], order=w.get('order') or 0, text=WITHHELD_SENTINEL,
-            role={'value': role_of(w)}))
-    figs_by_page = collections.defaultdict(list)
-    for f in tsl.get('figures') or ():
-        figs_by_page[f.get('page')].append(f)
-
-    out = []
-    for page, blocks in sorted(by_page.items()):
-        sdm = dict(book=tsl['book'], page=page, blocks=blocks, figures=figs_by_page.get(page) or [])
-        out.extend(repair_groups.structural_groups(sdm))
-    return out
+    """Delegates to `tsl_to_lesson_document.structural_groups_of` — ONE definition of «a group» for the
+    census, the bridge and the gold path. The adapter and its one honest limitation (a withheld region
+    has no text, so `procedure_steps` under-counts) live there."""
+    return bridge.structural_groups_of(tsl)
 
 
 def mutilated(groups, servable_by_id):
