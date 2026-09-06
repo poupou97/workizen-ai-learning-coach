@@ -14,6 +14,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
+import 'package:learning_coach/core/lesson_model/semantic_data.dart';
 import 'package:learning_coach/core/lesson_model/next_action.dart';
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
@@ -243,17 +244,36 @@ Future<void> _journey(WidgetTester t, LessonDocument d, String tag) async {
 
 /// Tài liệu lát cắt nghiên cứu: bản THẬT nếu máy có (gitignored), không thì
 /// bản MẪU đã commit — luật «không mã máy» phải đúng ở cả hai.
-LessonDocument _historyDoc() {
+///
+/// Trả về CẢ JSON gốc, không chỉ mô hình đã parse: bản ghi sửa (`repair`) là
+/// thứ tính chất trung thực treo lên, và nhánh này chưa mang nó vào mô hình
+/// app. Thứ phải đúng là **hiện vật đã phát**, nên đọc thẳng hiện vật.
+({LessonDocument doc, Map<String, Object?> raw, bool real}) _historyDoc() {
   const real = 'assets/fixtures/real/lesson-05-sgk-lich-su-va-dia-li-5-b8.json';
   const syn =
       'assets/fixtures/synthetic/lesson-05-sgk-lich-su-va-dia-li-5-b8.synthetic.json';
   final useReal = File(real).existsSync();
-  final j = jsonDecode(File(useReal ? real : syn).readAsStringSync()) as Map;
-  return LessonDocument.fromJson(
-    j.cast<String, Object?>(),
-    assetBase: useReal ? FixtureSlot.realDir : FixtureSlot.syntheticDir,
-  )!;
+  final j = (jsonDecode(File(useReal ? real : syn).readAsStringSync()) as Map)
+      .cast<String, Object?>();
+  return (
+    doc: LessonDocument.fromJson(
+      j,
+      assetBase: useReal ? FixtureSlot.realDir : FixtureSlot.syntheticDir,
+    )!,
+    raw: j,
+    real: useReal,
+  );
 }
+
+/// Những vùng ĐÃ SỬA, ĐÃ KIỂM mà **vẫn chưa được tin**: `VALIDATED_REPAIR` và
+/// `servable != true`. Sự tồn tại của chúng là điều kiện của tính chất trung
+/// thực mà test dưới đây canh — không phải «bài này có mốc hay không».
+List<Map<String, Object?>> _untrustedRepairs(Map<String, Object?> raw) => [
+  for (final b in (raw['blocks']! as List).cast<Map<Object?, Object?>>())
+    if (b['repair'] case final Map<Object?, Object?> r)
+      if (r['disposition'] == 'VALIDATED_REPAIR' && r['servable'] != true)
+        b.cast<String, Object?>(),
+];
 
 void main() {
   test('regex bắt được mã máy thật, không bắt lời trẻ', () {
@@ -284,9 +304,7 @@ void main() {
   });
 
   testWidgets('⭐⭐ fixture THẬT (nếu có): hành trình + sheet không lộ mã máy '
-      '(id tc2-p1, dòng nguồn pipeline, mã lý do giữ lại, mã luật)', (
-    t,
-  ) async {
+      '(id tc2-p1, dòng nguồn pipeline, mã lý do giữ lại, mã luật)', (t) async {
     final d = loadRealDocOrSkip();
     if (d == null) return;
     await _journey(t, d, 'thật');
@@ -298,7 +316,8 @@ void main() {
   /// Chạy trên fixture THẬT khi máy có, không thì trên fixture MẪU.
   testWidgets('⭐⭐ lát cắt nghiên cứu (LS&ĐL 5): Home + Trực quan → Dòng thời '
       'gian → nguồn không lộ mã máy', (t) async {
-    final d = _historyDoc();
+    final h = _historyDoc();
+    final d = h.doc;
     t.view.physicalSize = const Size(1080, 6000);
     t.view.devicePixelRatio = 2.75;
     addTearDown(t.view.reset);
@@ -322,8 +341,10 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.byKey(MissionCenterScreen.researchCardKey(d.slotKey)),
-        findsOneWidget);
+    expect(
+      find.byKey(MissionCenterScreen.researchCardKey(d.slotKey)),
+      findsOneWidget,
+    );
     _expectClean(t, 'nghiên cứu Home');
 
     // Workspace → Trực quan → Dòng thời gian.
@@ -335,23 +356,132 @@ void main() {
     await t.tap(find.byKey(ModePicker.cardKey(WorkspaceView.visual)));
     await t.pumpAndSettle();
     _expectClean(t, 'nghiên cứu Trực quan');
-    expect(find.byKey(TimelineView.rootKey), findsOneWidget,
-        reason: 'lát cắt phải mở thẳng vào Dòng thời gian');
-    _expectClean(t, 'nghiên cứu Dòng thời gian');
 
-    // Chạm một mốc ⇒ sheet «Sách viết» (gấp đóng) vẫn sạch.
-    await t.ensureVisible(find.byKey(TimelineView.sourceKey(0)));
-    await t.tap(find.byKey(TimelineView.sourceKey(0)));
+    // ⭐⭐ ROUND 6 — TÍNH CHẤT ĐƯỢC CANH Ở ĐÂY LÀ **TÍNH TRUNG THỰC**, KHÔNG
+    // PHẢI «bài này có mốc hay không».
+    //
+    // Vòng 4 chạy trên fixture MẪU: bảy mốc có năm là đồ dựng sẵn, nên lát cắt
+    // mở thẳng vào Dòng thời gian. Golden #1 của vòng 6 chạy trên bản THẬT đã
+    // sửa và đã kiểm: block `p039:000` — khối mang CẢ BẢY mốc — vẫn WITHHELD vì
+    // `agree_tones`, mang `VALIDATED_REPAIR` với `servable: false`, và KHÔNG
+    // mang chữ. Nên bài không còn mốc nào.
+    //
+    // ⚠ Cái giá của điều đó, nói thẳng: **TRẺ MẤT TRỤC THỜI GIAN.** Đó là giá
+    // nhìn thấy được của sự trung thực trong vòng này, không phải một lỗi.
+    //
+    // Nên luật là: **hễ còn một vùng ĐÃ SỬA mà CHƯA ĐƯỢC TIN, thì tuyệt đối
+    // không được có trục thời gian trên màn** — dù dữ liệu có mọc ra
+    // `TimelineSemantic` từ đâu. Ghim theo `d.semantic` là chưa đủ: bơm một
+    // `TimelineSemantic` vào fixture sẽ khiến app vẽ trục và test vẫn XANH.
+    final untrusted = _untrustedRepairs(h.raw);
+
+    if (untrusted.isEmpty) {
+      // Fixture MẪU (bản sao sạch / CI): mốc là nội dung của chính nó.
+      expect(
+        find.byKey(TimelineView.rootKey),
+        findsOneWidget,
+        reason: 'bản mẫu có mốc dựng sẵn ⇒ lát cắt mở thẳng vào Dòng thời gian',
+      );
+      _expectClean(t, 'nghiên cứu Dòng thời gian');
+      await t.ensureVisible(find.byKey(TimelineView.sourceKey(0)));
+      await t.tap(find.byKey(TimelineView.sourceKey(0)));
+      await t.pumpAndSettle();
+      _expectClean(t, 'nghiên cứu Sách viết (mốc)');
+      return;
+    }
+
+    // ── Bản THẬT đã sửa ─────────────────────────────────────────────────
+    // (a) Ở TẦNG DỮ LIỆU: còn vùng chưa được tin ⇒ không được có mốc nào.
+    //     Bắt ở đây, TRƯỚC cây widget, để việc bơm một `TimelineSemantic` vào
+    //     hiện vật là ĐỎ ngay — «trục thời gian quay lại mà không có quyết
+    //     định tin của Founder» chính là thứ phải đỏ.
+    expect(
+      h.doc.semantic.whereType<TimelineSemantic>(),
+      isEmpty,
+      reason:
+          '⭐ ${untrusted.length} vùng còn mang VALIDATED_REPAIR chưa được tin, '
+          'mà bài lại có TimelineSemantic. RESTORED ≠ TRUSTED: ngưỡng tin sản '
+          'xuất là cổng của Founder, không phải của pipeline.',
+    );
+
+    // (b) Ở TẦNG MÀN HÌNH: không có trục thời gian.
+    expect(
+      find.byKey(TimelineView.rootKey),
+      findsNothing,
+      reason: 'không mốc nào ⇒ tuyệt đối không được vẽ trục thời gian',
+    );
+
+    // (c) Khối mang bảy mốc phải có mặt như CHỖ TRỐNG CÓ LÝ DO, bằng lời trẻ
+    //     đọc được — không biến mất, không hiện thành chữ hỏng. Chỗ trống sống
+    //     ở màn ĐỌC (trang sách), nên sang đó rồi kiểm.
+    await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.read)));
     await t.pumpAndSettle();
-    _expectClean(t, 'nghiên cứu Sách viết (mốc)');
+    _expectClean(t, 'nghiên cứu Đọc (bản thật)');
+    final events = untrusted.firstWhere(
+      (b) => (b['id']! as String).endsWith('p039:tc2-p1:000'),
+      orElse: () => throw StateError(
+        'không tìm thấy khối p039:000 trong danh sách vùng đã sửa chưa được tin',
+      ),
+    );
+    expect(events['type'], 'withheld');
+    expect(
+      events.containsKey('text'),
+      isFalse,
+      reason: 'giá trị đề xuất không được rời khỏi corpus',
+    );
+    final printed =
+        (events['sourceRef']! as Map)['pagePrinted']; // 37 — trang IN
+    expect(
+      find.textContaining('SAM chưa đọc được'),
+      findsWidgets,
+      reason: 'chỗ trống phải nói bằng lời trẻ đọc được',
+    );
+    expect(
+      find.textContaining('trang $printed'),
+      findsWidgets,
+      reason: 'chỗ trống phải chỉ đúng TRANG IN để trẻ mở sách',
+    );
+
+    // (d) KHÔNG vùng nào bị giữ lại lặng lẽ trở thành chữ. Đây là phép đếm
+    //     CẤU TRÚC, không phải đi tìm một chuỗi.
+    //
+    //     ⚠ ĐÃ THỬ VÀ BỎ: canh bằng từ khoá («Bạch Đằng», «Ngô Quyền», «938»)
+    //     cho ĐỎ GIẢ — chính những chữ ấy nằm trong khối MỤC TIÊU BÀI đã được
+    //     phục vụ hợp lệ («ví dụ: 179 TCN, 40, 248, 542, 938,…»). Một canary
+    //     bắt cả chữ sách thật thì không canh được gì; tệ hơn, nó dạy người
+    //     đọc sau rằng đỏ ở đây là chuyện thường.
+    final withheldInArtefact = [
+      for (final b in (h.raw['blocks']! as List).cast<Map<Object?, Object?>>())
+        if (b['type'] == 'withheld') b,
+    ].length;
+    expect(
+      d.blocks.whereType<WithheldBlock>().length,
+      withheldInArtefact,
+      reason:
+          '⭐ hiện vật khai $withheldInArtefact vùng giữ lại; app dựng ra số '
+          'khác ⇒ có vùng đã lặng lẽ thành chữ trên đường nạp',
+    );
+    for (final w in d.blocks.whereType<WithheldBlock>()) {
+      expect(w.reasons, isNotEmpty, reason: 'mỗi chỗ trống phải nêu LÝ DO');
+    }
+    // Từ vựng của pipeline không phải chữ cho trẻ đọc.
+    final onScreen = t
+        .widgetList<Text>(find.byType(Text))
+        .map((w) => w.data ?? w.textSpan?.toPlainText() ?? '')
+        .join('\n');
+    for (final jargon in ['VALIDATED_REPAIR', 'agree_tones', 'servable']) {
+      expect(onScreen.contains(jargon), isFalse, reason: '«$jargon» trên màn');
+    }
+
+    // (e) Và lý do tồn tại của cả tệp này vẫn đúng: không mã máy nào lộ ra.
+    await t.tap(find.textContaining('Vì sao SAM để trống?').first);
+    await t.pumpAndSettle();
+    _expectClean(t, 'nghiên cứu «Vì sao SAM để trống?» (bản thật)');
   });
 
   test('mã máy vẫn ở nếp gấp: trustTechLines / techLinesFor mang mã', () {
     final d = loadSyntheticDoc();
     expect(trustTechLines(d).any(machineId.hasMatch), isTrue);
-    expect(
-      techLinesFor(d, d.blocks.first).any(machineId.hasMatch),
-      isTrue,
-    );
+    expect(techLinesFor(d, d.blocks.first).any(machineId.hasMatch), isTrue);
   });
 }

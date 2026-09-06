@@ -1,17 +1,25 @@
-/// ROUND 5 · Lane B — ĐO MẬT ĐỘ MÀN WORKSPACE (phản hồi Founder trên máy).
+/// ROUND 6 · WS-D — MẬT ĐỘ MÀN WORKSPACE SAU KHI THI HÀNH **PHƯƠNG ÁN B**.
 ///
-/// Founder cầm máy: «lặp lại, tốn chiều dọc, quá nhiều hiện diện của cùng ba
-/// Learning View, thẻ đề xuất chiếm chỗ thường trực, CTA lặp lại điều hướng
-/// đã thấy». Trước khi đổi bất cứ thứ gì, ĐO — bằng cây widget ở đúng khung
-/// nhìn Nokia 6.1 (1080×1920 @2.75 ⇒ 392.7×698.2 dp), không ước lượng bằng mắt.
+/// Vòng 5 đo hiện trạng và dựng bốn cách trình bày cùng một `NextAction` từ
+/// MỘT commit, rồi đo cả bốn trên Nokia 6.1. **Founder chọn B.** Tệp này
+/// không còn so A/B/C — nó ghim NHỮNG GÌ B PHẢI GIỮ ĐÚNG.
 ///
-/// Số đo (mỗi số là một câu trả lời được, không phải cảm giác):
-///  - `chromeDp`  : chiều cao phần GHIM trên đầu (từ đỉnh tới đỉnh thân View)
-///  - `firstContentDp` : Y của nội dung bài ĐẦU TIÊN (đã trừ cuộn)
-///  - `viewLabels`: số lần ba tên View xuất hiện trên một màn
-///  - `viewCtas`  : số nút/ô ĐỔI VIEW nhìn thấy (tab + thẻ + CTA)
-/// Test này KHÔNG chốt ngưỡng đẹp — nó ghim SỰ THẬT hiện tại để so sánh A/B,
-/// và ghim rằng phương án mới KHÔNG được tệ hơn ở các số đó.
+/// ── SỐ ĐO LỊCH SỬ (không tái dựng được ở nhánh này, và đó là chủ ý) ──
+/// Máy thật, Nokia 6.1, KHTN 6 Bài 17, cùng chuỗi chạm, Y của nội dung bài
+/// đầu tiên ở «Học với SAM»:
+///     card (vòng 4/5)  820 px · 42.7 % màn
+///     A icon           634 px · 33.0 %
+///     B peek (đang hé) 712 px · 37.1 %   ← ĐÃ CHỌN
+///     B peek (thu gọn) 634 px · 33.0 %
+///     C inlineTab      565 px · 29.4 %
+/// Cây widget, khung Nokia 392.7×698.2 dp: chrome ghim ở «Học với SAM»
+/// 411 dp (58.9 % khung nhìn) → 281 dp (B); nhãn View nhìn thấy 7 → 4.
+/// Nguồn: `docs/design/TRACK-B-ROUND5-WORKSPACE-DUPLICATION.md` §5; tái dựng
+/// được ở nhánh `lane-b/round5-experience` (PR #87). B thắng KHÔNG bằng
+/// pixel — C gọn hơn — mà vì B nói ĐÍCH ĐẾN với 0 chạm và mở được «vì sao»
+/// tại chỗ.
+///
+/// Số đo ở đây dùng fixture MẪU nên chạy được trên bản sao sạch.
 library;
 
 import 'dart:io';
@@ -23,6 +31,7 @@ import 'package:learning_coach/features/lesson_workspace/lesson_workspace_screen
 import 'package:learning_coach/features/lesson_workspace/smart_book_view.dart';
 import 'package:learning_coach/features/lesson_workspace/tutor_view.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/assist_layer.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/mode_picker.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_view.dart';
 import 'package:learning_coach/features/lesson_workspace/workspace_trace.dart';
 
@@ -53,248 +62,187 @@ int viewLabelHits(WidgetTester t) {
 /// Chiều cao phần ghim: đỉnh màn → đỉnh thân View.
 double chromeDp(WidgetTester t, Finder body) => t.getTopLeft(body).dy;
 
+Finder _bodyOf(WorkspaceView v) => switch (v) {
+  WorkspaceView.read => find.byType(SmartBookView),
+  WorkspaceView.visual => find.byType(VisualView),
+  WorkspaceView.tutor => find.byType(TutorView),
+};
+
+Future<void> _open(WidgetTester t) async {
+  _nokia(t);
+  await t.pumpWidget(
+    fixtureHost(
+      LessonWorkspaceScreen(doc: loadSyntheticDoc(), trace: WorkspaceTrace()),
+    ),
+  );
+  await t.pumpAndSettle();
+}
+
 void main() {
-  group('§0 ĐO HIỆN TRẠNG — thứ Founder gọi là «lặp lại và tốn chiều dọc»', () {
-    testWidgets('⭐ màn «Vào bài học»: ba tên View xuất hiện bao nhiêu lần', (
-      t,
-    ) async {
-      _nokia(t);
-      await t.pumpWidget(
-        fixtureHost(
-          LessonWorkspaceScreen(
-            doc: loadSyntheticDoc(),
-            trace: WorkspaceTrace(),
-          ),
-        ),
-      );
-      await t.pumpAndSettle();
-      final hits = viewLabelHits(t);
-      debugPrint('PICKER viewLabelHits=$hits');
-      // ĐO ĐƯỢC: 5 — và con số này tự nó là một phát hiện. Ba View được gọi
-      // bằng BA CÁCH khác nhau trên cùng màn: tab «Đọc / Trực quan / Học với
-      // SAM», thẻ «Đọc như sách / Trực quan hoá / Học cùng SAM». Bộ đếm chỉ
-      // bắt được 5 vì «Học cùng SAM» ≠ «Học với SAM» — tức là trẻ đọc SÁU
-      // nhãn cho BA thứ, và hai trong số đó còn khác chữ.
-      expect(
-        hits,
-        5,
-        reason: 'màn chọn đang gọi ba View bằng hai bộ chữ khác nhau',
-      );
-    });
-
-    testWidgets('⭐ trong một View: chrome ghim + số CTA đổi view', (t) async {
-      _nokia(t);
-      await t.pumpWidget(
-        fixtureHost(
-          LessonWorkspaceScreen(
-            doc: loadSyntheticDoc(),
-            trace: WorkspaceTrace(),
-          ),
-        ),
-      );
-      await t.pumpAndSettle();
-      await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.read)));
-      await t.pumpAndSettle();
-
-      final chrome = chromeDp(t, find.byType(SmartBookView));
-      final hits = viewLabelHits(t);
-      debugPrint('READ chromeDp=$chrome viewLabelHits=$hits');
-      expect(chrome, greaterThan(0));
-
-      await t.tap(
-        find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)),
-      );
-      await t.pumpAndSettle();
-      final chromeVisual = chromeDp(t, find.byType(VisualView));
-      debugPrint(
-        'VISUAL chromeDp=$chromeVisual '
-        'viewLabelHits=${viewLabelHits(t)}',
-      );
-
-      await t.tap(
-        find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.tutor)),
-      );
-      await t.pumpAndSettle();
-      final chromeTutor = chromeDp(t, find.byType(TutorView));
-      debugPrint(
-        'TUTOR chromeDp=$chromeTutor '
-        'viewLabelHits=${viewLabelHits(t)}',
-      );
-
-      // Màn Học với SAM còn GHIM thẻ đề xuất ⇒ chrome cao hơn Đọc/Trực quan.
-      expect(
-        chromeTutor,
-        greaterThan(chromeVisual),
-        reason:
-            'thẻ đề xuất vẫn ghim ở Học với SAM (vòng 4/5 chỉ gỡ ở Đọc '
-            'và Trực quan) — đây chính là chỗ Founder thấy tốn chiều dọc',
-      );
-    });
-
-    testWidgets('⭐ thẻ «SAM đề xuất» có mặt ở CẢ BA View — nó thường trực', (
-      t,
-    ) async {
-      _nokia(t);
-      await t.pumpWidget(
-        fixtureHost(
-          LessonWorkspaceScreen(
-            doc: loadSyntheticDoc(),
-            trace: WorkspaceTrace(),
-          ),
-        ),
-      );
-      await t.pumpAndSettle();
+  group('§1 MỘT BỘ CHỮ CHO BA VIEW — lỗi vòng 5 tìm ra, vòng 6 đóng', () {
+    testWidgets('⭐⭐ mọi nhãn View trên màn «Vào bài học» đều là chữ của '
+        '`WorkspaceView.label` — không có bộ chữ thứ hai', (t) async {
+      // Vòng 5 đo được bộ đếm ra 5 chứ không phải 6, và CHÍNH CON SỐ ẤY là
+      // phát hiện: «Học cùng SAM» (thẻ) ≠ «Học với SAM» (tab) nên bộ đếm
+      // trượt một lần. Trẻ đọc SÁU nhãn cho BA thứ, hai trong số đó khác chữ.
+      //
+      // Đếm số lần xuất hiện KHÔNG bắt được lỗi này (nó chỉ trượt xuống). Nên
+      // test đo đúng thứ hỏng: mỗi tên View phải xuất hiện ĐỦ số lần dự kiến
+      // — 2 (một trên tab, một trên thẻ) — chứ không phải 1.
+      await _open(t);
+      expect(find.byKey(const Key('mode-picker')), findsOneWidget);
+      final all = _texts(t).toList();
       for (final v in WorkspaceView.values) {
-        await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(v)));
-        await t.pumpAndSettle();
+        final hits = all.where((s) => s.contains(v.label)).length;
         expect(
-          find.byKey(LessonWorkspaceScreen.nextActionKey),
-          findsOneWidget,
-          reason: 'đề xuất hiện thường trực ở ${v.label}',
+          hits,
+          2,
+          reason:
+              '«${v.label}» phải xuất hiện đúng 2 lần (tab + thẻ) trên màn '
+              'chọn — nếu là 1 thì thẻ đang dùng một bộ chữ khác',
+        );
+      }
+      expect(
+        viewLabelHits(t),
+        6,
+        reason: 'ba View × (tab + thẻ) = 6, tất cả cùng một bộ chữ',
+      );
+      // Bộ chữ CŨ đã biến mất hẳn khỏi màn.
+      for (final gone in ['Học cùng SAM', 'Đọc như sách', 'Trực quan hoá']) {
+        expect(
+          all.where((s) => s.contains(gone)),
+          isEmpty,
+          reason: '«$gone» là bộ chữ thứ hai — đã bỏ',
+        );
+      }
+    });
+
+    test('⭐ nguồn: `ModePicker` không được có bảng tên riêng', () {
+      final src = File('lib/features/lesson_workspace/widgets/mode_picker.dart')
+          .readAsLinesSync()
+          .where((l) => !l.trimLeft().startsWith('//'))
+          .join('\n');
+      for (final gone in ['Học cùng SAM', 'Đọc như sách', 'Trực quan hoá']) {
+        expect(
+          src,
+          isNot(contains(gone)),
+          reason: 'tên View chỉ có MỘT nguồn: WorkspaceView.label',
         );
       }
     });
   });
 
-  group('§1 SO SÁNH A/B/C — cùng bài, cùng trạng thái, cùng khung nhìn', () {
-    tearDown(() => AssistPresentation.debugOverride = null);
-
-    /// Đo một phương án trên CẢ BA View. Trả về map để in thành bảng.
-    Future<Map<String, Object>> measure(
-      WidgetTester t,
-      AssistPresentation mode,
-    ) async {
-      AssistPresentation.debugOverride = mode;
-      _nokia(t);
-      await t.pumpWidget(
-        fixtureHost(
-          LessonWorkspaceScreen(
-            doc: loadSyntheticDoc(),
-            trace: WorkspaceTrace(),
-          ),
-        ),
-      );
-      await t.pumpAndSettle();
-      final out = <String, Object>{};
+  group('§2 CHIỀU DỌC — thứ Founder gọi là «lặp lại và tốn chiều dọc»', () {
+    testWidgets('⭐⭐ ba View có CÙNG chiều cao phần ghim; không View nào phải '
+        'trả giá cho một thẻ đề xuất', (t) async {
+      await _open(t);
+      final chrome = <WorkspaceView, double>{};
+      final labels = <WorkspaceView, int>{};
       for (final v in WorkspaceView.values) {
         await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(v)));
         await t.pumpAndSettle();
-        final body = switch (v) {
-          WorkspaceView.read => find.byType(SmartBookView),
-          WorkspaceView.visual => find.byType(VisualView),
-          WorkspaceView.tutor => find.byType(TutorView),
-        };
-        out['chrome.${v.name}'] = chromeDp(t, body);
-        out['labels.${v.name}'] = viewLabelHits(t);
+        chrome[v] = chromeDp(t, _bodyOf(v));
+        labels[v] = viewLabelHits(t);
       }
-      return out;
-    }
+      for (final v in WorkspaceView.values) {
+        debugPrint(
+          'B ${v.name.padRight(7)} chrome=${chrome[v]} dp '
+          'labels=${labels[v]}',
+        );
+      }
+      // Vòng 5: 411 dp ở «Học với SAM» so với 225 dp ở hai View kia — thẻ đề
+      // xuất ghim chỉ ở đó. Nay không còn thẻ ⇒ ba số phải bằng nhau.
+      expect(
+        chrome[WorkspaceView.tutor],
+        chrome[WorkspaceView.visual],
+        reason: 'Học với SAM không còn ghim thêm gì so với Trực quan',
+      );
+      expect(chrome[WorkspaceView.read], chrome[WorkspaceView.visual]);
+      // Trần cứng: phần ghim của B là tiêu đề + chip + tab + MỘT dòng gợi ý.
+      // 411 dp = 58.9 % khung nhìn là con số Founder phàn nàn; ghim ở đây để
+      // không ai lặng lẽ nhồi lại một thẻ nữa.
+      expect(
+        chrome[WorkspaceView.tutor]!,
+        lessThan(300),
+        reason: 'vòng 5 đo 411 dp ở đúng màn này',
+      );
+    });
 
-    testWidgets('⭐⭐ bảng số: chrome ghim (dp) và số nhãn View, bốn phương án', (
+    testWidgets('⭐ dòng gợi ý tốn ĐÚNG một dòng; thu gọn thì trả lại cả dòng '
+        'ấy mà không biến mất', (t) async {
+      await _open(t);
+      await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.read)));
+      await t.pumpAndSettle();
+      final withPeek = chromeDp(t, _bodyOf(WorkspaceView.read));
+      final peekBox = t.getSize(find.byKey(AssistPeek.peekKey));
+      expect(
+        peekBox.height,
+        greaterThanOrEqualTo(48),
+        reason: 'vùng chạm ≥ 48 dp',
+      );
+      expect(peekBox.height, lessThan(72), reason: 'một dòng, không phải thẻ');
+
+      await t.tap(find.byKey(AssistPeek.peekKey));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(AssistPeek.dismissKey));
+      await t.pumpAndSettle();
+      final collapsed = chromeDp(t, _bodyOf(WorkspaceView.read));
+      debugPrint('B peek chrome=$withPeek dp → collapsed=$collapsed dp');
+      expect(
+        collapsed,
+        lessThan(withPeek),
+        reason: '«Để sau» phải trả lại chiều dọc',
+      );
+      // ⚠ «hé dần, KHÔNG phải giấu đi» (lỗi D5 máy thật, vòng 5).
+      expect(find.byKey(AssistIconButton.buttonKey), findsOneWidget);
+    });
+  });
+
+  group('§3 B PHẢI GIỮ ĐÚNG — những điều không được đánh đổi', () {
+    testWidgets('⭐⭐ ĐỀ XUẤT NHÌN THẤY ĐƯỢC Ở CẢ BA VIEW, ở cả ba trạng thái', (
       t,
     ) async {
-      final rows = <AssistPresentation, Map<String, Object>>{};
-      for (final m in AssistPresentation.values) {
-        rows[m] = await measure(t, m);
-      }
-      for (final e in rows.entries) {
-        debugPrint(
-          'ASSIST ${e.key.flagName.padRight(10)} '
-          'chrome read=${e.value['chrome.read']} '
-          'visual=${e.value['chrome.visual']} '
-          'tutor=${e.value['chrome.tutor']} | '
-          'labels read=${e.value['labels.read']} '
-          'visual=${e.value['labels.visual']} '
-          'tutor=${e.value['labels.tutor']}',
-        );
-      }
-      final card = rows[AssistPresentation.card]!;
-      for (final m in [
-        AssistPresentation.icon,
-        AssistPresentation.peek,
-        AssistPresentation.inlineTab,
-      ]) {
+      await _open(t);
+      for (final v in WorkspaceView.values) {
+        await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(v)));
+        await t.pumpAndSettle();
+        // PEEK (mặc định): nói ĐÍCH ĐẾN với 0 chạm.
         expect(
-          rows[m]!['chrome.tutor']! as double,
-          lessThan(card['chrome.tutor']! as double),
-          reason:
-              '${m.flagName} phải trả lại chiều dọc ở Học với SAM — đó là '
-              'màn Founder thấy tốn nhất (411 dp = 58.9 % khung nhìn)',
+          find.byKey(AssistPeek.peekKey),
+          findsOneWidget,
+          reason: '${v.label}: PEEK phải thấy được',
         );
+        expect(find.textContaining('SAM gợi ý:'), findsOneWidget);
+        // EXPANDED: «vì sao» mở TẠI CHỖ, không phải sang màn khác.
+        await t.tap(find.byKey(AssistPeek.peekKey));
+        await t.pumpAndSettle();
+        expect(find.byKey(AssistPeek.expandedKey), findsOneWidget);
+        expect(find.byKey(AssistPeek.goKey), findsOneWidget);
+        // COLLAPSED: vẫn còn dấu hiệu, không biến mất.
+        await t.tap(find.byKey(AssistPeek.dismissKey));
+        await t.pumpAndSettle();
+        expect(
+          find.byKey(AssistIconButton.buttonKey),
+          findsOneWidget,
+          reason: '${v.label}: thu gọn KHÔNG được giấu hẳn đề xuất',
+        );
+        // Chạm 💡 ⇒ mở lại TẠI CHỖ (không bottom sheet — đó là phương án A).
+        await t.tap(find.byKey(AssistIconButton.buttonKey));
+        await t.pumpAndSettle();
+        expect(find.byKey(AssistPeek.expandedKey), findsOneWidget);
+        expect(find.byKey(const Key('assist-sheet')), findsNothing);
       }
     });
 
-    testWidgets(
-      '⭐ AI-FIRST KHÔNG BIẾN MẤT: mọi phương án đều cho trẻ thấy có gợi ý và '
-      'mở được «vì sao» — không có phương án nào chỉ giấu đi',
-      (t) async {
-        for (final m in AssistPresentation.values) {
-          AssistPresentation.debugOverride = m;
-          _nokia(t);
-          await t.pumpWidget(
-            fixtureHost(
-              LessonWorkspaceScreen(
-                doc: loadSyntheticDoc(),
-                trace: WorkspaceTrace(),
-              ),
-            ),
-          );
-          await t.pumpAndSettle();
-          await t.tap(
-            find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.tutor)),
-          );
-          await t.pumpAndSettle();
-          final visible = switch (m) {
-            AssistPresentation.card => find.byKey(
-              LessonWorkspaceScreen.nextActionKey,
-            ),
-            AssistPresentation.icon => find.byKey(AssistIconButton.buttonKey),
-            AssistPresentation.peek => find.byKey(AssistPeek.peekKey),
-            // C: dấu hiệu nằm TRONG nhãn tab được đề xuất.
-            AssistPresentation.inlineTab => find.textContaining('💡'),
-          };
-          expect(
-            visible,
-            findsOneWidget,
-            reason: '${m.flagName}: đề xuất phải NHÌN THẤY ĐƯỢC, không bị giấu',
-          );
-        }
-      },
-    );
-
-    testWidgets('⭐ B: hé → mở → «Để sau» → thu gọn; đề xuất MỚI thì hé lại', (
-      t,
-    ) async {
-      AssistPresentation.debugOverride = AssistPresentation.peek;
-      _nokia(t);
-      await t.pumpWidget(
-        fixtureHost(
-          LessonWorkspaceScreen(
-            doc: loadSyntheticDoc(),
-            trace: WorkspaceTrace(),
-          ),
-        ),
-      );
-      await t.pumpAndSettle();
+    testWidgets('⭐ đề xuất trỏ sang View KHÁC ⇒ hé lại một lần', (t) async {
+      await _open(t);
       await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.read)));
       await t.pumpAndSettle();
-      expect(find.byKey(AssistPeek.peekKey), findsOneWidget);
-      expect(find.textContaining('SAM gợi ý:'), findsOneWidget);
       await t.tap(find.byKey(AssistPeek.peekKey));
       await t.pumpAndSettle();
-      expect(find.byKey(AssistPeek.expandedKey), findsOneWidget);
-      expect(find.byKey(AssistPeek.goKey), findsOneWidget);
       await t.tap(find.byKey(AssistPeek.dismissKey));
       await t.pumpAndSettle();
       expect(find.byKey(AssistPeek.peekKey), findsNothing);
-      expect(find.byKey(AssistPeek.expandedKey), findsNothing);
-      // ⚠ «hé dần, KHÔNG phải giấu đi»: thu gọn rồi vẫn còn 💡 ở hàng tiêu đề.
-      expect(
-        find.byKey(AssistIconButton.buttonKey),
-        findsOneWidget,
-        reason: 'B thu gọn không được biến mất hoàn toàn',
-      );
-      // Đổi View ⇒ đề xuất trỏ đi chỗ KHÁC ⇒ hé lại một lần.
       await t.tap(
         find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)),
       );
@@ -302,66 +250,62 @@ void main() {
       expect(find.byKey(AssistPeek.peekKey), findsOneWidget);
     });
 
-    testWidgets('⭐ A: 💡 mở bottom sheet có lý do + một CTA; CTA đổi View', (
+    testWidgets('⭐ trợ năng: nhãn + gợi ý cho trình đọc màn hình ở mọi dấu '
+        'hiệu; vùng chạm ≥ 48 dp', (t) async {
+      final handle = t.ensureSemantics();
+      await _open(t);
+      await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.read)));
+      await t.pumpAndSettle();
+      expect(
+        find.bySemanticsLabel(RegExp('Gợi ý của SAM: xem')),
+        findsWidgets,
+        reason: '💡 một mình không đủ cho trình đọc màn hình',
+      );
+      await t.tap(find.byKey(AssistPeek.peekKey));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(AssistPeek.dismissKey));
+      await t.pumpAndSettle();
+      final icon = t.getSize(find.byKey(AssistIconButton.buttonKey));
+      expect(icon.width, greaterThanOrEqualTo(48));
+      expect(icon.height, greaterThanOrEqualTo(48));
+      expect(find.bySemanticsLabel(RegExp('Gợi ý của SAM: xem')), findsWidgets);
+      handle.dispose();
+    });
+
+    testWidgets('⭐ bàn phím lên (trẻ đang gõ trả lời SAM) ⇒ gợi ý nhường chỗ', (
       t,
     ) async {
-      AssistPresentation.debugOverride = AssistPresentation.icon;
       _nokia(t);
       await t.pumpWidget(
         fixtureHost(
           LessonWorkspaceScreen(
             doc: loadSyntheticDoc(),
             trace: WorkspaceTrace(),
+            initialView: WorkspaceView.tutor,
           ),
         ),
       );
       await t.pumpAndSettle();
-      await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.read)));
+      expect(find.byKey(AssistPeek.peekKey), findsOneWidget);
+      t.view.viewInsets = const FakeViewPadding(bottom: 800);
       await t.pumpAndSettle();
-      await t.tap(find.byKey(AssistIconButton.buttonKey));
-      await t.pumpAndSettle();
-      expect(find.byKey(const Key('assist-sheet')), findsOneWidget);
-      expect(find.textContaining('Gợi ý của SAM'), findsWidgets);
-      await t.tap(find.byKey(AssistPeek.goKey));
-      await t.pumpAndSettle();
-      expect(find.byType(VisualView), findsOneWidget);
+      expect(find.byKey(AssistPeek.peekKey), findsNothing);
+      expect(find.byKey(AssistIconButton.buttonKey), findsNothing);
     });
 
-    testWidgets(
-      '⭐ C: huy hiệu 💡 nằm TRONG nhãn tab được đề xuất, không thêm dòng nào',
-      (t) async {
-        AssistPresentation.debugOverride = AssistPresentation.inlineTab;
-        _nokia(t);
-        await t.pumpWidget(
-          fixtureHost(
-            LessonWorkspaceScreen(
-              doc: loadSyntheticDoc(),
-              trace: WorkspaceTrace(),
-            ),
-          ),
-        );
-        await t.pumpAndSettle();
-        await t.tap(
-          find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.read)),
-        );
-        await t.pumpAndSettle();
-        // Huy hiệu nằm trong nhãn tab ⇒ vùng chạm là cả tab (48 dp), không
-        // còn nút 21 dp lơ lửng giữa hai tab (lỗi D4 đo trên máy).
-        expect(find.textContaining('💡'), findsOneWidget);
-        final label = t.widget<Text>(find.textContaining('💡'));
-        expect(
-          label.data,
-          contains(WorkspaceView.visual.label),
-          reason: 'huy hiệu phải dính vào ĐÚNG tab được đề xuất',
-        );
-        // C đánh đổi có ý thức: KHÔNG có dòng «vì sao» tại chỗ — muốn hiểu vì
-        // sao thì phải sang View đó và đọc lời giải thích của chính View.
-        expect(find.byKey(AssistPeek.expandedKey), findsNothing);
-      },
-    );
+    testWidgets('⭐ ở màn «Vào bài học» KHÔNG có lớp trợ giúp — lý do đã nằm '
+        'trên thẻ được đề xuất, không lặp', (t) async {
+      await _open(t);
+      expect(
+        find.byKey(ModePicker.cardKey(WorkspaceView.read)),
+        findsOneWidget,
+      );
+      expect(find.byKey(AssistPeek.peekKey), findsNothing);
+      expect(find.byKey(AssistIconButton.buttonKey), findsNothing);
+    });
 
     test('⭐⭐ KHÔNG CÓ ĐỘNG CƠ THỨ HAI: lớp trợ giúp không đọc bài, không đọc '
-        'trace — chỉ nhận NextAction', () {
+        'trace — chỉ nhận NextAction và những chuỗi đã dựng sẵn', () {
       // Chỉ soi MÃ, không soi chú thích: chú thích được phép NHẮC TÊN thứ
       // mà lớp này bị cấm dùng (đó chính là chỗ ghi lý do cấm).
       final src =
@@ -384,40 +328,49 @@ void main() {
       }
     });
 
-    testWidgets('⭐⭐ Y của NỘI DUNG BÀI đầu tiên ở Trực quan — số thật mà trẻ '
-        'thấy (thẻ đề xuất của bản cũ nằm TRONG vùng cuộn nên chrome ghim '
-        'không kể hết)', (t) async {
-      final firstContent = <String, double>{};
-      for (final m in AssistPresentation.values) {
-        AssistPresentation.debugOverride = m;
-        _nokia(t);
-        await t.pumpWidget(
-          fixtureHost(
-            LessonWorkspaceScreen(
-              doc: loadSyntheticDoc(),
-              trace: WorkspaceTrace(),
-            ),
-          ),
-        );
-        await t.pumpAndSettle();
-        await t.tap(
-          find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)),
-        );
-        await t.pumpAndSettle();
-        firstContent[m.flagName] = t
-            .getTopLeft(find.byKey(VisualView.shapeKey('Sơ đồ quy trình')))
-            .dy;
+    test('⭐ cờ so A/B đã gỡ: bản dựng chỉ còn MỘT cách trình bày', () {
+      // Founder đã chọn. Để lại `--dart-define` là để thí nghiệm chạy tiếp,
+      // không phải thi hành quyết định.
+      for (final f in [
+        'lib/features/lesson_workspace/widgets/assist_layer.dart',
+        'lib/features/lesson_workspace/lesson_workspace_screen.dart',
+      ]) {
+        final src = File(f)
+            .readAsLinesSync()
+            .where((l) => !l.trimLeft().startsWith('//'))
+            .join('\n');
+        expect(src, isNot(contains('WAL_ASSIST')), reason: f);
+        expect(src, isNot(contains('AssistPresentation')), reason: f);
       }
-      for (final e in firstContent.entries) {
-        debugPrint('FIRSTCONTENT ${e.key.padRight(10)} y=${e.value} dp');
-      }
-      for (final m in ['icon', 'peek', 'inlineTab']) {
-        expect(
-          firstContent[m]!,
-          lessThan(firstContent['card']!),
-          reason: '$m phải đưa nội dung bài lên cao hơn bản hiện tại',
-        );
-      }
+    });
+  });
+
+  group('§4 Y CỦA NỘI DUNG BÀI ĐẦU TIÊN — số thật mà trẻ thấy', () {
+    testWidgets('⭐⭐ ở Trực quan, sơ đồ bắt đầu ở đâu (dp) — hé và thu gọn', (
+      t,
+    ) async {
+      await _open(t);
+      await t.tap(
+        find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)),
+      );
+      await t.pumpAndSettle();
+      final shape = find.byKey(VisualView.shapeKey('Sơ đồ quy trình'));
+      final peeking = t.getTopLeft(shape).dy;
+      await t.tap(find.byKey(AssistPeek.peekKey));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(AssistPeek.dismissKey));
+      await t.pumpAndSettle();
+      final collapsed = t.getTopLeft(shape).dy;
+      debugPrint(
+        'FIRSTCONTENT visual peek=$peeking dp collapsed=$collapsed dp',
+      );
+      expect(collapsed, lessThan(peeking));
+      // Vòng 5 đo bản «card» ở 384.0 dp trên chính fixture này.
+      expect(
+        peeking,
+        lessThan(384.0),
+        reason: 'B phải đưa nội dung bài lên cao hơn bản thẻ thường trực',
+      );
     });
   });
 }
