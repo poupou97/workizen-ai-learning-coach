@@ -88,3 +88,4 @@ has already lost four Desktop archives and had to grade a whole round against re
 criteria.
 
 | 44 | [`44-founder-authorization-full-autonomy-reconcile-and-merge-main.md`](44-founder-authorization-full-autonomy-reconcile-and-merge-main.md) | 5,900 | FOUNDER AUTHORIZATION — FULL AUTONOMY TO RECONCILE AND MERGE MAIN |
+| 45 | [`45-founder-task-jira-reconciliation-and-next-work-selection.md`](45-founder-task-jira-reconciliation-and-next-work-selection.md) | 4,300 | FOUNDER TASK — JIRA RECONCILIATION + NEXT WORK SELECTION |
