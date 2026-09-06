@@ -28,7 +28,7 @@ void main() {
     final d = _history();
     await t.pumpWidget(fixtureHost(Scaffold(body: VisualView(doc: d, onShowInRead: (_) {}))));
     await t.pumpAndSettle();
-    expect(find.byKey(VisualView.shapeKey('Dòng thời gian')), findsOneWidget);
+    expect(find.textContaining('Dòng thời gian'), findsWidgets);
     expect(find.byKey(TimelineView.rootKey), findsOneWidget);
     expect(find.textContaining('5 mốc'), findsOneWidget);
     final y0 = t.getTopLeft(find.text('101 - 103')).dy;

@@ -120,7 +120,7 @@ Future<void> _journey(WidgetTester t, LessonDocument d, String tag) async {
         data: data,
         onOpenSubjects: () {},
         workspaceLesson: d,
-        onOpenWorkspaceLesson: (_) {},
+        onOpenWorkspaceLesson: (_, {at}) {},
       ),
     ),
   );
@@ -186,29 +186,30 @@ Future<void> _journey(WidgetTester t, LessonDocument d, String tag) async {
   await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)));
   await t.pumpAndSettle();
   _expectClean(t, '$tag Trực quan');
+  // ROUND 7 V1: mọi sơ đồ của bài nằm trên CÙNG một màn cuộn — không còn
+  // chip hình dạng / chip sơ đồ để bấm qua. Quét thẳng màn, rồi quét cả hai
+  // cách nhìn của bảng so sánh, rồi mở nếp gấp «Bảng tóm tắt».
   for (final s in d.semantic) {
-    final chip = find.byKey(VisualView.instanceKey(s.id));
-    if (chip.evaluate().isNotEmpty) {
-      await t.tap(chip);
-      await t.pumpAndSettle();
-      _expectClean(t, '$tag Trực quan «${s.title}»');
-    }
+    expect(
+      find.byKey(VisualView.cardKey(s.id)),
+      findsOneWidget,
+      reason: '$tag Trực quan thiếu thẻ «${s.title}»',
+    );
   }
-  for (final shape in VisualView.shapesOf(d)) {
-    await t.tap(find.byKey(VisualView.shapeKey(shape)));
+  for (final v in ['table', 'mindmap']) {
+    final btn = find.byKey(VisualView.comparisonViewKey(v));
+    if (btn.evaluate().isEmpty) continue;
+    await t.ensureVisible(btn);
+    await t.tap(btn);
     await t.pumpAndSettle();
-    _expectClean(t, '$tag Trực quan $shape');
-    // ROUND 5: hình dạng so sánh có HAI cách nhìn — quét cả hai.
-    for (final v in ['table', 'mindmap']) {
-      final btn = find.byKey(VisualView.comparisonViewKey(v));
-      if (btn.evaluate().isEmpty) continue;
-      await t.tap(btn);
-      await t.pumpAndSettle();
-      _expectClean(t, '$tag Trực quan $shape ($v)');
-    }
+    _expectClean(t, '$tag Trực quan bảng so sánh ($v)');
   }
-  await t.tap(find.byKey(VisualView.shapeKey('summary')));
-  await t.pumpAndSettle();
+  final fold = find.byKey(const Key('visual-summary-toggle'));
+  if (fold.evaluate().isNotEmpty) {
+    await t.ensureVisible(fold);
+    await t.tap(fold);
+    await t.pumpAndSettle();
+  }
   _expectClean(t, '$tag Bảng tóm tắt');
   await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.tutor)));
   await t.pumpAndSettle();
@@ -336,7 +337,7 @@ void main() {
           onOpenSubjects: () {},
           workspaceLesson: loadSyntheticDoc(),
           researchLessons: [d],
-          onOpenWorkspaceLesson: (_) {},
+          onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );

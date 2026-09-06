@@ -162,6 +162,7 @@ Future<void> showSourceSheet(
   required LessonDocument doc,
   required LessonBlock block,
   VoidCallback? onShowInRead,
+  Widget? explain,
 }) {
   final text = LessonDocument.textOf(block);
   final crop = switch (block) {
@@ -189,6 +190,10 @@ Future<void> showSourceSheet(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ⭐ ROUND 7 · V1 — phần GIẢI THÍCH của nút vừa chạm đứng TRÊN
+              // phần nguồn. Sheet vẫn là MỘT sheet: «Sách viết» + «Xem trong
+              // Đọc» không đổi chỗ, chỉ có thêm lý do trẻ chạm vào để biết.
+              ?explain,
               const Text(
                 'Sách viết',
                 style: TextStyle(

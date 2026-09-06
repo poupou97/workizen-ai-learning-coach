@@ -222,11 +222,13 @@ void main() {
       expect(legend.data, contains('ô xám là bước SAM để trống'));
       expect(legend.data, contains('chạm một bước'));
       expect(find.byIcon(Icons.menu_book_outlined), findsWidgets);
-      expect(find.text('ⓘ Nguồn & độ tin'), findsOneWidget);
-      await t.tap(find.byKey(VisualView.shapeKey('Bảng so sánh')));
-      await t.pumpAndSettle();
+      // ROUND 7 V1: «ⓘ Nguồn & độ tin» đi cùng lời «vì sao» vào sheet —
+      // trên màn còn MỘT dòng ⓘ cho mỗi sơ đồ.
+      expect(find.text('ⓘ Nguồn & độ tin'), findsNothing);
+      expect(find.text('ⓘ Vì sao SAM vẽ thế này?'), findsWidgets);
       // mặc định vòng 5 là sơ đồ tư duy; bảng vẫn còn sau nút chuyển
       expect(find.textContaining('chạm một ô'), findsOneWidget);
+      await t.ensureVisible(find.byKey(VisualView.comparisonViewKey('table')));
       await t.tap(find.byKey(VisualView.comparisonViewKey('table')));
       await t.pumpAndSettle();
       expect(find.textContaining('chạm một hàng'), findsOneWidget);

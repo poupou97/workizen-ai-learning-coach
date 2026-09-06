@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
 import 'package:learning_coach/features/mission/mission_center_screen.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
 
@@ -43,14 +44,22 @@ void main() {
           data: await _data(),
           onOpenSubjects: () {},
           workspaceLesson: doc,
-          onOpenWorkspaceLesson: (d) => opened = d,
+          onOpenWorkspaceLesson: (d, {at}) => opened = d,
         ),
       ),
     );
     await t.pumpAndSettle();
     expect(find.byKey(MissionCenterScreen.workspaceCardKey), findsOneWidget);
-    expect(find.text('BÀI HỌC SAM · BẢN THỬ NGHIỆM'), findsOneWidget);
-    // ROUND 4: dòng SAM đầu Home cũng nêu tên bài ⇒ tìm TRONG thẻ.
+    // ROUND 7 V1 lượt 2: eyebrow còn MỘT từ; nhãn nguồn thành chip gọn — cùng
+    // widget và cùng bộ chữ với workspace. Nó KHÔNG được mất khi màn sắp lại.
+    expect(find.text('ĐANG HỌC'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(MissionCenterScreen.workspaceCardKey),
+        matching: find.byKey(FixtureChip.chipKey),
+      ),
+      findsOneWidget,
+    );
     final inCard = find.descendant(
       of: find.byKey(MissionCenterScreen.workspaceCardKey),
       matching: find.textContaining('Bài 17 · TÁCH CHẤT'),
@@ -58,7 +67,10 @@ void main() {
     expect(inCard, findsOneWidget);
     expect(find.textContaining('Chương IV'), findsOneWidget);
     expect(find.textContaining('trang 60–63'), findsOneWidget);
-    expect(find.textContaining('Học với SAM'), findsOneWidget);
+    // ROUND 7 V1: ba cách học không còn là MỘT DÒNG CHỮ trong thẻ — mỗi cách
+    // còn lại là một nút bấm được ở hàng «CÓ THỂ LÀM TIẾP».
+    expect(find.byKey(MissionCenterScreen.continueRowKey), findsOneWidget);
+    expect(find.textContaining('Học với SAM'), findsWidgets);
     // thẻ G2 của Track A vẫn còn — ROUND 4: đứng sau như «CÒN CÓ THỂ MỞ»
     expect(find.byKey(MissionCenterScreen.secondaryCardKey), findsOneWidget);
     expect(find.text('Vào Môn học ▸'), findsOneWidget);
@@ -86,7 +98,7 @@ void main() {
           data: await _data(),
           onOpenSubjects: () {},
           workspaceLesson: loadSyntheticDoc(),
-          onOpenWorkspaceLesson: (_) {},
+          onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );
