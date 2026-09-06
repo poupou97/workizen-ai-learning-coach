@@ -24,7 +24,12 @@ PDF_DIR = f'{ROOT}/poc-out/pdf'
 #: these resample the same pixels and move Vision's own segmentation. Chosen after the sweep on
 #: Toán 5 tập một p22 showed the answer is not monotonic in scale (3 and 12 miss the numerator
 #: `3`; 6 and 20 read it), which is exactly why more than one is asked and why agreement counts.
-DEFAULT_SCALES = (6.0, 10.0, 14.0, 20.0)
+DEFAULT_SCALES = tuple(float(x) for x in
+                       os.environ.get('RECOG_SCALES', '6,10,14,20').split(',') if x.strip())
+#   Overridable so the scale ladder itself can be measured rather than assumed: the largest
+#   addressable refusal group is INSUFFICIENT_AGREEMENT (one scale read it, no second), and
+#   whether more scales convert those without raising the false-recognition rate is a question
+#   with an answer, not a preference.
 
 
 def ensure_binary():
