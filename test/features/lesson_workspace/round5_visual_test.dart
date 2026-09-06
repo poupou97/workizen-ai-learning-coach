@@ -14,6 +14,8 @@
 /// mọi cặp nền/chữ của bảng màu bị kiểm tương phản WCAG ≥ 4.5:1 ở đây.
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/content_trust.dart';
@@ -433,6 +435,45 @@ void main() {
       await t.tap(find.byKey(VisualView.comparisonViewKey('table')));
       await t.pumpAndSettle();
       expect(find.textContaining('xếp thành bảng'), findsOneWidget);
+    });
+  });
+
+  group('§7 renderer KHÔNG được biết bài nào', () {
+    /// P0 «Visual Learning tổng quát» (Founder): renderer chỉ được vẽ từ dữ
+    /// liệu CÓ KIỂU; `if lesson == "KHTN6_BAI17"` là phản mẫu được gọi tên.
+    /// Hai renderer vòng 5 là HÀM THUẦN trên `SemanticData` — test này giữ cho
+    /// chúng như thế, kể cả khi lớp VisualSpec của lane E2 thay chỗ chúng.
+    test('⭐⭐ mã nguồn renderer không chứa danh tính bài/sách nào', () {
+      const files = [
+        'lib/features/lesson_workspace/views/mindmap_view.dart',
+        'lib/features/lesson_workspace/views/process_flow_view.dart',
+      ];
+      final identity = RegExp(
+        r'(KHTN|LS&ĐL|Bài\s*\d+|bai-\d+|0\d-sgk-|lessonNo\s*==|slotKey'
+        r'|doc\.book\s*==|\.lessonNo\b)',
+      );
+      for (final f in files) {
+        final src = File(f).readAsStringSync();
+        for (final line in src.split('\n')) {
+          expect(
+            identity.hasMatch(line),
+            isFalse,
+            reason: '$f khoá theo danh tính bài: «${line.trim()}»',
+          );
+        }
+      }
+    });
+
+    test('renderer chỉ nhận SemanticData + callback nguồn — không nhận '
+        'LessonDocument để tra bài', () {
+      final src = File(
+        'lib/features/lesson_workspace/views/mindmap_view.dart',
+      ).readAsStringSync();
+      expect(
+        src,
+        isNot(contains('LessonDocument')),
+        reason: 'sơ đồ tư duy vẽ từ nút + nhánh, không cần cả tài liệu',
+      );
     });
   });
 }
