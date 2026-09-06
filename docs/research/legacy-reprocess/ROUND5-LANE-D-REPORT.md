@@ -31,16 +31,16 @@ while withholding more is not a good result.
 |---|---|---|---|
 | **FALSE TRUST ↓** | 0.297 [0.199, 0.418] | **0.318** [0.218, 0.438] vs OLD **0.619** | **10/13 = 0.769** of batch 1's false-trust rows no longer served as before (was 7/13) |
 | **TEACHING-CRITICAL ↓** | 0.176 [0.062, 0.410] | **0.100** [0.043, 0.214] vs OLD 0.476 | 2/5 rows closed; **9 and 13 mutilated structures unchanged** |
-| **CORRECT SERVED ↑** | 221 served, ≈ 155 correct | **239 served**, ≈ 163 correct (63 % of learning blocks) | 232 served — **−8 colophon, +1 guard fix**; no served text changed |
+| **CORRECT SERVED ↑** | 221 served, ≈ 155 correct | **239 served**, ≈ 163 correct (63 % of learning blocks **as reported**; **0.589** once §7.7's silent loss is in the denominator) | 232 served — **−8 colophon, +1 guard fix**; no served text changed |
 | **OVER-WITHHOLD ↓** | 12/30 = 0.400 | **19/30 = 0.633** [0.455, 0.781] | 19/30 unchanged; 1 of the 19 restored |
 | **RESTORE PRECISION ↑** | not measured | **3/6 = 0.500** [0.188, 0.812] | 3/6 = 0.500 (transferred) · the one NEW restore is **0/1 — wrong** |
-| **ATTACHMENT** (added) | 5/8 = 0.625 rescued | 8/8 pending | **8/8 = 1.000 — every attachment defect closed** |
+| **ATTACHMENT** (added — the class Lane A1 closed) | 5/8 = 0.625 rescued | 5/8 on `tc2-p2r`, unchanged | **8/8 = 1.000 — every attachment defect closed** |
 
 Two of five moved the wrong way before Lane A1 merged. **After the merge, attachment is closed
 completely and nothing else moved**: the merged build changed **no served text at all** on either
 batch, because Lane A1's Vietnamese repairers and group rule live in their repair harness and are not
 yet wired into the path that produces a lesson. What reached the pipeline is two guard/attach fixes,
-and they are worth having — §8 measures exactly what each did.
+and they are worth having — §7 measures exactly what each did, and §7.7 records the correction Lane A2's finding forced on this lane's own coverage numbers.
 
 ---
 
