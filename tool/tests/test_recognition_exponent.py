@@ -164,3 +164,95 @@ class TestSuperscriptSign(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class SiValidatorApplicability(unittest.TestCase):
+    """ROUND 7 · WS-R — «`si_expected_exponent` abstained on all 171». WHY, and SHOULD IT?
+
+    Re-derived from the leaf rows of round 6's `exponent.json`, not from the summary:
+
+      · **166 of 171 lines print no SI prefix relation at all.** Inapplicable is the correct
+        answer there, and it is not an abstention.
+      · **5 do** — `1 kJ = 10ⁿ J`, `1 MJ`, `1 MW`, `1 GW`, `1 mêgaoát = 1 MW` — and on every one
+        of them the recogniser returned `10°` unchanged at all four scales (`STILL_BROKEN`). There
+        was nothing to check. The validator did not decline; it was never asked.
+      · one more line states `1 nm = 10⁻⁹ m`. The validator declines it ON PURPOSE: a reading is
+        reported as bare digits and cannot carry a minus, so comparing 9 against −9 would refuse a
+        correct reading or pass a wrong one.
+
+    TWO REAL DEFECTS, both fixed here:
+
+      1. `_PREFIXED` was anchored at `^\\s*1\\s*` while its docstring promised «where the page
+         itself states the prefix relation». «1 mêgaoát = 1 MW = 10° W» states it — SI fixes n = 6 —
+         and the anchor threw it away. Applicable rows 4 → 5.
+      2. `run` recorded `NOT_APPLICABLE` whenever the recogniser produced NO CANDIDATE, whatever the
+         line said, so `by_validator {'NOT_APPLICABLE': 171}` could not distinguish «no relation
+         printed» from «nothing to check». That single number cannot support the sentence it was
+         used for. Four outcomes now, and `si_applicable` beside them as the denominator.
+
+    WHAT STILL DOES NOT HAPPEN, stated rather than hidden: **0 PASS and 0 FAIL.** Making this
+    validator fire needs a digit recovered on a line that prints an SI relation, and round 6
+    measured those five lines as unreadable at every scale. That is a recognition gap, not a
+    validator gap, and no change here closes it.
+    """
+
+    def test_the_relation_is_found_anywhere_on_the_line(self):
+        # the line the anchor discarded, named
+        self.assertEqual(SN.si_expected_exponent('1 mêgaoát = 1 MW = 10° W'), 6)
+        self.assertEqual(SN.si_expected_exponent('Đổi đơn vị: 1 kJ = 10° J.'), 3)
+        self.assertEqual(SN.si_expected_exponent('(1 GW = 10° W)'), 9)
+
+    def test_the_guard_the_anchor_used_to_provide_is_kept(self):
+        """A `1` glued to another digit is not «one prefixed unit» — «21 kJ» must not match."""
+        for line in ('21 kJ = 10° J', '110 kJ = 10° J', 'x1 kJ = 10° J'):
+            with self.subTest(line=line):
+                self.assertIsNone(SN.si_expected_exponent(line))
+
+    def test_a_line_stating_two_different_relations_abstains(self):
+        """Which relation the destroyed `10°` belongs to is not decidable from the shape."""
+        self.assertIsNone(SN.si_expected_exponent('1 kJ = 10° J; 1 MW = 10° W'))
+        # the same relation twice is not ambiguous
+        self.assertEqual(SN.si_expected_exponent('1 kJ = 10° J và 1 kJ = 10° J'), 3)
+
+    def test_negative_exponents_are_declined_on_purpose_not_by_accident(self):
+        line = ('Màng lọc nano có khe lọc siêu nhỏ (kích thước nanomet, '
+                '1 nm = 10 ° m), bền cơ học, chỉ')
+        self.assertIsNone(SN.si_expected_exponent(line))
+        self.assertIsNone(SN.si_expected_exponent('1 mm = 10° m'))
+
+    def test_validate_separates_NOT_APPLICABLE_from_NO_CANDIDATE(self):
+        """The metric defect: one bucket cannot carry two different causes."""
+        self.assertEqual(X.validate(None, 'không có quan hệ SI nào ở đây 10° J'),
+                         ('NOT_APPLICABLE', None))
+        self.assertEqual(X.validate(None, '1 kJ = 10° J'), ('NO_CANDIDATE', 3))
+        self.assertEqual(X.validate('3', '1 kJ = 10° J'), ('PASS', 3))
+        self.assertEqual(X.validate('5', '1 kJ = 10° J'), ('FAIL', 3))
+
+    def test_abstention_is_still_never_a_pass(self):
+        """Round 6's rule, unchanged: neither inapplicable nor uncheckable may read as PASS."""
+        for verdict in ('NOT_APPLICABLE', 'NO_CANDIDATE'):
+            self.assertNotEqual(verdict, 'PASS')
+        self.assertEqual(X.validate('8', 'tốc độ ánh sáng 3.10° m/s')[0], 'NOT_APPLICABLE')
+
+    def test_the_round6_population_re_derived_from_its_own_leaf_rows(self):
+        """MEASURED, and re-derivable: 5 applicable of 171, all NO_CANDIDATE.
+
+        The ledger is gitignored corpus, so this asserts the SHAPE on the exact lines round 6
+        recorded rather than reading the file — a clean clone must still pin the finding.
+        """
+        applicable = {
+            '1 kJ = 10°J': 3,
+            '1 MJ = 10°J': 6,
+            '1 MW = 10° W': 6,
+            '1 GW = 10° W': 9,
+            '1 mêgaoát = 1 MW = 10° W': 6,
+        }
+        for line, n in applicable.items():
+            with self.subTest(line=line):
+                self.assertEqual(SN.si_expected_exponent(line), n)
+                # every one of them was STILL_BROKEN: no candidate to check
+                self.assertEqual(X.validate(None, line), ('NO_CANDIDATE', n))
+        # and the shape that dominates the population: no relation printed
+        for line in ('(c = 3.10° m/s)', '- Bar: 1 Bar = 10° Pa.', '10 \'112'):
+            with self.subTest(line=line):
+                self.assertEqual(X.validate(None, line)[0], 'NOT_APPLICABLE')

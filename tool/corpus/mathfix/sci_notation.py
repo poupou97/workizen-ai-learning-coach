@@ -40,8 +40,15 @@ SI_PREFIX = {'Y': 24, 'Z': 21, 'E': 18, 'P': 15, 'T': 12, 'G': 9, 'M': 6, 'k': 3
 # Base units whose prefixed forms appear in the K-12 science books.
 BASE_UNIT = ('J', 'W', 'V', 'A', 'N', 'Pa', 'Hz', 'Ω', 'C', 'K', 'g', 'm', 's', 'F', 'H', 'T', 'B')
 
+#: ROUND 7 · WS-R — the relation is found ANYWHERE on the line, not only at its start.
+#: MEASURED on round 6's 171 destroyed-exponent findings: 6 lines state an SI prefix relation, and
+#: the old `^\s*1\s*` anchor threw away 2 of them — «1 mêgaoát = 1 MW = 10° W», where SI fixes
+#: n = 6, and a `1 nm = 10 ° m` inside a sentence. The docstring said «where the page itself states
+#: the prefix relation»; the anchor said «where the LINE BEGINS with it». The anchor was the bug.
+#: `(?<!\w)` keeps the guard that made the anchor safe: «21 kJ» and «110°» still cannot match,
+#: because the `1` must not be preceded by a word character.
 _PREFIXED = re.compile(
-    r'^\s*1\s*(da|[YZEPTGMkhdcmµμnpfa])(' + '|'.join(BASE_UNIT) + r')\b\s*=\s*10\s*[°\'′]?\s*(\d*)\s*('
+    r'(?<!\w)1\s*(da|[YZEPTGMkhdcmµμnpfa])(' + '|'.join(BASE_UNIT) + r')\b\s*=\s*10\s*[°\'′]?\s*(\d*)\s*('
     + '|'.join(BASE_UNIT) + r')\b')
 
 
@@ -65,15 +72,26 @@ def si_expected_exponent(text):
     «1 kJ = 10? J» ⇒ 3.  «1 MW = 10? W» ⇒ 6.  «1 GW = 10? W» ⇒ 9.
     Returns None when the two units differ in kind, when no prefix is printed, or when the relation
     is not of this shape — never a default, never a guess.
+
+    ABSTENTIONS THAT ARE DELIBERATE, not gaps (round 7 · WS-R):
+    · a NEGATIVE exponent («1 nm = 10⁻⁹ m»). The recogniser reports the exponent as bare digits, so
+      it cannot express −9, and a validator that compared 9 against −9 would refuse a correct
+      reading — or, worse, pass a wrong one. Out of scope until a reading carries its sign.
+    · a line stating TWO DIFFERENT relations. Which one the destroyed `10°` belongs to is not
+      decidable from the shape, and picking one would be a guess with a nice pedigree.
     """
-    m = _PREFIXED.match(text or '')
-    if not m:
-        return None
-    prefix, left_unit, _digits, right_unit = m.groups()
-    if left_unit != right_unit:
-        return None
-    n = SI_PREFIX.get(prefix)
-    return n if (n is not None and n > 0) else None
+    n = None
+    for m in _PREFIXED.finditer(text or ''):
+        prefix, left_unit, _digits, right_unit = m.groups()
+        if left_unit != right_unit:
+            continue
+        v = SI_PREFIX.get(prefix)
+        if v is None or v <= 0:
+            continue
+        if n is not None and n != v:
+            return None                   # ambiguous line — abstain rather than choose
+        n = v
+    return n
 
 
 def find_destroyed_exponents(text):
