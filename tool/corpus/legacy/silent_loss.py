@@ -21,6 +21,15 @@ still be able to say what it refused.
 
 Counts only; the block text stays in gitignored poc-out (D4). What the repo carries is how much was
 lost, how much of it carried digits, and on which lessons.
+
+ROUND 6 (WS-A, R13): this file is FROZEN as the historical measurement. Its behaviour is unchanged so
+round 5's published numbers stay reproducible from round 5's artefacts — verified: batch 2
+232/135/27 → 0.6322/0.5888, batch 1 (holdout) 196/124/55 → 0.6125/0.5227. Its successor is
+`tool/corpus/accounting/ledger.py`, which partitions the WHOLE input population rather than scanning
+for one role, and FAILS (non-zero exit) instead of reporting. The two agree exactly on these batches,
+which is why the ledger can be trusted to have replaced it rather than merely reworded it. Round 6
+also shows this tool's correction is a LOWER BOUND: it puts every lost region into the learning
+denominator, and 50 of the 82 turned out to be defined non-learning regions.
 """
 import argparse
 import collections

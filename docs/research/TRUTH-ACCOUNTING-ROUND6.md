@@ -135,8 +135,8 @@ answer.
 rule in the function, before the rules for TABLE, FORMULA, page furniture, figure text and
 the printed `?` answer slot. Every letterless region reached `empty` before anything could
 name it. Measured consequence across the two batches: **17 of 18 Docling FORMULA regions
-never reached the `formula` role at all**, and `role.value == 'formula'` occurred exactly
-once in 1 292 blocks.
+never reached the `formula` role at all** (17 assigned `empty`, 1 assigned `formula`), so
+`role.value == 'formula'` occurred exactly **once in 1 655 blocks**.
 
 `letterless_role()` restores the order for letterless text only and asks nothing new. It
 uses the pipeline's own existing vocabulary, with the guards that vocabulary already carries:
