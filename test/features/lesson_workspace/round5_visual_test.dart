@@ -51,6 +51,47 @@ LessonDocument _withSemantic(LessonDocument d, List<SemanticData> semantic) =>
       evidencePolicy: EvidencePolicy.none,
     );
 
+/// Dựng `ComparisonSemantic` cho test QUA ĐƯỜNG JSON, không qua hàm dựng Dart.
+///
+/// ⭐ Lý do, không phải tiện tay: lane E2 (§8) đổi `ComparisonDimension` từ
+/// `values: List<String?>` trần sang `cells: List<ComparisonValue>` để **không
+/// ô nào lên màn mà không lần được về một block sách**. Hàm dựng Dart vì thế
+/// đổi chữ ký; ĐƯỜNG JSON thì không — nó vẫn nhận `values` là chuỗi hoặc
+/// `null`, và ở hợp đồng mới mỗi ô **thừa kế nguồn của chính hàng đó**
+/// (`ValueGrounding.inheritedFromEntity`) — thừa kế là sự thật kiểm được, vì
+/// hàng ấy sinh ra từ đúng block đó.
+///
+/// Nên test này đi qua **cùng bộ phân tích mà fixture thật đi qua** thay vì
+/// dựng đối tượng bằng tay, và nó biên dịch được với cả hợp đồng cũ lẫn mới.
+/// KHÔNG thêm hàm tiện dụng nào vào `lib/core`: một `fromStrings(...)` ở đó sẽ
+/// mở lại đúng cái lỗ E2 vừa bịt (làm cho ô không nguồn dựng được).
+/// `null` trong `values` = **sách không nói** — ô để trống, không điền hộ.
+ComparisonSemantic _comparison({
+  required String id,
+  required String title,
+  required List<String> entities,
+  required String sourceBlockId,
+  required List<({String name, List<String?> values})> dimensions,
+}) {
+  final s = SemanticData.fromJson({
+    'type': 'comparison',
+    'id': id,
+    'title': title,
+    'trust': ContentTrust.fixtureSynthetic.name,
+    'derivation': 'synthetic-test',
+    'entities': [
+      for (final e in entities) {'name': e, 'sourceBlockId': sourceBlockId},
+    ],
+    'dimensions': [
+      for (final d in dimensions) {'name': d.name, 'values': d.values},
+    ],
+  });
+  if (s is! ComparisonSemantic) {
+    throw StateError('fixture so sánh trong test không phân tích được');
+  }
+  return s;
+}
+
 void main() {
   group('§1 quy trình = sơ đồ dòng chảy', () {
     testWidgets('⭐ nút + trục + dải tổng quan; mỗi nút mở đúng block nguồn; '
@@ -197,20 +238,13 @@ void main() {
         '2 nút DƯỚI', (t) async {
       final d = loadSyntheticDoc();
       final src = d.blocks.whereType<ParagraphBlock>().first.id;
-      final cmp = ComparisonSemantic(
+      final cmp = _comparison(
         id: 'cmp-4',
         title: 'Các cách tách chất (mẫu)',
-        trust: ContentTrust.fixtureSynthetic,
-        derivation: 'synthetic-test',
-        entities: [
-          for (final n in ['Lọc', 'Lắng', 'Cô cạn', 'Chiết'])
-            ComparisonEntity(name: n, sourceBlockId: src),
-        ],
+        sourceBlockId: src,
+        entities: const ['Lọc', 'Lắng', 'Cô cạn', 'Chiết'],
         dimensions: const [
-          ComparisonDimension(
-            name: 'Dùng để tách',
-            values: ['một', 'hai', 'ba', null],
-          ),
+          (name: 'Dùng để tách', values: ['một', 'hai', 'ba', null]),
         ],
       );
       await t.pumpWidget(
@@ -256,19 +290,13 @@ void main() {
       final d = loadSyntheticDoc();
       final src = d.blocks.whereType<ParagraphBlock>().first.id;
       final names = ['Một', 'Hai', 'Ba', 'Bốn', 'Năm', 'Sáu'];
-      final cmp = ComparisonSemantic(
+      final cmp = _comparison(
         id: 'cmp-6',
         title: 'Sáu cách (mẫu)',
-        trust: ContentTrust.fixtureSynthetic,
-        derivation: 'synthetic-test',
-        entities: [
-          for (final n in names) ComparisonEntity(name: n, sourceBlockId: src),
-        ],
+        sourceBlockId: src,
+        entities: names,
         dimensions: [
-          ComparisonDimension(
-            name: 'Chiều',
-            values: [for (final _ in names) 'x'],
-          ),
+          (name: 'Chiều', values: [for (final _ in names) 'x']),
         ],
       );
       await t.pumpWidget(
@@ -297,19 +325,15 @@ void main() {
     ) async {
       final d = loadSyntheticDoc();
       final src = d.blocks.whereType<ParagraphBlock>().first.id;
-      final cmp = ComparisonSemantic(
+      final cmp = _comparison(
         id: 'cmp-3d',
         title: 'Ba chiều (mẫu)',
-        trust: ContentTrust.fixtureSynthetic,
-        derivation: 'synthetic-test',
-        entities: [
-          ComparisonEntity(name: 'A', sourceBlockId: src),
-          ComparisonEntity(name: 'B', sourceBlockId: src),
-        ],
+        sourceBlockId: src,
+        entities: const ['A', 'B'],
         dimensions: const [
-          ComparisonDimension(name: 'c1', values: ['1', '2']),
-          ComparisonDimension(name: 'c2', values: ['1', '2']),
-          ComparisonDimension(name: 'c3', values: ['1', '2']),
+          (name: 'c1', values: ['1', '2']),
+          (name: 'c2', values: ['1', '2']),
+          (name: 'c3', values: ['1', '2']),
         ],
       );
       expect(VisualView.mindmapFits(cmp), isFalse);
@@ -393,7 +417,9 @@ void main() {
         ),
       );
       await t.pumpAndSettle();
-      await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)));
+      await t.tap(
+        find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)),
+      );
       await t.pumpAndSettle();
       expect(
         find.descendant(
