@@ -18,9 +18,12 @@ SDM block (superset of TC-11 §2):
 
 Reason codes (guards): agree_text · agree_order · agree_numbers (round 4: the two OCR stacks read different
 digits for the same text) · agree_tones (round 4: same word, different tone marks between the stacks) · role_conflict · math_guard · unit_guard · chem_guard (round 4: flattened unit
-exponents / chemical subscripts) · empty_block · furniture (page number / running head) · box_boundary ·
-figure_dependent · answer_leak · teacher_text · page_feature:color_heavy · page_feature:diagram ·
-figure_text · low_ocr_conf.
+exponents / chemical subscripts) · empty_block (round 6: ONLY a region that really held nothing) ·
+unread:unreadable_region / unread:numeric_expression_inline / unread:numeric_expression_stacked /
+unread:numeric_label / unread:symbol_fragment (round 6 WS-A, R13: the classes the single `empty` bucket
+was hiding — a lost `7 8 2 8 7 - 2 8 5 8` is not an empty block) · furniture (page number / running
+head) · box_boundary · figure_dependent · answer_leak · teacher_text · page_feature:color_heavy ·
+page_feature:diagram · figure_text · low_ocr_conf.
 Informational (never withhold): enumerator_restored · refers_figure.
 
 Usage (bake-off venv python — rapidfuzz + numpy + pymupdf):
@@ -46,6 +49,8 @@ import tc_score  # noqa: E402
 import tc_cascade  # noqa: E402
 import layout_extract  # noqa: E402
 import tc2_paths  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, 'accounting'))
+import dispositions as unread  # noqa: E402  — round 6 WS-A: the vocabulary for letterless regions
 
 ROOT = tc_sdm.ROOT
 PDF = f'{ROOT}/poc-out/pdf'
@@ -349,6 +354,43 @@ def ends_sentence(t):
 
 
 # ---------------------------------------------------------------- role assignment
+def letterless_role(b, ctx, t, lab, bb):
+    """Round 6 (WS-A, R13). A region with no letters, named by the structural evidence that ALREADY EXISTS.
+
+    Round 5 §8.2: a block whose role is `empty` reached neither `blocks` nor `withheld` of the TSL — a
+    disappearance carrying no reason code — and one of the lost blocks reads `7 8 2 8 7 - 2 8 5 8`, so
+    `empty_block` / "no letters" also misstated what was lost. The cause is RULE ORDER, not a missing
+    rule: the letterless test used to run second, before every rule that can name such a region, so it
+    swallowed **17 of the 18** Docling FORMULA regions in the two legacy batches and every numeric label
+    inside a picture.
+
+    This restores the order for letterless text only, and asks nothing new: table, formula, page
+    furniture, figure text and the printed `?` answer slot are the pipeline's own existing vocabulary,
+    with their own existing guards. Nothing here serves a block, weakens a guard or repairs text — a
+    `formula` without a validated structure is still withheld (`formula_unvalidated`, Founder STEM §4).
+
+    Only when NO structural evidence names the region does it stay `empty`, and then it says which of the
+    six unread classes it is instead of claiming there was nothing there.
+    """
+    if b['role'] == 'TABLE':
+        return 'table', 'native', 0.95, ['docling table (no letters)']
+    if b['role'] == 'FORMULA':
+        structured = bool(b.get('formula_structured'))
+        return ('formula', 'native', 0.95 if structured else 0.60,
+                ['docling formula (no letters)'] + ([] if structured else ['structure NOT validated: label only']))
+    if lab == 'page_footer' or (bb[1] > 0.93 and len(t) < 40):
+        return ('page_number' if DIGITS.match(t) else 'running_head'), 'native', 0.9, ['footer band (no letters)']
+    if lab == 'page_header' or (bb[1] < 0.045 and len(t) < 50):
+        return 'running_head', 'native', 0.85, ['header band (no letters)']
+    if ctx.get('inside_picture'):
+        return 'figure_text', 'geometry', 0.85, ['inside docling picture bbox (no letters)']
+    if t and re.fullmatch(r'[\s?…._]+', t):
+        return 'answer_slot', 'lexicon', 0.9, ['? / blank slot']
+    lines = ctx.get('under_lines') or []
+    cls = unread.classify_unread(t, lines)
+    return 'empty', 'native', 1.0, [unread.unread_evidence(cls, t, lines)]
+
+
 def assign_role(b, ctx):
     """Deterministic role for one block. Returns (role, method, confidence, evidence[])."""
     t = (b['text'] or '').strip()
@@ -364,7 +406,7 @@ def assign_role(b, ctx):
     if b['role'] == 'FIGURE':
         return 'figure', 'native', 1.0, ['docling picture']
     if not t or not LETTERS.search(t) and not DIGITS.match(t):
-        return 'empty', 'native', 1.0, ['no letters']
+        return letterless_role(b, ctx, t, lab, bb)
     if DIGITS.match(t) and (bb[1] > 0.9 or bb[1] < 0.07) and not ctx.get('big_digit'):
         return 'page_number', 'geometry', 0.95, ['digits in margin']
     if LESSON_HDR.match(t) and len(t) <= 120:
@@ -707,7 +749,8 @@ COLOUR_HEAVY_EXEMPT = ('heading', 'stage_label', 'page_number', 'running_head', 
 # re-derivation, so the two cannot drift.
 ROLE_DERIVED_GUARDS = frozenset({'empty_block', 'furniture', 'figure_text', 'math_guard', 'unit_guard', 'chem_guard', 'formula_unvalidated',
                                  'figure_dependent', 'answer_leak', 'teacher_text',
-                                 'page_feature:color_heavy', 'page_feature:diagram', 'line_structure'})
+                                 'page_feature:color_heavy', 'page_feature:diagram', 'line_structure'}
+                                | {unread.unread_guard(c) for c in unread.UNREAD_CLASSES})
 # Round 4, R7c (found by Lane D's measured re-run of legacy batch 1, newly reachable because the block-level
 # colour fix serves these regions again): a block's text is ONE string, so a poem's verse lines arrive joined
 # into prose — «Tôi đạp vỡ màu nâu Bầu trời trong quả trứng Bỗng thấy nhiều gió lộng …». Roles whose line
@@ -764,7 +807,7 @@ STRUCTURED_EXEMPT = ('table', 'figure', 'empty')
 
 
 def role_guards(role, text, refers_figure, colour, features, inside_picture=False, verse=False,
-                formula_structured=False):
+                formula_structured=False, unread_class=None):
     """The guard reasons that depend on the block's role. Deterministic; withholds only, never repairs.
 
     `features` is the page census row (`color_heavy`, `diagram`); `colour` the block's own measured colour.
@@ -772,7 +815,9 @@ def role_guards(role, text, refers_figure, colour, features, inside_picture=Fals
     t = text or ''
     g = []
     if role == 'empty' or not t.strip():
-        g.append('empty_block')
+        # Round 6 (WS-A, R13): `empty_block` is truthful only for a region that really held nothing.
+        # For the rest the code names the class — a lost `7 8 2 8 7 - 2 8 5 8` is not an empty block.
+        g.append(unread.unread_guard(unread_class) if unread_class else 'empty_block')
     if role in ('page_number', 'running_head'):
         g.append('furniture')
     if role == 'figure_text':
@@ -825,7 +870,8 @@ def rederive_trust(out_blocks, features, inside_pic_by_id=None, verse_by_id=None
         r = ob['role']['value']
         keep = [x for x in ob['guards'] if x not in ROLE_DERIVED_GUARDS]
         g = role_guards(r, ob.get('text') or '', ob.get('refers_figure'), ob.get('colour'), features,
-                        inside_pic_by_id.get(ob.get('id'), False), verse_by_id.get(ob.get('id'), False)) + keep
+                        inside_pic_by_id.get(ob.get('id'), False), verse_by_id.get(ob.get('id'), False),
+                        unread_class=ob.get('unread_class')) + keep
         ob['guards'] = g
         withhold = [x for x in g if x != 'enumerator_restored']
         ob['trust']['reasons'] = withhold
@@ -1177,8 +1223,15 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
         xy_hint = xy_by_id.get(a.get('verifier_id'), {}).get('native_label') if a.get('verifier_id') else None
         # elementary lesson banner: a standalone 1–2 digit number printed ≥ 1.4× the median line height near the top
         big_digit = bool(DIGITS.match((b['text'] or '').strip())) and bb is not None and bb[1] < 0.3 and any(l['h'] >= 1.4 * med_h and DIGITS.match(l['text'].strip()) for l in under)
-        ctx = dict(prev_role=prev_role, prev_text=prev_text, box=box, docType=docType, inside_picture=inside_pic and b['role'] not in ('TABLE',), xy_hint=xy_hint, big_digit=big_digit, answer_section=answer_section)
+        ctx = dict(prev_role=prev_role, prev_text=prev_text, box=box, docType=docType, inside_picture=inside_pic and b['role'] not in ('TABLE',), xy_hint=xy_hint, big_digit=big_digit, answer_section=answer_section,
+                   under_lines=[l.get('text', '') for l in under])   # round 6 (WS-A): a region with no block text but OCR lines under it is UNREADABLE, not empty
         role, method, rconf, ev = assign_role(b, ctx)
+        # Round 6 (WS-A): the class is what makes the reason code truthful. It is carried for the `empty`
+        # role AND for any non-figure role whose block text is blank — a Docling FORMULA region with nine
+        # OCR lines under it and no block text has not lost nothing, it has lost everything, and
+        # `empty_block` says the opposite. A picture region is legitimately textless and keeps `empty_block`.
+        unread_class = (unread.classify_unread(b['text'], ctx['under_lines'])
+                        if (role == 'empty' or (not (b['text'] or '').strip() and role != 'figure')) else None)
         # coloured-box context: a stage label / sidebar label / objective marker opens a box until the colour ends
         t = (b['text'] or '').strip()
         if role == 'stage_label' or role == 'heading':
@@ -1219,7 +1272,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
         verse = verse_layout(under, ptw)
         _lg = line_geometry(under)
         guards = role_guards(role, t, refers_fig, col, cen, inside_pic, verse,
-                             formula_structured=bool(b.get('formula_structured')))
+                             formula_structured=bool(b.get('formula_structured')), unread_class=unread_class)
         learning = role not in NON_LEARNING
         if not a['ok'] and role not in ('figure', 'empty', 'page_number', 'running_head'):
             if a['reason'] == 'agree_order' and role in FLEX_ROLES:
@@ -1249,7 +1302,7 @@ def build_page(book, page, pipeline=PIPELINE_ID, docType=None, role_signal=None)
                   agreement=dict(text_sim=a['text_sim'], verifier_id=a['verifier_id'], verifier_role=a['verifier_role'], order_ok=a['order_ok'], verifier_pos=a.get('vpos'), moved=a.get('moved', False), tone_disagreements=tones[:6]),
                   role=dict(value=role, coarse=COARSE.get(role, 'UNKNOWN'), method=method, confidence=round(rconf, 2), evidence=ev, verifier_hint=xy_hint, conflict=conflict),
                   guards=guards, trust=dict(status=status, reasons=withhold), learning=learning, refers_figure=refers_fig, heading_path=list(heading_path),
-                  lesson=None, cells=b.get('cells'),
+                  lesson=None, cells=b.get('cells'), unread_class=unread_class,
                   # Founder STEM §2 - additive, backward-compatible: `text` above is the flat PROJECTION;
                   # this is the geometry it was flattened from. Lane A2's structured math model reads it.
                   geometry=dict(source='apple-vision lines (ocr-body)', lines=_lg, tokens=token_geometry(_lg),

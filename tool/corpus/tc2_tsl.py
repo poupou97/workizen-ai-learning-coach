@@ -8,6 +8,13 @@ header-based attachment (tc2_attach):
                 agreement.text_sim, pipeline, sdm_version}, refers_figure
   withheld[]    every non-trusted learning block: id, page, bbox, role, reasons[], text_len (NO text of
                 answer keys / teacher text is carried — only bbox + reason + provenance)
+  excluded[]    round 6 (WS-A, R13): every region that is NEITHER served NOR withheld, each with an
+                explicit reason — `non_learning:page_number` / `:running_head` / `:figure_region` /
+                `:figure_text` / `:no_content`. Before this the same regions were dropped at the
+                `FURNITURE` test with no record, and a block reading `7 8 2 8 7 - 2 8 5 8` disappeared
+                with them. `EXCLUDED_WITH_REASON` is not a synonym for WITHHELD.
+  conservation  the document's own arithmetic: INPUT SOURCE REGIONS = SERVED + WITHHELD +
+                EXCLUDED_WITH_REASON + defined non-learning regions, with `unaccounted` and `holds`
   figures[]     picture regions with bbox + caption block id
   boundary      {page_start, page_end, pages[], attach_methods{}, confidence = min page confidence,
                 header_found, toc_source}
@@ -21,7 +28,9 @@ header-based attachment (tc2_attach):
                              page image
                 + counts per mode (native / crop / withheld_ref)
 Invariants: no block with an answer_leak / teacher_text reason is ever serialised with its text; SGV
-lessons are written to a separate tree (sgv/) and never merged into an SGK lesson document.
+lessons are written to a separate tree (sgv/) and never merged into an SGK lesson document; and no
+extracted region leaves this builder without a disposition (`tool/corpus/accounting/ledger.py` checks
+it, and fails).
 
 Usage: python3 tool/corpus/tc2_tsl.py --pipeline tc2-p1 <book>…   → poc-out/trusted-corpus/tc-v2/<pipeline>/lessons/<book>/bai-NN.tsl.json
 """
@@ -37,14 +46,40 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import tc2_attach  # noqa: E402
 import tc2_paths  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, 'accounting'))
+import dispositions as unread  # noqa: E402  — round 6 WS-A: the disposition vocabulary
 
 ROOT = tc2_paths.ROOT
 NEVER_TEXT = {'answer_leak', 'teacher_text'}
-FURNITURE = {'page_number', 'running_head', 'figure', 'empty', 'figure_text'}
+#: Round 6 (WS-A, R13). These roles are not served and not withheld — but they are no longer DROPPED.
+#: Each one is now recorded in `excluded[]` with an explicit reason, so the document can say what it left
+#: out. `empty` has left this set: a region the role layer could not read is not furniture, and only the
+#: `no_content` class of it is a defensible exclusion (see `accounting/dispositions.py`).
+FURNITURE = {'page_number', 'running_head', 'figure', 'figure_text'}
+EXCLUSION_REASON = {'page_number': 'non_learning:page_number', 'running_head': 'non_learning:running_head',
+                    'figure': 'non_learning:figure_region', 'figure_text': 'non_learning:figure_text'}
 
 
 def out_root(pipeline):
     return tc2_paths.out_root(pipeline)
+
+
+def _exclusion_reason(ob, role):
+    """→ the reason code for a region that is neither served nor withheld, or None when it is neither.
+
+    `EXCLUDED_WITH_REASON` is the fourth term of the conservation invariant, and it is deliberately NOT a
+    synonym for WITHHELD: converting every region the pipeline dropped into a withheld one would trade a
+    silent loss for a mass over-withhold, and round 5 already measured over-withholding getting worse
+    (0.400 → 0.633). A page number is a defined non-learning region; a block of digits is not.
+    """
+    if role in EXCLUSION_REASON:
+        return EXCLUSION_REASON[role]
+    if role == 'empty':
+        cls = ob.get('unread_class') or unread.classify_unread(
+            ob.get('text'), [l.get('text') for l in ((ob.get('geometry') or {}).get('lines') or [])])
+        if cls in unread.ACCEPTABLE_UNREAD_EXCLUSIONS:
+            return f'non_learning:{cls}'
+    return None       # → the block stays in the learning population and is served or withheld
 
 
 def build_book(book, pipeline='tc2-p1', write=True):
@@ -54,7 +89,7 @@ def build_book(book, pipeline='tc2-p1', write=True):
     prec = {r['page']: r for r in att['pages']}
     titles = {l['number']: l.get('title') for l in att['lessons']}
     sdm_files = sorted(glob.glob(f'{out_root(pipeline)}/sdm/{book}/p*.sdm.json'), key=lambda f: int(re.search(r'p(\d+)', f).group(1)))
-    lessons = defaultdict(lambda: dict(blocks=[], withheld=[], figures=[], pages=[], methods=Counter(), confs=[], all_learning=0, no_lesson_blocks=0))
+    lessons = defaultdict(lambda: dict(blocks=[], withheld=[], excluded=[], figures=[], pages=[], methods=Counter(), confs=[], all_learning=0, no_lesson_blocks=0))
     no_lesson_pages = []
     for f in sdm_files:
         s = json.load(open(f))
@@ -69,7 +104,17 @@ def build_book(book, pipeline='tc2-p1', write=True):
             if page not in L['pages']:
                 L['pages'].append(page); L['methods'][method] += 1; L['confs'].append(pr.get('confidence', 0) if pr else 0)
             role = ob['role']['value']
-            if role in FURNITURE:
+            # Round 6 (WS-A, R13). This used to be `continue` — the line where a region left the pipeline
+            # with no record at all. `empty` was in that set, so a block reading `7 8 2 8 7 - 2 8 5 8`
+            # reached neither `blocks` nor `withheld` and no rate could see it. A region that is not
+            # served and not withheld is now EXCLUDED **with a reason**, which is auditable; and only a
+            # region that really held nothing may be excluded on the strength of being unreadable.
+            excl = _exclusion_reason(ob, role)
+            if excl:
+                L['excluded'].append(dict(id=ob['id'], page=page, page_printed=s.get('printed_page'),
+                                          order=ob['order'], role=role, bbox=ob['bbox'], reason=excl,
+                                          disposition='EXCLUDED_WITH_REASON',
+                                          evidence=list((ob.get('role') or {}).get('evidence') or [])[:3]))
                 continue
             L['all_learning'] += 1
             prov = dict(book=book, page_pdf=page, page_printed=s.get('printed_page'), bbox=ob['bbox'], extraction=ob['extraction'], ocr_conf=ob['ocr_conf'],
@@ -88,7 +133,9 @@ def build_book(book, pipeline='tc2-p1', write=True):
     for n in sorted(lessons):
         L = lessons[n]
         L['blocks'].sort(key=lambda b: (b['page'], b['order'])); L['withheld'].sort(key=lambda b: (b['page'], b['order']))
+        L['excluded'].sort(key=lambda b: (b['page'], b['order']))
         trusted_learning = len(L['blocks']); withheld_learning = len(L['withheld'])
+        excluded_regions = len(L['excluded'])
         src = 'FULL' if trusted_learning and withheld_learning == 0 else ('PARTIAL' if trusted_learning else 'NONE')
         seq = sorted([dict(kind='native', page=b['page'], order=b['order'], id=b['id']) for b in L['blocks']] + [dict(kind='withheld', page=w['page'], order=w['order'], id=w['id'], bbox=w['bbox'], reasons=w['reasons'], page_printed=w['page_printed']) for w in L['withheld']], key=lambda x: (x['page'], x['order']))
         with_images = [(dict(kind='native', block=x['id']) if x['kind'] == 'native' else dict(kind='source_crop', page=x['page'], bbox=x['bbox'], reason=','.join(x['reasons']), licence_gate='page-image delivery UNRESOLVED (OQ8)')) for x in seq]
@@ -101,8 +148,19 @@ def build_book(book, pipeline='tc2-p1', write=True):
                    boundary=dict(page_start=min(L['pages']), page_end=max(L['pages']), pages=sorted(L['pages']), attach_methods=dict(L['methods']), confidence=round(min(L['confs']) if L['confs'] else 0, 2),
                                  header_found=bool(header_pages), header_page=header_pages[0] if header_pages else None, source=next((l['source'] for l in att['lessons'] if l['number'] == n), None)),
                    sourceability=src, stats=dict(learning_blocks=L['all_learning'], trusted=trusted_learning, withheld=withheld_learning, withheld_by_reason=dict(Counter(r for w in L['withheld'] for r in w['reasons'])),
-                                                 roles_trusted=dict(Counter(b['role']['value'] for b in L['blocks'])), figures=len(L['figures'])),
-                   blocks=L['blocks'], withheld=L['withheld'], figures=L['figures'], hybridSmartBook=hsb, answer_keys_included=False)
+                                                 roles_trusted=dict(Counter(b['role']['value'] for b in L['blocks'])), figures=len(L['figures']),
+                                                 excluded=excluded_regions, excluded_by_reason=dict(Counter(x['reason'] for x in L['excluded']))),
+                   # Round 6 (WS-A, R13). The document states its own arithmetic, so a reader never has to
+                   # trust that nothing fell out between the page and this file. This is a SELF-REPORT and
+                   # it is not the check: a builder cannot audit itself for what it never recorded. The
+                   # authority is `tool/corpus/accounting/ledger.py`, which recomputes the population from
+                   # the SDM pages independently of this file and exits non-zero on a difference.
+                   conservation=dict(invariant='INPUT SOURCE REGIONS = SERVED + WITHHELD + EXCLUDED_WITH_REASON + defined non-learning regions',
+                                     inputSourceRegions=trusted_learning + withheld_learning + excluded_regions,
+                                     served=trusted_learning, withheld=withheld_learning,
+                                     excludedWithReason=excluded_regions, unaccounted=0, holds=True,
+                                     selfReport=True, checkedBy='tool/corpus/accounting/ledger.py audit'),
+                   blocks=L['blocks'], withheld=L['withheld'], excluded=L['excluded'], figures=L['figures'], hybridSmartBook=hsb, answer_keys_included=False)
         docs.append(doc)
     if write:
         d = f'{out_root(pipeline)}/lessons/{book}'; os.makedirs(d, exist_ok=True)

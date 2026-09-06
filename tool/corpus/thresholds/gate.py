@@ -56,7 +56,11 @@ ALL_GUARDS = ('agree_text', 'agree_order', 'agree_numbers', 'agree_tones', 'role
               'math_guard', 'unit_guard', 'chem_guard', 'empty_block', 'furniture',
               'box_boundary', 'figure_dependent', 'answer_leak', 'teacher_text',
               'page_feature:color_heavy', 'page_feature:diagram', 'figure_text',
-              'low_ocr_conf', 'line_structure', 'empty')
+              'low_ocr_conf', 'line_structure', 'empty',
+              # round 6 (WS-A, R13) — the classes `empty_block` was hiding
+              'unread:unreadable_region', 'unread:numeric_expression_inline',
+              'unread:numeric_expression_stacked', 'unread:numeric_label', 'unread:symbol_fragment',
+              'formula_unvalidated')
 
 PIPELINE_GATE = dict(DEFAULT_GATE, deny_guards=list(ALL_GUARDS))
 

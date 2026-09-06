@@ -1,0 +1,27 @@
+{
+  "batch": "golden",
+  "pipeline": "tc2-p3",
+  "created": "2026-09-06",
+  "round": 6,
+  "purpose": "Round 6 WS-A — the Founder's two named Golden slices, run end to end so the conservation invariant can be checked on them and only on them. GOLDEN #1 (LS&ĐL 5 Bài 8) is the primary delivery slice WS-C and WS-D are blocked behind; GOLDEN #2 (Toán 4 tập hai Bài 61) is the worst case round 5 measured — 4 trusted / 15 withheld / 32 silently lost, served share 0.211 reported → 0.078 corrected — and is explicitly NOT a learner-facing Math delivery target.",
+  "rules": [
+    "reprocess from the ORIGINAL SOURCE (PDF page + Apple-Vision OCR lines), never from the old units or packs",
+    "REPROCESSED != TRUSTED and RESTORED != TRUSTED",
+    "pages the pipeline cannot process are WITHHELD, never guessed",
+    "the same spec is run twice — once with the pre-fix pipeline (1a75d24) and once with the WS-A fix — so before → after is a controlled comparison and not two different populations"
+  ],
+  "lessons": [
+    {
+      "book": "05-sgk-lich-su-va-dia-li-5", "lesson": 8, "title": "Thời kì Bắc thuộc",
+      "pages_pdf": [38, 39, 40, 41],
+      "risk": ["lsdl", "two_col", "figure_caption", "map_figures", "order_suspect"],
+      "why": "GOLDEN #1 — the Founder's primary delivery slice. History/Geography, where round 5 measured the silent losses as MAP AND TABLE FIGURES (`0,6`, `1408`, `1010` on LS&ĐL 4 Bài 12), not as digits in exercises: a different loss profile from Toán, and a test of whether the Toán root cause generalises."
+    },
+    {
+      "book": "04-sgk-toan-4-tap-hai", "lesson": 61, "title": "Phép trừ phân số",
+      "pages_pdf": [80, 81, 82, 83],
+      "risk": ["toan", "two_col", "formula", "stacked_math", "order_suspect"],
+      "why": "GOLDEN #2 — the worst silent loss round 5 measured (32 lost against 4 trusted), and the home of the block reading `7 8 2 8 7 - 2 8 5 8` that `empty_block` / «no letters» misdescribed."
+    }
+  ]
+}
