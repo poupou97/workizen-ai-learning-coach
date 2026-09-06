@@ -44,6 +44,10 @@ void main() {
     await t.pump(const Duration(milliseconds: 200)); // cho indexLoader settle
     // Mở Môn học ngay — KHÔNG restart. Đột biến bỏ _loadLessonIndex trong
     // _onboarded ⇒ test này đỏ («SAM chưa nạp mục lục môn học trên máy này»).
+    // ROUND 7 V2 (order 50 §5): năm chip ý định chung chung xuống DƯỚI hai
+    // tầng «HÔM NAY» + «SAM GỢI Ý» — chúng không còn tranh màn đầu.
+    await t.scrollUntilVisible(find.text('📘 Học trước'), 200,
+        scrollable: find.byType(Scrollable).first);
     await t.tap(find.text('📘 Học trước'));
     await t.pumpAndSettle();
     expect(find.text('Môn học · Lớp 5'), findsOneWidget);

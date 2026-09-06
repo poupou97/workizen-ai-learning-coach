@@ -119,7 +119,7 @@ Future<void> _journey(WidgetTester t, LessonDocument d, String tag) async {
       MissionCenterScreen(
         data: data,
         onOpenSubjects: () {},
-        workspaceLesson: d,
+        lessonThreads: [HomeLessonThread(doc: d)],
         onOpenWorkspaceLesson: (_, {at}) {},
       ),
     ),
@@ -335,15 +335,20 @@ void main() {
         MissionCenterScreen(
           data: data,
           onOpenSubjects: () {},
-          workspaceLesson: loadSyntheticDoc(),
-          researchLessons: [d],
+          learnerGrade: 6,
+          lessonThreads: [
+            HomeLessonThread(doc: loadSyntheticDoc()),
+            HomeLessonThread(doc: d),
+          ],
           onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );
     await t.pumpAndSettle();
+    // ROUND 7 · V2 — bài sách lớp khác nay là MỘT THẺ HỌC BÌNH THƯỜNG trong
+    // hàng «HÔM NAY» (order 50 §6), không còn thẻ «lát cắt nghiên cứu» riêng.
     expect(
-      find.byKey(MissionCenterScreen.researchCardKey(d.slotKey)),
+      find.byKey(MissionCenterScreen.smartCardKey(d.slotKey)),
       findsOneWidget,
     );
     _expectClean(t, 'nghiên cứu Home');

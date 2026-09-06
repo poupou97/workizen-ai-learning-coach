@@ -488,6 +488,51 @@ class LessonIndex {
     return null;
   }
 
+  /// ⭐ ROUND 7 · V2 (Founder order 50) — HAI CON SỐ KHÁC NHAU CHO MỘT MÔN,
+  /// và sự khác nhau ấy là điều phải nói với trẻ.
+  ///
+  /// [listedLessonCountFor] = số bài MỤC LỤC liệt kê được — một mục giá sách
+  /// trẻ giở xem được. [openableLessonCountFor] = số bài trong đó có ít nhất
+  /// một việc trẻ LÀM được ở Môn học. Trên pack lớp 6 hôm nay, chín trên mười
+  /// môn có số thứ hai bằng **0**: giá sách có mục lục, chưa có việc. Home
+  /// phải nói đúng con số nào đang nói, không được gộp hai thứ thành «N bài».
+  ///
+  /// ⚠ HAI PHÉP ĐẾM, HAI MẪU SỐ — cố ý, và đây là chỗ suýt sai.
+  ///
+  /// Bản đầu của hàm này khử trùng CẢ HAI theo `(sách, số bài)`. Trên pack lớp
+  /// 6 thật, GDTC đánh số LẠI theo từng chủ đề: **24 mục lục sụp xuống còn 4
+  /// số bài**. Thẻ Home sẽ nói «mục lục 4 bài» trong khi Giá sách ngay sau một
+  /// chạm nói «24 bài» — hai con số cho cùng một giá sách, trên hai màn. Đúng
+  /// khuyết tật mà `_dedupeLessons` ở đầu tệp này đã cảnh báo: «Gộp theo số là
+  /// xoá bài của trẻ.»
+  ///
+  /// Nên:
+  /// - [listedLessonCountFor] đếm **BẢN GHI mục lục** (đã khử trùng-hệt lúc
+  ///   parse) — CÙNG con số `BookRef.lessonCount` mà Giá sách in ra;
+  /// - [openableLessonCountFor] đếm **số bài phân biệt theo (sách, số bài)**,
+  ///   vì `activitiesFor` định địa chỉ việc-làm-được BẰNG SỐ BÀI — đó là độ
+  ///   phân giải thật của dữ liệu, không phải một lựa chọn.
+  int listedLessonCountFor(String subject) {
+    var n = 0;
+    for (final b in subjects[subject] ?? const <BookLessons>[]) {
+      n += b.lessons.length;
+    }
+    return n;
+  }
+
+  int openableLessonCountFor(String subject) {
+    final seen = <String>{};
+    for (final b in subjects[subject] ?? const <BookLessons>[]) {
+      for (final l in b.lessons) {
+        if (activitiesFor(book: b.sourceDocumentId, lessonNo: l.no).isEmpty) {
+          continue;
+        }
+        seen.add('${b.sourceDocumentId}|${l.no}');
+      }
+    }
+    return seen.length;
+  }
+
   /// ⭐ WAL-166 — mọi việc gắn được vào MỘT bài của MỘT cuốn sách.
   ///
   /// Lọc theo `book` ở mọi loại — kể cả tư liệu Sử, thứ trước đây chỉ lọc

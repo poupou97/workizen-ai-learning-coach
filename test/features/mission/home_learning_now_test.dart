@@ -49,26 +49,44 @@ Future<MissionData> _data() => buildMissionFromStore(
 /// hứa một đằng mở một nẻo (lỗi máy thật vòng 1).
 WorkspaceView? openedAt;
 
+/// ⭐ ROUND 7 · V2 — Home nay có HAI TẦNG, nên phần THỨ CẤP («có thể làm
+/// tiếp», «SAM đã thấy gì») nằm dưới nếp gấp của khung test mặc định 800×600
+/// — đúng như thiết kế (order 50 §5: MỘT hành động nổi bật, phần còn lại
+/// xuống dưới). Bài kiểm so THỨ TỰ dựng màn cao để `ListView` dựng hết; bài
+/// kiểm đo NẾP GẤP dùng [nokia] — đúng kích thước máy của Founder.
 Future<void> _pump(
   WidgetTester t, {
   Set<WorkspaceView> opened = const {},
   LessonDocument? doc,
   void Function(LessonDocument)? onOpen,
+  bool nokia = false,
 }) async {
+  // Nokia 6.1: 1080×1920 @ 3.0 ⇒ 360×640 dp.
+  t.view.physicalSize = nokia ? const Size(1080, 1920) : const Size(1080, 5000);
+  t.view.devicePixelRatio = nokia ? 3.0 : 2.75;
+  addTearDown(t.view.reset);
   openedAt = null;
   final d = doc ?? loadSyntheticDoc();
   await t.pumpWidget(
     fixtureHost(
       MissionCenterScreen(
         data: await _data(),
+        learnerGrade: 6,
         onOpenSubjects: () {},
-        workspaceLesson: d,
+        // ROUND 7 · V2 — Home nhận MẠCH HỌC, không nhận «một bài»: cùng ba dữ
+        // kiện (tài liệu · dấu vết phiên · việc tiếp theo của động cơ), nay
+        // đóng thành một phần tử của danh sách nhiều môn.
+        lessonThreads: [
+          HomeLessonThread(
+            doc: d,
+            openedViews: opened,
+            next: founderNextAction(d, seen: opened),
+          ),
+        ],
         onOpenWorkspaceLesson: (d, {at}) {
           openedAt = at;
           onOpen?.call(d);
         },
-        openedViews: opened,
-        lessonNext: founderNextAction(d, seen: opened),
       ),
     ),
   );
@@ -80,7 +98,7 @@ void main() {
       (t) async {
     await _pump(t);
     double y(Finder f) => t.getTopLeft(f).dy;
-    final card = find.byKey(MissionCenterScreen.workspaceCardKey);
+    final card = find.byKey(MissionCenterScreen.samSuggestionKey);
     final cta = find.byKey(MissionCenterScreen.nextActionCtaKey);
     expect(card, findsOneWidget);
     expect(cta, findsOneWidget);
@@ -94,12 +112,22 @@ void main() {
     // và trên cả 5 chip chung chung.
     expect(y(cta), lessThan(y(find.byKey(MissionCenterScreen.continueRowKey))));
     expect(y(cta), lessThan(y(find.byKey(MissionCenterScreen.samSeenKey))));
-    // ⭐ NÚT PHẢI Ở TRONG MÀN ĐẦU — đây chính là lỗi máy thật vòng 1.
-    expect(
-      y(cta) + 48,
-      lessThan(t.view.physicalSize.height / t.view.devicePixelRatio),
-      reason: 'CTA rơi xuống dưới nếp gấp — lỗi 02-home.png',
-    );
+  });
+
+  testWidgets('⭐⭐ 1b. NẾP GẤP THẬT (Nokia 6.1, 360×640 dp): CẢ HAI TẦNG cùng '
+      'nằm trong màn đầu — hàng thẻ nhiều môn VÀ nút việc-tiếp-theo', (t) async {
+    // Phép đo mà order 50 sống chết bằng: nếu tầng 1 đẩy tầng 2 xuống dưới
+    // nếp gấp thì «MULTI-SUBJECT CONTEXT + SINGLE NEXT ACTION» thành HAI màn,
+    // không phải một. Lỗi máy thật vòng 1 (`02-home.png`) là cùng lỗi ấy ở
+    // dạng khác: nút rơi xuống dưới.
+    await _pump(t, nokia: true);
+    final fold = t.view.physicalSize.height / t.view.devicePixelRatio;
+    final row = t.getTopLeft(find.byKey(MissionCenterScreen.todayRowKey)).dy;
+    final cta =
+        t.getTopLeft(find.byKey(MissionCenterScreen.nextActionCtaKey)).dy;
+    expect(row, lessThan(fold), reason: 'hàng thẻ phải thấy được ngay');
+    expect(cta + 48, lessThan(fold),
+        reason: 'CTA rơi xuống dưới nếp gấp — lỗi 02-home.png quay lại');
   });
 
   testWidgets('⭐ 2. «SAM thấy gì» là HỖ TRỢ: nhỏ hơn, đứng SAU Next Action, '
