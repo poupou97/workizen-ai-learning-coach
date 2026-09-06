@@ -256,7 +256,36 @@ Bài kiểm dựng đúng hình dạng GDTC (ba «Bài 1» khác chủ đề) v�
 | `FIXTURE != TRUSTED CORPUS` | `FixtureChip` «Bản thử nghiệm» vẫn ở tầng 2, cùng widget + cùng sheet «Nguồn & độ tin» với workspace; có test canh nó không mất khi màn sắp lại |
 | `LLM OUTPUT != TRUTH` | Không gọi gì. Mọi chữ về việc tiếp theo là **nguyên văn** `LessonNextAction` |
 | `trusted = 0`, `eligible for teaching = 0` | **KHÔNG ĐỔI.** Vòng này không chạm pipeline, không chạm cổng TC; pack `contentHash` giống hệt |
-| D4 | Fixture thật + pack + `poc-out` vẫn gitignore (kiểm bằng `git check-ignore`); `git status` sạch. Khung máy thật ra `~/Desktop/wal-evidence/`, **không commit** |
+| D4 | Fixture thật + pack + `poc-out` vẫn gitignore; `git status` sạch. Khung máy thật ra `~/Desktop/wal-evidence/`, **không commit**. ⚠ **Một lỗi của chính tôi, đã sửa và đã dựng cổng** — xem §H1 |
+
+### H1 · ⚠ TÔI ĐÃ ĐƯA MỘT ĐƯỜNG DẪN NGUỒN VÀO GIT, VÀ HÀNG RÀO KHÔNG BẮT ĐƯỢC
+
+Để dựng lại pack trong worktree, tôi symlink nguồn về: `nguon-chi-thuc →
+/Users/…/workizen-ai-learning-coach/nguon-chi-thuc`. Một `git add -A` sau đó đưa **symlink ấy vào
+commit `266cdff`**.
+
+`.gitignore` **có** dòng `nguon-chi-thuc/` ngay đầu tệp, dưới ba lý do «KHÔNG BAO GIỜ COMMIT».
+Dấu `/` cuối nói với git: *chỉ khớp THƯ MỤC*. Một **symlink** cùng tên không bị nó chặn —
+`git check-ignore` xác nhận. Hàng rào đứng đó, và đi vòng qua được.
+
+**Mức nghiêm trọng, nói thẳng:** symlink chỉ mang **một chuỗi đường dẫn**. **Không có nội dung
+SGK nào rời khỏi máy** — đây không phải một vụ rò bản quyền. Nó nghiêm trọng vì hai lý do khác:
+một đường dẫn máy-cụ-thể đi vào lịch sử chung, và **hàng rào bị chứng minh là rỗng** — lần sau có
+thể là `poc-out` (text trích xuất SGK).
+
+**Đã làm:**
+1. `git rm --cached nguon-chi-thuc`, xoá symlink khỏi worktree;
+2. `.gitignore` thêm `nguon-chi-thuc` **và** `poc-out` ở dạng **không có dấu `/`**, kèm ghi chú
+   nói rõ vì sao dạng cũ không đủ (`poc-out` trước đây chỉ được chặn nhờ
+   `.git/info/exclude` — **cục bộ máy này**, không đi theo repo);
+3. **cổng mới** `test/ci/no_source_paths_tracked_test.dart`: (a) `git ls-files` không được trả về
+   đường dẫn nguồn nào, (b) `git check-ignore --no-index` phải chặn cả dạng không-thư-mục.
+
+**Kiểm-đột-biến (cả hai đã áp, cả hai giết được cổng):** bỏ dòng `nguon-chi-thuc` khỏi
+`.gitignore` ⇒ bài kiểm (b) **đỏ**; `git add -f` symlink trở lại index ⇒ bài kiểm (a) **đỏ**.
+
+**Không rewrite lịch sử:** blob chỉ là một chuỗi đường dẫn, không có gì phải xoá khỏi quá khứ, và
+rewrite một nhánh đã đẩy thì hại hơn lợi.
 
 ---
 
@@ -268,10 +297,10 @@ Bài kiểm dựng đúng hình dạng GDTC (ba «Bài 1» khác chủ đề) v�
 | Bài học mở được từ Home | 1 (+1 sau khi cuộn qua khu «nghiên cứu») | **2**, cùng một hàng, cùng một loại thẻ |
 | Nút **tô đặc** trên Home | 2 (việc tiếp theo + «Chụp bài tập») | **1** (có test đếm) |
 | Chiều cao khối «đang học» trước nút | mega-card ~ toàn màn đầu | thẻ **186 dp** + tầng 2 gọn |
-| Test | 1185 xanh · 1 skip | **1209 xanh · 1 skip** |
+| Test | 1185 xanh · 1 skip | **1211 xanh · 1 skip** |
 
 **Mẫu số của con số test:** cả hai đo **có fixture thật trên đĩa** (`assets/fixtures/real/*.json`
-— gitignored). Không có chúng, cùng nhánh này chạy **1185 xanh · 25 skip**: 24 bài kiểm chỉ chạy
+— gitignored). Không có chúng, cùng nhánh này chạy **1187 xanh · 25 skip**: 24 bài kiểm chỉ chạy
 khi máy đã sinh fixture thật. Hai mẫu số, ghi rõ, không gộp.
 
 ---
@@ -319,6 +348,7 @@ là BLOCKED có nguyên nhân ghi lại.
 
 | Tệp | Giữ điều gì |
 |---|---|
+| `test/ci/no_source_paths_tracked_test.dart` (**mới, 2**) | D4: không đường dẫn nguồn SGK nào được git theo dõi (kể cả symlink) · `.gitignore` chặn cả dạng không-thư-mục. Đã kiểm-đột-biến |
 | `test/features/mission/home_multi_subject_test.dart` (**mới, 23**) | Luật thẻ thuần (bảng trạng thái · thẻ rỗng không được gọi mục lục là «bài học được» · thứ tự hàng · trần thẻ · bậc thang chọn một việc · soi mã cấm động cơ thứ hai · `CÓ THỂ LUYỆN` chưa gán) · hàng trượt ngang (tỉ lệ 75–85 % ở 360 dp · vuốt sang thẻ 2 · chạm thẻ rỗng mở giá sách · nói ra số môn bị cắt) · thẻ đúng bốn câu · một `FilledButton` · vuốt không đổi gợi ý · bằng chứng thắng fixture · cấm 10 chuỗi mastery · **hai lỗi máy thật D1/D2** · **lỗi đếm mục lục GDTC** |
 | `test/features/mission/home_other_subject_card_test.dart` (**đổi tên** từ `home_research_card_test.dart`) | §6: ba chuỗi Founder bác bỏ bị **cấm bằng tên**; sự thật «Sách lớp 5 · không phải sách lớp con» ở **trên chính thẻ học**; sách lớp khác **không bao giờ** thành việc hôm nay (kể cả khi đứng trước) |
 | `test/features/mission/home_learning_now_test.dart` | Giữ nguyên 11 bất biến vòng 1 trên IA mới, **thêm** `1b` — nếp gấp thật của Nokia 6.1: cả hai tầng trong màn đầu |
