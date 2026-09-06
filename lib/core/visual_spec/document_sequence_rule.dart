@@ -123,8 +123,12 @@ VisualSection? compileNumberedSequence(LessonDocument doc) {
   return VisualSection(
     id: 'numbered-sequence',
     family: 'sequence',
-    // Tiêu đề bài là chữ sách; UI tự viết hoa lại.
-    title: LessonDocument.titleCase(doc.title),
+    // Tiêu đề bài là CHỮ SÁCH, nguyên văn. ROUND 7 · WS-R: trước đây chỗ này
+    // gọi `LessonDocument.titleCase` — tức tầng spec tự dựng một dạng TRÌNH
+    // BÀY, đúng thứ `no_presentation_constructor_test` cấm, và bằng luật cũ
+    // hạ chữ thường toàn chuỗi (làm hỏng danh từ riêng). Viết hoa là việc của
+    // UI: `displayTitle` ở `visual_view`.
+    title: doc.title,
     titleProvenance: refFor(run),
     nodes: nodes,
     edges: edges,

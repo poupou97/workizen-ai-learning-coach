@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/context/learning_context.dart';
+import '../../core/display/lesson_title.dart';
 import '../../core/curriculum/canonical_problem.dart';
 import '../../core/curriculum/subject_id.dart';
 import '../../core/intent/learning_intent.dart';
@@ -238,12 +239,6 @@ class SubjectHomeScreen extends StatelessWidget {
     );
   }
 
-  /// «CỘNG, TRỪ HAI PHÂN SỐ…» → «Cộng, trừ hai phân số…» — tiêu đề mined in hoa.
-  static String _titleCase(String upper) {
-    final low = upper.toLowerCase();
-    return low.isEmpty ? low : low[0].toUpperCase() + low.substring(1);
-  }
-
   void _openExercise(BuildContext context, LessonRef l, CorpusExercise e,
       LearningContext ctx) {
     // Sách là NGUỒN TIN: bài tập in trong SGK ⇒ sourceStated, có trang.
@@ -450,7 +445,7 @@ class SubjectHomeScreen extends StatelessWidget {
   /// thì để «Bài N» trần — KHÔNG bịa thứ tự «(1)», «(2)» vì con số đó không
   /// tồn tại trong sách.
   static String _lessonLabel(BookLessons b, LessonRef l) {
-    if (l.title != null) return 'Bài ${l.no} · ${_titleCase(l.title!)}';
+    if (l.title != null) return 'Bài ${l.no} · ${displayTitle(l.title!)}';
     final repeated = b.lessons.where((o) => o.no == l.no).length > 1;
     if (repeated && l.pageStart != null) return 'Bài ${l.no} · trang ${l.pageStart}';
     return 'Bài ${l.no}';

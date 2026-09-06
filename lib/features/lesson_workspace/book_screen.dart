@@ -19,6 +19,7 @@ import 'package:flutter/scheduler.dart' show SchedulerBinding, SchedulerPhase;
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
+import '../../core/display/lesson_title.dart';
 import '../../core/lesson_model/content_trust.dart';
 import '../subjects/lesson_index.dart';
 import 'chapter_screen.dart';
@@ -299,7 +300,7 @@ class BookScreen extends StatelessWidget {
         child: ListTile(
           minVerticalPadding: WalSpacing.sm,
           title: Text(
-            '${c.label} · ${LessonDocument.titleCase(c.title)}',
+            '${c.label} · ${displayTitle(c.title)}',
             style: const TextStyle(
               fontSize: WalType.body,
               fontWeight: FontWeight.w600,

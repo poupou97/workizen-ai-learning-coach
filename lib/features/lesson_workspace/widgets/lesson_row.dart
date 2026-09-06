@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/wal_tokens.dart';
 import '../../../core/lesson_model/lesson_document.dart';
+import '../../../core/display/lesson_title.dart';
 import '../../../core/lesson_model/next_action.dart' show WorkspaceView;
 import '../../subjects/lesson_index.dart';
 import '../lesson_workspace_screen.dart';
@@ -55,7 +56,7 @@ class LessonRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = lesson.title == null
         ? 'Bài ${lesson.no}'
-        : 'Bài ${lesson.no} · ${LessonDocument.titleCase(lesson.title!)}';
+        : displayLessonLabel(lesson.no, lesson.title!);
     final opened = doc != null && trace.opened(doc!.slotKey);
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),

@@ -36,6 +36,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
+import '../../core/display/lesson_title.dart';
 import '../../core/lesson_model/next_action.dart';
 import '../../core/lesson_model/tutor_script.dart';
 import 'smart_book_view.dart';
@@ -303,7 +304,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                 ),
               ),
               Text(
-                doc.lessonLabel,
+                displayLessonLabel(doc.lessonNo, doc.title),
                 maxLines: compact ? 1 : 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

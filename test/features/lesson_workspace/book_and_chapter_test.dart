@@ -93,7 +93,24 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.textContaining('Chương IV · Hỗn hợp'), findsOneWidget);
+    // ROUND 7 · WS-R — TIỀN ĐỀ ĐÃ SỬA, KHÔNG PHẢI CỔNG BỊ NỚI.
+    // Trước: màn hạ chữ thường TOÀN CHUỖI rồi viết hoa lại ⇒ «Chương IV ·
+    // Hỗn hợp…». Luật ấy phá danh từ riêng («… thời kì Bắc thuộc» → «bắc
+    // thuộc», lỗi máy thật vòng 6), nên nay chỉ chuỗi KHÔNG CÓ MỘT CHỮ THƯỜNG
+    // NÀO mới được viết hoa lại. Tên chương của fixture MẪU mang chú thích
+    // «(mẫu)» — chữ thường — nên nó là chuỗi HỖN HỢP hoa/thường và được giữ
+    // NGUYÊN VĂN. Đó là hành vi fail-closed đúng: thà hiện chữ in hoa của
+    // sách còn hơn khẳng định sai rằng một danh từ riêng không phải danh từ
+    // riêng. Tên chương THẬT (OCR mục lục in) KHÔNG có chữ thường nào, nên
+    // vẫn được viết hoa lại — test fixture THẬT ở dưới ghim điều đó.
+    expect(
+      find.textContaining('Chương IV · HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP'),
+      findsOneWidget,
+    );
+    // và luật vẫn ÁP cho chuỗi in hoa thuần: chương I của fixture MẪU là
+    // «MỞ ĐẦU (mẫu)» ⇒ cũng hỗn hợp ⇒ nguyên văn. Không có chương nào của
+    // fixture mẫu bị viết hoa lại, và đó là điều đang được ghim.
+    expect(find.textContaining('Chương IV · Hỗn hợp'), findsNothing);
     expect(find.textContaining('bài · ✨ 1 bài học SAM'), findsOneWidget);
     // ROUND 3 B1/B5: dải số bài từ mục lục; tên chương OCR nói rõ nguồn.
     expect(find.textContaining('Bài 16–17 · '), findsOneWidget);

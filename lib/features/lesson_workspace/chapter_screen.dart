@@ -10,6 +10,7 @@ import 'package:flutter/scheduler.dart' show SchedulerBinding, SchedulerPhase;
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
+import '../../core/display/lesson_title.dart';
 import '../subjects/lesson_index.dart';
 import 'widgets/fixture_chip.dart';
 import 'widgets/lesson_row.dart';
@@ -119,7 +120,7 @@ class _ChapterScreenState extends State<ChapterScreen> {
               ),
             ),
             Text(
-              LessonDocument.titleCase(widget.chapter.title),
+              displayTitle(widget.chapter.title),
               style: const TextStyle(
                 fontSize: WalType.display,
                 fontWeight: FontWeight.w700,
