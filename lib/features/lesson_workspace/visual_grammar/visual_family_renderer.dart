@@ -28,18 +28,121 @@ typedef OpenSourceCallback = void Function(ProvenanceRef ref);
 /// Renderer KHÔNG BAO GIỜ hiện id; nó chỉ có hàm này.
 typedef PageLabelLookup = String Function(String blockId);
 
+/// ⭐⭐ RÀO CHẮN DANH TÍNH — thứ mà một test theo TÊN TRƯỜNG không bắt được.
+///
+/// `VisualSpec` không có trường `book` / `lessonNo` / `slotKey`, và test đã
+/// khoá điều đó. Nhưng danh tính vẫn đi lọt qua GIÁ TRỊ: `blockIds` mang
+/// `06-sgk-khoa-hoc-tu-nhien-6:p062:…`. Một renderer chỉ cần
+/// `id.startsWith('06-sgk-khoa-hoc-tu-nhien-6')` là rẽ nhánh theo bài được,
+/// trong khi mọi rào theo tên trường vẫn xanh. Bảo đảm khi ấy chỉ là DANH
+/// NGHĨA — nó mạnh đúng bằng cái kênh hẹp nhất còn hở.
+///
+/// Nên tại RANH GIỚI VẼ, mọi `blockIds` bị thay bằng thẻ vô nghĩa (`h0`,
+/// `h1`…). Renderer cầm thẻ; chỉ `VisualRenderContext` giữ bảng thẻ → nguồn
+/// thật và mới đổi ngược được. Không phải renderer *không nên* đọc danh tính
+/// — nó KHÔNG CÒN GÌ ĐỂ ĐỌC.
+///
+/// Artefact trên đĩa vẫn giữ id block THẬT: chuỗi nguồn phải kiểm lại được.
+/// Chỉ bản mà renderer nhìn thấy mới bị che.
+VisualSection redactIdentityForRender(
+  VisualSection section,
+  Map<String, ProvenanceRef> handleToRef,
+) {
+  ProvenanceRef hide(ProvenanceRef ref) {
+    final handle = 'h${handleToRef.length}';
+    handleToRef[handle] = ref;
+    return ProvenanceRef(
+      blockIds: [handle],
+      // Tên luật, độ tin, khoảng ký tự: đã kiểm — KHÔNG mang danh tính bài.
+      derivationRule: ref.derivationRule,
+      trust: ref.trust,
+      claimId: ref.claimId,
+      charSpan: ref.charSpan,
+    );
+  }
+
+  return VisualSection(
+    id: section.id,
+    family: section.family,
+    title: section.title,
+    titleProvenance: hide(section.titleProvenance),
+    nodes: [
+      for (final n in section.nodes)
+        VisualNode(
+          id: n.id,
+          label: n.label,
+          detail: n.detail,
+          badge: n.badge,
+          status: n.status,
+          provenance: hide(n.provenance),
+          confidence: n.confidence,
+        ),
+    ],
+    edges: [
+      for (final e in section.edges)
+        VisualEdge(
+          fromId: e.fromId,
+          toId: e.toId,
+          label: e.label,
+          kind: e.kind,
+          status: e.status,
+          provenance: hide(e.provenance),
+        ),
+    ],
+    groups: [
+      for (final g in section.groups)
+        VisualGroup(
+          id: g.id,
+          label: g.label,
+          nodeIds: g.nodeIds,
+          axis: g.axis,
+          provenance: g.provenance == null ? null : hide(g.provenance!),
+        ),
+    ],
+    ordering: section.ordering,
+    emphasis: section.emphasis,
+    trust: section.trust,
+    childSummary: section.childSummary,
+  );
+}
+
 class VisualRenderContext {
-  const VisualRenderContext({
+  factory VisualRenderContext({
+    required VisualSection section,
+    required PageLabelLookup pageLabel,
+    required OpenSourceCallback onOpenSource,
+  }) {
+    final handles = <String, ProvenanceRef>{};
+    return VisualRenderContext._(
+      section: redactIdentityForRender(section, handles),
+      pageLabel: pageLabel,
+      onOpenSource: onOpenSource,
+      handleToRef: handles,
+    );
+  }
+
+  const VisualRenderContext._({
     required this.section,
     required this.pageLabel,
-    required this.onOpenSource,
+    required this._onOpenSource,
+    required this._handleToRef,
   });
 
+
+  /// Bản ĐÃ CHE — mọi `blockIds` là thẻ vô nghĩa.
   final VisualSection section;
   final PageLabelLookup pageLabel;
-  final OpenSourceCallback onOpenSource;
+  final OpenSourceCallback _onOpenSource;
+  final Map<String, ProvenanceRef> _handleToRef;
 
-  String pageOf(ProvenanceRef ref) => pageLabel(ref.primaryBlockId);
+  ProvenanceRef _real(ProvenanceRef redacted) =>
+      _handleToRef[redacted.primaryBlockId] ?? redacted;
+
+  /// «SGK KHTN 6 · trang 62» — host đổi thẻ thành lời trẻ.
+  String pageOf(ProvenanceRef ref) => pageLabel(_real(ref).primaryBlockId);
+
+  /// Mở «Sách viết gì ở đây». Renderer đưa thẻ; context đưa nguồn thật.
+  void openSource(ProvenanceRef ref) => _onOpenSource(_real(ref));
 }
 
 abstract class VisualFamilyRenderer {

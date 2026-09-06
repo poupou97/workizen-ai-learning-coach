@@ -94,7 +94,7 @@ class OrderedStepsRenderer extends VisualFamilyRenderer {
     final page = ctx.pageOf(n.provenance);
     return InkWell(
       key: stepKey(n.id),
-      onTap: () => ctx.onOpenSource(n.provenance),
+      onTap: () => ctx.openSource(n.provenance),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
