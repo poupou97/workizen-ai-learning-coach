@@ -48,6 +48,9 @@ const Map<String, String> _lexicon = {
   'story-attribution-v1':
       'Cuối mỗi câu chuyện sách ghi «Theo …» — SAM chép lại đúng dòng đó để '
           'con biết chuyện lấy từ đâu.',
+  'numbered-section-sequence-v1':
+      'Sách đánh số các phần của bài — SAM xếp lại đúng thứ tự ấy. Đây là thứ '
+          'tự SÁCH IN, không phải thứ tự bắt buộc phải làm.',
   'synthetic':
       'Đây là bài MẪU để thử máy — các câu trong hình không phải lời sách '
           'thật, con đừng học thuộc nhé.',

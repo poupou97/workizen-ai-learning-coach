@@ -279,6 +279,13 @@ class ComparisonValue {
       final text = v['text'];
       if (text != null && text is! String) return null;
       final src = v['sourceBlockId'];
+      // `grounding` khai rõ ⇒ TÔN TRỌNG. Nếu không đọc lại nó, một vòng
+      // ghi–đọc sẽ NÂNG «thừa kế của hàng» thành «ô tự khai nguồn»: bằng
+      // chứng tự mạnh lên qua một lần lưu tệp, đúng thứ làn này chống.
+      final declared = v['grounding'];
+      if (declared != null && ValueGrounding.parse(declared) == null) {
+        return null; // chuỗi lạ ⇒ từ chối, không đoán
+      }
       if (src == null) {
         return ComparisonValue(
           text: text as String?,
@@ -290,7 +297,8 @@ class ComparisonValue {
       return ComparisonValue(
         text: text as String?,
         sourceBlockId: src,
-        grounding: ValueGrounding.cellStated,
+        grounding:
+            ValueGrounding.parse(declared) ?? ValueGrounding.cellStated,
       );
     }
     return null;
