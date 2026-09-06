@@ -510,8 +510,7 @@ Coverage also deliberately fell by 41 activities and 10 lessons lost their exerc
 list entirely — recorded as a correctness gain with the count named.
 
 **6 · THIRD SIGNAL nào thực sự có ích?**
-Measured, and the answer separates cleanly. **[A4's systematic per-signal attribution
-is PENDING.]**
+Measured per signal, and the answer separates cleanly. Full attribution in §11.5.
 
 *Signals that earned their place — all of them read physical evidence from the page:*
 - **Raster / ink / geometry (A2):** `vinculum-raster-v1`, `ink-accounted-v1`,
@@ -810,6 +809,106 @@ for validated structured nodes **plus a per-block failure mode** · the four sub
 move to the visual side · a **semantic-yield gate** · and `khtn6_bai17.dart`'s 122
 hardcoded `const` lines become versioned data + compiled artefacts + a ~10-row rule
 registry + a small curated overlay.
+
+---
+
+## 11.5 Multi-signal verification (Lane A4) — which signal earned its place
+
+**PR #88**, CI PASS, Python **321 passed / 8 skipped**. Touches only
+`tool/corpus/verify/**` plus tests and two docs — no `lib/**`, no `repair/**`, no
+`mathfix/**`, no `legacy/**`.
+
+### The signal × case matrix (detect / propose-right / verify)
+
+| | A `3×10⁸` | B `Lý Thái Tổ` | C `bản sắc` | D `Cộng hoà` | E `cây ổi` | F `II` + watermark |
+|---|---|---|---|---|---|---|
+| deterministic `A.enumerator` | – | – | – | – | – | **Y / Y / Y** |
+| specialised parser (A2) | Y / – / – | – | – | – | – | Y / – / – |
+| Vietnamese lexical (A1) | – | – | – | – | – | – |
+| page furniture | – | – | – | – | – | **Y / Y / Y** |
+| **cross-corpus** | – | **Y / Y** / – | **Y / Y** / – | **abstains (correct)** | **Y / Y** / – | – |
+| **LLM semantic** | **Y / Y** / – | – | **Y / Y** / – | – | – | – |
+| external | appropriate | appropriate | not appropriate | appropriate | appropriate | not appropriate |
+
+**Case F is the only one where a signal both proposes a repair and independently
+verifies it — and no model is involved.** F is the `II` → `I1` + watermark row that
+Lane D's blind judgement scored 0/1; the deterministic enumerator and page-furniture
+signals close it end to end.
+
+### Measured, with false correction as P0
+
+| Signal | Detection recall | Correction precision | **False correction rate** | Proposals per 1,000 clean tokens |
+|---|---|---|---|---|
+| **Cross-corpus (strict)** | 0.500 | 0.938 | **0.063** | **0.92** |
+| Cross-corpus (recall policy) | 0.644 | — | 0.092 | 2.90 |
+| **LLM semantic** | **0.717** — best in lane | — | **1.000** | 13 proposals on 60 already-correct rows, **all wrong**; 26.7 % of rows flagged |
+
+Proper-noun false correction is **0.000** at all three cross-corpus policies. Router
+human-review rate **0.0900** over 1,200 real SDM blocks (LLM alone 0.416, cross-corpus
+alone 0.993, external **0.000**).
+
+**The LLM row is the strongest empirical statement of `LLM OUTPUT != TRUTH` this
+project has produced.** It has the best detection recall in the lane and a
+false-correction rate of 1.000 — it finds real trouble and is wrong about the fix every
+single time. Verdict: **detector only, never a proposer.**
+
+### The edge hypothesis — confirmed, and its refinement falsified
+
+The bbox-edge pattern from the 0/1 restore was tested at scale: **line-end tokens carry
+3–4× the interior unattested rate (n = 486,000)** — confirmed. The follow-on «runs into
+the right margin» refinement is **falsified at 0.5×**. Both reported.
+
+### «Cộng hoà» → «Cộng hoa» — the corpus writes the error 358× across ≥5 books
+
+Every signal abstains, correctly, and this is now asserted as a test. It corroborates
+Lane A1's independent finding from the other side (268 vs 303 pages). The doctrine it
+establishes: **frequency is evidence about the corpus, not about the truth.** A
+majority vote over a corpus that consistently mis-sets a diacritic will confidently
+propose the error.
+
+### The end-to-end result is a NEGATIVE, reported as one
+
+Running Lane A1's engine with Lane A4's signals: **0 repairs, 0 false corrections** —
+the independent-support rule held and nothing was rewritten. But **4 blocks moved
+TRUSTED → SUSPECT, 1 rightly and 3 wrongly: demotion precision 0.250.**
+
+**This produced the round's most useful methodological rule, and it is adopted here as
+standing:**
+
+> **`false_correction_rate` is the correct P0 for a *repairer* and is blind to a
+> *detector*.** A lane that raises detection recall must report **false demotion rate**
+> beside it — otherwise it scores perfectly by never repairing anything, while
+> withdrawing correct content from children.
+
+### Which signal earned a place
+
+- **Earned it unreservedly:** `A.enumerator` + `D.section_sequence` — the only
+  propose-and-verify pair; `B.page_furniture` (deletion-only); **edge position**.
+- **Earned it conditionally:** `D.cross_corpus` — **on the holdout, but not on History
+  prose.**
+- **Detector only:** `G.llm_semantic`.
+- **Did not earn a pipeline place:** `H.external` — consult rate **0.000**. The
+  question a Trusted Corpus asks is **source-bound**: «what does *this page* say», which
+  no external authority can answer.
+- **Not re-opened:** `F.third_stack`.
+
+**A measured negative kept with its evidence:** learning page furniture from repetition
+**fails** — the fuzzy cluster containing `C SỐNG` also contained «đời sống.». The form
+that works is a 3-string publisher registry plus a stray-single-letter guard.
+
+### Denominators — A4 took R13 seriously
+
+A4 measures over **OCR lines and SDM blocks, never the TSL**, so its router set still
+contains the **77 `role=empty` blocks (6.4 %)** that vanish downstream. Index excludes
+the 13 evaluated books.
+
+### The correction workflow (schema and triage only, no UI)
+
+`CorrectionRecord{record_id, source_block_id, original, proposed, reason, reporter_type,
+source_evidence, evidence[], corpus_version, reported_at, status, validation, reviewer,
+reviewed_at, resulting_corpus_version, prior_record_id}` →
+`REPORTED → VALIDATING | NEEDS_SOURCE | ACCEPTED | REJECTED`. **A report without a page
+reading is a detection, not a correction**, and users never overwrite canonical truth.
 
 ---
 
