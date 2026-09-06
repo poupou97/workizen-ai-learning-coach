@@ -310,6 +310,49 @@ because the intuition is natural and wrong.
 
 ---
 
+## 5b · End-to-end: A1's engine with A4's signals installed — and it is a NEGATIVE on this set
+
+Every other number above measures a signal on its own. This one measures what the *framework* does once
+A4's signals are registered in it, on Lane C's 51 human-verified Bài 8 blocks
+(`tool/corpus/verify/run_engine.py`, scored with A1's own `ledger.false_correction_report`).
+
+| | strict | recall |
+|---|---|---|
+| candidates proposed | 4 | 4 |
+| **repairs applied** | **0** | **0** |
+| **false corrections** (A1's P0 metric) | **0 — nothing was changed** | **0** |
+| TRUSTED → SUSPECT demotions | 4 | 4 |
+| — of which the print says really is a slip | **1** | 1 |
+| — of which the print says is verbatim | **3** | 3 |
+| **demotion precision** | **0.250** | 0.250 |
+| wrong served prevented | 1 | 1 |
+| **correct served lost** | **3** | 3 |
+
+**Two things are true at once and both matter.**
+
+The framework held. A cross-corpus candidate has support from layer `D` only, `xcorpus.independent-context-v1`
+returns `insufficient`, and A1's engine treats `insufficient` exactly like `rejected` for serving. So
+**nothing was rewritten and the false-correction rate is zero because nothing changed** — the
+independent-support rule did the job it exists for, without a threshold being tuned.
+
+And the cost is real. A1's engine converts «TRUSTED block, failure detected, nothing validated» into
+`SUSPECT`, which is a withhold — and `false_correction_report` **structurally cannot see it**, because no
+value changed. On this set that is **3 correct blocks lost to catch 1 wrong one**. The one caught
+(`p040:008`, «NGÔ QUYỀN ĐẠI PHẢ QUÂN NAM HÃN» — printed PHÁ/HÁN) is a real teaching-relevant slip; the
+three lost are Bài 8's poetry and narrative («Phất cờ khởi nghĩa giết người tà gian», «Tiếng thơm dài tạc
+đá vàng nước ta»).
+
+**So: on rare literary History prose, this signal costs more than it earns, and the honest report is that
+it should not be run there without the human layer attached.** That is consistent with, and explains, the
+weak `L-lanec` numbers in §2 — and it is why the router's escalation exists. All four demotions were
+escalated by the router, which is the only reason this is a queue rather than a silent coverage loss.
+
+Reported as a new metric because A1's P0 metric cannot express it: **`false_correction_rate` is the right
+P0 for a repairer and is blind to a detector.** A lane whose job is raising detection recall must report
+its **false demotion rate** beside it, or it can look perfect by never repairing anything.
+
+---
+
 ## 6 · The router — human review rate **0.0900**
 
 Measured on **1,200 real SDM blocks** with their real roles, guards and agreement:
@@ -374,7 +417,7 @@ frequency is not truth here either.
 |---|---|
 | **`A.enumerator`** (+ `D.section_sequence`) | **EARNED IT, unreservedly.** The only signal in the set that both proposed and independently verified a repair. No corpus, no model, ~120 lines, zero measured false-correction risk, and it closes half of a real audit row. |
 | **`B.page_furniture`** (known-series registry) | **EARNED IT.** Deletion-only, so it cannot invent a wrong word; closes the other half of the same row; three auditable strings. Its *learned* form did **not** earn its place and is reported as a negative. |
-| **`D.cross_corpus`** | **EARNED IT, with a stated boundary.** The only signal that catches B and E, and the only one that answers D correctly *for the right reason*. 0.92–2.90 proposals per 1,000 clean tokens, proper-noun FCR 0.000, common-word FCR 0.063–0.092. Weak on rare literary prose and blind to systematic corpus-wide OCR errors — both measured. |
+| **`D.cross_corpus`** | **EARNED IT ON THE HOLDOUT, NOT ON HISTORY PROSE.** The only signal that catches B and E, and the only one that answers D correctly *for the right reason*. 0.92–2.90 proposals per 1,000 clean tokens, proper-noun FCR 0.000, common-word FCR 0.063–0.092. Weak on rare literary prose and blind to systematic corpus-wide OCR errors — both measured. |
 | **`G.llm_semantic`** | **EARNED ITS PLACE AS A DETECTOR ONLY.** Recall 0.717 is the best in the lane; 13/13 wrong proposals on already-correct text is disqualifying for anything else. The router calls it to detect. |
 | **`H.external`** | **DID NOT EARN A PLACE IN THIS ROUND'S PIPELINE.** Consulted 0.000 of the time on 1,200 real blocks, and the audit says why: the question a Trusted Corpus asks is source-bound. Kept as a schema and a routing rule, with no network client, because when it *is* appropriate (a constant, a historical name) the evidence discipline has to already exist. |
 | **`E.human`** | **STRUCTURALLY NECESSARY, NOT YET MEASURABLE.** Lane C's Bài 8 result already shows a human read deciding both for and against machine corrections in one block. A4 ships the schema and the triage rule; the review-capacity commitment is a Founder decision. |
@@ -418,6 +461,7 @@ of those proposals still has to clear A1's independent-support rule before anyth
 ```
 python3 tool/corpus/verify/run_xcorpus.py      # index + context scan + cross-corpus, 3 policies (~5 min)
 python3 tool/corpus/verify/run_llm.py --offline  # re-score from the cache; drop --offline to call claude
+python3 tool/corpus/verify/run_engine.py --policy strict   # A1's engine with A4's signals
 python3 tool/corpus/verify/run_external.py     # the recorded external lookups + the refusal
 python3 tool/corpus/verify/run_furniture.py    # furniture learners + the edge-risk table
 python3 tool/corpus/verify/run_matrix.py       # the signal × case matrix + router rates
@@ -427,4 +471,4 @@ python3 -m unittest discover -s tool/tests -p 'test_*.py'
 
 Outputs (gitignored): `poc-out/round5/verify/{xcorpus-index*.json, xcorpus-report.json,
 xcorpus-decisions.jsonl, llm-report.json, llm-decisions.jsonl, llm-cache/, furniture-report.json,
-matrix-report.json, external-evidence.jsonl, external-report.json}`. No crop, no TSL and no verbatim SGK text is committed.
+matrix-report.json, external-evidence.jsonl, external-report.json, engine-report-*.json, engine-ledger-*.jsonl}`. No crop, no TSL and no verbatim SGK text is committed.
