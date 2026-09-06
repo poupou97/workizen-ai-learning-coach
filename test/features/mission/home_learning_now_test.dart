@@ -22,6 +22,7 @@ import 'package:learning_coach/core/lesson_model/lesson_document.dart';
 import 'package:learning_coach/core/lesson_model/next_action.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/runtime_plan.dart';
 import 'package:learning_coach/features/mission/mission_center_screen.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
@@ -44,12 +45,17 @@ Future<MissionData> _data() => buildMissionFromStore(
   index: _khtn6(),
 );
 
+/// Cách học mà nút vừa bấm hứa mở — bài kiểm đọc lại để canh rằng Home không
+/// hứa một đằng mở một nẻo (lỗi máy thật vòng 1).
+WorkspaceView? openedAt;
+
 Future<void> _pump(
   WidgetTester t, {
   Set<WorkspaceView> opened = const {},
   LessonDocument? doc,
   void Function(LessonDocument)? onOpen,
 }) async {
+  openedAt = null;
   final d = doc ?? loadSyntheticDoc();
   await t.pumpWidget(
     fixtureHost(
@@ -57,7 +63,10 @@ Future<void> _pump(
         data: await _data(),
         onOpenSubjects: () {},
         workspaceLesson: d,
-        onOpenWorkspaceLesson: onOpen ?? (_) {},
+        onOpenWorkspaceLesson: (d, {at}) {
+          openedAt = at;
+          onOpen?.call(d);
+        },
         openedViews: opened,
         lessonNext: founderNextAction(d, seen: opened),
       ),
@@ -229,8 +238,46 @@ void main() {
     expect(opened?.slotKey, loadSyntheticDoc().slotKey);
   });
 
-  testWidgets('nhãn «BẢN THỬ NGHIỆM» không mất khi màn được sắp lại', (t) async {
+  testWidgets('⭐⭐ nút mang tên một cách học ⇒ mở ĐÚNG cách học ấy — Home '
+      'không được hứa «📖 Đọc» rồi mở màn hỏi lại «con muốn học cách nào?»', (
+    t,
+  ) async {
+    // Lỗi máy thật vòng 1 (round7-v1-device/03b-mode-picker.png).
     await _pump(t);
-    expect(find.textContaining('BẢN THỬ NGHIỆM'), findsWidgets);
+    await t.tap(find.byKey(MissionCenterScreen.nextActionCtaKey));
+    expect(openedAt, WorkspaceView.read, reason: 'nút nói Đọc thì phải mở Đọc');
+
+    await _pump(t, opened: {WorkspaceView.read, WorkspaceView.visual});
+    await t.tap(find.byKey(MissionCenterScreen.nextActionCtaKey));
+    expect(openedAt, WorkspaceView.tutor);
+
+    // «CÓ THỂ LÀM TIẾP» cũng vậy — mỗi nút mở đúng cách học nó nêu tên.
+    await _pump(t);
+    await t.tap(
+      find.byKey(MissionCenterScreen.continueChipKey(WorkspaceView.visual)),
+    );
+    expect(openedAt, WorkspaceView.visual);
+  });
+
+  testWidgets('đã mở hết ⇒ R5 không nêu tên cách học nào ⇒ mở màn «Vào bài '
+      'học» như cũ (SAM chưa hứa gì thì không được hứa hộ)', (t) async {
+    await _pump(
+      t,
+      opened: {
+        WorkspaceView.read,
+        WorkspaceView.visual,
+        WorkspaceView.tutor,
+      },
+    );
+    await t.tap(find.byKey(MissionCenterScreen.nextActionCtaKey));
+    expect(openedAt, isNull);
+  });
+
+  testWidgets('nhãn nguồn «Bản thử nghiệm» không mất khi màn được sắp lại', (
+    t,
+  ) async {
+    await _pump(t);
+    expect(find.byKey(FixtureChip.chipKey), findsOneWidget);
+    expect(find.textContaining('Bản thử nghiệm'), findsWidgets);
   });
 }

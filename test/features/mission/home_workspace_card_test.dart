@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
 import 'package:learning_coach/features/mission/mission_center_screen.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
 
@@ -43,15 +44,22 @@ void main() {
           data: await _data(),
           onOpenSubjects: () {},
           workspaceLesson: doc,
-          onOpenWorkspaceLesson: (d) => opened = d,
+          onOpenWorkspaceLesson: (d, {at}) => opened = d,
         ),
       ),
     );
     await t.pumpAndSettle();
     expect(find.byKey(MissionCenterScreen.workspaceCardKey), findsOneWidget);
-    // ROUND 7 V1: thẻ nay mở đầu bằng «ĐANG HỌC» — nhãn bản thử nghiệm KHÔNG
-    // được mất khi màn được sắp lại.
-    expect(find.text('ĐANG HỌC · BÀI HỌC SAM · BẢN THỬ NGHIỆM'), findsOneWidget);
+    // ROUND 7 V1 lượt 2: eyebrow còn MỘT từ; nhãn nguồn thành chip gọn — cùng
+    // widget và cùng bộ chữ với workspace. Nó KHÔNG được mất khi màn sắp lại.
+    expect(find.text('ĐANG HỌC'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(MissionCenterScreen.workspaceCardKey),
+        matching: find.byKey(FixtureChip.chipKey),
+      ),
+      findsOneWidget,
+    );
     final inCard = find.descendant(
       of: find.byKey(MissionCenterScreen.workspaceCardKey),
       matching: find.textContaining('Bài 17 · TÁCH CHẤT'),
@@ -90,7 +98,7 @@ void main() {
           data: await _data(),
           onOpenSubjects: () {},
           workspaceLesson: loadSyntheticDoc(),
-          onOpenWorkspaceLesson: (_) {},
+          onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );

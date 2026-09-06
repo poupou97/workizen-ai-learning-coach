@@ -120,7 +120,7 @@ Future<void> _journey(WidgetTester t, LessonDocument d, String tag) async {
         data: data,
         onOpenSubjects: () {},
         workspaceLesson: d,
-        onOpenWorkspaceLesson: (_) {},
+        onOpenWorkspaceLesson: (_, {at}) {},
       ),
     ),
   );
@@ -337,7 +337,7 @@ void main() {
           onOpenSubjects: () {},
           workspaceLesson: loadSyntheticDoc(),
           researchLessons: [d],
-          onOpenWorkspaceLesson: (_) {},
+          onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );

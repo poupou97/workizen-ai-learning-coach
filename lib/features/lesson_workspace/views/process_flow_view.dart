@@ -90,11 +90,14 @@ class ProcessFlowView extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: WalSpacing.xs),
           child: Text(
+            // ROUND 7 · V1 — chạm một bước nay được GIẢI THÍCH (bước mấy
+            // trong mấy, lời sách, bước trước/sau), không chỉ «tra cứu».
+            // Chú thích phải nói đúng thứ sắp xảy ra.
             steps.any((s) => s.isWithheld)
                 ? 'Mỗi ô là một bước sách viết · ô xám là bước SAM để trống '
-                      '(xem trong sách) · chạm một bước để tra cứu lời sách'
+                      '(xem trong sách) · chạm một bước để SAM giải thích'
                 : 'Mỗi ô là một bước sách viết, mũi tên là thứ tự làm · chạm '
-                      'một bước để tra cứu lời sách',
+                      'một bước để SAM giải thích',
             key: legendKey,
             style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
           ),

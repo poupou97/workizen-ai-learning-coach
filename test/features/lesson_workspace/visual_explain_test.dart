@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/content_trust.dart';
 import 'package:learning_coach/core/lesson_model/semantic_data.dart';
+import 'package:learning_coach/features/lesson_workspace/views/process_flow_view.dart';
 import 'package:learning_coach/features/lesson_workspace/views/visual_explain.dart';
 import 'package:learning_coach/features/lesson_workspace/views/visual_explain_card.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_view.dart';
@@ -213,7 +214,7 @@ void main() {
       );
     });
 
-    testWidgets('⭐ chạm một bước ⇒ «Bước n trong N» + lời sách của bước', (
+    testWidgets('⭐ chạm một bước ⇒ «Bước n trong N» + hàng xóm của bước', (
       t,
     ) async {
       final d = loadSyntheticDoc();
@@ -229,7 +230,48 @@ void main() {
         find.textContaining('Bước 2 trong ${proc.steps.length} bước'),
         findsOneWidget,
       );
-      expect(find.text(explainVerbatimLabel), findsOneWidget);
+      expect(find.textContaining('Bước trước (bước 1)'), findsOneWidget);
+    });
+
+    testWidgets('⭐⭐ lời sách của bước KHÔNG in hai lần — block nguồn của '
+        'sheet chính là bước ấy (lỗi máy thật vòng 2)', (t) async {
+      final d = loadSyntheticDoc();
+      final proc = d.semantic.whereType<ProcessSemantic>().first;
+      final step = proc.steps.firstWhere((s) => s.text != null);
+      await t.pumpWidget(
+        fixtureHost(Scaffold(body: VisualView(doc: d, onShowInRead: (_) {}))),
+      );
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(ProcessFlowView.stepKey(step.order)));
+      await t.pumpAndSettle();
+      expect(find.byKey(VisualExplainCard.rootKey), findsOneWidget);
+      // Phần «Sách viết ở bước này» BIẾN MẤT khi nó trùng phần nguồn ngay dưới.
+      expect(find.text(explainVerbatimLabel), findsNothing);
+      expect(find.text('Sách viết'), findsOneWidget);
+      // Đếm TRONG sheet — sơ đồ phía sau vẫn còn trong cây widget, và nút của
+      // nó mang đúng câu ấy một cách chính đáng.
+      final shown = t
+          .widgetList<Text>(
+            find.descendant(
+              of: find.byKey(const Key('source-sheet')),
+              matching: find.byType(Text),
+            ),
+          )
+          .map((w) => w.data ?? '')
+          .where((s) => s.contains(step.text!.trim()))
+          .length;
+      expect(shown, 1, reason: 'một câu sách, in một lần trong sheet');
+    });
+
+    testWidgets('bước KHÔNG trùng block nguồn ⇒ vẫn in lời bước', (t) async {
+      // Hai bước cùng trỏ về MỘT block: lời của bước ≠ lời cả block.
+      final d = loadSyntheticDoc();
+      final proc = d.semantic.whereType<ProcessSemantic>().first;
+      final e = explainForStep(proc, proc.steps.first);
+      expect(e.verbatim, isNotNull);
+      expect(e.withoutVerbatim().verbatim, isNull);
+      expect(e.withoutVerbatim().facts, e.facts);
+      expect(e.withoutVerbatim().kicker, e.kicker);
     });
   });
 

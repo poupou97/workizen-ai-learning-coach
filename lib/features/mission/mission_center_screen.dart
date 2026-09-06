@@ -27,6 +27,8 @@ import '../../core/stories/stories_store.dart';
 import '../../core/store/learner_profile.dart';
 import '../camera/camera_demo_flow.dart';
 import '../parent/parent_tonight_screen.dart';
+import '../lesson_workspace/widgets/fixture_chip.dart';
+import '../lesson_workspace/widgets/trust_sheet.dart';
 import 'mission_data.dart';
 import '../subjects/subject_display.dart';
 
@@ -132,7 +134,15 @@ class MissionCenterScreen extends StatelessWidget {
   /// là bản thử nghiệm; nó KHÔNG thay thẻ «Việc SAM đề xuất» (hợp đồng G2
   /// của Track A giữ nguyên) — chỉ làm sản phẩm NHÌN THẤY được từ Home.
   final LessonDocument? workspaceLesson;
-  final void Function(LessonDocument)? onOpenWorkspaceLesson;
+  /// ⭐ ROUND 7 · V1 — [at] là CÁCH HỌC mà nút vừa hứa mở.
+  ///
+  /// Lỗi máy thật vòng 1: Home nói «📖 Đọc ▸», trẻ chạm, và app mở màn «Con
+  /// muốn học bài này theo cách nào?» — tức HỎI LẠI đúng câu Home vừa trả lời
+  /// hộ. Nút mang tên một cách học thì phải mở ĐÚNG cách học ấy. `null` (thẻ
+  /// nghiên cứu, thẻ phụ) ⇒ giữ màn «Vào bài học» như cũ: ở đó SAM chưa hứa
+  /// gì cả.
+  final void Function(LessonDocument doc, {WorkspaceView? at})?
+      onOpenWorkspaceLesson;
 
   /// ⭐ ROUND 4 (Lane C, Golden Slice #2) — LÁT CẮT NGHIÊN CỨU của lớp KHÁC
   /// (LS&ĐL 5 Bài 8 trên máy của học sinh lớp 6): hiện thành thẻ riêng, ghi
@@ -526,18 +536,19 @@ class MissionCenterScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // Nhãn «bản thử nghiệm» là BẮT BUỘC khi tài liệu là fixture — nó
-        // không được biến mất vì màn được sắp lại.
-        Text(
-            doc.isFixture
-                ? 'ĐANG HỌC · BÀI HỌC SAM · BẢN THỬ NGHIỆM'
-                : 'ĐANG HỌC · BÀI HỌC SAM',
-            style: const TextStyle(
-                fontSize: WalType.secondary,
+        // ROUND 7 · V1 lượt 2 (máy thật, 01-home.png): một dòng nhãn ba vế
+        // IN HOA 15sp XUỐNG HAI DÒNG và át cả tên bài. Nhãn «bản thử nghiệm»
+        // là BẮT BUỘC — nhưng nó là một SỰ THẬT VỀ NGUỒN, không phải tiêu đề
+        // của khu. Tách ra: eyebrow một từ, nhãn nguồn thành chip gọn dưới
+        // dòng trang, dùng LẠI `FixtureChip` của workspace (một bộ chữ, một
+        // đường mở sheet «Nguồn & độ tin»).
+        const Text('ĐANG HỌC',
+            style: TextStyle(
+                fontSize: 12,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.1,
                 color: WalColors.inkSoft)),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(displayLessonLabel(doc.lessonNo, doc.title),
             style: const TextStyle(
                 fontSize: WalType.title,
@@ -548,6 +559,16 @@ class MissionCenterScreen extends StatelessWidget {
         Text(where,
             style: const TextStyle(
                 fontSize: WalType.secondary, color: WalColors.inkSoft)),
+        if (doc.isFixture) ...[
+          const SizedBox(height: WalSpacing.sm),
+          Builder(
+            builder: (context) => FixtureChip(
+              trust: doc.trust,
+              compact: true,
+              onTap: () => showTrustSheet(context, doc: doc),
+            ),
+          ),
+        ],
         const SizedBox(height: WalSpacing.md),
         _evidenceBar(ways.length, opened),
         const SizedBox(height: WalSpacing.sm),
@@ -577,7 +598,7 @@ class MissionCenterScreen extends StatelessWidget {
                         BorderRadius.circular(WalSpacing.radiusButton))),
             onPressed: onOpenWorkspaceLesson == null
                 ? null
-                : () => onOpenWorkspaceLesson!(doc),
+                : () => onOpenWorkspaceLesson!(doc, at: next?.view),
             child: Text(ctaLabel,
                 style: const TextStyle(
                     fontSize: WalType.body, fontWeight: FontWeight.w700)),
@@ -646,7 +667,7 @@ class MissionCenterScreen extends StatelessWidget {
                               BorderRadius.circular(WalSpacing.radiusChip))),
                   onPressed: onOpenWorkspaceLesson == null
                       ? null
-                      : () => onOpenWorkspaceLesson!(doc),
+                      : () => onOpenWorkspaceLesson!(doc, at: rest[i]),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text('${rest[i].icon} ${rest[i].label}',

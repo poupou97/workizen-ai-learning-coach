@@ -223,7 +223,7 @@ class _VisualViewState extends State<VisualView> {
     final comparisonAsMindmap =
         s is ComparisonSemantic && !asTable && VisualView.mindmapFits(s);
     return Container(
-      key: VisualView.cardKey(s.id),
+      key: _anchorFor(s.id),
       padding: const EdgeInsets.fromLTRB(
         WalSpacing.sm,
         WalSpacing.md,
@@ -235,7 +235,7 @@ class _VisualViewState extends State<VisualView> {
         borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
       ),
       child: Column(
-        key: _anchorFor(s.id),
+        key: VisualView.cardKey(s.id),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
@@ -309,7 +309,9 @@ class _VisualViewState extends State<VisualView> {
       ConceptMapSemantic(:final relations) => relations.first.sourceBlockId,
       TimelineSemantic(:final events) => events.first.sourceBlockId,
     };
-    return '$n · ${_pageOf(firstSrc)} · chữ sách, SAM chỉ xếp lại';
+    // Máy thật lượt 2: «3 bước · SGK KHTN 6 · trang 61 · chữ sách…» xuống hai
+    // dòng, và «SGK KHTN 6» đã nằm ở hàng tiêu đề ngay trên. Bỏ vế lặp.
+    return '$n · ${_pageOnly(firstSrc)} · chữ sách, SAM chỉ xếp lại';
   }
 
   /// «Vì sao SAM vẽ thế này» — MỘT DÒNG, mở sheet. Vòng 5/6 để nguyên văn
@@ -449,13 +451,22 @@ class _VisualViewState extends State<VisualView> {
   void _openExplain(VisualExplain e, String blockId) => _openSource(
     blockId,
     explain: VisualExplainCard(
-      explain: e,
+      // Lời sách của nút TRÙNG lời sách của block nguồn ⇒ in một lần thôi.
+      explain: _sameAsSource(e.verbatim, blockId) ? e.withoutVerbatim() : e,
       onOpenLink: (l) {
         Navigator.of(context).maybePop();
         _scrollTo(l.semanticId);
       },
     ),
   );
+
+  /// Lời giải thích và block nguồn mang ĐÚNG một câu ⇒ không in hai lần.
+  bool _sameAsSource(String? verbatim, String blockId) {
+    if (verbatim == null) return false;
+    final b = widget.doc.blockById(blockId);
+    final text = b == null ? null : LessonDocument.textOf(b);
+    return text != null && text.trim() == verbatim.trim();
+  }
 
   /// Nhảy tới sơ đồ khác của CÙNG bài (từ «Bài này dùng ở đâu»).
   void _scrollTo(String semanticId) {
@@ -471,6 +482,14 @@ class _VisualViewState extends State<VisualView> {
   String _pageOf(String blockId) {
     final b = widget.doc.blockById(blockId);
     return b == null ? 'sách' : widget.doc.sourceLineForBlock(b);
+  }
+
+  /// Chỉ vế TRANG của dòng nguồn («SGK KHTN 6 · trang 61» → «trang 61») —
+  /// tên sách đã ở hàng tiêu đề của màn, in lại là tốn một dòng đọc.
+  String _pageOnly(String blockId) {
+    final src = _pageOf(blockId);
+    final i = src.indexOf(' · ');
+    return i < 0 ? src : src.substring(i + 3);
   }
 
   // ── Process ──

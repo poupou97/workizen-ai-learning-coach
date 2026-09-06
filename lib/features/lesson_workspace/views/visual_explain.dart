@@ -83,6 +83,23 @@ class VisualExplain {
 
   /// Bước bị giữ lại: lời giải thích nói VÌ SAO trống, không giả vờ có chữ.
   final String? withheldNote;
+
+  /// ⭐ Bản KHÔNG lặp lời sách.
+  ///
+  /// Lỗi máy thật vòng 2 (`14-AFTER-tap-step-explain.png`): với một BƯỚC quy
+  /// trình, block nguồn của sheet CHÍNH LÀ bước ấy — nên cùng một câu sách in
+  /// hai lần trên một màn, «Sách viết ở bước này» rồi «Sách viết». Trên Nokia
+  /// 6.1 câu đó dài năm dòng: mười dòng cho một câu. Chỗ biết hai chuỗi có
+  /// trùng nhau không là màn hình (nó có tài liệu), nên phép cắt nằm ở đây
+  /// dưới dạng một bản sao, không phải một cờ trong luật.
+  VisualExplain withoutVerbatim() => VisualExplain(
+    headline: headline,
+    kicker: kicker,
+    facts: facts,
+    links: links,
+    linksEmptyNote: linksEmptyNote,
+    withheldNote: withheldNote,
+  );
 }
 
 /// Nhãn phần «liên hệ» — một bộ chữ duy nhất cho mọi sơ đồ.

@@ -560,11 +560,15 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         // nhất; Home chỉ trình bày kết quả của nó.
                         openedViews: _workspaceOpened(_profile!),
                         lessonNext: _workspaceNext(_profile!),
-                        onOpenWorkspaceLesson: (doc) async {
+                        // ⭐ ROUND 7 · V1 — nút Home mang tên một cách học ⇒
+                        // mở ĐÚNG cách học ấy. Lỗi máy thật vòng 1: «📖 Đọc ▸»
+                        // mở ra màn hỏi «con muốn học theo cách nào?».
+                        onOpenWorkspaceLesson: (doc, {at}) async {
                           await Navigator.of(context).push(MaterialPageRoute(
                               builder: (_) => LessonWorkspaceScreen(
                                   doc: doc,
                                   trace: WorkspaceTrace.session,
+                                  initialView: at,
                                   learnerId: _profile!.learnerId)));
                           if (mounted) setState(() {});
                         },

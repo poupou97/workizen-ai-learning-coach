@@ -46,7 +46,7 @@ void main() {
           onOpenSubjects: () {},
           workspaceLesson: b17,
           researchLessons: [b8],
-          onOpenWorkspaceLesson: (d) => opened = d,
+          onOpenWorkspaceLesson: (d, {at}) => opened = d,
         ),
       ),
     );
@@ -81,7 +81,7 @@ void main() {
           onOpenSubjects: () {},
           workspaceLesson: b17,
           researchLessons: [b8],
-          onOpenWorkspaceLesson: (_) {},
+          onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );
@@ -137,7 +137,7 @@ void main() {
           data: await _data(),
           onOpenSubjects: () {},
           workspaceLesson: loadSyntheticDoc(),
-          onOpenWorkspaceLesson: (_) {},
+          onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );
