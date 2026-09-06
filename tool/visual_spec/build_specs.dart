@@ -82,6 +82,17 @@ void main(List<String> args) {
   }
 
   // ── đường 2: tài liệu (mục đánh số) — NHIỀU MÔN, §19 ──
+  // Đo TRƯỚC-LỌC để con số dương-tính-giả không biến mất khỏi báo cáo.
+  var firedAll = 0;
+  var firedTeacher = 0;
+  for (final f in goldPageFiles()) {
+    final any = goldPageToDocument(f, allowTeacherBook: true);
+    if (any == null) continue;
+    if (compileNumberedSequence(any) == null) continue;
+    firedAll++;
+    if (goldPageToDocument(f) == null) firedTeacher++;
+  }
+
   for (final f in goldPageFiles()) {
     final doc = goldPageToDocument(f);
     if (doc == null) continue;
@@ -129,6 +140,10 @@ void main(List<String> args) {
   stdout.writeln('section trong artefact: ${artifact.sectionCount}');
   stdout.writeln('họ hình               : ${artifact.sectionsByFamily}');
   stdout.writeln('môn có ít nhất 1 spec : ${subjects.length}');
+  stdout.writeln(
+    'luật mục-đánh-số      : bắn $firedAll/${goldPageFiles().length} trang gold; '
+    '$firedTeacher trong đó là SÁCH GIÁO VIÊN (đã lọc, không tới trẻ)',
+  );
   stdout.writeln('artefact              : $out (${encoded.length} bytes)');
   stdout.writeln('lệnh gọi mô hình      : 0 (không có trong cây import)');
 }

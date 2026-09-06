@@ -129,9 +129,17 @@ LessonBlock? _blockOf(
 }
 
 /// Đọc một trang gold thành `LessonDocument`. `null` ⇒ trang không dựng được.
-LessonDocument? goldPageToDocument(File file) {
+///
+/// ⭐ MẶC ĐỊNH BỎ SÁCH GIÁO VIÊN. Đo lần đầu cho thấy luật mục-đánh-số bắn
+/// đúng 6/54 trang, nhưng **3 trong 6 là SGV** — và một trong ba («1. KIẾN
+/// THỨC · 2. KĨ NĂNG · 3. PHẨM CHẤT») là danh mục năng lực của giáo viên,
+/// thứ tự không mang nghĩa gì cho trẻ. Trang gold có sẵn ô `docType`, nên
+/// đây là một CỬA CÓ THẬT chứ không phải phỏng đoán. Đặt
+/// `allowTeacherBook: true` để đo lại con số chưa lọc.
+LessonDocument? goldPageToDocument(File file, {bool allowTeacherBook = false}) {
   final j = jsonDecode(file.readAsStringSync());
   if (j is! Map) return null;
+  if (!allowTeacherBook && j['docType'] != 'SGK') return null;
   final book = j['book'];
   final page = j['page'];
   final subject = j['subject'];

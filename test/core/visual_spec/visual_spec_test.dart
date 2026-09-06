@@ -19,7 +19,7 @@ Map<String, Object?> _prov([String rule = 'r-v1']) => {
 
 Map<String, Object?> _node(String id, {Object? label = 'chữ sách'}) => {
   'id': id,
-  if (label != null) 'label': label,
+  'label': ?label,
   'status': 'stated',
   'provenance': _prov(),
 };
@@ -35,13 +35,13 @@ Map<String, Object?> _section({
   'titleProvenance': _prov(),
   'trust': 'trustedStructuredLesson',
   'nodes': nodes ?? [_node('a'), _node('b')],
-  if (edges != null) 'edges': edges,
+  'edges': ?edges,
 };
 
 Map<String, Object?> _spec({Map<String, Object?>? primary, List? secondary}) => {
   'specVersion': VisualSpec.currentVersion,
   'primary': primary ?? _section(),
-  if (secondary != null) 'secondary': secondary,
+  'secondary': ?secondary,
 };
 
 void main() {
