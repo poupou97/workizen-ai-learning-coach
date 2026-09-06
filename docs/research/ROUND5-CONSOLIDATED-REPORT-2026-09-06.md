@@ -385,9 +385,144 @@ rebuilt there.
 
 **[PENDING — requires Lane B device evidence and Lane D packs]**
 
-## 11. Answers to the Founder's ten questions
+## 11. Answers to the Founder's ten checkpoint questions (§18)
 
-**[PENDING]**
+**1 · DATA CHÍNH XÁC HƠN BAO NHIÊU?**
+On the measured batches, substantially — but **not for a child yet**. False trust
+0.619 → **0.318**; teaching-critical 0.476 → **0.100**; display fidelity 0.595 →
+**0.164**; reading order 0.455 → **0.000**. Role went the wrong way, 0.116 →
+**0.151**. Two counterweights that must travel with those numbers: over-withholding
+got **worse** (0.400 → **0.633**), and the corrected served share, once R13's silent
+loss is in the denominator, is **0.589** on the evaluation set and **0.523** on the
+holdout rather than the 0.632 / 0.613 reported. `trusted` = 0 and `eligible for
+teaching` = 0, unchanged and by design.
+
+**2 · LỖI NÀO ĐÃ ĐƯỢC SỬA THẬT, thay vì chỉ withhold?**
+Three classes were genuinely repaired, and one important thing was not.
+
+- **Attachment — closed. 8/8 = 1.000.** Every attachment defect in the batch, fixed
+  in the pipeline, plus the R1 class closed on a second book (tail-scan 1/6 → 0/6).
+- **Math expressions — repaired and validated.** 10 restored, all hand-verified,
+  including on a holdout; 2 fabricated expressions → 0; physics false trust −3 blocks
+  at zero over-withhold cost across 36,029 blocks / 1,410 pages.
+- **History dispositions — 6 of 16 withheld Bài 8 blocks became restorable**, every
+  one print-confirmed, **with no guard changed**, recovering the events block and the
+  «Âu Lạc (179 TCN)» anchor that round 4 had lost.
+- **Not repaired:** the mutilated-structure class (defect 8) on the path a child
+  reads — 9 → 9 and 13 → 13 — and the two named recognition defects `II` → `I1` and
+  `3×10⁸` → `3×10°`, which are born in OCR and need recognition on the crop, not a
+  parser.
+
+**3 · BAO NHIÊU NỘI DUNG ĐÚNG ĐÃ ĐƯỢC RESTORE?**
+Counted honestly and separated by mechanism, because the two differ by everything:
+
+| Path | Restored | Precision |
+|---|---|---|
+| Guard relaxation (legacy batch 2) | 1 of 19 falsely-withheld | **0 / 1 = 0.000** |
+| Verdicts transferred (legacy batch 1) | 4 of 12 falsely-withheld | **3 / 6 = 0.500** |
+| Validated math repair (A2) | 10 | **10 / 10 = 1.000**, holdout **8 / 8** |
+| History disposition repair (C) | 6 of 16, + 1 recovered event anchor | print-confirmed, guard unchanged |
+
+**The lesson is in the first row against the third.** Relaxing a guard restored one
+region and it was wrong. A deterministic validator restored ten and all ten were
+right. And **the audit's own labels predicted it**: 3 of 4 OVER-withheld restores
+came back correct; **both** SAFE-refusal restores came back **wrong**.
+
+**4 · WRONG SERVED giảm bao nhiêu?**
+False trust 0.619 → **0.318** on batch 2; **10 of 13** of batch 1's false-trust rows
+are no longer served as they were (up from 7/13). On Lane C's independently
+print-verified Bài 8 ledger, false trust **8 → 6** across 51 judged blocks. Two
+fabricated math expressions → **0**. Physics false trust **−3 blocks**. And 41
+geometry-rebuilt expressions stopped shipping as if printed.
+
+**5 · CORRECT SERVED tăng bao nhiêu?**
+221 → **239 served** (≈155 → ≈163 correct) on batch 2, and Lane C's correct-served
+rose **26 → 30** on Bài 8 with false-withheld falling **14 → 10**. But this is the
+number most at risk of being read too kindly, and R13 is why: **the served share is
+0.589 corrected, not 0.632**, and on Toán 4 tập hai Bài 61 it is **0.078, not 0.211**.
+Coverage also deliberately fell by 41 activities and 10 lessons lost their exercise
+list entirely — recorded as a correctness gain with the count named.
+
+**6 · THIRD SIGNAL nào thực sự có ích?**
+Measured, and the answer separates cleanly. **[A4's systematic per-signal attribution
+is PENDING.]**
+
+*Signals that earned their place — all of them read physical evidence from the page:*
+- **Raster / ink / geometry (A2):** `vinculum-raster-v1`, `ink-accounted-v1`,
+  `operator-raster-v1`, `digit-provenance-v1`, `arith-selfcheck-v1`. Detection
+  precision **1.000**, recall **0.955**; restore precision **1.000**.
+- **Human verification against the print (C):** the single largest mover of both
+  error directions on Bài 8 — false trust 8 → 6 and false withheld 14 → 10.
+
+*The signal that failed, and it is the round's cautionary result:* **`agree_tones`.**
+Book-wide it cut trusted text **1,263 → 1,020**, and on Bài 8 it withheld `p039:000`
+— the one block carrying **all seven dated events** — on a single token, «Bạch
+**Đằng**» primary versus «đăng» verifier, **where the print says the primary was
+right.** Its dominant-majority variant reaches precision 0.889 / recall 0.533 at a
+**false-correction rate of 0.111**, and the false correction it proposes **rewrites a
+person's name** («Đặng Khoa» for the author). That is the empirical case for «a repair
+is never trusted by default», produced by the pipeline itself rather than argued.
+
+*And the round-4 falsification held again:* the six remaining false-trust blocks on
+Bài 8 are display-font headings at `text_sim` 100 with `agree_tones` silent — **A26
+confirmed on new data. Agreement is not verbatim.**
+
+**7 · Legacy data có tiến gần teaching-ready không?**
+Closer on measurable accuracy, **not closer to teaching-ready**, and the gap is
+structural rather than a matter of degree. `trusted` = 0 and `eligible for teaching` =
+0, unchanged. Three reasons, all of them now named: **the repair path is not wired
+into the pipeline at all** (§8.1); **R13 means the denominators everyone reports are
+not the population a child reads from**; and the mutilated-structure class is still
+open on the lesson path. The pack machinery, by contrast, *is* ready — verify went
+0/12 FAIL → **12/12 PASS**, the old baseline reproduced three times, and the rebuild's
+content delta was **exactly zero**.
+
+**8 · Bài 17 thật hơn ở đâu?** **[PENDING — Lane B]**
+
+**9 · History đã phá/chứng minh gì?**
+Lane C falsified its own round-4 rule, which is the most valuable thing it could have
+done. **`prose-dated-events-v1` does not survive a different date style.** The book
+prints **112 date mentions in eight forms**; the rule accepts **one** of them (21
+parenthesised years) and extracts **3 events across 28 lessons**. Centuries (13),
+reign phrases (12), un-parenthesised ranges (8) and bare TCN years are invisible to
+it. **It is a Bài-8 shape, not a History rule** — a direct warning against the
+«compile 3,679 lessons from a grammar» plan: a grammar validated on one lesson
+generalises to almost nothing, and only a census over real date forms would have
+revealed it.
+
+It also proved the harder half of the doctrine: when the repair signal proposed
+correcting an attribution, **two independent signals objected and the candidate was
+rejected — so the attribution stopped being served rather than being half-corrected.**
+That is `DETECT → REPAIR → VALIDATE → WITHHOLD` completing correctly.
+
+**10 · Trẻ nhìn thấy sản phẩm tốt hơn ở đâu?** **[PENDING — Lane B device evidence.]**
+One thing can be said now, and it should be said plainly: **no APK built on this Mac
+carries any of this round's corrections.** The main checkout's packs are still the old
+ones, and nothing merges. Every accuracy result in this report is a result about the
+pipeline and the corpus, not about what a child currently sees.
+
+---
+
+## 11.1 Open P0 and the next bottleneck
+
+**Next bottleneck — recognition, not reasoning.** Both remaining named defects
+(`II` → `I1`, `3×10⁸` → `3×10°`) are born at OCR recognition; the digits and letters
+around them survive. No parser, normaliser or agreement check can reach them, and
+82 % of A2's unrepairable fractions (274 of 336) failed for the same reason: *the OCR
+never read the digit.* The next real gain is recognition on the crop with
+deterministic validation — not more rules over text that was never captured.
+
+**Open P0, in the order they block things:**
+1. **R13 silent loss** — a block the role layer drops must arrive as a withheld region
+   with a truthful reason. Until then every published rate has the wrong denominator.
+2. **Wire the repair path into the pipeline** — Founder gate; currently a validated
+   laboratory with no connection to the product.
+3. **R15 attach provenance does not reproduce** — 950 of 6,176 verdicts differ, 896
+   unexplained; the pack build depends on it. Founder decision, not taken.
+4. **Defect 8 on the lesson path** — closed where A1 measures, open where a child reads.
+5. **Bridge has no carrier for validated structured STEM** — `ROLE_MAP` has no
+   `formula`; the app union has no formula member and fails closed on the whole
+   document.
 
 ---
 
