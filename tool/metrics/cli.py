@@ -134,20 +134,32 @@ def cmd_deprecated(args):
 
 def cmd_lint(args):
     findings = container_lint.lint_paths(args.root)
-    known = container_lint.KNOWN_FINDINGS
+    known, repaired = container_lint.KNOWN_FINDINGS, container_lint.REPAIRED_FINDINGS
+    live = {f.key for f in findings}
     new = [f for f in findings if f.key not in known]
-    print(f'container-shape lint — {len(findings)} finding(s), '
-          f'{len(known)} known, {len(new)} new\n')
+    print(f'container-shape lint — {len(findings)} finding(s) live, '
+          f'{len(known)} baselined, {len(new)} new, {len(repaired)} repaired\n')
     for f in findings:
         tag = 'KNOWN' if f.key in known else '*** NEW ***'
         print(f'[{tag}] {f}')
         if f.key in known:
             print(f'    verdict: {known[f.key]}')
+        elif f.key in repaired:
+            print('    *** THIS DEFECT WAS REPAIRED AND HAS RETURNED. ***')
+            print(f"    was: {repaired[f.key]['defect']}")
         print()
     for key in known:
-        if key not in {f.key for f in findings}:
-            print(f'[GONE] {key} — recorded in KNOWN_FINDINGS but no longer found. '
-                  f'If it was fixed, remove it from the baseline in the same commit.')
+        if key not in live:
+            print(f'[GONE] {key} — baselined but no longer found. If it was fixed, MOVE it to '
+                  f'REPAIRED_FINDINGS in the same commit; do not delete it. What a repair means '
+                  f'for numbers published from the broken code must not vanish with the code.')
+    if repaired:
+        print('--- repaired, and what each repair means for numbers published earlier ---\n')
+        for key, r in repaired.items():
+            print(f'[REPAIRED{" — RETURNED!" if key in live else ""}] {key}')
+            print(f"    repaired : {r['repaired']}")
+            print(f"    OLD NUMBERS: {r['effect_on_published_numbers']}")
+            print(f"    recorded in: {r['correction_recorded_in']}\n")
     return 1 if new else 0
 
 
