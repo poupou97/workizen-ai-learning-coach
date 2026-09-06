@@ -113,11 +113,10 @@ class RepairEngine:
                         final_value=cand.proposed_value,
                         reasons=tuple(f'{v.validator_id}:{v.verdict}' for v in verdicts) or ('no-validator:insufficient',)))
                     if ok and best is None:
-                        best = (cand, entry)
+                        best = (cand, entry, tuple(verdicts))
         if not candidates:
             return Outcome(ctx.block_id, ctx.disposition, base_value, tuple(ctx.withhold_reasons), (), (), (), False, ())
 
-        covered = {c.failure_class for c, _ in ([best] if best else [])}
         # a validated repair covers the withhold reasons its rule declares it covers
         covered_reasons = set()
         if best:
@@ -140,10 +139,30 @@ class RepairEngine:
                           else model.Disposition.WITHHELD))
             final, restorable = base_value, False
             reasons = tuple(list(ctx.withhold_reasons) + ['detected_unrepaired:' + candidates[0].failure_class])
+        # ROUND 6 (workstream C) - HISTORICAL CORRECTION TO ROUND 5, and the reason it matters.
+        #
+        # This row used to carry `_merge(validations)`: a merge over EVERY candidate the block produced,
+        # not over the one that won. So a block whose disposition is VALIDATED_REPAIR could carry, on the
+        # same row, a merged verdict of `rejected` - because a DIFFERENT rule's candidate had been
+        # rejected earlier in the loop. Found on LS&DL 5 Bai 8 p038:018, where
+        # `lanec.tone-majority-v1` validated and `lanec.tone-corroboration-v1` had been rejected: the
+        # dispose row says «VALIDATED_REPAIR ... rejected», and a reader who takes the verdict at face
+        # value concludes the repair failed.
+        #
+        # It is the same family as R13's disappearance with no reason code and E2's self-strengthening
+        # grounding: a component reporting something other than what happened. Fixed forward; round 5's
+        # published numbers stay as published and the delta is recorded beside them
+        # (docs/research/REPAIR-INTEGRATION-ROUND6.md). `entry_id` is unaffected - it is derived from
+        # block, class, disposition, stage, observations, candidate, reasons and prior, never from the
+        # validation - so historical ledgers keep their identities and remain joinable.
+        if best:
+            ruling = best[2][0] if len(best[2]) == 1 else _merge(best[2])
+        else:
+            ruling = _merge(validations) if validations else None
         entry = self.ledger.append(model.LedgerEntry(
             block_id=ctx.block_id, failure_class=(best[0].failure_class if best else candidates[0].failure_class),
             disposition=disp, observations=ctx.observations, stage='dispose',
-            candidate=(best[0] if best else None), validation=(_merge(validations) if validations else None),
+            candidate=(best[0] if best else None), validation=ruling,
             final_value=final, reasons=reasons,
             prior_entry_id=(best[1].entry_id if best else None)))
         return Outcome(ctx.block_id, disp, final, reasons, (entry,), tuple(candidates), tuple(validations),

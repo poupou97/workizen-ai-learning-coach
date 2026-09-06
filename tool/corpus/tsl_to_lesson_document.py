@@ -179,8 +179,15 @@ def sha256_file(path):
         return sha256_bytes(f.read())
 
 
+#: Round 6 (WS-C): the hash method travels WITH every hash this module emits. `shasum -a 256` on the
+#: written file does NOT reproduce these numbers, and that is deliberate - canonical JSON survives
+#: reformatting and key reordering where a raw byte hash does not. A hash a reader cannot reproduce
+#: from the artefact alone does not prove lineage; it looks like tampering.
+HASH_METHOD = "sha256(json.dumps(obj, sort_keys=True, separators=(',',':'), ensure_ascii=False))"
+
+
 def document_hash(doc):
-    """sha256 of the canonical JSON (sorted keys, compact) — the determinism oracle."""
+    """sha256 of the canonical JSON (sorted keys, compact) — the determinism oracle. See `HASH_METHOD`."""
     return sha256_bytes(json.dumps(doc, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8'))
 
 
@@ -766,6 +773,7 @@ def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters
             'boundary': boundary,
             'tslPath': tsl_rel_path,
             'sourceHash': tsl_sha256,
+            'hashMethod': HASH_METHOD,
             'docType': tsl.get('docType'),
             'sourceability': tsl.get('sourceability'),
             'answerKeysIncluded': bool(tsl.get('answer_keys_included', False)),
@@ -1001,7 +1009,7 @@ def build(tsl_path, out_dir, dpi=150, crops=True, audit_status='notAudited', aud
     kinds = {}
     for b in doc['blocks']:
         kinds[b['type']] = kinds.get(b['type'], 0) + 1
-    print(f'{out_path}\n  hash={document_hash(doc)}\n  blocks={len(doc["blocks"])} {kinds}\n  byTrust={doc["provenance"]["blockCounts"]["byTrust"]}'
+    print(f'{out_path}\n  hash={document_hash(doc)} ({HASH_METHOD})\n  blocks={len(doc["blocks"])} {kinds}\n  byTrust={doc["provenance"]["blockCounts"]["byTrust"]}'
           f'\n  semantic={[(s["type"], s["title"]) for s in doc["semantic"]]}\n  chapters={len(doc["chapters"])} chapter={doc["chapter"] and doc["chapter"]["label"]}'
           f'\n  tutorScript={"có" if doc.get("tutorScript") else "không"} · auditStatus={audit_status} · licence={LICENCE}')
     return out_path
