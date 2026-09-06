@@ -236,9 +236,16 @@ def main():
         pk = packs.get(d['grade'])
         if pk:
             for key in ('toanExercises', 'tvReadings', 'tvWritings', 'suSources', 'khoaExperiments', 'diaMaps'):
+                # Round 7 (WS-M): this checked the shape but flattened ONE LEVEL SHORT —
+                # `list(xs.values())` on `toanExercises` yields LISTS, so `isinstance(e, dict)`
+                # below was always False and `pack_wiring['toanExercises']` was 0 for every
+                # candidate. Flatten to leaf records, not to the level above them.
                 xs = pk.get(key) or []
                 if isinstance(xs, dict):
-                    xs = list(xs.values())
+                    flat = []
+                    for x in xs.values():
+                        flat.extend(x if isinstance(x, list) else [x])
+                    xs = flat
                 for e in xs:
                     if isinstance(e, dict) and (e.get('book') or e.get('sourceDocumentId')) == book and (e.get('lesson') or e.get('lessonNo')) == no:
                         wiring[key] += 1
