@@ -62,3 +62,67 @@ destructive migration · unrestricted LLM generation · licensing / public SGK d
 paid infrastructure · public release · fundamental irreversible architecture replacement.
 
 **DO NOT MERGE.** Every PR ends at READY FOR FOUNDER REVIEW.
+
+---
+
+# FOUNDER ADDENDUM — GOLDEN DELIVERY DECISION (2026-09-06)
+
+Lesson selection is **decided**. No workstream runs its own selection.
+
+| Slice | Lesson | Purpose |
+|---|---|---|
+| **GOLDEN #1** | **LS&ĐL 5 Bài 8** | Prove `REPAIR → TSL → LESSON DOCUMENT → APP → REAL DEVICE`. **Primary delivery slice** — the round's delivery claim rests on it. |
+| **GOLDEN #2** | **Toán 4 tập hai Bài 61** | Prove **R13 accounting + recognition recovery**. **Not** a learner-facing delivery target. |
+| **REGRESSION** | **KHTN 6 Bài 17** | Prove round 6 does not break the existing real workspace. **Not** proof of repair effectiveness — it exercises essentially no repair. |
+
+## Golden #1 — the required chain, every link
+
+```
+real source → current observation/SDM → repair ledger → ValidatedRepair
+  → projected/repaired TSL → LessonDocument generated FROM that TSL
+  → assets/fixtures/real/ → WorkspaceCatalog real-path load → real device
+```
+
+**Do NOT use the old round-4 LessonDocument as the final proof.** Prove lineage **with hashes**.
+
+**Verified by the coordinator — no new loading path is needed, exactly as the Founder required:**
+
+- `lib/core/lesson_model/workspace_catalog.dart:76-77` already tries `realPath` **then** falls back to `syntheticPath`.
+- The slot is already registered: `FixtureSlot(book: '05-sgk-lich-su-va-dia-li-5', lessonNo: 8)` at `:47`, key `05-sgk-lich-su-va-dia-li-5#8`, and it is a **research slot** (`researchSlotKeys`, `:53`) so it carries the mandatory experimental chip.
+- `_stem()` is `lesson-$book-b$lessonNo`, so the exact file the app will prefer is:
+
+  **`assets/fixtures/real/lesson-05-sgk-lich-su-va-dia-li-5-b8.json`**
+
+- `assets/fixtures/real/` currently holds **only** `lesson-06-sgk-khoa-hoc-tu-nhien-6-b17.json` (plus `crops/`). **There is no real Bài 8 fixture, so the app is loading the synthetic fallback today.**
+
+Early-checkpoint item **C** is therefore precisely: *that file exists, generated from the round-6 projected/repaired TSL, so `_try(realPath)` succeeds.* **No `lib/` change is required to achieve it** — and if one appears to be, that is a signal something is being special-cased.
+
+## Repair gate
+
+Round 6 has `ValidatedRepair` code and `tsl_projection.py` but **no projected TSL artefact**. **That is not integration.** Produce a real projected TSL for Golden #1, and demonstrate at least one validated repair crossing `RepairLedger → Projected TSL → LessonDocument`. **Do not automatically promote a repair to TRUSTED**; disposition and trust rules stay fail-closed.
+
+## The sharp case — LS&ĐL 5 Bài 8, block `p039:000`
+
+One tone disagreement («Bạch **Đằng**» primary vs «đăng» verifier — **the print says the primary was right**) withheld the single block carrying **all seven dated events**. Round 6 must show what happens to it now: **repaired and validated → exact lineage; still withheld → report honestly.** **Do NOT restore the timeline by special-casing lesson identity.**
+
+Prior art (Lane C, PR #81): the block is recoverable as a **disposition repair — text unchanged** — and with the verbatim gate ON yields **8 events** (round 4's seven plus the «Âu Lạc (179 TCN)» anchor round 4 lost). The same lane also showed the correct negative: a proposed attribution correction was **rejected** by two independent signals, so the attribution stopped being served rather than being half-corrected. **Both behaviours must survive integration.**
+
+## Fixture version safety — hard requirement
+
+Every real fixture used for Founder or device evidence records: **source TSL hash · pipeline version · SDM version · repair version · generator version.** A fixture reproducible from `tc2-p1` / `sdm-v2` is **not** a current-pipeline fixture. **Do not silently mix generations.**
+
+## Math — do not fake delivery
+
+The bridge has no formula role mapping; `LessonDocument` has no formula type; the app has no math renderer; the pack path drops provenance/status. **Do not claim Math structure reaches a child until that path exists. A withheld crop is not structured Math delivery.** Learner-facing Math is explicitly **not** required this round.
+
+## The delivery claim — the exact bar
+
+Round 6 may claim **«VERIFIED ACCURACY REACHED THE LEARNER»** *only* if the device-loaded Golden #1 file traces to a current round-6 projected/repaired TSL. **Old generated documents or synthetic fallback do not count.**
+
+## Early checkpoint — return as soon as all three are true
+
+- **A** (WS-A) · R13 ledger has **zero unexplained loss** on one Golden slice
+- **B** (WS-C) · a **projected TSL containing a `ValidatedRepair` exists on disk**
+- **C** (WS-D) · **LS&ĐL 5 Bài 8 real fixture loads instead of synthetic fallback**
+
+C depends on B; B depends in practice on A. Then continue to real-device verification.
