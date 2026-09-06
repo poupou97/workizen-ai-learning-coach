@@ -64,11 +64,24 @@ sealed class SemanticData {
         for (final d
             in (j['dimensions'] as List? ?? const []).whereType<Map>()) {
           final name = d['name'];
-          final values = (d['values'] as List? ?? const [])
-              .map((v) => v is String ? v : null)
-              .toList();
-          if (name is! String || values.length != entities.length) return null;
-          dims.add(ComparisonDimension(name: name, values: values));
+          final raw = d['values'] as List? ?? const [];
+          if (name is! String || raw.length != entities.length) return null;
+          // ⭐ ROUND 5 (Lane E2, §8) — MỖI Ô PHẢI CÓ NGUỒN. Trước đây `values`
+          // là `List<String?>` trần: một ô có chữ mà KHÔNG có đường nào lần
+          // về block sách. Nay mọi ô đều mang `sourceBlockId`; ô không khai
+          // riêng thì THỪA KẾ nguồn của hàng (thực thể) — thừa kế là sự thật
+          // kiểm được (hàng ấy sinh ra từ chính block đó), và ô khai rõ mình
+          // là `inheritedFromEntity` chứ không giả vờ có nguồn riêng.
+          final cells = <ComparisonValue>[];
+          for (var i = 0; i < raw.length; i++) {
+            final cell = ComparisonValue.fromJson(
+              raw[i],
+              fallbackSourceBlockId: entities[i].sourceBlockId,
+            );
+            if (cell == null) return null; // ô hỏng ⇒ cả bảng không dùng
+            cells.add(cell);
+          }
+          dims.add(ComparisonDimension(name: name, cells: cells));
         }
         if (entities.isEmpty || dims.isEmpty) return null;
         return ComparisonSemantic(
@@ -208,12 +221,98 @@ class ComparisonEntity {
   final String sourceBlockId;
 }
 
-/// Một chiều so sánh; `values[i]` ứng với `entities[i]`, `null` = sách không
-/// nói — ô để trống, không điền hộ.
+/// ⭐ ROUND 5 (Lane E2, §8) — nguồn của MỘT Ô trong bảng so sánh.
+///
+/// `cellStated`  : JSON của ô khai `sourceBlockId` của chính nó.
+/// `inheritedFromEntity` : ô không khai ⇒ dùng nguồn của HÀNG. Không phải
+/// «đoán»: hàng ấy được sinh từ đúng block đó, nên ô nằm trong cùng block.
+/// UI/spec vẫn phải phân biệt hai mức này — thừa kế là bằng chứng YẾU HƠN.
+enum ValueGrounding {
+  cellStated,
+  inheritedFromEntity;
+
+  static ValueGrounding? parse(Object? v) {
+    if (v is! String) return null;
+    for (final g in values) {
+      if (g.name == v) return g;
+    }
+    return null;
+  }
+}
+
+/// Một Ô: chữ (hoặc «sách không nói») + nguồn BẮT BUỘC.
+class ComparisonValue {
+  const ComparisonValue({
+    required this.text,
+    required this.sourceBlockId,
+    required this.grounding,
+  });
+
+  /// `null` = sách không nói — ô để trống, KHÔNG điền hộ.
+  final String? text;
+
+  /// Luôn có: không ô nào lên màn mà không lần được về block sách.
+  final String sourceBlockId;
+  final ValueGrounding grounding;
+
+  /// `v` là `String` / `null` (dạng cũ) hoặc `{text, sourceBlockId}` (dạng
+  /// mới). Fail-closed: dạng lạ ⇒ `null` ⇒ cả bảng bị từ chối.
+  static ComparisonValue? fromJson(
+    Object? v, {
+    required String fallbackSourceBlockId,
+  }) {
+    if (v == null) {
+      return ComparisonValue(
+        text: null,
+        sourceBlockId: fallbackSourceBlockId,
+        grounding: ValueGrounding.inheritedFromEntity,
+      );
+    }
+    if (v is String) {
+      return ComparisonValue(
+        text: v,
+        sourceBlockId: fallbackSourceBlockId,
+        grounding: ValueGrounding.inheritedFromEntity,
+      );
+    }
+    if (v is Map) {
+      final text = v['text'];
+      if (text != null && text is! String) return null;
+      final src = v['sourceBlockId'];
+      if (src == null) {
+        return ComparisonValue(
+          text: text as String?,
+          sourceBlockId: fallbackSourceBlockId,
+          grounding: ValueGrounding.inheritedFromEntity,
+        );
+      }
+      if (src is! String || src.isEmpty) return null;
+      return ComparisonValue(
+        text: text as String?,
+        sourceBlockId: src,
+        grounding: ValueGrounding.cellStated,
+      );
+    }
+    return null;
+  }
+
+  Map<String, Object?> toJson() => {
+    if (text != null) 'text': text,
+    'sourceBlockId': sourceBlockId,
+    'grounding': grounding.name,
+  };
+}
+
+/// Một chiều so sánh; `cells[i]` ứng với `entities[i]`; `cells[i].text == null`
+/// = sách không nói — ô để trống, không điền hộ.
 class ComparisonDimension {
-  const ComparisonDimension({required this.name, required this.values});
+  const ComparisonDimension({required this.name, required this.cells});
   final String name;
-  final List<String?> values;
+  final List<ComparisonValue> cells;
+
+  /// Tương thích ngược cho các View đang đọc `values[i]` (Lane B) — CHỈ chữ.
+  /// Mã mới nên đọc `cells` để lấy cả nguồn.
+  List<String?> get values => [for (final c in cells) c.text];
 }
 
 final class ComparisonSemantic extends SemanticData {
@@ -238,8 +337,14 @@ final class ComparisonSemantic extends SemanticData {
       for (final e in entities)
         {'name': e.name, 'sourceBlockId': e.sourceBlockId},
     ],
+    // Round 5 (§8): ghi lại NGUYÊN Ô (chữ + nguồn), không ghi `List<String?>`
+    // trần nữa — đọc lại là ra đúng chuỗi nguồn, không phải dựng lại bằng suy.
     'dimensions': [
-      for (final d in dimensions) {'name': d.name, 'values': d.values},
+      for (final d in dimensions)
+        {
+          'name': d.name,
+          'values': [for (final c in d.cells) c.toJson()],
+        },
     ],
   };
 }

@@ -245,10 +245,19 @@ VisualSection _comparison(LessonDocument doc, ComparisonSemantic s) {
     rowIds[i] = [];
     for (var j = 0; j < s.dimensions.length; j++) {
       colIds.putIfAbsent(j, () => []);
-      final value = s.dimensions[j].values[i];
+      final cell = s.dimensions[j].cells[i];
+      final value = cell.text;
       if (value == null) continue; // sách không nói ⇒ không có nút
-      final srcId = s.entities[i].sourceBlockId;
-      final ref = _ref(doc, [srcId], s.derivation);
+      // ⭐ §8: nguồn của Ô, không phải nguồn của hàng mượn tạm. Ô thừa kế
+      // nguồn hàng vẫn ghi rõ luật thừa kế để đếm được hai mức riêng.
+      final srcId = cell.sourceBlockId;
+      final ref = _ref(
+        doc,
+        [srcId],
+        cell.grounding == ValueGrounding.cellStated
+            ? s.derivation
+            : '${s.derivation}+cell-inherits-row-v1',
+      );
       refs.add(ref);
       final id = 'cell-$i-$j';
       nodes.add(
