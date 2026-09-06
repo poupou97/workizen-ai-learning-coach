@@ -19,9 +19,10 @@ sys.path.insert(0, os.path.join(HERE, '..', 'semantic'))
 import extract as ex  # noqa: E402
 import ontology as onto  # noqa: E402
 import visualspec as vs  # noqa: E402
-from graph import (CLAIM_STATUS, KNOWLEDGE_ORIGIN, SemanticClaim,  # noqa: E402
-                   SemanticError, SemanticGraph, SemanticNode, SemanticRelation,
-                   SourceGrounding, lineage_of, provenance_of)
+from graph import (CLAIM_STATUS, KNOWLEDGE_ORIGIN, ProvenanceLaundering,  # noqa: E402
+                   SemanticClaim, SemanticError, SemanticGraph, SemanticNode,
+                   SemanticRelation, SourceGrounding, assert_not_strengthened,
+                   lineage_of, provenance_of)
 
 
 def g(block_id='b:p001:001', trust='trustedStructuredLesson', **kw):
@@ -217,6 +218,114 @@ class NoPresentationConstructorTests(unittest.TestCase):
             self.assertIn('from_<presentation>', fh.read())
 
 
+class RoundTripTests(unittest.TestCase):
+    """Serialisation is a provenance-laundering channel — from Lane E2 (PR #86), which
+    caught a save/load round trip UPGRADING a grounding from `inheritedFromEntity` to
+    `cellStated`. Nothing announces that; the file is simply written and read back and
+    the claim is stronger than the page supports."""
+
+    def _claim(self, **kw):
+        gr = SourceGrounding(book='b', block_id='b:1', page_printed=3, span=(0, 4),
+                             trust='trustedStructuredLesson', quote='abcd')
+        kw.setdefault('grounding', [gr])
+        return claim(**kw)
+
+    def test_round_trip_preserves_every_strength_axis(self):
+        c = self._claim(confidence=0.5)
+        j = c.to_json()
+        again = SemanticClaim.from_json(j).to_json()
+        self.assertTrue(assert_not_strengthened(j, again))
+        for key in ('support', 'status', 'derivation', 'citableAsTextbookFact',
+                    'learnerVisible', 'id'):
+            self.assertEqual(j[key], again[key], key)
+        self.assertEqual(j['grounding'], again['grounding'])
+
+    def test_the_guard_actually_catches_a_strengthened_claim(self):
+        before = self._claim().to_json()
+        for mutate in (
+                lambda d: d.update(support='sourceStated') if d.update(
+                    support='llmInferred') is None else None,):
+            pass
+        weak = self._claim(support='llmInferred').to_json()
+        strong = self._claim(support='sourceStated').to_json()
+        with self.assertRaises(ProvenanceLaundering):
+            assert_not_strengthened(weak, strong)
+        # and the reverse direction is fine — a claim may always get weaker
+        self.assertTrue(assert_not_strengthened(strong, weak))
+        self.assertTrue(assert_not_strengthened(before, before))
+
+    def test_the_guard_catches_a_strengthened_grounding(self):
+        weak = self._claim().to_json()
+        strong = self._claim().to_json()
+        strong['grounding'][0]['trust'] = 'trustedCorpus'
+        with self.assertRaises(ProvenanceLaundering):
+            assert_not_strengthened(weak, strong)
+
+    def test_the_guard_catches_a_locator_that_got_more_precise(self):
+        weak = self._claim().to_json()
+        weak['grounding'][0]['locatorKind'] = 'page-geometry'
+        strong = self._claim().to_json()      # text-span
+        with self.assertRaises(ProvenanceLaundering):
+            assert_not_strengthened(weak, strong)
+
+    def test_the_guard_catches_grounding_appearing_from_nowhere(self):
+        weak = self._claim().to_json()
+        strong = self._claim().to_json()
+        strong['grounding'] = strong['grounding'] * 2
+        with self.assertRaises(ProvenanceLaundering):
+            assert_not_strengthened(weak, strong)
+
+    def test_from_json_is_not_lenient(self):
+        j = self._claim().to_json()
+        j['status'] = 'definitely-fine'
+        with self.assertRaises(SemanticError):
+            SemanticClaim.from_json(j)
+
+
+class SpecCarriesNoLessonIdentityTests(unittest.TestCase):
+    """Lane E2 (PR #86) made `if (lessonId == BAI17)` UNTYPABLE in a renderer. The spec
+    must not hand the identity back through another door — so identity lives on the
+    claim/grounding side, in `lineage_json()`, which the renderer never receives."""
+
+    def _spec(self):
+        les = _lesson([_tsl_block('x:0', 'stage_label', 'Tiến hành', order=0)]
+                      + [_tsl_block('x:%d' % i, 'body', '%d. b %d' % (i, i), order=i)
+                         for i in (1, 2, 3)])
+        return vs.compile_process(ex.extract(les, subject='KHTN', grade=6))
+
+    def _walk(self, obj, path='$'):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                yield path + '.' + k, k, v
+                yield from self._walk(v, path + '.' + k)
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                yield from self._walk(v, '%s[%d]' % (path, i))
+
+    def test_no_identity_key_at_any_depth_of_the_spec(self):
+        j = self._spec().to_json()
+        for path, key, _ in self._walk(j):
+            self.assertNotIn(key, vs.VisualSpec.IDENTITY_KEYS,
+                             'renderer-facing spec leaks identity at %s' % path)
+
+    def test_no_book_or_lesson_number_appears_as_a_value_either(self):
+        import json as _json
+        blob = _json.dumps(self._spec().to_json(), ensure_ascii=False)
+        self.assertNotIn('06-sgk-khoa-hoc-tu-nhien-6', blob)
+        self.assertNotIn('KHTN', blob)
+
+    def test_identity_is_available_on_the_lineage_artefact(self):
+        ln = self._spec().lineage_json()
+        self.assertEqual(ln['lesson']['book'], '06-sgk-khoa-hoc-tu-nhien-6')
+        self.assertTrue(ln['rows'])
+        self.assertTrue(all(r['sourceRef'] for r in ln['rows']))
+
+    def test_the_two_artefacts_are_not_the_same_object(self):
+        spec = self._spec()
+        self.assertNotEqual(spec.to_json().get('schema'),
+                            spec.lineage_json().get('schema'))
+
+
 class OntologyTests(unittest.TestCase):
     def test_every_family_names_only_declared_primitives_and_relations(self):
         for fam, spec in onto.FAMILIES.items():
@@ -394,11 +503,12 @@ class VisualSpecTests(unittest.TestCase):
         self.assertEqual(t['contentTrustCeiling'], 'trustedStructuredLesson')
         self.assertFalse(t['allElementsValidated'])
 
-    def test_lineage_is_emitted_for_every_element(self):
+    def test_lineage_is_emitted_for_every_element_on_the_lineage_artefact(self):
         spec = vs.compile_process(self._process_graph())
-        j = spec.to_json()
-        self.assertEqual(len(j['lineage']), len(spec.elements))
-        self.assertTrue(all(l['sourceBlocks'] for l in j['lineage']))
+        rows = spec.lineage_json()['rows']
+        self.assertEqual(len(rows), len(spec.elements))
+        self.assertTrue(all(r['sourceBlocks'] for r in rows))
+        self.assertNotIn('lineage', spec.to_json())   # never on the renderer's copy
 
     def test_compilers_read_only_graph_fields(self):
         # §10: if a compiler needed a family-specific field, the "compiled projection"

@@ -91,9 +91,14 @@ def run_one(path, subject, grade, out_root, write=True):
                   encoding='utf-8') as fh:
             json.dump(g.to_json(), fh, ensure_ascii=False, indent=1)
         for fam, spec in specs.items():
-            with open(os.path.join(d, 'bai-%s.%s.visualspec.json' % (g.lesson, fam.lower())),
-                      'w', encoding='utf-8') as fh:
+            base = os.path.join(d, 'bai-%s.%s' % (g.lesson, fam.lower()))
+            # two artefacts on purpose: the renderer gets the spec and cannot see which
+            # lesson it is; the trust layer gets the lineage, which is where identity
+            # lives. See visualspec.VisualSpec.lineage_json.
+            with open(base + '.visualspec.json', 'w', encoding='utf-8') as fh:
                 json.dump(spec.to_json(), fh, ensure_ascii=False, indent=1)
+            with open(base + '.lineage.json', 'w', encoding='utf-8') as fh:
+                json.dump(spec.lineage_json(), fh, ensure_ascii=False, indent=1)
     return rec, g, specs
 
 

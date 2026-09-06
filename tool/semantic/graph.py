@@ -89,9 +89,55 @@ CLAIM_STATUS = (
 LEARNER_VISIBLE_STATUS = ('validated',)
 CITABLE_ORIGINS = ('sourceStated', 'sourceDemonstrated', 'sourceSequence')
 
+# ⭐ SERIALISATION IS A PROVENANCE-LAUNDERING CHANNEL — from Lane E2 (PR #86), which
+# caught a save/load round trip UPGRADING a grounding from `inheritedFromEntity` to
+# `cellStated`. Nothing announces that: the file is written, read back, and the claim is
+# quietly stronger than the page supports. So strength is given an explicit order and
+# `assert_not_strengthened()` is asserted across every round trip.
+# Same family as the "no constructor from a presentation form" rule: both are doors
+# through which a weak claim becomes a strong one without new evidence.
+TRUST_STRENGTH = {'withheld': 0, 'prototype': 1, 'fixtureSynthetic': 2,
+                  'fixtureFromTrustedCorpus': 3, 'trustedStructuredLesson': 4,
+                  'trustedCorpus': 5}
+SUPPORT_STRENGTH = {'llmInferred': 0, 'systemDerived': 1, 'humanCurated': 2,
+                    'sourceSequence': 3, 'sourceDemonstrated': 4, 'sourceStated': 5}
+STATUS_STRENGTH = {'withheld': 0, 'conflict': 1, 'superseded': 2, 'proposed': 3,
+                   'validated': 4}
+LOCATOR_STRENGTH = {'page': 0, 'page-geometry': 1, 'figure-region': 2, 'text-span': 3}
+
 
 class SemanticError(ValueError):
     """Raised instead of writing a half-grounded object. Fail-closed by construction."""
+
+
+class ProvenanceLaundering(SemanticError):
+    """Raised when a round trip made a claim stronger than it went in."""
+
+
+def assert_not_strengthened(before, after):
+    """Compare two claim JSONs. Every strength axis must be <= what went in."""
+    axes = (('support', SUPPORT_STRENGTH), ('status', STATUS_STRENGTH))
+    for key, order in axes:
+        b, a = order.get(before.get(key), -1), order.get(after.get(key), -1)
+        if a > b:
+            raise ProvenanceLaundering(
+                '%s strengthened %r -> %r across a round trip'
+                % (key, before.get(key), after.get(key)))
+    bg, ag = before.get('grounding') or [], after.get('grounding') or []
+    if len(ag) > len(bg):
+        raise ProvenanceLaundering('grounding gained %d entries across a round trip'
+                                   % (len(ag) - len(bg)))
+    for gb, ga in zip(bg, ag):
+        for key, order in (('trust', TRUST_STRENGTH), ('locatorKind', LOCATOR_STRENGTH)):
+            b, a = order.get(gb.get(key), -1), order.get(ga.get(key), -1)
+            if a > b:
+                raise ProvenanceLaundering(
+                    'grounding %s strengthened %r -> %r across a round trip'
+                    % (key, gb.get(key), ga.get(key)))
+    for key in ('citableAsTextbookFact', 'learnerVisible'):
+        if after.get(key) and not before.get(key):
+            raise ProvenanceLaundering('%s became true across a round trip' % key)
+    return True
 
 
 def _sha(obj):
@@ -170,6 +216,20 @@ class SourceGrounding:
         return d
 
     @staticmethod
+    def from_json(d):
+        """Structure -> structure. NOT a presentation form: this reads exactly what
+        `to_json` wrote, and the round-trip guard asserts it never comes back stronger."""
+        span = d.get('span')
+        return SourceGrounding(
+            book=d['book'], block_id=d['blockId'], page_pdf=d.get('pagePdf'),
+            page_printed=d.get('pagePrinted'), bbox=d.get('bbox'),
+            span=(span['start'], span['end']) if span else None,
+            figure_id=d.get('figureId'), extraction=d.get('extraction'),
+            pipeline=d.get('pipeline'), ocr_conf=d.get('ocrConf'),
+            agreement_score=d.get('agreementScore'), trust=d['trust'],
+            quote=d.get('quote'))
+
+    @staticmethod
     def from_tsl_block(block, span=None, quote=None):
         """Build a grounding from a TSL block dict as `corpus_io.load_tsl` returns it."""
         return SourceGrounding(
@@ -245,6 +305,19 @@ class SemanticClaim:
         """TRACE != EVIDENCE. Proposed is a trace. Only validated may reach a learner."""
         return (self.status in LEARNER_VISIBLE_STATUS
                 and all(g.trust != 'withheld' for g in self.grounding))
+
+    @staticmethod
+    def from_json(d):
+        """Structure -> structure, and deliberately NOT forgiving: an unknown status or
+        support raises rather than defaulting. A lenient reader is how a claim gets
+        stronger by being written to disk and read back."""
+        return SemanticClaim(
+            kind=d['kind'], subject=d['subject'], assertion=d['assertion'],
+            support=d['support'], derivation=d['derivation'],
+            grounding=[SourceGrounding.from_json(g) for g in d['grounding']],
+            confidence=d.get('confidence'), status=d['status'],
+            validator_id=d.get('validatorId'), validator_result=d.get('validatorResult'),
+            notes=d.get('notes'), claim_id=d.get('id'))
 
     def to_json(self):
         d = {'id': self.id, 'kind': self.kind, 'subject': self.subject,

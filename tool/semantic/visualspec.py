@@ -91,29 +91,54 @@ class VisualSpec:
             'contentTrustCeiling': 'trustedStructuredLesson',
         }
 
-    def to_json(self, with_lineage=True):
-        d = {
+    # ⭐ LESSON IDENTITY DOES NOT CROSS INTO THE SPEC — adopted from Lane E2 (PR #86).
+    #
+    # The first version carried {book, lesson, title, subject, grade} on the spec. E2 is
+    # right that this is not a cosmetic field: it makes `if (lessonId == BAI17)` TYPABLE
+    # inside a renderer, and a renderer that can name a lesson is a renderer that can
+    # grow 3,679 special cases with no test able to catch it. E2 made the anti-pattern
+    # untypable (no book/lessonNo/slotKey on VisualSpec, no LessonDocument on the render
+    # context) and guards it with source-scanning tests; the spec must not hand the
+    # identity back through another door.
+    #
+    # Identity is genuinely needed — for provenance, for tap-to-source, for addressing —
+    # so it lives on the CLAIM/GROUNDING side, in `lineage_json()`, which is a SEPARATE
+    # artefact for the trust layer. The renderer receives `to_json()` and cannot see a
+    # lesson at all. `04-BAI17-REPLACEMENT.md` reaches the same conclusion from the
+    # other direction, so this is agreement between two lanes, not a concession.
+
+    IDENTITY_KEYS = ('book', 'lesson', 'lessonNo', 'slotKey', 'subject', 'grade',
+                     'sourceRef', 'sourceBlocks', 'pagePdf', 'pagePrinted')
+
+    def to_json(self):
+        """The renderer-facing spec. Carries NO lesson identity, at any depth."""
+        return {
             'schema': SCHEMA,
             'family': self.family,
             'layout': self.layout,
             'title': self.title,
             'compiler': self.compiler,
-            'lesson': {'book': self.graph.book, 'lesson': self.graph.lesson,
-                       'title': self.graph.title, 'subject': self.graph.subject,
-                       'grade': self.graph.grade},
             'elements': [e.to_json() for e in self.elements],
             'counts': {'elements': len(self.elements),
                        'drawable': len(self.drawable),
                        'gaps': sum(1 for e in self.elements if e.role == 'gap')},
             'trust': self.trust_block(),
         }
-        if with_lineage:
-            d['lineage'] = [
-                lineage_of(e.id, self.graph.claims[e.claim_id], self.graph)
-                for e in self.elements
-                if e.claim_id and e.claim_id in self.graph.claims
-            ]
-        return d
+
+    def lineage_json(self):
+        """The trust-layer artefact. This is where identity lives, and it is not the
+        spec: a renderer is given `to_json()`, never this."""
+        return {
+            'schema': 'visual-spec-lineage/v0',
+            'family': self.family,
+            'compiler': self.compiler,
+            'lesson': {'book': self.graph.book, 'lesson': self.graph.lesson,
+                       'title': self.graph.title, 'subject': self.graph.subject,
+                       'grade': self.graph.grade},
+            'rows': [lineage_of(e.id, self.graph.claims[e.claim_id], self.graph)
+                     for e in self.elements
+                     if e.claim_id and e.claim_id in self.graph.claims],
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -235,9 +260,12 @@ def compile_labeled_figure(graph):
     for f in figs:
         c = f.claims[0]
         g0 = c.grounding[0]
+        # geometry, not identity: the bbox says WHERE ON ITS PAGE the figure sits, which
+        # a figure-anchored layout needs. The page NUMBER is identity and stays in the
+        # lineage artefact.
         spec.add(VisualElement('%s#f' % f.id, 'node', f.label, c.id, c.status,
                                slot={'figureNumber': f.attrs.get('figureNumber'),
-                                     'pagePrinted': g0.page_printed, 'bbox': g0.bbox}))
+                                     'bbox': g0.bbox}))
     for r in dep:
         src = graph.nodes[r.src]
         spec.add(VisualElement('%s#l' % r.id, 'label', src.label, r.claim.id,

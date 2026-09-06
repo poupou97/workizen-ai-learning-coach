@@ -132,6 +132,14 @@ def _g(block, span=None, quote=None):
 
 
 def _nid(prefix, *parts):
+    """A node id that is unique WITHIN a lesson and says nothing about WHICH lesson.
+
+    ⭐ It used to embed `graph.book` and `graph.lesson`, so a renderer could parse
+    `step:06-sgk-khoa-hoc-tu-nhien-6|17|0|0#n1` and branch on the lesson — the exact door
+    Lane E2 closed by making lesson identity untypable on its side. The graph object
+    already knows which lesson it is; its nodes do not need to repeat it, and the
+    identity a reader legitimately needs is on the lineage artefact.
+    """
     return prefix + ':' + '|'.join(str(p) for p in parts)
 
 
@@ -197,7 +205,7 @@ def rule_ordered_steps(les, graph):
         primitive = 'Step' if procedural else 'Statement'
         node_ids = []
         for i, (b, m) in enumerate(items):
-            nid = _nid('step' if procedural else 'item', graph.book, graph.lesson, ri, i)
+            nid = _nid('step' if procedural else 'item', ri, i)
             claim = SemanticClaim(
                 kind='node', subject=nid,
                 assertion=('%s %d of a printed enumeration (%s) under "%s"'
@@ -244,7 +252,7 @@ def rule_heading_partonomy(les, graph):
             continue
         prev = None
         for depth, h in enumerate(path):
-            nid = _nid('ent', graph.book, graph.lesson, depth, h[:48])
+            nid = _nid('ent', depth, h[:48])
             if nid not in seen:
                 claim = SemanticClaim(
                     kind='node', subject=nid,
@@ -287,7 +295,7 @@ def rule_dated_events(les, graph):
             when, title = m.group('when').strip(), m.group('title').strip()
             if not (WHEN_HAS_DIGIT_RX.search(when) and WHEN_DATE_RX.match(when)):
                 continue
-            nid = _nid('evt', graph.book, graph.lesson, title[:40], when[:20])
+            nid = _nid('evt', title[:40], when[:20])
             if nid in graph.nodes:
                 continue
             claim = SemanticClaim(
@@ -322,7 +330,7 @@ def rule_figure_reference(les, graph):
         if not m:
             continue
         num = m.group(1)
-        nid = _nid('fig', graph.book, graph.lesson, num)
+        nid = _nid('fig', num)
         if nid in fig_nodes:
             continue
         claim = SemanticClaim(
@@ -337,10 +345,10 @@ def rule_figure_reference(les, graph):
         if FIG_LABEL_RX.match((b['text'] or '').strip()):
             continue
         for m in FIG_REF_RX.finditer(b['text'] or ''):
-            nid = _nid('fig', graph.book, graph.lesson, m.group(1))
+            nid = _nid('fig', m.group(1))
             if nid not in fig_nodes:
                 continue
-            src = _nid('stmt', graph.book, graph.lesson, b['id'])
+            src = _nid('stmt', b['id'])
             if src not in graph.nodes:
                 sc = SemanticClaim(
                     kind='node', subject=src,
@@ -378,8 +386,8 @@ def rule_causal(les, graph):
             cause, effect = m.group('c').strip(), m.group('e').strip()
             if len(cause) < 4 or len(effect) < 4:
                 continue
-            cid = _nid('stmt', graph.book, graph.lesson, b['id'], 'c')
-            eid = _nid('stmt', graph.book, graph.lesson, b['id'], 'e')
+            cid = _nid('stmt', b['id'], 'c')
+            eid = _nid('stmt', b['id'], 'e')
             for nid, txt, sp in ((cid, cause, (m.start('c'), m.end('c'))),
                                  (eid, effect, (m.start('e'), m.end('e')))):
                 if nid in graph.nodes:
@@ -426,8 +434,8 @@ def rule_definition(les, graph):
             term, defn = m.group('t').strip(), m.group('d').strip()
             if len(term) < 2 or len(defn) < 6:
                 continue
-            tid = _nid('ent', graph.book, graph.lesson, 'def', term[:40])
-            did = _nid('stmt', graph.book, graph.lesson, b['id'], 'd')
+            tid = _nid('ent', 'def', term[:40])
+            did = _nid('stmt', b['id'], 'd')
             if tid not in graph.nodes:
                 tc = SemanticClaim(
                     kind='node', subject=tid, assertion='a term the book names',
