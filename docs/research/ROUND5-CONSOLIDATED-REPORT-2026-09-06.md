@@ -604,11 +604,43 @@ vocabulary, no layout and no pedagogy — only a **shape**, which is all the ren
 can see. That is the Founder's «một ngôn ngữ để 3.679 bài có thể được compile»,
 demonstrated rather than asserted.
 
-**The anti-pattern is untypable, not merely avoided.** `VisualSpec` carries no
-`book` / `lessonNo` / `slotKey`; `VisualRenderContext` carries no `LessonDocument`.
-Two source-scanning tests fail the build if either stops being true. Measured on
-`tool/corpus/tc_gold/` — 54 human-annotated pages across 10 subjects, **committed**,
-so a clean clone reproduces it.
+**The anti-pattern is now structurally blocked — but the first version of this claim
+was false, and the correction is the more valuable result.** E2's original guards
+checked that `VisualSpec` carries no `book` / `lessonNo` / `slotKey` field and that
+`VisualRenderContext` carries no `LessonDocument`. **Both guards were green while every
+element a renderer holds carried lesson identity inside a *value*.** Lane E1 found it
+while adopting the same constraint: **a field-name guard does not catch identity inside
+a value.**
+
+Audited across all 5 built specs, every string, by JSON path: ids were clean
+(`process-1`, `step-1`, `event-0`, `cell-0-0`, `derivationRule`, `family`, `kind`), but
+**`ProvenanceRef.blockIds` leaked in every position** — nodes, edges, groups and
+`titleProvenance` — carrying values like `06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:015`.
+`if (n.provenance.primaryBlockId.startsWith('06-sgk-khoa-hoc-tu-nhien-6'))` was **one
+line away.** The guarantee had been nominal.
+
+**The fix is structural rather than another naming rule.** At the render boundary
+`VisualRenderContext` replaces each `blockIds` value with an opaque handle (`h0`, `h1`,
+…) and keeps the handle→ref map itself; `pageOf` / `openSource` resolve handles, so the
+provenance chain is unchanged and **the artefact on disk keeps the real block ids** —
+that chain must stay auditable. Only the renderer's view is redacted. A renderer no
+longer *should not* read identity; **it has nothing left to read.** Verified by
+mutation: disabling the redaction fails 2 of the 6 new tests, and the suite also pins
+that the leak still exists *in the artefact*, so the guard cannot go vacuous.
+
+A second latent channel was closed at the same time: `VisualSection.id` was copied
+verbatim from `SemanticData.id` — today `process-1`, but an upstream
+`khtn6-bai17-process` would have flowed straight through. Compiler-minted ids are now
+constrained by **shape**.
+
+**One channel stays open by necessity and is recorded rather than hidden:**
+`title` / `label` / `detail` / `badge` carry the book's own words, which may say «Bài
+22». That is content the child reads, not an identifier — redacting it would delete the
+lesson from the screen.
+
+E2 corrected the over-strong «untypable» wording in `VISUAL-SPEC-v1.md` in place rather
+than leaving it standing. Measured on `tool/corpus/tc_gold/` — 54 human-annotated pages
+across 10 subjects, **committed**, so a clean clone reproduces it.
 
 ### The counterweight, and it is the more important half
 
