@@ -52,11 +52,8 @@ import 'features/subjects/subject_home_screen.dart';
 import 'features/mission/mission_data.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'app/boot_screen.dart';
-import 'core/lesson_model/lesson_document.dart';
 import 'core/lesson_model/workspace_catalog.dart';
 import 'features/lesson_workspace/lesson_workspace_screen.dart';
-import 'core/agenda/lesson_next_action.dart' show LessonNextAction;
-import 'core/lesson_model/next_action.dart' show WorkspaceView;
 import 'features/lesson_workspace/widgets/runtime_plan.dart' show founderNextAction;
 import 'features/lesson_workspace/workspace_trace.dart';
 
@@ -113,55 +110,61 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     _load();
   }
 
-  /// ⭐ ROUND 3 B1 — bài có Lesson Workspace của ĐÚNG lớp đang học (từ
-  /// catalog fixture; nạp lười, không chặn Home). Lớp khác ⇒ `null`.
-  LessonDocument? _workspaceLessonFor(LearnerProfile p) {
-    final c = WorkspaceCatalog.shared;
-    if (!c.isLoaded) return null;
-    for (final book in c.booksWithWorkspace) {
-      for (final d in c.docsForBook(book)) {
-        if (d.grade == p.grade && !WorkspaceCatalog.isResearchSlot(d)) {
-          return d;
-        }
-      }
-    }
-    return null;
-  }
-
-  /// ⭐⭐ ROUND 7 · V1 — dấu vết PHIÊN của bài đang học, đọc từ
-  /// `WorkspaceTrace.session` (cùng trace mà workspace ghi khi trẻ đổi tab).
-  /// Không có bài ⇒ rỗng. MỞ ≠ HIỂU: tập này không bao giờ đi vào kho.
-  Set<WorkspaceView> _workspaceOpened(LearnerProfile p) {
-    final doc = _workspaceLessonFor(p);
-    if (doc == null) return const {};
-    return WorkspaceTrace.session.viewsFor(doc.slotKey);
-  }
-
-  /// ⭐⭐ ROUND 7 · V1 — VIỆC TIẾP THEO của bài đang học, từ ĐỘNG CƠ DUY NHẤT
-  /// (`founderNextAction`, cùng hàm workspace gọi). Home không được có luật
-  /// riêng: nếu có, nút trên Home và gợi ý trong bài sẽ trỏ hai nơi khác nhau
-  /// cho cùng một trạng thái — đúng loại mâu thuẫn vòng 6 đã phải sửa.
-  LessonNextAction? _workspaceNext(LearnerProfile p) {
-    final doc = _workspaceLessonFor(p);
-    if (doc == null) return null;
-    return founderNextAction(
-      doc,
-      seen: WorkspaceTrace.session.viewsFor(doc.slotKey),
-      learnerId: p.learnerId,
-    );
-  }
-
-  /// ⭐ ROUND 4 (Lane C) — lát cắt NGHIÊN CỨU (Golden Slice #2, LS&ĐL 5 Bài 8)
-  /// hiện cho MỌI lớp, thẻ riêng ghi «sách lớp 5» — để tới được lát cắt trên
-  /// máy của học sinh lớp 6 mà không tạo hồ sơ mới (quyết định hiển thị tạm
-  /// cho vòng kiểm chứng; Founder chốt cách xử lí khác lớp sau).
-  List<LessonDocument> _researchLessons() {
+  /// ⭐⭐ ROUND 7 · V2 (Founder order 50) — MỌI MẠCH HỌC CÓ THẬT trên máy.
+  ///
+  /// Trước vòng này Home nhận ĐÚNG MỘT bài («bài của lớp con») cộng một danh
+  /// sách «lát cắt nghiên cứu» tách riêng. Founder cầm máy và gọi tên hệ quả:
+  /// Home thành landing page của Bài 17. Nay Home nhận CẢ HỆ — mỗi bài SAM đã
+  /// xếp sẵn là một mạch học, kèm dấu vết phiên và việc tiếp theo của CHÍNH
+  /// nó, và Home xếp chúng thành hàng thẻ.
+  ///
+  /// Thứ tự: bài của ĐÚNG LỚP trước, rồi bài sách lớp khác (thẻ tự dán nhãn
+  /// «sách lớp N»). Không có bài nào ⇒ danh sách rỗng, Home không bịa thẻ.
+  ///
+  /// ⚠ Việc tiếp theo đến từ `founderNextAction` — ĐỘNG CƠ DUY NHẤT mà Lesson
+  /// Workspace cũng gọi. Home không có luật riêng: nếu có, nút trên Home và
+  /// gợi ý trong bài sẽ trỏ hai nơi khác nhau cho cùng một trạng thái.
+  List<HomeLessonThread> _lessonThreads(LearnerProfile p) {
     final c = WorkspaceCatalog.shared;
     if (!c.isLoaded) return const [];
+    final docs = [
+      for (final book in c.booksWithWorkspace) ...c.docsForBook(book),
+    ]..sort((a, b) {
+        final own = (a.grade == p.grade ? 0 : 1) - (b.grade == p.grade ? 0 : 1);
+        return own != 0 ? own : a.slotKey.compareTo(b.slotKey);
+      });
     return [
-      for (final book in c.booksWithWorkspace)
-        for (final d in c.docsForBook(book))
-          if (WorkspaceCatalog.isResearchSlot(d)) d,
+      for (final d in docs)
+        HomeLessonThread(
+          doc: d,
+          openedViews: WorkspaceTrace.session.viewsFor(d.slotKey),
+          next: founderNextAction(
+            d,
+            seen: WorkspaceTrace.session.viewsFor(d.slotKey),
+            learnerId: p.learnerId,
+          ),
+        ),
+    ];
+  }
+
+  /// ⭐⭐ ROUND 7 · V2 — MÔN TRÊN GIÁ SÁCH CỦA TRẺ CHƯA CÓ BÀI NÀO SAM XẾP SẴN.
+  ///
+  /// Đây là chỗ đơn hàng 50 dễ bị phản bội nhất: cách nhanh để hàng thẻ trông
+  /// đầy là bịa một thẻ «Toán 6 — đang học 70%». Không. Môn nào chưa có bài
+  /// thì thẻ của nó NÓI THẲNG là chưa có, kèm con số mục lục THẬT lấy từ pack.
+  ///
+  /// Mục lục chưa nạp ⇒ rỗng: không mục lục thì không biết trẻ có sách gì, và
+  /// đoán là bịa.
+  List<HomeShelfSubject> _shelfSubjects() {
+    final idx = _lessonIndex;
+    if (idx == null) return const [];
+    return [
+      for (final subject in idx.subjects.keys)
+        HomeShelfSubject(
+          subject: subject,
+          listedLessons: idx.listedLessonCountFor(subject),
+          openableLessons: idx.openableLessonCountFor(subject),
+        ),
     ];
   }
 
@@ -551,15 +554,17 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                         bookRecommendation: _bookRecommendation(),
                         onStartRecommendation: (rec) =>
                             _startRecommendation(context, data, rec),
-                        workspaceLesson: _workspaceLessonFor(_profile!),
-                        researchLessons: _researchLessons(),
-                        // ⭐⭐ ROUND 7 · V1 — Home nhận DẤU VẾT PHIÊN và VIỆC
-                        // TIẾP THEO đã dựng sẵn. Không phải để Home thông
-                        // minh hơn: để Home và workspace nói CÙNG một điều về
-                        // cùng một bài. `founderNextAction` là động cơ duy
-                        // nhất; Home chỉ trình bày kết quả của nó.
-                        openedViews: _workspaceOpened(_profile!),
-                        lessonNext: _workspaceNext(_profile!),
+                        // ⭐⭐ ROUND 7 · V2 — Home nhận CẢ HỆ MẠCH HỌC, mỗi
+                        // mạch kèm dấu vết phiên và việc tiếp theo ĐÃ DỰNG
+                        // SẴN, cộng danh sách môn trên giá sách chưa có bài.
+                        // Không phải để Home thông minh hơn: để Home và
+                        // workspace nói CÙNG một điều về cùng một bài, và để
+                        // môn chưa có bài vẫn được nói ra đúng trạng thái.
+                        // `founderNextAction` là động cơ duy nhất; Home chỉ
+                        // trình bày và xếp hạng kết quả của nó.
+                        learnerGrade: _profile!.grade,
+                        lessonThreads: _lessonThreads(_profile!),
+                        shelfSubjects: _shelfSubjects(),
                         // ⭐ ROUND 7 · V1 — nút Home mang tên một cách học ⇒
                         // mở ĐÚNG cách học ấy. Lỗi máy thật vòng 1: «📖 Đọc ▸»
                         // mở ra màn hỏi «con muốn học theo cách nào?».

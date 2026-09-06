@@ -488,6 +488,37 @@ class LessonIndex {
     return null;
   }
 
+  /// ⭐ ROUND 7 · V2 (Founder order 50) — HAI CON SỐ KHÁC NHAU CHO MỘT MÔN,
+  /// và sự khác nhau ấy là điều phải nói với trẻ.
+  ///
+  /// [listedLessonCountFor] = số bài MỤC LỤC liệt kê được — một mục giá sách
+  /// trẻ giở xem được. [openableLessonCountFor] = số bài trong đó có ít nhất
+  /// một việc trẻ LÀM được ở Môn học. Trên pack lớp 6 hôm nay, chín trên mười
+  /// môn có số thứ hai bằng **0**: giá sách có mục lục, chưa có việc. Home
+  /// phải nói đúng con số nào đang nói, không được gộp hai thứ thành «N bài».
+  ///
+  /// Cả hai khử trùng theo (sách, số bài) — một bài in ở hai tập không được
+  /// đếm hai lần.
+  int listedLessonCountFor(String subject) =>
+      _lessonKeys(subject, openableOnly: false).length;
+
+  int openableLessonCountFor(String subject) =>
+      _lessonKeys(subject, openableOnly: true).length;
+
+  Set<String> _lessonKeys(String subject, {required bool openableOnly}) {
+    final seen = <String>{};
+    for (final b in subjects[subject] ?? const <BookLessons>[]) {
+      for (final l in b.lessons) {
+        if (openableOnly &&
+            activitiesFor(book: b.sourceDocumentId, lessonNo: l.no).isEmpty) {
+          continue;
+        }
+        seen.add('${b.sourceDocumentId}|${l.no}');
+      }
+    }
+    return seen;
+  }
+
   /// ⭐ WAL-166 — mọi việc gắn được vào MỘT bài của MỘT cuốn sách.
   ///
   /// Lọc theo `book` ở mọi loại — kể cả tư liệu Sử, thứ trước đây chỉ lọc
