@@ -75,6 +75,7 @@ below is now the full text it was reconstructing.
 | 40 | [`40-founder-addendum-round-6-golden-delivery-decision.md`](40-founder-addendum-round-6-golden-delivery-decision.md) | 4,640 | FOUNDER ADDENDUM — ROUND 6 GOLDEN DELIVERY DECISION |
 | 41 | [`41-founder-decision-close-round-6-prepare-round-7.md`](41-founder-decision-close-round-6-prepare-round-7.md) | 7,192 | FOUNDER DECISION — CLOSE ROUND 6 / PREPARE ROUND 7 |
 | 42 | [`42-founder-decision-round-7-title-fidelity.md`](42-founder-decision-round-7-title-fidelity.md) | 1,247 | FOUNDER DECISION — ROUND 7 TITLE FIDELITY |
+| 43 | [`43-founder-task-order-round-7-closeout-repository-source-of-record.md`](43-founder-task-order-round-7-closeout-repository-source-of-record.md) | 7,192 | FOUNDER TASK ORDER — ROUND 7 CLOSEOUT + REPOSITORY SOURCE-OF-RECORD |
 
 ## Rule from here
 
