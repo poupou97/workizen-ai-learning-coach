@@ -415,10 +415,31 @@ the *right* disposition. It is auditable and evidence-backed (they sit inside a 
 picture bbox), and the ledger counts the content-bearing ones separately — but whether a
 diagram-aware recogniser should recover them is WS-B's question, not this workstream's.
 
-**HYPOTHESIS:** that the fix generalises beyond these 12 lessons + 2 Golden slices. It has
-been measured on 1 524 input regions in three independent populations, one of them a holdout,
-and on both a Math and a History/Geography loss profile. It has **not** been run over the
-whole corpus.
+### 8.1 How wide the measurement actually is
+
+The tables above report the 12 batch-spec lessons and the 2 Golden slices, because those are
+the populations round 5 published. The pipeline also produced TSLs for every **other** lesson
+that shares a page range with them, and those were audited too — a free widening of the
+sample that nobody chose:
+
+| population | lessons | input regions | SERVED | WITHHELD | EXCLUDED | **UNACCOUNTED** |
+|---|---:|---:|---:|---:|---:|---:|
+| batch 2, all lessons — before | 11 | 787 | 285 | 160 | 309 | **33** |
+| batch 2, all lessons — after | 11 | 787 | **285** | 169 | 333 | **0** |
+| batch 1 (holdout), all lessons — before | 14 | 814 | 234 | 144 | 374 | **62** |
+| batch 1 (holdout), all lessons — after | 14 | 814 | **234** | 170 | 410 | **0** |
+| golden run, all lessons — before | 4 | 277 | 43 | 35 | 156 | **43** |
+| golden run, all lessons — after | 4 | 277 | **43** | 43 | 191 | **0** |
+
+**1 878 input regions · 29 lesson ledgers · 138 unaccounted → 0 · served unchanged in all
+three.** Five of the lessons that close here were never in any batch spec and were never
+looked at while the fix was written — including `04-sgk-toan-4-tap-hai` Bài 60 (5 lost) and
+`05-sgk-toan-5-tap-mot` Bài 5 (1 lost).
+
+**HYPOTHESIS:** that the fix generalises beyond these 29 lesson ledgers. It has been measured
+on 1 878 input regions in three independent populations, one of them a holdout, on both a Math
+and a History/Geography loss profile, and on lessons nobody selected. It has **not** been run
+over the whole corpus.
 
 **UNKNOWN:** whether any lesson elsewhere in the corpus has a region whose role is a *learning*
 role but which reaches neither TSL list. The ledger would report it as
