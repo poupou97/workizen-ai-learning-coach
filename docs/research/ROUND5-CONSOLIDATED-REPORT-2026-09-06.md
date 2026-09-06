@@ -1027,7 +1027,8 @@ what found out. It costs one throw-away worktree and roughly ten minutes.
 | #85 | `e1/round5-semantic-foundation` | E1 semantic foundation + K-12 census | PASS |
 | #86 | `e2/round5-visualspec-renderer` | E2 VisualSpec + cross-subject renderer | PASS |
 | #87 | `lane-b/round5-experience` | B experience + workspace UX + Visual | PASS |
+| #88 | `a4/round5-multi-signal-verification` | A4 multi-signal verification + router | PASS |
 
-Still running: A4 (`a4/round5-multi-signal-verification`).
+All nine are CI-green, and the nine composed together are green (§11.3).
 
 **No standing merge authority. READY FOR FOUNDER REVIEW.**
