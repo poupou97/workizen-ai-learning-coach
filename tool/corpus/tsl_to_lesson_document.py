@@ -17,6 +17,16 @@ WHAT IS PRESERVED, block by block (100 % of TSL blocks, asserted by `check_docum
 Lesson level: book, lesson number, title, boundary (pages, attach methods, confidence, header),
 pipeline version, sourceability, answer_keys_included, TSL sha256, stats.
 
+ROUND 6 (workstream C) — a VALIDATED REPAIR now crosses this bridge, and does NOT become trusted:
+  TSL region with `repair` (disposition `VALIDATED_REPAIR`, written by `repair/tsl_projection.py`) →
+  the region stays a `WithheldBlock` with NO text, and gains a `repair` object carrying the trace
+  (failure class · method · repair version · validator + version · verdict · supporting layers ·
+  whether the value changed · caps). **`repairs[]` — which holds the PROPOSED VALUE — is corpus-side
+  and is NEVER copied into the document**; `check_document` asserts no proposed value appears anywhere
+  in the emitted JSON. So a validated repair becomes *visible and countable* to the app while remaining
+  unreadable by a child. Making one servable is a separate, Founder-gated act; this bridge has no input
+  for it and refuses a repair record that claims `TRUSTED`.
+
 TRUST MAPPING (fail-closed):
   TSL block TRUSTED  → `trustedStructuredLesson`   (NOT production trust: G1 + licence are separate gates;
                                                      the UI keeps a «chưa kiểm định» chip)
@@ -82,6 +92,34 @@ ROLE_MAP = {
 }
 
 
+#: Roles the bridge KNOWS and deliberately has no carrier for. Round 6 (workstream C), obstacle 1:
+#: `ROLE_MAP` had no `formula` key, so a formula region fell through to `unknown_role:formula` — a reason
+#: code that says «the machine does not know what this is» about a block whose role the machine assigned
+#: with confidence 0.95. Round 5 named that exact sin on the other side of the pipeline (`empty_block` on a
+#: block reading `7 8 2 8 7 - 2 8 5 8` «misstates what was lost»), so it is not repeated here.
+#:
+#: `no_carrier:formula` is BEHAVIOUR-NEUTRAL for the app today: `withheld_card.dart` matches
+#: `reason.contains('formula')` before it matches `unknown_role`, so the child-facing words are the same
+#: ones the formula branch already produced. The set starts and ends at `formula` on purpose — extending
+#: it to `footnote` / `activity` / `option` would change what a child reads («máy chưa rõ đoạn này là
+#: gì» → the default), and `lib/features/**` is workstream D's. That is a coordination item, not a
+#: unilateral one.
+#:
+#: What a carrier would be is NOT decided here. A servable structured block kind needs BOTH app-side
+#: rendering (D) AND a Founder trust decision, and a flattened expression served as a paragraph is the
+#: harm round 5 measured — so the honest position today is: withheld region + page crop + the structure
+#: countable through its repair record.
+KNOWN_UNCARRIED_ROLES = {'formula': 'no_carrier:formula'}
+
+#: A region-level repair projection may carry NONE of these. They are the ways a proposed value could
+#: ride into the document on a block a renderer walks.
+REPAIR_FORBIDDEN_KEYS = ('proposedValue', 'text', 'value', 'latex', 'textProjection', 'candidate',
+                         'originalObservations', 'structuredValue')
+REPAIR_REQUIRED_KEYS = ('repairId', 'disposition', 'failureClass', 'method', 'repairVersion',
+                        'validatorId', 'verdict')
+DISPOSITION_VALIDATED_REPAIR = 'VALIDATED_REPAIR'
+
+
 class BridgeRefusal(Exception):
     """The TSL violates a precondition the bridge will not paper over."""
 
@@ -100,6 +138,36 @@ def role_conf(b):
 def role_method(b):
     r = b.get('role')
     return r.get('method') if isinstance(r, dict) else None
+
+
+def repair_of(x):
+    """The region-level repair projection, checked. Returns None when there is none.
+
+    Refuses rather than sanitises: a record that carries a value, or claims a disposition the bridge has
+    no Founder decision for, is a bug upstream and papering over it is how an ungated repair reaches a
+    child. `tool/corpus/repair/tsl_projection.py` writes exactly the accepted shape.
+    """
+    r = x.get('repair')
+    if r is None:
+        return None
+    if not isinstance(r, dict):
+        raise BridgeRefusal(f'block {x.get("id")} has a non-object `repair`')
+    missing = [k for k in REPAIR_REQUIRED_KEYS if not r.get(k)]
+    if missing:
+        raise BridgeRefusal(f'block {x.get("id")} has a repair record missing {missing} — a repair that '
+                            f'cannot name its validator and its version is not a repair')
+    present = [k for k in REPAIR_FORBIDDEN_KEYS if k in r]
+    if present:
+        raise BridgeRefusal(f'block {x.get("id")} carries {present} inline on its repair record — the '
+                            f'proposed value stays corpus-side (INTERNAL/RESEARCH), never on a block a '
+                            f'renderer walks')
+    if r['disposition'] != DISPOSITION_VALIDATED_REPAIR:
+        raise BridgeRefusal(f'block {x.get("id")} has a repair with disposition {r["disposition"]!r}. '
+                            f'This bridge carries {DISPOSITION_VALIDATED_REPAIR} only: making a repair '
+                            f'TRUSTED is a Founder gate and the bridge has no input for it.')
+    if r.get('servable'):
+        raise BridgeRefusal(f'block {x.get("id")} has a repair record claiming to be servable')
+    return dict(r)
 
 
 def sha256_bytes(data):
@@ -147,6 +215,21 @@ def validate_tsl(tsl):
         if b['id'] in ids:
             raise BridgeRefusal(f'duplicate block id {b["id"]}')
         ids.add(b['id'])
+    repair_ids = set()
+    for r in tsl.get('repairs') or []:
+        if not isinstance(r, dict) or not r.get('repairId'):
+            raise BridgeRefusal('a `repairs[]` entry has no repairId')
+        if r.get('disposition') != DISPOSITION_VALIDATED_REPAIR:
+            raise BridgeRefusal(f'repair {r["repairId"]} has disposition {r.get("disposition")!r}; only '
+                                f'{DISPOSITION_VALIDATED_REPAIR} crosses this bridge — TRUSTED is a Founder gate')
+        if r.get('servable'):
+            raise BridgeRefusal(f'repair {r["repairId"]} claims to be servable')
+        repair_ids.add(r['repairId'])
+    for x in list(tsl['blocks']) + list(tsl.get('withheld') or []):
+        rp = repair_of(x)
+        if rp and rp['repairId'] not in repair_ids:
+            raise BridgeRefusal(f'block {x.get("id")} names repair {rp["repairId"]!r} that is not in '
+                                f'`repairs[]` — a trace nobody can follow is not a trace')
     for w in tsl.get('withheld') or []:
         if w.get('text') not in (None, ''):
             raise BridgeRefusal(f'withheld region {w.get("id")} carries text — the TSL is not fail-closed')
@@ -206,7 +289,15 @@ def text_block(book, b, caption_of):
         'relations': relations_of(b, caption_of.get(b['id'])),
     }
     text = b['text']
+    if repair_of(b) is not None:
+        # `tsl_projection.check_projection` already forbids this; asserted again here because the bridge
+        # is the last place before a child, and «a served block carrying an untrusted repair» is the
+        # exact shape of an ungated restore.
+        raise BridgeRefusal(f'block {b["id"]} is SERVED and carries a repair record — a validated repair '
+                            f'is not a trusted one')
     mapped = ROLE_MAP.get(role)
+    if role in KNOWN_UNCARRIED_ROLES:
+        return withheld_block(book, b, [KNOWN_UNCARRIED_ROLES[role]], status='WITHHELD', source_role=role)
     if mapped is None:
         return withheld_block(book, b, [f'unknown_role:{role}'], status='WITHHELD', source_role=role)
     typ, kind = mapped
@@ -228,8 +319,12 @@ def text_block(book, b, caption_of):
     raise AssertionError(role)  # ROLE_MAP and this chain must agree
 
 
-def withheld_block(book, w, reasons, status, source_role=None, crop_rel=None):
-    """WithheldBlock JSON — structurally WITHOUT a text field."""
+def withheld_block(book, w, reasons, status, source_role=None, crop_rel=None, repair=None):
+    """WithheldBlock JSON — structurally WITHOUT a text field.
+
+    Round 6: it may now carry `repair` — the trace of a `ValidatedRepair` for this region. The region
+    stays withheld and stays text-less; what it gains is that a reader can SEE and COUNT that a
+    deterministic validator confirmed a repair here and that nobody has gated serving it."""
     blk = {
         'id': w['id'],
         'type': 'withheld',
@@ -245,6 +340,9 @@ def withheld_block(book, w, reasons, status, source_role=None, crop_rel=None):
         blk['textLen'] = w['text_len']
     if crop_rel:
         blk['crop'] = crop_rel
+    if repair:
+        blk['repair'] = repair
+        blk['disposition'] = repair['disposition']
     assert 'text' not in blk
     return blk
 
@@ -574,17 +672,24 @@ def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters
 
     # 1. text blocks in reading order (unknown roles become withheld blocks — never dropped)
     seq = []  # (page, y, x, order, block)
-    unknown_role = 0
+    unknown_role = no_carrier = 0
     for b in blocks_in:
         blk = text_block(book, b, caption_of)
         if blk['type'] == 'withheld':
-            unknown_role += 1
+            # Two different facts, counted separately since round 6: «the consumer model has no type for
+            # this role» and «the model knows this role and has no carrier for it». Folding them together
+            # is what made a formula region indistinguishable from an unrecognised one.
+            if any(r.startswith('no_carrier:') for r in blk['reasons']):
+                no_carrier += 1
+            else:
+                unknown_role += 1
         seq.append((b['page'], b['bbox'][1], b['bbox'][0], b['order'], blk))
     # 2. withheld regions of the TSL — by (page, order), with their crop when rendered
     for w in tsl.get('withheld') or []:
         c = crops.get(w['id']) or {}
         seq.append((w['page'], w['bbox'][1], w['bbox'][0], w['order'],
-                    withheld_block(book, w, list(w.get('reasons') or []), status=w.get('status') or 'WITHHELD', crop_rel=c.get('crop'))))
+                    withheld_block(book, w, list(w.get('reasons') or []), status=w.get('status') or 'WITHHELD',
+                                   crop_rel=c.get('crop'), repair=repair_of(w))))
     seq.sort(key=lambda t: (t[0], t[3]))
     # 3. figures — inserted before the first same-page block whose y > the figure's centre y
     figs = [f for f in tsl.get('figures') or [] if figure_kept(f)]
@@ -668,11 +773,15 @@ def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters
             'auditRef': audit_ref,
             'distribution': DISTRIBUTION,
             'tslStats': tsl.get('stats'),
+            'repair': repair_summary(tsl, blocks),
             'blockCounts': {
                 'byTrust': counts,
                 'tslTrusted': len(blocks_in),
                 'tslWithheld': len(tsl.get('withheld') or []),
                 'unknownRoleWithheld': unknown_role,
+                'noCarrierWithheld': no_carrier,
+                'validatedRepairsInTsl': len(tsl.get('repairs') or []),
+                'validatedRepairsOnBlocks': sum(1 for b in blocks if b.get('repair')),
                 'imagesKept': images_kept,
                 'imagesWithoutCrop': images_without_crop,
                 'figuresInTsl': len(tsl.get('figures') or []),
@@ -687,6 +796,31 @@ def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters
         doc['tutorScript'] = script
     check_document(doc, tsl)
     return doc
+
+
+def repair_summary(tsl, blocks):
+    """Document-level accounting for validated repairs. Counts only — the values stay corpus-side."""
+    reps = tsl.get('repairs') or []
+    on_blocks = [b['repair'] for b in blocks if b.get('repair')]
+    by_class, by_method, capped = {}, {}, 0
+    for r in reps:
+        by_class[r.get('failureClass')] = by_class.get(r.get('failureClass'), 0) + 1
+        by_method[r.get('repairMethod')] = by_method.get(r.get('repairMethod'), 0) + 1
+        if r.get('caps'):
+            capped += 1
+    return {
+        'validatedRepairs': len(reps),
+        'onBlocks': len(on_blocks),
+        'trusted': 0,                     # invariant, not a measurement: nothing here can be trusted
+        'capped': capped,
+        'byFailureClass': by_class,
+        'byMethod': by_method,
+        'projection': (tsl.get('repairProjection') or {}).get('version'),
+        'framework': (tsl.get('repairProjection') or {}).get('framework'),
+        'productionTrustThreshold': None,
+        'note': 'VALIDATED REPAIR != TRUSTED. Every repaired region below is still withheld and still '
+                'carries no text; the proposed value never leaves the corpus.',
+    }
 
 
 def check_document(doc, tsl):
@@ -707,7 +841,9 @@ def check_document(doc, tsl):
         assert b['sourceRef']['book'] == doc['book']
         assert isinstance(b['sourceRef']['pagePdf'], int) and len(b['sourceRef']['bbox']) == 4
     n_withheld = sum(1 for b in blocks if b['type'] == 'withheld')
-    assert n_withheld == len(tsl.get('withheld') or []) + doc['provenance']['blockCounts']['unknownRoleWithheld']
+    counts = doc['provenance']['blockCounts']
+    assert n_withheld == (len(tsl.get('withheld') or [])
+                          + counts['unknownRoleWithheld'] + counts.get('noCarrierWithheld', 0))
     assert doc['licence'] == LICENCE and doc['provenance']['trust'] == TRUST_TSL
     assert doc['provenance']['answerKeysIncluded'] is False
     # verbatim: every trusted text block reproduces the TSL text unchanged
@@ -715,6 +851,32 @@ def check_document(doc, tsl):
     for b in blocks:
         if b['id'] in tsl_text and b['type'] not in ('withheld', 'table'):
             assert b['text'] == tsl_text[b['id']], f'text altered for {b["id"]}'
+
+    # ---- ROUND 6 (workstream C): a validated repair crosses, its VALUE does not.
+    #
+    # The weak version of this check reads the fields we chose to emit and finds nothing, because we
+    # chose not to emit them. The strong version searches the WHOLE serialised document for each
+    # proposed value, so a future field, a nested provenance dict or a careless `**record` cannot open
+    # the door quietly. Values equal to the block's own observation are skipped: an unchanged proposal
+    # is the text the TSL already carries, and finding it proves nothing.
+    blob = json.dumps(doc, ensure_ascii=False)
+    for r in tsl.get('repairs') or []:
+        proposed = ((r.get('candidate') or {}).get('proposed_value'))
+        observed = next((o.get('value') for o in (r.get('originalObservations') or [])), None)
+        if not isinstance(proposed, str) or len(proposed) < 8 or proposed == observed:
+            continue
+        assert proposed not in blob, (
+            f'the proposed value of repair {r.get("repairId")} appears in the LessonDocument — a '
+            f'repaired value reached the app without a Founder trust decision')
+    for b in blocks:
+        rp = b.get('repair')
+        if not rp:
+            continue
+        assert b['type'] == 'withheld', f'block {b["id"]} is servable and carries a repair record'
+        assert 'text' not in b, f'repaired block {b["id"]} carries text'
+        assert rp['disposition'] == DISPOSITION_VALIDATED_REPAIR
+        assert b.get('disposition') == DISPOSITION_VALIDATED_REPAIR
+    assert doc['provenance']['repair']['trusted'] == 0
 
 
 # ------------------------------------------------------------------ crops (I/O, internal only)
