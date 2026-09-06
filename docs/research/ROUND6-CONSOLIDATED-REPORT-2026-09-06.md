@@ -212,6 +212,56 @@ Each was corrected by **fixing the premise, never loosening the gate**, and muta
 
 ---
 
+## 10.1 · Composition CI — the round composes
+
+Verified in a throw-away worktree from `integration/round6-2026-09-06` with all five
+branches merged and the **real gitignored assets synced in** (packs + fixtures), so a
+missing asset could not be mistaken for a defect and — more importantly — so the stale
+premises of §10 could not hide.
+
+| Check | Result |
+|---|---|
+| Git merge, 5 branches | **0 conflicts** |
+| `flutter analyze` | **No issues found** |
+| Python suite | **748 tests OK** (23 skipped) |
+| Dart suite | **1084 tests — All tests passed** |
+
+Heads: WS-A `02e28dc` · WS-C `4193c50` · WS-B `371b6b0` · WS-D `eeb38c1` · archive `73a5321`.
+
+**It did not compose on the first attempt**, and both failures were worth having.
+
+1. **A conflict that was the downstream cost of a shared-checkout collision.** WS-C's
+   branch carried WS-A's `47247dd` while WS-A had rebased the same change as `24f6136`;
+   `git patch-id` proved them **byte-identical with different SHAs**, so git could not
+   dedupe. I confirmed none of WS-C's own commits touched either file, so WS-A's newer
+   version won and nothing was lost. WS-C then rebased onto WS-A's branch, dropping both
+   borrowed commits — PR #90 is now a declared **stacked PR** rather than a 17-commit
+   mixed chain.
+2. **The three stale premises of §10**, each corrected by fixing the premise and
+   mutation-checked.
+
+**A correction WS-D made to its own first fix, which is the sharper lesson.** Its initial
+rewrite asserted an *equivalence*: the timeline appears **iff** the document carries a
+`TimelineSemantic`. That is satisfied by the app faithfully drawing whatever the data
+says — injecting a `TimelineSemantic` made a timeline appear **and the test stayed
+green**. The property that matters is not «does this lesson have events» but **«has
+anyone been granted trust»**. The rule now reads the **published artefact**
+(`disposition` + `servable != true`), not the parsed model, and fires at the data layer
+before the widget tree. Both mutations now kill it; removing the fixture still walks the
+synthetic route green.
+
+WS-D also **tried a canary and rejected it**: a keyword leak check on «Bạch Đằng» /
+«Ngô Quyền» / «938» gave a **false red**, because those words legitimately appear in the
+served lesson-objectives block. *A canary that fires on real book text guards nothing and
+teaches the next reader that red is normal.* Replaced with a structural count — the
+number of `WithheldBlock`s the app builds must equal the number the artefact declares.
+
+**Recommendation stands: the composition check is standing procedure.** Five green CI
+badges did not mean the round worked. Running them together, with real assets, is what
+found out — for the second round running.
+
+---
+
 ## 11 · Merge debt
 
 **Recommendation unchanged: MERGE #79.** #73 is a strict ancestor of #79; `main` is an ancestor of both; the entire delta #73 → #79 is **16 commits touching 3 files, all documentation**. So merging #79 carries exactly the code risk of #73 — already Founder-ACCEPTED — plus a report, and ships **none** of round 5's unreviewed lane code. Close #73 as subsumed. Hold #80–#88. Full analysis in `ROUND6-MERGE-DEBT-AUDIT.md`.
