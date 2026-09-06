@@ -49,8 +49,9 @@ void main() {
     );
     await t.pumpAndSettle();
     expect(find.byKey(MissionCenterScreen.workspaceCardKey), findsOneWidget);
-    expect(find.text('BÀI HỌC SAM · BẢN THỬ NGHIỆM'), findsOneWidget);
-    // ROUND 4: dòng SAM đầu Home cũng nêu tên bài ⇒ tìm TRONG thẻ.
+    // ROUND 7 V1: thẻ nay mở đầu bằng «ĐANG HỌC» — nhãn bản thử nghiệm KHÔNG
+    // được mất khi màn được sắp lại.
+    expect(find.text('ĐANG HỌC · BÀI HỌC SAM · BẢN THỬ NGHIỆM'), findsOneWidget);
     final inCard = find.descendant(
       of: find.byKey(MissionCenterScreen.workspaceCardKey),
       matching: find.textContaining('Bài 17 · TÁCH CHẤT'),
@@ -58,7 +59,10 @@ void main() {
     expect(inCard, findsOneWidget);
     expect(find.textContaining('Chương IV'), findsOneWidget);
     expect(find.textContaining('trang 60–63'), findsOneWidget);
-    expect(find.textContaining('Học với SAM'), findsOneWidget);
+    // ROUND 7 V1: ba cách học không còn là MỘT DÒNG CHỮ trong thẻ — mỗi cách
+    // còn lại là một nút bấm được ở hàng «CÓ THỂ LÀM TIẾP».
+    expect(find.byKey(MissionCenterScreen.continueRowKey), findsOneWidget);
+    expect(find.textContaining('Học với SAM'), findsWidgets);
     // thẻ G2 của Track A vẫn còn — ROUND 4: đứng sau như «CÒN CÓ THỂ MỞ»
     expect(find.byKey(MissionCenterScreen.secondaryCardKey), findsOneWidget);
     expect(find.text('Vào Môn học ▸'), findsOneWidget);

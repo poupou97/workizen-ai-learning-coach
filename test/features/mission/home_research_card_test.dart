@@ -88,14 +88,26 @@ void main() {
     await t.pumpAndSettle();
     double y(Finder f) => t.getTopLeft(f).dy;
 
-    // ① Ở đầu màn: nhãn HÔM NAY đứng trên thẻ Bài học SAM, và khu nghiên cứu
-    // CHƯA xuất hiện — nó không chen vào việc hôm nay.
-    expect(y(find.text('HÔM NAY')),
-        lessThan(y(find.byKey(MissionCenterScreen.workspaceCardKey))));
+    // ① ROUND 7 V1 — Ở ĐẦU màn là thẻ «ĐANG HỌC» (bài của chính lớp con) và
+    // nút VIỆC TIẾP THEO của nó, cả hai TRONG màn đầu tiên (ListView lười —
+    // thứ chưa dựng thì thật sự chưa ở trên màn). Khu nghiên cứu CHƯA xuất
+    // hiện: nó không chen vào việc hôm nay.
+    expect(find.byKey(MissionCenterScreen.workspaceCardKey), findsOneWidget);
+    expect(y(find.byKey(MissionCenterScreen.workspaceCardKey)),
+        lessThan(y(find.byKey(MissionCenterScreen.nextActionCtaKey))));
+    expect(y(find.byKey(MissionCenterScreen.nextActionCtaKey)),
+        lessThan(y(find.byKey(MissionCenterScreen.samSeenKey))));
     expect(find.text('SAM ĐANG TẬP ĐỌC SÁCH KHÁC'), findsNothing);
 
     final card = find.byKey(MissionCenterScreen.researchCardKey(b8.slotKey));
-    await t.scrollUntilVisible(card, 120, scrollable: find.byType(Scrollable).first);
+    // ROUND 7 V1: màn đầu dài hơn (ĐANG HỌC + việc tiếp theo + SAM thấy gì)
+    // ⇒ cuộn tới NHÃN KHU trước, rồi mới tới thẻ; cuộn thẳng tới thẻ sẽ đẩy
+    // nhãn ra khỏi màn và bài kiểm không còn đọc được nó.
+    await t.scrollUntilVisible(
+      find.text('SAM ĐANG TẬP ĐỌC SÁCH KHÁC'),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
     await t.pumpAndSettle();
 
     // ② Cuộn xuống mới tới khu riêng của lát cắt.

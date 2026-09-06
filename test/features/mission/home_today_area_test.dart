@@ -60,25 +60,30 @@ void main() {
     );
     await t.pumpAndSettle();
     expect(find.text('HÔM NAY'), findsOneWidget);
-    final line = t.widget<Text>(
-      find.descendant(
-        of: find.byKey(MissionCenterScreen.samLineKey),
-        matching: find.byType(Text),
-      ),
-    );
-    expect(line.data, contains('Bài 17'));
-    expect(line.data, contains('Mở bài học'));
-    expect(line.data, isNot(contains('trò chuyện')));
+    // ⭐⭐ ROUND 7 V1 — dòng SAM ở ĐẦU màn đã bị XOÁ khỏi đường «đang học»:
+    // nó nhắc lại đúng tên bài nằm ngay dưới nó (Founder: «lời chào lặp hai
+    // lần») và nó đẩy nút xuống dưới nếp gấp. Lời SAM nay nằm TRONG thẻ.
+    expect(find.byKey(MissionCenterScreen.samLineKey), findsNothing);
     expect(find.byIcon(Icons.mic_none), findsNothing);
-    // vì sao bài này — lời trẻ, đếm từ tài liệu
+    // «Vì sao» nay là LÝ DO của động cơ đề xuất — nguyên văn, không viết lại
     final why = t.widget<Text>(find.byKey(const Key('home-workspace-why')));
-    expect(why.data, startsWith('Vì sao bài này?'));
-    expect(why.data, contains('đọc như trong sách'));
-    expect(why.data, contains('câu hỏi trong sách cùng SAM'));
-    // thứ tự: bài học SAM trên, thẻ Scale dưới
+    expect(why.data, isNotEmpty);
+    expect(why.data, isNot(contains('%')));
+    // thứ tự: ĐANG HỌC là thứ đầu tiên sau lời chào; thẻ Scale ở dưới
     final yWs = t.getTopLeft(find.byKey(MissionCenterScreen.workspaceCardKey)).dy;
     final ySc = t.getTopLeft(find.byKey(MissionCenterScreen.secondaryCardKey)).dy;
+    final ySeen = t.getTopLeft(find.byKey(MissionCenterScreen.samSeenKey)).dy;
+    final yCta = t.getTopLeft(find.byKey(MissionCenterScreen.nextActionCtaKey)).dy;
     expect(yWs, lessThan(ySc));
+    // ⭐ «SAM thấy gì» KHÔNG được tranh hierarchy với Next Action (order 49):
+    // nút việc-tiếp-theo phải đứng TRÊN nó.
+    expect(yCta, lessThan(ySeen));
+    expect(ySeen, lessThan(ySc));
+    // 5 chip chung chung không còn ăn màn đầu — chúng ở dưới cả hai thẻ
+    expect(
+      t.getTopLeft(find.text('📘 Học trước')).dy,
+      greaterThan(ySc),
+    );
     expect(find.text('CÒN CÓ THỂ MỞ'), findsOneWidget);
     expect(find.text('Có 2 bài để học ở Môn học'), findsOneWidget);
     expect(find.textContaining('chưa có bài dạy riêng'), findsNothing,

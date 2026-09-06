@@ -55,6 +55,9 @@ import 'app/boot_screen.dart';
 import 'core/lesson_model/lesson_document.dart';
 import 'core/lesson_model/workspace_catalog.dart';
 import 'features/lesson_workspace/lesson_workspace_screen.dart';
+import 'core/agenda/lesson_next_action.dart' show LessonNextAction;
+import 'core/lesson_model/next_action.dart' show WorkspaceView;
+import 'features/lesson_workspace/widgets/runtime_plan.dart' show founderNextAction;
 import 'features/lesson_workspace/workspace_trace.dart';
 
 Future<void> main() async {
@@ -123,6 +126,29 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
       }
     }
     return null;
+  }
+
+  /// ⭐⭐ ROUND 7 · V1 — dấu vết PHIÊN của bài đang học, đọc từ
+  /// `WorkspaceTrace.session` (cùng trace mà workspace ghi khi trẻ đổi tab).
+  /// Không có bài ⇒ rỗng. MỞ ≠ HIỂU: tập này không bao giờ đi vào kho.
+  Set<WorkspaceView> _workspaceOpened(LearnerProfile p) {
+    final doc = _workspaceLessonFor(p);
+    if (doc == null) return const {};
+    return WorkspaceTrace.session.viewsFor(doc.slotKey);
+  }
+
+  /// ⭐⭐ ROUND 7 · V1 — VIỆC TIẾP THEO của bài đang học, từ ĐỘNG CƠ DUY NHẤT
+  /// (`founderNextAction`, cùng hàm workspace gọi). Home không được có luật
+  /// riêng: nếu có, nút trên Home và gợi ý trong bài sẽ trỏ hai nơi khác nhau
+  /// cho cùng một trạng thái — đúng loại mâu thuẫn vòng 6 đã phải sửa.
+  LessonNextAction? _workspaceNext(LearnerProfile p) {
+    final doc = _workspaceLessonFor(p);
+    if (doc == null) return null;
+    return founderNextAction(
+      doc,
+      seen: WorkspaceTrace.session.viewsFor(doc.slotKey),
+      learnerId: p.learnerId,
+    );
   }
 
   /// ⭐ ROUND 4 (Lane C) — lát cắt NGHIÊN CỨU (Golden Slice #2, LS&ĐL 5 Bài 8)
@@ -527,6 +553,13 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                             _startRecommendation(context, data, rec),
                         workspaceLesson: _workspaceLessonFor(_profile!),
                         researchLessons: _researchLessons(),
+                        // ⭐⭐ ROUND 7 · V1 — Home nhận DẤU VẾT PHIÊN và VIỆC
+                        // TIẾP THEO đã dựng sẵn. Không phải để Home thông
+                        // minh hơn: để Home và workspace nói CÙNG một điều về
+                        // cùng một bài. `founderNextAction` là động cơ duy
+                        // nhất; Home chỉ trình bày kết quả của nó.
+                        openedViews: _workspaceOpened(_profile!),
+                        lessonNext: _workspaceNext(_profile!),
                         onOpenWorkspaceLesson: (doc) async {
                           await Navigator.of(context).push(MaterialPageRoute(
                               builder: (_) => LessonWorkspaceScreen(

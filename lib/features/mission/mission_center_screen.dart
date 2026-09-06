@@ -22,6 +22,7 @@ import '../../core/display/lesson_title.dart';
 import '../../core/intent/next_lesson.dart';
 import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/next_action.dart';
+import '../../core/agenda/lesson_next_action.dart' show LessonNextAction;
 import '../../core/stories/stories_store.dart';
 import '../../core/store/learner_profile.dart';
 import '../camera/camera_demo_flow.dart';
@@ -75,6 +76,8 @@ class MissionCenterScreen extends StatelessWidget {
     this.workspaceLesson,
     this.onOpenWorkspaceLesson,
     this.researchLessons = const [],
+    this.openedViews = const {},
+    this.lessonNext,
   });
 
   final MissionData data;
@@ -137,7 +140,29 @@ class MissionCenterScreen extends StatelessWidget {
   /// Rỗng ⇒ không thẻ. Mở bằng cùng [onOpenWorkspaceLesson].
   final List<LessonDocument> researchLessons;
 
+  /// ⭐⭐ ROUND 7 · V1 — DẤU VẾT PHIÊN của [workspaceLesson]: những cách học
+  /// trẻ đã MỞ. Home KHÔNG tự hỏi `WorkspaceTrace` (cùng kỷ luật với lớp trợ
+  /// giúp trong workspace): tầng trên dựng sẵn và truyền xuống.
+  ///
+  /// ⚠ MỞ ≠ HIỂU. Tập này chỉ được dùng để nói «con đã mở gì», không bao giờ
+  /// để nói «con đã hiểu gì» — `home_learning_now_test.dart` giữ điều đó.
+  final Set<WorkspaceView> openedViews;
+
+  /// ⭐⭐ ROUND 7 · V1 — VIỆC TIẾP THEO của [workspaceLesson], do CHÍNH động
+  /// cơ mà workspace dùng sinh ra (`founderNextAction`). Home không có động
+  /// cơ đề xuất thứ hai: nếu nó tự nghĩ ra CTA, Home và workspace sẽ nói hai
+  /// điều khác nhau về cùng một bài. `null` ⇒ nút mở bài như cũ.
+  final LessonNextAction? lessonNext;
+
   static const workspaceCardKey = Key('home-workspace-card');
+
+  /// ROUND 7 · V1 — những phần của thẻ «ĐANG HỌC».
+  static const nextActionCtaKey = Key('home-next-action-cta');
+  static const progressKey = Key('home-evidence-progress');
+  static const samSeenKey = Key('home-sam-seen');
+  static const continueRowKey = Key('home-continue-row');
+  static Key continueChipKey(WorkspaceView v) =>
+      Key('home-continue-${v.name}');
   static const samLineKey = Key('home-sam-line');
   static const secondaryCardKey = Key('home-secondary-card');
 
@@ -163,20 +188,38 @@ class MissionCenterScreen extends StatelessWidget {
           padding: const EdgeInsets.all(WalSpacing.md),
           children: [
             _greeting(),
-            const SizedBox(height: WalSpacing.sm),
-            _samLine(),
-            const SizedBox(height: WalSpacing.sm),
-            _intentChips(),
-            const SizedBox(height: WalSpacing.md),
-            _sectionLabel('HÔM NAY'),
-            // ROUND 4 — một vùng «Hôm nay»: bài học SAM là việc chính khi có
-            // (và Toán không khẩn vì bằng chứng); thẻ Scale/agenda đứng sau
-            // như «còn có thể mở». Không có bài học SAM ⇒ thẻ cũ giữ nguyên.
+            // ⭐⭐ ROUND 7 · V1 — MÀN ĐẦU TRẢ LỜI BA CÂU, KHÔNG PHẢI LÀ MỘT
+            // BỆ PHÓNG. Founder order 49 §1: «Một màn đầu phải nổi bật: ĐANG
+            // HỌC GÌ + VIỆC TIẾP THEO. SAM thấy gì là hỗ trợ, không tranh
+            // hierarchy với Next Action.»
+            //
+            // Máy thật (`round7-r1-device-walk/02-home.png`) cho thấy thứ tự
+            // cũ: chào → SAM nhắc LẠI tên bài → 5 chip chung chung (một phần
+            // ba màn) → nhãn HÔM NAY → thẻ bài → nút «Mở bài học» RƠI XUỐNG
+            // DƯỚI NẾP GẤP. Trẻ mở app và thấy… một bảng nút.
+            //
+            // Thứ tự mới khi có bài đang học: ĐANG HỌC (nổi bật, có việc tiếp
+            // theo trong chính thẻ) → CÓ THỂ LÀM TIẾP (những cách học còn
+            // lại) → SAM ĐÃ THẤY GÌ (nhỏ, phụ) → rồi mới tới phần còn lại.
+            // Dòng SAM nhắc lại tên bài bị XOÁ khỏi đường này: nó lặp đúng
+            // cái tiêu đề nằm ngay dưới nó, và nó đẩy nút xuống.
             if (_workspaceIsPrimary) ...[
-              _workspaceCard(workspaceLesson!, primary: true),
               const SizedBox(height: WalSpacing.sm),
+              _learningNowCard(workspaceLesson!),
+              const SizedBox(height: WalSpacing.sm),
+              _continueRow(workspaceLesson!),
+              const SizedBox(height: WalSpacing.sm),
+              _samSeenCard(workspaceLesson!),
+              const SizedBox(height: WalSpacing.lg),
+              _sectionLabel('HÔM NAY'),
               _nextActionCard(secondary: true),
             ] else ...[
+              const SizedBox(height: WalSpacing.sm),
+              _samLine(),
+              const SizedBox(height: WalSpacing.sm),
+              _intentChips(),
+              const SizedBox(height: WalSpacing.md),
+              _sectionLabel('HÔM NAY'),
               _nextActionCard(),
               if (workspaceLesson != null) ...[
                 const SizedBox(height: WalSpacing.sm),
@@ -220,6 +263,14 @@ class MissionCenterScreen extends StatelessWidget {
             if (data.unobservedCaseNames.isNotEmpty) ...[
               _sectionLabel('Thử dạng mới'),
               for (final name in data.unobservedCaseNames) _unseenTile(name),
+            ],
+            // ROUND 7 · V1 — 5 chip ý định chung chung KHÔNG còn ăn một phần
+            // ba màn đầu khi trẻ đang có bài dở. Chúng vẫn còn, đủ xa để
+            // không tranh chỗ với việc tiếp theo.
+            if (_workspaceIsPrimary) ...[
+              const SizedBox(height: WalSpacing.lg),
+              _sectionLabel('CÁCH KHÁC ĐỂ HỌC'),
+              _intentChips(),
             ],
             const SizedBox(height: WalSpacing.xl),
             _bottomActions(),
@@ -431,6 +482,221 @@ class MissionCenterScreen extends StatelessWidget {
                   ),
           ),
         ],
+      ]),
+    );
+  }
+
+  // ── ROUND 7 · V1 — «ĐANG HỌC» + «VIỆC TIẾP THEO» ───────────────────────
+
+  /// Những cách học bài này thật sự CÓ (một nguồn với luật đề xuất).
+  List<WorkspaceView> _waysOf(LessonDocument doc) => [
+        if (doc.blocks.any((b) => b is! WithheldBlock)) WorkspaceView.read,
+        if (doc.semantic.isNotEmpty) WorkspaceView.visual,
+        if (doc.tutorScript != null) WorkspaceView.tutor,
+      ];
+
+  /// Đã mở bao nhiêu trong số cách học bài NÀY có. Giao với [_waysOf] để một
+  /// dấu vết của bài khác không bao giờ đếm vào đây.
+  int _openedCount(LessonDocument doc) =>
+      _waysOf(doc).where(openedViews.contains).length;
+
+  /// ⭐⭐ THẺ «ĐANG HỌC» — thẻ nổi bật nhất của màn đầu.
+  ///
+  /// Nó trả lời cả hai câu Founder yêu cầu trong MỘT khối: đang học gì (tên
+  /// bài, sách, trang) và việc tiếp theo (nút, nhãn lấy từ [lessonNext] — tức
+  /// từ CHÍNH động cơ workspace dùng, không phải một luật thứ hai của Home).
+  ///
+  /// Tiến độ là BẰNG CHỨNG MỞ, không phải mastery: N vạch cho N cách học bài
+  /// này có, tô những cách đã mở. Không %, không sao, không «đã thạo».
+  Widget _learningNowCard(LessonDocument doc) {
+    final ways = _waysOf(doc);
+    final opened = _openedCount(doc);
+    final where = doc.chapter == null
+        ? doc.pageRangeLine
+        : '${doc.chapter!.label} · ${doc.pageRangeLine}';
+    final next = lessonNext;
+    final ctaLabel = next == null
+        ? 'Mở bài học'
+        : (next.view == null ? 'Xem tiếp bài này ▸' : '${next.label} ▸');
+    return Container(
+      key: MissionCenterScreen.workspaceCardKey,
+      padding: const EdgeInsets.all(WalSpacing.lg),
+      decoration: BoxDecoration(
+        color: WalColors.surfaceLavender,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Nhãn «bản thử nghiệm» là BẮT BUỘC khi tài liệu là fixture — nó
+        // không được biến mất vì màn được sắp lại.
+        Text(
+            doc.isFixture
+                ? 'ĐANG HỌC · BÀI HỌC SAM · BẢN THỬ NGHIỆM'
+                : 'ĐANG HỌC · BÀI HỌC SAM',
+            style: const TextStyle(
+                fontSize: WalType.secondary,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.1,
+                color: WalColors.inkSoft)),
+        const SizedBox(height: 4),
+        Text(displayLessonLabel(doc.lessonNo, doc.title),
+            style: const TextStyle(
+                fontSize: WalType.title,
+                fontWeight: FontWeight.w700,
+                color: WalColors.primaryText,
+                height: 1.2)),
+        const SizedBox(height: 2),
+        Text(where,
+            style: const TextStyle(
+                fontSize: WalType.secondary, color: WalColors.inkSoft)),
+        const SizedBox(height: WalSpacing.md),
+        _evidenceBar(ways.length, opened),
+        const SizedBox(height: WalSpacing.sm),
+        // SAM nói — NGUYÊN VĂN lý do của động cơ, Home không viết lại.
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _samChip('assets/mascot/sam-explain.png', size: 30),
+          const SizedBox(width: WalSpacing.sm),
+          Expanded(
+            child: Text(next?.reason ?? workspaceWhyLine(doc),
+                key: const Key('home-workspace-why'),
+                style: const TextStyle(
+                    fontSize: WalType.secondary,
+                    color: WalColors.ink,
+                    height: 1.4)),
+          ),
+        ]),
+        const SizedBox(height: WalSpacing.md),
+        SizedBox(
+          width: double.infinity,
+          height: WalSpacing.minTouch,
+          child: FilledButton(
+            key: MissionCenterScreen.nextActionCtaKey,
+            style: FilledButton.styleFrom(
+                backgroundColor: WalColors.primary500,
+                shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(WalSpacing.radiusButton))),
+            onPressed: onOpenWorkspaceLesson == null
+                ? null
+                : () => onOpenWorkspaceLesson!(doc),
+            child: Text(ctaLabel,
+                style: const TextStyle(
+                    fontSize: WalType.body, fontWeight: FontWeight.w700)),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  /// N vạch cho N cách học bài này CÓ; tô những cách đã mở. Chú thích nói
+  /// đúng nó là gì: «đã mở», không phải «đã xong».
+  Widget _evidenceBar(int total, int opened) => Row(
+        key: MissionCenterScreen.progressKey,
+        children: [
+          for (var i = 0; i < total; i++) ...[
+            if (i > 0) const SizedBox(width: 5),
+            Expanded(
+              child: Container(
+                height: 7,
+                decoration: BoxDecoration(
+                  color: i < opened
+                      ? WalColors.primary500
+                      : WalColors.primary500.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(width: WalSpacing.sm),
+          Text('đã mở $opened/$total cách học',
+              style: const TextStyle(
+                  fontSize: 13, color: WalColors.inkSoft)),
+        ],
+      );
+
+  /// «CÓ THỂ LÀM TIẾP» — những cách học của CHÍNH bài này, không phải năm
+  /// chip chung chung. Cách học SAM đang đề xuất không lặp lại ở đây (nút của
+  /// nó đã ở trên); cách học bài không có thì không được mời.
+  Widget _continueRow(LessonDocument doc) {
+    final rest = [
+      for (final v in _waysOf(doc))
+        if (v != lessonNext?.view) v,
+    ];
+    if (rest.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: MissionCenterScreen.continueRowKey,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionLabel('CÓ THỂ LÀM TIẾP'),
+        Row(children: [
+          for (var i = 0; i < rest.length; i++) ...[
+            if (i > 0) const SizedBox(width: WalSpacing.sm),
+            Expanded(
+              child: SizedBox(
+                height: WalSpacing.minTouch,
+                child: OutlinedButton(
+                  key: MissionCenterScreen.continueChipKey(rest[i]),
+                  style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: WalColors.ink,
+                      side: BorderSide(
+                          color: WalColors.primary500.withValues(alpha: 0.3)),
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(WalSpacing.radiusChip))),
+                  onPressed: onOpenWorkspaceLesson == null
+                      ? null
+                      : () => onOpenWorkspaceLesson!(doc),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('${rest[i].icon} ${rest[i].label}',
+                        style: const TextStyle(
+                            fontSize: WalType.secondary,
+                            fontWeight: FontWeight.w600)),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ]),
+      ],
+    );
+  }
+
+  /// «SAM ĐÃ THẤY GÌ» — HỖ TRỢ, không tranh hierarchy với việc tiếp theo
+  /// (Founder order 49 §1). Nền trắng phẳng, chữ nhỏ, không nút, không mascot.
+  ///
+  /// ⚠ Nó nói ĐÚNG một điều: trẻ đã MỞ gì. Và nó nói thẳng rằng mở không phải
+  /// hiểu — vì đây là chỗ duy nhất trên Home có hình dạng của «tiến độ», nên
+  /// nó cũng là chỗ dễ bị đọc nhầm thành mastery nhất.
+  Widget _samSeenCard(LessonDocument doc) {
+    final total = _waysOf(doc).length;
+    final opened = _openedCount(doc);
+    final line = opened == 0
+        ? 'Con chưa mở cách học nào của bài này trong phiên này. '
+            'SAM chưa chấm phần nào — mở bài không phải là hiểu bài.'
+        : 'Con đã mở $opened trong $total cách học. '
+            'SAM chưa chấm phần nào — mở bài không phải là hiểu bài.';
+    return Container(
+      key: MissionCenterScreen.samSeenKey,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+          horizontal: WalSpacing.md, vertical: WalSpacing.sm + 2),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text('SAM ĐÃ THẤY GÌ',
+            style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: .8,
+                color: WalColors.inkSoft)),
+        const SizedBox(height: 3),
+        Text(line,
+            style: const TextStyle(
+                fontSize: 13, color: WalColors.ink, height: 1.4)),
       ]),
     );
   }
