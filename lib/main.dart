@@ -222,13 +222,6 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (p == null) return;
     setState(() {
       _profile = p;
-      // ⭐ Lệnh 51 §1 (C-2) — tên sách là bộ nhớ TOÀN CỤC tích luỹ theo lớp đã
-      // mở. Không xoá thì «Kho khám phá» (kho của toàn corpus, không lọc lớp)
-      // hiện «SGK Ngữ văn 6» hay hiện mã sách trần TUỲ vào việc phiên này đã
-      // mở hồ sơ lớp 6 trước hay chưa — cùng màn, cùng hồ sơ, hai kết quả.
-      // Xoá ở đây để hiển thị chỉ phụ thuộc hồ sơ đang mở, không phụ thuộc
-      // lịch sử bấm của phiên.
-      knownBookTitles.clear();
       _refreshMission(); // mission tính lại TỪ KHO của đúng learner này
     });
     widget.store.saveActiveLearner(p.learnerId); // sống qua restart

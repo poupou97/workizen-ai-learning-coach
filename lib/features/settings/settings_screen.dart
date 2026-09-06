@@ -11,7 +11,6 @@ import '../../core/store/learner_profile.dart';
 import '../../core/store/learner_store.dart';
 import '../discovery/discovery_library_screen.dart';
 import '../learning_map/learning_map_screen.dart';
-import '../progress/progress_screen.dart';
 import '../student/sessions_screen.dart';
 import '../profile/profile_screen.dart';
 import '../subjects/lesson_index.dart';
@@ -75,10 +74,9 @@ class SettingsScreen extends StatelessWidget {
               ),
               // WAL-142 — ba lối vào truths (chỉ khi có hồ sơ thật).
               if (profile != null && store != null) ...[
-                const SizedBox(height: WalSpacing.sm),
-                _entry(context, '🌱', 'Tiến bộ của con',
-                    'Điều SAM biết chắc — có bằng chứng, không điểm số',
-                    (c) => ProgressScreen(profile: profile!, store: store!)),
+                // ⭐ Lệnh 52 §6 — «Tiến bộ của con» nay là TAB «Thành tích» ở
+                // thanh dưới. Bỏ lối vào thứ hai ở đây: hai cửa vào cùng một
+                // màn làm trẻ tưởng là hai thứ khác nhau, và §9 cấm nhân bản.
                 const SizedBox(height: WalSpacing.sm),
                 _entry(context, '🗺️', 'Bản đồ học tập',
                     'Cây bài theo môn — bài nào đang học cùng SAM',
