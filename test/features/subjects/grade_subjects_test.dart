@@ -12,6 +12,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/features/subjects/grade_subjects.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
 
+/// ⭐ `assets/pack/` KHÔNG nằm trong git (dựng lại từ corpus, WAL-43). Trên CI
+/// nó vắng mặt. Test này khẳng định nội dung THẬT của pack nên không thể chạy
+/// khi thiếu — và cũng KHÔNG được biến thành khẳng định rỗng chạy qua trong im
+/// lặng. Nên nó BỎ QUA có nêu lý do: CI báo «skipped», không báo «passed».
+final bool _hasPack =
+    File('assets/pack/lesson-index-g6.json').existsSync() &&
+    File('assets/pack/lesson-index-g5.json').existsSync();
+
+const _noPack =
+    'assets/pack/ không có trên máy này (không nằm trong git) — '
+    'test cần pack THẬT của lớp 5 và lớp 6';
+
 LessonIndex _pack(int grade) {
   final f = File('assets/pack/lesson-index-g$grade.json');
   final idx = LessonIndex.fromJsonString(f.readAsStringSync());
@@ -20,38 +32,46 @@ LessonIndex _pack(int grade) {
 }
 
 void main() {
-  group('§7 — môn giải từ catalog thật, không phải danh sách bịa', () {
-    test('lớp 6 có KHTN và Ngữ văn; lớp 5 có Khoa học và Tiếng Việt', () {
-      final g6 = gradeSubjectNames(_pack(6));
-      final g5 = gradeSubjectNames(_pack(5));
-      expect(g6, containsAll(['KHTN', 'Ngữ văn', 'Toán']));
-      expect(g5, containsAll(['Khoa học', 'Tiếng Việt', 'Toán', 'LS&ĐL']));
-    });
+  group(
+    '§7 — môn giải từ catalog thật, không phải danh sách bịa',
+    skip: _hasPack ? null : _noPack,
+    () {
+      test('lớp 6 có KHTN và Ngữ văn; lớp 5 có Khoa học và Tiếng Việt', () {
+        final g6 = gradeSubjectNames(_pack(6));
+        final g5 = gradeSubjectNames(_pack(5));
+        expect(g6, containsAll(['KHTN', 'Ngữ văn', 'Toán']));
+        expect(g5, containsAll(['Khoa học', 'Tiếng Việt', 'Toán', 'LS&ĐL']));
+      });
 
-    test('hai lớp cho hai bộ môn KHÁC nhau — Na và Minh không thể trùng', () {
-      final g6 = gradeSubjectNames(_pack(6)).toSet();
-      final g5 = gradeSubjectNames(_pack(5)).toSet();
-      expect(g6, isNot(equals(g5)));
-      // Môn chỉ có ở cấp 2 không được lọt xuống lớp 5, và ngược lại.
-      expect(g5, isNot(contains('KHTN')));
-      expect(g5, isNot(contains('Ngữ văn')));
-      expect(g6, isNot(contains('Khoa học')));
-      expect(g6, isNot(contains('Tiếng Việt')));
-    });
+      test('hai lớp cho hai bộ môn KHÁC nhau — Na và Minh không thể trùng', () {
+        final g6 = gradeSubjectNames(_pack(6)).toSet();
+        final g5 = gradeSubjectNames(_pack(5)).toSet();
+        expect(g6, isNot(equals(g5)));
+        // Môn chỉ có ở cấp 2 không được lọt xuống lớp 5, và ngược lại.
+        expect(g5, isNot(contains('KHTN')));
+        expect(g5, isNot(contains('Ngữ văn')));
+        expect(g6, isNot(contains('Khoa học')));
+        expect(g6, isNot(contains('Tiếng Việt')));
+      });
 
-    test('mọi môn đều có ít nhất một cuốn sách thật đứng sau', () {
-      for (final grade in [5, 6]) {
-        for (final s in gradeSubjects(_pack(grade))) {
-          expect(s.books, isNotEmpty, reason: '${s.subject} không có sách nào');
-          for (final b in s.books) {
-            expect(b.subject, s.subject);
+      test('mọi môn đều có ít nhất một cuốn sách thật đứng sau', () {
+        for (final grade in [5, 6]) {
+          for (final s in gradeSubjects(_pack(grade))) {
+            expect(
+              s.books,
+              isNotEmpty,
+              reason: '${s.subject} không có sách nào',
+            );
+            for (final b in s.books) {
+              expect(b.subject, s.subject);
+            }
           }
         }
-      }
-    });
-  });
+      });
+    },
+  );
 
-  group('§8 — BOOK ≠ SUBJECT', () {
+  group('§8 — BOOK ≠ SUBJECT', skip: _hasPack ? null : _noPack, () {
     test('Toán Tập 1 + Tập 2 là MỘT môn «Toán», không phải hai', () {
       for (final grade in [5, 6]) {
         final subs = gradeSubjects(_pack(grade));
@@ -102,9 +122,13 @@ void main() {
     });
   });
 
-  group('thứ tự ổn định — TKB sinh ra phải tái lập được', () {
-    test('gọi hai lần cho cùng một pack ⇒ cùng thứ tự môn', () {
-      expect(gradeSubjectNames(_pack(6)), gradeSubjectNames(_pack(6)));
-    });
-  });
+  group(
+    'thứ tự ổn định — TKB sinh ra phải tái lập được',
+    skip: _hasPack ? null : _noPack,
+    () {
+      test('gọi hai lần cho cùng một pack ⇒ cùng thứ tự môn', () {
+        expect(gradeSubjectNames(_pack(6)), gradeSubjectNames(_pack(6)));
+      });
+    },
+  );
 }
