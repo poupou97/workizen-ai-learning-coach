@@ -81,11 +81,24 @@ void main() {
       ),
       findsOneWidget,
     );
-    final inCard = find.descendant(
-      of: find.byKey(MissionCenterScreen.samSuggestionKey),
-      matching: find.textContaining('Bài 17 · TÁCH CHẤT'),
+    // ⚠ ROUND 7 V2 lượt 2 (máy thật `01-home.png`): tầng 2 KHÔNG in lại
+    // nguyên tiêu đề IN HOA của Smart Card ngay trên nó — nó ĐỊNH DANH bài
+    // («KHTN 6 · Bài 17»), đúng ví dụ §5 của Founder. Tên đầy đủ vẫn có ở
+    // Smart Card và trong bài.
+    expect(
+      find.descendant(
+        of: find.byKey(MissionCenterScreen.samSuggestionKey),
+        matching: find.text('KHTN 6 · Bài 17'),
+      ),
+      findsOneWidget,
     );
-    expect(inCard, findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(MissionCenterScreen.smartCardKey(doc.slotKey)),
+        matching: find.textContaining('Bài 17 · TÁCH CHẤT'),
+      ),
+      findsOneWidget,
+    );
     expect(find.textContaining('Chương IV'), findsOneWidget);
     expect(find.textContaining('trang 60–63'), findsOneWidget);
     // ROUND 7 V1: ba cách học không còn là MỘT DÒNG CHỮ trong thẻ — mỗi cách

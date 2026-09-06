@@ -465,6 +465,56 @@ void main() {
     });
   });
 
+  group('§7 — HERO CO LẠI, KHÔNG LẶP (lỗi tìm ra TRÊN MÁY THẬT)', () {
+    testWidgets('⭐⭐ tầng 2 KHÔNG in lại nguyên tiêu đề của Smart Card ngay '
+        'trên nó — nó chỉ ĐỊNH DANH bài', (t) async {
+      // Máy thật lượt 1 (`01-home.png`): «KHTN 6 · Bài 17 · TÁCH CHẤT KHỎI
+      // HỖN HỢP» in HAI lần trên một màn, ăn hai dòng ở tầng 2. §7: «Không
+      // cần lặp… Ưu tiên: title · state · next action.»
+      final d = loadSyntheticDoc();
+      await _pump(t, threads: [_thread(d)]);
+      final full = t
+          .widgetList<Text>(find.descendant(
+              of: find.byKey(MissionCenterScreen.smartCardKey(d.slotKey)),
+              matching: find.byType(Text)))
+          .map((w) => w.data ?? '')
+          .firstWhere((s) => s.startsWith('Bài 17'));
+      final tier2 = t
+          .widgetList<Text>(find.descendant(
+              of: find.byKey(MissionCenterScreen.samSuggestionKey),
+              matching: find.byType(Text)))
+          .map((w) => w.data ?? '')
+          .join(' | ');
+      expect(tier2, isNot(contains(full)),
+          reason: 'tầng 2 lặp nguyên tiêu đề của thẻ — lỗi 01-home.png');
+      expect(tier2, contains('KHTN 6 · Bài 17'));
+    });
+
+    testWidgets('⭐⭐ thẻ có thêm dòng «sách lớp N» chỉ được MỘT hàng cho dòng '
+        '«đã mở gì» — chữ bị xén ngang là chữ không đọc được', (t) async {
+      // Máy thật lượt 1 (`02-swipe-card2.png`): ở chiều cao thẻ cũ, dòng này
+      // bị CẮT NGANG THÂN CHỮ trên thẻ LS&ĐL 5 — thẻ duy nhất có bốn dòng
+      // cộng dòng sự thật về lớp.
+      final b8 = _readOnly(loadSyntheticDoc());
+      await _pump(t, threads: [_thread(loadSyntheticDoc()), _thread(b8)]);
+      // Thẻ KHÔNG có dòng «sách lớp N» vẫn được hai hàng — đo trước khi vuốt,
+      // vì `PageView` huỷ thẻ đã rời màn.
+      final own = t.widget<Text>(find.descendant(
+        of: find.byKey(
+            MissionCenterScreen.smartCardKey(loadSyntheticDoc().slotKey)),
+        matching: find.textContaining('SAM đã xếp sẵn'),
+      ));
+      expect(own.maxLines, 2);
+      await _swipe(t, 1);
+      final detail = t.widget<Text>(find.descendant(
+        of: find.byKey(MissionCenterScreen.smartCardKey(b8.slotKey)),
+        matching: find.textContaining('SAM đã xếp sẵn'),
+      ));
+      expect(detail.maxLines, 1);
+      expect(detail.overflow, TextOverflow.ellipsis);
+    });
+  });
+
   group('§5 — MỘT NEXT ACTION', () {
     testWidgets('⭐⭐ cả màn ĐÚNG MỘT nút tô đặc, và nó là việc tiếp theo',
         (t) async {

@@ -430,11 +430,16 @@ class MissionCenterScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('${card.subjectLine} · ${card.lessonLine}',
-            maxLines: 2,
+        // ⚠ MÁY THẬT lượt 1 (`01-home.png`): thẻ này in LẠI nguyên tiêu đề IN
+        // HOA của Smart Card ngay trên nó — «KHTN 6 · Bài 17 · TÁCH CHẤT
+        // KHỎI HỖN HỢP» hai lần trên một màn, ăn hai dòng. Đó đúng là điều
+        // order 50 §7 cấm («Không cần lặp»). Tầng 2 nay chỉ ĐỊNH DANH bài —
+        // đúng như ví dụ §5 của Founder: «Tiếp tục KHTN 6 · Bài 17 →».
+        Text('${card.subjectLine} · Bài ${doc.lessonNo}',
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-                fontSize: WalType.body + 1,
+                fontSize: WalType.body + 2,
                 fontWeight: FontWeight.w700,
                 color: WalColors.primaryText,
                 height: 1.25)),
@@ -1007,9 +1012,14 @@ class _SmartCardRow extends StatefulWidget {
 class _SmartCardRowState extends State<_SmartCardRow> {
   static const double viewportFraction = .82;
   /// Chiều cao thẻ — cố định để hàng không nhảy khi thẻ này dài hơn thẻ kia.
-  /// Con số đến từ phép đo: bốn dòng bắt buộc + dòng «sách lớp N» của thẻ
-  /// lớp khác, ở 360 dp. Cao hơn nữa thì tầng 2 rơi xuống dưới nếp gấp.
-  static const double cardHeight = 172;
+  ///
+  /// ⚠ MÁY THẬT lượt 1 (`02-swipe-card2.png`): ở 172 dp, thẻ LS&ĐL 5 — thẻ
+  /// DUY NHẤT có thêm dòng «Sách lớp 5 · không phải sách lớp con» — cắt ngang
+  /// dòng «đã mở gì», để lại một nửa hàng chữ giữa nhãn trạng thái và dòng
+  /// «Tiếp theo». Một dòng chữ bị xén ngang là chữ KHÔNG ĐỌC ĐƯỢC, và nó rơi
+  /// đúng vào thẻ mang sự thật «sách lớp khác». Nâng lên 186 + [_detailLines]
+  /// giới hạn theo đúng thẻ ấy.
+  static const double cardHeight = 186;
 
   late final PageController _controller =
       PageController(viewportFraction: viewportFraction);
@@ -1184,13 +1194,19 @@ class _SmartCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Expanded(
-                  child: Text(card.detailLine,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 12.5,
-                          color: WalColors.inkSoft,
-                          height: 1.3)),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(card.detailLine,
+                        // Thẻ có thêm dòng «sách lớp N» thì dòng này chỉ còn
+                        // chỗ cho MỘT hàng — cắt bằng «…» là đọc được, cắt
+                        // ngang thân chữ thì không.
+                        maxLines: card.otherGradeNote == null ? 2 : 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 12.5,
+                            color: WalColors.inkSoft,
+                            height: 1.3)),
+                  ),
                 ),
                 // VIỆC TIẾP THEO
                 Text('Tiếp theo: ${card.nextLabel} →',
