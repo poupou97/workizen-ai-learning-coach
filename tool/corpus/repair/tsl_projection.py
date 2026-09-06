@@ -43,6 +43,7 @@ measured run; the report always names the blocks either way.
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from collections import Counter, defaultdict
 
@@ -65,6 +66,13 @@ class UnTrustedRepairServed(RepairIntegrityError):
     """A TSL served a block the repair ledger says was repaired. Fail-closed: nothing is written."""
 
 
+def canonical_sha256(obj):
+    """sha256 of the canonical JSON — the same oracle `tsl_to_lesson_document.document_hash` uses, so a
+    reader can chain SOURCE TSL -> PROJECTED TSL -> LESSON DOCUMENT by hash without a second convention."""
+    return hashlib.sha256(json.dumps(obj, ensure_ascii=False, sort_keys=True,
+                                     separators=(',', ':')).encode('utf-8')).hexdigest()
+
+
 def block_key(block_id):
     """`<book>:pNNN:<pipeline>:<order>` -> `<book>:pNNN:<order>`.
 
@@ -85,11 +93,25 @@ def chains(rows):
     return dict(out)
 
 
-def _final_rows(rows):
-    """From one block's chain, pick the row that states the outcome, plus whether a RESTORE happened.
+def _candidate_id(row):
+    return ((row or {}).get('candidate') or {}).get('candidate_id')
 
-    The engine writes `detect` -> `validate` -> `dispose`, and `restore` only when the caller served
-    it. The dispose row is the block's outcome; a validate row is used when the caller stopped there.
+
+def _final_rows(rows):
+    """From one block's chain: the row that states the outcome, the validation that ACTUALLY ruled on
+    the winning candidate, and whether a RESTORE happened.
+
+    The engine writes `detect` -> `validate` -> `dispose`, and `restore` only when the caller served it.
+
+    **A defect in the engine this join must not inherit** (`engine.py:run_block`, round 5): the dispose
+    row's `validation` is `_merge(validations)` over EVERY candidate the block produced, not over the one
+    that won. On LS&DL 5 Bai 8 p038:018 the block's disposition is VALIDATED_REPAIR (the
+    `lanec.tone-majority-v1` candidate validated) while the same row's merged verdict reads `rejected`,
+    because a DIFFERENT candidate (`lanec.tone-corroboration-v1`) had been rejected earlier. A reader who
+    takes the dispose row's verdict at face value concludes the repair was rejected. So the validation is
+    taken from the `validate` row for the SAME candidate id, and the merged row is kept only as a
+    fallback. Reported, not silently patched in the engine: changing `_merge` would change round-5
+    numbers that are published.
     """
     restored = any(r.get('stage') == 'restore' or r.get('disposition') == Disposition.TRUSTED
                    for r in rows)
@@ -100,7 +122,12 @@ def _final_rows(rows):
     if outcome is not None and outcome.get('disposition') == Disposition.TRUSTED and validate:
         # a restore row superseded the dispose row; the *repair* is the validated one underneath it
         outcome = validate[-1]
-    return outcome, restored, bool(validate)
+    ruling = None
+    if outcome is not None and outcome.get('disposition') == Disposition.VALIDATED_REPAIR:
+        cid = _candidate_id(outcome)
+        same = [r for r in validate if _candidate_id(r) == cid]
+        ruling = same[-1] if same else None
+    return outcome, restored, ruling
 
 
 def repairs_for_tsl(tsl, rows, *, source_version=None):
@@ -117,6 +144,7 @@ def repairs_for_tsl(tsl, rows, *, source_version=None):
     prov0 = ((tsl.get('blocks') or [{}])[0].get('provenance') or {})
     sv.setdefault('sdm_version', prov0.get('sdm_version'))
     sv.setdefault('projection', PROJECTION_VERSION)
+    sv.setdefault('framework', model.FRAMEWORK_VERSION)
 
     in_lesson = {block_key(b['id']) for b in tsl.get('blocks') or []}
     in_lesson |= {block_key(w['id']) for w in tsl.get('withheld') or []}
@@ -126,7 +154,7 @@ def repairs_for_tsl(tsl, rows, *, source_version=None):
         if key not in in_lesson:
             skipped += 1
             continue
-        outcome, restored, has_validated = _final_rows(rws)
+        outcome, restored, ruling = _final_rows(rws)
         if outcome is None:
             continue
         if outcome.get('disposition') != Disposition.VALIDATED_REPAIR:
@@ -137,7 +165,9 @@ def repairs_for_tsl(tsl, rows, *, source_version=None):
             continue
         caps = [CAP_TRUST_GATE] if restored else []
         entry = ledger_mod.entry_from_json(outcome)
-        by_key[key] = ValidatedRepair.from_entry(entry, source_version=sv, caps=caps)
+        ruling_val = ledger_mod.entry_from_json(ruling).validation if ruling else None
+        by_key[key] = ValidatedRepair.from_entry(entry, source_version=sv, caps=caps,
+                                                 validation=ruling_val)
     return by_key, other, skipped
 
 
@@ -197,9 +227,18 @@ def project(tsl, rows, *, source_version=None, on_served_repair='refuse',
                              f'ungated repair')
 
     out = copy.deepcopy(tsl)
+    # FIXTURE VERSION SAFETY (round-6 Founder addendum): anything downstream uses for Founder or device
+    # evidence must be able to name the exact generation it came from. The chain is recorded by hash:
+    # SOURCE TSL sha -> this projection's version -> the ledger run -> the SDM version -> the generator.
+    # A fixture reproducible from `tc2-p1`/`sdm-v2` is NOT a current-pipeline fixture, and mixing
+    # generations silently is the failure this block exists to make impossible.
+    source_sha = canonical_sha256(tsl)
     run = ledger_run(rows)
     same_pipeline = bool(run.get('pipeline')) and out.get('pipeline') == run.get('pipeline')
-    by_key, other, skipped = repairs_for_tsl(out, rows, source_version=source_version)
+    sv = dict(source_version or {})
+    sv.setdefault('sourceTslSha256', source_sha)
+    sv.setdefault('ledgerRun', {k: run.get(k) for k in ('lane', 'baseline', 'pipeline', 'framework')})
+    by_key, other, skipped = repairs_for_tsl(out, rows, source_version=sv)
     restored_keys = {k for k, rws in chains(rows).items()
                      if any(r.get('stage') == 'restore' or r.get('disposition') == Disposition.TRUSTED
                             for r in rws)}
@@ -291,6 +330,9 @@ def project(tsl, rows, *, source_version=None, on_served_repair='refuse',
         onServedRepair=on_served_repair, onServedUnrepaired=on_served_unrepaired,
         onDetectedUnrepaired=on_detected_unrepaired,
         ledgerRun=run, samePipelineAsLedger=same_pipeline,
+        sourceTslSha256=source_sha,
+        sourcePipeline=out.get('pipeline'),
+        sourceSdmVersion=((out.get('blocks') or [{}])[0].get('provenance') or {}).get('sdm_version'),
         productionTrustThreshold=None,
         findings=findings,
         note='CONNECT != TRUST. No mechanism in this projection produces a TRUSTED disposition; '
@@ -312,6 +354,8 @@ def project(tsl, rows, *, source_version=None, on_served_repair='refuse',
     stats['withheld'] = len(withheld)
     out['stats'] = stats
     report = dict(book=out.get('book'), lesson=out.get('lesson'), pipeline=out.get('pipeline'),
+                  source_tsl_sha256=source_sha,
+                  projected_tsl_sha256=canonical_sha256(out),
                   validated_repairs=len(by_key), crossed=crossed, trusted_repairs=0,
                   same_pipeline_as_ledger=same_pipeline, ledger_run=run,
                   violations=violations, findings=findings, detected_unrepaired=other,
@@ -379,6 +423,10 @@ def main(argv=None):
     ap.add_argument('--tsl', required=True)
     ap.add_argument('--ledger', required=True, help='repair-ledger.jsonl from run_gold.py')
     ap.add_argument('--out', help='write the projected TSL here (default: report only)')
+    ap.add_argument('--lesson-document', help='also emit the LessonDocument through the ONE bridge '
+                                              '(tool/corpus/tsl_to_lesson_document.py). No crops.')
+    ap.add_argument('--subject', help='subject name for the document (else derived from the book id)')
+    ap.add_argument('--grade', type=int, help='grade for the document (else derived from the book id)')
     ap.add_argument('--on-served-repair', default='refuse', choices=('refuse', 'withhold'))
     ap.add_argument('--on-detected-unrepaired', default='report', choices=('report', 'withhold'))
     ap.add_argument('--on-served-unrepaired', default='report', choices=('report', 'withhold'))
@@ -393,6 +441,30 @@ def main(argv=None):
         with open(a.out, 'w', encoding='utf-8') as fh:
             json.dump(out, fh, ensure_ascii=False)
         print(f'wrote {a.out}')
+    if a.lesson_document:
+        import os
+        import sys as _sys
+        _sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        import tsl_to_lesson_document as bridge      # the ONE path, not a second one
+        meta = {}
+        if a.subject:
+            meta['subject'] = a.subject
+        if a.grade:
+            meta['grade'] = a.grade
+        src_rel = os.path.relpath(a.out or a.tsl)
+        doc = bridge.convert(out, tsl_rel_path=src_rel,
+                             tsl_sha256=canonical_sha256(out), book_meta=meta,
+                             chapters=bridge.chapters_from_toc(out['book']))
+        # The version chain the round-6 addendum requires, carried ON the document itself.
+        doc['provenance']['repair']['sourceTslSha256'] = report['source_tsl_sha256']
+        doc['provenance']['repair']['projectedTslSha256'] = report['projected_tsl_sha256']
+        doc['provenance']['repair']['ledgerRun'] = report['ledger_run']
+        doc['provenance']['repair']['sourceTslPath'] = os.path.relpath(a.tsl)
+        doc['provenance']['repair']['ledgerPath'] = os.path.relpath(a.ledger)
+        doc['provenance']['repair']['generator'] = bridge.GENERATOR
+        with open(a.lesson_document, 'w', encoding='utf-8') as fh:
+            json.dump(doc, fh, ensure_ascii=False)
+        print(f'wrote {a.lesson_document}  documentHash={bridge.document_hash(doc)}')
     return 0
 
 
