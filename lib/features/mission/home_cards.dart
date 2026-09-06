@@ -251,8 +251,9 @@ HomeCard cardForThread(HomeLessonThread thread, {int? learnerGrade}) {
     detailLine: openedDetailLine(thread),
     // NGUYÊN VĂN nhãn của động cơ. Home không đặt tên việc tiếp theo.
     nextLabel: thread.next?.label ?? 'Mở bài học',
-    otherGradeNote:
-        otherGrade ? 'Sách lớp ${d.grade} · không phải sách lớp con' : null,
+    otherGradeNote: otherGrade
+        ? 'Sách lớp ${d.grade} · không phải sách lớp con'
+        : null,
     thread: thread,
   );
 }
@@ -266,9 +267,9 @@ HomeCard cardForThread(HomeLessonThread thread, {int? learnerGrade}) {
 HomeCard cardForShelfSubject(HomeShelfSubject s) {
   final detail = s.openableLessons > 0
       ? 'SAM chưa xếp sẵn bài nào ở môn này. Giá sách có '
-          '${s.openableLessons} bài con mở làm được.'
+            '${s.openableLessons} bài con mở làm được.'
       : 'SAM chưa xếp sẵn bài nào ở môn này. Giá sách mới có mục lục '
-          '${s.listedLessons} bài.';
+            '${s.listedLessons} bài.';
   return HomeCard(
     id: 'shelf:${s.subject}',
     subjectLine: s.subject,
@@ -306,22 +307,19 @@ HomeCardRow buildHomeCards({
     (card.otherGradeNote == null ? own : other).add(card);
   }
 
-  final rest = [
-    for (final s in shelf)
-      if (!seenSubjects.contains(s.subject)) s,
-  ]..sort((a, b) {
-      final byOpenable = b.openableLessons.compareTo(a.openableLessons);
-      if (byOpenable != 0) return byOpenable;
-      final byListed = b.listedLessons.compareTo(a.listedLessons);
-      if (byListed != 0) return byListed;
-      return a.subject.compareTo(b.subject);
-    });
+  final rest =
+      [
+        for (final s in shelf)
+          if (!seenSubjects.contains(s.subject)) s,
+      ]..sort((a, b) {
+        final byOpenable = b.openableLessons.compareTo(a.openableLessons);
+        if (byOpenable != 0) return byOpenable;
+        final byListed = b.listedLessons.compareTo(a.listedLessons);
+        if (byListed != 0) return byListed;
+        return a.subject.compareTo(b.subject);
+      });
 
-  final all = [
-    ...own,
-    ...other,
-    for (final s in rest) cardForShelfSubject(s),
-  ];
+  final all = [...own, ...other, for (final s in rest) cardForShelfSubject(s)];
   final shown = all.length <= limit ? all : all.sublist(0, limit);
   return HomeCardRow(cards: shown, totalSubjects: all.length);
 }
@@ -383,4 +381,78 @@ bool _less(List<int> a, List<int> b) {
     if (a[i] != b[i]) return a[i] < b[i];
   }
   return false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Concept «05 Home» — hai dải ngang còn lại. Ba dải có NGỮ NGHĨA KHÁC NHAU và
+// không được lẫn: SẮP TỚI = thời khoá biểu từ mai (xem `home_upcoming.dart`);
+// CÁC MÔN CỦA CON = cửa vào Giá sách; TIẾP TỤC HỌC = bài đang học DỞ.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// ⭐ «TIẾP TỤC HỌC» — bài trẻ đã mở nhưng CHƯA mở hết cách học.
+///
+/// «Đang học dở» là điều duy nhất ở đây đo được: trẻ đã mở ít nhất một cách
+/// học, và còn cách chưa mở. Nó KHÔNG nói trẻ hiểu tới đâu.
+///
+/// ⭐⭐ VÌ SAO KHÔNG CÓ PHẦN TRĂM. Concept vẽ «60%», «40%», «20%». Không có
+/// phép đo nào trong sản phẩm này sinh ra được những con số ấy: số cách học đã
+/// mở chia cho số cách học có KHÔNG phải mức hiểu bài — nó là tỉ lệ MỞ. Hiện
+/// một con số phần trăm bên cạnh chữ «học» là nói với trẻ và bố mẹ rằng SAM đo
+/// được sự hiểu, trong khi `OPENED != UNDERSTOOD`. Thẻ vì thế nói **đã mở gì
+/// và còn gì chưa mở** — cùng lượng thông tin, không mượn thẩm quyền.
+List<HomeLessonThread> continueLearning(List<HomeLessonThread> threads) => [
+  for (final t in threads)
+    if (t.openedHere.isNotEmpty &&
+        t.openedHere.length < t.availableViews.length)
+      t,
+];
+
+/// Một ô trong dải «CÁC MÔN CỦA CON» — cửa vào Giá sách của môn ấy.
+///
+/// ⭐ Cố ý NGHÈO: tên môn và có/không có bài SAM xếp sẵn. Concept vẽ thêm nhãn
+/// «Tốt», «Ôn tập» dưới mỗi môn — đó là lời tuyên bố về NĂNG LỰC, và sản phẩm
+/// này chỉ được nói điều có bằng chứng. Order 50 §5 đã liệt kê nhãn cấm:
+/// ĐÃ HIỂU / 70% / GIỎI / MASTERED. «Tốt» thuộc đúng họ ấy.
+class HomeSubjectChip {
+  const HomeSubjectChip({required this.subject, required this.hasSamLesson});
+
+  final String subject;
+
+  /// Môn này có ít nhất một bài SAM đã xếp sẵn (khác với «có sách trên giá»).
+  final bool hasSamLesson;
+}
+
+/// Dải «CÁC MÔN CỦA CON»: MỌI môn trên giá sách của trẻ, theo thứ tự mục lục.
+///
+/// Gộp hai nguồn về một danh sách duy nhất, không lặp: môn có bài SAM xếp sẵn
+/// ([threads]) và môn chỉ có sách ([shelf]). Trẻ không cần biết hai nguồn ấy
+/// khác nhau — nhưng ô nào có bài thì nói được là có.
+List<HomeSubjectChip> homeSubjectChips({
+  required List<HomeLessonThread> threads,
+  required List<HomeShelfSubject> shelf,
+  required int learnerGrade,
+}) {
+  final withLesson = <String>{
+    for (final t in threads)
+      // Bài lớp KHÁC không làm cho môn của lớp NÀY thành «có bài».
+      if (t.doc.grade == learnerGrade) t.doc.subject,
+  };
+  final out = <HomeSubjectChip>[];
+  final seen = <String>{};
+  for (final s in shelf) {
+    if (!seen.add(s.subject)) continue;
+    out.add(
+      HomeSubjectChip(
+        subject: s.subject,
+        hasSamLesson: withLesson.contains(s.subject),
+      ),
+    );
+  }
+  // Môn có bài SAM nhưng vắng mặt trên giá (mục lục chưa nạp) vẫn phải có ô.
+  for (final s in withLesson) {
+    if (seen.add(s)) {
+      out.add(HomeSubjectChip(subject: s, hasSamLesson: true));
+    }
+  }
+  return out;
 }
