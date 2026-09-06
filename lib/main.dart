@@ -263,6 +263,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
       // hiện «SGK Ngữ văn 6» hay hiện mã sách trần TUỲ vào việc phiên này đã
       // mở hồ sơ lớp 6 trước hay chưa — cùng màn, cùng hồ sơ, hai kết quả.
       knownBookTitles.clear();
+      // ⭐ Lệnh 53 — trace «đã mở cách học nào» là của PHIÊN, không của người
+      // học: không xoá thì Home của trẻ sau hiện dấu vết của trẻ trước.
+      WorkspaceTrace.session.clear();
       _refreshMission(); // mission tính lại TỪ KHO của đúng learner này
     });
     widget.store.saveActiveLearner(p.learnerId); // sống qua restart
@@ -736,7 +739,10 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                   learnerGrade: _profile!.grade,
                   coverBySubject: _coverBySubject(),
                 ),
-                continueThreads: continueLearning(_lessonThreads(_profile!)),
+                continueThreads: continueLearning(
+                  _lessonThreads(_profile!),
+                  learnerGrade: _profile!.grade,
+                ),
                 // MÃ môn trong TKB → TÊN trong mục lục thật. Không
                 // tra được ⇒ giữ mã trần, không bịa tên.
                 subjectLabelOf: _subjectLabelOf,

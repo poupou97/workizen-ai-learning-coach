@@ -400,9 +400,16 @@ bool _less(List<int> a, List<int> b) {
 /// một con số phần trăm bên cạnh chữ «học» là nói với trẻ và bố mẹ rằng SAM đo
 /// được sự hiểu, trong khi `OPENED != UNDERSTOOD`. Thẻ vì thế nói **đã mở gì
 /// và còn gì chưa mở** — cùng lượng thông tin, không mượn thẩm quyền.
-List<HomeLessonThread> continueLearning(List<HomeLessonThread> threads) => [
+List<HomeLessonThread> continueLearning(
+  List<HomeLessonThread> threads, {
+  required int learnerGrade,
+}) => [
   for (final t in threads)
-    if (t.openedHere.isNotEmpty &&
+    // ⭐ Bài của LỚP KHÁC không bao giờ là «việc con đang học dở». Đo trên
+    // Nokia (lệnh 53): hồ sơ lớp 5 hiện thẻ «KHTN 6 · Bài 17», vì dải này
+    // nhận mọi bài trong catalog mà không lọc lớp.
+    if (t.doc.grade == learnerGrade &&
+        t.openedHere.isNotEmpty &&
         t.openedHere.length < t.availableViews.length)
       t,
 ];

@@ -14,6 +14,15 @@ class WorkspaceTrace extends ChangeNotifier {
   WorkspaceTrace();
 
   /// Một trace cho cả phiên app (không persist).
+  ///
+  /// ⭐⭐ TRACE NÀY KHÔNG BIẾT AI ĐANG HỌC — nó chỉ khoá theo `slotKey`. Trên
+  /// máy dùng chung, đó là một đường RÒ giữa hai hồ sơ: Na mở «Đọc» bài 17,
+  /// đổi sang em, Home của em hiện «Đã mở: Đọc» cho chính bài ấy. Đo được
+  /// trên Nokia, lệnh 53.
+  ///
+  /// Cách chặn: [clear] khi đổi hồ sơ. Không khoá theo learnerId vì trace là
+  /// thứ CỦA PHIÊN, không phải của người học — đổi người thì phiên học cũ
+  /// chấm dứt, và trace phải chấm dứt cùng nó.
   static final session = WorkspaceTrace();
 
   final Map<String, Set<WorkspaceView>> _views = {};
@@ -36,6 +45,14 @@ class WorkspaceTrace extends ChangeNotifier {
   /// Nhãn trẻ đọc — chỉ nói về việc MỞ, không nói về việc HỌC.
   String childLabel(String slotKey) =>
       opened(slotKey) ? 'Đã xem (phiên này)' : 'Chưa xem';
+
+  /// Xoá sạch trace. Gọi khi ĐỔI HỒ SƠ: người học mới bắt đầu phiên của mình
+  /// từ con số không, không thừa hưởng «đã mở» của người trước.
+  void clear() {
+    _views.clear();
+    _opened.clear();
+    notifyListeners();
+  }
 
   @visibleForTesting
   void reset() {

@@ -1279,8 +1279,16 @@ class MissionCenterScreen extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Color(0x00000000), Color(0xE6000000)],
-                      stops: [0.35, 1.0],
+                      // Đo trên máy: dừng ở 0.35 thì dòng «KHTN 6» rơi vào
+                      // mảng trời sáng và gần như không đọc được. Kéo lớp phủ
+                      // lên sớm hơn và thêm một nấc giữa để cả BA dòng chữ
+                      // đều nằm trên nền đủ tối (§6: gradient đủ contrast).
+                      colors: [
+                        Color(0x00000000),
+                        Color(0x73000000),
+                        Color(0xF2000000),
+                      ],
+                      stops: [0.18, 0.52, 1.0],
                     ),
                   ),
                 ),
@@ -1298,7 +1306,7 @@ class MissionCenterScreen extends StatelessWidget {
                         letterSpacing: 0.6,
                         color: hero == null
                             ? WalColors.primaryText
-                            : Colors.white70,
+                            : Colors.white,
                       ),
                     ),
                     Text(

@@ -38,7 +38,7 @@ void main() {
   group('TIẾP TỤC HỌC — chỉ bài đang học DỞ', () {
     test('chưa mở cách nào ⇒ KHÔNG nằm trong «tiếp tục học»', () {
       final d = loadSyntheticDoc();
-      expect(continueLearning([_t(d, const {})]), isEmpty);
+      expect(continueLearning([_t(d, const {})], learnerGrade: 6), isEmpty);
     });
 
     test('mở một phần ⇒ CÓ nằm trong «tiếp tục học»', () {
@@ -46,7 +46,7 @@ void main() {
       expect(
         continueLearning([
           _t(d, {WorkspaceView.read}),
-        ]),
+        ], learnerGrade: 6),
         hasLength(1),
       );
     });
@@ -55,7 +55,7 @@ void main() {
       final d = loadSyntheticDoc();
       final all = HomeLessonThread(doc: d).availableViews.toSet();
       expect(
-        continueLearning([_t(d, all)]),
+        continueLearning([_t(d, all)], learnerGrade: 6),
         isEmpty,
         reason: 'mở hết rồi thì không phải việc còn dở',
       );
@@ -71,8 +71,19 @@ void main() {
           ),
         );
       if (foreign.isEmpty) return; // bài mẫu có đủ mọi view ⇒ không kiểm được
-      expect(continueLearning([_t(d, foreign)]), isEmpty);
+      expect(continueLearning([_t(d, foreign)], learnerGrade: 6), isEmpty);
     });
+  });
+
+  test('⭐⭐ bài LỚP KHÁC không bao giờ là «đang học dở» của trẻ này', () {
+    final d = loadSyntheticDoc();
+    final g5 = _asSubject(d, 'LS&ĐL', 5);
+    // Đã mở một cách học ⇒ về mặt «dở» thì đủ điều kiện…
+    final t = _t(g5, {HomeLessonThread(doc: g5).availableViews.first});
+    expect(continueLearning([t], learnerGrade: 5), hasLength(1));
+    // …nhưng với học sinh LỚP 6 thì đây không phải việc của em.
+    // Lỗi thật đo trên Nokia: hồ sơ lớp 5 hiện thẻ «KHTN 6 · Bài 17».
+    expect(continueLearning([t], learnerGrade: 6), isEmpty);
   });
 
   group('CÁC MÔN CỦA CON — cửa vào Giá sách', () {
