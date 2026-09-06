@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
 import 'package:learning_coach/core/lesson_model/semantic_data.dart';
+import 'package:learning_coach/core/lesson_model/timeline_verbatim.dart';
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
 import 'package:learning_coach/features/lesson_workspace/views/timeline_view.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_view.dart';
@@ -99,5 +100,44 @@ void main() {
     await t.pumpAndSettle();
     expect(find.byKey(TimelineView.orderCheckKey), findsNothing);
     expect(find.textContaining('chưa đọc được năm'), findsWidgets);
+  });
+
+  // ── round 5 (§11): cổng nguyên văn ─────────────────────────────────────
+  testWidgets('cổng TẮT ⇒ trục nói rõ là chưa đối chiếu bản in (không im lặng)', (t) async {
+    final d = _history();
+    final tl = d.semantic.whereType<TimelineSemantic>().single;
+    await t.pumpWidget(
+      fixtureHost(Scaffold(body: SingleChildScrollView(child: TimelineView(doc: d, semantic: tl, onOpenSource: (_) {})))),
+    );
+    await t.pumpAndSettle();
+    expect(find.byKey(TimelineView.verbatimNoteKey), findsOneWidget);
+    expect(find.textContaining('chưa được đối chiếu với bản in'), findsOneWidget);
+    expect(find.text('101 - 103'), findsOneWidget, reason: 'cổng tắt ⇒ không giấu mốc nào');
+  });
+
+  testWidgets('cổng BẬT và không mốc nào đối chiếu ⇒ không vẽ mốc, đếm phần giữ lại, không có phần kiểm', (t) async {
+    final d = _history();
+    final tl = d.semantic.whereType<TimelineSemantic>().single;
+    final gate = VerbatimIndex.fromRawJson({
+      'provenance': {
+        'historyRules': {
+          'verbatimGate': {'enabled': true, 'ledger': 'l.json', 'blockStatus': <String, String>{}},
+        },
+      },
+    });
+    await t.pumpWidget(
+      fixtureHost(Scaffold(
+        body: SingleChildScrollView(
+          child: TimelineView(doc: d, semantic: tl, onOpenSource: (_) {}, verbatim: gate),
+        ),
+      )),
+    );
+    await t.pumpAndSettle();
+    expect(find.text('101 - 103'), findsNothing, reason: 'mốc chưa đối chiếu không được vẽ');
+    expect(find.text('NGUỒN KỂ CHUYỆN — sách ghi'), findsNothing);
+    expect(find.text('SAM giữ lại 6 phần vì chưa đối chiếu được với bản in.'), findsOneWidget,
+        reason: '5 mốc + 1 nguồn — đếm ra, không giấu');
+    expect(find.byKey(TimelineView.orderCheckKey), findsNothing);
+    expect(find.text('Có 5 mốc chưa đối chiếu được với bản in — SAM không kiểm thứ tự.'), findsOneWidget);
   });
 }

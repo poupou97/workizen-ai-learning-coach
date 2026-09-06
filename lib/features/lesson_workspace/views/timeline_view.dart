@@ -18,6 +18,7 @@ import '../../../core/lesson_model/semantic_data.dart';
 import '../../../core/lesson_model/timeline_date.dart';
 import '../../../core/lesson_model/timeline_sources.dart';
 import '../../../core/lesson_model/timeline_validator.dart';
+import '../../../core/lesson_model/timeline_verbatim.dart';
 
 class TimelineView extends StatefulWidget {
   const TimelineView({
@@ -25,13 +26,20 @@ class TimelineView extends StatefulWidget {
     required this.doc,
     required this.semantic,
     required this.onOpenSource,
+    this.verbatim = VerbatimIndex.off,
   });
 
   final LessonDocument doc;
   final TimelineSemantic semantic;
   final void Function(String blockId) onOpenSource;
 
+  /// Round 5 — CỔNG NGUYÊN VĂN. Mặc định TẮT vì đường nạp fixture hôm nay chưa
+  /// mang trạng thái đối chiếu bản in; khi tắt, thẻ đầu tiên NÓI RÕ là chưa
+  /// đối chiếu (không im lặng coi như đã).
+  final VerbatimIndex verbatim;
+
   static const rootKey = Key('visual-timeline');
+  static const verbatimNoteKey = Key('timeline-verbatim-note');
   static const orderCheckKey = Key('timeline-order-check');
   static const orderResetKey = Key('timeline-order-reset');
   static Key sourceKey(int i) => Key('timeline-source-$i');
@@ -47,21 +55,43 @@ class _TimelineViewState extends State<TimelineView> {
   TimelineCheck? _check;
 
   TimelineSemantic get s => widget.semantic;
-  late final List<DatedEvent> _dated = dateEvents(s);
-  late final TimelineValidator? _validator = TimelineValidator.forSemantic(s);
-  late final List<StoryAttribution> _sources = deriveStoryAttributions(widget.doc);
+  VerbatimIndex get _v => widget.verbatim;
+
+  /// Mốc còn dùng được sau cổng nguyên văn — mọi chỉ số bên dưới theo danh
+  /// sách NÀY, không theo `s.events`, để không bao giờ vẽ một mốc bị giữ lại.
+  late final List<TimelineEvent> _events = TimelineValidator.servableEvents(
+    s,
+    verbatim: _v,
+  );
+  late final int _eventsHeldBack = s.events.length - _events.length;
+  late final List<DatedEvent> _dated = [
+    for (final e in _events) DatedEvent(event: e, date: TimelineDate.parse(e.when)),
+  ];
+  late final TimelineValidator? _validator = TimelineValidator.forSemantic(
+    s,
+    verbatim: _v,
+  );
+  late final List<StoryAttribution> _sources = deriveStoryAttributions(
+    widget.doc,
+    verbatim: _v,
+  );
+  late final int _sourcesHeldBack = storyAttributionsHeldBack(
+    widget.doc,
+    verbatim: _v,
+  );
 
   /// Thứ tự chip để trẻ chọn: ĐẢO ngược thứ tự sách (tất định, không ngẫu
   /// nhiên — test lặp lại được; và không phải thứ tự đúng để khỏi «chạm theo
   /// hàng» là xong).
-  List<int> get _chipOrder => [for (var i = s.events.length - 1; i >= 0; i--) i];
+  List<int> get _chipOrder => [for (var i = _events.length - 1; i >= 0; i--) i];
 
   @override
   Widget build(BuildContext context) => Column(
     key: TimelineView.rootKey,
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      for (var i = 0; i < s.events.length; i++) _node(i),
+      _verbatimNote(),
+      for (var i = 0; i < _events.length; i++) _node(i),
       if (_sources.isNotEmpty) ...[
         const SizedBox(height: WalSpacing.md),
         _label('NGUỒN KỂ CHUYỆN — sách ghi'),
@@ -72,6 +102,22 @@ class _TimelineViewState extends State<TimelineView> {
       _orderExercise(),
     ],
   );
+
+  /// Nói thật về việc đã (hay chưa) đối chiếu với bản in — vòng 4 đã bác bỏ
+  /// «hai bộ OCR đồng ý ⇒ đúng nguyên văn», nên im lặng ở đây là nói dối.
+  Widget _verbatimNote() {
+    final held = _v.heldBackLine(_eventsHeldBack + _sourcesHeldBack);
+    final line = !_v.enabled ? VerbatimIndex.notCheckedLine : held;
+    if (line == null) return const SizedBox.shrink();
+    return Padding(
+      key: TimelineView.verbatimNoteKey,
+      padding: const EdgeInsets.only(bottom: WalSpacing.sm),
+      child: Text(
+        line,
+        style: const TextStyle(fontSize: 12, color: WalColors.inkSoft, height: 1.35),
+      ),
+    );
+  }
 
   Widget _label(String t) => Padding(
     padding: const EdgeInsets.only(bottom: WalSpacing.sm),
@@ -88,7 +134,7 @@ class _TimelineViewState extends State<TimelineView> {
 
   // ── mốc ──
   Widget _node(int i) {
-    final e = s.events[i];
+    final e = _events[i];
     final d = _dated[i].date;
     return InkWell(
       onTap: () => widget.onOpenSource(e.sourceBlockId),
@@ -101,7 +147,7 @@ class _TimelineViewState extends State<TimelineView> {
               child: CustomPaint(
                 painter: _TimelinePainter(
                   first: i == 0,
-                  last: i == s.events.length - 1,
+                  last: i == _events.length - 1,
                 ),
               ),
             ),
@@ -232,7 +278,8 @@ class _TimelineViewState extends State<TimelineView> {
     if (v == null) {
       return _card(
         Text(
-          TimelineValidator.unavailableReason(s) ?? 'Không kiểm được.',
+          TimelineValidator.unavailableReason(s, verbatim: _v) ??
+              'Không kiểm được.',
           style: const TextStyle(fontSize: WalType.secondary, color: WalColors.inkSoft),
         ),
       );
@@ -251,8 +298,8 @@ class _TimelineViewState extends State<TimelineView> {
                   key: TimelineView.pickKey(i),
                   label: Text(
                     _picked.contains(i)
-                        ? '${_picked.indexOf(i) + 1} · ${s.events[i].title}'
-                        : s.events[i].title,
+                        ? '${_picked.indexOf(i) + 1} · ${_events[i].title}'
+                        : _events[i].title,
                     style: TextStyle(
                       fontSize: 13,
                       color: _picked.contains(i) ? Colors.white : WalColors.ink,
@@ -294,7 +341,7 @@ class _TimelineViewState extends State<TimelineView> {
                       ? null
                       : () => setState(() {
                           _check = v.checkOrder([
-                            for (final i in _picked) s.events[i].title,
+                            for (final i in _picked) _events[i].title,
                           ]);
                         }),
                   child: const Text('Kiểm với sách'),

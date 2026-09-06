@@ -23,6 +23,7 @@ library;
 
 import 'semantic_data.dart';
 import 'timeline_date.dart';
+import 'timeline_verbatim.dart';
 
 /// Kết quả một phép kiểm — luôn kèm mốc sách để UI trích.
 class TimelineCheck {
@@ -63,13 +64,35 @@ class TimelineValidator {
   final List<DatedEvent> dated;
 
   /// `null` ⇒ không có validator cho sơ đồ này; [unavailableReason] nói vì sao.
-  static TimelineValidator? forSemantic(TimelineSemantic? s) {
-    if (unavailableReason(s) != null) return null;
+  ///
+  /// Round 5 — CỔNG NGUYÊN VĂN: mốc nào có block chưa đối chiếu bản in thì
+  /// không được dùng để kiểm. Validator không được đứng trên chữ có thể sai.
+  static TimelineValidator? forSemantic(
+    TimelineSemantic? s, {
+    VerbatimIndex verbatim = VerbatimIndex.off,
+  }) {
+    if (unavailableReason(s, verbatim: verbatim) != null) return null;
     return TimelineValidator._(s!, dateEvents(s));
   }
 
-  static String? unavailableReason(TimelineSemantic? s) {
+  /// Các mốc còn dùng được sau cổng nguyên văn (cổng tắt ⇒ tất cả).
+  static List<TimelineEvent> servableEvents(
+    TimelineSemantic s, {
+    VerbatimIndex verbatim = VerbatimIndex.off,
+  }) => [
+    for (final e in s.events)
+      if (verbatim.servable(e.sourceBlockId)) e,
+  ];
+
+  static String? unavailableReason(
+    TimelineSemantic? s, {
+    VerbatimIndex verbatim = VerbatimIndex.off,
+  }) {
     if (s == null) return 'Bài này không có dòng thời gian suy từ sách.';
+    final held = s.events.length - servableEvents(s, verbatim: verbatim).length;
+    if (held > 0) {
+      return 'Có $held mốc chưa đối chiếu được với bản in — SAM không kiểm thứ tự.';
+    }
     if (s.events.length < 2) {
       return 'Sách chỉ nêu ${s.events.length} mốc — chưa đủ để kiểm thứ tự.';
     }
