@@ -333,6 +333,39 @@ void main() {
     });
   });
 
+  group('⛔ HAI CON SỐ CHO MỘT GIÁ SÁCH — lỗi tìm ra khi đọc pack THẬT', () {
+    test('⭐⭐ môn đánh số LẠI theo chủ đề (GDTC): «mục lục N bài» phải khớp '
+        'con số Giá sách in ra, không được gộp theo số bài', () {
+      // Pack lớp 6 thật: GDTC có 24 bản ghi mục lục nhưng chỉ 4 SỐ BÀI phân
+      // biệt (sách đánh số lại theo từng chủ đề). Bản đầu của
+      // `listedLessonCountFor` khử trùng theo (sách, số bài) ⇒ thẻ Home nói
+      // «mục lục 4 bài» còn Giá sách ngay sau một chạm nói «24 bài». Hai con
+      // số cho cùng một giá sách, trên hai màn.
+      //
+      // `_dedupeLessons` ở đầu `lesson_index.dart` đã viết sẵn lý do:
+      // «Gộp theo số là xoá bài của trẻ.»
+      final idx = LessonIndex.fromJsonString('''
+{"grade":6,"subjects":{"GDTC":[{"sourceDocumentId":"06-sgk-giao-duc-the-chat-6",
+  "volume":null,"lessons":[
+   {"no":1,"title":"Chủ đề 1 · Bài 1","pageStart":5},
+   {"no":2,"title":"Chủ đề 1 · Bài 2","pageStart":9},
+   {"no":1,"title":"Chủ đề 2 · Bài 1","pageStart":21},
+   {"no":2,"title":"Chủ đề 2 · Bài 2","pageStart":25},
+   {"no":1,"title":"Chủ đề 3 · Bài 1","pageStart":40}]}]}}
+''')!;
+      expect(idx.listedLessonCountFor('GDTC'), 5,
+          reason: 'gộp theo số bài là xoá bài của trẻ');
+      expect(idx.openableLessonCountFor('GDTC'), 0);
+      // …và bản ghi TRÙNG HỆT vẫn bị bỏ (luật cũ giữ nguyên).
+      final dup = LessonIndex.fromJsonString('''
+{"grade":6,"subjects":{"X":[{"sourceDocumentId":"b","volume":null,"lessons":[
+   {"no":1,"title":"A","pageStart":5},
+   {"no":1,"title":"A","pageStart":5}]}]}}
+''')!;
+      expect(dup.listedLessonCountFor('X'), 1);
+    });
+  });
+
   // ══ MÀN HÌNH ═════════════════════════════════════════════════════════════
   group('§2 · §4 — HÀNG THẺ TRƯỢT NGANG', () {
     testWidgets('⭐⭐ thẻ chính chiếm 75–85 % viewport và thẻ kế bên HÉ RA',
