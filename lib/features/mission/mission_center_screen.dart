@@ -1061,13 +1061,16 @@ class MissionCenterScreen extends StatelessWidget {
     );
   }
 
-  /// ⭐ DẢI «SẮP TỚI» — thời khoá biểu TỪ NGÀY MAI.
+  /// ═══ A. DẢI «SẮP TỚI» — THẺ LỊCH, NÉN, THIÊN VỀ THỜI GIAN ═══════════
   ///
-  /// Thẻ nói đúng ba điều thời khoá biểu biết: THỨ · NGÀY · MÔN (+ tiết đầu).
-  /// KHÔNG tên bài (F4 cấm suy), KHÔNG giờ đồng hồ (dữ liệu không có) — xem
-  /// `home_upcoming.dart` để biết vì sao.
+  /// Lệnh 53 §3: ba dải phải KHÁC HÌNH THÁI. Thẻ lịch là thẻ nhỏ nhất, không
+  /// ảnh, có VIỀN TRÁI đánh dấu — nhìn thoáng qua đã biết «đây là lịch», khác
+  /// hẳn bìa sách dọc và thẻ bài học đầy ảnh.
+  ///
+  /// Nói đúng ba điều thời khoá biểu biết: THỨ · NGÀY · MÔN (+ tiết đầu).
+  /// KHÔNG tên bài (F4 cấm suy), KHÔNG giờ đồng hồ (dữ liệu không có).
   Widget _upcomingDaysRow() => SizedBox(
-    height: 128,
+    height: 116,
     child: ListView.separated(
       key: MissionCenterScreen.upcomingRowKey,
       scrollDirection: Axis.horizontal,
@@ -1077,11 +1080,19 @@ class MissionCenterScreen extends StatelessWidget {
       itemBuilder: (_, i) {
         final d = upcoming[i];
         return Container(
-          width: 176,
-          padding: const EdgeInsets.all(WalSpacing.md),
+          width: 168,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+            borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+            border: const Border(
+              left: BorderSide(color: WalColors.primary500, width: 3),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(
+            WalSpacing.md,
+            WalSpacing.sm,
+            WalSpacing.sm,
+            WalSpacing.sm,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1091,6 +1102,15 @@ class MissionCenterScreen extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
+                  color: WalColors.ink,
+                ),
+              ),
+              Text(
+                'Từ tiết ${d.firstPeriod}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
                   color: WalColors.primaryText,
                 ),
               ),
@@ -1104,16 +1124,11 @@ class MissionCenterScreen extends StatelessWidget {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: WalType.secondary,
-                    color: WalColors.ink,
-                    height: 1.35,
+                    fontSize: 12,
+                    color: WalColors.inkSoft,
+                    height: 1.3,
                   ),
                 ),
-              ),
-              // «Tiết N» — thứ CÓ THẬT. Không bịa giờ đồng hồ.
-              Text(
-                'Từ tiết ${d.firstPeriod}',
-                style: const TextStyle(fontSize: 12, color: WalColors.inkSoft),
               ),
             ],
           ),
@@ -1122,147 +1137,204 @@ class MissionCenterScreen extends StatelessWidget {
     ),
   );
 
-  /// ⭐ DẢI «CÁC MÔN CỦA CON» — mỗi ô là cửa vào Giá sách.
+  /// ═══ B. DẢI «CÁC MÔN CỦA CON» — QUYỂN SÁCH DỰNG ĐỨNG ════════════════
   ///
-  /// KHÔNG nhãn năng lực dưới tên môn: «Tốt» / «Ôn tập» là tuyên bố về trình
-  /// độ, cùng họ với những nhãn order 50 §5 đã cấm.
+  /// Lệnh 53 §1: bìa là VẬT THỂ DỌC. Bìa vuông là sai hình thái — sách không
+  /// vuông, và cắt vuông thì mất tên sách in trên bìa. Tỉ lệ 3:4 giữ nguyên
+  /// khung bìa gốc (`BoxFit.contain` — KHÔNG cắt), đặt trên nền trắng, bo góc
+  /// nhẹ, đổ bóng rất mảnh, và có một VẠCH KỆ mờ dưới chân để thành «kệ sách».
   Widget _subjectChipRow() => SizedBox(
-    height: 104,
+    height: 186,
     child: ListView.separated(
       key: MissionCenterScreen.subjectRowKey,
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: WalSpacing.lg),
       itemCount: subjectChips.length,
       separatorBuilder: (_, _) => const SizedBox(width: WalSpacing.md),
-      itemBuilder: (_, i) {
-        final c = subjectChips[i];
-        return SizedBox(
-          width: 76,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
-            onTap: onOpenSubjects,
-            child: Column(
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: c.hasSamLesson
-                        ? WalColors.surfaceLavender
-                        : Colors.white,
-                    borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
-                  ),
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.antiAlias,
-                  // ⭐ BÌA SÁCH THẬT của môn — cùng ảnh Giá sách đang dùng,
-                  // không phải icon vẽ thêm. Thiếu bìa ⇒ chữ cái đầu.
-                  child: c.coverAsset == null
-                      ? _subjectInitial(c)
-                      : Image.asset(
-                          'assets/pack/${c.coverAsset}',
-                          fit: BoxFit.cover,
-                          width: 60,
-                          height: 60,
-                          errorBuilder: (_, _, _) => _subjectInitial(c),
-                        ),
-                ),
-                const SizedBox(height: WalSpacing.xs),
-                Text(
-                  c.subject,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: WalColors.ink,
-                    height: 1.2,
-                  ),
+      itemBuilder: (_, i) => _bookCard(subjectChips[i]),
+    ),
+  );
+
+  Widget _bookCard(HomeSubjectChip c) => SizedBox(
+    width: 96,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+      onTap: onOpenSubjects,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Bìa DỌC 3:4 — không cắt vuông, không kéo méo.
+          Container(
+            width: 96,
+            height: 128,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1A2D2D3A),
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
                 ),
               ],
             ),
+            clipBehavior: Clip.antiAlias,
+            child: c.coverAsset == null
+                ? _subjectInitial(c)
+                : Image.asset(
+                    'assets/pack/${c.coverAsset}',
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => _subjectInitial(c),
+                  ),
           ),
-        );
-      },
+          // Vạch kệ: mảnh, mờ — gợi cái kệ mà không vẽ thêm đồ hoạ.
+          Container(width: 96, height: 2, color: const Color(0x142D2D3A)),
+          const SizedBox(height: WalSpacing.xs),
+          Text(
+            c.subject,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: WalColors.ink,
+              height: 1.2,
+            ),
+          ),
+          if (learnerGrade != null)
+            Text(
+              'Lớp $learnerGrade',
+              style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
+            ),
+        ],
+      ),
     ),
   );
 
-  Widget _subjectInitial(HomeSubjectChip c) => Text(
-    c.subject.characters.first.toUpperCase(),
-    style: TextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.w700,
-      color: c.hasSamLesson ? WalColors.primary500 : WalColors.inkSoft,
+  /// Không có bìa ⇒ CHỮ, không phải ảnh của môn khác (lệnh 53 §1 fallback).
+  Widget _subjectInitial(HomeSubjectChip c) => ColoredBox(
+    color: c.hasSamLesson ? WalColors.surfaceLavender : Colors.white,
+    child: Center(
+      child: Text(
+        c.subject.characters.first.toUpperCase(),
+        style: TextStyle(
+          fontSize: 40,
+          fontWeight: FontWeight.w700,
+          color: c.hasSamLesson ? WalColors.primary500 : WalColors.inkSoft,
+        ),
+      ),
     ),
   );
 
-  /// ⭐ DẢI «TIẾP TỤC HỌC» — bài đang học DỞ.
+  /// ═══ C. DẢI «TIẾP TỤC HỌC» — THẺ NGANG, ẢNH LÀM NỀN ═════════════════
   ///
-  /// KHÔNG phần trăm. Thẻ nói ĐÃ MỞ GÌ và CÒN GÌ CHƯA MỞ — cùng lượng thông
-  /// tin, nhưng không nói dối rằng SAM đo được mức hiểu bài.
+  /// Lệnh 53 §2: thẻ lớn nhất trong ba dải, ảnh THẬT của chính bài phủ kín nền,
+  /// phủ một lớp tối dần từ dưới lên để chữ luôn đọc được, chữ nằm ở đáy —
+  /// vùng ít nội dung nhất của một hình minh hoạ sách.
+  ///
+  /// KHÔNG phần trăm: «đã mở / còn» là điều đo được, mức hiểu thì không.
   Widget _continueLearningRow() => SizedBox(
-    height: 206,
+    height: 172,
     child: ListView.separated(
       key: MissionCenterScreen.continueLearningRowKey,
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: WalSpacing.lg),
       itemCount: continueThreads.length,
-      separatorBuilder: (_, _) => const SizedBox(width: WalSpacing.sm),
-      itemBuilder: (_, i) {
-        final t = continueThreads[i];
-        final left = [
-          for (final v in t.availableViews)
-            if (!t.openedHere.contains(v)) v.label,
-        ];
-        return Container(
-          width: 236,
-          padding: const EdgeInsets.all(WalSpacing.md),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      separatorBuilder: (_, _) => const SizedBox(width: WalSpacing.md),
+      itemBuilder: (_, i) => _lessonImageCard(continueThreads[i]),
+    ),
+  );
+
+  Widget _lessonImageCard(HomeLessonThread t) {
+    final hero = lessonHeroImage(t.doc);
+    final left = [
+      for (final v in t.availableViews)
+        if (!t.openedHere.contains(v)) v.label,
+    ];
+    final opened = t.openedHere.map((v) => v.label).join(', ');
+    return SizedBox(
+      width: 268,
+      child: Material(
+        color: hero == null ? Colors.white : WalColors.ink,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onOpenWorkspaceLesson == null
+              ? null
+              : () => onOpenWorkspaceLesson!(t.doc),
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              Text(
-                '${t.doc.subject} ${t.doc.grade} · Bài ${t.doc.lessonNo}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: WalColors.primaryText,
+              if (hero != null)
+                Image.asset(
+                  hero.asset,
+                  fit: BoxFit.cover,
+                  // Máy chưa có crop ⇒ về thẻ SẠCH, không ô trắng vỡ.
+                  errorBuilder: (_, _, _) =>
+                      const ColoredBox(color: Colors.white),
                 ),
-              ),
-              const SizedBox(height: WalSpacing.xs),
-              Expanded(
-                child: Text(
-                  'Đã mở: ${t.openedHere.map((v) => v.label).join(', ')}'
-                  '${left.isEmpty ? '' : ' · Còn: ${left.join(', ')}'}',
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: WalType.secondary,
-                    color: WalColors.ink,
-                    height: 1.35,
+              if (hero != null)
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x00000000), Color(0xE6000000)],
+                      stops: [0.35, 1.0],
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: WalSpacing.minTouch - 8,
-                child: TextButton(
-                  onPressed: onOpenWorkspaceLesson == null
-                      ? null
-                      : () => onOpenWorkspaceLesson!(t.doc),
-                  child: const Text(
-                    'Tiếp tục ▸',
-                    style: TextStyle(fontSize: WalType.secondary),
-                  ),
+              Padding(
+                padding: const EdgeInsets.all(WalSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${t.doc.subject} ${t.doc.grade}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.6,
+                        color: hero == null
+                            ? WalColors.primaryText
+                            : Colors.white70,
+                      ),
+                    ),
+                    Text(
+                      'Bài ${t.doc.lessonNo} · ${t.doc.title}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: WalType.body,
+                        fontWeight: FontWeight.w700,
+                        height: 1.25,
+                        color: hero == null ? WalColors.ink : Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: WalSpacing.xs),
+                    Text(
+                      'Đã mở: $opened'
+                      '${left.isEmpty ? '' : ' · Còn: ${left.join(', ')}'}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.3,
+                        color: hero == null
+                            ? WalColors.inkSoft
+                            : Colors.white70,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        );
-      },
-    ),
-  );
+        ),
+      ),
+    );
+  }
 
   Widget _sectionLabel(String t) => Padding(
     padding: const EdgeInsets.only(bottom: WalSpacing.sm),

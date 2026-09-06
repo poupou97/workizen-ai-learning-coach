@@ -474,17 +474,70 @@ List<HomeSubjectChip> homeSubjectChips({
   return out;
 }
 
-/// ⭐ Ảnh đại diện của MỘT BÀI: crop đầu tiên của chính bài ấy trong sách.
+/// ⭐ Lệnh 53 §2 — ẢNH ĐẠI DIỆN của MỘT BÀI, chọn TẤT ĐỊNH.
 ///
-/// Không icon vẽ thêm — thẻ mang đúng hình trẻ sẽ thấy khi mở bài. Bài không
-/// có hình nào ⇒ `null`, và thẻ vẽ như cũ (không placeholder giả).
+/// Ảnh phải đến từ CHÍNH bài ấy: `doc.blocks` chỉ chứa hình của bài này, nên
+/// không có đường nào để ảnh bài khác lọt vào.
+///
+/// ⭐⭐ LUẬT CHỌN (đo được, không «đẹp/xấu»), theo đúng thứ tự:
+///
+/// 1. LOẠI ảnh quá hẹp hoặc quá dẹt — `aspect` ngoài [minAspect, maxAspect].
+///    Ảnh dẹt như dải trang trí (aspect ~3.0) làm hero thì cắt mất nội dung;
+///    ảnh cao gầy thì nhồi vào thẻ ngang cũng vậy.
+/// 2. LOẠI ảnh quá nhỏ — diện tích bbox dưới [minArea] phần trang. Đây là cách
+///    đo «icon / logo / bảng con» mà KHÔNG cần đoán ngữ nghĩa: một hình chiếm
+///    dưới 2% trang không phải hình minh hoạ chính của bài.
+/// 3. Trong số còn lại, chọn DIỆN TÍCH LỚN NHẤT. Hoà thì ưu tiên hình CÓ CHÚ
+///    THÍCH ĐÁNH SỐ (`labels > 0`): sách đánh số lên hình khi hình mang nghĩa.
+/// 4. Vẫn hoà thì theo `id` tăng dần — để cùng một bài LUÔN cho cùng một ảnh,
+///    mọi lần chạy, mọi máy.
+///
+/// Không ảnh nào qua được ⇒ `null`, và thẻ vẽ dạng KHÔNG ẢNH. Không bịa hình.
 ///
 /// ⚠ Ảnh crop là nội dung SGK: INTERNAL / RESEARCH ONLY. Chúng nằm ngoài git
 /// (`assets/fixtures/real/crops/`) và chỉ hiện trong app trên máy nghiên cứu —
 /// đúng như màn Đọc đang làm. Đây KHÔNG phải quyết định phát hành.
-String? lessonThumbnailAsset(LessonDocument doc) {
-  for (final b in doc.blocks) {
-    if (b is ImageBlock) return '${doc.assetBase}${b.crop}';
+class LessonHeroImage {
+  const LessonHeroImage({required this.asset, required this.aspect});
+
+  /// Đường dẫn asset đầy đủ, đã gắn `assetBase` của tài liệu.
+  final String asset;
+
+  /// width/height — để thẻ giữ chỗ đúng tỉ lệ, không kéo méo ảnh.
+  final double aspect;
+}
+
+/// Ảnh quá cao/quá dẹt không dùng làm hero được.
+const double kHeroMinAspect = 0.5;
+const double kHeroMaxAspect = 2.5;
+
+/// Dưới 2% diện tích trang ⇒ icon/bảng con, không phải hình của bài.
+const double kHeroMinArea = 0.02;
+
+LessonHeroImage? lessonHeroImage(LessonDocument doc) {
+  ({ImageBlock b, double area})? best;
+  for (final blk in doc.blocks) {
+    if (blk is! ImageBlock) continue;
+    final aspect = blk.aspect;
+    if (aspect == null) continue; // không biết tỉ lệ ⇒ không dám làm hero
+    if (aspect < kHeroMinAspect || aspect > kHeroMaxAspect) continue;
+    // `bbox` là hằng 4 số (assert trong SourceRef) — rộng × cao đã chuẩn hoá
+    // theo trang, nên diện tích là PHẦN TRANG mà hình chiếm.
+    final bbox = blk.sourceRef.bbox;
+    final area = bbox[2] * bbox[3];
+    if (area < kHeroMinArea) continue;
+    if (best == null ||
+        area > best.area ||
+        (area == best.area &&
+            (blk.labels > best.b.labels ||
+                (blk.labels == best.b.labels &&
+                    blk.id.compareTo(best.b.id) < 0)))) {
+      best = (b: blk, area: area);
+    }
   }
-  return null;
+  if (best == null) return null;
+  return LessonHeroImage(
+    asset: '${doc.assetBase}${best.b.crop}',
+    aspect: best.b.aspect!,
+  );
 }
