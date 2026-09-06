@@ -33,6 +33,8 @@ something true.
 | 19 | **Domain extensions proven necessary** | **3 of 7** as new node kinds | 7 candidates | MATH_AST · LIT_TEXT · CHEM_REACTION; 3 refuted, 1 reducible |
 | 20 | **Generic rule vs curated rule, head to head** | **7 / 7**, equal | 1 lesson (LS&ĐL 5 Bài 8, `tc2-p1`) | the generic `e1-prose-dated-events-v1` matched Lane C's hand-checked result, and also runs on Science where it correctly yields 0 |
 | 21 | **Family survival across pipeline builds** | **24 / 28 unchanged · 4 lost a family · 0 gained** | 28 LS&ĐL lessons with two builds | every disagreement runs the same direction |
+| 21a | **Surface-form coverage — ENUMERATION** | **0.992** (7 of 10 forms) | 5,513 enumerator mentions, 238 TSL lessons | ≥ 0.975 in every book. This is why PROCESS generalises. |
+| 21b | **Surface-form coverage — DATE** | **0.140** (3 of 12 forms) | 21,860 date mentions, 1,784 units-backed lessons | LS&ĐL uses **all 12** at coverage 0.131; Địa lí 0.003. **This is why TIMELINE is 3 of 224** — the rule is complete for one convention and blind to eleven. |
 | 22 | **Holdout precision** | **NOT MEASURED** | — | the rules were written against Bài 17 and Bài 8. This blank is the most important row on the board. |
 | 23 | **Inter-annotator agreement on families** | **NOT MEASURED** | — | no second annotator has looked at a family assignment |
 | 24 | **LLM calls** | **0** | — | census, classification and generation are all deterministic |
@@ -106,8 +108,12 @@ leave the largest addressable cluster blocked on two defects that are already lo
 
 1. **Precision on a holdout** the rules were not written against — rows 22 and 23. Nothing else
    should be built first.
-2. **A COMPARISON extractor** — the largest cue family with no rule (53.8 % of units-backed).
-3. **`gap`-emitting compilers**, so a withheld member makes a structure visibly incomplete rather
+2. **A form census for every family before its extractor is written** (rows 21a/21b). Enumeration
+   is a closed grammar at 0.992 and date is an open one at 0.140, and *that* — not rule quality —
+   is what decides whether a family generalises. `forms.py` runs in seconds, which is what makes
+   skipping it inexcusable. This now ranks above the COMPARISON extractor.
+3. **A COMPARISON extractor** — the largest cue family with no rule (53.8 % of units-backed).
+4. **`gap`-emitting compilers**, so a withheld member makes a structure visibly incomplete rather
    than quietly smaller (round-5 defect 8, reproduced inside this lane).
-4. **A human read of the 63 tier-E lessons** — the right size for curation, and where a genuinely
+5. **A human read of the 63 tier-E lessons** — the right size for curation, and where a genuinely
    new pattern would appear if one exists.

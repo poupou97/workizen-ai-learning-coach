@@ -43,6 +43,7 @@ classification, not for generation.
 | `tool/semantic/census.py`, `gaps.py` | P0.3, §15, §17 |
 | `tool/semantic/run_poc.py` | the §27 checkpoint run |
 | `tool/semantic/verify.py` | grounding integrity over all 238 TSL lessons + a seeded holdout sample |
+| `tool/semantic/forms.py` | surface-form census — count the forms BEFORE proposing a rule |
 | `tool/tests/test_semantic_foundation.py` | 58 tests |
 
 Outputs are corpus-derived and stay in the gitignored `poc-out/round5/semantic/` (Founder D4 — no
@@ -53,5 +54,7 @@ python3 tool/semantic/run_poc.py          # the checkpoint: 2 subjects, 1 extrac
 python3 tool/semantic/census.py           # the census
 python3 tool/semantic/gaps.py             # structure gaps + exception clusters
 python3 tool/semantic/verify.py integrity # does every grounding point where it says?
+python3 tool/semantic/forms.py date       # 12 date forms; current rules accept 3
+python3 tool/semantic/forms.py enum --layer tsl   # 10 enum forms; rules accept 7
 python3 -m unittest discover -s tool/tests -p "test_*.py"
 ```

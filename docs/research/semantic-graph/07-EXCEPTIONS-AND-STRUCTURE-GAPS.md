@@ -115,7 +115,7 @@ the DATA ACCURACY SCOREBOARD can delete the visual layer while its numbers impro
 **semantic-yield regression check** run on every pipeline change. `tool/semantic/census.py` computes
 it per lesson today; wiring it into A1's and D's gates is a coordination decision, not an E1 one.
 
-### 3.2 A tone slip deletes a family
+### 3.2 A tone slip deletes a family (see also §4 — a rule that covers one form of twelve)
 
 Bài 17's filtering procedure is governed by a block reading **«Chuẩn bị: … Tiền hành:»** — OCR's
 version of «Tiến hành». Round 4 lists this exact slip among the four that survive *because both OCR
@@ -130,3 +130,91 @@ every metric that counts characters.
 
 E1's mitigation (comparing tone-stripped for structural markers only) is a **workaround, not a
 repair**: it makes the discriminator robust, and it does nothing for the text the child reads.
+
+---
+
+## 4. ⭐ Why one family generalises and another does not — count the forms
+
+Reproduce: `python3 tool/semantic/forms.py date` · `python3 tool/semantic/forms.py enum --layer tsl`.
+
+Three lanes independently found that a grammar validated on one lesson does not generalise
+(`09-E2-RECONCILIATION.md` §3). This measures *why*, and the answer is not about rule quality. It
+is about whether the surface grammar is **closed** or **open**.
+
+### ENUMERATION is nearly closed — 7 forms of 10 cover 99.2 %
+
+Denominator: **238 TSL lessons, verbatim block text** (the units layer cannot answer this — see the
+caveat below).
+
+| form | mentions | lessons | accepted by `e1-ordered-steps-v1` |
+|---|---:|---:|---|
+| `num_dot` («1. ») | 2,029 | 230 | yes |
+| `bullet_mid` («· ») | 1,646 | 237 | yes |
+| `bullet_dash` («– ») | 1,101 | 148 | yes |
+| `alpha_paren` («a) ») | 542 | 121 | yes |
+| `buoc_n` («Bước 1») | 147 | 34 | yes |
+| `plus` («+ ») | 34 | 11 | **no** |
+| `star` | 6 | 4 | **no** |
+| `alpha_dot` | 4 | 1 | yes |
+| `roman` | 4 | 1 | **no** |
+
+**Coverage 0.992**, and it is ≥ 0.975 in every one of the six books. Five forms carry essentially
+all of it. That is why PROCESS extracts on 104 of 224 lessons across three subjects: an enumeration
+rule can be *complete* because the notation is nearly closed.
+
+### DATE is wide open — 3 forms of 12 cover 14.0 %
+
+Denominator: **1,784 units-backed lessons, line-level text**.
+
+| form | mentions | lessons | accepted by `e1-prose-dated-events-v1` |
+|---|---:|---:|---|
+| `bare_year` («… 1945 …») | 8,415 | 863 | **no** |
+| `nam_year` («năm 938») | 3,186 | 437 | **no** |
+| `paren_single` («(248)») | 1,813 | 351 | yes |
+| `giai_doan` («giai đoạn …») | 1,385 | 325 | **no** |
+| `dmy_slash` («2/9/1945») | 1,339 | 374 | **no** |
+| `year_range` («40 – 43» unbracketed) | 1,293 | 364 | **no** |
+| `paren_range` («(40 - 43)») | 965 | 217 | yes |
+| `the_ki_roman` («thế kỉ X») | 936 | 140 | **no** |
+| `ngay_thang` («ngày 2 tháng 9») | 487 | 175 | **no** |
+| `the_ki_arabic` · `nam_tcn` · `paren_tcn` | 41 | 23 | 1 of 3 |
+
+| subject | lessons | date mentions | distinct forms | coverage |
+|---|---:|---:|---:|---:|
+| LS&ĐL | 84 | 5,326 | **12** | 0.131 |
+| Ngữ văn | 47 | 2,907 | 9 | 0.286 |
+| Lịch sử | 16 | 1,998 | 11 | 0.163 |
+| Chuyên đề | 175 | 1,849 | 10 | 0.108 |
+| GDKT&PL | 56 | 1,488 | 8 | **0.005** |
+| Toán | 280 | 1,256 | 9 | 0.111 |
+| Địa lí | 43 | 663 | 8 | **0.003** |
+| KHTN | 148 | 350 | 9 | 0.083 |
+
+**This explains TIMELINE = 3 of 224 exactly, and from first principles rather than by observation.**
+The rule accepts a *parenthesised* date, which is a History-textbook convention for a reign; Science
+books state dates in prose and essentially never parenthesise them. The rule is not weak — it is
+**complete for one convention and blind to eleven**.
+
+It also generalises Lane C's finding at 47× the scale. Lane C measured LS&ĐL 5 printing **112 date
+mentions in 8 forms**; across all LS&ĐL the corpus prints **5,326 mentions in 12 forms**, and the
+rule's coverage is **0.131**. Same shape, whole corpus.
+
+### The procedural rule this yields
+
+> **Before writing an extraction rule, count how many distinct surface forms the thing takes, per
+> subject, and state the coverage the rule will have. A rule at 0.99 form coverage is a grammar; a
+> rule at 0.14 is a special case wearing a rule's name.**
+
+The count is cheap — `forms.py` is 160 lines and runs in seconds — which is what makes *not* getting
+it inexcusable. It ranks above the COMPARISON extractor on this lane's queue.
+
+### ⚠️ And a caveat that is itself a finding: the layer changes the answer
+
+Run the same enumeration census on the **units** layer and it reports `num_dot` at **100 %** with no
+bullets at all. That is false. The units extractor keeps the number prefix and **drops the bullet
+glyph**, so the measurement describes the extractor, not the books — and «·» is the *second most
+common* enumerator in the corpus (1,646 mentions, 237 of 238 lessons).
+
+A form census run on the wrong layer would have concluded that the enumeration grammar was already
+closed and that no bullet rule was needed. **Measure surface forms on the layer that preserves the
+surface.**
