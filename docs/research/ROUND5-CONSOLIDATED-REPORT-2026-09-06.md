@@ -1,14 +1,16 @@
 # ROUND 5 — DATA ACCURACY: REPAIR → VALIDATE → RESTORE
 ## Consolidated Founder report — 2026-09-06
 
-> **Status: LIVE DRAFT.** Sections marked **[PENDING]** are awaiting a lane that is
-> still running. Every number already printed here has been verified by the
-> coordinator against the repository or against a page render, not relayed from a
-> lane's summary. Where a lane's own wording was wrong, the correction is stated.
+> **Status: COMPLETE.** All nine lanes have reported. Every number here was verified
+> by the coordinator against the repository, against a page render, or by running the
+> suites — not relayed from a lane's summary. Where a lane's own wording was wrong or
+> over-strong, the correction is stated in place rather than the claim quietly dropped.
 >
-> **Nothing is merged.** Six round-5 PRs are open against
+> **Nothing is merged.** Nine round-5 PRs are open against
 > `integration/round5-2026-09-06`, which is itself open against `main` as PR #79.
-> READY FOR FOUNDER REVIEW.
+> The composed round was verified in a throw-away worktree (§11.3): **0 conflicts,
+> `flutter analyze` clean, 623 Python tests OK, 1061 Dart tests pass.**
+> **READY FOR FOUNDER REVIEW.**
 
 ---
 
@@ -74,9 +76,13 @@ generalisable signal and it has been routed to Lane A4 to measure.
 
 **Honesty about the mechanism.** Lane D's own output file records it:
 `"restoreMechanism": "guard change in the pipeline build — NOT a repair. No REPAIRED
-stage ran."` The REPAIRED stage is running now against A1's newly-green framework;
-guard-relax at **1/19 recovered, 0.000 precision** is the baseline it must beat.
-**[PENDING — Lane D]**
+stage ran."` Guard relaxation therefore stands at **1 of 19 falsely-withheld regions
+recovered, at 0.000 restore precision.**
+
+**The REPAIRED stage then ran against A1's framework, and changed nothing served.**
+It closed attachment completely (8/8) and fixed the R1 class on a second book, but
+**no served text changed anywhere** — see §8.1, where that is shown to be a structural
+certainty of the wiring rather than a measurement outcome.
 
 ---
 
