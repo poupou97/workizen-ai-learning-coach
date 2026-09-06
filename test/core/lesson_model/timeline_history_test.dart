@@ -20,6 +20,8 @@ import 'package:learning_coach/core/lesson_model/timeline_validator.dart';
 import 'package:learning_coach/core/lesson_model/tutor_script.dart';
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
 
+import '../../support/golden_chain_ledger.dart';
+
 const historySyntheticPath =
     'assets/fixtures/synthetic/lesson-05-sgk-lich-su-va-dia-li-5-b8.synthetic.json';
 const historyRealPath =
@@ -195,10 +197,7 @@ void main() {
 
     test('⭐⭐ block bảy mốc: CÓ MẶT, BỊ GIỮ LẠI, mang VALIDATED_REPAIR — và '
         'không dòng thời gian nào dựng được khi nó chưa được tin', () {
-      if (!f.existsSync()) {
-        markTestSkipped('fixture thật chưa sinh trên máy này (poc-out)');
-        return;
-      }
+      if (!goldenChainGate('GC-07')) return;
       final d = _load(historyRealPath, FixtureSlot.realDir);
       // danh tính bài học không đổi — đây vẫn là Golden #1
       expect(d.trust, ContentTrust.trustedStructuredLesson);
@@ -254,13 +253,11 @@ void main() {
           reason: '${b.id} được phục vụ mà mang sửa chữa ⇒ phục hồi chưa qua cổng',
         );
       }
+      recordGoldenChain('GC-07', exercised: true);
     });
 
     test('kế toán sửa chữa của tài liệu nói thật: 6 vùng mang sửa chữa, 0 tin được', () {
-      if (!f.existsSync()) {
-        markTestSkipped('fixture thật chưa sinh trên máy này (poc-out)');
-        return;
-      }
+      if (!goldenChainGate('GC-08')) return;
       final d = _load(historyRealPath, FixtureSlot.realDir);
       final withRepair = d.validatedRepairs;
       expect(withRepair, hasLength(6));
@@ -286,13 +283,11 @@ void main() {
       ]) {
         expect(prov[k], isNotNull, reason: 'thiếu $k ⇒ không chứng minh được lai lịch');
       }
+      recordGoldenChain('GC-08', exercised: true);
     });
 
     test('nguồn kể chuyện vẫn dựng được từ những block CÒN được phục vụ', () {
-      if (!f.existsSync()) {
-        markTestSkipped('fixture thật chưa sinh trên máy này (poc-out)');
-        return;
-      }
+      if (!goldenChainGate('GC-09')) return;
       final d = _load(historyRealPath, FixtureSlot.realDir);
       final src = deriveStoryAttributions(d);
       // Không ghim một con số của vòng 4: khẳng định TÍNH CHẤT — mọi nguồn dựng
@@ -306,6 +301,7 @@ void main() {
           reason: '${a.attributionBlockId}: không dựng nguồn từ vùng bị giữ lại',
         );
       }
+      recordGoldenChain('GC-09', exercised: true);
     });
   });
 }

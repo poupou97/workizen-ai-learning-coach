@@ -14,6 +14,13 @@
 /// `.gitignore` và đọc như một test đạt; ở đây «không có file» phải nói thẳng
 /// là không có file.
 ///
+/// ⭐⭐ WAL-218 — «bỏ qua» KHÔNG CÒN LÀ MỘT KẾT QUẢ IM LẶNG. Mỗi test dưới đây
+/// mang một mã nghĩa vụ (`GC-01`…`GC-06`) khai trong
+/// `tool/ci/golden-chain-obligations.json`, và MỖI LẦN CHẠY để lại một dòng
+/// trong `build/golden-chain/`: đã kiểm, hay UNVERIFIED-vì-vắng-fixture.
+/// `tool/ci/golden_chain_verdict.py` đọc lại sổ ấy và in ra ĐỘ PHỦ THẬT.
+/// Vắng mặt không thoả mãn được một nghĩa vụ khẳng định.
+///
 /// ⚠ VALIDATED REPAIR ≠ TRUSTED. Test nặng nhất trong tệp này không kiểm rằng
 /// bản sửa ĐẾN ĐƯỢC trẻ — nó kiểm rằng bản sửa **KHÔNG** đến được trẻ: vùng đã
 /// sửa và đã kiểm vẫn withheld, vẫn không mang chữ. `CONNECT ≠ TRUST`.
@@ -33,26 +40,18 @@ import 'package:learning_coach/features/lesson_workspace/smart_book_view.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
 import 'package:learning_coach/features/lesson_workspace/workspace_trace.dart';
 
+import '../../support/golden_chain_ledger.dart';
 import 'support.dart';
 
 const _slot = FixtureSlot(book: '05-sgk-lich-su-va-dia-li-5', lessonNo: 8);
 
-Map<String, Object?>? _rawGolden() {
-  final f = File(_slot.realPath);
-  if (!f.existsSync()) {
-    markTestSkipped(
-      'Golden #1 chưa sinh trên máy này — chạy '
-      'tool/evidence/golden_delivery.py (cần poc-out/)',
-    );
-    return null;
-  }
-  return (jsonDecode(f.readAsStringSync()) as Map).cast<String, Object?>();
-}
+/// Chỉ được gọi SAU `goldenChainGate` — vắng fixture thì không tới đây.
+Map<String, Object?> _rawGolden() =>
+    (jsonDecode(File(_slot.realPath).readAsStringSync()) as Map)
+        .cast<String, Object?>();
 
-LessonDocument? _goldenDoc() {
-  final j = _rawGolden();
-  if (j == null) return null;
-  final d = LessonDocument.fromJson(j, assetBase: FixtureSlot.realDir);
+LessonDocument _goldenDoc() {
+  final d = LessonDocument.fromJson(_rawGolden(), assetBase: FixtureSlot.realDir);
   expect(
     d,
     isNotNull,
@@ -61,15 +60,20 @@ LessonDocument? _goldenDoc() {
         'tài liệu khi gặp một loại khối lạ — nên nếu WS-C phát một loại khối '
         'mới ra pack mà app chưa biết, cả bài trắng. Pack và app đi cùng nhau.',
   );
-  return d;
+  return d!;
 }
 
 void main() {
+  // Đường của `_slot` phải là ĐÚNG đường bản đăng ký nghĩa vụ nói tới; hai
+  // hằng số cùng chỉ một tệp là hai chỗ để lệch nhau.
+  test('bản đăng ký WAL-218 và test này nói về CÙNG một fixture', () {
+    expect(_slot.realPath, goldenChainFixturePath);
+  });
+
   group('§1 CHUỖI GIAO HÀNG — nguồn → TSL đã chiếu → tài liệu → app', () {
     test('⭐⭐ ĐƯỜNG THẬT thắng ĐƯỜNG MẪU: catalog nạp fixture thật, không rơi '
         'về bản mẫu', () async {
-      final raw = _rawGolden();
-      if (raw == null) return;
+      if (!goldenChainGate('GC-01')) return;
       // Bundle chỉ có ĐÚNG hai tệp: đường thật và đường mẫu. Nếu catalog vẫn
       // chọn bản mẫu thì đây là chỗ biết ngay.
       final catalog = WorkspaceCatalog(
@@ -97,11 +101,12 @@ void main() {
         reason: 'chữ [MẪU] lọt vào đường thật ⇒ đang trộn hai thế hệ',
       );
       expect(WorkspaceCatalog.isResearchSlot(doc), isTrue);
+      recordGoldenChain('GC-01', exercised: true);
     });
 
     test('⭐ tài liệu khai ĐỦ NĂM TRƯỜNG PHIÊN BẢN Founder yêu cầu', () {
+      if (!goldenChainGate('GC-02')) return;
       final raw = _rawGolden();
-      if (raw == null) return;
       final p = (raw['provenance'] as Map).cast<String, Object?>();
       for (final k in [
         'sourceHash',
@@ -134,13 +139,14 @@ void main() {
             '⭐ CONNECT ≠ TRUST — không một bản sửa nào được TRUSTED. Ngưỡng tin '
             'sản xuất là cổng của Founder, không phải của pipeline.',
       );
+      recordGoldenChain('GC-02', exercised: true);
     });
   });
 
   group('§2 VALIDATED REPAIR ≠ TRUSTED — bản sửa KHÔNG được tới trẻ', () {
     test('⭐⭐ mọi vùng đã sửa vẫn WITHHELD và vẫn KHÔNG mang chữ', () {
+      if (!goldenChainGate('GC-03')) return;
       final raw = _rawGolden();
-      if (raw == null) return;
       final blocks = (raw['blocks'] as List).cast<Map<Object?, Object?>>();
       final repaired = [
         for (final b in blocks)
@@ -163,25 +169,27 @@ void main() {
               'đọc nó như chữ sách.',
         );
       }
+      recordGoldenChain('GC-03', exercised: true);
     });
 
     test('⭐ chỗ SAM để trống hiện ra như CHỖ TRỐNG CÓ LÝ DO, không phải chữ '
         'hỏng — mô hình app cũng không mang chữ', () {
+      if (!goldenChainGate('GC-04')) return;
       final doc = _goldenDoc();
-      if (doc == null) return;
       final withheld = doc.blocks.whereType<WithheldBlock>().toList();
       expect(withheld, isNotEmpty);
       for (final w in withheld) {
         expect(w.reasons, isNotEmpty, reason: 'mỗi chỗ trống phải nêu LÝ DO');
       }
+      recordGoldenChain('GC-04', exercised: true);
     });
   });
 
   group('§3 TRÊN MÀN HÌNH — thứ trẻ thật sự thấy', () {
     testWidgets('⭐ ba View mở được trên bài THẬT; chip «chưa kiểm định» bắt '
         'buộc còn nguyên', (t) async {
+      if (!goldenChainGate('GC-05')) return;
       final doc = _goldenDoc();
-      if (doc == null) return;
       t.view.physicalSize = const Size(1080, 1920);
       t.view.devicePixelRatio = 2.75;
       addTearDown(t.view.reset);
@@ -202,14 +210,14 @@ void main() {
       await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.read)));
       await t.pumpAndSettle();
       expect(find.byType(SmartBookView), findsOneWidget);
+      recordGoldenChain('GC-05', exercised: true);
     });
 
     testWidgets('⭐⭐ BẢN GHI SỬA KHÔNG MANG GIÁ TRỊ ĐỀ XUẤT — không có chữ nào '
         'để lọt lên màn Đọc, kể cả khi ai đó vẽ nhầm', (t) async {
+      if (!goldenChainGate('GC-06')) return;
       final raw = _rawGolden();
-      if (raw == null) return;
       final doc = _goldenDoc();
-      if (doc == null) return;
 
       // ĐO ĐƯỢC (2026-09-06): bản ghi sửa của Golden #1 mang repairId ·
       // disposition · failureClass · method · repairVersion · validatorId ·
@@ -276,6 +284,7 @@ void main() {
         isFalse,
         reason: 'từ vựng của pipeline không phải chữ cho trẻ đọc',
       );
+      recordGoldenChain('GC-06', exercised: true);
     });
   });
 }

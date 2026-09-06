@@ -1,0 +1,94 @@
+{
+  "$comment": [
+    "WAL-218 — CI GREEN != GOLDEN CHAIN VERIFIED.",
+    "",
+    "Golden #1 (LS&DL 5 Bai 8) is the only place where the whole delivery chain is",
+    "pinned end to end: source -> SDM -> repair ledger -> ValidatedRepair -> projected",
+    "TSL -> LessonDocument -> assets/fixtures/real/ -> WorkspaceCatalog -> three",
+    "Learning Views. The fixture that carries it is gitignored under Founder D4",
+    "(verbatim SGK text and page crops are INTERNAL / RESEARCH ONLY), so CI never has",
+    "it and every assertion below turns into markTestSkipped on the runner.",
+    "",
+    "Before WAL-218 that was invisible: nine tests skipped and `flutter test` still",
+    "printed 'All tests passed!'. This file is the list those nine tests must report",
+    "against. Absence cannot satisfy a positive obligation: a run with no fixture",
+    "records nine UNVERIFIED rows and can never be reported as a Golden-chain PASS.",
+    "",
+    "Adding a Golden-chain assertion means adding a row here AND calling",
+    "recordGoldenChain(<id>) from the test. Deleting a test without deleting its row",
+    "makes tool/ci/golden_chain_verdict.py exit 2 (an obligation vanished); deleting",
+    "both drops `declared` below the --min-obligations floor pinned in",
+    ".github/workflows/ci.yml, which also goes red. Two files, on purpose."
+  ],
+  "fixture": "assets/fixtures/real/lesson-05-sgk-lich-su-va-dia-li-5-b8.json",
+  "fixtureIsGitignored": true,
+  "regenerate": "tool/evidence/golden_delivery.py (needs poc-out/ — machine-local, D4)",
+  "ledgerDir": "build/golden-chain",
+  "obligations": [
+    {
+      "id": "GC-01",
+      "test": "test/features/lesson_workspace/golden1_history_test.dart",
+      "claim": "WorkspaceCatalog loads the REAL path and does not fall back to the synthetic one when both are present",
+      "syntheticMirror": "SYN-01"
+    },
+    {
+      "id": "GC-02",
+      "test": "test/features/lesson_workspace/golden1_history_test.dart",
+      "claim": "the document declares all five version fields (sourceHash, pipelineVersion, sdmVersion, generator, tslPath) and repair provenance with trusted = 0",
+      "syntheticMirror": "SYN-02"
+    },
+    {
+      "id": "GC-03",
+      "test": "test/features/lesson_workspace/golden1_history_test.dart",
+      "claim": "every repaired region stays WITHHELD and still carries no text key",
+      "syntheticMirror": "SYN-03"
+    },
+    {
+      "id": "GC-04",
+      "test": "test/features/lesson_workspace/golden1_history_test.dart",
+      "claim": "withheld regions reach the app model as reasoned gaps, and the model carries no text for them",
+      "syntheticMirror": "SYN-04"
+    },
+    {
+      "id": "GC-05",
+      "test": "test/features/lesson_workspace/golden1_history_test.dart",
+      "claim": "the three Learning Views open on the real lesson and the non-dismissable «chua kiem dinh» chip stays",
+      "syntheticMirror": "SYN-05"
+    },
+    {
+      "id": "GC-06",
+      "test": "test/features/lesson_workspace/golden1_history_test.dart",
+      "claim": "no repair record carries a text-bearing key, every record is servable=false / VALIDATED_REPAIR, and no pipeline vocabulary reaches the Read screen",
+      "syntheticMirror": "SYN-06"
+    },
+    {
+      "id": "GC-07",
+      "test": "test/core/lesson_model/timeline_history_test.dart",
+      "claim": "the seven-milestone block is PRESENT, WITHHELD, carries a non-servable VALIDATED_REPAIR — and no timeline is built while it is untrusted",
+      "syntheticMirror": "SYN-07"
+    },
+    {
+      "id": "GC-08",
+      "test": "test/core/lesson_model/timeline_history_test.dart",
+      "claim": "document-level repair accounting tells the truth: 6 regions repaired, 0 trusted, no production trust threshold",
+      "syntheticMirror": "SYN-08"
+    },
+    {
+      "id": "GC-09",
+      "test": "test/core/lesson_model/timeline_history_test.dart",
+      "claim": "story attributions are derived only from blocks that are still served",
+      "syntheticMirror": "SYN-09"
+    }
+  ],
+  "syntheticMirrors": [
+    {"id": "SYN-01", "test": "test/features/lesson_workspace/golden_chain_synthetic_test.dart"},
+    {"id": "SYN-02", "test": "test/features/lesson_workspace/golden_chain_synthetic_test.dart"},
+    {"id": "SYN-03", "test": "test/features/lesson_workspace/golden_chain_synthetic_test.dart"},
+    {"id": "SYN-04", "test": "test/features/lesson_workspace/golden_chain_synthetic_test.dart"},
+    {"id": "SYN-05", "test": "test/features/lesson_workspace/golden_chain_synthetic_test.dart"},
+    {"id": "SYN-06", "test": "test/features/lesson_workspace/golden_chain_synthetic_test.dart"},
+    {"id": "SYN-07", "test": "test/features/lesson_workspace/golden_chain_synthetic_test.dart"},
+    {"id": "SYN-08", "test": "test/features/lesson_workspace/golden_chain_synthetic_test.dart"},
+    {"id": "SYN-09", "test": "test/features/lesson_workspace/golden_chain_synthetic_test.dart"}
+  ]
+}
