@@ -434,6 +434,14 @@ structures did not fall, and the single new restore is wrong. The round's remain
 over-withholding at 0.633, mutilated structures at 9 and 13, R2/R3 open, verse partial — are all
 still open on the path that produces a lesson.
 
+**And the corpus is smaller than this lane had been reporting.** Lane A2's finding, checked here,
+shows that a block the role layer drops as `empty` reaches neither list in the Trusted Structured
+Lesson — so it is outside every served/withheld rate. Corrected, the share of extracted content that
+reaches a child is 0.589 on the evaluation set and 0.523 on the holdout, not 0.632 and 0.613; on
+Toán 4 tập hai Bài 61 it is **0.078**, not 0.211. The blocks that vanish are the printed exercises.
+A pipeline that refuses to guess must still be able to say what it refused, and on this path it
+cannot (§7.7, filed as R13).
+
 **Reprocessing made the legacy corpus safer and smaller again. It still did not make it teachable.**
 0 lessons trusted, 0 eligible for teaching, and the pipeline cannot raise either.
 
