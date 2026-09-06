@@ -109,7 +109,15 @@ having:
   lesson, `len()` returned keys, and 10 *lessons* were reported as 10 *expressions* against a true
   41. **Before recording a disagreement with a workstream, re-derive the number a second way.** A
   wrong `NOT CAPTURED` is worse than no note, because it puts the archive's authority behind a doubt
-  that does not exist.
+  that does not exist. **Round 7 · WS-M turned this paragraph into a tool:**
+  `python3 tool/metrics/cli.py verify` re-derives every registered metric from its leaf records and
+  exits non-zero on any mismatch, and `python3 tool/metrics/cli.py lint` flags the container-shape
+  defect itself anywhere under `tool/`. Before writing a number into an archive, check whether the
+  registry already defines it (`tool/metrics/metric_registry.py`,
+  `docs/research/METRIC-REGISTRY-ROUND7.md`); if it does not and the number matters, **add it there
+  with its nine fields rather than only quoting it here.** «total activities» is DEPRECATED — the
+  phrase admits three answers; write `ACTIVITY_LEAF_COUNT` or `LEARNER_ACTIVITY_LEAF_COUNT`, with
+  its family set beside it.
 - **When a published archive turns out to be wrong, regenerate as `-vN` and keep the earlier one**,
   with the correction recorded *inside* the new archive rather than silently applied. A superseded
   archive is still evidence — of what was believed at the time.
