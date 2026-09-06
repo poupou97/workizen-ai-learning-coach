@@ -37,6 +37,15 @@ final RegExp _sentenceStart = RegExp(r'(^\s*|[.!?]\s*)(\S)', unicode: true);
 /// biến đổi là phép đồng nhất nên không hại gì.
 bool isAllUpperCase(String s) => s == s.toUpperCase();
 
+/// Số «từ có chữ cái» — dùng để tách VIẾT TẮT khỏi TIÊU ĐỀ in hoa.
+int _letterWords(String s) => s
+    .split(RegExp(r'\s+'))
+    .where((w) => w.runes.any((r) {
+          final c = String.fromCharCode(r);
+          return c.toUpperCase() != c.toLowerCase();
+        }))
+    .length;
+
 /// Tiêu đề bài để HIỂN THỊ.
 ///
 /// - đã có chữ thường ⇒ **giữ nguyên từng ký tự** (chính tả của sách/mục lục);
@@ -44,6 +53,11 @@ bool isAllUpperCase(String s) => s == s.toUpperCase();
 ///   (giữ đúng hành vi vòng 3–6 cho «HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP»).
 String displayTitle(String title) {
   if (!isAllUpperCase(title)) return title;
+  // MỘT TỪ IN HOA LÀ VIẾT TẮT, không phải tiêu đề bị hét. Đo trên pack đang
+  // phát hành: 67 trong 175 tiêu đề in hoa là một từ — «GDTC 5», «GDKT&PL 10»,
+  // «TN&XH 1» — và luật cũ biến chúng thành «Gdtc 5». Hạ chữ một viết tắt là
+  // làm hỏng một cái tên; để nguyên chỉ là hơi to tiếng. Chọn cái sau.
+  if (_letterWords(title) < 2) return title;
   return title.toLowerCase().replaceAllMapped(
         _sentenceStart,
         (m) => '${m[1]}${m[2]!.toUpperCase()}',

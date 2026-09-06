@@ -117,6 +117,8 @@ void main() {
     });
   });
 
+  _acronyms();
+
   group('MỘT luật duy nhất — có test soi mã', () {
     test('không tệp nào ngoài lib/core/lesson_model/ gọi thẳng '
         'LessonDocument.titleCase', () {
@@ -136,6 +138,28 @@ void main() {
         isEmpty,
         reason: 'dùng displayTitle() — xem lib/core/display/lesson_title.dart',
       );
+    });
+  });
+}
+
+/// ROUND 7 · WS-R — VIẾT TẮT KHÔNG PHẢI TIÊU ĐỀ BỊ HÉT.
+///
+/// Đo trên `assets/pack/lesson-index-*.json` đang phát hành: 175 trên 2 623
+/// tiêu đề là IN HOA, và **67 trong số đó chỉ có MỘT từ có chữ cái** —
+/// «GDTC 5», «GDKT&PL 10», «TN&XH 1». Luật cũ hạ chúng thành «Gdtc 5»: một
+/// cái tên bị làm hỏng. Để nguyên thì chỉ hơi to tiếng.
+void _acronyms() {
+  group('viết tắt giữ nguyên', () {
+    test('một từ in hoa ⇒ nguyên văn', () {
+      for (final s in ['GDTC 5', 'GDKT&PL 10', 'TN&XH 1', 'KHTN', 'SGK']) {
+        expect(displayTitle(s), s, reason: s);
+      }
+    });
+    test('từ hai từ trở lên vẫn được viết hoa lại', () {
+      expect(displayTitle('MỞ ĐẦU'), 'Mở đầu');
+      expect(displayTitle('TẾ BÀO'), 'Tế bào');
+      expect(displayTitle('ĐẤT NƯỚC VÀ CON NGƯỜI VIỆT NAM'),
+          'Đất nước và con người việt nam');
     });
   });
 }
