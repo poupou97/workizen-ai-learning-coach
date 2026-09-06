@@ -222,11 +222,13 @@ void main() {
       expect(legend.data, contains('ô xám là bước SAM để trống'));
       expect(legend.data, contains('chạm một bước'));
       expect(find.byIcon(Icons.menu_book_outlined), findsWidgets);
-      expect(find.text('ⓘ Nguồn & độ tin'), findsOneWidget);
-      await t.tap(find.byKey(VisualView.shapeKey('Bảng so sánh')));
-      await t.pumpAndSettle();
+      // ROUND 7 V1: «ⓘ Nguồn & độ tin» đi cùng lời «vì sao» vào sheet —
+      // trên màn còn MỘT dòng ⓘ cho mỗi sơ đồ.
+      expect(find.text('ⓘ Nguồn & độ tin'), findsNothing);
+      expect(find.text('ⓘ Vì sao SAM vẽ thế này?'), findsWidgets);
       // mặc định vòng 5 là sơ đồ tư duy; bảng vẫn còn sau nút chuyển
       expect(find.textContaining('chạm một ô'), findsOneWidget);
+      await t.ensureVisible(find.byKey(VisualView.comparisonViewKey('table')));
       await t.tap(find.byKey(VisualView.comparisonViewKey('table')));
       await t.pumpAndSettle();
       expect(find.textContaining('chạm một hàng'), findsOneWidget);
@@ -247,7 +249,12 @@ void main() {
       final line = t.widget<Text>(find.byKey(const Key('tutor-runtime-line')));
       expect(line.data, contains('lời lấy đúng trong sách'));
       expect(line.data, isNot(contains('Runtime')));
-      expect(find.text(TutorView.labelLegend), findsOneWidget);
+      // ⭐ ROUND 7 V2 — chú giải nhãn KHÔNG còn ở đầu màn «Học với SAM»: đo ở
+      // 360 dp nó chiếm 96 dp, và cùng dòng runtime đầy đủ đẩy nội dung dạy
+      // đầu tiên xuống 63 % chiều cao màn. Sự thật không mất: dòng ngắn + ⓘ
+      // mở sheet «Nguồn & độ tin», nơi đã có sẵn bản đầy đủ.
+      expect(find.text(TutorView.labelLegend), findsNothing);
+      expect(find.byKey(const Key('tutor-runtime-info')), findsOneWidget);
       await t.tap(find.text('Tiếp ▸'));
       await t.pumpAndSettle();
       expect(find.byKey(const Key('tutor-hint-ladder')), findsOneWidget);

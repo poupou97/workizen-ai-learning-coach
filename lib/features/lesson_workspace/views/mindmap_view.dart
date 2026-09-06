@@ -94,6 +94,7 @@ class MindmapView extends StatelessWidget {
     required this.nodes,
     required this.onOpenSource,
     this.hubSourceBlockId,
+    this.onTapNode,
   });
 
   /// Nút trung tâm — chữ đã có sẵn trong dữ liệu có kiểu, KHÔNG tự đặt tên.
@@ -101,6 +102,14 @@ class MindmapView extends StatelessWidget {
   final List<MindmapNode> nodes;
   final void Function(String blockId) onOpenSource;
   final String? hubSourceBlockId;
+
+  /// ⭐ ROUND 7 · V1 — chạm một nút ⇒ GIẢI THÍCH nút đó, không chỉ mở lại lời
+  /// sách trong ô. `null` ⇒ hành vi vòng 5 (mở sheet nguồn). Renderer trao
+  /// lại chỉ số + chính nút — nó không biết nút ấy thuộc bài nào.
+  final void Function(int index, MindmapNode node)? onTapNode;
+
+  void _tap(int i, MindmapNode n) =>
+      onTapNode == null ? onOpenSource(n.sourceBlockId) : onTapNode!(i, n);
 
   static const viewKey = Key('visual-mindmap');
   static Key nodeKey(int i) => Key('visual-mindmap-node-$i');
@@ -267,7 +276,7 @@ class MindmapView extends StatelessWidget {
       child: InkWell(
         key: nodeKey(i),
         borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-        onTap: () => onOpenSource(n.sourceBlockId),
+        onTap: () => _tap(i, n),
         child: Container(
           constraints: const BoxConstraints(minHeight: 64),
           padding: const EdgeInsets.all(WalSpacing.sm + 2),

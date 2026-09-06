@@ -1,32 +1,45 @@
 /// TRACK B — MODE 2 «Trực quan»: renderer trên `SemanticData` CÓ KIỂU.
 ///
-/// Không có đường «bài → LLM → hình». Tab con chỉ hiện cho hình dạng bài này
-/// CÓ (16-UX-CONCEPT §1 hàng 5); luôn có «Bảng tóm tắt» làm fallback (chữ
-/// nguyên văn phần MỤC TIÊU / Em đã học). Nút/hàng chạm được ⇒ mở đúng block
+/// Không có đường «bài → LLM → hình». Nút/hàng chạm được ⇒ mở đúng block
 /// nguồn; «Xem trong Đọc» nhảy về Mode 1 tại block đó.
 ///
-/// ROUND 3 B3 — HỌ RENDERER THEO KIỂU (concept khung 5 «Trực quan hoá»):
-/// - Tab theo HÌNH DẠNG (🔁 Sơ đồ quy trình · ⚖️ Bảng so sánh · 🕸️ Sơ đồ
-///   khái niệm · 🕰️ Dòng thời gian · 📋 Bảng tóm tắt); hình dạng có nhiều sơ đồ
-///   ⇒ hàng chọn thứ hai «1 · tên» «2 · tên» (Nokia n1 D2: hai tab y hệt).
-/// - `TimelineEvent[]` → dòng thời gian: trục dọc + mốc (Lane C sở hữu).
-///
-/// ROUND 5 B — TRỰC QUAN THÀNH SƠ ĐỒ THẬT (Founder §12: «Trực quan vẫn chưa
-/// tới khung concept»). Không đổi nguồn sự thật, chỉ đổi CÁCH VẼ dữ liệu có
-/// kiểu; vẫn không có đường «bài → LLM → hình»:
+/// ROUND 3 B3 — HỌ RENDERER THEO KIỂU (concept khung 5 «Trực quan hoá»).
+/// ROUND 5 B — sơ đồ THẬT thay danh sách chữ:
 /// - `ProcessStep[]` → `ProcessFlowView`: nút trên MỘT TRỤC liên tục + mũi
-///   tên + dải tổng quan chạm được; bước withheld là nút rỗng chỉ trang
-///   (trước: danh sách đánh số).
-/// - `ComparisonSemantic` → `MindmapView`: nút trung tâm là tiêu đề dữ liệu,
-///   mỗi thực thể một nút nhánh có màu mang chữ sách — đúng hình khung concept
-///   khung 5. Bảng vẫn còn, sau nút chuyển «Sơ đồ tư duy / Bảng».
-/// - `ConceptRelation[]` → cùng `MindmapView` (nút trung tâm tất định =
-///   thực thể gặp nhiều nhất); quan hệ không chạm trung tâm ⇒ thẻ bên dưới.
-/// - MÀU CHỈ PHÂN BIỆT NHÁNH/BƯỚC, có một dòng nói đúng thế cho trẻ; KHÔNG
-///   emoji theo nghĩa (chọn emoji = suy ra nội dung nguồn không nói).
-/// Bài 17 chỉ có Process + Comparison ⇒ hai tab kia KHÔNG hiện (fail closed);
-/// hai renderer còn lại được kiểm bằng dữ liệu có kiểu dựng trong test.
-/// Mã luật sinh (`derivation`) rời màn trẻ đọc ⇒ nằm trong sheet «Nguồn & độ tin».
+///   tên + dải tổng quan chạm được; bước withheld là nút rỗng chỉ trang.
+/// - `ComparisonSemantic` / `ConceptRelation[]` → `MindmapView`.
+/// - MÀU CHỈ PHÂN BIỆT NHÁNH/BƯỚC; KHÔNG emoji theo nghĩa.
+///
+/// ⭐⭐ ROUND 7 · V1 — HAI LỖI TRÌNH BÀY ĐƯỢC ĐO TRÊN MÁY THẬT, ĐÃ SỬA:
+///
+/// **1. Ba hàng điều hướng cho một màn.** Founder order 48: «Giữ MỘT
+/// navigation chính. Không lặp lại navigation bằng nhiều card.» Máy thật
+/// (`round5-1-07-visual-mindmap.png`) đếm được BA: tab của workspace, hàng
+/// chip HÌNH DẠNG («Sơ đồ quy trình · Bảng so sánh · Bảng tóm tắt» — tự
+/// xuống hai dòng trên Nokia), rồi hàng chip CÁCH NHÌN («Sơ đồ tư duy ·
+/// Bảng»). Ba hàng ấy đẩy nội dung học đầu tiên xuống **83 % chiều cao màn**:
+/// trẻ mở «Trực quan» và thấy… nút bấm.
+///
+/// Vòng 7 xoá cả hai hàng chip. **Bài có bao nhiêu sơ đồ thì cuộn bấy nhiêu
+/// sơ đồ, theo thứ tự tài liệu** — không phải chọn rồi mới thấy. «Cách nhìn»
+/// của bảng so sánh (sơ đồ tư duy / bảng) đi vào ĐẦU THẺ của chính nó: nó là
+/// một lựa chọn TRONG một sơ đồ, không phải điều hướng của màn. «Bảng tóm
+/// tắt» thành nếp gấp cuối màn — nó là bản dự phòng khi không có sơ đồ, nên
+/// khi CÓ sơ đồ nó không được đứng ngang hàng.
+///
+/// **2. «Vì sao SAM chọn sơ đồ này» chiếm một thẻ lavender to.** Nó đúng và
+/// phải giữ, nhưng nó là lời giải thích về CÔNG CỤ, không phải nội dung học.
+/// Nay là một dòng «ⓘ Vì sao SAM vẽ thế này?» cuối mỗi sơ đồ, mở sheet.
+///
+/// **3. Chạm một ô thì được GIẢI THÍCH.** Founder order 49 §3: «Chạm "Lọc" →
+/// thấy: dùng khi nào · tách cái gì · liên hệ với nội dung bài.» Vòng 5 chạm
+/// ra sheet nguồn — đúng câu trẻ vừa đọc trong ô. Vòng 7 chèn `VisualExplain`
+/// (hàm THUẦN trên dữ liệu có kiểu, `views/visual_explain.dart`) lên trên
+/// phần nguồn của cùng sheet ấy: nút này là gì trong sơ đồ, sách nói gì ở
+/// từng chiều, và CHỖ KHÁC TRONG BÀI có nhắc đúng từ này — chạm là nhảy tới
+/// sơ đồ đó. Không có sơ đồ nào khác nhắc tới ⇒ nói thẳng ra, không gợi bừa.
+///
+/// Mã luật sinh (`derivation`) vẫn nằm trong sheet «Nguồn & độ tin».
 library;
 
 import 'package:flutter/material.dart';
@@ -39,6 +52,8 @@ import '../../core/lesson_model/semantic_data.dart';
 import 'views/mindmap_view.dart';
 import 'views/process_flow_view.dart';
 import 'views/timeline_view.dart';
+import 'views/visual_explain.dart';
+import 'views/visual_explain_card.dart';
 import 'widgets/source_sheet.dart';
 import 'widgets/trust_sheet.dart';
 
@@ -48,28 +63,39 @@ class VisualView extends StatefulWidget {
     required this.doc,
     required this.onShowInRead,
     this.header,
+    this.scrollToSemanticId,
   });
 
   final LessonDocument doc;
   final void Function(String blockId) onShowInRead;
 
+  /// ROUND 7 · V2 — vào Trực quan và DỪNG ĐÚNG ở một sơ đồ. Lời phản hồi của
+  /// SAM («bài này dùng cách ấy ở đây») chỉ giữ được lời hứa nếu cú chạm rơi
+  /// vào đúng thẻ, không phải vào đầu màn.
+  final String? scrollToSemanticId;
+
   /// ROUND 5 D1 — thẻ «SAM đề xuất» đi vào ĐẦU VÙNG CUỘN thay vì bị ghim trên
-  /// đầu màn (như màn Đọc từ vòng 4): lý do dài 6 dòng ghim lại thì che mất
-  /// nút trung tâm của sơ đồ.
+  /// đầu màn: lý do dài 6 dòng ghim lại thì che mất nút trung tâm của sơ đồ.
   final Widget? header;
 
   static const summaryShape = '📋 Bảng tóm tắt';
 
-  static Key shapeKey(String shapeLabel) => Key('visual-shape-$shapeLabel');
-  static Key instanceKey(String id) => Key('visual-instance-$id');
+  /// Nếp gấp «Bảng tóm tắt» cuối màn (ROUND 7 — không còn là một chip
+  /// ngang hàng với sơ đồ).
+  static const summaryFoldKey = Key('visual-summary-fold');
+
+  /// Thẻ của MỘT sơ đồ trong màn cuộn (ROUND 7 — thay hàng chip hình dạng).
+  static Key cardKey(String semanticId) => Key('visual-card-$semanticId');
+  static Key whyKey(String semanticId) => Key('visual-why-$semanticId');
+
+  /// ROUND 5 — nút chuyển cách nhìn của bảng so sánh («mindmap» / «table»),
+  /// nay nằm TRONG thẻ của chính bảng so sánh đó.
+  static Key comparisonViewKey(String v) => Key('visual-comparison-view-$v');
+  static const comparisonLegendKey = Key('visual-comparison-legend');
 
   /// Sơ đồ tư duy chỉ đọc được khi mỗi nút mang tối đa 2 dòng chữ; nhiều
   /// chiều hơn ⇒ CHỈ bảng (fail closed, không nhồi chữ vào nút).
   static bool mindmapFits(ComparisonSemantic s) => s.dimensions.length <= 2;
-
-  /// ROUND 5 — nút chuyển cách nhìn của bảng so sánh («mindmap» / «table»).
-  static Key comparisonViewKey(String v) => Key('visual-comparison-view-$v');
-  static const comparisonLegendKey = Key('visual-comparison-legend');
 
   /// Mục tiêu + các dòng sau «Em đã học» tới nhãn/tiêu đề kế — NGUYÊN VĂN.
   static List<LessonBlock> summaryBlocks(LessonDocument doc) {
@@ -90,7 +116,7 @@ class VisualView extends StatefulWidget {
     return out;
   }
 
-  /// Hình dạng có trong bài, theo thứ tự xuất hiện — tab chỉ cho thứ CÓ.
+  /// Hình dạng có trong bài, theo thứ tự xuất hiện.
   static List<String> shapesOf(LessonDocument doc) {
     final out = <String>[];
     for (final s in doc.semantic) {
@@ -129,37 +155,43 @@ class VisualView extends StatefulWidget {
 }
 
 class _VisualViewState extends State<VisualView> {
-  /// Hình dạng đang xem; `VisualView.summaryShape` = Bảng tóm tắt.
-  late String _shape;
+  /// ROUND 5 — bảng so sánh có HAI cách nhìn: sơ đồ tư duy (mặc định) và
+  /// bảng. Cùng một dữ liệu có kiểu, không thêm sự thật nào. Trạng thái theo
+  /// TỪNG sơ đồ vì màn nay hiện nhiều sơ đồ một lúc.
+  final Set<String> _asTable = {};
 
-  /// Sơ đồ đang xem trong hình dạng đó (khi có nhiều).
-  int _instance = 0;
+  /// Neo cuộn tới một sơ đồ khi trẻ chạm «Bài này dùng ở đâu».
+  final Map<String, GlobalKey> _anchors = {};
 
-  /// ROUND 5 — bảng so sánh có HAI cách nhìn: sơ đồ tư duy (khung concept,
-  /// mặc định) và bảng. Cùng một dữ liệu có kiểu, không thêm sự thật nào.
-  bool _comparisonAsTable = false;
+  bool _summaryOpen = false;
+
+  GlobalKey _anchorFor(String id) => _anchors.putIfAbsent(id, GlobalKey.new);
 
   @override
   void initState() {
     super.initState();
-    final shapes = VisualView.shapesOf(widget.doc);
-    _shape = shapes.isEmpty ? VisualView.summaryShape : shapes.first;
+    _jumpAfterFrame();
   }
 
-  List<SemanticData> get _ofShape => [
-    for (final s in widget.doc.semantic)
-      if (s.shapeLabel == _shape) s,
-  ];
+  @override
+  void didUpdateWidget(VisualView old) {
+    super.didUpdateWidget(old);
+    if (old.scrollToSemanticId != widget.scrollToSemanticId) _jumpAfterFrame();
+  }
+
+  /// Neo chỉ tồn tại sau khi thẻ được dựng ⇒ cuộn ở khung hình sau.
+  void _jumpAfterFrame() {
+    final id = widget.scrollToSemanticId;
+    if (id == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _scrollTo(id);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final doc = widget.doc;
-    final shapes = VisualView.shapesOf(doc);
-    final summary = _shape == VisualView.summaryShape;
-    final inShape = summary ? const <SemanticData>[] : _ofShape;
-    final current = inShape.isEmpty
-        ? null
-        : inShape[_instance.clamp(0, inShape.length - 1)];
+    final diagrams = doc.semantic;
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
         WalSpacing.md,
@@ -174,152 +206,119 @@ class _VisualViewState extends State<VisualView> {
             widget.header!,
             const SizedBox(height: WalSpacing.sm),
           ],
-          Wrap(
-            spacing: WalSpacing.sm,
-            runSpacing: WalSpacing.sm,
-            children: [
-              for (final sh in shapes)
-                _chip(
-                  key: VisualView.shapeKey(sh),
-                  label:
-                      '${VisualView.icon(doc.semantic.firstWhere((s) => s.shapeLabel == sh))} $sh',
-                  selected: _shape == sh,
-                  onTap: () => setState(() {
-                    _shape = sh;
-                    _instance = 0;
-                  }),
-                ),
-              _chip(
-                key: VisualView.shapeKey('summary'),
-                label: VisualView.summaryShape,
-                selected: summary,
-                onTap: () => setState(() => _shape = VisualView.summaryShape),
-              ),
+          if (diagrams.isEmpty)
+            _noDiagrams()
+          else
+            for (var i = 0; i < diagrams.length; i++) ...[
+              if (i > 0) const SizedBox(height: WalSpacing.md),
+              _diagramCard(diagrams[i]),
             ],
-          ),
-          if (inShape.length > 1) ...[
-            const SizedBox(height: WalSpacing.sm),
-            Wrap(
-              spacing: WalSpacing.xs,
-              runSpacing: WalSpacing.xs,
-              children: [
-                for (var i = 0; i < inShape.length; i++)
-                  _chip(
-                    key: VisualView.instanceKey(inShape[i].id),
-                    label: '${i + 1} · ${_short(inShape[i].title)}',
-                    selected: _instance == i,
-                    small: true,
-                    onTap: () => setState(() => _instance = i),
-                  ),
-              ],
-            ),
-          ],
           const SizedBox(height: WalSpacing.md),
-          if (shapes.isEmpty)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.asset(
-                  'assets/mascot/sam-admit-uncertainty.png',
-                  width: densityOf(context).mascotChip,
-                  height: densityOf(context).mascotChip,
-                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                ),
-                const SizedBox(width: WalSpacing.sm),
-                const Expanded(
-                  child: Text(
-                    // ROUND 4 §6.5 — fail closed nói VÌ SAO bằng lời trẻ.
-                    'SAM chưa có sơ đồ cho bài này. SAM chỉ vẽ sơ đồ khi sách '
-                    'viết rõ từng bước hoặc từng cách; bài này chưa có phần như '
-                    'vậy nên SAM không tự vẽ — con xem bảng tóm tắt, đọc sách '
-                    'hoặc học cùng SAM nhé.',
-                    style: TextStyle(
-                      fontSize: WalType.body,
-                      color: WalColors.ink,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          if (current != null) _renderer(current) else _summary(doc),
+          _summaryFold(doc, forceOpen: diagrams.isEmpty),
         ],
       ),
     );
   }
 
-  static String _short(String t) =>
-      t.length > 30 ? '${t.substring(0, 30)}…' : t;
-
-  Widget _chip({
-    required Key key,
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
-    bool small = false,
-  }) => SizedBox(
-    height: WalSpacing.minTouch,
-    child: ChoiceChip(
-      key: key,
-      label: Text(
-        label,
-        style: TextStyle(
-          fontSize: small ? 13 : WalType.secondary,
-          fontWeight: FontWeight.w600,
-          color: selected ? Colors.white : WalColors.ink,
+  // ── Không có sơ đồ ⇒ nói VÌ SAO (fail closed, ROUND 4 §6.5) ──
+  Widget _noDiagrams() => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Image.asset(
+        'assets/mascot/sam-admit-uncertainty.png',
+        width: densityOf(context).mascotChip,
+        height: densityOf(context).mascotChip,
+        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+      ),
+      const SizedBox(width: WalSpacing.sm),
+      const Expanded(
+        child: Text(
+          'SAM chưa có sơ đồ cho bài này. SAM chỉ vẽ sơ đồ khi sách '
+          'viết rõ từng bước hoặc từng cách; bài này chưa có phần như '
+          'vậy nên SAM không tự vẽ — con xem bảng tóm tắt, đọc sách '
+          'hoặc học cùng SAM nhé.',
+          style: TextStyle(fontSize: WalType.body, color: WalColors.ink),
         ),
       ),
-      selected: selected,
-      selectedColor: small ? WalColors.primaryText : WalColors.primary500,
-      backgroundColor: Colors.white,
-      showCheckmark: false,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
-      ),
-      onSelected: (_) => onTap(),
-    ),
+    ],
   );
 
-  Widget _renderer(SemanticData s) {
-    // Sơ đồ tư duy của bảng so sánh LẤY CHÍNH tiêu đề làm nút trung tâm ⇒
-    // không in lại tiêu đề bên trên (Nokia: một dòng thừa là một dòng đọc mất).
-    final titleIsHub =
-        s is ComparisonSemantic &&
-        !_comparisonAsTable &&
-        VisualView.mindmapFits(s);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (!titleIsHub) ...[
-          Text(
-            displayTitle(s.title),
-            style: const TextStyle(
-              fontSize: WalType.title,
-              fontWeight: FontWeight.w700,
-              color: WalColors.ink,
+  // ── MỘT sơ đồ = MỘT thẻ ──────────────────────────────────────────────────
+
+  Widget _diagramCard(SemanticData s) {
+    final asTable = _asTable.contains(s.id);
+    final comparisonAsMindmap =
+        s is ComparisonSemantic && !asTable && VisualView.mindmapFits(s);
+    return Container(
+      key: _anchorFor(s.id),
+      padding: const EdgeInsets.fromLTRB(
+        WalSpacing.sm,
+        WalSpacing.md,
+        WalSpacing.sm,
+        WalSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+      ),
+      child: Column(
+        key: VisualView.cardKey(s.id),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: WalSpacing.sm),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '${VisualView.icon(s)} ${s.shapeLabel}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: .6,
+                    color: WalColors.inkSoft,
+                  ),
+                ),
+                // Sơ đồ tư duy của bảng so sánh LẤY CHÍNH tiêu đề làm nút
+                // trung tâm ⇒ không in lại tiêu đề bên trên.
+                if (!comparisonAsMindmap) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    displayTitle(s.title),
+                    style: const TextStyle(
+                      fontSize: WalType.body + 2,
+                      fontWeight: FontWeight.w700,
+                      color: WalColors.ink,
+                      height: 1.25,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 2),
+                Text(
+                  _subtitle(s),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: WalColors.inkSoft,
+                  ),
+                ),
+                const SizedBox(height: WalSpacing.sm),
+              ],
             ),
           ),
-          const SizedBox(height: 2),
+          switch (s) {
+            ProcessSemantic() => _process(s),
+            ComparisonSemantic() => _comparison(s, asTable: asTable),
+            ConceptMapSemantic() => _conceptMap(s),
+            // Round 4 (Lane C, Golden Slice #2): renderer Lịch sử.
+            TimelineSemantic() => TimelineView(
+              doc: widget.doc,
+              semantic: s,
+              onOpenSource: _openSource,
+            ),
+          },
+          _whyLine(s),
         ],
-        Text(
-          _subtitle(s),
-          style: const TextStyle(fontSize: 13, color: WalColors.inkSoft),
-        ),
-        const SizedBox(height: WalSpacing.sm),
-        switch (s) {
-          ProcessSemantic() => _process(s),
-          ComparisonSemantic() => _comparison(s),
-          ConceptMapSemantic() => _conceptMap(s),
-          // Round 4 (Lane C, Golden Slice #2): renderer Lịch sử — mốc + nguồn kể
-          // chuyện + thử xếp thứ tự (TimelineValidator), views/timeline_view.dart.
-          TimelineSemantic() => TimelineView(
-            doc: widget.doc,
-            semantic: s,
-            onOpenSource: _openSource,
-          ),
-        },
-        const SizedBox(height: WalSpacing.md),
-        _why(s),
-      ],
+      ),
     );
   }
 
@@ -337,107 +336,173 @@ class _VisualViewState extends State<VisualView> {
       ConceptMapSemantic(:final relations) => relations.first.sourceBlockId,
       TimelineSemantic(:final events) => events.first.sourceBlockId,
     };
-    return '$n · ${_pageOf(firstSrc)} · chữ sách, SAM chỉ xếp lại';
+    // Máy thật lượt 2: «3 bước · SGK KHTN 6 · trang 61 · chữ sách…» xuống hai
+    // dòng, và «SGK KHTN 6» đã nằm ở hàng tiêu đề ngay trên. Bỏ vế lặp.
+    return '$n · ${_pageOnly(firstSrc)} · chữ sách, SAM chỉ xếp lại';
   }
 
-  /// «Vì sao SAM chọn sơ đồ này» — lời TẤT ĐỊNH theo luật sinh, không LLM.
-  Widget _why(SemanticData s) {
-    final text = switch (s) {
-      ProcessSemantic() =>
-        'Sách viết hoạt động này thành các bước đánh dấu «·» theo thứ tự — SAM '
-            'xếp đúng thứ tự sách, giữ nguyên lời sách, không thêm bước nào. Bước '
-            'nào SAM chưa đọc chắc thì để trống và chỉ trang.',
-      // ROUND 5 D2 (Nokia, iter 1): lời này phải nói ĐÚNG THỨ TRẺ ĐANG NHÌN —
-      // mặc định giờ là sơ đồ tư duy, không phải bảng.
-      ComparisonSemantic() when !_comparisonAsTable =>
-        'Phần «Em đã học» của sách liệt kê từng cách kèm chú thích trong '
-            'ngoặc — SAM đặt tên chung vào giữa và mỗi cách một ô xung quanh, '
-            'chữ trong ô vẫn là chữ sách. Màu chỉ để phân biệt các ô.',
-      ComparisonSemantic() =>
-        'Phần «Em đã học» của sách liệt kê từng cách kèm chú thích trong ngoặc — '
-            'SAM xếp thành bảng để con so sánh, chữ vẫn là chữ sách.',
-      ConceptMapSemantic() =>
-        'Các quan hệ lấy từ dữ liệu có kiểu của bài — SAM đặt khái niệm gặp '
-            'nhiều nhất vào giữa và nối các khái niệm sách nói tới, không thêm '
-            'quan hệ nào.',
-      TimelineSemantic() =>
-        'Các mốc lấy từ dữ liệu có kiểu của bài, xếp theo thứ tự sách nêu — '
-            'SAM không thêm mốc, không đoán năm.',
-    };
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Image.asset(
-          'assets/mascot/sam-explain.png',
-          width: densityOf(context).mascotChip,
-          height: densityOf(context).mascotChip,
-          errorBuilder: (_, _, _) => const SizedBox.shrink(),
-        ),
-        const SizedBox(width: WalSpacing.sm),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(WalSpacing.md),
-            decoration: BoxDecoration(
-              color: WalColors.surfaceLavender,
-              borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Vì sao SAM chọn sơ đồ này',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: WalColors.primaryText,
+  /// «Vì sao SAM vẽ thế này» — MỘT DÒNG, mở sheet. Vòng 5/6 để nguyên văn
+  /// này trong một thẻ lavender to ngay dưới mỗi sơ đồ; đúng nhưng nó là lời
+  /// về CÔNG CỤ, không phải nội dung học, nên nó không được ăn chỗ của sơ đồ
+  /// tiếp theo.
+  Widget _whyLine(SemanticData s) => Align(
+    alignment: Alignment.centerLeft,
+    child: TextButton(
+      key: VisualView.whyKey(s.id),
+      style: TextButton.styleFrom(
+        minimumSize: const Size(WalSpacing.minTouch, WalSpacing.minTouch),
+        padding: const EdgeInsets.symmetric(horizontal: WalSpacing.sm),
+      ),
+      onPressed: () => _showWhy(s),
+      child: const Text(
+        'ⓘ Vì sao SAM vẽ thế này?',
+        style: TextStyle(fontSize: 13, color: WalColors.primaryText),
+      ),
+    ),
+  );
+
+  /// Lời TẤT ĐỊNH theo luật sinh, không LLM.
+  String _whyText(SemanticData s) => switch (s) {
+    ProcessSemantic() =>
+      'Sách viết hoạt động này thành các bước đánh dấu «·» theo thứ tự — SAM '
+          'xếp đúng thứ tự sách, giữ nguyên lời sách, không thêm bước nào. Bước '
+          'nào SAM chưa đọc chắc thì để trống và chỉ trang.',
+    // ROUND 5 D2 (Nokia, iter 1): lời này phải nói ĐÚNG THỨ TRẺ ĐANG NHÌN —
+    // mặc định giờ là sơ đồ tư duy, không phải bảng.
+    ComparisonSemantic() when !_asTable.contains(s.id) =>
+      'Phần «Em đã học» của sách liệt kê từng cách kèm chú thích trong '
+          'ngoặc — SAM đặt tên chung vào giữa và mỗi cách một ô xung quanh, '
+          'chữ trong ô vẫn là chữ sách. Màu chỉ để phân biệt các ô.',
+    ComparisonSemantic() =>
+      'Phần «Em đã học» của sách liệt kê từng cách kèm chú thích trong ngoặc — '
+          'SAM xếp thành bảng để con so sánh, chữ vẫn là chữ sách.',
+    ConceptMapSemantic() =>
+      'Các quan hệ lấy từ dữ liệu có kiểu của bài — SAM đặt khái niệm gặp '
+          'nhiều nhất vào giữa và nối các khái niệm sách nói tới, không thêm '
+          'quan hệ nào.',
+    TimelineSemantic() =>
+      'Các mốc lấy từ dữ liệu có kiểu của bài, xếp theo thứ tự sách nêu — '
+          'SAM không thêm mốc, không đoán năm.',
+  };
+
+  void _showWhy(SemanticData s) => showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: WalColors.surface,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (sheet) => SafeArea(
+      child: SingleChildScrollView(
+        key: const Key('visual-why-sheet'),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            WalSpacing.lg,
+            0,
+            WalSpacing.lg,
+            WalSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.asset(
+                    'assets/mascot/sam-explain.png',
+                    width: densityOf(context).mascotChip,
+                    height: densityOf(context).mascotChip,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  text,
-                  style: const TextStyle(
-                    fontSize: WalType.secondary,
-                    color: WalColors.ink,
-                    height: 1.4,
-                  ),
-                ),
-                SizedBox(
-                  height: WalSpacing.minTouch - 8,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton(
-                      key: const Key('visual-trust-link'),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(WalSpacing.minTouch, 36),
-                      ),
-                      onPressed: () => showTrustSheet(context, doc: widget.doc),
-                      child: const Text(
-                        'ⓘ Nguồn & độ tin',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: WalColors.primaryText,
-                        ),
+                  const SizedBox(width: WalSpacing.sm),
+                  const Expanded(
+                    child: Text(
+                      'Vì sao SAM chọn sơ đồ này',
+                      style: TextStyle(
+                        fontSize: WalType.title,
+                        fontWeight: FontWeight.w700,
+                        color: WalColors.ink,
                       ),
                     ),
                   ),
+                ],
+              ),
+              const SizedBox(height: WalSpacing.sm),
+              Text(
+                _whyText(s),
+                style: const TextStyle(
+                  fontSize: WalType.secondary,
+                  color: WalColors.ink,
+                  height: 1.45,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: WalSpacing.sm),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  key: const Key('visual-trust-link'),
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(WalSpacing.minTouch, 44),
+                    padding: EdgeInsets.zero,
+                  ),
+                  onPressed: () {
+                    Navigator.of(sheet).pop();
+                    showTrustSheet(context, doc: widget.doc);
+                  },
+                  child: const Text(
+                    'ⓘ Nguồn & độ tin',
+                    style: TextStyle(fontSize: 13, color: WalColors.primaryText),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ),
+  );
 
-  void _openSource(String blockId) {
+  // ── Chạm một nút ⇒ giải thích + nguồn (ROUND 7 · V1) ──────────────────────
+
+  void _openSource(String blockId, {Widget? explain}) {
     final b = widget.doc.blockById(blockId);
     if (b == null) return;
     showSourceSheet(
       context,
       doc: widget.doc,
       block: b,
+      explain: explain,
       onShowInRead: () => widget.onShowInRead(blockId),
+    );
+  }
+
+  void _openExplain(VisualExplain e, String blockId) => _openSource(
+    blockId,
+    explain: VisualExplainCard(
+      // Lời sách của nút TRÙNG lời sách của block nguồn ⇒ in một lần thôi.
+      explain: _sameAsSource(e.verbatim, blockId) ? e.withoutVerbatim() : e,
+      onOpenLink: (l) {
+        Navigator.of(context).maybePop();
+        _scrollTo(l.semanticId);
+      },
+    ),
+  );
+
+  /// Lời giải thích và block nguồn mang ĐÚNG một câu ⇒ không in hai lần.
+  bool _sameAsSource(String? verbatim, String blockId) {
+    if (verbatim == null) return false;
+    final b = widget.doc.blockById(blockId);
+    final text = b == null ? null : LessonDocument.textOf(b);
+    return text != null && text.trim() == verbatim.trim();
+  }
+
+  /// Nhảy tới sơ đồ khác của CÙNG bài (từ «Bài này dùng ở đâu»).
+  void _scrollTo(String semanticId) {
+    final ctx = _anchors[semanticId]?.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      duration: const Duration(milliseconds: 260),
+      alignment: 0.05,
     );
   }
 
@@ -446,58 +511,79 @@ class _VisualViewState extends State<VisualView> {
     return b == null ? 'sách' : widget.doc.sourceLineForBlock(b);
   }
 
-  // ── Process: dòng chảy nút + cạnh (ROUND 5, views/process_flow_view.dart) ──
+  /// Chỉ vế TRANG của dòng nguồn («SGK KHTN 6 · trang 61» → «trang 61») —
+  /// tên sách đã ở hàng tiêu đề của màn, in lại là tốn một dòng đọc.
+  String _pageOnly(String blockId) {
+    final src = _pageOf(blockId);
+    final i = src.indexOf(' · ');
+    return i < 0 ? src : src.substring(i + 3);
+  }
+
+  // ── Process ──
   Widget _process(ProcessSemantic s) => ProcessFlowView(
     doc: widget.doc,
     semantic: s,
     onOpenSource: _openSource,
+    onOpenStep: (step) =>
+        _openExplain(explainForStep(s, step), step.sourceBlockId),
     onShowInRead: widget.onShowInRead,
     pageOf: _pageOf,
   );
 
   // ── Comparison: sơ đồ tư duy (mặc định) hoặc bảng ──
 
-  Widget _comparison(ComparisonSemantic s) {
+  Widget _comparison(ComparisonSemantic s, {required bool asTable}) {
     final fits = VisualView.mindmapFits(s);
-    final asTable = _comparisonAsTable || !fits;
+    final table = asTable || !fits;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (fits) ...[
-          Row(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: WalSpacing.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _chip(
-                key: VisualView.comparisonViewKey('mindmap'),
-                label: '🕸️ Sơ đồ tư duy',
-                selected: !asTable,
-                small: true,
-                onTap: () => setState(() => _comparisonAsTable = false),
-              ),
-              const SizedBox(width: WalSpacing.xs),
-              _chip(
-                key: VisualView.comparisonViewKey('table'),
-                label: '⚖️ Bảng',
-                selected: asTable,
-                small: true,
-                onTap: () => setState(() => _comparisonAsTable = true),
+              // «Cách nhìn» là lựa chọn TRONG sơ đồ này, nên nó ở trong thẻ
+              // của sơ đồ — không phải một hàng điều hướng thứ ba của màn.
+              if (fits) ...[
+                // `Wrap`, không `Row`: hai nhãn tiếng Việt + emoji tràn 5 dp
+                // trên màn 360 dp (đo bằng test mật độ) — tràn là chữ bị cắt.
+                Wrap(
+                  spacing: WalSpacing.xs,
+                  runSpacing: WalSpacing.xs,
+                  children: [
+                    _viewChip(
+                      key: VisualView.comparisonViewKey('mindmap'),
+                      label: '🕸️ Sơ đồ tư duy',
+                      selected: !table,
+                      onTap: () => setState(() => _asTable.remove(s.id)),
+                    ),
+                    _viewChip(
+                      key: VisualView.comparisonViewKey('table'),
+                      label: '⚖️ Bảng',
+                      selected: table,
+                      onTap: () => setState(() => _asTable.add(s.id)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: WalSpacing.sm),
+              ],
+              Padding(
+                padding: const EdgeInsets.only(bottom: WalSpacing.sm),
+                child: Text(
+                  table
+                      ? 'Mỗi hàng là một cách sách nêu · chạm một hàng để SAM '
+                            'giải thích'
+                      : 'Mỗi ô là một cách sách nêu · màu chỉ để phân biệt, '
+                            'không phải điểm số · chạm một ô để SAM giải thích',
+                  key: VisualView.comparisonLegendKey,
+                  style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: WalSpacing.sm),
-        ],
-        Padding(
-          padding: const EdgeInsets.only(bottom: WalSpacing.sm),
-          child: Text(
-            asTable
-                ? 'Mỗi hàng là một cách sách nêu · chạm một hàng để tra cứu '
-                      'lời sách'
-                : 'Mỗi ô là một cách sách nêu · màu chỉ để phân biệt, không '
-                      'phải điểm số · chạm một ô để tra cứu lời sách',
-            key: VisualView.comparisonLegendKey,
-            style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
-          ),
         ),
-        if (asTable) _comparisonTable(s) else _comparisonMindmap(s),
+        if (table) _comparisonTable(s) else _comparisonMindmap(s),
       ],
     );
   }
@@ -507,6 +593,10 @@ class _VisualViewState extends State<VisualView> {
     hub: displayTitle(s.title),
     hubSourceBlockId: s.entities.first.sourceBlockId,
     onOpenSource: _openSource,
+    onTapNode: (i, _) => _openExplain(
+      explainForEntity(s, i, alsoIn: widget.doc.semantic),
+      s.entities[i].sourceBlockId,
+    ),
     nodes: [
       for (var i = 0; i < s.entities.length; i++)
         MindmapNode(
@@ -521,8 +611,9 @@ class _VisualViewState extends State<VisualView> {
   );
 
   Widget _comparisonTable(ComparisonSemantic s) => Container(
+    margin: const EdgeInsets.symmetric(horizontal: WalSpacing.xs),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: WalColors.surface,
       borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
     ),
     child: Table(
@@ -542,7 +633,7 @@ class _VisualViewState extends State<VisualView> {
           TableRow(
             children: [
               InkWell(
-                onTap: () => _openSource(s.entities[i].sourceBlockId),
+                onTap: () => _tapEntity(s, i),
                 child: _cell(
                   s.entities[i].name,
                   bold: true,
@@ -551,13 +642,18 @@ class _VisualViewState extends State<VisualView> {
               ),
               for (final d in s.dimensions)
                 InkWell(
-                  onTap: () => _openSource(s.entities[i].sourceBlockId),
+                  onTap: () => _tapEntity(s, i),
                   child: _cell(d.values[i] ?? '— (sách không nói)'),
                 ),
             ],
           ),
       ],
     ),
+  );
+
+  void _tapEntity(ComparisonSemantic s, int i) => _openExplain(
+    explainForEntity(s, i, alsoIn: widget.doc.semantic),
+    s.entities[i].sourceBlockId,
   );
 
   Widget _cell(String t, {bool bold = false, Color color = WalColors.ink}) =>
@@ -586,10 +682,15 @@ class _VisualViewState extends State<VisualView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Padding(
-          padding: EdgeInsets.only(bottom: WalSpacing.sm),
+          padding: EdgeInsets.fromLTRB(
+            WalSpacing.sm,
+            0,
+            WalSpacing.sm,
+            WalSpacing.sm,
+          ),
           child: Text(
             'Ô giữa là khái niệm sách nói tới nhiều nhất · màu chỉ để phân '
-            'biệt nhánh · chạm một ô để tra cứu lời sách',
+            'biệt nhánh · chạm một ô để SAM giải thích',
             key: Key('visual-concept-legend'),
             style: TextStyle(fontSize: 11, color: WalColors.inkSoft),
           ),
@@ -601,6 +702,10 @@ class _VisualViewState extends State<VisualView> {
               ? spokes.first.sourceBlockId
               : s.relations.first.sourceBlockId,
           onOpenSource: _openSource,
+          onTapNode: (i, _) => _openExplain(
+            explainForRelation(s, spokes[i], hub, alsoIn: widget.doc.semantic),
+            spokes[i].sourceBlockId,
+          ),
           nodes: [
             for (final r in spokes)
               MindmapNode(
@@ -630,37 +735,97 @@ class _VisualViewState extends State<VisualView> {
     );
   }
 
-  // ── Bảng tóm tắt (fallback) ──
-  Widget _summary(LessonDocument doc) {
+  // ── Bảng tóm tắt: NẾP GẤP cuối màn (fallback) ──
+  Widget _summaryFold(LessonDocument doc, {required bool forceOpen}) {
     final blocks = VisualView.summaryBlocks(doc);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text(
-          'Bảng tóm tắt — lời sách',
-          style: TextStyle(
-            fontSize: WalType.title,
-            fontWeight: FontWeight.w700,
-            color: WalColors.ink,
-          ),
-        ),
-        const SizedBox(height: WalSpacing.sm),
-        if (blocks.isEmpty)
-          const Text(
-            'Bài này chưa có phần tóm tắt SAM đọc được.',
-            style: TextStyle(fontSize: WalType.body, color: WalColors.inkSoft),
-          )
-        else
-          for (final b in blocks)
-            Padding(
-              padding: const EdgeInsets.only(bottom: WalSpacing.sm),
-              child: SourceCard(
-                doc: doc,
-                block: b,
-                onTap: () => _openSource(b.id),
+    final open = forceOpen || _summaryOpen;
+    return Container(
+      key: VisualView.summaryFoldKey,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (!forceOpen)
+            InkWell(
+              key: const Key('visual-summary-toggle'),
+              borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+              onTap: () => setState(() => _summaryOpen = !_summaryOpen),
+              child: Padding(
+                padding: const EdgeInsets.all(WalSpacing.md),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        '${VisualView.summaryShape} — lời sách',
+                        style: TextStyle(
+                          fontSize: WalType.secondary,
+                          fontWeight: FontWeight.w700,
+                          color: WalColors.ink,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      open ? Icons.expand_less : Icons.expand_more,
+                      color: WalColors.inkSoft,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                WalSpacing.md,
+                WalSpacing.md,
+                WalSpacing.md,
+                0,
+              ),
+              child: Text(
+                'Bảng tóm tắt — lời sách',
+                style: TextStyle(
+                  fontSize: WalType.title,
+                  fontWeight: FontWeight.w700,
+                  color: WalColors.ink,
+                ),
               ),
             ),
-      ],
+          if (open)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                WalSpacing.md,
+                WalSpacing.sm,
+                WalSpacing.md,
+                WalSpacing.md,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (blocks.isEmpty)
+                    const Text(
+                      'Bài này chưa có phần tóm tắt SAM đọc được.',
+                      style: TextStyle(
+                        fontSize: WalType.body,
+                        color: WalColors.inkSoft,
+                      ),
+                    )
+                  else
+                    for (final b in blocks)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: WalSpacing.sm),
+                        child: SourceCard(
+                          doc: doc,
+                          block: b,
+                          onTap: () => _openSource(b.id),
+                        ),
+                      ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -669,9 +834,37 @@ class _VisualViewState extends State<VisualView> {
     margin: const EdgeInsets.only(bottom: WalSpacing.sm),
     padding: const EdgeInsets.all(WalSpacing.md),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: WalColors.surface,
       borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
     ),
     child: child,
+  );
+
+  Widget _viewChip({
+    required Key key,
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) => SizedBox(
+    height: WalSpacing.minTouch - 8,
+    child: ChoiceChip(
+      key: key,
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: selected ? Colors.white : WalColors.ink,
+        ),
+      ),
+      selected: selected,
+      selectedColor: WalColors.primaryText,
+      backgroundColor: WalColors.surface,
+      showCheckmark: false,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+      ),
+      onSelected: (_) => onTap(),
+    ),
   );
 }

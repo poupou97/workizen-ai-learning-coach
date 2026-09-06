@@ -163,7 +163,12 @@ Future<void> showTrustSheet(
                         '${script.asks.length} câu nguyên văn trong sách. Khoá '
                         'đáp án là bản nháp của người viết — KHÔNG phải sách '
                         'giáo viên. Khớp/không khớp chỉ so với bản nháp đó.',
-              detail: script == null ? null : TutorView.runtimeLine(plan),
+              // ROUND 7 V2: bản ĐẦY ĐỦ của dòng runtime + chú giải nhãn về
+              // đây; đầu màn «Học với SAM» chỉ giữ một dòng ngắn + ⓘ.
+              detail: script == null
+                  ? null
+                  : '${TutorView.runtimeLine(plan)}\n\n'
+                        '${TutorView.labelLegend}',
             ),
             _section(
               '📝 Bằng chứng học',

@@ -32,12 +32,23 @@ class ProcessFlowView extends StatelessWidget {
     required this.onOpenSource,
     required this.onShowInRead,
     required this.pageOf,
+    this.onOpenStep,
   });
 
   final LessonDocument doc;
   final ProcessSemantic semantic;
   final void Function(String blockId) onOpenSource;
   final void Function(String blockId) onShowInRead;
+
+  /// ⭐ ROUND 7 · V1 — chạm một bước ⇒ GIẢI THÍCH bước đó (Founder order 49
+  /// §3), không chỉ mở lại lời sách đã nằm trong ô. `null` ⇒ hành vi vòng 5:
+  /// chạm mở thẳng sheet nguồn. Renderer vẫn không biết bài nào: nó chỉ trao
+  /// lại `ProcessStep` đã có trong dữ liệu có kiểu.
+  final void Function(ProcessStep step)? onOpenStep;
+
+  void _tap(ProcessStep step) => onOpenStep == null
+      ? onOpenSource(step.sourceBlockId)
+      : onOpenStep!(step);
 
   /// Dòng «SGK … · trang N» của một block — chủ sở hữu là `LessonDocument`.
   final String Function(String blockId) pageOf;
@@ -79,11 +90,14 @@ class ProcessFlowView extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: WalSpacing.xs),
           child: Text(
+            // ROUND 7 · V1 — chạm một bước nay được GIẢI THÍCH (bước mấy
+            // trong mấy, lời sách, bước trước/sau), không chỉ «tra cứu».
+            // Chú thích phải nói đúng thứ sắp xảy ra.
             steps.any((s) => s.isWithheld)
                 ? 'Mỗi ô là một bước sách viết · ô xám là bước SAM để trống '
-                      '(xem trong sách) · chạm một bước để tra cứu lời sách'
+                      '(xem trong sách) · chạm một bước để SAM giải thích'
                 : 'Mỗi ô là một bước sách viết, mũi tên là thứ tự làm · chạm '
-                      'một bước để tra cứu lời sách',
+                      'một bước để SAM giải thích',
             key: legendKey,
             style: const TextStyle(fontSize: 11, color: WalColors.inkSoft),
           ),
@@ -139,7 +153,7 @@ class ProcessFlowView extends StatelessWidget {
                 ),
               ),
             InkWell(
-              onTap: () => onOpenSource(steps[i].sourceBlockId),
+              onTap: () => _tap(steps[i]),
               customBorder: const CircleBorder(),
               child: Container(
                 width: 34,
@@ -214,7 +228,7 @@ class ProcessFlowView extends StatelessWidget {
                 child: InkWell(
                   key: stepKey(st.order),
                   borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-                  onTap: () => onOpenSource(st.sourceBlockId),
+                  onTap: () => _tap(st),
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(

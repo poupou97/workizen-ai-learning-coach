@@ -17,38 +17,70 @@ const _sampleIndex = '''
 ''';
 
 void main() {
-  testWidgets('⭐ máy trắng: onboarding → Môn học có mục lục NGAY (không restart)',
-      (t) async {
-    expect(LessonIndex.fromJsonString(_sampleIndex), isNotNull,
-        reason: 'sample của test phải parse được — nếu đỏ ở đây là lỗi test');
-    await t.pumpWidget(HocCungSamApp(
-        store: JsonlLearnerStore(),
-        indexLoader: (g) async =>
-            g == 5 ? LessonIndex.fromJsonString(_sampleIndex) : null));
-    await t.pumpAndSettle();
-    // Onboarding (máy trắng — không bịa học sinh)
-    expect(find.text('Tớ gọi con là gì?'), findsOneWidget);
-    await t.enterText(find.byType(TextField), 'Na');
-    // ListView lười — chip lớp + nút nằm dưới fold: cuộn tới rồi mới bấm.
-    final five = find.widgetWithText(FilledButton, '5');
-    await t.scrollUntilVisible(five, 200,
-        scrollable: find.byType(Scrollable).first);
-    await t.tap(five);
-    await t.pumpAndSettle();
-    final btn = find.text('Bắt đầu học ▸');
-    await t.scrollUntilVisible(btn, 200,
-        scrollable: find.byType(Scrollable).first);
-    await t.tap(btn);
-    await t.pumpAndSettle();
-    expect(find.text('Chào Na!'), findsOneWidget);
-    await t.pump(const Duration(milliseconds: 200)); // cho indexLoader settle
-    // Mở Môn học ngay — KHÔNG restart. Đột biến bỏ _loadLessonIndex trong
-    // _onboarded ⇒ test này đỏ («SAM chưa nạp mục lục môn học trên máy này»).
-    await t.tap(find.text('📘 Học trước'));
-    await t.pumpAndSettle();
-    expect(find.text('Môn học · Lớp 5'), findsOneWidget);
-    expect(find.textContaining('chưa nạp mục lục'), findsNothing,
-        reason: '⭐ index phải nạp lại sau onboarding');
-    expect(find.text('Tiếng Việt'), findsOneWidget);
-  });
+  testWidgets(
+    '⭐ máy trắng: onboarding → Môn học có mục lục NGAY (không restart)',
+    (t) async {
+      expect(
+        LessonIndex.fromJsonString(_sampleIndex),
+        isNotNull,
+        reason: 'sample của test phải parse được — nếu đỏ ở đây là lỗi test',
+      );
+      await t.pumpWidget(
+        HocCungSamApp(
+          store: JsonlLearnerStore(),
+          indexLoader: (g) async =>
+              g == 5 ? LessonIndex.fromJsonString(_sampleIndex) : null,
+        ),
+      );
+      await t.pumpAndSettle();
+      // Onboarding (máy trắng — không bịa học sinh)
+      expect(find.text('Tớ gọi con là gì?'), findsOneWidget);
+      await t.enterText(find.byType(TextField), 'Na');
+      // ListView lười — chip lớp + nút nằm dưới fold: cuộn tới rồi mới bấm.
+      final five = find.widgetWithText(FilledButton, '5');
+      await t.scrollUntilVisible(
+        five,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await t.tap(five);
+      await t.pumpAndSettle();
+      final btn = find.text('Bắt đầu học ▸');
+      await t.scrollUntilVisible(
+        btn,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await t.tap(btn);
+      await t.pumpAndSettle();
+      expect(find.text('Chào Na!'), findsOneWidget);
+      await t.pump(const Duration(milliseconds: 200)); // cho indexLoader settle
+      // Mở Môn học ngay — KHÔNG restart. Đột biến bỏ _loadLessonIndex trong
+      // _onboarded ⇒ test này đỏ («SAM chưa nạp mục lục môn học trên máy này»).
+      // ROUND 7 V2 (order 50 §5): năm chip ý định chung chung xuống DƯỚI hai
+      // tầng «HÔM NAY» + «SAM GỢI Ý» — chúng không còn tranh màn đầu.
+      // ⭐ Lệnh 52 — thanh nav 5 tab ăn ~68dp đáy màn, cộng Home hai tầng của
+      // lệnh 50 đẩy dải chip xuống sâu. `scrollUntilVisible` dừng khi widget
+      // XUẤT HIỆN, chưa chắc đã nằm trong vùng CHẠM ĐƯỢC — trên CI (font Linux,
+      // không có pack/fixture) nó dừng ngay dưới thanh nav và cú tap trượt.
+      // Hai PR gốc đều xanh riêng lẻ; chỉ khi gộp mới lộ. `ensureVisible` kéo
+      // nốt phần còn thiếu.
+      await t.scrollUntilVisible(
+        find.text('📘 Học trước'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await t.ensureVisible(find.text('📘 Học trước'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('📘 Học trước'));
+      await t.pumpAndSettle();
+      expect(find.text('Môn học · Lớp 5'), findsOneWidget);
+      expect(
+        find.textContaining('chưa nạp mục lục'),
+        findsNothing,
+        reason: '⭐ index phải nạp lại sau onboarding',
+      );
+      expect(find.text('Tiếng Việt'), findsOneWidget);
+    },
+  );
 }

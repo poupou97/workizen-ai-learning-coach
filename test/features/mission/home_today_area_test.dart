@@ -1,7 +1,12 @@
-/// ROUND 4 (Lane B §6 «Home») — MỘT vùng «Hôm nay»: dòng SAM nói học gì và vì
-/// sao (lời trẻ), thẻ Bài học SAM là việc chính, thẻ Scale trung thực đứng sau
-/// như «còn có thể mở» và KHÔNG còn nói «SAM chưa có bài dạy riêng cho lớp 6»
-/// ngay dưới một bài học SAM. Không mic, không hứa chat.
+/// ROUND 4 (Lane B §6 «Home») — MỘT vùng «Hôm nay»: bài học SAM là việc chính,
+/// đường Scale trung thực đứng sau và KHÔNG còn nói «SAM chưa có bài dạy riêng
+/// cho lớp 6» ngay dưới một bài học SAM. Không mic, không hứa chat.
+///
+/// ⭐⭐ ROUND 7 · V2 (Founder order 50) — cùng những bất biến ấy, đo trên IA
+/// mới: «HÔM NAY» là HÀNG THẺ NHIỀU MÔN, «SAM GỢI Ý» là ĐÚNG MỘT việc, và
+/// đường Scale xuống «CÁC MÔN CỦA CON» dưới dạng nút VIỀN. Điều được giữ
+/// nguyên là điều Founder quan tâm: thứ tự (việc trước, bằng chứng sau, chip
+/// chung chung cuối) và KHÔNG mâu thuẫn giữa hai câu trên cùng một màn.
 library;
 
 import 'package:flutter/material.dart';
@@ -9,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/features/mission/mission_center_screen.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/runtime_plan.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
 
@@ -53,38 +59,54 @@ void main() {
         MissionCenterScreen(
           data: data,
           onOpenSubjects: () => subjects++,
-          workspaceLesson: loadSyntheticDoc(),
-          onOpenWorkspaceLesson: (_) {},
+          learnerGrade: 6,
+          lessonThreads: [
+            HomeLessonThread(
+              doc: loadSyntheticDoc(),
+              next: founderNextAction(loadSyntheticDoc(), seen: const {}),
+            ),
+          ],
+          onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );
     await t.pumpAndSettle();
     expect(find.text('HÔM NAY'), findsOneWidget);
-    final line = t.widget<Text>(
-      find.descendant(
-        of: find.byKey(MissionCenterScreen.samLineKey),
-        matching: find.byType(Text),
-      ),
-    );
-    expect(line.data, contains('Bài 17'));
-    expect(line.data, contains('Mở bài học'));
-    expect(line.data, isNot(contains('trò chuyện')));
+    // ⭐⭐ ROUND 7 V2 — hai tầng, đúng tên Founder đặt.
+    expect(find.text('SAM GỢI Ý'), findsOneWidget);
+    expect(find.byKey(MissionCenterScreen.todayRowKey), findsOneWidget);
+    // ⭐⭐ ROUND 7 V1 — dòng SAM ở ĐẦU màn đã bị XOÁ khỏi đường «đang học»:
+    // nó nhắc lại đúng tên bài nằm ngay dưới nó (Founder: «lời chào lặp hai
+    // lần») và nó đẩy nút xuống dưới nếp gấp. Lời SAM nay nằm TRONG thẻ.
+    expect(find.byKey(MissionCenterScreen.samLineKey), findsNothing);
     expect(find.byIcon(Icons.mic_none), findsNothing);
-    // vì sao bài này — lời trẻ, đếm từ tài liệu
+    // «Vì sao» nay là LÝ DO của động cơ đề xuất — nguyên văn, không viết lại
     final why = t.widget<Text>(find.byKey(const Key('home-workspace-why')));
-    expect(why.data, startsWith('Vì sao bài này?'));
-    expect(why.data, contains('đọc như trong sách'));
-    expect(why.data, contains('câu hỏi trong sách cùng SAM'));
-    // thứ tự: bài học SAM trên, thẻ Scale dưới
-    final yWs = t.getTopLeft(find.byKey(MissionCenterScreen.workspaceCardKey)).dy;
+    expect(why.data, isNotEmpty);
+    expect(why.data, isNot(contains('%')));
+    // thứ tự: hàng thẻ nhiều môn đứng đầu; lối vào Môn học ở dưới
+    final yWs = t.getTopLeft(find.byKey(MissionCenterScreen.todayRowKey)).dy;
     final ySc = t.getTopLeft(find.byKey(MissionCenterScreen.secondaryCardKey)).dy;
+    final ySeen = t.getTopLeft(find.byKey(MissionCenterScreen.samSeenKey)).dy;
+    final yCta = t.getTopLeft(find.byKey(MissionCenterScreen.nextActionCtaKey)).dy;
     expect(yWs, lessThan(ySc));
-    expect(find.text('CÒN CÓ THỂ MỞ'), findsOneWidget);
-    expect(find.text('Có 2 bài để học ở Môn học'), findsOneWidget);
+    // ⭐ «SAM thấy gì» KHÔNG được tranh hierarchy với Next Action (order 49):
+    // nút việc-tiếp-theo phải đứng TRÊN nó.
+    expect(yCta, lessThan(ySeen));
+    expect(ySeen, lessThan(ySc));
+    // 5 chip chung chung không còn ăn màn đầu — chúng ở dưới cả hai thẻ
+    expect(
+      t.getTopLeft(find.text('📘 Học trước')).dy,
+      greaterThan(ySc),
+    );
+    expect(find.text('CÁC MÔN CỦA CON'), findsOneWidget);
     expect(find.textContaining('chưa có bài dạy riêng'), findsNothing,
-        reason: 'mâu thuẫn với thẻ Bài học SAM ngay trên');
+        reason: 'mâu thuẫn với bài học SAM ngay trên');
     expect(find.textContaining('mở được 2 bài từ sách giáo khoa'), findsOneWidget);
     expect(find.text('Bắt đầu'), findsNothing);
+    // ⭐⭐ order 50 §5 «Không tạo 5 CTA cạnh tranh nhau»: cả màn ĐÚNG MỘT nút
+    // tô đặc, và nó là việc tiếp theo.
+    expect(find.byType(FilledButton), findsOneWidget);
     await t.ensureVisible(find.text('Vào Môn học ▸'));
     await t.tap(find.text('Vào Môn học ▸'));
     expect(subjects, 1);
@@ -111,8 +133,14 @@ void main() {
         MissionCenterScreen(
           data: await _data(),
           onOpenSubjects: () {},
-          workspaceLesson: loadSyntheticDoc(),
-          onOpenWorkspaceLesson: (_) {},
+          learnerGrade: 6,
+          lessonThreads: [
+            HomeLessonThread(
+              doc: loadSyntheticDoc(),
+              next: founderNextAction(loadSyntheticDoc(), seen: const {}),
+            ),
+          ],
+          onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );

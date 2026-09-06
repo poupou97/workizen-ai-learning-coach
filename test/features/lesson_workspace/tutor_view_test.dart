@@ -34,7 +34,10 @@ void main() {
       findsOneWidget,
       reason: 'PEDAGOGY REALITY nhìn thấy: 4 runtimeGuided / 8 prototype',
     );
-    expect(find.byKey(const Key('tutor-label-legend')), findsOneWidget);
+    // ROUND 7 V2 — chú giải nhãn về sheet «Nguồn & độ tin»; đầu màn giữ một
+    // dòng ngắn + ⓘ (xem `runtimeLineShort`: 232 dp chữ về MÁY ở 360 dp).
+    expect(find.byKey(const Key('tutor-label-legend')), findsNothing);
+    expect(find.byKey(const Key('tutor-runtime-info')), findsOneWidget);
     expect(find.text('SÁCH VIẾT'), findsOneWidget, reason: 'trích block nguồn');
     await t.tap(find.text('Tiếp ▸'));
     await t.pumpAndSettle();
@@ -107,6 +110,10 @@ void main() {
     expect(find.byKey(TutorView.endCardKey), findsOneWidget);
     expect(find.text('Con đã học cùng SAM phần này'), findsOneWidget);
     expect(find.textContaining('chưa phải bằng chứng'), findsOneWidget);
+    // ROUND 7 V2: thẻ kết nay có thêm dòng «chuyện đã xảy ra» từng câu, nên
+    // nút bước tiếp nằm dưới nếp gấp của khung test — cuộn tới rồi mới chạm.
+    await t.ensureVisible(find.textContaining('Đọc lại phần'));
+    await t.pumpAndSettle();
     await t.tap(find.textContaining('Đọc lại phần'));
     expect(target, NextTarget.read);
   });
@@ -146,8 +153,12 @@ void main() {
     expect(find.text('Cô cạn'), findsOneWidget, reason: 'vào thẳng câu hỏi');
   });
 
-  testWidgets('ROUND 3 B4: dải pha sáng đúng pha — giải thích → hỏi/con trả '
-      'lời → gợi ý → phản hồi → tiếp; «Câu n/N»; chữ cái A/B/C/D', (t) async {
+  // ⭐ ROUND 7 V2 — dải pha ĐỔI THỨ TỰ có chủ ý: order 49 §2 nói vòng lặp là
+  // «… → TRẺ TRẢ LỜI → SAM PHẢN HỒI THEO CÂU TRẢ LỜI → GIẢI THÍCH KHÁC NẾU
+  // CẦN → THỬ LẠI». Runner nay phản hồi TRƯỚC khi giải thích khác, nên dải
+  // phải nói đúng cái app làm, nếu không nó tự mâu thuẫn ngay trên màn.
+  testWidgets('ROUND 7 V2: dải pha sáng đúng pha — giải thích → con trả lời → '
+      'giải thích khác → phản hồi; «Câu n/N»; chữ cái A/B/C/D', (t) async {
     final d = loadSyntheticDoc();
     await t.pumpWidget(
       fixtureHost(Scaffold(body: TutorView(doc: d, onNext: (_, _) {}))),
@@ -167,7 +178,8 @@ void main() {
     expect(find.widgetWithText(FilledButton, 'Cô cạn'), findsOneWidget);
     await t.tap(find.textContaining('Gợi ý cho tớ'));
     await t.pumpAndSettle();
-    expect(chip('Gợi ý').style?.fontWeight, FontWeight.w700);
+    // xin gợi ý TRƯỚC khi thử ⇒ SAM đang «giải thích khác», chưa tới lượt thử lại
+    expect(chip('Giải thích khác').style?.fontWeight, FontWeight.w700);
     await t.tap(find.widgetWithText(FilledButton, 'Cô cạn'));
     await t.pumpAndSettle();
     expect(chip('Phản hồi').style?.fontWeight, FontWeight.w700);
@@ -182,9 +194,9 @@ void main() {
     expect(TutorView.phaseOf(r), 2, reason: 'SAM vừa hỏi ⇒ lượt con');
     expect(TutorView.askedCount(r), 0);
     r.requestHint();
-    expect(TutorView.phaseOf(r), 3);
+    expect(TutorView.phaseOf(r), 4, reason: 'gợi ý khi CHƯA thử ⇒ giải thích khác');
     r.submit('Cô cạn');
-    expect(TutorView.phaseOf(r), 4, reason: 'phản hồi khớp + câu mới');
+    expect(TutorView.phaseOf(r), 3, reason: 'phản hồi khớp + câu mới');
     expect(TutorView.askedCount(r), 1);
     expect(TutorView.askCaption(d.tutorScript!, d.tutorScript!.asks.first.id),
         'Câu 1/${d.tutorScript!.asks.length}');

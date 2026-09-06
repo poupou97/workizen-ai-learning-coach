@@ -9,10 +9,19 @@
 #    Trước khi có tệp này, một lệnh `git add -A` ở thư mục cha là đủ để đẩy đi.
 # 3. 9,8GB trong lịch sử git là không gỡ được nếu không rewrite history.
 nguon-chi-thuc/
+# ⚠ VÀ CẢ DẠNG SYMLINK. Dòng trên có DẤU / cuối ⇒ git chỉ coi nó khớp THƯ MỤC.
+# Một symlink tên `nguon-chi-thuc` trỏ vào 9,8GB PDF ấy KHÔNG bị nó chặn — và
+# đó chính là thứ đã lọt vào commit 266cdff của round7/multi-subject-home khi
+# một worktree symlink nguồn về để dựng lại pack. Bản thân symlink chỉ chứa một
+# chuỗi đường dẫn (không có nội dung SGK), nhưng nó là đường dẫn máy-cụ-thể và
+# nó làm rỗng chính hàng rào này. `test/ci/no_source_paths_tracked_test.dart`
+# giữ điều đó bằng test.
+nguon-chi-thuc
 
 # Sản phẩm phái sinh từ SGK cũng KHÔNG commit: text trích xuất, ảnh trang, chunk,
 # embedding — chúng vẫn là tác phẩm phái sinh của nguồn có bản quyền.
 poc-out/
+poc-out
 *.pdf
 
 .DS_Store

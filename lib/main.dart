@@ -25,6 +25,9 @@ import 'features/camera/mlkit_ocr_adapter.dart';
 import 'features/mission/mission_center_screen.dart';
 import 'features/discovery/story_detail_screen.dart';
 import 'features/parent/parent_area.dart';
+import 'features/navigation/app_shell.dart';
+import 'features/navigation/sam_hub_screen.dart';
+import 'features/progress/progress_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'core/context/learning_context.dart';
 import 'core/curriculum/canonical_problem.dart';
@@ -55,26 +58,33 @@ import 'app/boot_screen.dart';
 import 'core/lesson_model/lesson_document.dart';
 import 'core/lesson_model/workspace_catalog.dart';
 import 'features/lesson_workspace/lesson_workspace_screen.dart';
+import 'features/lesson_workspace/widgets/runtime_plan.dart'
+    show founderNextAction;
 import 'features/lesson_workspace/workspace_trace.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final dir = await getApplicationDocumentsDirectory();
   final store = await FileLearnerStore.open(
-      File('${dir.path}/hoc-cung-sam/learner-store.jsonl'));
-  runApp(HocCungSamApp(
+    File('${dir.path}/hoc-cung-sam/learner-store.jsonl'),
+  );
+  runApp(
+    HocCungSamApp(
       store: store,
       ocr: MlkitEducationOcrAdapter(),
-      storiesDbPath: '${dir.path}/hoc-cung-sam/sam-stories.db'));
+      storiesDbPath: '${dir.path}/hoc-cung-sam/sam-stories.db',
+    ),
+  );
 }
 
 class HocCungSamApp extends StatefulWidget {
-  const HocCungSamApp(
-      {super.key,
-      required this.store,
-      this.ocr,
-      this.storiesDbPath,
-      this.indexLoader = LessonIndex.loadForGrade});
+  const HocCungSamApp({
+    super.key,
+    required this.store,
+    this.ocr,
+    this.storiesDbPath,
+    this.indexLoader = LessonIndex.loadForGrade,
+  });
 
   final LearnerStore store;
 
@@ -110,32 +120,62 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     _load();
   }
 
-  /// ⭐ ROUND 3 B1 — bài có Lesson Workspace của ĐÚNG lớp đang học (từ
-  /// catalog fixture; nạp lười, không chặn Home). Lớp khác ⇒ `null`.
-  LessonDocument? _workspaceLessonFor(LearnerProfile p) {
-    final c = WorkspaceCatalog.shared;
-    if (!c.isLoaded) return null;
-    for (final book in c.booksWithWorkspace) {
-      for (final d in c.docsForBook(book)) {
-        if (d.grade == p.grade && !WorkspaceCatalog.isResearchSlot(d)) {
-          return d;
-        }
-      }
-    }
-    return null;
-  }
-
-  /// ⭐ ROUND 4 (Lane C) — lát cắt NGHIÊN CỨU (Golden Slice #2, LS&ĐL 5 Bài 8)
-  /// hiện cho MỌI lớp, thẻ riêng ghi «sách lớp 5» — để tới được lát cắt trên
-  /// máy của học sinh lớp 6 mà không tạo hồ sơ mới (quyết định hiển thị tạm
-  /// cho vòng kiểm chứng; Founder chốt cách xử lí khác lớp sau).
-  List<LessonDocument> _researchLessons() {
+  /// ⭐⭐ ROUND 7 · V2 (Founder order 50) — MỌI MẠCH HỌC CÓ THẬT trên máy.
+  ///
+  /// Trước vòng này Home nhận ĐÚNG MỘT bài («bài của lớp con») cộng một danh
+  /// sách «lát cắt nghiên cứu» tách riêng. Founder cầm máy và gọi tên hệ quả:
+  /// Home thành landing page của Bài 17. Nay Home nhận CẢ HỆ — mỗi bài SAM đã
+  /// xếp sẵn là một mạch học, kèm dấu vết phiên và việc tiếp theo của CHÍNH
+  /// nó, và Home xếp chúng thành hàng thẻ.
+  ///
+  /// Thứ tự: bài của ĐÚNG LỚP trước, rồi bài sách lớp khác (thẻ tự dán nhãn
+  /// «sách lớp N»). Không có bài nào ⇒ danh sách rỗng, Home không bịa thẻ.
+  ///
+  /// ⚠ Việc tiếp theo đến từ `founderNextAction` — ĐỘNG CƠ DUY NHẤT mà Lesson
+  /// Workspace cũng gọi. Home không có luật riêng: nếu có, nút trên Home và
+  /// gợi ý trong bài sẽ trỏ hai nơi khác nhau cho cùng một trạng thái.
+  List<HomeLessonThread> _lessonThreads(LearnerProfile p) {
     final c = WorkspaceCatalog.shared;
     if (!c.isLoaded) return const [];
+    final docs =
+        [for (final book in c.booksWithWorkspace) ...c.docsForBook(book)]
+          ..sort((a, b) {
+            final own =
+                (a.grade == p.grade ? 0 : 1) - (b.grade == p.grade ? 0 : 1);
+            return own != 0 ? own : a.slotKey.compareTo(b.slotKey);
+          });
     return [
-      for (final book in c.booksWithWorkspace)
-        for (final d in c.docsForBook(book))
-          if (WorkspaceCatalog.isResearchSlot(d)) d,
+      for (final d in docs)
+        HomeLessonThread(
+          doc: d,
+          openedViews: WorkspaceTrace.session.viewsFor(d.slotKey),
+          next: founderNextAction(
+            d,
+            seen: WorkspaceTrace.session.viewsFor(d.slotKey),
+            learnerId: p.learnerId,
+          ),
+        ),
+    ];
+  }
+
+  /// ⭐⭐ ROUND 7 · V2 — MÔN TRÊN GIÁ SÁCH CỦA TRẺ CHƯA CÓ BÀI NÀO SAM XẾP SẴN.
+  ///
+  /// Đây là chỗ đơn hàng 50 dễ bị phản bội nhất: cách nhanh để hàng thẻ trông
+  /// đầy là bịa một thẻ «Toán 6 — đang học 70%». Không. Môn nào chưa có bài
+  /// thì thẻ của nó NÓI THẲNG là chưa có, kèm con số mục lục THẬT lấy từ pack.
+  ///
+  /// Mục lục chưa nạp ⇒ rỗng: không mục lục thì không biết trẻ có sách gì, và
+  /// đoán là bịa.
+  List<HomeShelfSubject> _shelfSubjects() {
+    final idx = _lessonIndex;
+    if (idx == null) return const [];
+    return [
+      for (final subject in idx.subjects.keys)
+        HomeShelfSubject(
+          subject: subject,
+          listedLessons: idx.listedLessonCountFor(subject),
+          openableLessons: idx.openableLessonCountFor(subject),
+        ),
     ];
   }
 
@@ -154,8 +194,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (idx != null) {
       knownBookTitles.addAll({
         for (final b in idx.books)
-          b.sourceDocumentId:
-              b.volumeLabel == null ? b.title : '${b.title} · ${b.volumeLabel}',
+          b.sourceDocumentId: b.volumeLabel == null
+              ? b.title
+              : '${b.title} · ${b.volumeLabel}',
       });
     }
     setState(() {
@@ -182,10 +223,13 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
         _stories = s;
         final quotes = s.loadingQuotes();
         if (quotes.isNotEmpty) {
-          _splashQuote = quotes[Random(DateTime.now().day).nextInt(quotes.length)];
+          _splashQuote =
+              quotes[Random(DateTime.now().day).nextInt(quotes.length)];
         }
       });
-    } catch (_) {/* thiếu asset ⇒ kho rỗng, UI nói thật */}
+    } catch (_) {
+      /* thiếu asset ⇒ kho rỗng, UI nói thật */
+    }
   }
 
   Future<void> _load() async {
@@ -210,6 +254,11 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (p == null) return;
     setState(() {
       _profile = p;
+      // ⭐ Lệnh 51 §1 (C-2) — tên sách là bộ nhớ TOÀN CỤC tích luỹ theo lớp đã
+      // mở. Không xoá thì «Kho khám phá» (kho của toàn corpus, không lọc lớp)
+      // hiện «SGK Ngữ văn 6» hay hiện mã sách trần TUỲ vào việc phiên này đã
+      // mở hồ sơ lớp 6 trước hay chưa — cùng màn, cùng hồ sơ, hai kết quả.
+      knownBookTitles.clear();
       _refreshMission(); // mission tính lại TỪ KHO của đúng learner này
     });
     widget.store.saveActiveLearner(p.learnerId); // sống qua restart
@@ -221,7 +270,10 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     _mission = p == null
         ? null
         : buildMissionFromStore(
-            profile: p, store: widget.store, index: _lessonIndex);
+            profile: p,
+            store: widget.store,
+            index: _lessonIndex,
+          );
     if (p != null) {
       widget.store.timetable(p.learnerId).then((t) {
         if (mounted) setState(() => _timetable = t);
@@ -234,9 +286,9 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   /// Môn đang có chỗ vướng / đến hạn ôn — suy từ CHÍNH danh sách ôn đã tính,
   /// không tính lại bằng luật thứ hai. Một luật, một chỗ.
   Set<String> _reviewDueSubjects(MissionData data) => {
-        for (final r in data.reviews)
-          if (r.subjectId != null) r.subjectId!,
-      };
+    for (final r in data.reviews)
+      if (r.subjectId != null) r.subjectId!,
+  };
 
   /// ⭐⭐ WAL-176 (Missing #1) — gợi ý CẤP SÁCH từ TKB, môn BẤT KỲ có bìa +
   /// hoạt động thật (không riêng Toán — `LearningAgenda`/WAL-102 chỉ phủ dòng
@@ -246,39 +298,52 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     final idx = _lessonIndex;
     if (idx == null) return null;
     return nextBookRecommendation(
-        index: idx, now: DateTime.now(), timetable: _timetable);
+      index: idx,
+      now: DateTime.now(),
+      timetable: _timetable,
+    );
   }
 
   /// Bấm «Bắt đầu» trên thẻ gợi ý sách: mở ĐÚNG Book Home rồi tự vào thẳng
   /// bài/ý định đã đề nghị — trẻ không bị hỏi lại (SAM đã hỏi xong ở Home).
   Future<void> _startRecommendation(
-      BuildContext context, MissionData data, HomeRecommendation rec) async {
+    BuildContext context,
+    MissionData data,
+    HomeRecommendation rec,
+  ) async {
     final idx = _lessonIndex;
     if (idx == null) return;
-    final book =
-        idx.books.where((b) => b.sourceDocumentId == rec.sourceDocumentId).firstOrNull;
+    final book = idx.books
+        .where((b) => b.sourceDocumentId == rec.sourceDocumentId)
+        .firstOrNull;
     if (book == null) return;
-    await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-      final screen = SubjectHomeScreen(
-        profile: _profile!,
-        store: widget.store,
-        index: idx,
-        subject: rec.subject,
-        book: book,
-        timetable: _timetable,
-        reviewDueSubjects: _reviewDueSubjects(data),
-      );
-      // ⭐ Book Home vào ĐÚNG stack (back trả về đây, không rơi thẳng về
-      // Home) — rồi mới tự mở tiếp bài/ý định, không cần trẻ chạm lần hai.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!ctx.mounted) return;
-        screen.openLessonWithIntent(ctx,
-            sourceDocumentId: rec.sourceDocumentId,
-            lessonNo: rec.lessonNo,
-            intent: rec.intent);
-      });
-      return screen;
-    }));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) {
+          final screen = SubjectHomeScreen(
+            profile: _profile!,
+            store: widget.store,
+            index: idx,
+            subject: rec.subject,
+            book: book,
+            timetable: _timetable,
+            reviewDueSubjects: _reviewDueSubjects(data),
+          );
+          // ⭐ Book Home vào ĐÚNG stack (back trả về đây, không rơi thẳng về
+          // Home) — rồi mới tự mở tiếp bài/ý định, không cần trẻ chạm lần hai.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!ctx.mounted) return;
+            screen.openLessonWithIntent(
+              ctx,
+              sourceDocumentId: rec.sourceDocumentId,
+              lessonNo: rec.lessonNo,
+              intent: rec.intent,
+            );
+          });
+          return screen;
+        },
+      ),
+    );
     if (mounted) setState(_refreshMission);
   }
 
@@ -303,46 +368,55 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     final idx = _lessonIndex;
     final exs = idx?.exercisesForToan(6) ?? const [];
     if (p == null || exs.length < 2) {
-      _honest(context,
-          'Chưa có bài nào tới hạn ôn — con học một bài mới trước nhé!');
+      _honest(
+        context,
+        'Chưa có bài nào tới hạn ôn — con học một bài mới trước nhé!',
+      );
       return;
     }
     final log = await widget.store.evidenceFor(
-        learnerId: p.learnerId, skillCaseId: 'denominator-non-divisible');
+      learnerId: p.learnerId,
+      skillCaseId: 'denominator-non-divisible',
+    );
     if (log.events.isEmpty) {
       if (context.mounted) {
-        _honest(context,
-            'Con chưa học dạng này nên chưa có gì để ôn — vào Môn học nhé!');
+        _honest(
+          context,
+          'Con chưa học dạng này nên chưa có gì để ôn — vào Môn học nhé!',
+        );
       }
       return;
     }
     final e = exs[1]; // bài KHÁC bài đầu — ôn không phải làm lại y hệt
     if (!context.mounted) return;
-    await openCanonicalProblem(context,
-        problem: CanonicalProblem.fromCurriculum(
-          exerciseLabel: 'b6-on',
-          expression: e.expr,
-          provenance: Provenance(
-            origin: KnowledgeOrigin.sourceStated,
-            sourceId: e.book,
-            extractionMethod: 'qmap-v1',
-            confidence: 0.9,
-            grade: p.grade,
-            subject: 'Toán',
-            pageStart: e.page,
-          ),
+    await openCanonicalProblem(
+      context,
+      problem: CanonicalProblem.fromCurriculum(
+        exerciseLabel: 'b6-on',
+        expression: e.expr,
+        provenance: Provenance(
+          origin: KnowledgeOrigin.sourceStated,
+          sourceId: e.book,
+          extractionMethod: 'qmap-v1',
+          confidence: 0.9,
+          grade: p.grade,
+          subject: 'Toán',
+          pageStart: e.page,
         ),
-        profile: p,
-        store: widget.store,
-        // ⭐ WAL-210 lineage: bài ôn lấy từ `exercisesForToan(6)` ⇒ đúng
-        // cuốn của bài tập + bài 6 (số bài hoá cứng cùng chỗ với danh sách).
-        learningContext: LearningContext(
-            learnerId: p.learnerId,
-            grade: p.grade,
-            subject: 'Toán',
-            sourceDocumentId: e.book,
-            lessonNo: 6,
-            intent: LearningIntent.review));
+      ),
+      profile: p,
+      store: widget.store,
+      // ⭐ WAL-210 lineage: bài ôn lấy từ `exercisesForToan(6)` ⇒ đúng
+      // cuốn của bài tập + bài 6 (số bài hoá cứng cùng chỗ với danh sách).
+      learningContext: LearningContext(
+        learnerId: p.learnerId,
+        grade: p.grade,
+        subject: 'Toán',
+        sourceDocumentId: e.book,
+        lessonNo: 6,
+        intent: LearningIntent.review,
+      ),
+    );
     if (mounted) setState(_refreshMission);
   }
 
@@ -368,7 +442,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     setState(() {
       _profiles = [
         for (final p in _profiles)
-          if (p.learnerId == saved.learnerId) saved else p
+          if (p.learnerId == saved.learnerId) saved else p,
       ];
       if (_profile?.learnerId == saved.learnerId) _profile = saved;
       _refreshMission();
@@ -388,18 +462,24 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     final c = cs.length == 1 ? cs.single : null;
     final exs = _lessonIndex?.exercisesForToan(6) ?? const [];
     if (p == null || c == null || exs.length < 2) {
-      _honest(context,
-          'Máy này chưa nạp đủ bài để kiểm tra — con vào Môn học làm vài bài '
-          'trước, rồi SAM mới kiểm tra được.');
+      _honest(
+        context,
+        'Máy này chưa nạp đủ bài để kiểm tra — con vào Môn học làm vài bài '
+        'trước, rồi SAM mới kiểm tra được.',
+      );
       return;
     }
     final log = await widget.store.evidenceFor(
-        learnerId: p.learnerId, skillCaseId: 'denominator-non-divisible');
+      learnerId: p.learnerId,
+      skillCaseId: 'denominator-non-divisible',
+    );
     if (log.events.isEmpty) {
       if (context.mounted) {
-        _honest(context,
-            'Con chưa học dạng này nên SAM chưa kiểm tra — mình học trước đã '
-            'nhé, rồi kiểm tra mới nói lên điều gì.');
+        _honest(
+          context,
+          'Con chưa học dạng này nên SAM chưa kiểm tra — mình học trước đã '
+          'nhé, rồi kiểm tra mới nói lên điều gì.',
+        );
       }
       return;
     }
@@ -410,47 +490,57 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (who.learnerId != p.learnerId) {
       _selectProfile(who.learnerId);
       if (!context.mounted) return;
-      _honest(context,
-          'SAM đã chuyển sang sổ học của ${who.displayName} — con bấm «Kiểm '
-          'tra hiểu bài» lại một lần nữa nhé.');
+      _honest(
+        context,
+        'SAM đã chuyển sang sổ học của ${who.displayName} — con bấm «Kiểm '
+        'tra hiểu bài» lại một lần nữa nhé.',
+      );
       return;
     }
     if (!context.mounted) return;
     final nav = Navigator.of(context);
-    await nav.push(MaterialPageRoute(
+    await nav.push(
+      MaterialPageRoute(
         builder: (_) => AssessmentScreen(
-              items: exs.take(3).toList(),
-              // ⭐ WAL-210 lineage: đề lấy từ `exercisesForToan(6)` ⇒ bài 6
-              // của đúng cuốn chứa bài tập (số bài hoá cứng cùng chỗ).
-              learningContext: LearningContext(
-                  learnerId: p.learnerId,
-                  grade: p.grade,
-                  subject: 'Toán',
-                  sourceDocumentId: exs.first.book,
-                  lessonNo: 6),
-              onFinished: (events, answers) async {
-                final rec = await recordSession(
-                  store: widget.store,
-                  learnerId: p.learnerId,
-                  subjectId: c.subjectId,
-                  events: events,
-                  trigger: SessionTrigger.assessment,
-                  mode: SessionMode.assess,
-                );
-                final m = await masteryFromStore(
-                    widget.store, p.learnerId, c);
-                if (!nav.mounted) return;
-                nav.pushReplacement(MaterialPageRoute(
-                    builder: (_) => AssessmentResultScreen(
-                          answers: answers,
-                          summary: ConceptSummary.of(m,
-                              knownCaseIds: {for (final k in c.cases) k.id},
-                              now: DateTime.now()),
-                          violations: rec.violations,
-                          onDone: () => nav.pop(),
-                        )));
-              },
-            )));
+          items: exs.take(3).toList(),
+          // ⭐ WAL-210 lineage: đề lấy từ `exercisesForToan(6)` ⇒ bài 6
+          // của đúng cuốn chứa bài tập (số bài hoá cứng cùng chỗ).
+          learningContext: LearningContext(
+            learnerId: p.learnerId,
+            grade: p.grade,
+            subject: 'Toán',
+            sourceDocumentId: exs.first.book,
+            lessonNo: 6,
+          ),
+          onFinished: (events, answers) async {
+            final rec = await recordSession(
+              store: widget.store,
+              learnerId: p.learnerId,
+              subjectId: c.subjectId,
+              events: events,
+              trigger: SessionTrigger.assessment,
+              mode: SessionMode.assess,
+            );
+            final m = await masteryFromStore(widget.store, p.learnerId, c);
+            if (!nav.mounted) return;
+            nav.pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => AssessmentResultScreen(
+                  answers: answers,
+                  summary: ConceptSummary.of(
+                    m,
+                    knownCaseIds: {for (final k in c.cases) k.id},
+                    now: DateTime.now(),
+                  ),
+                  violations: rec.violations,
+                  onDone: () => nav.pop(),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
     if (mounted) setState(_refreshMission);
   }
 
@@ -472,149 +562,257 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
       showDragHandle: true,
       builder: (_) => Padding(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-        child: Text(msg,
-            style: const TextStyle(fontSize: 17, height: 1.5)),
+        child: Text(msg, style: const TextStyle(fontSize: 17, height: 1.5)),
       ),
     );
   }
 
   /// WAL-109 — thêm người học: dùng LẠI onboarding, không nhánh UI mới.
   void _addProfile(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute(
+    Navigator.of(context).push(
+      MaterialPageRoute(
         builder: (_) => Scaffold(
-              body: SafeArea(
-                child: OnboardingScreen(onDone: (p) async {
-                  await _onboarded(p);
-                  if (context.mounted) Navigator.of(context).pop();
-                }),
-              ),
-            )));
+          body: SafeArea(
+            child: OnboardingScreen(
+              onDone: (p) async {
+                await _onboarded(p);
+                if (context.mounted) Navigator.of(context).pop();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'Học cùng SAM',
-        debugShowCheckedModeBanner: false,
-        home: BandDensityScope(
-          density: WalBandDensity.forGradeBandLabel(
-              bandForGrade(_profile?.grade ?? 3)?.label ?? '3-5'),
-          child: _homeChild(),
+    title: 'Học cùng SAM',
+    debugShowCheckedModeBanner: false,
+    home: BandDensityScope(
+      density: WalBandDensity.forGradeBandLabel(
+        bandForGrade(_profile?.grade ?? 3)?.label ?? '3-5',
+      ),
+      child: _homeChild(),
+    ),
+  );
+
+  /// ⭐ Lệnh 52 §4 — GỐC của tab «Giá sách».
+  ///
+  /// Cùng MỘT cây widget mà `onOpenSubjects` đẩy — tách ra để tab và CTA cũ
+  /// dùng chung, KHÔNG nhân bản màn (§9).
+  ///
+  /// §13: lớp là ngữ cảnh của hồ sơ, nên `profile` đi thẳng vào đây — giá sách
+  /// không bao giờ hỏi lại «con học lớp mấy».
+  Widget _bookshelfRoot(BuildContext context, MissionData data) {
+    final idx = _lessonIndex;
+    if (idx == null || idx.books.isEmpty) {
+      return SubjectsScreen(
+        profile: _profile!,
+        store: widget.store,
+        index: idx,
+      );
+    }
+    return BookShelfScreen(
+      profile: _profile!,
+      index: idx,
+      onOpenBook: (b) => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => SubjectHomeScreen(
+            profile: _profile!,
+            store: widget.store,
+            index: idx,
+            subject: b.subject,
+            book: b,
+            timetable: _timetable,
+            reviewDueSubjects: _reviewDueSubjects(data),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Bài mà tab SAM mở: bài của ĐÚNG lớp trẻ đang học. Bài lớp khác KHÔNG
+  /// được lôi vào đây — tab SAM là chỗ học, không phải chỗ trưng bày.
+  LessonDocument? _samLessonDoc() {
+    final p = _profile;
+    if (p == null) return null;
+    for (final t in _lessonThreads(p)) {
+      if (t.doc.grade == p.grade) return t.doc;
+    }
+    return null;
+  }
+
+  /// `null` ⇒ tab SAM ẩn lối vào ấy thay vì mở một màn rỗng.
+  VoidCallback? _openWorkspaceLessonFromSam(BuildContext context) {
+    final doc = _samLessonDoc();
+    if (doc == null) return null;
+    return () async {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => LessonWorkspaceScreen(
+            doc: doc,
+            trace: WorkspaceTrace.session,
+            learnerId: _profile!.learnerId,
+          ),
         ),
       );
+      if (mounted) setState(_refreshMission);
+    };
+  }
 
   Widget _homeChild() => _loading
-            ? (_splashQuote == null
-                // ROUND 3 B5 (audit O1): khung trắng lúc chờ hồ sơ ⇒ màn
-                // khởi động có nhãn hiệu, nói thật «đang mở».
-                ? const BootScreen(note: 'Đang mở hồ sơ của con…')
-                : SplashQuoteScreen(quote: _splashQuote!))
-            : _profile == null
-                ? OnboardingScreen(onDone: _onboarded)
-                : FutureBuilder<MissionData>(
-                    future: _mission,
-                    builder: (context, snap) {
-                      final data = snap.data;
-                      if (data == null) {
-                        // ROUND 3 B5 (audit O1): chờ mission tính từ kho —
-                        // vẫn là màn khởi động, không phải khung trắng.
-                        return const BootScreen(note: 'Đang xem hôm nay học gì…');
-                      }
-                      final ocr = widget.ocr;
-                      return MissionCenterScreen(
-                        data: data,
-                        bookRecommendation: _bookRecommendation(),
-                        onStartRecommendation: (rec) =>
-                            _startRecommendation(context, data, rec),
-                        workspaceLesson: _workspaceLessonFor(_profile!),
-                        researchLessons: _researchLessons(),
-                        onOpenWorkspaceLesson: (doc) async {
-                          await Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => LessonWorkspaceScreen(
-                                  doc: doc,
-                                  trace: WorkspaceTrace.session,
-                                  learnerId: _profile!.learnerId)));
-                          if (mounted) setState(() {});
-                        },
-                        learnerName: _profile!.displayName,
-                        profiles: _profiles,
-                        activeLearnerId: _profile!.learnerId,
-                        onSelectProfile: _selectProfile,
-                        onAddProfile: () => _addProfile(context),
-                        onParentArea: () => openParentArea(context,
-                            store: widget.store,
-                            profiles: _profiles,
-                            saveExport: _saveExport),
-                        onReview: () => _openReview(context),
-                        onAssess: () => _openAssessment(context),
-                        onOpenSettings: () async {
-                          await Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => SettingsScreen(
-                                  stories: _stories,
-                                  profile: _profile,
-                                  store: widget.store,
-                                  index: _lessonIndex,
-                                  profiles: _profiles,
-                                  onProfileChanged: _onProfileEdited)));
-                          // ⭐⭐ WAL-176 — Thời khoá biểu sửa được TỪ Thêm →
-                          // Cài đặt; Home đọc `_timetable` từ STATE trong bộ
-                          // nhớ, không phải kho mỗi lần build. Thiếu dòng này
-                          // thì gợi ý sách qua TKB đứng yên tới lần mở app
-                          // sau — TKB tưởng đã lưu nhưng Home chưa "thấy".
-                          if (mounted) setState(_refreshMission);
-                        },
-                        todayStory: _stories
-                            .todayEvents(DateTime.now())
-                            .firstOrNull,
-                        didYouKnowStory: _didYouKnow(),
-                        onOpenStory: (st) => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) => StoryDetailScreen(
-                                    item: st, stories: _stories))),
-                        // WAL-167 — cửa trước nay là GIÁ SÁCH khi máy có bìa
-                        // thật; chưa có bìa thì vẫn vào lưới môn như cũ
-                        // (không chặn việc học vì thiếu ảnh).
-                        onOpenSubjects: () async {
-                          final idx = _lessonIndex;
-                          await Navigator.of(context).push(MaterialPageRoute(
-                              builder: (ctx) => idx != null && idx.books.isNotEmpty
-                                  ? BookShelfScreen(
-                                      profile: _profile!,
-                                      index: idx,
-                                      onOpenBook: (b) => Navigator.of(ctx).push(
-                                          MaterialPageRoute(
-                                              builder: (_) => SubjectHomeScreen(
-                                                    profile: _profile!,
-                                                    store: widget.store,
-                                                    index: idx,
-                                                    subject: b.subject,
-                                                    book: b,
-                                                    // ⭐ WAL-175 — hai tín hiệu
-                                                    // để SAM ĐỀ NGHỊ ý định.
-                                                    // Rỗng ⇒ SAM hỏi thẳng.
-                                                    timetable: _timetable,
-                                                    reviewDueSubjects:
-                                                        _reviewDueSubjects(data),
-                                                  ))))
-                                  : SubjectsScreen(
-                                      profile: _profile!,
-                                      store: widget.store,
-                                      index: idx)));
-                          if (mounted) setState(_refreshMission);
-                        },
-                        onStartHomework: ocr == null
-                            ? null
-                            : () async {
-                                await startHomeworkFlow(
-                                  context,
-                                  profile: _profile!,
-                                  store: widget.store,
-                                  ocr: ocr,
-                                );
-                                // Về Hôm nay ⇒ mission tính LẠI từ kho —
-                                // vòng khép kín nhìn thấy được trên màn.
-                                if (mounted) setState(_refreshMission);
-                              },
-                      );
-                    },
+      ? (_splashQuote == null
+            // ROUND 3 B5 (audit O1): khung trắng lúc chờ hồ sơ ⇒ màn
+            // khởi động có nhãn hiệu, nói thật «đang mở».
+            ? const BootScreen(note: 'Đang mở hồ sơ của con…')
+            : SplashQuoteScreen(quote: _splashQuote!))
+      : _profile == null
+      ? OnboardingScreen(onDone: _onboarded)
+      : FutureBuilder<MissionData>(
+          future: _mission,
+          builder: (context, snap) {
+            final data = snap.data;
+            if (data == null) {
+              // ROUND 3 B5 (audit O1): chờ mission tính từ kho —
+              // vẫn là màn khởi động, không phải khung trắng.
+              return const BootScreen(note: 'Đang xem hôm nay học gì…');
+            }
+            final ocr = widget.ocr;
+            // ⭐ Lệnh 52 — Home nhiều môn trở thành GỐC của tab
+            // «Trang chủ». Màn KHÔNG bị viết lại; chỉ đổi chỗ nó
+            // đứng trong cây (§3).
+            return AppShell(
+              home: MissionCenterScreen(
+                data: data,
+                bookRecommendation: _bookRecommendation(),
+                onStartRecommendation: (rec) =>
+                    _startRecommendation(context, data, rec),
+                // ⭐⭐ ROUND 7 · V2 — Home nhận CẢ HỆ MẠCH HỌC, mỗi
+                // mạch kèm dấu vết phiên và việc tiếp theo ĐÃ DỰNG
+                // SẴN, cộng danh sách môn trên giá sách chưa có bài.
+                // Không phải để Home thông minh hơn: để Home và
+                // workspace nói CÙNG một điều về cùng một bài, và để
+                // môn chưa có bài vẫn được nói ra đúng trạng thái.
+                // `founderNextAction` là động cơ duy nhất; Home chỉ
+                // trình bày và xếp hạng kết quả của nó.
+                learnerGrade: _profile!.grade,
+                lessonThreads: _lessonThreads(_profile!),
+                shelfSubjects: _shelfSubjects(),
+                // ⭐ ROUND 7 · V1 — nút Home mang tên một cách học ⇒
+                // mở ĐÚNG cách học ấy. Lỗi máy thật vòng 1: «📖 Đọc ▸»
+                // mở ra màn hỏi «con muốn học theo cách nào?».
+                onOpenWorkspaceLesson: (doc, {at}) async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => LessonWorkspaceScreen(
+                        doc: doc,
+                        trace: WorkspaceTrace.session,
+                        initialView: at,
+                        learnerId: _profile!.learnerId,
+                      ),
+                    ),
                   );
+                  if (mounted) setState(() {});
+                },
+                learnerName: _profile!.displayName,
+                profiles: _profiles,
+                activeLearnerId: _profile!.learnerId,
+                onSelectProfile: _selectProfile,
+                onAddProfile: () => _addProfile(context),
+                onParentArea: () => openParentArea(
+                  context,
+                  store: widget.store,
+                  profiles: _profiles,
+                  saveExport: _saveExport,
+                ),
+                onReview: () => _openReview(context),
+                onAssess: () => _openAssessment(context),
+                onOpenSettings: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => SettingsScreen(
+                        stories: _stories,
+                        profile: _profile,
+                        store: widget.store,
+                        index: _lessonIndex,
+                        profiles: _profiles,
+                        onProfileChanged: _onProfileEdited,
+                      ),
+                    ),
+                  );
+                  // ⭐⭐ WAL-176 — Thời khoá biểu sửa được TỪ Thêm →
+                  // Cài đặt; Home đọc `_timetable` từ STATE trong bộ
+                  // nhớ, không phải kho mỗi lần build. Thiếu dòng này
+                  // thì gợi ý sách qua TKB đứng yên tới lần mở app
+                  // sau — TKB tưởng đã lưu nhưng Home chưa "thấy".
+                  if (mounted) setState(_refreshMission);
+                },
+                todayStory: _stories.todayEvents(DateTime.now()).firstOrNull,
+                didYouKnowStory: _didYouKnow(),
+                onOpenStory: (st) => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        StoryDetailScreen(item: st, stories: _stories),
+                  ),
+                ),
+                // WAL-167 — cửa trước nay là GIÁ SÁCH khi máy có bìa
+                // thật; chưa có bìa thì vẫn vào lưới môn như cũ
+                // (không chặn việc học vì thiếu ảnh).
+                // ⭐ Lệnh 52 §9 — CÙNG gốc với tab «Giá sách»
+                // (`_bookshelfRoot`), không dựng bản thứ hai.
+                onOpenSubjects: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => _bookshelfRoot(context, data),
+                    ),
+                  );
+                  if (mounted) setState(_refreshMission);
+                },
+                onStartHomework: ocr == null
+                    ? null
+                    : () async {
+                        await startHomeworkFlow(
+                          context,
+                          profile: _profile!,
+                          store: widget.store,
+                          ocr: ocr,
+                        );
+                        // Về Hôm nay ⇒ mission tính LẠI từ kho —
+                        // vòng khép kín nhìn thấy được trên màn.
+                        if (mounted) setState(_refreshMission);
+                      },
+              ),
+              bookshelf: _bookshelfRoot(context, data),
+              sam: SamHubScreen(
+                learnerName: _profile!.displayName,
+                onCapture: ocr == null
+                    ? null
+                    : () async {
+                        await startHomeworkFlow(
+                          context,
+                          profile: _profile!,
+                          store: widget.store,
+                          ocr: ocr,
+                        );
+                        if (mounted) setState(_refreshMission);
+                      },
+                onLearnWithSam: _openWorkspaceLessonFromSam(context),
+                lessonLabel: _samLessonDoc()?.title,
+              ),
+              achievements: ProgressScreen(
+                profile: _profile!,
+                store: widget.store,
+              ),
+              more: SettingsScreen(
+                stories: _stories,
+                profile: _profile,
+                store: widget.store,
+                index: _lessonIndex,
+                profiles: _profiles,
+                onProfileChanged: _onProfileEdited,
+              ),
+            );
+          },
+        );
 }
