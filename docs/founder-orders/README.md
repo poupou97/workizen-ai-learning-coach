@@ -91,3 +91,4 @@ criteria.
 | 45 | [`45-founder-task-jira-reconciliation-and-next-work-selection.md`](45-founder-task-jira-reconciliation-and-next-work-selection.md) | 4,300 | FOUNDER TASK — JIRA RECONCILIATION + NEXT WORK SELECTION |
 | 46 | [`46-founder-addendum-confluence-reconciliation-authorized.md`](46-founder-addendum-confluence-reconciliation-authorized.md) | 1,050 | FOUNDER ADDENDUM — CONFLUENCE RECONCILIATION AUTHORIZED |
 | 47 | [`47-founder-autonomous-run-root-cause-fix-trusted-slice.md`](47-founder-autonomous-run-root-cause-fix-trusted-slice.md) | 6,400 | FOUNDER AUTONOMOUS RUN — ROOT CAUSE → FIX → TRUSTED SLICE |
+| 49 | [`49-founder-checkpoint-round-7-ui-ux-approved.md`](49-founder-checkpoint-round-7-ui-ux-approved.md) | 2,800 | FOUNDER CHECKPOINT — ROUND 7 UI/UX approved, Bài 17 |
