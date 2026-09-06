@@ -49,7 +49,8 @@ def resolve_bound(bound_id):
         raise SystemExit('no frozen policy in the ledger — there is no predeclared bound to '
                          'measure against, and this tool will not invent one')
     e = entries[-1]
-    payload = json.load(open(os.path.join(F.ROOT, e['payload_path']), encoding='utf-8'))
+    with open(os.path.join(F.ROOT, e['payload_path']), encoding='utf-8') as fh:
+        payload = json.load(fh)
     if F.sha256(payload) != e['sha256']:
         raise SystemExit('the frozen policy no longer hashes to its ledger entry')
     if bound_id not in payload['bounds']:

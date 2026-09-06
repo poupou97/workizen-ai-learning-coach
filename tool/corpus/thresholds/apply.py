@@ -59,7 +59,8 @@ def _frozen(kind, name=None):
     if not entries:
         raise Refused(f'no frozen {kind} in the ledger')
     e = entries[-1]
-    payload = json.load(open(os.path.join(F.ROOT, e['payload_path']), encoding='utf-8'))
+    with open(os.path.join(F.ROOT, e['payload_path']), encoding='utf-8') as fh:
+        payload = json.load(fh)
     if F.sha256(payload) != e['sha256']:
         raise Refused(f'{kind} payload no longer hashes to its ledger entry — it was edited '
                       f'after freezing')
@@ -70,7 +71,8 @@ def check_approval(approval_path, candidate):
     if not approval_path or not os.path.exists(approval_path):
         raise Refused('no approval artefact. Round 7 stops at step B; steps C-G happen only '
                       'after the Founder approves a frozen policy.')
-    ap = json.load(open(approval_path, encoding='utf-8'))
+    with open(approval_path, encoding='utf-8') as fh:
+        ap = json.load(fh)
     pe, _ = _frozen('policy')
     if ap.get('policy_sha256') != pe['sha256']:
         raise Refused(f"approval names policy {ap.get('policy_sha256')} but the frozen policy is "

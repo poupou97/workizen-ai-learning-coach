@@ -60,7 +60,8 @@ def _git(*args):
 def read_ledger(path=LEDGER):
     if not os.path.exists(path):
         return []
-    return [json.loads(l) for l in open(path, encoding='utf-8') if l.strip()]
+    with open(path, encoding='utf-8') as fh:
+        return [json.loads(l) for l in fh if l.strip()]
 
 
 def freeze(kind, payload, payload_path, note=None, ledger_path=LEDGER, root=None):
@@ -117,7 +118,8 @@ def verify(ledger_path=LEDGER, root=None):
         if not os.path.exists(p):
             problems.append(f"seq {e['seq']}: payload missing at {e['payload_path']}")
         else:
-            got = sha256(json.load(open(p, encoding='utf-8')))
+            with open(p, encoding='utf-8') as fh:
+                got = sha256(json.load(fh))
             if got != e['sha256']:
                 problems.append(f"seq {e['seq']}: payload hash {got} != recorded {e['sha256']}")
         if e['kind'] in POST_APPROVAL and 'approval' not in seen:
