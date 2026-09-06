@@ -98,6 +98,24 @@ def repo_name(repo: str) -> str:
     return os.path.basename(os.path.abspath(repo))
 
 
+def branch_label(repo: str) -> str:
+    """Describe the checkout usefully, including when HEAD is detached.
+
+    An archive is often built from a detached worktree pinned to an exact commit; reporting
+    "branch HEAD" tells a later reader nothing. Name the branches that contain the commit
+    instead, so the manifest says which line of work it came from.
+    """
+    name = git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+    if name and name not in ("HEAD", "UNAVAILABLE"):
+        return f"branch `{name}`"
+    refs = git(repo, "for-each-ref", "--points-at", "HEAD",
+               "--format=%(refname:short)", "refs/remotes", "refs/heads")
+    names = [r for r in refs.splitlines() if r] if refs != "UNAVAILABLE" else []
+    if names:
+        return "a detached checkout of " + ", ".join(f"`{n}`" for n in names[:4])
+    return "a detached checkout (no ref points at this commit)"
+
+
 def fail(msg: str) -> None:
     print(f"FAIL: {msg}", file=sys.stderr)
     raise SystemExit(1)
@@ -174,6 +192,17 @@ def check_required(spec: dict, root: str) -> list[str]:
             problems.append(f"MISSING required directory: {d}/")
         elif not walk_files(p):
             problems.append(f"EMPTY required directory: {d}/")
+
+    # No zero-byte file anywhere in the archive, not merely among the required documents.
+    # An empty evidence file is the same failure as an empty report: it reads as "nothing
+    # happened" when the truth is "this was not captured". Round 6 shipped one (an empty
+    # git-log evidence file, because `git log --since` prunes traversal through merge
+    # commits) and only a hand check caught it. Now the build fails instead.
+    for rel in walk_files(root):
+        if os.path.getsize(os.path.join(root, rel)) == 0:
+            problems.append(
+                f"ZERO-BYTE file: {rel} — write UNAVAILABLE / NOT CAPTURED into it, "
+                f"or drop it from the archive")
     return problems
 
 
@@ -257,7 +286,7 @@ def write_manifest(spec: dict, repo: str, root: str, missing_optional: list[str]
         f"| Files (excluding this manifest) | **{len(rows)}** |",
         f"| Total staged size | **{human(total)}** ({total:,} bytes) |",
         f"| Repository | `{repo_name(repo)}` |",
-        f"| Built from commit | `{git(repo, 'rev-parse', 'HEAD')}` on branch `{git(repo, 'rev-parse', '--abbrev-ref', 'HEAD')}` |",
+        f"| Built from commit | `{git(repo, 'rev-parse', 'HEAD')}` on {branch_label(repo)} |",
         "",
         "## Close-date evidence",
         "",

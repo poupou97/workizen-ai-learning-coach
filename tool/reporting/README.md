@@ -44,7 +44,7 @@ Requires only the Python 3 standard library.
 | Rule | Behaviour |
 |---|---|
 | **Never overwrite an archive** | If `…-<date>.zip` exists, it writes `…-v2.zip` (then `-v3` …) and prints a NOTE. A previous round's ZIP is immutable evidence. |
-| **No zero-byte required document** | The build **fails** rather than shipping an empty required report. An empty file reads as "nothing happened" instead of "not captured", which is worse than a missing one. |
+| **No zero-byte file anywhere** | The build **fails** rather than shipping an empty file — required report or evidence artefact alike. An empty file reads as "nothing happened" instead of "not captured", which is worse than a missing one. *Round 6 shipped one on the first attempt — an empty git-log evidence file, because `git log --since` prunes traversal through merge commits — and only a hand check caught it. Now the tool does.* Write `UNAVAILABLE` / `NOT CAPTURED` into the file, or drop it. |
 | **No broken in-archive reference** | Any backticked path whose first segment is a required directory (`evidence/…`, `metrics/…`, `screenshots/…`, `reports/…`, `manifests/…`), and any reference to a numbered document, must resolve inside the archive. Conservative by design, so prose mentioning a *repository* path cannot produce noise. |
 | **The manifest is generated, never written by hand** | `15-FILE-MANIFEST.md` is built from the staged bytes — one SHA-256 and byte count per file — and then **re-verified against the finished ZIP** by recomputing every hash from inside it. |
 | **Missing optional sources are recorded, not dropped** | A `copy` entry marked `"optional": true` that matches nothing is listed in the manifest as **NOT CAPTURED**. |
@@ -119,7 +119,14 @@ having:
 - **Widget tests and emulators are not real-device evidence** — say so wherever that distinction
   applies.
 - **Answer plainly: what can a child use now that they could not before?** Then answer separately
-  for parent, for SAM, and for internal-research-only.
+  for parent, for SAM, and for internal-research-only. **If the round took something away from a
+  child, lead with the loss** — round 6 replaced a fake History lesson with a real one and the child
+  lost a timeline; an archive that buried that under the gains would be a worse record than none.
+- **Archive the artefacts a gate depends on, not just the report about them.** Gitignored build
+  inputs (a real fixture, a pack set) are usually small, and they are what lets a later reader
+  re-verify a gate instead of trusting it. Round 6's Gate C was re-proved from the archived fixture
+  alone. Copy them out of an ephemeral worktree **at the moment the gate is claimed** — round 6 came
+  within one `git worktree remove` of losing them.
 
 ---
 
@@ -128,5 +135,6 @@ having:
 | File | Purpose |
 |---|---|
 | `build_round_archive.py` | the generator |
-| `examples/round05-archive-spec.json` | the spec that built the round-5 archive; copy it as a starting point |
+| `examples/round05-archive-spec.json` | the spec that built the round-5 archive |
+| `examples/round06-archive-spec.json` | the spec that built the round-6 archive — **the better starting point**, since it also shows how to archive small gitignored artefacts a gate depends on |
 | `README.md` | this file |
