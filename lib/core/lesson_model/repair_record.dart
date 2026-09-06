@@ -73,7 +73,151 @@ const repairForbiddenKeys = <String>{
   'candidate',
   'originalObservations',
   'structuredValue',
+  // ⭐ WAL-213. Một supersession có HAI giá trị — chữ đã bị phá và chữ thay thế
+  // — nên nó mở thêm hai cửa cùng hình dạng. Block chỉ mang `supersedes`, bản
+  // chiếu NHỎ (đếm + lớp phủ + engine); bản ghi đầy đủ ở lại corpus.
+  'supersession',
+  'supersededValue',
+  'supersedingValue',
+  'supersededText',
+  'superseded',
+  'superseding',
 };
+
+/// ⭐⭐ WAL-213 — QUAN HỆ THAY THẾ, ở phía app.
+///
+/// Vòng 7 đo: **một chữ số phục hồi được KHÔNG trở thành một block đã sửa**
+/// (`10 → 10, Δ 0`), vì bộ nhận dạng **THÊM** một quan sát vào chỗ mà quan sát
+/// bị phá phải bị **THAY THẾ**. Một block khi đó giữ hai đoạn chữ mâu thuẫn và
+/// không có gì nói cái nào là chữ của nó.
+///
+/// Bản ghi này là điều app được biết về mâu thuẫn đó — và chỉ có thế:
+/// **ĐẾM ĐƯỢC, KHÔNG ĐỌC ĐƯỢC.** Không trường nào ở đây mang chữ, của bên nào.
+///
+/// * `disposition` chỉ có thể là `SUPERSEDED` (thay thế sạch) hoặc `CONFLICT`
+///   (bản thay thế sẽ xoá mất chữ in khác ⇒ **đóng an toàn**, không bên nào là
+///   hiện hành). `TRUSTED` bị từ chối như mọi chuỗi lạ.
+/// * `servable` LUÔN `false`, là getter — JSON không đặt được.
+/// * `fromJson` trả `null` ở mọi nhánh hỏng, và `null` ⇒ bản ghi sửa chữa bị từ
+///   chối ⇒ tài liệu bị từ chối. Một mâu thuẫn hỏng KHÔNG được im lặng biến mất.
+class SupersessionRef {
+  const SupersessionRef({
+    required this.supersessionId,
+    required this.disposition,
+    required this.supersededObservations,
+    required this.supersedingEngine,
+    required this.coverage,
+    this.agreeingScales = 0,
+    this.stacked = false,
+    this.resolved = false,
+    this.changed = false,
+  });
+
+  /// Hai lớp phủ hình học. `FULL` ⇒ bản thay thế phủ hết chữ nó thay;
+  /// `PARTIAL` ⇒ còn chữ in bên ngoài ⇒ CONFLICT. `NONE` ⇒ không chỉ được ra
+  /// trên trang.
+  static const coverageValues = <String>{'FULL', 'PARTIAL', 'NONE'};
+
+  final String supersessionId;
+
+  /// `SUPERSEDED` hoặc `CONFLICT` — LẤY NGUYÊN của `repair.model.Disposition`.
+  final RepairDisposition disposition;
+
+  /// BAO NHIÊU quan sát gốc bị thay thế. Không phải chúng nói gì.
+  final int supersededObservations;
+
+  /// Engine ĐỘC LẬP đã đọc lại vùng đó (`apple-vision-crop-v1`). Một nguồn
+  /// không được thay thế quan sát của chính nó — luật ở phía Python.
+  final String supersedingEngine;
+  final String coverage;
+
+  /// Bao nhiêu THANG ĐO độc lập cùng đọc ra một chuỗi. 1 là giai thoại.
+  final int agreeingScales;
+
+  /// Ảnh cả vùng có thấy hai nửa XẾP CHỒNG không — bằng chứng duy nhất nói hai
+  /// nửa thuộc về một phân số in.
+  final bool stacked;
+
+  /// Quan hệ có giải quyết được không. `false` ⇒ block đóng an toàn.
+  final bool resolved;
+
+  /// Bản thay thế có nói khác chữ nó thay không.
+  final bool changed;
+
+  /// LUÔN `false`. Getter, không phải trường.
+  bool get servable => false;
+
+  static SupersessionRef? fromJson(Object? v) {
+    if (v is! Map) return null;
+    for (final k in repairForbiddenKeys) {
+      if (v.containsKey(k)) return null;
+    }
+    if (v['servable'] == true) return null;
+    final d = RepairDisposition.parse(v['disposition']);
+    if (d != RepairDisposition.superseded && d != RepairDisposition.conflict) {
+      return null;
+    }
+    final id = v['supersessionId'];
+    final engine = v['supersedingEngine'];
+    final coverage = v['coverage'];
+    final n = v['supersededObservations'];
+    if (id is! String || id.isEmpty) return null;
+    if (engine is! String || engine.isEmpty) return null;
+    if (coverage is! String || !coverageValues.contains(coverage)) return null;
+    if (n is! int || n < 1) return null; // 0 ⇒ không thay thế gì ⇒ không phải quan hệ này
+    final resolved = v['resolved'] == true;
+    // Hình học và trạng thái phải khớp: chỉ FULL mới được giải quyết.
+    if (resolved != (coverage == 'FULL')) return null;
+    if (resolved != (d == RepairDisposition.superseded)) return null;
+    return SupersessionRef(
+      supersessionId: id,
+      disposition: d!,
+      supersededObservations: n,
+      supersedingEngine: engine,
+      coverage: coverage,
+      agreeingScales: v['agreeingScales'] is int ? v['agreeingScales'] as int : 0,
+      stacked: v['stacked'] == true,
+      resolved: resolved,
+      changed: v['changed'] == true,
+    );
+  }
+
+  Map<String, Object?> toJson() => {
+    'supersessionId': supersessionId,
+    'disposition': disposition.wire,
+    'supersededObservations': supersededObservations,
+    'supersedingEngine': supersedingEngine,
+    'coverage': coverage,
+    'agreeingScales': agreeingScales,
+    'stacked': stacked,
+    'resolved': resolved,
+    'changed': changed,
+    'servable': servable,
+  };
+
+  /// Một vòng lưu–đọc KHÔNG được làm quan hệ này mạnh lên. Trục riêng của
+  /// WAL-213: `CONFLICT → SUPERSEDED` là một mâu thuẫn trở thành quyết định mà
+  /// không có bằng chứng mới, và MẤT một quan sát bị thay thế là mâu thuẫn trở
+  /// thành vô hình — tệ hơn không ghi, vì bản ghi giờ trông đầy đủ.
+  static bool notStrengthened(
+    Map<String, Object?> before,
+    Map<String, Object?> after,
+  ) {
+    final b = RepairDisposition.parse(before['disposition'])?.strength ?? -1;
+    final a = RepairDisposition.parse(after['disposition'])?.strength ?? -1;
+    if (a > b) return false;
+    final bn = before['supersededObservations'];
+    final an = after['supersededObservations'];
+    if (bn is int && an is int && an < bn) return false;
+    if (after['resolved'] == true && before['resolved'] != true) return false;
+    if (after['servable'] == true && before['servable'] != true) return false;
+    const rank = {'NONE': 0, 'PARTIAL': 1, 'FULL': 2};
+    final br = rank[before['coverage']] ?? -1;
+    final ar = rank[after['coverage']] ?? -1;
+    if (ar > br) return false;
+    return true;
+  }
+}
 
 /// DẤU VẾT của một sửa chữa đã được một validator TẤT ĐỊNH xác nhận — và chưa
 /// ai quyết định cho phục vụ.
@@ -96,6 +240,7 @@ class ValidatedRepairRef {
     this.changed = false,
     this.structuredKind,
     this.caps = const [],
+    this.supersedes,
   });
 
   /// Định danh bản ghi trong `repairs[]` của TSL (nội bộ/nghiên cứu).
@@ -133,6 +278,10 @@ class ValidatedRepairRef {
   /// Mất một cap qua vòng lưu–đọc là làm mất lý do — test bắt.
   final List<String> caps;
 
+  /// ⭐ WAL-213. Quan sát nào đã bị THAY THẾ để có bản sửa này — `null` với mọi
+  /// bản sửa vòng 5/6, vốn viết lại chữ đã có chứ không thay quan sát nào.
+  final SupersessionRef? supersedes;
+
   /// LUÔN `false`. Là getter chứ không phải trường: JSON không đặt được.
   bool get servable => false;
 
@@ -168,6 +317,13 @@ class ValidatedRepairRef {
     if (rv is! String || rv.isEmpty) return null;
     if (vid is! String || vid.isEmpty) return null;
     if (verdict != 'validated') return null;
+    // ⭐ Fail-closed: có khoá `supersedes` nhưng đọc không ra ⇒ TỪ CHỐI cả bản
+    // ghi. Một quan hệ thay thế hỏng không được rơi xuống thành «không có».
+    SupersessionRef? supersedes;
+    if (v.containsKey('supersedes') && v['supersedes'] != null) {
+      supersedes = SupersessionRef.fromJson(v['supersedes']);
+      if (supersedes == null) return null;
+    }
     return ValidatedRepairRef(
       repairId: id,
       failureClass: fc,
@@ -190,6 +346,7 @@ class ValidatedRepairRef {
         for (final c in (v['caps'] as List? ?? const []))
           if (c is String && c.isNotEmpty) c,
       ],
+      supersedes: supersedes,
     );
   }
 
@@ -207,6 +364,7 @@ class ValidatedRepairRef {
     'servable': servable,
     'structuredKind': structuredKind,
     'caps': caps,
+    'supersedes': supersedes?.toJson(),
   };
 
   /// Một vòng lưu–đọc KHÔNG được làm bản ghi mạnh lên (Lane E2, PR #86).
@@ -225,6 +383,12 @@ class ValidatedRepairRef {
     final bc = (before['caps'] as List? ?? const []).length;
     final ac = (after['caps'] as List? ?? const []).length;
     if (ac < bc) return false; // mất một cap là mất lý do bị chặn
+    // ⭐ WAL-213: mất quan hệ thay thế qua vòng lưu–đọc là mất mâu thuẫn.
+    final bs = before['supersedes'], as_ = after['supersedes'];
+    if (bs is Map<String, Object?> && as_ == null) return false;
+    if (bs is Map<String, Object?> && as_ is Map<String, Object?>) {
+      if (!SupersessionRef.notStrengthened(bs, as_)) return false;
+    }
     return true;
   }
 }

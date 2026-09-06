@@ -471,6 +471,168 @@ class TestVocabularyIsReused(unittest.TestCase):
         self.assertTrue(SUP.assert_not_trusted(s))
 
 
+# ---------------------------------------------------------------- end to end
+class TestEndToEnd(unittest.TestCase):
+    """WAL-213 requires the relation to be expressible «recogniser output, block record, trust
+    decision, and whatever the app eventually consumes». These are the joints."""
+
+    def _repair(self, sup=None, resolved=True):
+        from repair.validated import ValidatedRepair, grounding_for
+        superseded = (obs('1O', (0.12, 0.12, 0.20, 0.18)) if resolved
+                      else obs('0) 1 3', (0.02, 0.12, 0.20, 0.18)),)
+        superseded = superseded if isinstance(superseded, tuple) else (superseded,)
+        s = sup or supersession(superseded)
+        cand = s.candidate
+        val = ValidationResult('wal213.region-stacking-v1', Verdict.VALIDATED)
+        return ValidatedRepair(
+            block_id=BLOCK, failure_class='DIGIT_LOSS', original_observations=s.superseded,
+            candidate=cand, validation=val, source_grounding=grounding_for(cand),
+            repair_method=cand.rule_id, validator_id='wal213.region-stacking-v1',
+            validator_version='v1', repair_version='repair-v1/' + cand.rule_id,
+            caps=('trust_gate:founder_decision_absent',), supersession=s), s
+
+    def test_a_validated_repair_can_carry_the_relation_and_is_still_not_trusted(self):
+        vr, s = self._repair()
+        self.assertIs(vr.supersession, s)
+        self.assertFalse(vr.servable)
+        self.assertEqual(vr.disposition, Disposition.VALIDATED_REPAIR)
+
+    def test_a_repair_without_one_reads_back_exactly_as_before(self):
+        """Every round-5/6 repair has no supersession. The field is optional and last so an existing
+        record is unchanged by this work."""
+        from repair.validated import ValidatedRepair
+        vr, _ = self._repair()
+        d = vr.to_json()
+        d['supersession'] = None
+        back = ValidatedRepair.from_json(d)
+        self.assertIsNone(back.supersession)
+        self.assertIsNone(back.to_block_json()['supersedes'])
+
+    def test_the_relation_survives_the_repair_round_trip(self):
+        from repair.validated import ValidatedRepair
+        vr, _ = self._repair()
+        before = json.loads(json.dumps(vr.to_json(), ensure_ascii=False, default=list))
+        after = json.loads(json.dumps(ValidatedRepair.from_json(before).to_json(),
+                                      ensure_ascii=False, default=list))
+        self.assertEqual(before, after)
+
+    def test_dropping_the_relation_across_a_round_trip_is_laundering(self):
+        from repair.validated import assert_repair_not_strengthened
+        from semantic.graph import ProvenanceLaundering
+        vr, _ = self._repair()
+        before = vr.to_json()
+        after = copy.deepcopy(before)
+        after['supersession'] = None
+        with self.assertRaises(ProvenanceLaundering):
+            assert_repair_not_strengthened(before, after)
+
+    def test_strengthening_the_relation_inside_the_repair_is_caught(self):
+        from repair.validated import assert_repair_not_strengthened
+        vr, _ = self._repair(resolved=False)
+        before = vr.to_json()
+        self.assertEqual(before['supersession']['disposition'], Disposition.CONFLICT)
+        after = copy.deepcopy(before)
+        after['supersession']['disposition'] = Disposition.SUPERSEDED
+        after['supersession']['resolved'] = True
+        with self.assertRaises(SUP.TrustEscalation):
+            assert_repair_not_strengthened(before, after)
+
+    def test_the_honest_round_trip_still_passes(self):
+        """Mutation check for the two above."""
+        from repair.validated import assert_repair_not_strengthened
+        vr, _ = self._repair()
+        before = vr.to_json()
+        self.assertTrue(assert_repair_not_strengthened(before, copy.deepcopy(before)))
+
+    def test_a_look_alike_supersession_is_refused(self):
+        """No fourth provenance universe. A dict that serialises the same way, or a duck-typed
+        stand-in that answers every question, is still not the type — and a repair built on one
+        would carry a relation nothing else in the framework can re-decide."""
+        from repair.validated import RepairIntegrityError, ValidatedRepair, grounding_for
+        vr, s = self._repair()
+        base = dict(block_id=vr.block_id, failure_class=vr.failure_class,
+                    original_observations=vr.original_observations, candidate=vr.candidate,
+                    validation=vr.validation, source_grounding=grounding_for(vr.candidate),
+                    repair_method=vr.repair_method, validator_id=vr.validator_id,
+                    validator_version=vr.validator_version, repair_version=vr.repair_version)
+
+        class LookAlike:
+            block_id = BLOCK
+            servable = False
+            disposition = Disposition.SUPERSEDED
+            validation = None
+
+            def to_json(self):
+                return s.to_json()
+
+            def to_block_json(self):
+                return s.to_block_json()
+
+        for fake in (s.to_json(), LookAlike(), 'a supersession'):
+            with self.assertRaises(RepairIntegrityError, msg=type(fake).__name__):
+                ValidatedRepair(**base, supersession=fake)
+
+    def test_a_supersession_for_another_block_is_refused(self):
+        from repair.validated import RepairIntegrityError, ValidatedRepair, grounding_for
+        vr, _ = self._repair()
+        elsewhere = '07-sgk-mau-7:p032:tc2-p1:999'
+        other = supersession((obs('1O', (0.12, 0.12, 0.20, 0.18), block=elsewhere),),
+                             block=elsewhere)
+        with self.assertRaises(RepairIntegrityError):
+            ValidatedRepair(block_id=vr.block_id, failure_class=vr.failure_class,
+                            original_observations=vr.original_observations, candidate=vr.candidate,
+                            validation=vr.validation, source_grounding=grounding_for(vr.candidate),
+                            repair_method=vr.repair_method, validator_id=vr.validator_id,
+                            validator_version=vr.validator_version,
+                            repair_version=vr.repair_version, supersession=other)
+
+    def test_the_block_projection_reaches_the_bridge_and_carries_no_value(self):
+        import tsl_to_lesson_document as br
+        vr, _ = self._repair()
+        block = dict(id=BLOCK, repair=vr.to_block_json())
+        out = br.repair_of(block)
+        self.assertIsNotNone(out['supersedes'])
+        self.assertEqual(out['supersedes']['supersededObservations'], 1)
+        blob = json.dumps(out['supersedes'], ensure_ascii=False)
+        self.assertNotIn('3/10', blob)
+        self.assertNotIn('1O', blob)
+
+    def test_the_bridge_refuses_a_supersession_carrying_a_reading(self):
+        import tsl_to_lesson_document as br
+        vr, _ = self._repair()
+        for key in ('supersededValue', 'supersedingValue', 'text', 'value', 'proposedValue'):
+            rec = vr.to_block_json()
+            rec['supersedes'] = dict(rec['supersedes'])
+            rec['supersedes'][key] = '3/10'
+            with self.assertRaises(br.BridgeRefusal, msg=key):
+                br.repair_of(dict(id=BLOCK, repair=rec))
+
+    def test_the_bridge_refuses_a_full_record_riding_on_a_block(self):
+        import tsl_to_lesson_document as br
+        vr, s = self._repair()
+        rec = vr.to_block_json()
+        rec['supersession'] = s.to_json()
+        with self.assertRaises(br.BridgeRefusal):
+            br.repair_of(dict(id=BLOCK, repair=rec))
+
+    def test_the_bridge_refuses_a_trusted_or_servable_supersession(self):
+        import tsl_to_lesson_document as br
+        vr, _ = self._repair()
+        for patch in ({'disposition': Disposition.TRUSTED}, {'servable': True},
+                      {'disposition': Disposition.VALIDATED_REPAIR}):
+            rec = vr.to_block_json()
+            rec['supersedes'] = {**rec['supersedes'], **patch}
+            with self.assertRaises(br.BridgeRefusal, msg=str(patch)):
+                br.repair_of(dict(id=BLOCK, repair=rec))
+
+    def test_the_bridge_accepts_the_honest_projection(self):
+        """Mutation check: the allowlist must let the real shape through."""
+        import tsl_to_lesson_document as br
+        vr, _ = self._repair(resolved=False)
+        out = br.repair_of(dict(id=BLOCK, repair=vr.to_block_json()))
+        self.assertEqual(out['supersedes']['disposition'], Disposition.CONFLICT)
+
+
 # ================================================================= B · the real population
 def load_census():
     with open(CENSUS) as fh:

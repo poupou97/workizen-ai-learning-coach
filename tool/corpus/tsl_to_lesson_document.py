@@ -168,10 +168,25 @@ def structural_groups_of(tsl):
 #: A region-level repair projection may carry NONE of these. They are the ways a proposed value could
 #: ride into the document on a block a renderer walks.
 REPAIR_FORBIDDEN_KEYS = ('proposedValue', 'text', 'value', 'latex', 'textProjection', 'candidate',
-                         'originalObservations', 'structuredValue')
+                         'originalObservations', 'structuredValue',
+                         # WAL-213. A supersession has TWO values — the destroyed reading and the
+                         # replacement — so it opens two more doors of exactly the same shape. The
+                         # block carries only `supersedes`, the small projection (a count, an
+                         # engine, a coverage class); `supersession` is the full record and stays
+                         # corpus-side with the rest of the trace.
+                         'supersession', 'supersededValue', 'supersedingValue', 'supersededText',
+                         'superseded', 'superseding')
 REPAIR_REQUIRED_KEYS = ('repairId', 'disposition', 'failureClass', 'method', 'repairVersion',
                         'validatorId', 'verdict')
 DISPOSITION_VALIDATED_REPAIR = 'VALIDATED_REPAIR'
+
+#: WAL-213. Exactly what a block-level supersession projection may hold — an allowlist, not a
+#: denylist, because the thing being kept out is «any field that could hold a reading» and only an
+#: allowlist closes doors nobody has thought of yet.
+SUPERSEDES_ALLOWED_KEYS = frozenset({'supersessionId', 'disposition', 'supersededObservations',
+                                     'supersedingEngine', 'coverage', 'agreeingScales', 'stacked',
+                                     'resolved', 'changed', 'servable'})
+SUPERSEDES_DISPOSITIONS = frozenset({'SUPERSEDED', 'CONFLICT'})
 
 
 class BridgeRefusal(Exception):
@@ -221,6 +236,21 @@ def repair_of(x):
                             f'TRUSTED is a Founder gate and the bridge has no input for it.')
     if r.get('servable'):
         raise BridgeRefusal(f'block {x.get("id")} has a repair record claiming to be servable')
+    sup = r.get('supersedes')
+    if sup is not None:
+        if not isinstance(sup, dict):
+            raise BridgeRefusal(f'block {x.get("id")} has a non-object `supersedes`')
+        extra = sorted(set(sup) - SUPERSEDES_ALLOWED_KEYS)
+        if extra:
+            raise BridgeRefusal(
+                f'block {x.get("id")} carries {extra} on its supersession projection. The block '
+                f'form is a COUNT and a COVERAGE CLASS; the readings on both sides of a '
+                f'supersession stay corpus-side (INTERNAL/RESEARCH).')
+        if sup.get('servable') or sup.get('disposition') not in SUPERSEDES_DISPOSITIONS:
+            raise BridgeRefusal(
+                f'block {x.get("id")} has a supersession with disposition '
+                f'{sup.get("disposition")!r}; a supersession is SUPERSEDED or CONFLICT and is never '
+                f'servable')
     return dict(r)
 
 
