@@ -1,0 +1,20 @@
+{
+  "device": "Nokia 6.1 (192.168.1.3:5555) · Android 10 / SDK 29 · ai.workizen.learningcoach",
+  "iterations": [
+    {
+      "iter": 1,
+      "build": {"gitSha": "eac69ea1ad37a6b343e162be9e55d82df7f6db7e", "branch": "ws-d/round6-golden-delivery", "packs": "rebuilt 2026-09-06 · verify 12/12 OK · 41 toanExercises disappeared"},
+      "steps": [
+        {"step": "01", "expect": "Home «Chào Na!» — hồ sơ Founder giữ nguyên (cài bằng -r)", "result": "PASS", "frames": ["round6-01-home.png"], "note": "học sinh Na · bài hôm nay vẫn là KHTN 6 Bài 17"},
+        {"step": "02", "expect": "Thẻ LÁT CẮT NGHIÊN CỨU · Bài 8 với tiêu đề THẬT từ mục lục in, trang 36–39", "result": "PASS", "frames": ["round6-02-home-research.png"], "note": "«Đấu tranh giành độc lập thời kì bắc thuộc» — trước vòng này fixture thật chưa tồn tại nên app rơi về bản MẪU"},
+        {"step": "03", "expect": "Màn «Vào bài học»: MỘT bộ tên cho ba View; ba thẻ đếm từ chính bài; chip thử nghiệm", "result": "PASS", "frames": ["round6-03-picker.png"], "note": "Đọc «18 đoạn · 3 câu hỏi trong sách · 17 chỗ SAM để trống»; Trực quan «Chưa có sơ đồ cho bài này»; Học với SAM «Chưa có kịch bản cho bài này» — ba số 0 trung thực"},
+        {"step": "04", "expect": "PHƯƠNG ÁN B · PEEK: một dòng «💡 SAM gợi ý: …», không thẻ đề xuất, không chân dung, không CTA lặp", "result": "PASS", "frames": ["round6-04-read-peek.png"], "note": "chữ SGK thật hiện ngay: BÀI 8 · mục tiêu «179 TCN, 40, 248, 542, 938»; một chỗ SAM để trống ngay khối đầu"},
+        {"step": "05", "expect": "PHƯƠNG ÁN B · EXPANDED: vì sao + «Đã mở ● ○ ○» + CTA + «Để sau», mở TẠI CHỖ", "result": "PASS", "frames": ["round6-05-read-expanded.png"], "note": "hàng «Đã mở» nay nằm trong trạng thái mở, không thường trực"},
+        {"step": "06", "expect": "PHƯƠNG ÁN B · COLLAPSED: 💡 lên hàng tiêu đề, KHÔNG biến mất (lỗi D5 vòng 5)", "result": "PASS", "frames": ["round6-06-read-collapsed.png"], "note": "nội dung bài lên cao ~146 px so với trạng thái hé"},
+        {"step": "07", "expect": "«Học với SAM» nói thật là chưa có kịch bản; phần ghim BẰNG với hai View kia", "result": "PASS", "frames": ["round6-07-tutor.png"], "note": "không còn thẻ đề xuất ghim riêng ở màn này — đúng điều Founder gọi là tốn chiều dọc"},
+        {"step": "08", "expect": "kiểm tĩnh từng điểm ảnh: máy không có ai đang dùng", "result": "PASS", "frames": [], "note": "0 / 2 073 600 điểm ảnh khác nhau qua 6 giây"},
+        {"step": "09", "expect": "17 chỗ SAM để trống có ẢNH CẮT TRANG", "result": "FAIL", "frames": ["round6-04-read-peek.png"], "note": "KHOẢNG TRỐNG G1 — tài liệu WS-C dựng không có ảnh cắt, nên chỗ trống chỉ có lời giải thích + số trang. Trả về WS-C, không tự vá."}
+      ]
+    }
+  ]
+}

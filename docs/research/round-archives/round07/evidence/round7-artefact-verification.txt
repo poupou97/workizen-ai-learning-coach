@@ -1,0 +1,43 @@
+# Round-7 artefact verification — recomputed by the archive builder
+# generated 2026-09-06T07:53:54+00:00
+#
+# INTERNAL / RESEARCH ONLY (Founder D4): the 22 PNG crops are verbatim SGK page images.
+
+fixture: lesson-05-sgk-lich-su-va-dia-li-5-b8.json
+  sha256      1862f27b2282a4bb7694719a839c78fadc275bc89ed279c50dea299a7ab150f0
+  bytes       61322
+
+  blocks      57   {'image': 5, 'heading': 4, 'withheld': 17, 'activity': 6, 'paragraph': 18, 'question': 3, 'caption': 3, 'sourceRef': 1}
+  withheld    17   carrying a crop: 17   carrying text: 0
+  image       5   carrying text: 0
+  repairs     6   dispositions {'VALIDATED_REPAIR': 6}   servable {'False': 6}   on types {'withheld': 6}
+  provenance.repair: validatedRepairs 9 · onBlocks 6 · trusted 0 · capped 0
+  title       Đấu tranh giành độc lập thời kì Bắc thuộc
+  semantic 0 · tutorSteps 0
+
+crops: 22 PNG files
+  05-sgk-lich-su-va-dia-li-5-p038-fig00.png                      226384  1e83a94e5464472f045570e458d4d4ad
+  05-sgk-lich-su-va-dia-li-5-p038-withheld-003.png               204189  3902d0095db0bfac4985757eb9fc3da6
+  05-sgk-lich-su-va-dia-li-5-p038-withheld-018.png               131337  009494b1b6c187d9f140806a7ec34300
+  05-sgk-lich-su-va-dia-li-5-p038-withheld-020.png                42367  6ef7f491d915ff831345e699a4b38d76
+  05-sgk-lich-su-va-dia-li-5-p038-withheld-021.png                76095  415a3dd0e1ed57f4488d8f9747e6dd45
+  05-sgk-lich-su-va-dia-li-5-p038-withheld-022.png               117191  a1371fd928ffd9aeae1c9083bc277e25
+  05-sgk-lich-su-va-dia-li-5-p038-withheld-023.png                94425  1f3fa900e73bbc2ae5fe78f34ddc8a80
+  05-sgk-lich-su-va-dia-li-5-p038-withheld-024.png               109862  ccac1b5e759080b1a7cdff8ad00b6f5c
+  05-sgk-lich-su-va-dia-li-5-p038-withheld-027.png               426270  b8cf49a6f2a0be3659d608bea8cbe86b
+  05-sgk-lich-su-va-dia-li-5-p039-fig01.png                      412037  4576e5b5efb52e6abce50b750303c4bd
+  05-sgk-lich-su-va-dia-li-5-p039-withheld-000.png               190017  deade0fc7b0753d264c03d4ea003b8a6
+  05-sgk-lich-su-va-dia-li-5-p039-withheld-003.png                73323  21fe79ddc8db4c4c06a320a39f0ab0e7
+  05-sgk-lich-su-va-dia-li-5-p039-withheld-009.png               108721  f7bf26fd4385dc2c93a2bf6a84d520e6
+  05-sgk-lich-su-va-dia-li-5-p040-fig01.png                     1413939  713c41735791f540c95b45fc217be7dc
+  05-sgk-lich-su-va-dia-li-5-p040-withheld-003.png               822602  248150be9c79372fad48400fedc47a9d
+  05-sgk-lich-su-va-dia-li-5-p040-withheld-008.png               135613  2cd33e041d57c6809f707689f9afb431
+  05-sgk-lich-su-va-dia-li-5-p041-fig01.png                      207753  b7b227ef9c874e04b255c89155ca82ac
+  05-sgk-lich-su-va-dia-li-5-p041-fig03.png                      483840  a537de193ad9c21b222e45ad31265f40
+  05-sgk-lich-su-va-dia-li-5-p041-withheld-001.png               239096  022c159cc51c8e57b6d8ece78d66ad05
+  05-sgk-lich-su-va-dia-li-5-p041-withheld-002.png               152659  ab6dddb5f5a6dd567389a2c4963eec71
+  05-sgk-lich-su-va-dia-li-5-p041-withheld-019.png               152079  ef8e28c6f61df25d270801821fe4e7bf
+  05-sgk-lich-su-va-dia-li-5-p041-withheld-022.png               195543  1546f5832bb3d9178ed39a0d00c9dddb
+
+withheld=17  with-crop=17  ->  L5b coverage 17/17
+figure crops = 22 total - 17 withheld = 5 figure ImageBlocks

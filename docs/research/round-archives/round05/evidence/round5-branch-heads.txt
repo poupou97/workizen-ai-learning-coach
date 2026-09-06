@@ -1,0 +1,16 @@
+# Round-5 lane branch heads, resolved from origin on 2026-09-06T03:48:08Z
+# Compared against the heads recorded in ROUND5-CONSOLIDATED-REPORT-2026-09-06.md §11.3
+
+BRANCH                                         RESOLVED   REPORTED   MATCH
+lane-a3/round5-role-spec-trust-gate            569dad6    569dad6    YES
+lane-c/round5-history                          d241fdc    d241fdc    YES
+a1/round5-repair-framework                     6652d58    6652d58    YES
+a2/round5-math-formula-accuracy                465d235    465d235    YES
+lane-d/round5-legacy-packs                     0113019    0113019    YES
+a4/round5-multi-signal-verification            1733ff7    1733ff7    YES
+e1/round5-semantic-foundation                  ea6b0f8    ea6b0f8    YES
+e2/round5-visualspec-renderer                  538715f    538715f    YES
+lane-b/round5-experience                       6e5f6e7    6e5f6e7    YES
+
+integration/round5-2026-09-06 head: bab657a
+integration/round6-2026-09-06 head: 657192a

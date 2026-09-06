@@ -1,0 +1,183 @@
+# Commits round 6 added on top of the round-5 integration base
+# range: origin/integration/round5-2026-09-06..origin/integration/round6-2026-09-06
+# generated 2026-09-06T05:29:31Z by the archive builder
+#
+# NOTE: 'git log --since=2026-09-06' returns EMPTY on this branch — --since prunes traversal
+# through the nine round-5 merge commits. An explicit revision range is the correct query.
+
+d5a9946 | 2026-09-06T12:03:20+07:00 | docs(round6): composition CI — the round composes, 1084 Dart tests green
+ba90f16 | 2026-09-06T11:56:08+07:00 | docs(round6): consolidated Founder report — 4 gates PASS, 1 truthful zero
+8ae8b9a | 2026-09-06T11:19:41+07:00 | docs(round5): commit the Founder's §16 criteria, and correct my own tally
+51711c0 | 2026-09-06T10:59:53+07:00 | docs(round6): Founder addendum — Golden Delivery decided, with the target verified
+657192a | 2026-09-06T10:45:25+07:00 | docs(round6): merge debt audit — recommend B, merge #79 which subsumes #73
+1a75d24 | 2026-09-06T10:40:28+07:00 | docs(round6): plan and ownership — four workstreams, five acceptance gates
+def6971 | 2026-09-06T10:39:43+07:00 | Merge remote-tracking branch 'origin/lane-b/round5-experience' into integration/round6-2026-09-06
+f78b583 | 2026-09-06T10:39:43+07:00 | Merge remote-tracking branch 'origin/e2/round5-visualspec-renderer' into integration/round6-2026-09-06
+10bad77 | 2026-09-06T10:39:43+07:00 | Merge remote-tracking branch 'origin/e1/round5-semantic-foundation' into integration/round6-2026-09-06
+21f4e36 | 2026-09-06T10:39:43+07:00 | Merge remote-tracking branch 'origin/a4/round5-multi-signal-verification' into integration/round6-2026-09-06
+0976268 | 2026-09-06T10:39:43+07:00 | Merge remote-tracking branch 'origin/lane-d/round5-legacy-packs' into integration/round6-2026-09-06
+57feca9 | 2026-09-06T10:39:43+07:00 | Merge remote-tracking branch 'origin/a2/round5-math-formula-accuracy' into integration/round6-2026-09-06
+49971ec | 2026-09-06T10:39:43+07:00 | Merge remote-tracking branch 'origin/a1/round5-repair-framework' into integration/round6-2026-09-06
+b624a2e | 2026-09-06T10:39:43+07:00 | Merge remote-tracking branch 'origin/lane-c/round5-history' into integration/round6-2026-09-06
+1e0a137 | 2026-09-06T10:39:43+07:00 | Merge remote-tracking branch 'origin/lane-a3/round5-role-spec-trust-gate' into integration/round6-2026-09-06
+1733ff7 | 2026-09-06T09:15:37+07:00 | fix(verify): registration must survive a registry reset, and must fail loudly
+538715f | 2026-09-06T09:10:10+07:00 | docs(visual-spec): record the value-level identity leak and the retraction
+5024ff9 | 2026-09-06T09:09:55+07:00 | fix(visual-grammar): identity leaked through VALUES, not field names
+f80ed57 | 2026-09-06T09:04:03+07:00 | docs(round5): D4 — token-level evidence only, no SGK sentence reproduced
+6e5f6e7 | 2026-09-06T09:03:21+07:00 | fix(round5/test): dựng fixture so sánh QUA ĐƯỜNG JSON — biên dịch được với cả hợp đồng cũ và mới
+58e687b | 2026-09-06T09:02:58+07:00 | docs(round5): the end-to-end demotion cost in the signal verdict table
+1982801 | 2026-09-06T09:02:08+07:00 | feat(verify): run A1's engine with A4's signals — and report the negative
+ea6b0f8 | 2026-09-06T08:59:41+07:00 | docs(e1): refresh the checkpoint's lineage example after the id change
+861c81e | 2026-09-06T08:57:33+07:00 | feat(e1): the form census — why one family generalises and another does not
+73651aa | 2026-09-06T08:55:07+07:00 | feat(verify): the external-verification POC, performed rather than described
+2c5408e | 2026-09-06T08:54:49+07:00 | feat(e1): grounding integrity 0.952 -> 1.000 across all 238 TSL lessons
+57fa9e8 | 2026-09-06T08:52:45+07:00 | docs(round5): multi-signal verification — the audit, the matrix, and which signal earned its place
+f18e653 | 2026-09-06T08:51:26+07:00 | fix(e1): lesson identity leaves the renderer-facing spec — E2 (PR #86) is right
+8953baf | 2026-09-06T08:50:22+07:00 | docs(round5): báo cáo Lane B — Trực quan tới khung concept + thẻ nghiệm thu màn Workspace
+7606c78 | 2026-09-06T08:50:12+07:00 | test(verify): the multi-signal contract, including two assertions of ABSTENTION
+ead5de5 | 2026-09-06T08:48:11+07:00 | docs(e1): test count 42 -> 44 after the D4 fixture regressions
+71b3638 | 2026-09-06T08:48:00+07:00 | evidence(round5): manifest lượt 4–5 (36 frame, 28 bước, 0 hạ cấp)
+0f65d4f | 2026-09-06T08:47:35+07:00 | test(e1): D4 — replace near-verbatim SGK fixtures with invented text
+e4d9cd0 | 2026-09-06T08:46:33+07:00 | docs(e1): correct the relation edge counts in the census
+fa935d9 | 2026-09-06T08:45:58+07:00 | docs(e1): index for docs/research/semantic-graph
+406e897 | 2026-09-06T08:45:39+07:00 | docs(round5): ghi chú nghiên cứu kết xuất STEM (đã gác) + hợp đồng đề nghị với A2
+4c7030a | 2026-09-06T08:45:23+07:00 | feat(verify): enumerator signal, router with a measured escalation rate, correction workflow
+2ce23a5 | 2026-09-06T08:44:52+07:00 | docs(e1): semantic foundation detail, known defects, and the §19 scoreboard
+bcaf373 | 2026-09-06T08:44:11+07:00 | test(visual-spec): close the §19 proof — one renderer, BOTH semantic paths
+168a7fa | 2026-09-06T08:44:03+07:00 | docs(round5): bản đồ trùng lặp Lesson Workspace + so sánh A/B/C có số đo
+8bfce4c | 2026-09-06T08:43:05+07:00 | fix(visual-grammar): the trust chip is not optional (Lane E1 contract, rule 4)
+e71ab0c | 2026-09-06T08:42:21+07:00 | evidence(round5): xác nhận trên máy hai bản vá D4 (C) và D5 (B)
+5daf5f5 | 2026-09-06T08:42:18+07:00 | docs(e1): P0.3 census, §15 exception clusters, §17 structure gaps
+0113019 | 2026-09-06T08:41:14+07:00 | fix(lane-d): record the restore mechanism by checking, not by naming a branch
+6f5e52e | 2026-09-06T08:39:24+07:00 | feat(e1): P0.3 census + §17 structure gaps + §15 exception clusters
+7b1420e | 2026-09-06T08:39:00+07:00 | fix(round5/workspace): hai lỗi máy thật ở khung so sánh A/B/C
+0d3614e | 2026-09-06T08:38:06+07:00 | docs(visual-spec): reuse audit, spec v1, §19 generalisation, §27 checkpoint
+3ec5c85 | 2026-09-06T08:37:59+07:00 | docs(round5): the verdict has to carry the silent-loss correction
+1b59b6a | 2026-09-06T08:37:57+07:00 | feat(verify): LLM verifier, external evidence store, page-furniture signal
+10be95e | 2026-09-06T08:37:30+07:00 | docs(round5): fix a cross-reference and two cells in the headline table
+420bcfd | 2026-09-06T08:36:56+07:00 | docs(round5): date the pre-merge sections so they are not read as the final state
+ea83a1c | 2026-09-06T08:36:21+07:00 | evidence(round5): khung so sánh CURRENT vs A/B/C trên Nokia 6.1
+ec9f720 | 2026-09-06T08:35:13+07:00 | docs(round5): evidence manifest covers the REPAIRED stage, the provenance experiment and silent loss
+184d300 | 2026-09-06T08:35:08+07:00 | docs(e1): §10 KEEP/EVOLVE/ADAPT/DEPRECATE and §24 the Bai 17 replacement
+6ebfe89 | 2026-09-06T08:33:53+07:00 | docs(round5): file R13-R15, and close R1 / re-open R10 by measurement
+891d6fb | 2026-09-06T08:33:33+07:00 | fix(visual-spec): drop teacher-book pages before compiling a learner sequence
+2798adb | 2026-09-06T08:32:45+07:00 | docs(round5): the silent-loss correction, and Lane A2's two other cautions checked against this report
+18e435e | 2026-09-06T08:32:17+07:00 | docs(e1): §27 early Founder checkpoint + the VisualSpec contract for Lane E2
+f9b30c2 | 2026-09-06T08:31:54+07:00 | feat(lane-d): SILENT LOSS — content that is neither served nor withheld, and it corrects my own coverage
+809ae9b | 2026-09-06T08:31:00+07:00 | test(visual-spec): fail-closed, no lesson branching, no presentation constructor
+3124de8 | 2026-09-06T08:30:20+07:00 | fix(e1): an enumeration is not a procedure; adopt A2's no-rendering-to-structure rule
+63dafdd | 2026-09-06T08:28:55+07:00 | feat(lane-d): the REPAIRED stage — Lane A1 merged and scored from outside
+f04fbd7 | 2026-09-06T08:26:34+07:00 | feat(visual-spec): §19 proof — one renderer, one schema, six subjects
+d8147c9 | 2026-09-06T08:26:13+07:00 | feat(round5/workspace): lớp trợ giúp ngữ cảnh — ba phương án A/B/C sau một cờ build
+ae33beb | 2026-09-06T08:26:00+07:00 | test(e1): 41 tests for the semantic foundation; three real defects fixed
+657c27d | 2026-09-06T08:21:35+07:00 | feat(e1): P0.1 semantic foundation — SemanticClaim, SourceGrounding, provenance bridge
+7464e06 | 2026-09-06T08:20:40+07:00 | feat(visual-grammar): open renderer registry + one reusable ordered-steps renderer
+465d235 | 2026-09-06T08:20:30+07:00 | feat(mathfix): fill Lane A1's layer-C slot, read its geometry, earn its formula_structured flag
+4df7c2d | 2026-09-06T08:18:06+07:00 | fix(lesson-model): ground every comparison cell in a source block (Round 5 §8)
+7415dab | 2026-09-06T08:16:55+07:00 | feat(verify): cross-corpus signal registered into A1's framework, not beside it
+19a41ac | 2026-09-06T08:16:06+07:00 | Merge remote-tracking branch 'origin/a1/round5-repair-framework' into lane-d/round5-legacy-packs
+bb2aa11 | 2026-09-06T08:14:10+07:00 | wip: snapshot of in-progress lane work (coordinator preserved after a session rate limit)
+efafa0b | 2026-09-06T08:14:08+07:00 | wip: snapshot of in-progress lane work (coordinator preserved after a session rate limit)
+cee8d76 | 2026-09-06T08:14:03+07:00 | wip: snapshot of in-progress lane work (coordinator preserved after a session rate limit)
+e60e21d | 2026-09-06T08:14:00+07:00 | wip: snapshot of in-progress lane work (coordinator preserved after a session rate limit)
+d146a70 | 2026-09-05T23:51:09+07:00 | Merge remote-tracking branch 'origin/a1/round5-repair-framework' into a4/round5-multi-signal-verification
+ac0032d | 2026-09-05T23:50:47+07:00 | docs(math): the POC results — 10 restores, precision 1.000, 2 false corrections found and closed
+6652d58 | 2026-09-05T23:45:42+07:00 | docs(round5): the agree_tones clean rate does not reconcile across three lanes — reported
+04321f5 | 2026-09-05T23:44:57+07:00 | fix(lane-d): «independently audited» was one number doing two jobs
+f2f8617 | 2026-09-05T23:44:55+07:00 | docs(round5): correct the test counts the framework and result documents cite
+54fa315 | 2026-09-05T23:43:19+07:00 | fix(attach): the imprint page is end matter, not the last lesson (Founder audit defect 6)
+e3acf3a | 2026-09-05T23:41:56+07:00 | docs(round5): prove the OLD baseline rather than assert it
+ee8b7c7 | 2026-09-05T23:39:34+07:00 | docs(round5): read the empty-restore sentence out loud
+5484e55 | 2026-09-05T23:39:23+07:00 | feat(repair): the false-correction rate is computable straight from the ledger, with per-signal attribution
+1410367 | 2026-09-05T23:38:43+07:00 | feat(mathfix): the canonical AST — and the false correction it did not catch
+c56adad | 2026-09-05T23:38:03+07:00 | docs(round5): Lane D evidence manifest — and the operational state of this Mac
+831573a | 2026-09-05T23:37:22+07:00 | feat(repair): Vietnamese third-signal repair, structural groups, guard precision — measured
+3e9252f | 2026-09-05T23:35:24+07:00 | docs(round5): Lane D report, the five-direction data-accuracy scoreboard, and four new pipeline requests
+1a6ea70 | 2026-09-05T23:30:10+07:00 | fix(pack): INFERRED geometry-rebuilt expressions FAIL CLOSED — 41 of them were shipping as verbatim
+5659eb3 | 2026-09-05T23:26:57+07:00 | audit(math): where each STEM defect is born, stage by stage — plus two regressions
+d241fdc | 2026-09-05T23:26:05+07:00 | chore(lane-c): drop an unused import from the repair plugin
+24cc0ea | 2026-09-05T23:25:26+07:00 | docs(lane-c): precise counts — 36 attribution-role blocks book-wide, 31 derived attributions
+c636a8f | 2026-09-05T23:24:52+07:00 | feat(lane-d): orphaned-sibling detection, a pack-level back-matter scan, and two corrections the audit forced
+9a74320 | 2026-09-05T23:23:56+07:00 | fix(round5/book): D3 — tab «Bài học» có chip lọc «✨ Bài học SAM»
+373c8b3 | 2026-09-05T23:22:50+07:00 | docs(lane-c): round-5 History report, the TimelineValidator verdict, and the ledger deltas
+b855dbe | 2026-09-05T23:22:27+07:00 | Merge remote-tracking branch 'origin/a1/round5-repair-framework' into a4/round5-multi-signal-verification
+12f010b | 2026-09-05T23:20:07+07:00 | feat(mathfix): read bars off the neutral-ink layer; add the hand-check sheets
+8411f55 | 2026-09-05T23:18:34+07:00 | research(lane-c): a Lane C plugin on Lane A1's repair framework — the timeline comes back, the attribution does not
+c0eabbe | 2026-09-05T23:18:17+07:00 | Merge remote-tracking branch 'origin/integration/round5-2026-09-06' into lane-d/round5-legacy-packs
+4884489 | 2026-09-05T23:15:16+07:00 | feat(lane-d): RESTORE PRECISION, the figure-caption relation field, a two-round scoreboard
+65c68d0 | 2026-09-05T23:14:57+07:00 | feat(round5/shelf,book): ô tìm + chip lọc ở Giá sách; hai tab «Chương | Bài học» ở Sách
+569dad6 | 2026-09-05T23:11:41+07:00 | docs(round5): correct the post-spec WRONG rate and one example id in the role spec
+bf0b1a9 | 2026-09-05T23:11:12+07:00 | feat(timeline): the verbatim gate on the Dart side — fail closed, and say so when it is off
+3a160fd | 2026-09-05T23:09:07+07:00 | docs(round5): TRUST-GATE-SENSITIVITY — the curve, the regions, and what moves them
+e7055be | 2026-09-05T23:08:15+07:00 | feat(lane-d): the surviving-defect regression corpus + batch 2 spec
+2bc52f9 | 2026-09-05T23:07:46+07:00 | feat(mathfix): register the repairer against Lane A1's registry
+b032d6b | 2026-09-05T23:06:10+07:00 | docs(round5): ROLE DEFINITION SPEC v1 + re-annotation of the round-4 disagreement sample
+5f52ce2 | 2026-09-05T23:05:08+07:00 | fix(round5/visual): hai lỗi máy thật tìm ra ở lượt 1 (Nokia 6.1)
+61da939 | 2026-09-05T23:04:23+07:00 | research(lane-c): deliberate falsification of the two rules on the other 27 lessons
+41ed4d2 | 2026-09-05T23:00:14+07:00 | research(lane-c): the verbatim gate (v2) for the two PROPOSED History rules + a tone-repair probe
+0bb0418 | 2026-09-05T22:58:13+07:00 | feat(mathfix): propose from observations only, and let an independent signal decide
+90f75e0 | 2026-09-05T22:55:34+07:00 | fix(lane-d): an unbadged page is UNJUDGEABLE, not a disagreement
+2a87b88 | 2026-09-05T22:54:52+07:00 | feat(round5/visual): Trực quan thành sơ đồ thật — dòng chảy quy trình + sơ đồ tư duy
+d9a8731 | 2026-09-05T22:53:38+07:00 | feat(thresholds): block-level trust-gate simulator + THRESHOLDS.example.json (research only)
+2506064 | 2026-09-05T22:53:31+07:00 | test(lane-d): pack tools under test + fix a sandbox guarantee that depended on file order
+d3d7fcd | 2026-09-05T22:52:43+07:00 | research(lane-c): re-run Bài 8 on the round-5 pipeline + a human verbatim ledger
+b0fed82 | 2026-09-05T22:51:35+07:00 | feat(mathfix): find the printed fraction, not the flattened one
+48f2e08 | 2026-09-05T22:46:33+07:00 | feat(repair): the data-accuracy framework — DETECT/REPAIR/VALIDATE/RESTORE with a plugin registry
+75c2183 | 2026-09-05T22:45:43+07:00 | feat(lane-d): pack snapshot → rebuild → delta tool (§13 rebuild, snapshot first)
+
+# Commits on each workstream branch, on top of the round-6 base
+
+## ws-a/round6-accounting (02e28dc)
+02e28dc | 2026-09-06T11:31:04+07:00 | docs(ws-a): the TSL's conservation block is a SELF-REPORT, and says so
+1df09c7 | 2026-09-06T11:29:39+07:00 | docs(ws-a): the three served shares, with the composed column beside them
+b6809bc | 2026-09-06T11:28:55+07:00 | docs(ws-a): widen the evidence — 29 lesson ledgers, 1 878 input regions, 138 unaccounted → 0
+ee7922b | 2026-09-06T11:27:24+07:00 | docs(ws-a): freeze silent_loss.py as the historical measurement, and correct one count
+7a00d5b | 2026-09-06T11:26:19+07:00 | docs(ws-a): TRUTH ACCOUNTING round 6 — R13, the historical correction, A2, and WS-C's demotion kept apart
+58465a7 | 2026-09-06T11:21:06+07:00 | feat(ws-a): A2 — SourceLessonRecord vs CanonicalLessonIdentity, decided by the printed page
+3f6d700 | 2026-09-06T11:13:21+07:00 | feat(ws-a): the Founder's two Golden slices, run before and after — UNACCOUNTED 0 on both
+24f6136 | 2026-09-06T10:59:00+07:00 | fix(ws-a): R13 — no extracted region leaves the pipeline without a disposition
+06387ea | 2026-09-06T10:50:49+07:00 | feat(ws-a): conservation ledger — INPUT = SERVED + WITHHELD + EXCLUDED_WITH_REASON + defined non-learning
+
+## ws-b/round6-recognition (371b6b0)
+371b6b0 | 2026-09-06T11:42:30+07:00 | docs(round6): the scale ladder measured — and the holdout disagreeing with DEV about it
+9ee4fe2 | 2026-09-06T11:34:22+07:00 | docs(round6): correct two precision rows in the census — the SUPERSCRIPT and ROMAN rules have census false positives too
+d98a87c | 2026-09-06T11:33:49+07:00 | feat(recognition): make the scale ladder itself measurable via RECOG_SCALES
+801b54f | 2026-09-06T11:31:52+07:00 | docs(round6): recognition failure census and re-crop results — GATE B met, with the negatives
+206bce8 | 2026-09-06T11:24:24+07:00 | feat(recognition): Roman-numeral and ohm re-read; census corrections found by probing the census
+13f5a32 | 2026-09-06T11:17:26+07:00 | test(recognition): 16 CI tests for exponent recovery, incl. the two guard bugs as regressions
+0dddf7a | 2026-09-06T11:14:45+07:00 | feat(recognition): destroyed-exponent recovery, with the guard that had to be built after hand-check
+d2593f3 | 2026-09-06T11:03:47+07:00 | feat(recognition): bounded head-to-head against Docling CodeFormulaV2; consensus never exposes a refused value
+2551804 | 2026-09-06T11:00:08+07:00 | feat(recognition): failure census, study driver, and 34 CI tests
+6947ea0 | 2026-09-06T10:50:42+07:00 | feat(recognition): targeted re-crop harness — boxes, multi-scale consensus, hand-check sheet
+df121cf | 2026-09-06T10:46:40+07:00 | feat(recognition): Apple Vision on a page REGION — the crop-level observation the pipeline never had
+
+## ws-c/round6-repair-integration (4193c50)
+4193c50 | 2026-09-06T11:52:02+07:00 | test(ws-c): the timeline test's premise is now false, and it should be — corrected, not loosened
+f2ce138 | 2026-09-06T11:19:49+07:00 | docs(ws-c): the laboratory-restore cap, demonstrated rather than asserted + CI
+854d321 | 2026-09-06T11:16:38+07:00 | docs(ws-c): REPAIR -> PRODUCT INTEGRATION — the wire, the artefact, and what it does not claim
+21c0d91 | 2026-09-06T11:12:52+07:00 | test(ws-c): the app-side contract — twelve doors, none of them open
+f1a1c09 | 2026-09-06T11:08:36+07:00 | fix(repair): the dispose row now carries the WINNING candidate's ruling — historical correction to round 5
+0b97b15 | 2026-09-06T11:02:01+07:00 | feat(ws-c): GOLDEN #1 artefact — LS&DL 5 Bai 8 projected TSL + LessonDocument on disk
+2493d5e | 2026-09-06T10:58:55+07:00 | feat(ws-c): the bridge and the app carry a ValidatedRepair — and cannot serve it
+67d7e98 | 2026-09-06T10:52:48+07:00 | feat(ws-c): ValidatedRepair + the TSL join that makes a validated repair visible
+02e28dc | 2026-09-06T11:31:04+07:00 | docs(ws-a): the TSL's conservation block is a SELF-REPORT, and says so
+1df09c7 | 2026-09-06T11:29:39+07:00 | docs(ws-a): the three served shares, with the composed column beside them
+b6809bc | 2026-09-06T11:28:55+07:00 | docs(ws-a): widen the evidence — 29 lesson ledgers, 1 878 input regions, 138 unaccounted → 0
+ee7922b | 2026-09-06T11:27:24+07:00 | docs(ws-a): freeze silent_loss.py as the historical measurement, and correct one count
+7a00d5b | 2026-09-06T11:26:19+07:00 | docs(ws-a): TRUTH ACCOUNTING round 6 — R13, the historical correction, A2, and WS-C's demotion kept apart
+58465a7 | 2026-09-06T11:21:06+07:00 | feat(ws-a): A2 — SourceLessonRecord vs CanonicalLessonIdentity, decided by the printed page
+3f6d700 | 2026-09-06T11:13:21+07:00 | feat(ws-a): the Founder's two Golden slices, run before and after — UNACCOUNTED 0 on both
+24f6136 | 2026-09-06T10:59:00+07:00 | fix(ws-a): R13 — no extracted region leaves the pipeline without a disposition
+06387ea | 2026-09-06T10:50:49+07:00 | feat(ws-a): conservation ledger — INPUT = SERVED + WITHHELD + EXCLUDED_WITH_REASON + defined non-learning
+
+## ws-d/round6-golden-delivery (eeb38c1)
+eeb38c1 | 2026-09-06T12:00:47+07:00 | test(ws-d): the research slice guards HONESTY, not «does this lesson have a timeline»
+26821d7 | 2026-09-06T11:40:47+07:00 | docs(ws-d): the Toán zero belongs in the answer to «what can a child use now»
+0ec1310 | 2026-09-06T11:40:25+07:00 | feat(ws-d): learning-view census over 238 real lessons — and it argues AGAINST new renderers
+f4c15fc | 2026-09-06T11:31:33+07:00 | docs(ws-d): round-6 report — Option B, Golden #1 on the Nokia, and two device-only findings
+eac69ea | 2026-09-06T11:20:26+07:00 | feat(ws-d): GOLDEN #1 placed — LS&ĐL 5 Bài 8 loads REAL, not the synthetic fallback
+49bad4d | 2026-09-06T11:10:19+07:00 | feat(ws-d): golden delivery driver + dual hash methods — and it caught a stale artefact
+1897dec | 2026-09-06T11:02:46+07:00 | feat(ws-d): fixture lineage gate — which GENERATION is this fixture?
+cc5743d | 2026-09-06T10:58:34+07:00 | feat(ws-d): ship Workspace OPTION B — the Founder's choice, flag removed
+af369f6 | 2026-09-06T10:47:04+07:00 | wip(ws-d): Option B — assist layer reduced to the single Founder-selected presentation
+2abb4bf | 2026-09-06T10:45:25+07:00 | docs(round6): merge debt audit — recommend B, merge #79 which subsumes #73

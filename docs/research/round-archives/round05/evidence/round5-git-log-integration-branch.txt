@@ -1,0 +1,156 @@
+bab657a 2026-09-06T09:21:08+07:00 Alex Nguyen docs(round5): complete the PR table — all nine lanes green, composed green
+4fce34b 2026-09-06T09:20:52+07:00 Alex Nguyen docs(round5): report complete — all nine lanes in, no pending sections left
+ca1e1b6 2026-09-06T09:20:24+07:00 Alex Nguyen docs(round5): the round composes — 9 branches, 0 conflicts, both suites green
+248f21b 2026-09-06T09:13:37+07:00 Alex Nguyen docs(round5): correct the identity-guarantee claim — it was nominal, now structural
+7f1c9a5 2026-09-06T09:11:04+07:00 Alex Nguyen docs(round5): multi-signal verification — which third signal earned its place
+4b8ac9e 2026-09-06T09:04:38+07:00 Alex Nguyen docs(round5): semantic foundation + K-12 census — six primitives, three refuted domains
+78395ab 2026-09-06T08:59:57+07:00 Alex Nguyen docs(round5): integration check — the round composes, with one defect CI cannot see
+d2523b5 2026-09-06T08:56:14+07:00 Alex Nguyen docs(round5): five product scores, the workspace duplication result, Q8 and Q10
+dac0dcd 2026-09-06T08:49:24+07:00 Alex Nguyen docs(round5): Visual Grammar P0 — §19 proven, and the counterweight that matters more
+dd91ecc 2026-09-06T08:48:13+07:00 Alex Nguyen docs(round5): answer the Founder's ten checkpoint questions (§18)
+4d73e11 2026-09-06T08:45:52+07:00 Alex Nguyen docs(round5): Data Accuracy + Legacy Reprocess scoreboards, and R13 silent loss
+db1c7e7 2026-09-06T08:32:47+07:00 Alex Nguyen docs(round5): Founder STEM §3 verified — 41 inferred expressions fail closed
+04749b9 2026-09-06T08:32:02+07:00 Alex Nguyen docs(round5): Founder STEM §4 verified closed — label no longer buys formula trust
+6cd1cd0 2026-09-06T08:31:22+07:00 Alex Nguyen docs(round5): consolidated Founder report — live draft with the verified sections
+b6f7fef 2026-09-05T23:16:39+07:00 Alex Nguyen docs(round5): the 97-row independent audit as an evaluation set (not a tuning set)
+c92c08e 2026-09-05T22:35:22+07:00 Alex Nguyen docs(round5): lane plan and ownership — data accuracy REPAIR/VALIDATE/RESTORE
+05a0927 2026-09-05T22:27:24+07:00 Alex Nguyen docs(round4): consolidated Founder report — five scores, legacy scoreboard, five questions
+a281ea5 2026-09-05T22:24:40+07:00 Alex Nguyen fix(pack): derive attachmentRule from lesson_attach.RULE instead of hard-coding v1
+1a2a390 2026-09-05T22:21:33+07:00 Alex Nguyen Merge remote-tracking branch 'origin/lane-b/round4-experience' into integration/round4-2026-09-05
+eea5eed 2026-09-05T22:21:33+07:00 Alex Nguyen Merge remote-tracking branch 'origin/lane-d/round4-legacy-reprocess' into integration/round4-2026-09-05
+38cee27 2026-09-05T22:21:33+07:00 Alex Nguyen Merge remote-tracking branch 'origin/lane-c/round4-golden-slice-2' into integration/round4-2026-09-05
+d1b89f3 2026-09-05T22:21:33+07:00 Alex Nguyen Merge remote-tracking branch 'origin/lane-a/round4-pipeline-failure-classes' into integration/round4-2026-09-05
+1429fcf 2026-09-05T22:17:53+07:00 Alex Nguyen docs(round4): §13 — the independent correctness review, finding by finding, with the re-measured numbers
+1cf70b7 2026-09-05T22:12:46+07:00 Alex Nguyen corpus+ui: figures are crop neighbours too; the attach directory is read at call time; the rule id in the doc strings is v2
+1960d85 2026-09-05T22:11:03+07:00 Alex Nguyen corpus(sdm): withhold verse rather than serve it joined into prose (R7c)
+040573d 2026-09-05T22:02:33+07:00 Alex Nguyen corpus(sdm+bridge): close the caption dead zone, re-derive every role-dependent guard, read a dash sub-item's own enumerator, stop «bảng chia» being a figure
+c147db5 2026-09-05T21:53:32+07:00 Alex Nguyen corpus(sdm): a parenthesised source line is an attribution whatever its case — and never a heading_path
+5a84b80 2026-09-05T21:51:28+07:00 Alex Nguyen corpus(bridge): a chapter marker needs a boundary, its tone class is the banner's, and a title's year is not a page number
+1a8799b 2026-09-05T21:47:17+07:00 Alex Nguyen corpus(attach): a false cover no longer deletes a book's tail; the TOC-range clamp no longer skips the near lesson
+2f4a9cd 2026-09-05T21:37:36+07:00 Alex Nguyen docs(round4): Lane B experience report + device evidence (2 iterations, 32 frames, manifest 0 downgraded)
+9628c84 2026-09-05T21:26:02+07:00 Alex Nguyen test(legacy): pin that a re-run follows withheld regions too (over-withholding is measurable)
+746627f 2026-09-05T21:24:57+07:00 Alex Nguyen fix(timeline): round 4 — a mốc card said the same thing three times
+bea004c 2026-09-05T21:24:48+07:00 Alex Nguyen docs(legacy): note that Lane A-pipeline's gold FTR and Lane D's legacy false trust are not comparable (D5)
+ce849ac 2026-09-05T21:23:29+07:00 Alex Nguyen feat(legacy): three-way OLD vs tc2-p1 vs tc2-p2 on Lane A's shipped build (PR #77 @ cb60cde)
+d8f5386 2026-09-05T21:19:04+07:00 Alex Nguyen fix(tutor): round 4 — the runtime line listed step kinds from a hard-coded string, so it contradicted its own number
+af2245a 2026-09-05T21:17:16+07:00 Alex Nguyen Merge Lane A-pipeline's round-4 failure-class fixes (PR #77, cb60cde) into Lane D
+421d3ab 2026-09-05T21:17:03+07:00 Alex Nguyen feat(legacy): measure the OTHER half of a re-run — which refused regions are served again
+71b4f2c 2026-09-05T21:14:01+07:00 Alex Nguyen docs(legacy): correct an overstatement — 12 of 30 withheld regions are OVER-withheld (0.400)
+6e1b7b7 2026-09-05T21:12:04+07:00 Alex Nguyen docs(legacy): make the Founder gate concrete — THRESHOLDS template + what setting it would and would not do
+cb60cde 2026-09-05T21:11:59+07:00 Alex Nguyen docs(round4): PIPELINE-ROUND4-FAILURE-CLASS-FIXES — per class, mechanism → fix → tests → before/after with denominators and CIs
+2dd5552 2026-09-05T21:09:37+07:00 Alex Nguyen docs(legacy): blind second annotation of the batch-1 rows by a different model — κ per class
+5387abe 2026-09-05T21:07:18+07:00 Alex Nguyen corpus(tc2): a stable bounded-batch CLI for Lane D (--make-pages <book>[:FROM-TO]) and a loud warning when the bridge cannot see poc-out
+3868da5 2026-09-05T21:06:10+07:00 Alex Nguyen ui(pack): the pack builder's TC-v2 attach directory is overridable (WAL_TC2_ATTACH_DIR)
+3ac3eb2 2026-09-05T21:05:33+07:00 Alex Nguyen feat(legacy): quota sample for a class the stratified sample cannot see — figure/caption measured
+a9ccfb8 2026-09-05T21:04:28+07:00 Alex Nguyen fix(workspace): round 4 — two defects measured on the Nokia in iteration 1
+0533599 2026-09-05T21:04:22+07:00 Alex Nguyen corpus(bridge): chapter title cleanup, figure `labels` is a count not a list, and pipeline-agnostic block ids for the Bài 17 tutor script
+324352a 2026-09-05T21:00:57+07:00 Alex Nguyen test(legacy): 6 tests for the re-run delta — transfer licence, rescue counting, coverage
+54786fa 2026-09-05T20:59:42+07:00 Alex Nguyen docs(legacy): batch-1 report (method · compare · audit · κ · tc2-p2 delta · verdict PARTIAL) + pipeline requests
+c3d1297 2026-09-05T20:57:55+07:00 Alex Nguyen corpus(tc2): the TOC-range fallback must never run before the book's first header (measured regression)
+4d870e1 2026-09-05T20:54:23+07:00 Alex Nguyen fix(timeline): round 4 §6.9 — the machine-id grep test now walks the research slice, and it found a real overflow
+c5a498f 2026-09-05T20:53:57+07:00 Alex Nguyen feat(legacy): re-run delta (does an improved pipeline rescue legacy data?) + scoreboard artefacts
+b4d8606 2026-09-05T20:51:50+07:00 Alex Nguyen feat(home): round 4 — Lane C's research slice gets its own Home area, outside «Hôm nay»
+2b23801 2026-09-05T20:50:37+07:00 Alex Nguyen Merge remote-tracking branch 'origin/lane-c/round4-golden-slice-2' into lane-b/round4-experience
+1cd1616 2026-09-05T20:48:17+07:00 Alex Nguyen corpus(gold): errata — LS&ĐL 5 p041 lesson 9→8 and p080 lesson 17→18, recorded in the files (Lane C request 1)
+9fae06b 2026-09-05T20:46:25+07:00 Alex Nguyen feat(tutor): round 4 §5 — wire SourceQuoteIndex + fix the two script quote defects; Pedagogy Reality 5/17 → 7/17 (measured)
+b8d9044 2026-09-05T20:46:07+07:00 Alex Nguyen corpus(tc2): Lane C cross-lane requests 2–6 (LS&ĐL 5 gate, PR #75) — banner Ã, block-level colour, attribution + dash sub-questions, figure phrasing, «Chủ đề» chapters
+6f6d8aa 2026-09-05T20:45:01+07:00 Alex Nguyen feat(legacy): scoreboard (in scope · pending · reprocessed · audited · trusted · partial · withheld · rejected · eligible) + 30 hermetic tests
+3b1481f 2026-09-05T20:42:03+07:00 Alex Nguyen fix(evidence): round 4 §4 — the two unstamped Lane B emitters now stamp through the validator, not by hand
+130064e 2026-09-05T20:40:38+07:00 Alex Nguyen corpus(tc2): finish the WIP snapshot — figure/caption geometry + per-side crop padding (failure class 5), attachment test hooks
+7973e3c 2026-09-05T20:33:18+07:00 Alex Nguyen wip: snapshot of in-progress lane work (coordinator preserved after the agent hit a model rate limit)
+eb1dd9a 2026-09-05T20:33:16+07:00 Alex Nguyen wip: snapshot of in-progress lane work (coordinator preserved after the agent hit a model rate limit)
+206a103 2026-09-05T20:33:14+07:00 Alex Nguyen wip: snapshot of in-progress lane work (coordinator preserved after the agent hit a model rate limit)
+fb7f1c8 2026-09-05T20:30:15+07:00 Alex Nguyen test(mission): Home research card for the grade-5 slice (LÁT CẮT NGHIÊN CỨU · SÁCH LỚP 5) — opens the right document; absent ⇒ no card
+b5be5c2 2026-09-05T20:29:29+07:00 Alex Nguyen docs(lane-c): device walk QUEUED — Nokia locked at both idle checks (manifest with APK/fixture hashes, read-only device metadata); round-4 pointer in the summary
+9e17e7b 2026-09-05T20:27:49+07:00 Alex Nguyen docs(lane-c): Golden Slice #2 gate (steps 1–5, verdict), History abstractions, ledger round-4 column, PROPOSED bridge §7
+961956a 2026-09-05T20:27:48+07:00 Alex Nguyen feat(lesson-model): Golden Slice #2 — typed History additions (TimelineDate, story attribution, TimelineValidator), timeline view, catalog slot, Home research card
+9d9816d 2026-09-05T20:27:13+07:00 Alex Nguyen corpus(tc2): tone-mark agreement guard (failure class 2b, cross-lane finding from A-runtime) — withhold, never repair
+19a58ba 2026-09-05T20:25:57+07:00 Alex Nguyen Merge remote-tracking branch 'origin/a-runtime/round4-strict-evidence' into lane-b/round4-experience
+e519cbe 2026-09-05T20:24:54+07:00 Alex Nguyen docs(round4): Lane B experience report draft (items 1–10, bands, five-number inputs; device section pending)
+76633ee 2026-09-05T20:24:49+07:00 Alex Nguyen corpus(tc2): role layer — ?-box numbered continuation rule + icon/box-tint signal behind a flag (failure class 3)
+bdd4917 2026-09-05T20:23:01+07:00 Alex Nguyen research(lane-c): PROPOSED History rules (prose-dated events, story attribution, title, figure-dependent guard, typed tutor) + synthetic LS&ĐL 5 Bài 8 fixture
+57db972 2026-09-05T20:22:44+07:00 Alex Nguyen feat(workspace): round 4 §6.5/6.6/6.7 — visual legend + tap-to-source, tutor runtime line in child words + label legend + visible hint ladder, «Đã mở» trace row on the SAM đề xuất card
+536ecd8 2026-09-05T20:22:44+07:00 Alex Nguyen feat(smart-book): round 4 §6.3/6.4/6.8/6.9 — readable book page, child-language withheld «vì sao», tra cứu sheet, trust sheet for a child + parents, machine ids behind a closed fold
+84f54e6 2026-09-05T20:20:59+07:00 Alex Nguyen corpus(tc2): number / unit / chemistry guards (failure class 2: formula, number, unit fidelity) — withhold, never guess
+fe1bb19 2026-09-05T20:19:54+07:00 Alex Nguyen docs(architecture): ROUND4-RUNTIME-CONTRACTS.md — strict default, read-side classes, per-screen consequences, Bài 17 pedagogy before→after, validator registry state (PROPOSED)
+b2c3cab 2026-09-05T20:19:54+07:00 Alex Nguyen test: core + Lane B fixtures follow the strict default (fraction-check-v1 stamps on Deep-simulating events); Home demo tests skipped pending mission_data stamp
+7140c35 2026-09-05T20:14:39+07:00 Alex Nguyen corpus(tc2): reading-order agreement by LIS + geometry-gated re-sequencing (failure class 1: two-column / displaced boxes)
+6751ba9 2026-09-05T20:13:31+07:00 Alex Nguyen feat(pedagogy): SourceQuoteIndex — verbatim «…» quote verification for hints/feedback/scaffold; camera-lineage core test; validateCandidateEvidence no half stamp (Round 4 A-runtime, Founder §4/§5)
+d61b2e1 2026-09-05T20:11:55+07:00 Alex Nguyen feat(legacy): audit tooling — blind second-annotation sampler (seed 20260906), NEW/OLD batch samplers, contact sheets, annotate/score/kappa
+2c48e56 2026-09-05T20:10:18+07:00 Alex Nguyen research(lane-c): LS&ĐL 5 bounded TC-v2 run report + second review data (gate steps 1–3)
+e6712a1 2026-09-05T20:09:20+07:00 Alex Nguyen feat(legacy): OLD vs NEW compare — geometric alignment of old served blocks to TSL trusted/withheld regions, mechanical per-class signals, hashes both sides
+59b6539 2026-09-05T20:04:58+07:00 Alex Nguyen feat(legacy): registry of every legacy lesson in scope (113 ∪ sam-units = 243) with source, layout, risk, hashed OLD artefacts
+4ff077d 2026-09-05T20:04:37+07:00 Alex Nguyen feat(runtime): StudentLessonState standing + evidenceNote under strict read; parent line and Next Action say «chưa được kiểm» honestly (Round 4 A-runtime)
+d193a72 2026-09-05T20:04:21+07:00 Alex Nguyen corpus(tc2): versioned output root + raw-candidate reuse (tc2_paths) — tc2-p2 never overwrites tc2-p1
+359eb36 2026-09-05T20:02:44+07:00 Alex Nguyen feat(bookshelf): round 4 — one vocabulary «✨ N bài học SAM» from shelf → book → chapter; lesson state from trace in child words
+b9b35ab 2026-09-05T20:02:39+07:00 Alex Nguyen feat(home): round 4 — one «Hôm nay» area: SAM line (learn what, why), Bài học SAM primary, Scale card as «còn có thể mở», no mic placeholder
+9dcf080 2026-09-05T20:01:43+07:00 Alex Nguyen feat(legacy): Lane D batch orchestrator + batch-1 spec (TC-v2 CLI as-is under a shadow TC_ROOT)
+a3b59cc 2026-09-05T20:01:26+07:00 Alex Nguyen feat(evidence): strict validation is the default read rule; historicalUnvalidated read-side class (Round 4 A-runtime, Founder §4)
+2e42487 2026-09-05T16:30:49+07:00 Alex Nguyen docs(round4): lane plan and file ownership for round 4 (integration base)
+61dbfdb 2026-09-05T16:27:45+07:00 poupou97 Merge pull request #58 from poupou97/research/tc-v2-science-slice
+01cb28a 2026-09-05T16:27:39+07:00 poupou97 Merge round 2 + round 3 integration into main (Founder-authorized 2026-09-05)
+7ac9595 2026-09-05T16:22:59+07:00 Alex Nguyen docs(round3): iteration-3 evidence manifest (steps.json in the retain.py schema)
+a0f1da3 2026-09-05T16:22:02+07:00 Alex Nguyen docs(round3): consolidated Founder report + integrated-build device evidence (iteration 3, manifest)
+1701a2e 2026-09-05T16:15:37+07:00 Alex Nguyen Merge remote-tracking branch 'origin/a-data/round3-tsl-bridge-ft-audit' into integration/round3-2026-09-05
+99182d8 2026-09-05T16:15:37+07:00 Alex Nguyen Merge remote-tracking branch 'origin/lane-b/round3-experience' into integration/round3-2026-09-05
+5d8955a 2026-09-05T16:15:37+07:00 Alex Nguyen Merge remote-tracking branch 'origin/lane-c/round3-k12-research' into integration/round3-2026-09-05
+9c211bd 2026-09-05T16:11:22+07:00 Alex Nguyen docs(research): A1 bridge contract (PROPOSED) + A2 false-trust audit RESULT (measurement only, 484 rows, eight rates with Wilson CIs)
+877c38c 2026-09-05T16:11:22+07:00 Alex Nguyen feat(bridge+audit): Round-3 hand-offs and the eight-rate scorer
+c07b095 2026-09-05T16:01:33+07:00 Alex Nguyen Merge origin/lane-b/round3-experience into a-data/round3-tsl-bridge-ft-audit
+8fd638d 2026-09-05T16:00:26+07:00 Alex Nguyen Merge remote-tracking branch 'origin/a-runtime/round3-prove' into a-data/round3-tsl-bridge-ft-audit
+ac6aed2 2026-09-05T15:50:54+07:00 Alex Nguyen docs(design): round 3 Experience lane — report (six questions, B1–B5, Lane A consumption, five numbers), device checklist with iteration 1–2 results, 33 Nokia frames + steps.json + MANIFEST.json (tool/evidence/retain.py: 0 downgraded)
+f31b617 2026-09-05T15:46:32+07:00 Alex Nguyen test(ui): round 3 §7 metrics test — prints SOURCE REALITY / SOURCE TRUST / PEDAGOGY REALITY / EVIDENCE REALITY inputs from the fixture (real: 97 elements = 92 fixtureFromTrustedCorpus + 5 prototype, 0 trustedCorpus; 17 planned tutor steps = 5 runtimeGuided / 12 prototype; 0 validators)
+e3e9e9e 2026-09-05T15:43:21+07:00 Alex Nguyen fix(android): round 3 Nokia n2 — native launch window is the app surface colour with the SAM mascot instead of pure white (the first cold-start frame on the Nokia is this window, before Flutter's BootScreen); guard test reads the drawables
+08af1bf 2026-09-05T15:39:09+07:00 Alex Nguyen fix(ui): round 3 Nokia n1 D-R3-10 — Smart Book anchor lands with the target block fully visible (alignment 0.14)
+53e0208 2026-09-05T15:36:11+07:00 Alex Nguyen feat(ui): round 3 — consume Lane A-runtime (#69): per-step «SAM (runtime có kiểm)» labels from PedagogyRuntime.planForScript, «SAM đề xuất» via NextBestLearningAction (Founder A8 order Đọc → Trực quan → SAM), hint leaks rewritten, gallery relies on the core grade filter
+809adac 2026-09-05T15:29:13+07:00 Alex Nguyen Merge remote-tracking branch 'origin/a-runtime/round3-prove' into lane-b/round3-experience
+297687e 2026-09-05T15:29:13+07:00 Alex Nguyen fix(ui): round 3 Nokia n1 — D-R3-03 proposal reason no longer clipped mid-quote in portrait; D-R3-07 machine reason code leaves the withheld card (kept in the source sheet); D-R3-08 six tutor phases fit one row on 360dp
+dce004c 2026-09-05T15:26:55+07:00 Alex Nguyen docs(research): LANE C — trim evidence-gap list
+bab7cab 2026-09-05T15:26:07+07:00 Alex Nguyen fix(ui): round 3 B5 (device D-R3-01) — «Kho khám phá» source lines read «Nguồn: SGK Ngữ văn 6 · Tập 1 · trang PDF 26» instead of a raw book id and a PDF page posing as a printed page
+1ee8bb5 2026-09-05T15:26:04+07:00 Alex Nguyen docs(research): LANE C — tighten to the 8,000-word budget
+9ff7fad 2026-09-05T15:25:22+07:00 Alex Nguyen docs(research): LANE C — K-12 generalisation audit, assumption ledger, second golden lesson candidates (WAL-210)
+3fcf7ad 2026-09-05T15:23:28+07:00 Alex Nguyen docs(architecture): ROUND3-RUNTIME-CONTRACTS — A3–A8 + #7 contracts (all PROPOSED), Lane B API, returned-for-Founder list (WAL-210 round 3)
+01bcbb6 2026-09-05T15:22:05+07:00 Alex Nguyen feat(tool): round 3 §6 — evidence-retention manifest tool (tool/evidence/retain.py): git SHA, APK sha256, packVersion per pack, fixture provenance, device getprop (read-only), frame sha256s, checklist step → result; a PASS without an existing frame is downgraded to UNVERIFIED (exit 1); 6 stdlib unit tests
+f50025d 2026-09-05T15:22:04+07:00 Alex Nguyen docs(architecture): A4 evidence durability & integrity options — research only, no storage change (WAL-210 round 3)
+098055c 2026-09-05T15:22:04+07:00 Alex Nguyen fix(subjects): sourceAssetsFor filters by book/grade — Toán 6 no longer shows a Toán 5 asset (#7, Lane B request)
+f5b1c72 2026-09-05T15:22:04+07:00 Alex Nguyen feat(agenda): A8 Next Best Learning Action for a lesson — R0..R5 from StudentLessonState + LearningContext (WAL-210 round 3)
+1f2c1cc 2026-09-05T15:22:04+07:00 Alex Nguyen feat(pedagogy): A7 bounded PedagogyRuntime — TutorScript steps → PlannedAct via TutorScope + validateRealization, per-step mode (WAL-210 round 3)
+3e99acc 2026-09-05T15:22:04+07:00 Alex Nguyen feat(curriculum): A6 SemanticBinding contract + registry with ONE PROPOSED binding (KHTN 6 Bài 17) (WAL-210 round 3)
+3409527 2026-09-05T15:20:00+07:00 Alex Nguyen feat(ui): round 3 B4 — Học với SAM loop made visible: phase strip (Giải thích › Hỏi › Con trả lời › Gợi ý › Phản hồi › Tiếp), «Câu n/N» captions, A/B/C/D option letters, participation-only end count
+9b6b4c0 2026-09-05T15:17:12+07:00 Alex Nguyen feat(ui): round 3 B3 — typed Visual renderer family: shape tabs + instance chooser, process overview strip, ConceptRelation[] radial concept map, TimelineEvent[] timeline; rule ids move to the trust sheet
+938b50f 2026-09-05T15:13:23+07:00 Alex Nguyen feat(ui): round 3 B2 — Smart Book: page chips + «trang N» dividers from printed pages, figure rows with grouped captions (no machine caption linking), section badges, deduplicated image source line
+db23c41 2026-09-05T15:10:51+07:00 Alex Nguyen tool(audit): A2 — deterministic pre-checks, contact sheets and annotation log for the false-trust sample
+8a47134 2026-09-05T15:10:38+07:00 Alex Nguyen test(store): A4 durability regression — torn last line keeps earlier sessions; re-open + retry no double count on disk (WAL-210 round 3)
+d09ee45 2026-09-05T15:10:38+07:00 Alex Nguyen feat(evidence): A3 ValidatedEvidence contract + A5 lineage-from-resolved-context (WAL-210 round 3, PROPOSED)
+80aeb88 2026-09-05T15:10:03+07:00 Alex Nguyen feat(bridge): A1 — TSL → LessonDocument bridge with full provenance, fail-closed withheld, licence separate from trust
+dc96736 2026-09-05T15:09:53+07:00 Alex Nguyen feat(ui): round 3 B1 — journey visibility: first-open «Vào bài học» mode picker with SAM's reason, breadcrumb header, compact tappable trust chip + «Nguồn & độ tin» sheet, Home «Bài học SAM» card, TOC honesty footnote + lesson ranges
+bd9a630 2026-09-05T15:06:54+07:00 Alex Nguyen research(lane-c): read-only K-12 generalisation scripts — TSL audit, subject-family census, second-lesson candidate census (WAL-210)
+d4cfad7 2026-09-05T12:54:43+07:00 Alex Nguyen fix(ui): round 3 B5 — misleading states: app label «Học cùng SAM», boot screen instead of blank frame, no cross-grade gallery asset, child-facing subject/book names, map source grade from the book id
+2df75dc 2026-09-05T12:40:01+07:00 Alex Nguyen integration: adapt Track B throwing fake store to appendSession → Future<bool> (Track A contract)
+0778298 2026-09-05T12:37:07+07:00 Alex Nguyen Merge remote-tracking branch 'origin/feat/wal-210-track-b-lesson-workspace' into integration/round3-2026-09-05
+87e3afe 2026-09-05T12:37:07+07:00 Alex Nguyen Merge remote-tracking branch 'origin/docs/checkpoint-2026-09-05-dual-track' into integration/round3-2026-09-05
+ee596f6 2026-09-05T12:37:07+07:00 Alex Nguyen Merge remote-tracking branch 'origin/audit/pre-autonomy-readiness-2026-09-05' into integration/round3-2026-09-05
+214353a 2026-09-05T12:37:07+07:00 Alex Nguyen Merge remote-tracking branch 'origin/b-lane/pr3-false-trust-audit-role-layer' into integration/round3-2026-09-05
+9070cf0 2026-09-05T12:37:07+07:00 Alex Nguyen Merge remote-tracking branch 'origin/b-lane/pr2-d6-d5-docs' into integration/round3-2026-09-05
+877110e 2026-09-05T12:37:07+07:00 Alex Nguyen Merge remote-tracking branch 'origin/b-lane/pr1-pack-provenance-attachment-gates' into integration/round3-2026-09-05
+61a6e74 2026-09-05T12:27:36+07:00 Alex Nguyen docs(checkpoint): dual-track checkpoint 2026-09-05 — Track A B-lane (7 PRs) + Track B Bài 17 workspace slice; verdict B with guardrails
+489e225 2026-09-05T12:20:42+07:00 Alex Nguyen docs(design): Track B — vertical-slice report (boundary, two percentages, Track C log D1–D9), device checklist with results, 74 Nokia evidence frames (iterations 1–4)
+6151e0b 2026-09-05T12:16:32+07:00 Alex Nguyen fix(ui): Track B — Nokia n4 D9: a scripted pattern match must not use the CELEBRATE mascot (claim has no evidence) — matched turns use sam-explain
+34672ad 2026-09-05T12:08:30+07:00 Alex Nguyen fix(ui): Track B — Nokia n3 D8: keyboard overflowed the tutor by 60 px and hid the answer field — whole tutor body is one scroll view; next-action card hides while the keyboard is up
+f195ce8 2026-09-05T12:03:08+07:00 Alex Nguyen fix(fixtures): Track B — Nokia n3 D7: same-row figures were inserted in reverse (Hình 17.1 photos swapped vs captions); insert after already-placed figures
+8222b35 2026-09-05T11:54:40+07:00 Alex Nguyen fix(ui): Track B — Nokia n2 D6 (tutor auto-scroll hid the question: latest SAM turn now aligns to the top) + D3 (compact landscape chrome: 1-line title/reason, no mascot in the next-action card)
+567b8b1 2026-09-05T11:50:56+07:00 Alex Nguyen fix(ui): Track B — Nokia n2 D5: cap Smart Book image boxes at ~45 % of the viewport height (portrait crops were ~2 600 px tall in landscape)
+538174c 2026-09-05T11:47:06+07:00 Alex Nguyen fix(ui): Track B — Nokia n1 defects D1 (title case after '.'), D2 (duplicate process tab labels), D4 (anchor scroll drifts: ImageBlock.aspect reserves crop height); device checklist
+c0d4369 2026-09-05T11:43:09+07:00 Alex Nguyen test(corpus): WAL-210 — Wilson lower bound at k=0 is a ~1e-17 float; compare almost-equal
+7405e46 2026-09-05T11:42:15+07:00 Alex Nguyen research(corpus): WAL-210 — false-trust audit tooling + protocol (D3) and bounded Role-Layer signal experiment (10a/10b)
+a6480d3 2026-09-05T11:39:47+07:00 Alex Nguyen test: Track B — model (de)serialisation, tutor runner, next action, catalog, per-screen widget tests, boundary gate (throwing fake LearnerStore, source grep, git ls-files)
+0cc6c55 2026-09-05T11:39:47+07:00 Alex Nguyen feat(ui): Track B — Lesson Workspace vertical slice (Book → Chapter → Lesson → Đọc / Trực quan / Học với SAM)
+07a2450 2026-09-05T11:36:55+07:00 Alex Nguyen feat(pack): WAL-210 — diaMaps[] carry a canonical `lesson` (Dart lane request, PR #63/#64)
+5c1317a 2026-09-05T11:34:32+07:00 Alex Nguyen feat(fixtures): Track B — lesson fixture generator (TSL → LessonDocument JSON + internal page crops), synthetic CI fixture, asset dirs
+27184cf 2026-09-05T11:30:51+07:00 Alex Nguyen docs(audit): store Dart check scripts as .dart.txt so flutter analyze ignores audit artefacts
+d1fd8f8 2026-09-05T11:28:38+07:00 Alex Nguyen fix(ui): WAL-210 — default-build guard for router content, honest Home card for Scale-only grades, distinct reading labels
+e277380 2026-09-05T11:21:59+07:00 Alex Nguyen feat(evidence): WAL-210 — D1 participation kind, Scale lineage on every emitter, pack buildProvenance/knowledgeModelVersion
+dba8a6d 2026-09-05T11:20:50+07:00 Alex Nguyen test(pack): WAL-210 — align two attachment tests with the refined capped-toc-v1 rule; silence CLI prints in provenance tests
+62679a1 2026-09-05T11:18:11+07:00 Alex Nguyen docs(research): WAL-210 D6 + D5 — mark unsupported "Founder-approved convergence" as TBD / PROPOSED; add METRIC-DENOMINATORS.md
+320ae88 2026-09-05T11:12:47+07:00 Alex Nguyen feat(pack): WAL-210 — pack build provenance (G5), capped/header-repaired lesson attachment (G2) + lesson-identity gate (G3)
+21fc3c5 2026-09-05T11:05:39+07:00 Alex Nguyen fix(evidence): WAL-210 — unique event ids, idempotent appendSession, no 'unknown-case' bucket (audit C1/C3, hole A)

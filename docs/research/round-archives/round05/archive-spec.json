@@ -1,0 +1,94 @@
+{
+  "schema": "wal-round-archive-spec-v1",
+  "round": "05",
+  "roundLabel": "Round 5 — DATA ACCURACY: REPAIR -> VALIDATE -> RESTORE",
+  "closeDate": "2026-09-06",
+  "closeDateEvidence": "Consolidated report dated 2026-09-06; last round-5 commit bab657a on 2026-09-06; round-5 PRs #79-#88 created 2026-09-05T15:35Z to 2026-09-06T01:53Z; device manifest generatedAt 2026-09-06T01:47:09Z. No round-5 PR was merged, so no merge date exists.",
+  "classification": "INTERNAL / RESEARCH ONLY - DO NOT PUBLISH. Contains verbatim SGK text, SGK page crops and publisher cover artwork (Founder rule D4).",
+  "rootDir": "ROUND-05",
+  "archiveNameTemplate": "HOC-CUNG-SAM-ROUND-{round}-{closeDate}.zip",
+
+  "requiredDocs": [
+    "00-START-HERE.md",
+    "01-ROUND-OBJECTIVE.md",
+    "02-PLAN-VS-ACTUAL.md",
+    "03-WORK-COMPLETED.md",
+    "04-FAILURES-AND-FALSIFICATIONS.md",
+    "05-METRICS-BEFORE-AFTER.md",
+    "06-PRODUCT-REALITY.md",
+    "07-TEST-CI-PR-EVIDENCE.md",
+    "08-DEVICE-EVIDENCE.md",
+    "09-ARCHITECTURE-DATA-CHANGES.md",
+    "10-OPEN-RISKS-BLOCKERS.md",
+    "11-FOUNDER-ACCEPTANCE-CARD.md",
+    "12-NEXT-ROUND-PLAN.md",
+    "13-REMAINING-ROADMAP.md",
+    "14-JIRA-CONFLUENCE-STATUS.md",
+    "15-FILE-MANIFEST.md"
+  ],
+  "generatedDocs": ["15-FILE-MANIFEST.md"],
+  "requiredDirs": ["evidence", "metrics", "screenshots", "reports", "manifests"],
+
+  "copy": [
+    { "dest": "reports", "src": "docs/research/ROUND5-CONSOLIDATED-REPORT-2026-09-06.md" },
+    { "dest": "reports", "src": "docs/research/ROUND5-PLAN.md" },
+    { "dest": "reports", "src": "docs/research/ROUND5-AUDIT-97-EVALUATION-SET.md" },
+    { "dest": "reports", "src": "docs/research/ROUND6-PLAN.md" },
+    { "dest": "reports", "src": "docs/research/ROUND6-MERGE-DEBT-AUDIT.md" },
+
+    { "dest": "reports/lane-a1-repair-framework", "src": "docs/research/DATA-ACCURACY-FRAMEWORK.md" },
+    { "dest": "reports/lane-a1-repair-framework", "src": "docs/research/THIRD-SIGNAL-LAYER.md" },
+    { "dest": "reports/lane-a1-repair-framework", "src": "docs/research/VIETNAMESE-REPAIR-RESULT.md" },
+    { "dest": "reports/lane-a1-repair-framework", "src": "docs/research/FALSE-TRUST-AUDIT-PROTOCOL.md", "optional": true },
+
+    { "dest": "reports/lane-a2-math", "src": "docs/research/MATH-ACCURACY-AUDIT-2026-09-06.md" },
+    { "dest": "reports/lane-a2-math", "src": "docs/research/MATH-ACCURACY-POC-RESULTS-2026-09-06.md" },
+    { "dest": "reports/lane-a2-math", "src": "docs/research/MATH-ACCURACY-STRUCTURED-CONTRACT.md" },
+
+    { "dest": "reports/lane-a3-role-spec", "src": "docs/research/ROLE-DEFINITION-SPEC-v1.md" },
+    { "dest": "reports/lane-a3-role-spec", "src": "docs/research/TRUST-GATE-SENSITIVITY.md" },
+
+    { "dest": "reports/lane-a4-multi-signal", "src": "docs/research/ACCURACY-RECOVERY-AUDIT.md" },
+    { "dest": "reports/lane-a4-multi-signal", "src": "docs/research/ACCURACY-RECOVERY-RESULT.md" },
+
+    { "dest": "reports/lane-b-experience", "src": "docs/design/TRACK-B-ROUND5-EXPERIENCE.md" },
+    { "dest": "reports/lane-b-experience", "src": "docs/design/TRACK-B-ROUND5-WORKSPACE-DUPLICATION.md" },
+    { "dest": "reports/lane-b-experience", "src": "docs/design/STEM-RENDERING-NOTE-ROUND5.md", "optional": true },
+
+    { "dest": "reports/lane-c-history", "src": "docs/research/lane-c/07-ROUND5-HISTORY.md" },
+    { "dest": "reports/lane-c-history", "src": "docs/research/lane-c/00-LANE-C-SUMMARY.md", "optional": true },
+    { "dest": "reports/lane-c-history/data", "src": "docs/research/lane-c/data/lsdl5-round5-rerun.md", "optional": true },
+    { "dest": "reports/lane-c-history/data", "src": "docs/research/lane-c/data/lsdl5-tone-repair-probe.md", "optional": true },
+    { "dest": "reports/lane-c-history/data", "src": "docs/research/lane-c/data/lsdl5-history-stress.md", "optional": true },
+    { "dest": "reports/lane-c-history/data", "src": "docs/research/lane-c/data/lsdl5-repair-plugin.md", "optional": true },
+    { "dest": "reports/lane-c-history/data", "src": "docs/research/lane-c/data/lsdl5-bai8-verbatim-ledger.json", "optional": true },
+
+    { "dest": "reports/lane-d-legacy-packs", "src": "docs/research/legacy-reprocess/ROUND5-LANE-D-REPORT.md" },
+    { "dest": "reports/lane-d-legacy-packs", "src": "docs/research/legacy-reprocess/ROUND5-LANE-D-EVIDENCE.md" },
+    { "dest": "reports/lane-d-legacy-packs", "src": "docs/research/legacy-reprocess/PIPELINE-REQUESTS-FROM-LEGACY.md", "optional": true },
+
+    { "dest": "reports/lane-e-semantic-visual", "src": "docs/research/semantic-graph/*.md" },
+
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND4-CONSOLIDATED-REPORT-2026-09-06.md" },
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND4-PLAN.md", "optional": true },
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND3-CONSOLIDATED-REPORT-2026-09-05.md" },
+
+    { "dest": "metrics", "src": "docs/research/DATA-ACCURACY-SCOREBOARD-LANE-D.md" },
+    { "dest": "metrics", "src": "docs/research/METRIC-DENOMINATORS.md" },
+    { "dest": "metrics", "src": "docs/research/legacy-reprocess/LEGACY-REPROCESS-SCOREBOARD.md" },
+    { "dest": "metrics", "src": "docs/research/legacy-reprocess/LEGACY-REPROCESS-SCOREBOARD.json" },
+    { "dest": "metrics", "src": "docs/research/legacy-reprocess/THRESHOLDS.example.json" },
+
+    { "dest": "screenshots", "src": "docs/design/track-b-evidence/round5/*.png" },
+
+    { "dest": "manifests", "src": "docs/design/track-b-evidence/round5/MANIFEST.json", "rename": "round5-device-MANIFEST.json" },
+    { "dest": "manifests", "src": "docs/design/track-b-evidence/round5/steps.json", "rename": "round5-device-steps.json" },
+    { "dest": "manifests", "src": ".workforce.json", "rename": "workforce-config.json" }
+  ],
+
+  "excluded": [
+    { "what": "SGK PDF source", "path": "nguon-chi-thuc/", "size": "9.8 GB", "reason": "copyright; never committed, never archived" },
+    { "what": "all derived pipeline artefacts", "path": "poc-out/", "size": "14 GB", "reason": "derivative works of copyrighted source; gitignored" },
+    { "what": "round-5 artefacts", "path": "poc-out/round5/", "size": "341 MB", "reason": "inventory only - see manifests/large-data-inventory.txt" }
+  ]
+}

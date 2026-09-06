@@ -1,0 +1,13 @@
+# Round-6 branch heads, resolved from origin on 2026-09-06T05:08:11Z
+# Compared against §10.1 of ROUND6-CONSOLIDATED-REPORT-2026-09-06.md
+
+BRANCH                                     RESOLVED   REPORTED   MATCH
+ws-a/round6-accounting                     02e28dc    02e28dc    YES
+ws-c/round6-repair-integration             4193c50    4193c50    YES
+ws-b/round6-recognition                    371b6b0    371b6b0    YES
+ws-d/round6-golden-delivery                eeb38c1    eeb38c1    YES
+ws-archive/round5-retrospective            73a5321    73a5321    YES
+
+integration/round6-2026-09-06 head: d5a9946
+integration/round5-2026-09-06 head: bab657a
+main head:                          61dbfdb

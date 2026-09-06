@@ -1,0 +1,39 @@
+# Atlassian tracker status, read by the archive builder on 2026-09-06T04:05:51Z
+# site: workizen.atlassian.net · Jira project WAL · Confluence space WAL (per .workforce.json)
+
+## Jira — JQL: project = WAL AND updated >= "2026-09-05" ORDER BY updated DESC
+WAL-209  Done   2026-09-05T16:29:15+0700  [P0] TC-v2 Science Slice — Source -> ... -> Trusted Structured Lesson
+WAL-210  Done   2026-09-05T16:29:14+0700  [P0] B-lane after pre-autonomy checkpoint — gates before growth
+WAL-195  Ideas  2026-09-05T10:40:48+0700  [ARCH] Education Data Architecture & Learning Graph Research (Epic)
+WAL-206  QA     2026-09-05T02:14:37+0700  [P0] Layout-aware K-12 extraction
+WAL-207  QA     2026-09-05T02:14:33+0700  [P0 Research] Learning Views concept & reference research
+WAL-208  Done   2026-09-05T02:14:30+0700  [RESEARCH] Trusted-Corpus Feasibility Study (TC-v1)
+
+RESULT: 6 issues touched on or after 2026-09-05. NONE of them is a round-5 issue.
+        No WAL issue was created, transitioned or commented for any of the nine round-5 lanes.
+        Newest WAL update anywhere: 2026-09-05T16:29 (+0700) — before six of the ten round-5 PRs existed.
+
+## Confluence — CQL: space = WAL AND type = page ORDER BY lastmodified DESC (top 20 by recency)
+2026-09-02T11:47:32.000Z|15 — Current Status
+2026-09-02T08:02:49.000Z|11 — UI/UX &amp; Design System
+2026-09-02T04:34:27.000Z|19 — Coverage Dashboard
+2026-09-02T03:55:00.000Z|18 — Learning Science &amp; Pedagogy Research (P0)
+2026-09-01T08:06:13.000Z|17 — AI Curriculum chính thức (QĐ 2422)
+2026-09-01T07:51:49.000Z|16 — SAM Teaching Philosophy (Hiến chương)
+2026-09-01T04:47:41.000Z|14 — Safety / Privacy / Compliance
+2026-09-01T04:47:31.000Z|13 — ADR / Decisions
+2026-09-01T04:47:21.000Z|12 — Research
+2026-09-01T04:47:03.000Z|10 — AI Lab
+2026-09-01T04:46:57.000Z|09 — Parent Experience
+2026-09-01T04:46:48.000Z|08 — Student Experience
+2026-09-01T04:46:35.000Z|07 — Camera Tutor / Problem Understanding
+2026-09-01T04:46:25.000Z|06 — AI Tutor / TutorScope
+2026-09-01T04:46:17.000Z|05 — Adaptive Learning Engine
+2026-09-01T04:46:10.000Z|04 — Student Knowledge Model
+2026-09-01T04:45:57.000Z|03 — Educational Knowledge Model
+2026-09-01T04:45:48.000Z|02 — Product Architecture
+2026-09-01T04:45:39.000Z|01 — Product Vision
+2026-09-01T04:45:28.000Z|00 — Start Here
+
+RESULT: newest Confluence page in space WAL was last modified 2026-09-02.
+        No Confluence page was created or updated for round 3, round 4 or round 5.
