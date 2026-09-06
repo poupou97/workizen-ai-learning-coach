@@ -245,7 +245,11 @@ class MissionCenterScreen extends StatelessWidget {
                   ),
                 )),
               // ── TẦNG 2: ĐÚNG MỘT VIỆC ──────────────────────────────────
-              const SizedBox(height: WalSpacing.lg),
+              //
+              // Khoảng cách md (không phải lg): hai tầng PHẢI cùng nằm trong
+              // màn đầu của Nokia 6.1 (360×640 dp). `home_multi_subject_test`
+              // đo đúng điều đó ở đúng kích thước ấy.
+              const SizedBox(height: WalSpacing.md),
               _pad(_sectionLabel('SAM GỢI Ý')),
               _pad(promoted == null
                   ? _nextActionCard()
@@ -427,8 +431,10 @@ class MissionCenterScreen extends StatelessWidget {
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('${card.subjectLine} · ${card.lessonLine}',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-                fontSize: WalType.body + 2,
+                fontSize: WalType.body + 1,
                 fontWeight: FontWeight.w700,
                 color: WalColors.primaryText,
                 height: 1.25)),
@@ -437,6 +443,8 @@ class MissionCenterScreen extends StatelessWidget {
             card.otherGradeNote == null
                 ? where
                 : '$where · ${card.otherGradeNote}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
                 fontSize: 13, color: WalColors.inkSoft)),
         if (doc.isFixture) ...[
@@ -998,7 +1006,10 @@ class _SmartCardRow extends StatefulWidget {
 
 class _SmartCardRowState extends State<_SmartCardRow> {
   static const double viewportFraction = .82;
-  static const double cardHeight = 186;
+  /// Chiều cao thẻ — cố định để hàng không nhảy khi thẻ này dài hơn thẻ kia.
+  /// Con số đến từ phép đo: bốn dòng bắt buộc + dòng «sách lớp N» của thẻ
+  /// lớp khác, ở 360 dp. Cao hơn nữa thì tầng 2 rơi xuống dưới nếp gấp.
+  static const double cardHeight = 172;
 
   late final PageController _controller =
       PageController(viewportFraction: viewportFraction);
@@ -1125,8 +1136,10 @@ class _SmartCard extends StatelessWidget {
                             letterSpacing: 1.0,
                             color: WalColors.primaryText)),
                   ),
+                  // Dấu nối hai tầng: thẻ nào đang được «SAM GỢI Ý» nêu.
+                  // Chữ KHÁC nhãn của tầng 2 có chủ ý — hai chỗ, hai vai.
                   if (promoted)
-                    const Text('SAM GỢI Ý',
+                    const Text('ĐANG GỢI Ý',
                         style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -1139,7 +1152,7 @@ class _SmartCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontSize: WalType.body,
+                        fontSize: WalType.body - .5,
                         fontWeight: FontWeight.w700,
                         height: 1.2,
                         color: card.lessonLine == null

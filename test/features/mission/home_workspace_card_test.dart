@@ -1,6 +1,13 @@
-/// ROUND 3 B1 — Home nhìn thấy sản phẩm: thẻ «Bài học SAM» cho bài có Lesson
-/// Workspace của ĐÚNG lớp; không có bài ⇒ không có thẻ; thẻ nói rõ thử nghiệm
-/// và KHÔNG thay thẻ «Việc SAM đề xuất» (hợp đồng G2 của Track A).
+/// ROUND 3 B1 — Home nhìn thấy sản phẩm: bài có Lesson Workspace hiện thành
+/// thẻ; không có bài ⇒ không có thẻ; nhãn thử nghiệm bắt buộc; lối vào Môn học
+/// (hợp đồng G2 của Track A) không bị nuốt.
+///
+/// ⭐⭐ ROUND 7 · V2 (Founder order 50) — SỬA TIỀN ĐỀ, KHÔNG NỚI KỲ VỌNG.
+/// «Thẻ Bài học SAM» của vòng trước là một MEGA-CARD chiếm gần hết màn đầu.
+/// Founder đã bác nó (§7). Cùng những sự thật ấy nay nằm ở hai chỗ có tên:
+/// Smart Card của hàng «HÔM NAY» (MÔN · BÀI · TRẠNG THÁI · VIỆC TIẾP THEO) và
+/// thẻ «SAM GỢI Ý» (tên bài · nguồn · lời SAM · nút). Mỗi kỳ vọng dưới đây
+/// vẫn đòi một chuỗi CỤ THỂ — chỉ đổi chỗ nó phải xuất hiện.
 library;
 
 import 'package:flutter/material.dart';
@@ -9,6 +16,7 @@ import 'package:learning_coach/core/lesson_model/lesson_document.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/runtime_plan.dart';
 import 'package:learning_coach/features/mission/mission_center_screen.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
 
@@ -28,8 +36,8 @@ void main() {
 // mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
 // vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
 
-  testWidgets('⭐ có bài workspace ⇒ thẻ «BÀI HỌC SAM · BẢN THỬ NGHIỆM» với tên '
-      'bài, chương, trang, ba cách học; «Mở bài học» trả đúng tài liệu', (
+  testWidgets('⭐ có bài workspace ⇒ Smart Card «HÔM NAY» + thẻ «SAM GỢI Ý» với '
+      'tên bài, chương, trang, nhãn nguồn; nút trả đúng tài liệu', (
     t,
   ) async {
     final doc = loadSyntheticDoc();
@@ -43,25 +51,38 @@ void main() {
         MissionCenterScreen(
           data: await _data(),
           onOpenSubjects: () {},
-          workspaceLesson: doc,
+          learnerGrade: 6,
+          // ⭐ VIỆC TIẾP THEO đến từ ĐỘNG CƠ DUY NHẤT — không truyền nó thì
+          // Home KHÔNG có gì để đưa lên «SAM GỢI Ý» và rơi về thẻ đề xuất cũ
+          // (fail-closed có chủ ý: Home không tự nghĩ ra một đề xuất).
+          lessonThreads: [
+            HomeLessonThread(doc: doc, next: founderNextAction(doc, seen: const {})),
+          ],
           onOpenWorkspaceLesson: (d, {at}) => opened = d,
         ),
       ),
     );
     await t.pumpAndSettle();
-    expect(find.byKey(MissionCenterScreen.workspaceCardKey), findsOneWidget);
-    // ROUND 7 V1 lượt 2: eyebrow còn MỘT từ; nhãn nguồn thành chip gọn — cùng
-    // widget và cùng bộ chữ với workspace. Nó KHÔNG được mất khi màn sắp lại.
-    expect(find.text('ĐANG HỌC'), findsOneWidget);
+    // TẦNG 1 — Smart Card của chính bài này, khoá theo slot (không còn một
+    // «thẻ bài học» duy nhất của cả màn).
+    expect(
+      find.byKey(MissionCenterScreen.smartCardKey(doc.slotKey)),
+      findsOneWidget,
+    );
+    // Trạng thái là TỪ VỰNG Founder, và nó nói đúng sự thật: chưa mở gì.
+    expect(find.text('CHƯA BẮT ĐẦU'), findsOneWidget);
+    // TẦNG 2 — nhãn nguồn thành chip gọn, cùng widget và cùng bộ chữ với
+    // workspace. Nó KHÔNG được mất khi màn sắp lại.
+    expect(find.byKey(MissionCenterScreen.samSuggestionKey), findsOneWidget);
     expect(
       find.descendant(
-        of: find.byKey(MissionCenterScreen.workspaceCardKey),
+        of: find.byKey(MissionCenterScreen.samSuggestionKey),
         matching: find.byKey(FixtureChip.chipKey),
       ),
       findsOneWidget,
     );
     final inCard = find.descendant(
-      of: find.byKey(MissionCenterScreen.workspaceCardKey),
+      of: find.byKey(MissionCenterScreen.samSuggestionKey),
       matching: find.textContaining('Bài 17 · TÁCH CHẤT'),
     );
     expect(inCard, findsOneWidget);
@@ -71,12 +92,16 @@ void main() {
     // còn lại là một nút bấm được ở hàng «CÓ THỂ LÀM TIẾP».
     expect(find.byKey(MissionCenterScreen.continueRowKey), findsOneWidget);
     expect(find.textContaining('Học với SAM'), findsWidgets);
-    // thẻ G2 của Track A vẫn còn — ROUND 4: đứng sau như «CÒN CÓ THỂ MỞ»
+    // Lối vào Môn học (G2 của Track A) vẫn còn — ROUND 7 V2: dưới nhãn «CÁC
+    // MÔN CỦA CON», nút VIỀN, không tranh CTA với «SAM GỢI Ý».
     expect(find.byKey(MissionCenterScreen.secondaryCardKey), findsOneWidget);
+    expect(find.text('CÁC MÔN CỦA CON'), findsOneWidget);
     expect(find.text('Vào Môn học ▸'), findsOneWidget);
-    await t.ensureVisible(find.text('Mở bài học'));
+    // Nhãn nút là NGUYÊN VĂN nhãn của động cơ (R2 ⇒ «📖 Đọc»), không phải một
+    // chuỗi Home tự đặt.
+    await t.ensureVisible(find.text('📖 Đọc ▸'));
     await t.pumpAndSettle();
-    await t.tap(find.text('Mở bài học'));
+    await t.tap(find.text('📖 Đọc ▸'));
     expect(opened?.slotKey, doc.slotKey);
   });
 
@@ -87,8 +112,9 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.byKey(MissionCenterScreen.workspaceCardKey), findsNothing);
+    expect(find.byKey(MissionCenterScreen.todayRowKey), findsNothing);
     expect(find.textContaining('BÀI HỌC SAM'), findsNothing);
+    expect(find.textContaining('Bài 17'), findsNothing);
   });
 
   testWidgets('thẻ không có %, sao, «đã học»', (t) async {
@@ -97,14 +123,20 @@ void main() {
         MissionCenterScreen(
           data: await _data(),
           onOpenSubjects: () {},
-          workspaceLesson: loadSyntheticDoc(),
+          learnerGrade: 6,
+          lessonThreads: [
+            HomeLessonThread(
+              doc: loadSyntheticDoc(),
+              next: founderNextAction(loadSyntheticDoc(), seen: const {}),
+            ),
+          ],
           onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );
     await t.pumpAndSettle();
     final card = find.descendant(
-      of: find.byKey(MissionCenterScreen.workspaceCardKey),
+      of: find.byKey(MissionCenterScreen.samSuggestionKey),
       matching: find.byType(Text),
     );
     for (final e in card.evaluate()) {
