@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/band_density_scope.dart';
 import '../../../app/theme/wal_tokens.dart';
 import '../../../core/lesson_model/lesson_document.dart';
+import '../../../core/agenda/lesson_next_action.dart';
 import '../../../core/lesson_model/next_action.dart';
 
 class ModePicker extends StatelessWidget {
@@ -25,7 +26,7 @@ class ModePicker extends StatelessWidget {
   });
 
   final LessonDocument doc;
-  final NextAction proposal;
+  final LessonNextAction proposal;
   final void Function(WorkspaceView view) onPick;
 
   static Key cardKey(WorkspaceView v) => Key('workspace-pick-${v.name}');

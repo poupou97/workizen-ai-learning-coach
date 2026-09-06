@@ -35,8 +35,9 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
-import '../../core/lesson_model/lesson_document.dart';
+import '../../core/agenda/lesson_next_action.dart';
 import '../../core/display/lesson_title.dart';
+import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/next_action.dart';
 import '../../core/lesson_model/tutor_script.dart';
 import 'smart_book_view.dart';
@@ -95,7 +96,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   WorkspaceView? _assistFor;
 
   /// Đề xuất đổi sang View KHÁC ⇒ hé lại (không nhắc lại cùng một điều).
-  void _syncAssist(NextAction next) {
+  void _syncAssist(LessonNextAction next) {
     if (_assistFor == next.view) return;
     _assistFor = next.view;
     _assist = AssistState.peek;
@@ -133,7 +134,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   /// từ `NextBestLearningAction` (Lane A-runtime, PR #69) — luật prototype
   /// «có sơ đồ ⇒ Trực quan trước» của `nextActionFor` không còn dùng ở UI.
   /// Xung đột thứ tự này được TRẢ VỀ Founder trong PR, không tự quyết ở đây.
-  NextAction _proposal() =>
+  LessonNextAction _proposal() =>
       founderNextAction(doc, seen: _seen, learnerId: widget.learnerId);
 
   List<String> get _crumbs =>
@@ -259,11 +260,27 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   /// «Đã mở: ● Đọc ○ Trực quan ○ Học với SAM» — dấu vết PHIÊN, không phải
   /// bằng chứng học. MỞ ≠ HIỂU. Dựng ở đây vì lớp trợ giúp không được đọc
   /// trace.
-  String get _seenLine => [
-    'Đã mở:',
-    for (final v in WorkspaceView.values)
-      '${_seen.contains(v) ? '●' : '○'} ${v.label}',
-  ].join(' ');
+  ///
+  /// ⭐ ROUND 7 · WS-R — hàng này từng duyệt `WorkspaceView.values` VÔ ĐIỀU
+  /// KIỆN, nên nó vẽ «○ Trực quan ○ Học với SAM» cho cả bài KHÔNG CÓ hai thứ
+  /// đó. Trên LS&ĐL 5 Bài 8 (Nokia 6.1) nó nằm ngay dưới câu SAM nói trẻ đã
+  /// đi qua mọi cách học của bài — hai câu ngược nhau trên một màn, và «○»
+  /// mời trẻ đi tìm thứ không tồn tại. Màn «Vào bài học» đã nói thật từ vòng
+  /// 3 («Chưa có sơ đồ cho bài này»); hàng này thì chưa. Nay nó chỉ chấm
+  /// ●/○ cho những cách học bài NÀY có, và NÊU TÊN những cách không có.
+  String get _seenLine {
+    final have = availableViewsOf(doc);
+    final missing = [
+      for (final v in WorkspaceView.values)
+        if (!have.contains(v)) v.label,
+    ];
+    final marks = [
+      'Đã mở:',
+      for (final v in have) '${_seen.contains(v) ? '●' : '○'} ${v.label}',
+    ].join(' ');
+    if (missing.isEmpty) return marks;
+    return '$marks · Bài này chưa có ${missing.join(', ')}';
+  }
 
   Widget _header(BuildContext context, {bool compact = false}) => Padding(
     padding: const EdgeInsets.fromLTRB(
