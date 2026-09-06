@@ -47,6 +47,7 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
 from . import model
+from . import supersession as _sup
 from .model import Disposition, Observation, RepairCandidate, ValidationResult, Verdict
 
 # Lane E1's grounding, imported rather than re-declared (`tool/` on the path; `repair` lives in
@@ -162,6 +163,11 @@ class ValidatedRepair:
     framework_version: str = model.FRAMEWORK_VERSION
     integration_version: str = INTEGRATION_VERSION
     caps: Sequence[str] = ()                    # what this record was NOT allowed to be, and why
+    #: WAL-213. The relation by which this repair's observation REPLACED a destroyed one, when the
+    #: repair came from a recogniser rather than from a rule over the text that was already there.
+    #: `None` for every round-5/6 repair, which is why it is optional and last: an existing record
+    #: reads back unchanged, and a record that HAS one can never lose it (see `to_json`).
+    supersession: Any = None                    # repair.supersession.Supersession
 
     #: not a field. A `ValidatedRepair` is a validated repair; it is not a trusted one.
     disposition = Disposition.VALIDATED_REPAIR
@@ -185,6 +191,18 @@ class ValidatedRepair:
         object.__setattr__(self, 'source_version', model._freeze(dict(self.source_version)))
         object.__setattr__(self, 'provenance', model._freeze(dict(self.provenance)))
         object.__setattr__(self, 'caps', tuple(self.caps))
+        if self.supersession is not None:
+            if not isinstance(self.supersession, _sup.Supersession):
+                raise RepairIntegrityError(
+                    'supersession must be repair.supersession.Supersession — reuse the type, do not '
+                    'invent a fourth provenance universe')
+            if self.supersession.block_id != self.block_id:
+                raise RepairIntegrityError(
+                    f'supersession is for block {self.supersession.block_id!r}, this repair is for '
+                    f'{self.block_id!r}')
+            if self.supersession.servable:
+                raise TrustEscalation('a supersession attached to a repair claimed to be servable')
+            _sup.assert_not_trusted(self.supersession)
 
     # ------------------------------------------------------------------ read-only projections
     @property
@@ -217,7 +235,7 @@ class ValidatedRepair:
     # ------------------------------------------------------------------ construction
     @staticmethod
     def from_entry(entry, *, grounding=None, source_version=None, structured_value=None, caps=(),
-                   validation=None):
+                   validation=None, supersession=None):
         """Build from an append-only ledger row. The ONLY construction path from the engine.
 
         Refuses anything that is not a confirmed repair, and refuses a `restore` row outright: a
@@ -251,7 +269,8 @@ class ValidatedRepair:
             repair_version=f'{entry.framework_version}/{cand.rule_id}',
             source_version=sv, provenance=prov,
             structured_value=structured_value, ledger_entry_id=entry.entry_id,
-            framework_version=entry.framework_version, caps=tuple(caps))
+            framework_version=entry.framework_version, caps=tuple(caps),
+            supersession=supersession)
 
     @staticmethod
     def from_json(d):
@@ -293,7 +312,9 @@ class ValidatedRepair:
             ledger_entry_id=d.get('ledgerEntryId'),
             framework_version=d.get('frameworkVersion') or model.FRAMEWORK_VERSION,
             integration_version=d.get('integrationVersion') or INTEGRATION_VERSION,
-            caps=tuple(d.get('caps') or ()))
+            caps=tuple(d.get('caps') or ()),
+            supersession=(_sup.Supersession.from_json(d['supersession'])
+                          if d.get('supersession') else None))
 
     # ------------------------------------------------------------------ serialisation
     def to_json(self):
@@ -321,6 +342,7 @@ class ValidatedRepair:
             ledgerEntryId=self.ledger_entry_id,
             servable=self.servable,
             caps=list(self.caps),
+            supersession=self.supersession.to_json() if self.supersession else None,
         )
 
     def to_block_json(self):
@@ -341,6 +363,10 @@ class ValidatedRepair:
             servable=self.servable,
             structuredKind=(self.structured_value or {}).get('kind') if isinstance(self.structured_value, Mapping) else None,
             caps=list(self.caps),
+            # WAL-213: the SMALL supersession projection — a count, an engine and a coverage class.
+            # Never a value on either side: the destroyed reading and the replacement both stay
+            # corpus-side, so a renderer can COUNT the contradiction and cannot READ it.
+            supersedes=self.supersession.to_block_json() if self.supersession else None,
         )
 
 
@@ -383,6 +409,15 @@ def assert_repair_not_strengthened(before, after):
     if len(after.get('caps') or ()) < len(before.get('caps') or ()):
         raise ProvenanceLaundering('a cap was dropped across a round trip - the reason a repair was '
                                    'held back must survive serialisation')
+    # WAL-213: a repair that carried a supersession must still carry it, and the supersession
+    # itself must not have been laundered. A record whose contradiction disappeared across a save
+    # and load looks MORE complete than the one that went in, which is the worst kind of lie.
+    sb, sa = before.get('supersession'), after.get('supersession')
+    if sb and not sa:
+        raise ProvenanceLaundering('a supersession was dropped across a round trip — the observation '
+                                   'this repair replaced must survive serialisation')
+    if sb and sa:
+        _sup.assert_supersession_not_strengthened(sb, sa)
     # E1's own guard, on the grounding pair. Its shape is {support, status, grounding[], ...}.
     _graph.assert_not_strengthened(
         dict(grounding=[before.get('sourceGrounding') or {}]),
