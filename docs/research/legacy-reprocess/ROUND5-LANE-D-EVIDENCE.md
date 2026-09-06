@@ -64,6 +64,33 @@ Reproduce the OLD baseline:
 | fresh blind verdicts | `poc-out/round5/legacy/batch-1-round5/restore/restore-answers.json` |
 | RESTORE PRECISION | `poc-out/round5/legacy/batch-1-round5/restore/restore-precision.{json,md}` |
 
+## The REPAIRED stage (Lane A1 merged, `tc2-p3`)
+
+| what | where |
+|---|---|
+| batch 2 re-run on the merged build | `poc-out/round5/legacy/batch-2-repaired/` |
+| batch 1 re-run on the merged build (holdout) | `poc-out/round5/legacy/batch-1-round5-repaired/` |
+| re-run delta `tc2-p2` → `tc2-p3` (rescue · collateral · recovery) | `.../batch-2-repaired/delta-from-p2/delta.{json,md}` |
+| re-run delta `tc2-p1` → `tc2-p3` (the whole round, batch 1) | `.../batch-1-round5-repaired/delta-from-p1/delta.{json,md}` |
+| restore precision, REPAIRED stage (0/1) | `.../batch-2-repaired/restore/restore-precision.{json,md}` |
+| restore precision, batch 1 (3/6, verdicts transferred) | `.../batch-1-round5-repaired/restore/restore-precision.{json,md}` |
+| orphaned siblings after the merge | `.../batch-2-repaired/orphan/orphans.{json,md}`, `.../batch-1-round5-repaired/orphan/…` |
+| **silent loss** (neither served nor withheld) | `.../batch-2-repaired/silent-loss.{json,md}`, `.../batch-1-round5-repaired/silent-loss.{json,md}` |
+| named defects on the merged build | `poc-out/round5/legacy/regression/round5-repaired-tc2-p3.{json,md}` |
+| R1 class on a second book, after the fix | `poc-out/round5/legacy/regression/batch-2-repaired-tail-scan.json` |
+
+## Provenance of the attach artefact
+
+| what | where |
+|---|---|
+| reproducibility check, 38 books / 6,176 page verdicts | `poc-out/round5/legacy/provenance/attach-repro.{json,md}` |
+| freshly regenerated attach used for the experiment | `poc-out/round5/legacy/provenance/attach-fresh/attach/` |
+| packs rebuilt against the fresh attach | `poc-out/round5/legacy/provenance/REBUILD-FRESH-ATTACH.json` |
+| resulting pack delta (**zero**) | `poc-out/round5/legacy/provenance/PACK-DELTA-FRESH-ATTACH.{json,md}` |
+| attach log from that build (the diagnosis that did move) | `poc-out/round5/legacy/provenance/attach-log-fresh/` |
+| snapshot taken before the experiment | `poc-out/round5/legacy/packs-before-a1/` |
+| default rebuild after the A1 merge (content identical) | `poc-out/round5/legacy/after-a1/` |
+
 ## Regression corpus and orphaned siblings
 
 | what | where |
@@ -85,7 +112,8 @@ sample files, the compare output, the packs and the units:
 | batch 2 OLD | 43 | what the old product served |
 | batch 2 NEW | 97 (67 trusted + 30 withheld) | what the new pipeline serves, and whether each refusal was safe |
 | batch 2 caption quota | 20 | the caption class, incl. the new `figure_relation` field |
-| restored regions | 6 | what is served now, after a guard change handed it back |
+| restored regions (pre-merge) | 6 | what is served now, after a guard change handed it back |
+| restored region (REPAIRED stage) | 1 | the `chem_guard` release, judged WRONG on two counts |
 
 ## Commands
 
@@ -102,6 +130,12 @@ LEGACY_OUT=$PWD/poc-out/round5/legacy python3 tool/corpus/legacy/run_batch.py \
 LEGACY_OUT=$PWD/poc-out/round5/legacy python3 tool/corpus/legacy/compare.py \
     --batch-dir $PWD/poc-out/round5/legacy/batch-2
 
+# provenance: does the stored attach artefact reproduce from its own code?
+python3 tool/corpus/legacy/attach_repro.py check --md /tmp/attach-repro.md
+
+# content that is neither served nor withheld
+python3 tool/corpus/legacy/silent_loss.py scan --batch-dir <dir> --pipeline <id> --md /tmp/silent.md
+
 # the named defects, on any build
 python3 tool/corpus/legacy/regression.py check --batch-dir <dir> --pipeline <id>
 python3 tool/corpus/legacy/regression.py tail-scan --batch-dir <dir> --pipeline <id>
@@ -116,7 +150,8 @@ python3 tool/corpus/legacy/scoreboard.py \
 
 ## Tests
 
-`python3 -m unittest discover -s tool/tests` → **289 OK** (60 new in this lane:
-`test_lane_d_packs`, `test_lane_d_regression`, `test_lane_d_restore`, `test_lane_d_orphan`).
+`python3 -m unittest discover -s tool/tests` → **348 OK, 7 skipped** (67 in this lane:
+`test_lane_d_packs`, `test_lane_d_regression`, `test_lane_d_restore`, `test_lane_d_orphan`,
+`test_lane_d_silent_loss`; the rest are Lane A1's, merged).
 `flutter test` → **948 pass, 15 skipped**, including the three pack-gated FILE THẬT tests and the
 new INFERRED gate.
