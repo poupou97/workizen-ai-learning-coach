@@ -12,12 +12,14 @@
 /// 4. widget vẽ ra ĐÚNG chữ sách của từng môn, không phải chữ SAM viết.
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
 import 'package:learning_coach/core/visual_spec/document_sequence_rule.dart';
+import 'package:learning_coach/core/visual_spec/semantic_to_spec.dart';
 import 'package:learning_coach/core/visual_spec/visual_spec.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_grammar/renderers/ordered_steps_renderer.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_grammar/visual_spec_view.dart';
@@ -151,6 +153,49 @@ void main() {
         );
       }
     }
+  });
+
+  testWidgets('§19 CÙNG renderer phục vụ CẢ HAI đường vào ngữ nghĩa', (t) async {
+    // Đường 1 = tầng ngữ nghĩa có kiểu (`ProcessSemantic`, luật TSL của KHTN 6);
+    // đường 2 = cấu trúc tài liệu (mục đánh số, các môn khác). Hai đường sinh
+    // ra HAI HỌ hình khác nhau, và MỘT renderer nhận cả hai — đó mới là điều
+    // §19 đòi, chứ không phải «một renderer chạy hai lần trên cùng một luật».
+    final f = File(
+      'assets/fixtures/synthetic/'
+      'lesson-06-sgk-khoa-hoc-tu-nhien-6-b17.synthetic.json',
+    );
+    expect(f.existsSync(), isTrue);
+    final doc = LessonDocument.fromJson(
+      (jsonDecode(f.readAsStringSync()) as Map).cast<String, Object?>(),
+    )!;
+    final spec = compileLesson(doc).spec!;
+    expect(spec.primary.family, 'process');
+
+    const renderer = OrderedStepsRenderer();
+    expect(renderer.unsupportedReason(spec.primary), isNull);
+
+    await t.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: VisualSpecView(
+            spec: spec,
+            pageLabel: (id) {
+              final b = doc.blockById(id);
+              return b == null ? 'sách' : doc.sourceLineForBlock(b);
+            },
+            onOpenSource: (_) {},
+          ),
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(find.byKey(OrderedStepsRenderer.rootKey), findsOneWidget);
+    // Bước bị giữ lại vẫn là một CHỖ TRỐNG nhìn thấy được, không biến mất.
+    expect(find.textContaining('SAM chưa đọc được'), findsWidgets);
+
+    // Và cùng renderer ấy nhận họ `sequence` của các môn khác.
+    final families = {spec.primary.family, for (final c in cases) c.section.family};
+    expect(families.length, greaterThanOrEqualTo(2), reason: '$families');
   });
 
   test('trang gold vẫn còn trong repo (test này không được xanh giả)', () {
