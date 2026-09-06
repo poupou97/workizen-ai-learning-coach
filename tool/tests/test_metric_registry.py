@@ -387,5 +387,69 @@ class TestRealArtefacts(unittest.TestCase):
         self.assertEqual(R.DEPRECATED_BY_ID['ACTIVITY_TOTAL_161'].reconstruct(self.ctx), 161)
 
 
+# --------------------------------------------------------------------------- ledger population
+class TestLedgerPopulationIsNamed(unittest.TestCase):
+    """A TOTAL WITHOUT ITS POPULATION IS NOT A METRIC.
+
+    Round 6 published two different accounting totals over the same batch dirs — §7's
+    «29 lesson ledgers · 1 878 input regions» and §9's withheld counts — and
+    `ledger.py audit` had no way to say which it was computing. It always read
+    `batch-spec.json`, so the documented command reproduced §9's population and not §7's.
+    Both sets of numbers are right; only the re-derivation path was ambiguous.
+
+    These tests pin the selector, and pin `spec` as the default so nothing that already
+    ran changes its answer.
+    """
+
+    BOOK, PIPE, PAGE = 'b-sgk-x', 'test-pipe', 81
+
+    def setUp(self):
+        sys.path.insert(0, os.path.join(HERE, '..', 'corpus', 'accounting'))
+        import ledger                                          # noqa: E402
+        self.ledger = ledger
+        self.tmp = tempfile.mkdtemp(prefix='ws-m-ledger-')
+        root = os.path.join(self.tmp, 'tcroot', 'poc-out', 'trusted-corpus', 'tc-v2', self.PIPE)
+        os.makedirs(os.path.join(root, 'sdm', self.BOOK))
+        os.makedirs(os.path.join(root, 'lessons', self.BOOK))
+        # Lesson 1 is in the spec; lesson 2 is a neighbour the pipeline also produced.
+        with open(os.path.join(self.tmp, 'batch-spec.json'), 'w') as fh:
+            json.dump({'batch': 't', 'lessons': [{'book': self.BOOK, 'lesson': 1}]}, fh)
+        for lesson, page in ((1, self.PAGE), (2, self.PAGE + 1)):
+            bid = f'{self.BOOK}:p{page:03d}:{self.PIPE}:000'
+            with open(os.path.join(root, 'sdm', self.BOOK, f'p{page:03d}.sdm.json'), 'w') as fh:
+                json.dump({'book': self.BOOK, 'page': page,
+                           'blocks': [{'id': bid, 'order': 0, 'role': {'value': 'body'},
+                                       'text': 'x'}]}, fh)
+            with open(os.path.join(root, 'lessons', self.BOOK, f'bai-{lesson:02d}.tsl.json'), 'w') as fh:
+                json.dump({'book': self.BOOK, 'lesson': lesson, 'boundary': {'pages': [page]},
+                           'blocks': [{'id': bid}], 'withheld': [], 'excluded': []}, fh)
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_the_two_populations_are_different_and_both_reachable(self):
+        spec = self.ledger.batch_lessons(self.tmp, self.PIPE, self.ledger.SPEC)
+        every = self.ledger.batch_lessons(self.tmp, self.PIPE, self.ledger.ALL_TSL)
+        self.assertEqual(spec, [(self.BOOK, 1)])
+        self.assertEqual(every, [(self.BOOK, 1), (self.BOOK, 2)])
+        self.assertNotEqual(spec, every)
+
+    def test_the_default_is_still_the_spec_so_no_existing_run_changes_answer(self):
+        self.assertEqual(self.ledger.batch_lessons(self.tmp, self.PIPE),
+                         self.ledger.batch_lessons(self.tmp, self.PIPE, self.ledger.SPEC))
+
+    def test_the_output_records_which_population_produced_it(self):
+        for population, lessons, regions in ((self.ledger.SPEC, 1, 1), (self.ledger.ALL_TSL, 2, 2)):
+            out = self.ledger.ledger_batch(self.tmp, self.PIPE, (), population)
+            self.assertEqual(out['population'], population)
+            self.assertEqual(out['lessons'], lessons)
+            self.assertEqual(out['inputSourceRegions'], regions)
+
+    def test_an_unnamed_population_is_refused_rather_than_guessed(self):
+        with self.assertRaises(ValueError):
+            self.ledger.batch_lessons(self.tmp, self.PIPE, 'whatever-looks-right')
+
+
 if __name__ == '__main__':
     unittest.main()
