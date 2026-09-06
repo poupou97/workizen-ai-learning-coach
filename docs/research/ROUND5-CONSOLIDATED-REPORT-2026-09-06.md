@@ -503,6 +503,89 @@ pipeline and the corpus, not about what a child currently sees.
 
 ---
 
+## 11.2 Semantic Graph → Visual Grammar (P0) — what the escalation actually produced
+
+Lane E2, **PR #86**, CI pass on `bcaf373`, `flutter analyze` clean, **973 Dart tests
+pass / 42 skipped**.
+
+### §19 is proven — one renderer, three subjects, two independent semantic paths
+
+| lesson | family | path into the renderer |
+|---|---|---|
+| KHTN 6 Bài 17 · tách chất | `process` | typed semantic layer (`tsl-enumerated-steps-v1`) |
+| KHTN 7 p20 · nguyên tố hoá học | `sequence` | document structure |
+| **Ngữ văn 9 p82 · nói và nghe** | `sequence` | document structure |
+| **Vật lí 10 p88 · thực hành tổng hợp lực** | `sequence` | document structure |
+
+A grade-6 chemistry procedure and a grade-9 literature speaking task share no
+vocabulary, no layout and no pedagogy — only a **shape**, which is all the renderer
+can see. That is the Founder's «một ngôn ngữ để 3.679 bài có thể được compile»,
+demonstrated rather than asserted.
+
+**The anti-pattern is untypable, not merely avoided.** `VisualSpec` carries no
+`book` / `lessonNo` / `slotKey`; `VisualRenderContext` carries no `LessonDocument`.
+Two source-scanning tests fail the build if either stops being true. Measured on
+`tool/corpus/tc_gold/` — 54 human-annotated pages across 10 subjects, **committed**,
+so a clean clone reproduces it.
+
+### The counterweight, and it is the more important half
+
+**A grammar validated on one lesson does not generalise — two lanes found this
+independently, from opposite ends, in the same round.**
+
+- **E2:** the sequence rule fires on **6 of 54** gold pages, **3 of them teacher
+  books** (one a competency list whose order means nothing). Learner-facing precision
+  **0.500**, gated on `docType` with the unfiltered count still printed. **Toán, Tiếng
+  Việt and Tin học produce nothing at all** — no upstream structure exists, and
+  inventing a rule there would be the visual layer deciding meaning.
+- **Lane C:** LS&ĐL 5 prints **112 date mentions in eight forms**;
+  `prose-dated-events-v1` accepts **one** form and extracts **3 events across 28
+  lessons**. **A Bài-8 shape, not a History rule.**
+
+Both were found only by counting real forms across many lessons. This is the direct
+argument for the Founder's execution order §32 — the **P0.3 census must precede
+broadening the grammar**, because a rule that looks universal on its origin lesson
+reliably is not, and no test on that lesson can reveal it.
+
+### Two provenance holes found by tests that existed to look for them
+
+1. **A sentence that was true in type and false in content.** «vì sao SAM chọn sơ đồ
+   này» was keyed on the **Dart type**, so every `ProcessSemantic` was told the book
+   used «·» bullets — Bài 17's own rule asserted as universal. **No test caught it:
+   the type is right, the widget renders, the sentence is false.** Fixed by keying
+   explanations on the **rule id**. This is the exact failure mode the Founder named
+   as `TRACE ≠ EVIDENCE`, appearing in the explanation surface.
+2. **Evidence strengthened itself through a file write.** The §8 fix
+   (`ComparisonValue{text, sourceBlockId, grounding}`) brought a regression test that
+   caught a **save/load round trip upgrading a grounding from `inheritedFromEntity` to
+   `cellStated`.** Serialisation is a provenance-laundering channel. Recommended as a
+   general rule: every provenance-bearing type needs a round-trip test asserting
+   grounding **never strengthens**.
+
+Also found: the LS&ĐL fixture carries `charSpan` / `yearStart` that the model drops,
+after which the app **re-parses the year from a string at render time**.
+
+### Discipline that held
+
+**0 runtime model calls**, enforced by an import-set test. 5 specs / 6 sections /
+19,289 bytes precomputed; two builds byte-identical. Correction edits the claim, the
+graph or the spec — **never pixels** — and a node cannot be added without a
+`sourceRef`.
+
+### One divergence raised, not resolved
+
+E1's spec carries **lesson identity**, which would make `if (lessonId == BAI17)`
+typable again and dissolve E2's structural guarantee. Filed in
+`VISUAL-SPEC-E1-E2-RECONCILIATION.md` with three others, routed to E1, **not decided
+by either lane.** E1's census makes **HIERARCHY** and **LABELED_FIGURE** the justified
+next renderers.
+
+**Device: not walked** — Lane B owns that loop; `VisualSpecView` is handed over as a
+six-line mount, and the §27 checkpoint is substituted by a machine-generated
+transcript of the real widget across three subjects.
+
+---
+
 ## 11.1 Open P0 and the next bottleneck
 
 **Next bottleneck — recognition, not reasoning.** Both remaining named defects
@@ -537,8 +620,9 @@ deterministic validation — not more rules over text that was never captured.
 | #83 | `a1/round5-repair-framework` | A1 repair framework | PASS |
 | #84 | `a2/round5-math-formula-accuracy` | A2 math / formula / number | PASS |
 
+| #86 | `e2/round5-visualspec-renderer` | E2 VisualSpec + cross-subject renderer | PASS |
+
 Lanes still running with pushed branches not yet raised as PRs: A4
-(`a4/round5-multi-signal-verification`), Lane B (`lane-b/round5-experience`), E1, E2
-(`e2/round5-visualspec-renderer`).
+(`a4/round5-multi-signal-verification`), Lane B (`lane-b/round5-experience`), E1.
 
 **No standing merge authority. READY FOR FOUNDER REVIEW.**
