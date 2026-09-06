@@ -13,23 +13,31 @@ const _p = LearnerProfile(learnerId: 'na', displayName: 'Na', grade: 5);
 const _subjects = ['Toán', 'Tiếng Việt', 'Khoa học'];
 
 Future<void> _pump(WidgetTester t, LearnerStore store) async {
-  await t.pumpWidget(MaterialApp(
-      home: TimetableScreen(
-          profile: _p, store: store, subjects: _subjects)));
+  await t.pumpWidget(
+    MaterialApp(
+      home: TimetableScreen(profile: _p, store: store, subjects: _subjects),
+    ),
+  );
   await t.pumpAndSettle();
 }
 
 void main() {
-  testWidgets('⭐ TKB RỖNG là trạng thái HỢP LỆ, không phải việc còn dở',
-      (t) async {
+  testWidgets('⭐ TKB RỖNG là trạng thái HỢP LỆ, không phải việc còn dở', (
+    t,
+  ) async {
     await _pump(t, JsonlLearnerStore());
-    expect(find.textContaining('để trống cũng không sao'), findsOneWidget,
-        reason: '⭐ đột biến bắt buộc nhập TKB ⇒ đỏ (F13: tuỳ chọn)');
+    expect(
+      find.textContaining('để trống cũng không sao'),
+      findsOneWidget,
+      reason: '⭐ đột biến bắt buộc nhập TKB ⇒ đỏ (F13: tuỳ chọn)',
+    );
   });
 
   testWidgets('thêm môn ⇒ ghi kho; xoá ⇒ mất khỏi kho', (t) async {
     final store = JsonlLearnerStore();
     await _pump(t, store);
+    await t.ensureVisible(find.widgetWithText(ActionChip, 'Toán'));
+    await t.pumpAndSettle();
     await t.tap(find.widgetWithText(ActionChip, 'Toán'));
     await t.pumpAndSettle();
     var saved = await store.timetable('na');
@@ -40,24 +48,30 @@ void main() {
     expect(saved.single.weekday, DateTime.monday);
     expect(saved.single.period, 1);
 
+    await t.ensureVisible(find.byIcon(Icons.close));
+    await t.pumpAndSettle();
     await t.tap(find.byIcon(Icons.close));
     await t.pumpAndSettle();
     saved = await store.timetable('na');
     expect(saved, isEmpty);
   });
 
-  testWidgets('mỗi ngày một danh sách riêng — thêm ở Thứ Hai không lộ sang Thứ Ba',
-      (t) async {
-    final store = JsonlLearnerStore();
-    await _pump(t, store);
-    await t.tap(find.widgetWithText(ActionChip, 'Toán'));
-    await t.pumpAndSettle();
-    expect(find.textContaining('Tiết 1 · Toán'), findsOneWidget);
-    await t.tap(find.widgetWithText(FilledButton, 'Thứ Ba'));
-    await t.pumpAndSettle();
-    expect(find.textContaining('Tiết 1 · Toán'), findsNothing);
-    expect(find.textContaining('để trống cũng không sao'), findsOneWidget);
-  });
+  testWidgets(
+    'mỗi ngày một danh sách riêng — thêm ở Thứ Hai không lộ sang Thứ Ba',
+    (t) async {
+      final store = JsonlLearnerStore();
+      await _pump(t, store);
+      await t.ensureVisible(find.widgetWithText(ActionChip, 'Toán'));
+      await t.pumpAndSettle();
+      await t.tap(find.widgetWithText(ActionChip, 'Toán'));
+      await t.pumpAndSettle();
+      expect(find.textContaining('Tiết 1 · Toán'), findsOneWidget);
+      await t.tap(find.widgetWithText(FilledButton, 'Thứ Ba'));
+      await t.pumpAndSettle();
+      expect(find.textContaining('Tiết 1 · Toán'), findsNothing);
+      expect(find.textContaining('để trống cũng không sao'), findsOneWidget);
+    },
+  );
 
   testWidgets('⭐ màn NÓI RÕ giới hạn: không đoán cô dạy bài nào', (t) async {
     await _pump(t, JsonlLearnerStore());
@@ -65,8 +79,9 @@ void main() {
   });
 
   test('⭐⭐ CẤU TRÚC (F4): màn TKB không có đường nào chạm tới BÀI học', () {
-    final src =
-        File('lib/features/timetable/timetable_screen.dart').readAsStringSync();
+    final src = File(
+      'lib/features/timetable/timetable_screen.dart',
+    ).readAsStringSync();
     for (final banned in [
       'LessonRef',
       'exercisesForToan',
@@ -74,9 +89,72 @@ void main() {
       'lessonNo',
       'openCanonicalProblem',
     ]) {
-      expect(src.contains(banned), isFalse,
-          reason: '⭐⭐ F4: «môn trong TKB» KHÔNG được suy ra bài cụ thể — '
-              'màn này chạm vào «$banned»');
+      expect(
+        src.contains(banned),
+        isFalse,
+        reason:
+            '⭐⭐ F4: «môn trong TKB» KHÔNG được suy ra bài cụ thể — '
+            'màn này chạm vào «$banned»',
+      );
     }
+  });
+
+  group('⭐ Lệnh 51 §8/§10/§11 — tạo tự động', () {
+    testWidgets('màn NÓI đây là gợi ý, KHÔNG phải chương trình của Bộ', (
+      t,
+    ) async {
+      await _pump(t, JsonlLearnerStore());
+      expect(find.textContaining('THỜI KHOÁ BIỂU GỢI Ý'), findsOneWidget);
+      expect(
+        find.textContaining('không phải thời khoá biểu chuẩn'),
+        findsOneWidget,
+        reason: '§10 cấm tuyên bố là chương trình chuẩn khi chưa có nguồn',
+      );
+    });
+
+    testWidgets('bấm «Tạo tự động» ⇒ ghi kho, đúng learner, ghi MÃ môn', (
+      t,
+    ) async {
+      final store = JsonlLearnerStore();
+      await _pump(t, store);
+      await t.tap(find.widgetWithText(FilledButton, 'Tạo tự động'));
+      await t.pumpAndSettle();
+
+      final saved = await store.timetable('na');
+      expect(saved, isNotEmpty);
+      expect(saved.every((e) => e.learnerId == 'na'), isTrue);
+      // ⭐⭐ WAL-176 lần nữa: sinh ra phải là MÃ môn, không phải tên hiển thị.
+      // Sinh tên «Tiếng Việt» thì mọi phép so khớp TKB trượt trong im lặng.
+      expect(
+        {for (final e in saved) e.subjectId},
+        {'toan', 'tieng-viet', 'khoa-hoc'},
+      );
+    });
+
+    testWidgets('§11 — «Xoá hết» xoá sạch sau khi xác nhận', (t) async {
+      final store = JsonlLearnerStore();
+      await _pump(t, store);
+      await t.tap(find.widgetWithText(FilledButton, 'Tạo tự động'));
+      await t.pumpAndSettle();
+      expect(await store.timetable('na'), isNotEmpty);
+
+      await t.tap(find.widgetWithText(TextButton, 'Xoá hết'));
+      await t.pumpAndSettle();
+      await t.tap(find.widgetWithText(TextButton, 'Xoá hết').last);
+      await t.pumpAndSettle();
+      expect(await store.timetable('na'), isEmpty);
+    });
+
+    testWidgets('§14 — tạo TKB KHÔNG tạo phiên học nào', (t) async {
+      final store = JsonlLearnerStore();
+      await _pump(t, store);
+      await t.tap(find.widgetWithText(FilledButton, 'Tạo tự động'));
+      await t.pumpAndSettle();
+      expect(
+        await store.sessions(learnerId: 'na'),
+        isEmpty,
+        reason: 'TIMETABLE ENTRY != LEARNING SESSION',
+      );
+    });
   });
 }
