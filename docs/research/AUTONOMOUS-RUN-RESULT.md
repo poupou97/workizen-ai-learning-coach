@@ -174,8 +174,17 @@ measurement rather than an outcome.
 `VERDICT: GOLDEN CHAIN UNVERIFIED — 0/9 exercised`. **48 of the 57 skips remain the same family
 with no ledger — nine accounted-for skips is not fifty-seven.**
 
-**DEVICE** — **not used.** The Founder is offline and the Nokia was not touched.
-**TECHNICALLY VALIDATED ≠ HARDWARE VERIFIED.** R-1 remains **HARDWARE UNVERIFIED**.
+**DEVICE** — **UPDATED after this report was first written.** The Founder returned, authorised a
+device walk, and it ran: a build of `main` `c86d377` was installed on the Nokia 6.1 at 19:36:53,
+replacing the 11:26 build that predated this run. **R-1 is now HARDWARE VERIFIED** — the 17 withheld
+gaps render their page crops on a real screen, no timeline appeared, and the Next Action fix and
+title casing are confirmed on hardware. See `docs/research/R1-HARDWARE-VERIFICATION.md`.
+
+Two limits carried with it: the walking agent was terminated mid-run by an API error, so **2 of 27
+frames were adjudicated and there is no per-step log** — the rest is *evidence captured, not
+adjudicated*. And **verification changed nothing about trust**: `trusted = 0`, `eligible for
+teaching = 0`, and §7's answer stands. **TECHNICALLY VALIDATED ≠ HARDWARE VERIFIED ≠ DISTRIBUTION
+RIGHT** — R-1 has cleared the second, not the third.
 
 **D4** — clean. `assets/fixtures/real/` holds **two `.gitkeep` files and nothing else**, asserted
 by a test using `git ls-files` rather than trusting `.gitignore`. Phase B's own D4 self-scan found
