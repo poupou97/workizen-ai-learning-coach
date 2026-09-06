@@ -32,7 +32,13 @@ FIDELITY_GUARDS = ['agree_tones', 'agree_text', 'agree_order', 'agree_numbers',
 POLICY_GUARDS = ['teacher_text', 'answer_leak', 'figure_text', 'figure_dependent',
                  'page_feature:diagram', 'page_feature:color_heavy', 'box_boundary', 'role_conflict']
 # Guards that are structural: waiving them serves nothing (an empty block, a page number).
-STRUCTURAL_GUARDS = ['empty_block', 'furniture', 'empty']
+# Round 6 (WS-A, R13): `empty_block` split into the classes it was hiding. `unread:no…` never occurs —
+# a region that really held nothing keeps `empty_block`; the rest name what was there. All of them stay
+# STRUCTURAL: waiving one still serves nothing, because the pipeline could not read the region.
+STRUCTURAL_GUARDS = ['empty_block', 'furniture', 'empty',
+                     'unread:unreadable_region', 'unread:numeric_expression_inline',
+                     'unread:numeric_expression_stacked', 'unread:numeric_label',
+                     'unread:symbol_fragment']
 
 HEAD = ('name', 'coverage', 'served', 'served_correct', 'served_wrong', 'ftr',
         'served_teaching_critical', 'withheld', 'withheld_clean', 'restored',
