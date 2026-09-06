@@ -11,7 +11,7 @@ invents a field: the repair happens upstream in `tool/corpus/repair/`, and if no
 repair reached the TSL then this tool says so and (under `--require-repair`) declines.
 
     python3 tool/evidence/golden_delivery.py \\
-        --tsl <path to the TSL to ship from> \\
+        (--tsl <TSL to bridge> | --doc <LessonDocument already built upstream>) \\
         [--history-rules] [--verbatim-ledger docs/research/lane-c/data/…json] \\
         [--require-repair] [--place] [--stage <dir>] [--json <out>]
 
@@ -57,17 +57,46 @@ def run(cmd):
 
 
 def only_document(d):
-    got = [f for f in sorted(os.listdir(d))
-           if f.startswith('lesson-') and f.endswith('.json')]
+    """The one LessonDocument in a staging dir — a document has `book` + `lesson`;
+    the reports the tools write beside it do not."""
+    got = []
+    for f in sorted(os.listdir(d)):
+        if not f.endswith('.json'):
+            continue
+        try:
+            with open(os.path.join(d, f), encoding='utf-8') as fh:
+                j = json.load(fh)
+        except (ValueError, UnicodeDecodeError):
+            continue
+        if isinstance(j, dict) and 'book' in j and 'lesson' in j and 'blocks' in j:
+            got.append(f)
     if len(got) != 1:
         raise SystemExit(f'expected exactly one lesson document in {d}, found {got}')
     return os.path.join(d, got[0])
 
 
+def slot_filename(doc_path):
+    """The name `WorkspaceCatalog` looks for: `lesson-<book>-b<N>.json` (`FixtureSlot._stem`).
+
+    Derived from the document's OWN book + lesson, never from the staging filename —
+    a document that lands under a name the loader does not look for is invisible, and
+    invisible reads exactly like «the fixture is missing».
+    """
+    with open(doc_path, encoding='utf-8') as fh:
+        d = json.load(fh)
+    return f"lesson-{d['book']}-b{d['lesson']}.json"
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--tsl', required=True)
+    src = ap.add_mutually_exclusive_group(required=True)
+    src.add_argument('--tsl', help='bridge this TSL into a LessonDocument here')
+    src.add_argument('--doc', help=(
+        'start from a LessonDocument another workstream already built. Use this when the '
+        'upstream bridge carries something this branch\'s bridge does not — round 6: only '
+        'WS-C\'s bridge stamps `provenance.repair`, so re-bridging here would silently DROP '
+        'the repair lineage and produce a document that looks fine and proves nothing.'))
     ap.add_argument('--stage', default=os.path.join(ROOT, 'poc-out', 'round6', 'golden'))
     ap.add_argument('--history-rules', action='store_true',
                     help='apply the PROPOSED History rules post-pass (LS&ĐL only)')
@@ -82,27 +111,39 @@ def main(argv=None):
     ap.add_argument('--json', dest='json_out')
     a = ap.parse_args(argv)
 
-    tsl = a.tsl if os.path.isabs(a.tsl) else os.path.join(ROOT, a.tsl)
-    if not os.path.exists(tsl):
-        raise SystemExit(f'no TSL at {a.tsl}')
-    tsl_hash = fl.sha256_file(tsl)
-
     stage = os.path.abspath(a.stage)
-    bridged = os.path.join(stage, 'bridged')
-    shutil.rmtree(bridged, ignore_errors=True)
-    os.makedirs(bridged, exist_ok=True)
+    steps = []
+    tsl_hash = None
 
-    steps = [dict(step='TSL', path=os.path.relpath(tsl, ROOT), sha256=tsl_hash)]
-
-    cmd = [sys.executable, BRIDGE, '--tsl', tsl, '--out', bridged]
-    if a.no_crops:
-        cmd.append('--no-crops')
-    run(cmd)
-    doc_path = only_document(bridged)
-    steps.append(dict(step='LESSON DOCUMENT (bridge)',
-                      path=os.path.relpath(doc_path, ROOT),
-                      sha256=fl.sha256_file(doc_path),
-                      generator='tool/corpus/tsl_to_lesson_document.py'))
+    if a.tsl:
+        tsl = a.tsl if os.path.isabs(a.tsl) else os.path.join(ROOT, a.tsl)
+        if not os.path.exists(tsl):
+            raise SystemExit(f'no TSL at {a.tsl}')
+        d = fl.digests(tsl)
+        tsl_hash = d.get('canonical') or d['bytes']
+        steps.append(dict(step='TSL', path=os.path.relpath(tsl, ROOT),
+                          sha256=d['bytes'], sha256Canonical=d.get('canonical'),
+                          hashMethod='both shown'))
+        bridged = os.path.join(stage, 'bridged')
+        shutil.rmtree(bridged, ignore_errors=True)
+        os.makedirs(bridged, exist_ok=True)
+        cmd = [sys.executable, BRIDGE, '--tsl', tsl, '--out', bridged]
+        if a.no_crops:
+            cmd.append('--no-crops')
+        run(cmd)
+        doc_path = only_document(bridged)
+        steps.append(dict(step='LESSON DOCUMENT (bridge)',
+                          path=os.path.relpath(doc_path, ROOT),
+                          sha256=fl.sha256_file(doc_path),
+                          generator='tool/corpus/tsl_to_lesson_document.py'))
+    else:
+        doc_path = a.doc if os.path.isabs(a.doc) else os.path.join(ROOT, a.doc)
+        if not os.path.exists(doc_path):
+            raise SystemExit(f'no document at {a.doc}')
+        steps.append(dict(step='LESSON DOCUMENT (upstream)',
+                          path=os.path.relpath(doc_path, ROOT),
+                          sha256=fl.sha256_file(doc_path),
+                          generator='built by another workstream — NOT re-bridged here'))
 
     if a.history_rules:
         ruled = os.path.join(stage, 'history-rules')
@@ -114,8 +155,8 @@ def main(argv=None):
         if a.toc_title:
             cmd += ['--toc-title', a.toc_title]
         out = run(cmd)
-        # the rules write beside the document but do not copy crops — carry them.
-        crops = os.path.join(bridged, 'crops')
+        # the rules write a new document but do not copy crops — carry them across.
+        crops = os.path.join(os.path.dirname(doc_path), 'crops')
         if os.path.isdir(crops):
             shutil.copytree(crops, os.path.join(ruled, 'crops'), dirs_exist_ok=True)
         doc_path = only_document(ruled)
@@ -140,7 +181,7 @@ def main(argv=None):
             print('\n  REFUSED TO PLACE — the lineage gate failed. Nothing was copied.')
             return 1
         os.makedirs(os.path.join(REAL_DIR, 'crops'), exist_ok=True)
-        placed = os.path.join(REAL_DIR, os.path.basename(doc_path))
+        placed = os.path.join(REAL_DIR, slot_filename(doc_path))
         shutil.copy2(doc_path, placed)
         src_crops = os.path.join(os.path.dirname(doc_path), 'crops')
         n = 0

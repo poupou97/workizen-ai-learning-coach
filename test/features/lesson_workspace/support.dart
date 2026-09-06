@@ -80,6 +80,11 @@ class _FixtureStub extends CachingAssetBundle {
 CachingAssetBundle syntheticOnlyBundle() =>
     _FixtureStub(json: {syntheticPath: File(syntheticPath).readAsStringSync()});
 
+/// Bundle mang ĐÚNG những asset JSON được liệt kê — dùng để kiểm rằng
+/// `WorkspaceCatalog` chọn đường THẬT khi cả hai đường cùng có mặt.
+CachingAssetBundle fixtureBundleWith(Map<String, String> json) =>
+    _FixtureStub(json: json);
+
 /// Bundle không có fixture nào.
 CachingAssetBundle noFixtureBundle() => _FixtureStub();
 

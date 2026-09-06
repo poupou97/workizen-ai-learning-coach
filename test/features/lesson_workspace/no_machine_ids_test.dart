@@ -14,6 +14,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
+import 'package:learning_coach/core/lesson_model/semantic_data.dart';
 import 'package:learning_coach/core/lesson_model/next_action.dart';
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
@@ -284,9 +285,7 @@ void main() {
   });
 
   testWidgets('⭐⭐ fixture THẬT (nếu có): hành trình + sheet không lộ mã máy '
-      '(id tc2-p1, dòng nguồn pipeline, mã lý do giữ lại, mã luật)', (
-    t,
-  ) async {
+      '(id tc2-p1, dòng nguồn pipeline, mã lý do giữ lại, mã luật)', (t) async {
     final d = loadRealDocOrSkip();
     if (d == null) return;
     await _journey(t, d, 'thật');
@@ -322,8 +321,10 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.byKey(MissionCenterScreen.researchCardKey(d.slotKey)),
-        findsOneWidget);
+    expect(
+      find.byKey(MissionCenterScreen.researchCardKey(d.slotKey)),
+      findsOneWidget,
+    );
     _expectClean(t, 'nghiên cứu Home');
 
     // Workspace → Trực quan → Dòng thời gian.
@@ -335,8 +336,31 @@ void main() {
     await t.tap(find.byKey(ModePicker.cardKey(WorkspaceView.visual)));
     await t.pumpAndSettle();
     _expectClean(t, 'nghiên cứu Trực quan');
-    expect(find.byKey(TimelineView.rootKey), findsOneWidget,
-        reason: 'lát cắt phải mở thẳng vào Dòng thời gian');
+
+    // ⭐ ROUND 6 — DÒNG THỜI GIAN CÓ HAY KHÔNG LÀ VIỆC CỦA DỮ LIỆU, KHÔNG PHẢI
+    // CỦA TEST. Vòng 4 chạy trên bản tc2-p1/sdm-v2: block `p039:000` (khối
+    // mang CẢ BẢY mốc có năm) được phục vụ, nên lát cắt mở thẳng vào Dòng
+    // thời gian. Golden #1 của vòng 6 chạy trên bản đã sửa và đã kiểm: cùng
+    // block ấy vẫn WITHHELD vì `agree_tones`, mang `VALIDATED_REPAIR` nhưng
+    // KHÔNG mang chữ — nên bài không còn mốc nào và **không được** vẽ trục
+    // thời gian. Đó là câu trả lời ĐÚNG: VALIDATED REPAIR ≠ TRUSTED, và một
+    // số 0 trung thực chấp nhận được.
+    //
+    // Nên test ghim ĐIỀU TƯƠNG ĐƯƠNG chứ không ghim một trong hai vế: trục
+    // thời gian hiện ra KHI VÀ CHỈ KHI bài có `TimelineSemantic`. Nới thành
+    // «có cũng được, không cũng được» sẽ xanh cả khi app vẽ trục từ hư không.
+    final hasTimeline = d.semantic.whereType<TimelineSemantic>().isNotEmpty;
+    expect(
+      find.byKey(TimelineView.rootKey),
+      hasTimeline ? findsOneWidget : findsNothing,
+      reason: hasTimeline
+          ? 'bài CÓ mốc ⇒ lát cắt phải mở thẳng vào Dòng thời gian'
+          : 'bài KHÔNG có mốc nào ⇒ tuyệt đối không được vẽ trục thời gian',
+    );
+    if (!hasTimeline) {
+      _expectClean(t, 'nghiên cứu Trực quan (không có mốc)');
+      return;
+    }
     _expectClean(t, 'nghiên cứu Dòng thời gian');
 
     // Chạm một mốc ⇒ sheet «Sách viết» (gấp đóng) vẫn sạch.
@@ -349,9 +373,6 @@ void main() {
   test('mã máy vẫn ở nếp gấp: trustTechLines / techLinesFor mang mã', () {
     final d = loadSyntheticDoc();
     expect(trustTechLines(d).any(machineId.hasMatch), isTrue);
-    expect(
-      techLinesFor(d, d.blocks.first).any(machineId.hasMatch),
-      isTrue,
-    );
+    expect(techLinesFor(d, d.blocks.first).any(machineId.hasMatch), isTrue);
   });
 }
