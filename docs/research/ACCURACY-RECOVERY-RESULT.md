@@ -255,6 +255,34 @@ word, and a digit does not count («Bài 5» is a lesson number). Six negative c
 sits outside the false-correction risk the rest of the lane spends its budget bounding: subtracting
 furniture cannot invent a wrong word.
 
+### The external POC, performed rather than described
+
+Two bounded lookups were actually run on 2026-09-06 and recorded in the required schema
+(`tool/corpus/verify/run_external.py`, `poc-out/round5/verify/external-evidence.jsonl`):
+
+| case | question | independent hosts | authority | confidence |
+|---|---|---|---|---|
+| **A** `3×10°` | is this a physical constant? | `bipm.org`, `goldbook.iupac.org` | official + reference | 0.75 (capped) |
+| **B** `Lý Thái Tô` | how is the founder of the Lý dynasty spelled? | `vov2.vov.vn`, `vi.wikipedia.org` | official + secondary | 0.75 (capped) |
+
+Both carry URL · retrieval timestamp · extracted claim · authority classification · relation, because
+`EvidenceRef` **raises without them**. Confidence is capped at 0.75 by construction: an external page is
+never proof about a printed page.
+
+**Case D was refused at construction**, which is the result worth reporting:
+
+> `external verification is not appropriate here: the question is what the printed page says; no external
+> source knows that (orthography_variant)`
+
+«Cộng hoà» vs «Cộng hòa» looks like the ideal external lookup — an official state name — and it is
+precisely the case where an external source cannot help, because both spellings are correct Vietnamese and
+the only question is which one *this book printed*. The type system refuses it rather than leaving it to
+a reviewer's judgement.
+
+And on case B, external verification is **worse and more expensive than the cheap signal**: two web
+lookups make «Lý Thái Tô» implausible; `thái tổ` 75× / `thái tô` 0× in our own corpus settles it, for
+free, with evidence a Founder can open.
+
 ---
 
 ## 5 · Edge risk — the coordinator's hypothesis, tested, and half of it falsified
@@ -390,6 +418,7 @@ of those proposals still has to clear A1's independent-support rule before anyth
 ```
 python3 tool/corpus/verify/run_xcorpus.py      # index + context scan + cross-corpus, 3 policies (~5 min)
 python3 tool/corpus/verify/run_llm.py --offline  # re-score from the cache; drop --offline to call claude
+python3 tool/corpus/verify/run_external.py     # the recorded external lookups + the refusal
 python3 tool/corpus/verify/run_furniture.py    # furniture learners + the edge-risk table
 python3 tool/corpus/verify/run_matrix.py       # the signal × case matrix + router rates
 python3 tool/corpus/verify/probe.py "<text>" --pairs "thái tổ" "cộng hòa"
@@ -398,4 +427,4 @@ python3 -m unittest discover -s tool/tests -p 'test_*.py'
 
 Outputs (gitignored): `poc-out/round5/verify/{xcorpus-index*.json, xcorpus-report.json,
 xcorpus-decisions.jsonl, llm-report.json, llm-decisions.jsonl, llm-cache/, furniture-report.json,
-matrix-report.json}`. No crop, no TSL and no verbatim SGK text is committed.
+matrix-report.json, external-evidence.jsonl, external-report.json}`. No crop, no TSL and no verbatim SGK text is committed.
