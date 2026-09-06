@@ -1097,7 +1097,10 @@ class MissionCenterScreen extends StatelessWidget {
               const SizedBox(height: WalSpacing.xs),
               Expanded(
                 child: Text(
-                  d.subjectIds.join(' · '),
+                  // MÃ môn → TÊN. Không tra được ⇒ giữ mã trần, không bịa.
+                  d.subjectIds
+                      .map((id) => subjectLabelOf?.call(id) ?? id)
+                      .join(' · '),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
