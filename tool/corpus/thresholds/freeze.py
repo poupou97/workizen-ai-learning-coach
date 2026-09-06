@@ -63,7 +63,7 @@ def read_ledger(path=LEDGER):
     return [json.loads(l) for l in open(path, encoding='utf-8') if l.strip()]
 
 
-def freeze(kind, payload, payload_path, note=None, ledger_path=LEDGER):
+def freeze(kind, payload, payload_path, note=None, ledger_path=LEDGER, root=None):
     """Append one commitment. Returns the entry. Raises rather than write a bad one."""
     if kind not in ORDER:
         raise ValueError(f'unknown kind {kind!r}')
@@ -88,7 +88,7 @@ def freeze(kind, payload, payload_path, note=None, ledger_path=LEDGER):
         prev=entries[-1]['sha256'] if entries else None,
         frozen_at_utc=datetime.datetime.now(datetime.timezone.utc)
                       .strftime('%Y-%m-%dT%H:%M:%SZ'),
-        payload_path=os.path.relpath(payload_path, ROOT),
+        payload_path=os.path.relpath(payload_path, root or ROOT),
         git_commit=_git('rev-parse', 'HEAD'),
         git_branch=_git('rev-parse', '--abbrev-ref', 'HEAD'),
         note=note,
