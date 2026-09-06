@@ -389,6 +389,12 @@ trước khi điều tra hình thái là lặp lại đúng kết quả vòng 5 
    sau «Để sau»; nội dung bài ở Trực quan bắt đầu ở **289 dp** thay vì 384 dp; ba tên
    View nay là **một** bộ chữ thay vì hai.
 
+3. **41 biểu thức Toán bịa đã biến mất.** Bản dựng pack theo luật fail-closed vòng 5 gỡ
+   toàn bộ **41 `toanExercises`** dựng lại bằng hình học mà mất `status`/`provenance`.
+   Đây là **một thứ BỚT đi**, không phải thêm vào — và là thứ đúng phải bớt. Hệ quả:
+   **app hiện có 0 bài tập Toán.** Bản vá đã nằm trong mã từ vòng 5; vòng 6 là lúc nó
+   lần đầu tới được một bản APK trên máy này.
+
 **PHỤ HUYNH:** *không có gì mới.*
 
 **SAM:** *không có gì mới.* Không có kịch bản nào cho Bài 8 ở đường thật, và Next Action
@@ -407,6 +413,8 @@ tính là giao hàng cho người học.**
 - Rằng phương án B tốt hơn A/C với **trẻ** (số vòng 5 là mật độ và số chạm, không phải
   kết quả học).
 - Rằng khôi phục ảnh cắt (G1) sẽ làm 17 chỗ trống dễ hiểu hơn — hợp lí, **chưa đo.**
+- Rằng thêm ba loại khối cho `unknown_role:*` sẽ mở khoá 118 khối — **đo được là chúng
+  bị giữ lại vì thiếu kiểu**, nhưng chưa đo là trẻ đọc được gì thêm khi có kiểu.
 
 
 ---
