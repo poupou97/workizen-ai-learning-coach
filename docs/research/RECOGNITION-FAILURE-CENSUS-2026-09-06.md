@@ -59,11 +59,15 @@ a precision of 1.
 |---|---|---|---|---|
 | **SUBSCRIPT** (a subscript flattened onto the baseline) | 6 168 | 388 | **5/16** hand-checked, seeded sample | `Khí O2 chiếm…` (prints `O₂`); `nhánh D1)` (prints `D₁`); `= Q3` (prints `Q₃`) |
 | **SYMBOL CONFUSION** (Ω read as a capital + digit) | **22** | 11 | not formally sampled; all 12 inspected rows are real | `1 MS = 1 000 000 S2` — the page prints `1 MΩ = 1 000 000 Ω` |
-| **SUPERSCRIPT** (a power-of-ten exponent destroyed) | 171 | 47 | 0 false positives in 21 hand-checked readings | `c = 3.10° m/s` (prints `3×10⁸ m/s`); `1 Bar = 10° Pa` (prints `10⁵`) |
-| **ROMAN NUMERAL** (a Roman section number broken) | 106 | 59 | 7/8 on the readings that were re-read | `I1 - Định luật khúc xạ ánh sáng`; `Il - Glucose và saccharose` |
+| **SUPERSCRIPT** (a power-of-ten exponent destroyed) | 171 | 47 | **≥2 false positives** among 21 inspected | `c = 3.10° m/s` (prints `3×10⁸ m/s`); `1 Bar = 10° Pa` (prints `10⁵`). The two false positives are `(2 + x)¹⁰⁰`, which is not a power of ten, and a flattened `−35/10 ; −1/10` |
+| **ROMAN NUMERAL** (a Roman section number broken) | 106 | 59 | **≥1 false positive** among 8 inspected | `I1 - Định luật khúc xạ ánh sáng`; `Il - Glucose và saccharose`. The false positive is `Vì Â = 180° − …` — the Vietnamese word «because», matched as `V1` |
 | **SEGMENTATION** (enumerator + number + operator fused) | 24 | 10 | all 24 inspected are the same real shape | `b) 10 +.` — the page prints `b) 3/10 +` |
 | **DIACRITIC** | see §3 | — | unigram rule **FALSIFIED**; bigram rule = candidate list | `thong tin` 16 × against `thông tin` 262 × in one book |
 | OPERATOR LOSS · MATH REGION · FORMULA · TABLE/STRUCTURE | **NOT MEASURED at line level** | — | — | see §4 |
+
+**Precision is only ever stated where it was measured, and it was measured by looking at the
+printed page.** Where a row says «among N inspected», N is the number of tiles a human read; the
+remaining findings of that class are unverified and are candidates, not failures.
 
 Sub-form worth naming inside SUBSCRIPT: **`V` + digit — 687 candidates**, of which an unknown
 share are `√n` misread (OBSERVED on two tiles), and the rest are genuine physics indices `V₁`,
