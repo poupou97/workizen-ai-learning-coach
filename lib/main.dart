@@ -22,6 +22,8 @@ import 'core/store/learner_profile.dart';
 import 'core/store/learner_store.dart';
 import 'features/camera/education_ocr_adapter.dart';
 import 'features/camera/mlkit_ocr_adapter.dart';
+import 'features/mission/home_cards.dart';
+import 'features/mission/home_upcoming.dart';
 import 'features/mission/mission_center_screen.dart';
 import 'features/discovery/story_detail_screen.dart';
 import 'features/parent/parent_area.dart';
@@ -699,6 +701,14 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                 learnerGrade: _profile!.grade,
                 lessonThreads: _lessonThreads(_profile!),
                 shelfSubjects: _shelfSubjects(),
+                // ⭐ Concept «05 Home» — ba dải ngang, ba nguồn KHÁC nhau.
+                upcoming: upcomingDays(_timetable, today: DateTime.now()),
+                subjectChips: homeSubjectChips(
+                  threads: _lessonThreads(_profile!),
+                  shelf: _shelfSubjects(),
+                  learnerGrade: _profile!.grade,
+                ),
+                continueThreads: continueLearning(_lessonThreads(_profile!)),
                 // ⭐ ROUND 7 · V1 — nút Home mang tên một cách học ⇒
                 // mở ĐÚNG cách học ấy. Lỗi máy thật vòng 1: «📖 Đọc ▸»
                 // mở ra màn hỏi «con muốn học theo cách nào?».
