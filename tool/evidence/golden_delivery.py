@@ -96,7 +96,11 @@ def main(argv=None):
         'start from a LessonDocument another workstream already built. Use this when the '
         'upstream bridge carries something this branch\'s bridge does not — round 6: only '
         'WS-C\'s bridge stamps `provenance.repair`, so re-bridging here would silently DROP '
-        'the repair lineage and produce a document that looks fine and proves nothing.'))
+        'the repair lineage and produce a document that looks fine and proves nothing. '
+        'ROUND 7: that reason has EXPIRED on the integration branch — the bridge here stamps '
+        '`provenance.repair` AND renders crops, and `--doc` renders none, which is how round 6 '
+        'shipped 17 withheld regions with no page image. Prefer --tsl; L5b now refuses to place '
+        'a document whose croppable withheld regions have no crop.'))
     ap.add_argument('--stage', default=os.path.join(ROOT, 'poc-out', 'round6', 'golden'))
     ap.add_argument('--history-rules', action='store_true',
                     help='apply the PROPOSED History rules post-pass (LS&ĐL only)')
@@ -104,6 +108,9 @@ def main(argv=None):
                     help='history-rules@v2 verbatim gate; without it the rules run v1')
     ap.add_argument('--toc-title')
     ap.add_argument('--no-crops', action='store_true')
+    ap.add_argument('--allow-missing-crops', action='store_true',
+                    help='downgrade the L5b crop-coverage gate to UNKNOWN (never PASS) when the '
+                         'source PDF is genuinely unavailable on this machine')
     ap.add_argument('--require-repair', action='store_true',
                     help='the delivery claim: refuse a document with no repair lineage')
     ap.add_argument('--place', action='store_true',
@@ -167,7 +174,8 @@ def main(argv=None):
                           note=out.splitlines()[-1] if out else ''))
 
     lineage = fl.check(doc_path, root=ROOT, require_repair=a.require_repair,
-                       expect_source_hash=tsl_hash)
+                       expect_source_hash=tsl_hash,
+                       allow_missing_crops=a.allow_missing_crops)
     print(fl.render(lineage))
     print()
     for s in steps:
