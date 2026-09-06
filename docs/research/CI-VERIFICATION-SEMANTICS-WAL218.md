@@ -201,3 +201,51 @@ and a run that verified none of them.
 
 > Stale doctrine blocks as hard as a real gate, and no test catches it. The same is true of
 > a stale claim of verification. This is that check, for one specific claim.
+
+---
+
+## 7. The sweep — the same shape, nine more places
+
+WAL-218's scope asked for a sweep: *"wherever an existence obligation is checked by
+consistency alone."* Run 2026-09-06 across `tool/**/*.py`, `.github/workflows/ci.yml` and the
+gate-like Dart tests. Ten instances, four of them in gates that run on CI today. Each was
+read at the source before being listed; **none is fixed by this branch.**
+
+### HIGH — live CI gates
+
+| # | where | how absence reads as success |
+|---|---|---|
+| S1 | `test/features/subjects/scale_lineage_test.dart:414` | the gate exists to prove the pack carries `packVersion` build lineage; **the one condition it should fail on — lineage absent — is a `markTestSkipped`.** The surviving assertion is "if there is a packVersion it is non-empty". No ledger row anywhere |
+| S2 | `test/features/subjects/default_build_guard_test.dart:90` | twelve grade tests must prove every pack on the machine is a non-experimental default build with zero router activities. On CI all twelve skip; on a machine whose pack parsed to zero activities, `every(...)` is vacuously true |
+| S3 | `.github/workflows/ci.yml` — *Pack provenance verify (only when packs exist)* | the shell skips the gate whenever the artefacts it guards are absent, and exits 0. The step's own comment argues this is «không xanh giả … bước in rõ là bỏ qua» — **that is exactly the argument `All tests passed!` was making**, and it is wrong for the same reason: printing that you skipped is not a record anything downstream can read |
+| S4 | `tool/ui/pack_provenance.py:181` (`router_sources`, `:69`) | `for e in pack.get(fam) or []` over every family: a pack with no activity families yields `srcs == []`, `problems == []`, and the tool prints `OK … verified as DEFAULT builds`. **A pack that shipped no content at all is certified as a good default build** |
+
+S3 and S4 compose: the CI step skips when there is no pack, and the tool passes when the pack
+is empty. There is no input for which that pair reports a problem about absence.
+
+### MEDIUM — hand-run gates and helpers
+
+| # | where | how absence reads as success |
+|---|---|---|
+| S5 | `tool/extract/verify_corpus_gates.py` G5–G8 (`:121`, `:134`, `:149`, `:160`) | four of nine gate families vanish when their artefact is not on the machine, and the script still prints `🟢 SCALE GATE: TẤT CẢ XANH` and exits 0. The verdict is computed from `FAILS` alone — a check that never ran is indistinguishable from a check that passed |
+| S6 | `tool/extract/verify_corpus_gates.py:52` | the future-knowledge leak gate passes whenever the fraction-rule population is empty. An extraction regression producing zero `RULE` units makes every leak gate green. The same file already knows the fix — `:72` uses `len(same_den) > 0 and all(...)` |
+| S7 | `tool/extract/verify_corpus_gates.py:137`, `:152` | "every edge carries origin" and "no `BUILDS_ON` claims `sourceStated`" are both vacuously true for a graph with zero edges — which is also what a broken graph builder produces |
+| S8 | `tool/metrics/cli.py:75` | `NO_RECORD` is not counted as `bad`, and `verify` returns 0. **Deleting a recorded value is a way to make the metric gate green.** This is the ticket's "cannot distinguish *not applicable* from *never asked*", verbatim |
+| S9 | `tool/research/lane_c/repair_plugin.py:160` | on a failed framework import `register()` returns `[]` instead of raising, and the caller at `:305` discards the return. A run with zero repairers registered reports "no repair candidates" — indistinguishable from "the repairers ran and found nothing". The ticket's "plugin loader" shape |
+| S10 | `tool/shadow/guard_check.dart:32` | prints `GUARD: chặn 0/0 transcript` and exits 0 on an empty run directory; `catch (_) { continue; }` drops unparsable transcripts without incrementing either counter. Literally the `0/0 · PASS` print |
+
+### Two notes, not counted
+
+- `tool/evidence/fixture_lineage.py:283` still prints `0/0 present` with `PASS` — the round-7
+  row itself is unchanged. It is *mitigated* by L5b (`:295`), which measures the population
+  and returns `UNKNOWN` when withheld regions exist but none is croppable. Mitigated is not
+  removed: the literal string can still appear.
+- `tool/reporting/build_round_archive.py:337` derives three distinct YES claims from one
+  `not problems` flag — a report generator, not a merge gate, but the same shape.
+
+### Status
+
+**The sweep is DONE. The remediation is NOT** — filed separately, and deliberately not folded
+into this branch: WAL-218 asked CI to stop reporting success while a D4-gated assertion is
+skipped, and that is what shipped. Fixing ten unrelated gates under the same ticket would have
+made the before→after numbers above unreadable.
