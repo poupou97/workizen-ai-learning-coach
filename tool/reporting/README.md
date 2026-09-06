@@ -104,7 +104,15 @@ These are conventions the tool cannot enforce, and they are the reason the archi
 having:
 
 - **Do not fabricate missing evidence.** Write **`UNAVAILABLE`** or **`NOT CAPTURED`**. That is a
-  correct answer.
+  correct answer — but **check that it is the answer** before writing it. Round 6's archive filed a
+  settled figure as NOT CAPTURED because of a counting bug: `toanExercises` is a dict keyed by
+  lesson, `len()` returned keys, and 10 *lessons* were reported as 10 *expressions* against a true
+  41. **Before recording a disagreement with a workstream, re-derive the number a second way.** A
+  wrong `NOT CAPTURED` is worse than no note, because it puts the archive's authority behind a doubt
+  that does not exist.
+- **When a published archive turns out to be wrong, regenerate as `-vN` and keep the earlier one**,
+  with the correction recorded *inside* the new archive rather than silently applied. A superseded
+  archive is still evidence — of what was believed at the time.
 - **Label claims:** **PROVEN** (re-verified first-hand — a command, a hash, an API read) ·
   **MEASURED** (an instrument's number, recorded in a committed report) · **OBSERVED** (seen on a
   real device or a page render) · **INFERRED** · **HYPOTHESIS** · **UNKNOWN**.
