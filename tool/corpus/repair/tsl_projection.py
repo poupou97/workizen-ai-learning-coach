@@ -66,11 +66,53 @@ class UnTrustedRepairServed(RepairIntegrityError):
     """A TSL served a block the repair ledger says was repaired. Fail-closed: nothing is written."""
 
 
+#: How every hash in this module is computed, in a form a reader can run. A hash nobody can reproduce
+#: with an obvious command does not prove lineage - it looks like tampering. `shasum -a 256 <file>` does
+#: NOT reproduce these numbers, and that is deliberate: canonical JSON survives reformatting and key
+#: reordering, a raw byte hash does not. So the method travels WITH the hash, everywhere, always.
+HASH_METHOD = "sha256(json.dumps(obj, sort_keys=True, separators=(',',':'), ensure_ascii=False))"
+
+
 def canonical_sha256(obj):
     """sha256 of the canonical JSON — the same oracle `tsl_to_lesson_document.document_hash` uses, so a
-    reader can chain SOURCE TSL -> PROJECTED TSL -> LESSON DOCUMENT by hash without a second convention."""
+    reader can chain SOURCE TSL -> PROJECTED TSL -> LESSON DOCUMENT by hash without a second convention.
+
+    Reproduce with `HASH_METHOD`, not with `shasum -a 256`.
+    """
     return hashlib.sha256(json.dumps(obj, ensure_ascii=False, sort_keys=True,
                                      separators=(',', ':')).encode('utf-8')).hexdigest()
+
+
+def generation_check(tsl, source_path=None):
+    """Does this artefact agree with itself about WHICH GENERATION it is?
+
+    Found on GOLDEN #1: the LS&DL 5 Bai 8 lesson lives under a directory named `tc2-r5`, its own
+    `pipeline` FIELD says `tc2-p1`, and its blocks were produced by `sdm-v3`. Three labels, three
+    answers. The Founder's rule «do not silently mix generations» exists for exactly this, and a future
+    reader would otherwise trust whichever label they happened to read first.
+
+    **`sdmVersion` is authoritative** and the other two are recorded as claims: the SDM version is what
+    fixes the structure of the blocks, while a directory name is a filing decision and the `pipeline`
+    field is copied from whatever `tc2_tsl.build_book` was invoked with.
+    """
+    import os
+    prov0 = ((tsl.get('blocks') or [{}])[0].get('provenance') or {})
+    directory = None
+    if source_path:
+        parts = os.path.abspath(source_path).split(os.sep)
+        directory = next((p for p in reversed(parts) if p.startswith('tc2-')), None)
+    pipeline = tsl.get('pipeline')
+    labels = {k: v for k, v in (('directory', directory), ('pipelineField', pipeline)) if v}
+    agree = len(set(labels.values())) <= 1
+    return dict(
+        directory=directory, pipelineField=pipeline, sdmVersion=prov0.get('sdm_version'),
+        authoritative='sdmVersion',
+        labelsAgree=agree,
+        discrepancy=None if agree else
+        f'this artefact misstates its own generation: directory={directory!r} vs pipeline field '
+        f'{pipeline!r}; blocks were produced by {prov0.get("sdm_version")!r}, which is authoritative',
+        note='`pipeline` cannot be trusted as the generation marker; `sdmVersion` can. Recorded rather '
+             'than reconciled - renaming either label would rewrite provenance.')
 
 
 def block_key(block_id):
@@ -158,9 +200,11 @@ def repairs_for_tsl(tsl, rows, *, source_version=None):
         if outcome is None:
             continue
         if outcome.get('disposition') != Disposition.VALIDATED_REPAIR:
+            obs = (outcome.get('observations') or [{}])[0]
             other[key] = dict(disposition=outcome.get('disposition'),
                               failure_class=outcome.get('failure_class'),
                               reasons=list(outcome.get('reasons') or ()),
+                              observed=obs.get('value'),
                               entry_id=outcome.get('entry_id'))
             continue
         caps = [CAP_TRUST_GATE] if restored else []
@@ -210,13 +254,24 @@ def classify_served(vr, block, *, restored, same_pipeline):
     return 'join_unverified', False
 
 
-def project(tsl, rows, *, source_version=None, on_served_repair='refuse',
-            on_detected_unrepaired='report', on_served_unrepaired='report'):
+def project(tsl, rows, *, source_version=None, source_path=None, on_served_repair='refuse',
+            on_detected_unrepaired='withhold', on_served_unrepaired='report'):
     """TSL + ledger rows -> (new TSL, report). Pure: the input TSL is never mutated.
 
     `on_served_repair`: 'refuse' (default) raises `UnTrustedRepairServed` on a VIOLATION; 'withhold'
     demotes the block to a withheld region carrying its record and the reason `repair_not_trusted`.
-    `on_served_unrepaired` / `on_detected_unrepaired`: 'report' (default) or 'withhold'.
+    `on_detected_unrepaired`: 'withhold' (default) or 'report'. **The default HONOURS the ledger.** The
+    engine's own rule is «a failure detected on a served block that nothing validated is WITHHELD -
+    accuracy first», and a row that says WITHHELD / SUSPECT / CONFLICT is that ruling already made. A
+    projection that kept the block served would be quietly overriding a fail-closed decision to protect
+    coverage, which is the doctrine this round exists to defend. It only ever REMOVES text from the
+    served set, so it cannot serve anything wrong - but it CAN withdraw something right, so every
+    demotion is listed in `report['demotions']` and counted as **false-demotion exposure** beside the
+    round-5 prior (demotion precision 0.250 on 4 blocks). A demotion is applied ONLY when the served
+    text still equals the observation the ledger ruled on; otherwise the join is unverified and nothing
+    is done.
+
+    `on_served_unrepaired`: 'report' (default) or 'withhold'.
     """
     for name, v in (('on_served_repair', on_served_repair),
                     ('on_detected_unrepaired', on_detected_unrepaired),
@@ -237,13 +292,14 @@ def project(tsl, rows, *, source_version=None, on_served_repair='refuse',
     same_pipeline = bool(run.get('pipeline')) and out.get('pipeline') == run.get('pipeline')
     sv = dict(source_version or {})
     sv.setdefault('sourceTslSha256', source_sha)
+    sv.setdefault('hashMethod', HASH_METHOD)
     sv.setdefault('ledgerRun', {k: run.get(k) for k in ('lane', 'baseline', 'pipeline', 'framework')})
     by_key, other, skipped = repairs_for_tsl(out, rows, source_version=sv)
     restored_keys = {k for k, rws in chains(rows).items()
                      if any(r.get('stage') == 'restore' or r.get('disposition') == Disposition.TRUSTED
                             for r in rws)}
 
-    kept_blocks, demoted = [], []
+    kept_blocks, demoted, demotions = [], [], []
     counts = Counter()
     violations, findings = [], []
 
@@ -270,14 +326,22 @@ def project(tsl, rows, *, source_version=None, on_served_repair='refuse',
                 continue
             kept_blocks.append(b)             # NOT annotated: a served block never carries a repair record
             continue
-        if oth is not None and oth['disposition'] in (Disposition.SUSPECT, Disposition.CONFLICT):
+        if oth is not None and oth['disposition'] in (Disposition.SUSPECT, Disposition.CONFLICT,
+                                                      Disposition.WITHHELD):
             counts['detected_unrepaired_on_served_block'] += 1
+            verified = oth.get('observed') is not None and b.get('text') == oth['observed']
             findings.append(dict(block_id=b['id'], kind='detected_unrepaired',
-                                 disposition=oth['disposition'], failure_class=oth.get('failure_class')))
-            if on_detected_unrepaired == 'withhold':
-                demoted.append((b, None, REASON_DETECTED + ':' + (oth.get('failure_class') or 'unknown')))
+                                 disposition=oth['disposition'], failure_class=oth.get('failure_class'),
+                                 join_verified=verified))
+            if on_detected_unrepaired == 'withhold' and verified:
+                reason = REASON_DETECTED + ':' + (oth.get('failure_class') or 'unknown')
+                demoted.append((b, None, reason))
+                demotions.append(dict(block_id=b['id'], reason=reason,
+                                      disposition=oth['disposition'], entry_id=oth.get('entry_id')))
                 counts['detected_unrepaired_demoted'] += 1
                 continue
+            if on_detected_unrepaired == 'withhold' and not verified:
+                counts['detected_unrepaired_join_unverified'] += 1
         kept_blocks.append(b)
 
     if violations and on_served_repair == 'refuse':
@@ -331,10 +395,18 @@ def project(tsl, rows, *, source_version=None, on_served_repair='refuse',
         onDetectedUnrepaired=on_detected_unrepaired,
         ledgerRun=run, samePipelineAsLedger=same_pipeline,
         sourceTslSha256=source_sha,
+        hashMethod=HASH_METHOD,
+        generation=generation_check(tsl, source_path),
         sourcePipeline=out.get('pipeline'),
         sourceSdmVersion=((out.get('blocks') or [{}])[0].get('provenance') or {}).get('sdm_version'),
         productionTrustThreshold=None,
         findings=findings,
+        demotions=demotions,
+        falseDemotionExposure=dict(
+            blocks=len(demotions),
+            note='every demotion here WITHDRAWS text from a child. `false_correction_rate` is blind to '
+                 'this; round 5 measured demotion precision 0.250 on 4 blocks, so the count is published '
+                 'beside the restores rather than folded into them.'),
         note='CONNECT != TRUST. No mechanism in this projection produces a TRUSTED disposition; '
              'a validated repair is visible and countable, and is still withheld from a child.')
     stats = dict(out.get('stats') or {})
@@ -356,9 +428,12 @@ def project(tsl, rows, *, source_version=None, on_served_repair='refuse',
     report = dict(book=out.get('book'), lesson=out.get('lesson'), pipeline=out.get('pipeline'),
                   source_tsl_sha256=source_sha,
                   projected_tsl_sha256=canonical_sha256(out),
+                  hash_method=HASH_METHOD,
+                  generation=generation_check(tsl, source_path),
                   validated_repairs=len(by_key), crossed=crossed, trusted_repairs=0,
                   same_pipeline_as_ledger=same_pipeline, ledger_run=run,
                   violations=violations, findings=findings, detected_unrepaired=other,
+                  demotions=demotions, false_demotion_exposure=len(demotions),
                   capped=[v.repair_id for v in by_key.values() if CAP_TRUST_GATE in v.caps],
                   stats=stats['repair'])
     check_projection(tsl, out)
@@ -428,12 +503,12 @@ def main(argv=None):
     ap.add_argument('--subject', help='subject name for the document (else derived from the book id)')
     ap.add_argument('--grade', type=int, help='grade for the document (else derived from the book id)')
     ap.add_argument('--on-served-repair', default='refuse', choices=('refuse', 'withhold'))
-    ap.add_argument('--on-detected-unrepaired', default='report', choices=('report', 'withhold'))
+    ap.add_argument('--on-detected-unrepaired', default='withhold', choices=('report', 'withhold'))
     ap.add_argument('--on-served-unrepaired', default='report', choices=('report', 'withhold'))
     a = ap.parse_args(argv)
     tsl = json.load(open(a.tsl, encoding='utf-8'))
     rows = ledger_mod.read(a.ledger)
-    out, report = project(tsl, rows, on_served_repair=a.on_served_repair,
+    out, report = project(tsl, rows, source_path=a.tsl, on_served_repair=a.on_served_repair,
                           on_detected_unrepaired=a.on_detected_unrepaired,
                           on_served_unrepaired=a.on_served_unrepaired)
     print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
@@ -462,9 +537,12 @@ def main(argv=None):
         doc['provenance']['repair']['sourceTslPath'] = os.path.relpath(a.tsl)
         doc['provenance']['repair']['ledgerPath'] = os.path.relpath(a.ledger)
         doc['provenance']['repair']['generator'] = bridge.GENERATOR
+        doc['provenance']['repair']['hashMethod'] = HASH_METHOD
+        doc['provenance']['repair']['generation'] = report['generation']
         with open(a.lesson_document, 'w', encoding='utf-8') as fh:
             json.dump(doc, fh, ensure_ascii=False)
-        print(f'wrote {a.lesson_document}  documentHash={bridge.document_hash(doc)}')
+        print(f'wrote {a.lesson_document}  documentHash={bridge.document_hash(doc)}  '
+              f'({HASH_METHOD})')
     return 0
 
 
