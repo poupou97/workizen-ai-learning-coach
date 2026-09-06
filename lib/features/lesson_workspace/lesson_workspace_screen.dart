@@ -87,6 +87,10 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   WorkspaceView? _view;
   String? _tutorAnchor;
   String? _readAnchor;
+
+  /// ROUND 7 · V2 — sơ đồ mà Trực quan phải dừng đúng ở đó, khi trẻ chạm một
+  /// liên hệ trong lời phản hồi của SAM.
+  String? _visualAnchor;
   int _fontStep = 0;
 
   /// PHƯƠNG ÁN B — trạng thái của lớp trợ giúp. Ở ĐÂY, không ở widget con, vì
@@ -121,11 +125,17 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     if (v != null) widget.trace.markView(doc.slotKey, v);
   }
 
-  void _switch(WorkspaceView v, {String? tutorAnchor, String? readAnchor}) {
+  void _switch(
+    WorkspaceView v, {
+    String? tutorAnchor,
+    String? readAnchor,
+    String? visualAnchor,
+  }) {
     setState(() {
       _view = v;
       if (v == WorkspaceView.tutor) _tutorAnchor = tutorAnchor;
       if (v == WorkspaceView.read) _readAnchor = readAnchor;
+      if (v == WorkspaceView.visual) _visualAnchor = visualAnchor;
     });
     widget.trace.markView(doc.slotKey, v);
   }
@@ -408,12 +418,17 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     WorkspaceView.visual => VisualView(
       doc: doc,
       onShowInRead: (id) => _switch(WorkspaceView.read, readAnchor: id),
+      scrollToSemanticId: _visualAnchor,
     ),
     WorkspaceView.tutor => TutorView(
       doc: doc,
       learnerId: widget.learnerId,
       anchorBlockId: _tutorAnchor,
+      // TRACE != EVIDENCE: SAM chi duoc noi «con da MO», khong bao gio «con da hieu».
+      viewsSeen: _seen,
       onShowInRead: (id) => _switch(WorkspaceView.read, readAnchor: id),
+      onOpenVisual: (semanticId) =>
+          _switch(WorkspaceView.visual, visualAnchor: semanticId),
       onNext: (target, anchor) => switch (target) {
         NextTarget.read => _switch(WorkspaceView.read, readAnchor: anchor),
         NextTarget.visual => _switch(WorkspaceView.visual),

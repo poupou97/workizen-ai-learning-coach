@@ -20,8 +20,12 @@ import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/content_trust.dart';
 import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/tutor_script.dart';
+import '../../core/lesson_model/next_action.dart';
+import 'teaching/answer_diagnosis.dart';
+import 'teaching/diagnosis_card.dart';
 import 'widgets/sam_bubble.dart';
 import 'widgets/source_sheet.dart';
+import 'widgets/trust_sheet.dart';
 import '../../core/pedagogy/pedagogy_runtime.dart';
 import 'widgets/runtime_plan.dart';
 
@@ -32,10 +36,19 @@ class TutorView extends StatefulWidget {
     required this.onNext,
     this.anchorBlockId,
     this.onShowInRead,
+    this.onOpenVisual,
     this.learnerId,
+    this.viewsSeen = const {},
   });
 
   final LessonDocument doc;
+
+  /// Cách học trẻ ĐÃ MỞ trong phiên (`WorkspaceTrace`). TRACE ≠ EVIDENCE: chỉ
+  /// dùng để nói «trước đó con đã MỞ Trực quan», không bao giờ để suy ra hiểu.
+  final Set<WorkspaceView> viewsSeen;
+
+  /// Chạm một liên hệ trong lời phản hồi ⇒ mở Trực quan ở đúng sơ đồ ấy.
+  final void Function(String semanticId)? onOpenVisual;
 
   /// Học sinh đang mở (cho `LearningContext` của runtime). `null` ⇒ hằng
   /// [noLearnerId]; không có sự kiện nào được phát dù giá trị là gì.
@@ -49,29 +62,47 @@ class TutorView extends StatefulWidget {
   static const endCardKey = Key('tutor-end-card');
   static const phaseStripKey = Key('tutor-phase-strip');
 
-  /// Sáu pha của vòng lặp — thứ tự cố định, chữ trẻ đọc.
+  /// Sáu pha của vòng lặp — ⭐ ROUND 7 · V2: ĐÚNG vòng lặp của order 49 §2
+  /// «GIẢI THÍCH NGẮN → HỎI → TRẺ TRẢ LỜI → SAM PHẢN HỒI THEO CÂU TRẢ LỜI →
+  /// GIẢI THÍCH KHÁC NẾU CẦN → THỬ LẠI».
+  ///
+  /// Vòng 3 dựng dải này khi phản hồi đến SAU gợi ý («Gợi ý › Phản hồi ›
+  /// Tiếp»). Vòng 2 đảo thứ tự THẬT trong runner — phản hồi theo lỗi đứng
+  /// trước cách giải thích khác — nên dải phải nói đúng cái app làm, nếu
+  /// không nó tự mâu thuẫn ngay trên màn. Pha cuối là «Thử lại», không phải
+  /// «Tiếp»: vòng lặp đóng ở chỗ trẻ được thử lại, không ở chỗ chấm điểm.
   static const phases = [
     'Giải thích',
     'Hỏi',
     'Con trả lời',
-    'Gợi ý',
     'Phản hồi',
-    'Tiếp',
+    'Giải thích khác',
+    'Thử lại',
   ];
 
   /// Pha hiện tại, TẤT ĐỊNH từ runner: bước hiện tại + lượt cuối transcript.
+  /// `-1` ⇒ vòng lặp đã đóng (thẻ kết thay chỗ) ⇒ ẨN dải, không để một dải
+  /// không sáng ô nào.
   static int phaseOf(TutorRunner r) {
-    if (r.finished || r.current is NextStep) return 5;
+    if (r.finished || r.current is NextStep) return -1;
     if (r.current is ExplainStep) return 0;
     final last = r.transcript.isEmpty ? null : r.transcript.last;
     return switch (last?.kind) {
       null || TurnKind.explain => 1,
-      TurnKind.ask => _hasFeedbackBefore(r) ? 4 : 2,
-      TurnKind.hint => 3,
-      TurnKind.matched || TurnKind.scaffold => 4,
+      TurnKind.ask => _hasFeedbackBefore(r) ? 3 : 2,
+      TurnKind.diagnose || TurnKind.matched || TurnKind.scaffold => 3,
+      // Gợi ý SAU một lần thử = «giải thích khác» đã xong ⇒ bóng đang ở chân
+      // trẻ: sáng «Thử lại». Xin gợi ý TRƯỚC khi thử ⇒ SAM đang giải thích.
+      TurnKind.hint => _attemptedCurrent(r) ? 5 : 4,
       TurnKind.learner || TurnKind.next => 2,
     };
   }
+
+  /// Trẻ đã thử ít nhất một lần ở bước hỏi hiện tại chưa.
+  static bool _attemptedCurrent(TutorRunner r) => switch (r.current) {
+    AskStep(:final id) => r.answersFor(id).isNotEmpty,
+    _ => false,
+  };
 
   /// Lượt ngay trước câu hỏi hiện tại là phản hồi (khớp/scaffold) ⇒ trẻ đang
   /// đọc phản hồi + câu mới: pha «Phản hồi».
@@ -81,6 +112,62 @@ class TutorView extends StatefulWidget {
     final k = r.transcript[n - 2].kind;
     return k == TurnKind.matched || k == TurnKind.scaffold;
   }
+
+  // ── ⭐ ROUND 7 · V2 — «CORRECT ANSWER != MASTERY» thành một câu ────────────
+
+  /// Chuyện ĐÃ XẢY RA ở một câu hỏi, đo từ transcript: mấy lần thử, mấy gợi
+  /// ý, và (nếu biết) trẻ đã MỞ cách học nào trước đó.
+  ///
+  /// Đây là chỗ luật `CORRECT ANSWER != MASTERY` được nói ra thành lời: đúng
+  /// sau hai lần thử và một gợi ý thì SAM nói ĐÚNG THẾ. Không có câu nào ở
+  /// đây được phép nói «con đã thạo» / «con hiểu rồi» — test quét chữ.
+  static String attemptStory(
+    TutorRunner r,
+    String stepId, {
+    Set<WorkspaceView> viewsSeen = const {},
+  }) {
+    final tries = r.answersFor(stepId).length;
+    final hints = r.hintsUsedFor(stepId);
+    final matched = r.matchedStep(stepId);
+    final opened = _openedWords(viewsSeen);
+    final buf = StringBuffer();
+    if (matched) {
+      buf.write(
+        tries <= 1
+            ? 'Con trả lời khớp ngay lần đầu'
+            : 'Con trả lời khớp ở lần thử thứ $tries',
+      );
+      buf.write(hints == 0 ? ', không cần gợi ý' : ', sau $hints gợi ý');
+    } else {
+      buf.write(
+        tries == 0
+            ? 'Con chưa trả lời câu này'
+            : 'Con đã thử $tries lần; SAM chưa khớp được câu trả lời nào nên '
+                  'đã chỉ chỗ trong sách',
+      );
+    }
+    if (opened != null) buf.write(' — trước đó con đã mở $opened');
+    buf.write('.');
+    return buf.toString();
+  }
+
+  /// Tên các cách học trẻ ĐÃ MỞ trong phiên (TRACE ≠ EVIDENCE: «mở», không
+  /// phải «hiểu»). `null` khi chưa mở gì ngoài chính màn này.
+  static String? _openedWords(Set<WorkspaceView> views) {
+    const word = {
+      WorkspaceView.read: 'Đọc',
+      WorkspaceView.visual: 'Trực quan',
+    };
+    final out = [
+      for (final v in word.keys)
+        if (views.contains(v)) word[v]!,
+    ];
+    return out.isEmpty ? null : out.join(' và ');
+  }
+
+  /// Neo cuộn — công khai cho test (xem `_TutorViewState._anchorIndex`).
+  @visibleForTesting
+  static int debugAnchorIndex(TutorRunner r) => _TutorViewState._anchorIndex(r);
 
   /// «Câu n/N» của một bước hỏi; không phải bước hỏi ⇒ `null`.
   static String? askCaption(TutorScript script, String? stepId) {
@@ -113,6 +200,11 @@ class TutorView extends StatefulWidget {
       TurnKind.matched => PlannedStepPhase.feedbackMatched,
       TurnKind.scaffold => PlannedStepPhase.scaffold,
       TurnKind.next => PlannedStepPhase.next,
+      // Phản hồi theo lỗi KHÔNG có bước tương ứng trong kế hoạch runtime —
+      // nó được dựng từ `SemanticData` chứ không từ kịch bản. `null` ⇒ nhãn
+      // kịch bản (mặc định an toàn): SAM không tự phong cho mình nhãn «runtime
+      // có kiểm» ở một lượt runtime không hề lập kế hoạch.
+      TurnKind.diagnose => null,
       TurnKind.learner => null,
     };
     if (phase == null) return null;
@@ -179,6 +271,25 @@ class TutorView extends StatefulWidget {
         '${proto == null ? '' : ' ($proto)'}.';
   }
 
+  /// ⭐ ROUND 7 · V2 — bản NGẮN cho ĐẦU MÀN. Con số giữ nguyên; danh sách
+  /// loại bước trong ngoặc đi vào sheet «Nguồn & độ tin» (nơi đã có sẵn bản
+  /// đầy đủ).
+  ///
+  /// Vì sao rút: đo ở 360 dp (khổ Nokia), bản đầy đủ chiếm **136 dp** và chú
+  /// giải nhãn thêm **96 dp** — 232 dp nói về MÁY trước khi SAM kịp nói một
+  /// câu nào về BÀI, trên một màn cao 640 dp. Nội dung dạy đầu tiên rơi xuống
+  /// 63 % chiều cao màn. Sự thật không mất đi: nó nằm sau một ⓘ, đúng cách
+  /// vòng 1 đã làm với «Vì sao SAM chọn sơ đồ này».
+  static String runtimeLineShort(RuntimePlan? plan) {
+    if (plan == null) return 'Bài này không có kịch bản.';
+    if (!plan.isBound) {
+      return 'Máy chưa ràng buộc được bài này với sách — mọi bước là lời viết '
+          'sẵn để thử.';
+    }
+    return 'Máy đã kiểm ${plan.runtimeGuidedCount}/${plan.steps.length} bước '
+        'là lời lấy đúng trong sách.';
+  }
+
   /// Dòng runtime KỸ THUẬT (mã từ chối) — chỉ trong nếp gấp «Chi tiết kỹ
   /// thuật» của sheet «Nguồn & độ tin».
   static String runtimeLineTechnical(RuntimePlan? plan) {
@@ -236,11 +347,27 @@ class _TutorViewState extends State<TutorView> {
     }
   }
 
+  /// ⭐ ROUND 7 · V2 — lời phản hồi cho MỘT câu trả lời, dựng từ dữ liệu có
+  /// kiểu của CHÍNH bài này. Hàm THUẦN và TẤT ĐỊNH ⇒ `_diagnosisFor` dựng lại
+  /// đúng nó khi vẽ, không cần giữ bản sao trong transcript.
+  AnswerDiagnosis? _diagnose(AskStep step, String answer, List<String> earlier) =>
+      diagnoseAnswer(
+        step: step,
+        answer: answer,
+        semantic: widget.doc.semantic,
+        earlierAnswers: earlier,
+      );
+
   void _start() {
     final s = widget.doc.tutorScript;
     _runner = s == null
         ? null
-        : TutorRunner(s, startAtBlockId: widget.anchorBlockId);
+        : TutorRunner(
+            s,
+            startAtBlockId: widget.anchorBlockId,
+            diagnose: (step, answer, earlier) =>
+                _diagnose(step, answer, earlier)?.headline,
+          );
     // A7: kế hoạch runtime — nhãn theo bước; không phát sự kiện nào.
     _plan = planForDoc(widget.doc, learnerId: widget.learnerId);
   }
@@ -271,8 +398,30 @@ class _TutorViewState extends State<TutorView> {
     });
   }
 
-  /// Chỉ số lượt SAM (không phải «next») mới nhất trong transcript.
-  static int _latestSamIndex(TutorRunner r) {
+  /// Lượt SAM mà màn phải đưa lên ĐẦU sau mỗi thao tác.
+  ///
+  /// ⭐ LỖI MÁY THẬT VÒNG 2, LƯỢT 1 (`05-wrong-loc.png`): sau một đáp án sai,
+  /// runner thêm HAI lượt — phản hồi theo lỗi rồi gợi ý — và neo cũ (lượt SAM
+  /// CUỐI) đưa **gợi ý** lên đầu màn. Trẻ thấy «Gợi ý 1/2» trước, còn câu nói
+  /// về ĐÁP ÁN CỦA CHÍNH MÌNH nằm khuất phía trên và phải cuộn ngược lên mới
+  /// đọc được. Thế là đúng vòng lặp order 49 §2 bị đảo ngay trên màn: giải
+  /// thích khác đến TRƯỚC phản hồi.
+  ///
+  /// Nên: nếu sau lượt trả lời gần nhất có một lượt PHẢN HỒI THEO LỖI, neo
+  /// vào lượt ấy. Không có thì giữ hành vi cũ (lượt SAM cuối).
+  static int _anchorIndex(TutorRunner r) {
+    var lastLearner = -1;
+    for (var i = r.transcript.length - 1; i >= 0; i--) {
+      if (r.transcript[i].kind == TurnKind.learner) {
+        lastLearner = i;
+        break;
+      }
+    }
+    if (lastLearner >= 0) {
+      for (var i = lastLearner + 1; i < r.transcript.length; i++) {
+        if (r.transcript[i].kind == TurnKind.diagnose) return i;
+      }
+    }
     for (var i = r.transcript.length - 1; i >= 0; i--) {
       final t = r.transcript[i];
       if (t.isSam && t.kind != TurnKind.next) return i;
@@ -341,20 +490,35 @@ class _TutorViewState extends State<TutorView> {
                         ),
                       ),
                       // A7.2 — PEDAGOGY REALITY nhìn thấy được: bao nhiêu
-                      // bước runtime kiểm được, bao nhiêu bước còn là kịch bản.
-                      Text(
-                        TutorView.runtimeLine(_plan),
-                        key: const Key('tutor-runtime-line'),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: WalColors.mintText,
+                      // bước runtime kiểm được, bao nhiêu bước còn là kịch
+                      // bản. ROUND 7 V2: một DÒNG + ⓘ, phần còn lại ở sheet
+                      // «Nguồn & độ tin» (xem `runtimeLineShort`).
+                      InkWell(
+                        key: const Key('tutor-runtime-info'),
+                        onTap: () =>
+                            showTrustSheet(context, doc: widget.doc),
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                TutorView.runtimeLineShort(_plan),
+                                key: const Key('tutor-runtime-line'),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: WalColors.mintText,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Text(
+                              'ⓘ',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: WalColors.primaryText,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      // ROUND 4 §6.6 — chú giải nhãn theo bước bằng lời trẻ.
-                      const Text(
-                        TutorView.labelLegend,
-                        key: Key('tutor-label-legend'),
-                        style: TextStyle(fontSize: 11, color: WalColors.inkSoft),
                       ),
                     ],
                   ),
@@ -362,15 +526,16 @@ class _TutorViewState extends State<TutorView> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              WalSpacing.md,
-              WalSpacing.sm,
-              WalSpacing.md,
-              0,
+          if (TutorView.phaseOf(r) >= 0)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                WalSpacing.md,
+                WalSpacing.sm,
+                WalSpacing.md,
+                0,
+              ),
+              child: _phaseStrip(TutorView.phaseOf(r)),
             ),
-            child: _phaseStrip(TutorView.phaseOf(r)),
-          ),
           if (anchor != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -404,13 +569,26 @@ class _TutorViewState extends State<TutorView> {
               children: [
                 for (var i = 0; i < r.transcript.length; i++) ...[
                   KeyedSubtree(
-                    key: i == _latestSamIndex(r) ? _latestSamKey : null,
+                    key: i == _anchorIndex(r) ? _latestSamKey : null,
                     child: _turn(
                       r.transcript[i],
                       TutorView.stepForTurn(_plan, r.transcript, i),
                       hintCaption: r.transcript[i].kind == TurnKind.hint
                           ? 'Gợi ý ${TutorView.hintNumber(r.transcript, i)}/'
                                 '${_hintsOf(r.transcript[i].stepId)}'
+                          : null,
+                      diagnosis: r.transcript[i].kind == TurnKind.diagnose
+                          ? _diagnosisFor(r, i)
+                          : null,
+                      // CORRECT ANSWER != MASTERY — câu «chuyện đã xảy ra»
+                      // đứng ngay dưới lời khớp, không để trẻ (hay phụ huynh)
+                      // đọc «khớp» thành «đã thạo».
+                      footer: r.transcript[i].kind == TurnKind.matched
+                          ? TutorView.attemptStory(
+                              r,
+                              r.transcript[i].stepId!,
+                              viewsSeen: widget.viewsSeen,
+                            )
                           : null,
                     ),
                   ),
@@ -473,7 +651,34 @@ class _TutorViewState extends State<TutorView> {
     return 0;
   }
 
-  Widget _turn(TutorTurn t, PlannedStep? step, {String? hintCaption}) {
+  /// Dựng lại lời phản hồi của lượt [i] (kind `diagnose`). Lượt ngay trước nó
+  /// LUÔN là lượt trả lời của trẻ — runner thêm hai lượt liền nhau — nên đầu
+  /// vào lấy lại được nguyên vẹn, và hàm thuần cho đúng kết quả cũ.
+  AnswerDiagnosis? _diagnosisFor(TutorRunner r, int i) {
+    if (i == 0) return null;
+    final learner = r.transcript[i - 1];
+    if (learner.kind != TurnKind.learner) return null;
+    final stepId = r.transcript[i].stepId;
+    AskStep? step;
+    for (final s in widget.doc.tutorScript?.asks ?? const <AskStep>[]) {
+      if (s.id == stepId) step = s;
+    }
+    if (step == null) return null;
+    final earlier = <String>[];
+    for (var k = 0; k < i - 1; k++) {
+      final t = r.transcript[k];
+      if (t.kind == TurnKind.learner && t.stepId == stepId) earlier.add(t.text);
+    }
+    return _diagnose(step, learner.text, earlier);
+  }
+
+  Widget _turn(
+    TutorTurn t,
+    PlannedStep? step, {
+    String? hintCaption,
+    AnswerDiagnosis? diagnosis,
+    String? footer,
+  }) {
     if (!t.isSam) {
       return Align(
         alignment: Alignment.centerRight,
@@ -515,22 +720,66 @@ class _TutorViewState extends State<TutorView> {
       background: switch (t.kind) {
         TurnKind.hint => WalColors.surfaceLavender,
         TurnKind.scaffold => LearningStateToken.needsWork.bg,
+        // Phản hồi theo lỗi: nền «cần luyện» ẤM, không đỏ — không phải màu
+        // phạt; vòng lặp còn tiếp.
+        TurnKind.diagnose => LearningStateToken.needsWork.bg,
         _ => Colors.white,
       },
-      child: showSource
-          ? SourceCard(
-              doc: widget.doc,
-              block: src,
-              onTap: () => showSourceSheet(
-                context,
-                doc: widget.doc,
-                block: src,
-                onShowInRead: widget.onShowInRead == null
-                    ? null
-                    : () => widget.onShowInRead!(src.id),
-              ),
-            )
-          : null,
+      child: _turnChild(t, src, showSource, diagnosis, footer),
+    );
+  }
+
+  /// Phần dưới bong bóng: lời phản hồi có cấu trúc, thẻ nguồn, và câu «chuyện
+  /// đã xảy ra». Không cái nào bắt buộc ⇒ `null` khi không có gì.
+  Widget? _turnChild(
+    TutorTurn t,
+    LessonBlock? src,
+    bool showSource,
+    AnswerDiagnosis? diagnosis,
+    String? footer,
+  ) {
+    final parts = <Widget>[
+      if (diagnosis != null)
+        DiagnosisCard(
+          diagnosis: diagnosis,
+          onOpenLink: widget.onOpenVisual == null
+              ? null
+              : (l) => widget.onOpenVisual!(l.semanticId),
+          onShowInRead: widget.onShowInRead,
+        ),
+      if (showSource && src != null)
+        SourceCard(
+          doc: widget.doc,
+          block: src,
+          onTap: () => showSourceSheet(
+            context,
+            doc: widget.doc,
+            block: src,
+            onShowInRead: widget.onShowInRead == null
+                ? null
+                : () => widget.onShowInRead!(src.id),
+          ),
+        ),
+      if (footer != null)
+        Text(
+          footer,
+          key: const Key('tutor-attempt-story'),
+          style: const TextStyle(
+            fontSize: 12,
+            color: WalColors.inkSoft,
+            height: 1.4,
+          ),
+        ),
+    ];
+    if (parts.isEmpty) return null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < parts.length; i++) ...[
+          if (i > 0) const SizedBox(height: WalSpacing.sm),
+          parts[i],
+        ],
+      ],
     );
   }
 
@@ -540,10 +789,28 @@ class _TutorViewState extends State<TutorView> {
     switch (s) {
       case ExplainStep():
         body = _primary('Tiếp ▸', () => _after(r.advance));
-      case AskStep(:final options, :final isChoice):
+      case AskStep(:final options, :final isChoice, :final id):
+        final tried = r.answersFor(id);
         body = Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // ⭐ ORDER 49 §2 — «THỬ LẠI» phải NHÌN THẤY ĐƯỢC, nếu không vòng
+            // lặp kết ở lời phản hồi và trẻ tưởng câu đã đóng.
+            if (tried.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: WalSpacing.xs),
+                child: Text(
+                  isChoice
+                      ? '↺ Đến lượt con thử lại — chọn lại một đáp án.'
+                      : '↺ Đến lượt con thử lại — con viết lại câu trả lời.',
+                  key: const Key('tutor-retry-banner'),
+                  style: const TextStyle(
+                    fontSize: WalType.secondary,
+                    fontWeight: FontWeight.w700,
+                    color: WalColors.primaryText,
+                  ),
+                ),
+              ),
             if (isChoice)
               for (var i = 0; i < options.length; i++) ...[
                 SizedBox(
@@ -591,6 +858,26 @@ class _TutorViewState extends State<TutorView> {
                             style: const TextStyle(fontSize: WalType.body),
                           ),
                         ),
+                        // Đáp án ĐÃ THỬ được đánh dấu — vẫn bấm được (không
+                        // phạt, không khoá), chỉ để trẻ khỏi lặp lại vô tình.
+                        if (tried.any(
+                          (a) => normalizeAnswer(a) ==
+                              normalizeAnswer(options[i]),
+                        ))
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: WalSpacing.xs,
+                            ),
+                            child: Text(
+                              'đã thử',
+                              key: Key('tutor-option-tried-$i'),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: WalColors.inkSoft,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -763,7 +1050,7 @@ class _TutorViewState extends State<TutorView> {
             ),
           ),
           const SizedBox(height: 4),
-          if (TutorView.askedCount(r) > 0)
+          if (TutorView.askedCount(r) > 0) ...[
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Text(
@@ -777,6 +1064,33 @@ class _TutorViewState extends State<TutorView> {
                 ),
               ),
             ),
+            // ⭐ ROUND 7 · V2 — CHUYỆN ĐÃ XẢY RA từng câu, không phải điểm.
+            // Không có %, không có sao, không có «đúng/sai» thành số: mỗi
+            // dòng nói mấy lần thử và mấy gợi ý — đó là thứ máy ĐO ĐƯỢC.
+            Padding(
+              padding: const EdgeInsets.only(bottom: WalSpacing.sm),
+              child: Column(
+                key: const Key('tutor-end-story'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final a in r.script.asks)
+                    if (r.answersFor(a.id).isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          '· ${TutorView.askCaption(r.script, a.id)}: '
+                          '${TutorView.attemptStory(r, a.id, viewsSeen: widget.viewsSeen)}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: WalColors.inkSoft,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                ],
+              ),
+            ),
+          ],
           const Text(
             'Đây là kịch bản thử nghiệm — SAM ghi nhận con đã THAM GIA, chưa '
             'phải bằng chứng con đã hiểu. Thầy cô mới là người xác nhận.',
