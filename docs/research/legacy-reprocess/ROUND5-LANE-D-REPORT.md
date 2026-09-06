@@ -306,17 +306,21 @@ the sha256 of all 57 outputs.
 Three annotators, each in a separate session, judged only from page renders and were forbidden the
 sample files: OLD (43 rows), NEW (97 rows = 67 trusted + 30 withheld), caption quota (20 rows).
 
-### 2.6 The REPAIRED stage is **empty**
+### 2.6 When this batch was first measured, the REPAIRED stage was empty
 
-`ORIGINAL → OLD → NEW` ran. **REPAIRED did not.** Lane A1's repair framework landed as scaffolding
-(`origin/a1/round5-repair-framework`, engine + registry + ledger + 235 test lines, no repairer
-plugins) and Lane A2's math repairer had not appeared on `origin` when this batch was measured. The
-column is left explicitly empty rather than implied, and every restore number below says which
-mechanism produced it.
+`ORIGINAL → OLD → NEW` ran; **REPAIRED did not**, because Lane A1's repair framework was still
+scaffolding and Lane A2 had no branch on `origin`. Everything in §2 is that measurement, and it is
+kept as it was measured rather than restated — the `tc2-p2` column is the build without any of Lane
+A1's round-5 work.
+
+Lane A1's PR #83 later went green and **§7 is the REPAIRED stage on the merged build**, with both
+batches re-run from the original source. Every restore number in this report says which mechanism
+produced it, because a restore by a loosened guard and a restore by a validated repair are different
+events and are never summed.
 
 ---
 
-## 3. The regression corpus — three surviving defects, on a third build
+## 3. The regression corpus — three surviving defects, on a third build (before Lane A1 merged)
 
 `tool/corpus/legacy/regression.py` turns each named defect into a deterministic probe over the
 pipeline's own output, so "did the round fix it?" is answered by the build. Verdicts are
@@ -333,7 +337,8 @@ including the 14 post-review fixes — **not** the `cb60cde` round 4 measured).
 | R3 | **tone slips in the lesson title** | PRESENT | **PRESENT** | `…:p021:*:001` = `CỘNG, TRỪ HẠI PHẬN SỐ KHÁC MẪU SỐ`, role `heading`, confidence 0.88 |
 | R7c | **verse joined into prose** | CHANGED | **PARTIAL** | 7 regions now withheld with a `line_structure` reason — but 3 long single-run body blocks are still served, and the blind restore audit judged one of them (a four-line stanza) WRONG on this very build |
 
-**Three of the three survive a third build.** R7c improved but is not closed — and the probe first
+**Three of the three survive a third build.** (On the *fourth* — the merged build of §7 — R1 closes;
+R2, R3 and R7c do not.) R7c improved but is not closed — and the probe first
 said FIXED. It called the class closed because *some* verse is withheld; the blind audit then found a
 stanza served as one prose run on the same build. The probe now returns PARTIAL. **A probe that
 reports FIXED while the class still fires is worse than no probe**, and this one nearly did.
@@ -348,10 +353,11 @@ The independent NEW-side annotator found the same row without being told to look
 
 ---
 
-## 4. Restore — the round's headline, measured on the only restores that happened
+## 4. Restore, before Lane A1 merged — guard-change restores only
 
-No repairer ran, so every restore here comes from a **guard change**, not a repair. The two are
-different events and are never summed.
+Measured before the merge. No repairer had run, so every restore in this section comes from a
+**guard change**, not a repair; the two are different events and are never summed. §7.5 carries the
+one restore the merged build added, and it is scored separately.
 
 Base = batch 1 on `tc2-p1` (whose 30 withheld regions carry the round-4 OVER/SAFE review).
 Re-run = the same lessons on `tc2-p2r`.
