@@ -20,10 +20,11 @@ something true.
 | 7 | **REPRESENTABLE** (≥1 family cue) | **1,654** = 92.7 % | **1,784 units-backed** | a hypothesis about content, not a capability |
 | 8 | **REPRESENTABLE, multi-family** | **1,404** = 78.7 % | 1,784 units-backed | multiple visual patterns per lesson is the norm |
 | 9 | **EXTRACTABLE** (≥1 family built) | **220** = 98.2 % | **224 TSL-backed** | |
-| 10 | **EXTRACTABLE, multi-family** | **192** = 85.7 % | 224 TSL-backed | |
+| 10 | **EXTRACTABLE, multi-family** | **191** = 85.3 % | 224 TSL-backed | |
 | 11 | **EXTRACTABLE, none** | **4** = 1.8 % | 224 TSL-backed | |
 | 12 | **GROUNDABLE** | **220 / 220** | lessons with any extractable family | by construction — a grounding without a locator raises |
-| 13 | **Grounding locator quality** | **32 % text-span · 68 % page-geometry** | 68 groundings (Bài 17) | spans where text is the evidence, geometry where the figure is |
+| 12a | **Span integrity** | **1.0000** (was 0.9521) | **4,681 spans across all 238 TSL lessons** | does each grounding point where it says it does? 226 failures found and fixed — see `06-CENSUS.md` §3.2a. **Integrity is not precision.** |
+| 13 | **Grounding locator quality** | **38 % text-span · 62 % page-geometry** | 12,349 groundings, 238 lessons | spans where text is the evidence, geometry where the figure is |
 | 14 | **VALIDATABLE** | **3 lessons · 1 family** | 224 TSL-backed | `timeline-order-v1` is the only validator in the repo |
 | 15 | **VISUALIZABLE** (renderer exists) | **4 families**, of which **2** reach real corpus data — on **1 lesson each** | 10 families | |
 | 16 | **LEARNER_READY** | **0** | any denominator | `THRESHOLDS.json` does not exist |

@@ -28,7 +28,8 @@ classification, not for generation.
 | 05 | `05-KNOWN-DEFECTS.md` | eight defects fixed with regression tests, eight still open |
 | 06 | `06-CENSUS.md` | P0.3 — the census, tiers, denominators, how few primitives suffice, which extensions are proven |
 | 07 | `07-EXCEPTIONS-AND-STRUCTURE-GAPS.md` | §15 exception clusters ranked by lessons-unlocked · §17 structure gaps |
-| 08 | `08-SCOREBOARD.md` | §19 — 24 metrics with denominators, and the recommendation |
+| 08 | `08-SCOREBOARD.md` | §19 — 25 metrics with denominators, and the recommendation |
+| 09 | `09-E2-RECONCILIATION.md` | the four E1↔E2 divergences and how each was resolved |
 
 ## Code
 
@@ -41,7 +42,8 @@ classification, not for generation.
 | `tool/semantic/discover_markers.py`, `probe_cues.py` | the DISCOVER step — every cue cites its measured lesson count |
 | `tool/semantic/census.py`, `gaps.py` | P0.3, §15, §17 |
 | `tool/semantic/run_poc.py` | the §27 checkpoint run |
-| `tool/tests/test_semantic_foundation.py` | 44 tests |
+| `tool/semantic/verify.py` | grounding integrity over all 238 TSL lessons + a seeded holdout sample |
+| `tool/tests/test_semantic_foundation.py` | 58 tests |
 
 Outputs are corpus-derived and stay in the gitignored `poc-out/round5/semantic/` (Founder D4 — no
 verbatim SGK text or page crops in the repo).
@@ -50,5 +52,6 @@ verbatim SGK text or page crops in the repo).
 python3 tool/semantic/run_poc.py          # the checkpoint: 2 subjects, 1 extractor
 python3 tool/semantic/census.py           # the census
 python3 tool/semantic/gaps.py             # structure gaps + exception clusters
+python3 tool/semantic/verify.py integrity # does every grounding point where it says?
 python3 -m unittest discover -s tool/tests -p "test_*.py"
 ```

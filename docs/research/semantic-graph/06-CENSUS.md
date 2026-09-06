@@ -84,7 +84,7 @@ A cue match is a **hypothesis about the content**. It is not extraction and neve
 | DEFINITION | 154 | 68.8 % |
 | PROCESS | 104 | 46.4 % |
 | CAUSAL | 85 | 37.9 % |
-| LABELED_FIGURE | 79 | 35.3 % |
+| LABELED_FIGURE | 75 | 33.5 % |
 | TIMELINE | 3 | 1.3 % |
 | COMPARISON · CONCEPT_MAP · QUANTITY · SPATIAL | **0** | — |
 
@@ -94,8 +94,37 @@ A cue match is a **hypothesis about the content**. It is not extraction and neve
 > comparison rule. That is a gap in this lane, not a fact about the books.
 
 - **220 of 224 (98.2 %) yield at least one family.** Only **4** yield none.
-- **192 of 224 (85.7 %) yield two or more families.**
-- Distribution: 3 families → 77 lessons · 4 → 49 · 2 → 52 · 5 → 14 · 1 → 28 · 0 → 4.
+- **191 of 224 (85.3 %) yield two or more families.**
+- Distribution: 3 families → 80 lessons · 2 → 51 · 4 → 46 · 1 → 29 · 5 → 14 · 0 → 4.
+
+### 3.2a Grounding integrity — a check the census would not have caught
+
+`python3 tool/semantic/verify.py integrity` re-derives every claim over all **238 TSL lessons**
+and asks a mechanical question: *does each grounding point where it says it does?* The span must
+lie inside its block, the recorded quote must be exactly the characters at that span, and no span
+may begin or end mid-word.
+
+| | before the fixes | after |
+|---|---:|---:|
+| groundings checked | 12,426 | 12,349 |
+| of which carry a character span | 4,720 | 4,681 |
+| **span integrity** | **0.9521** (226 failures) | **1.0000** (0 failures) |
+
+The 226 failures were three defects, each invisible to the census because the census counts
+*whether a family was built*, not *whether its evidence is sound*:
+
+- **`e1-definition-v1`, 173 failures** — a `.strip()`ed quote paired with an *unstripped* span, so
+  the recorded characters were not the characters at the recorded offsets; and a length-bounded
+  group (`{6,140}`) that ends wherever the budget runs out, mid-word.
+- **`e1-figure-reference-v1`, 39 failures** — «hình 1a» matched only «hình 1». That split the word
+  *and* anchored the reference to figure 1 instead of 1a. Science figure numbers almost always
+  carry a letter suffix, so this was wrong at scale, quietly.
+- **`e1-causal-connective-v1`, 14 failures** — the same mid-word class.
+
+**Integrity is not precision.** A claim can point at exactly the right characters and still be a
+wrong claim about the lesson; row 22 of the scoreboard stays blank. But a grounding that is one
+character off is not a grounding a reviewer can check at all, so this had to be 1.000 before any
+precision study would mean anything.
 
 ### 3.3 GROUNDABLE (denominator: 224)
 

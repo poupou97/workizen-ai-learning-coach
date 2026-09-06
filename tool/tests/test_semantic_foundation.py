@@ -473,6 +473,65 @@ class ExtractorTests(unittest.TestCase):
                        'bai17', 'bai-17'):
             self.assertNotIn(banned, body, 'extract.py branches on %r' % banned)
 
+    def test_a_figure_number_may_carry_a_letter_suffix(self):
+        # regression: «hình 1a» matched only "hình 1", splitting the word AND anchoring
+        # the reference to figure 1 instead of 1a. 39 occurrences across 238 lessons,
+        # found by verify.py integrity rather than by reading.
+        les = _lesson([_tsl_block('f:1', 'caption', 'Hình 2a', order=1),
+                       _tsl_block('f:2', 'body', 'Quan sát như hình 2a rồi trả lời.',
+                                  order=2)])
+        gr = ex.extract(les)
+        figs = [n for n in gr.nodes.values() if n.primitive == 'Figure']
+        self.assertEqual([f.attrs['figureNumber'] for f in figs], ['2a'])
+        dep = [r for r in gr.relations if r.relation == 'depicts']
+        self.assertEqual(len(dep), 1)
+        self.assertEqual(dep[0].claim.grounding[0].quote, 'hình 2a')
+
+    def test_every_span_matches_the_quote_it_carries(self):
+        # regression: a .strip()ed quote paired with an UNstripped span means the
+        # recorded characters are not the characters at the recorded offsets.
+        les = _lesson([_tsl_block('x:0', 'stage_label', 'Tiến hành', order=0),
+                       _tsl_block('x:1', 'body', '1. Việc thứ nhất', order=1),
+                       _tsl_block('x:2', 'body', '2. Việc thứ hai', order=2),
+                       _tsl_block('d:1', 'body',
+                                  'Hỗn hợp là hai hay nhiều chất trộn lẫn với nhau',
+                                  order=3),
+                       _tsl_block('c:1', 'body',
+                                  'Vì vật nặng hơn nên nó chìm xuống đáy', order=4)])
+        by_id = {b['id']: b for b in les['blocks']}
+        for c in ex.extract(les).claims.values():
+            for g in c.grounding:
+                if g.span is None:
+                    continue
+                text = by_id[g.block_id]['text']
+                s, e = g.span
+                self.assertEqual(text[s:e], g.quote, c.derivation)
+
+    def test_no_span_begins_or_ends_inside_a_word(self):
+        les = _lesson([_tsl_block('d:1', 'body',
+                                  'Nước là chất lỏng không màu không mùi và rất cần '
+                                  'cho sự sống của mọi sinh vật trên Trái Đất này',
+                                  order=1)])
+        by_id = {b['id']: b for b in les['blocks']}
+        import re as _re
+        w = _re.compile(r'\w', _re.UNICODE)
+        for c in ex.extract(les).claims.values():
+            for g in c.grounding:
+                if g.span is None:
+                    continue
+                t = by_id[g.block_id]['text']
+                s, e = g.span
+                if s > 0:
+                    self.assertFalse(w.match(t[s - 1]) and w.match(t[s]),
+                                     'span starts mid-word: %r' % t[s - 6:s + 6])
+                if e < len(t):
+                    self.assertFalse(w.match(t[e - 1]) and w.match(t[e]),
+                                     'span ends mid-word: %r' % t[e - 6:e + 6])
+
+    def test_trim_span_returns_none_when_nothing_survives(self):
+        self.assertIsNone(ex._trim_span('   ', 0, 3))
+        self.assertEqual(ex._trim_span('  abc  ', 0, 7), (2, 5))
+
     def test_a_failing_rule_does_not_take_the_lesson_down(self):
         les = _lesson([_tsl_block('x:1', 'body', None)])   # text is None
         gr = ex.extract(les)                               # must not raise

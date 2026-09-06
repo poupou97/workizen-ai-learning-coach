@@ -90,8 +90,14 @@ CONTRAST_RX = [
     ('khac_nhau', re.compile(r'(?:khác\s+nhau|điểm\s+khác|sự\s+khác\s+biệt|phân\s+biệt|'
                              r'so\s+sánh)\s+(?:giữa\s+)?(?P<a>[^.;?]{2,80})')),
 ]
-FIG_REF_RX = re.compile(r'(?:hình|Hình|HÌNH)\s+(\d{1,2}(?:[.,]\d{1,2})?)')
-FIG_LABEL_RX = re.compile(r'^\s*(?:hình|Hình|HÌNH)\s+(\d{1,2}(?:[.,]\d{1,2})?)\s*[.:]?\s*$')
+# ⭐ A figure number may carry a LETTER SUFFIX, and in Science it usually does:
+# «hình 1a», «hình 2b», «hình 4c». Matching only the digits split the word — the span
+# ended between "1" and "a" — and, worse, anchored the reference to figure 1 rather than
+# to figure 1a. Found by the integrity check across all 238 lessons (39 occurrences),
+# not by reading.
+FIG_NUM = r'\d{1,2}(?:[.,]\d{1,2})?[a-zA-Z]?'
+FIG_REF_RX = re.compile(r'(?:hình|Hình|HÌNH)\s+(' + FIG_NUM + r')(?![\wÀ-ỹ])')
+FIG_LABEL_RX = re.compile(r'^\s*(?:hình|Hình|HÌNH)\s+(' + FIG_NUM + r')\s*[.:]?\s*$')
 YEAR_RX = re.compile(r'(?<![\d])(?:năm\s+)?(\d{3,4})(?:\s*[-–—]\s*(\d{3,4}))?'
                      r'(\s*(?:TCN|tcn|trước\s+Công\s+nguyên))?')
 # Inside a parenthesis the context is already narrow, so a 1-2 digit year counts —
@@ -127,7 +133,42 @@ DEFN_RX = [
 PROCEDURAL_ROLES = ('instruction', 'activity', 'stage_label')
 
 
+WORD_CH = re.compile(r'[\w]', re.UNICODE)
+
+
+def _trim_span(text, start, end):
+    """Shrink a span to whole words and drop surrounding whitespace.
+
+    Two defects made this necessary, both found by `verify.py integrity` over all 238
+    lessons rather than by reading: a length-bounded group (`{6,140}`) ends wherever the
+    budget runs out, mid-word; and a `.strip()`ed quote paired with an UNstripped span
+    means the recorded characters are not the characters at the recorded offsets. A
+    grounding that points one character off is not a grounding a reviewer can trust.
+    """
+    n = len(text)
+    start = max(0, min(start, n))
+    end = max(start, min(end, n))
+    while start < end and text[start].isspace():
+        start += 1
+    while end > start and text[end - 1].isspace():
+        end -= 1
+    # never begin or end inside a word
+    while 0 < start < n and WORD_CH.match(text[start - 1]) and WORD_CH.match(text[start]):
+        start += 1
+    while start < end < n and WORD_CH.match(text[end - 1]) and WORD_CH.match(text[end]):
+        end -= 1
+    return (start, end) if end > start else None
+
+
 def _g(block, span=None, quote=None):
+    """Build a grounding, keeping the quote and the span in lockstep."""
+    text = block.get('text') or ''
+    if span is not None:
+        span = _trim_span(text, span[0], span[1])
+        if span is None:
+            span, quote = None, None
+        else:
+            quote = text[span[0]:span[1]]
     return SourceGrounding.from_tsl_block(block, span=span, quote=quote)
 
 
