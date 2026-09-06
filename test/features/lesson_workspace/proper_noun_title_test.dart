@@ -64,19 +64,30 @@ void main() {
       expect(displayTitle(goldenTitle), isNot(contains('bắc thuộc')));
     });
 
-    test('tiêu đề IN HOA vẫn được viết hoa lại như vòng 3–6 (Nokia n1 D1)', () {
-      expect(
-        displayTitle('HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP'),
-        'Hỗn hợp. Tách chất ra khỏi hỗn hợp',
-      );
-      expect(displayTitle('TÁCH CHẤT KHỎI HỖN HỢP'), 'Tách chất khỏi hỗn hợp');
+    // ⭐⭐ ROUND 7 · WS-S — HAI TEST DƯỚI ĐÂY BỊ ĐẢO CHIỀU BỞI QUYẾT ĐỊNH CỦA
+    // FOUNDER, và cả hai được sửa TIỀN ĐỀ chứ không bị xoá: chúng vẫn ghim đúng
+    // hai sự thật, chỉ khác kết luận.
+    test('⭐ tiêu đề IN HOA cũng giữ NGUYÊN VĂN (đảo chiều hành vi vòng 3–6)', () {
+      // Vòng 3–6 trả «Hỗn hợp. Tách chất ra khỏi hỗn hợp». Phép ấy an toàn với
+      // ĐÚNG chuỗi này và phá tên riêng ở 107 chuỗi khác của cùng pack, nên nó
+      // không còn chạy. Cái giá được ghim ở đây, không giấu: màn hình hiện IN
+      // HOA.
+      expect(displayTitle('HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP'),
+          'HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP');
+      expect(displayTitle('TÁCH CHẤT KHỎI HỖN HỢP'), 'TÁCH CHẤT KHỎI HỖN HỢP');
       expect(displayTitle(''), '');
     });
 
     test('GIỚI HẠN ĐÃ BIẾT, ghim để không ai tưởng đã chữa: nguồn IN HOA thì '
         'danh từ riêng KHÔNG khôi phục được', () {
-      // Thông tin hoa/thường đã mất ở NGUỒN. Ghim sự thật ấy, đừng che nó.
-      expect(displayTitle('THỜI KĨ BẮC THUỘC'), 'Thời kĩ bắc thuộc');
+      // Thông tin hoa/thường đã mất ở NGUỒN, và **hiển thị không chữa được dữ
+      // liệu**. Vòng 6 trả «Thời kĩ bắc thuộc» — sai tên riêng. Vòng 7 trả
+      // nguyên văn IN HOA — vẫn KHÔNG khôi phục «Bắc thuộc», chỉ thôi khẳng
+      // định một cách viết sai. Đường chữa duy nhất là DỮ LIỆU: `lesson-title-v1`
+      // lấy tên từ mục lục in.
+      expect(displayTitle('THỜI KĨ BẮC THUỘC'), 'THỜI KĨ BẮC THUỘC');
+      expect(displayTitle('THỜI KĨ BẮC THUỘC'), isNot(contains('Bắc thuộc')),
+          reason: 'không phép hiển thị nào khôi phục được hoa/thường đã mất');
     });
 
     test('không ký tự nào bị bịa: độ dài và chuỗi chữ-thường luôn bằng nguồn', () {
@@ -155,11 +166,28 @@ void _acronyms() {
         expect(displayTitle(s), s, reason: s);
       }
     });
-    test('từ hai từ trở lên vẫn được viết hoa lại', () {
-      expect(displayTitle('MỞ ĐẦU'), 'Mở đầu');
-      expect(displayTitle('TẾ BÀO'), 'Tế bào');
-      expect(displayTitle('ĐẤT NƯỚC VÀ CON NGƯỜI VIỆT NAM'),
-          'Đất nước và con người việt nam');
+    // ⭐ ROUND 7 · WS-S — TIỀN ĐỀ NÀY ĐÃ BỊ FOUNDER BÁC, và test được sửa chứ
+    // không bị nới. Bản trước khẳng định «từ hai từ trở lên vẫn được viết hoa
+    // lại» và tự viết ra bằng chứng chống lại chính nó ở dòng cuối:
+    //     displayTitle('ĐẤT NƯỚC VÀ CON NGƯỜI VIỆT NAM')
+    //         → 'Đất nước và con người việt nam'
+    // — tên nước bị hạ chữ, ghim thành hành vi ĐÚNG. Quyết định vòng 7 là GIỮ
+    // NGUYÊN VĂN NGUỒN: không chuẩn hoá khi phép biến đổi có thể làm hỏng một
+    // danh từ riêng. Mức hỏng đo trên quần thể thật: 107/107.
+    test('⭐⭐ IN HOA NHIỀU TỪ cũng giữ nguyên văn — 108 tiêu đề của pack', () {
+      for (final s in const [
+        'MỞ ĐẦU',
+        'TẾ BÀO',
+        'ĐẤT NƯỚC VÀ CON NGƯỜI VIỆT NAM',
+        'ASEAN AND VIET NAM',
+        'CHIẾN TRANH VÀ HOA BÌNH TRONG THẾ KỈ XX',
+      ]) {
+        expect(displayTitle(s), s, reason: s);
+      }
+      // và nói thẳng cái giá: «MỞ ĐẦU» vẫn hiện IN HOA trên màn. Đó là chốt an
+      // toàn về độ trung thực, không phải UX cuối cùng — xem điều kiện bật ở
+      // lib/core/display/lesson_title.dart.
+      expect(displayTitle('MỞ ĐẦU'), isNot('Mở đầu'));
     });
   });
 }

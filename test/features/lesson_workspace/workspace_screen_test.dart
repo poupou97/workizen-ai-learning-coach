@@ -21,6 +21,11 @@ import 'package:learning_coach/features/lesson_workspace/workspace_trace.dart';
 import 'support.dart';
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   testWidgets('⭐ ba View nhìn thấy + tiêu đề «Bài 17 · …» + chip thử nghiệm + '
       'đường dẫn', (t) async {
     await t.pumpWidget(
@@ -29,7 +34,7 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.textContaining('Bài 17 · Tách chất'), findsOneWidget);
+    expect(find.textContaining('Bài 17 · TÁCH CHẤT'), findsOneWidget);
     for (final v in WorkspaceView.values) {
       expect(find.byKey(LessonWorkspaceScreen.tabKey(v)), findsOneWidget);
       expect(find.textContaining(v.label), findsWidgets);

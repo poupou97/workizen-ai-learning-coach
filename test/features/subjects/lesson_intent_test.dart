@@ -43,6 +43,11 @@ LessonIndex _mixed() => LessonIndex.fromJsonString('''
 ''')!;
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   test('⭐⭐ ý định XẾP THỨ TỰ hoạt động, KHÔNG nuốt hoạt động nào', () {
     const r = ReadingActivity(TvReading(
         book: 'b', lesson: 1, passage: 'p', questions: []));
@@ -97,7 +102,7 @@ void main() {
       ],
     )));
     await t.pumpAndSettle();
-    await t.tap(find.textContaining('Thanh âm'));
+    await t.tap(find.textContaining('THANH ÂM'));
     await t.pumpAndSettle();
 
     expect(find.text('Mai lớp con có tiết này.'), findsOneWidget,
@@ -115,7 +120,7 @@ void main() {
         index: _mixed(),
         subject: 'Tiếng Việt')));
     await t.pumpAndSettle();
-    await t.tap(find.textContaining('Thanh âm'));
+    await t.tap(find.textContaining('THANH ÂM'));
     await t.pumpAndSettle();
     expect(find.text('Con muốn bắt đầu thế nào?'), findsOneWidget);
     expect(find.textContaining('Mai lớp con'), findsNothing,
@@ -132,7 +137,7 @@ void main() {
         index: _tv(),
         subject: 'Tiếng Việt')));
     await t.pumpAndSettle();
-    await t.tap(find.textContaining('Thanh âm'));
+    await t.tap(find.textContaining('THANH ÂM'));
     await t.pumpAndSettle();
     expect(find.text('Con muốn bắt đầu thế nào?'), findsNothing,
         reason: '⭐⭐ đột biến luôn hỏi ý định ⇒ đỏ: hỏi mà mọi lựa chọn cho '

@@ -22,6 +22,11 @@ Future<MissionData> _data() => buildMissionFromStore(
 );
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   testWidgets('⭐ có bài workspace ⇒ thẻ «BÀI HỌC SAM · BẢN THỬ NGHIỆM» với tên '
       'bài, chương, trang, ba cách học; «Mở bài học» trả đúng tài liệu', (
     t,
@@ -48,7 +53,7 @@ void main() {
     // ROUND 4: dòng SAM đầu Home cũng nêu tên bài ⇒ tìm TRONG thẻ.
     final inCard = find.descendant(
       of: find.byKey(MissionCenterScreen.workspaceCardKey),
-      matching: find.textContaining('Bài 17 · Tách chất'),
+      matching: find.textContaining('Bài 17 · TÁCH CHẤT'),
     );
     expect(inCard, findsOneWidget);
     expect(find.textContaining('Chương IV'), findsOneWidget);

@@ -9,6 +9,7 @@
 /// - `fromJson` fail-closed: JSON lệch ⇒ `null`, không tài liệu nửa vời.
 library;
 
+import '../display/lesson_title.dart';
 import 'content_trust.dart';
 import 'repair_record.dart';
 import 'semantic_data.dart';
@@ -1080,14 +1081,19 @@ class LessonDocument {
     return m;
   }
 
-  /// «HỖN HỢP. TÁCH CHẤT…» → «Hỗn hợp. Tách chất…»: viết hoa đầu chuỗi và
-  /// sau dấu kết câu (Nokia n1 D1: «Hỗn hợp. tách chất» — chữ thường sau «.»).
-  static String titleCase(String upper) => upper.toLowerCase().replaceAllMapped(
-    RegExp(r'(^\s*|[.!?]\s*)(\S)', unicode: true),
-    (m) => '${m[1]}${m[2]!.toUpperCase()}',
-  );
-
-  String get lessonLabel => 'Bài $lessonNo · ${titleCase(title)}';
+  /// ⭐ ROUND 7 (WS-S, HO-1 từ WS-R) — `titleCase` ĐÃ BỊ XOÁ.
+  ///
+  /// Nó `toLowerCase()` TOÀN CHUỖI rồi mới viết hoa lại đầu câu, và đó là
+  /// nguyên nhân gốc của «thời kì **b**ắc thuộc» trên máy thật. Quyết định của
+  /// Founder ở vòng 7 là **GIỮ NGUYÊN VĂN NGUỒN**, nên phép biến đổi ấy không
+  /// còn được phép chạy ở đâu cả — và **một phép biến đổi không bao giờ được
+  /// chạy thì tốt hơn là bị xoá, chứ không phải để đó nạp sẵn.** Ứng viên chuẩn
+  /// hoá (chưa bật, có điều kiện bật) nằm ở `lib/core/display/lesson_title.dart`
+  /// dưới tên `sentenceCaseAllCaps`, cùng nghĩa vụ chứng minh của nó.
+  ///
+  /// Nhãn bài học uỷ quyền cho LUẬT DUY NHẤT. Không dựng chuỗi tại chỗ: hai chỗ
+  /// dựng một nhãn là cách để chúng lệch nhau vào ngày phép chuẩn hoá được bật.
+  String get lessonLabel => displayLessonLabel(lessonNo, title);
 
   /// «SGK KHTN 6 · trang 60–63» — chỉ từ trang IN; thiếu ⇒ nói thật.
   String get pageRangeLine {

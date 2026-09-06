@@ -38,6 +38,11 @@ LessonIndex _idx() => LessonIndex.fromJsonString('''
 ''')!;
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   test('⭐ bản ghi TRÙNG HỆT bị bỏ — bỏ đi không mất thông tin nào', () {
     final gdtc = _idx().subjects['GDTC']!.single.lessons;
     expect(gdtc.length, 2,
@@ -74,8 +79,8 @@ void main() {
         index: _idx(),
         subject: 'GDTC')));
     await t.pumpAndSettle();
-    expect(find.text('Bài 1 · Bài tập đội hình đội ngũ'), findsOneWidget);
-    expect(find.text('Bài 1 · Dẫn bóng theo đường vòng'), findsOneWidget);
+    expect(find.text('Bài 1 · BÀI TẬP ĐỘI HÌNH ĐỘI NGŨ'), findsOneWidget);
+    expect(find.text('Bài 1 · DẪN BÓNG THEO ĐƯỜNG VÒNG'), findsOneWidget);
     expect(find.textContaining('trang'), findsNothing,
         reason: 'có tên rồi thì thêm trang là nhiễu');
   });

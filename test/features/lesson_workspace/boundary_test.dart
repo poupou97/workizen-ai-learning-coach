@@ -85,6 +85,11 @@ Iterable<File> _dartFiles(String dir) => Directory(dir)
     .where((f) => f.path.endsWith('.dart'));
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   test('⭐⭐ MÃ: workspace + lesson_model không import kho/bằng chứng/LLM, không '
       'gọi recordSession/appendSession', () {
     const forbiddenImports = [
@@ -183,9 +188,9 @@ void main() {
       await t.pumpAndSettle();
       await t.tap(find.textContaining('Chương IV'));
       await t.pumpAndSettle();
-      await t.ensureVisible(find.textContaining('Bài 17 · Tách chất'));
+      await t.ensureVisible(find.textContaining('Bài 17 · TÁCH CHẤT'));
       await t.pumpAndSettle();
-      await t.tap(find.textContaining('Bài 17 · Tách chất'));
+      await t.tap(find.textContaining('Bài 17 · TÁCH CHẤT'));
       await t.pumpAndSettle();
       expect(find.byType(LessonWorkspaceScreen), findsOneWidget);
       // ba View

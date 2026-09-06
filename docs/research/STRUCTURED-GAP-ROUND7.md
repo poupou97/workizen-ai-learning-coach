@@ -366,3 +366,96 @@ Files: `tool/corpus/structured_gap_census.py` (new) · `tool/corpus/tsl_to_lesso
 `test/core/lesson_model/structural_group_test.dart` (10).
 
 **DO NOT MERGE. Nothing here is activated.**
+
+---
+
+# ADDENDUM · FOUNDER DECISION — PRESERVE SOURCE VERBATIM (WS-S, 2026-09-06)
+
+Received mid-round from the coordinator; it lands in files this workstream owns.
+
+> **The 108 multi-word ALL-CAPS titles: display the source verbatim. Do not sentence-case when the
+> transformation could lose or corrupt a proper noun.** This is a **fidelity fail-safe, not the final
+> UX.** Normalisation may be researched later, but may only be **activated once proper-noun
+> preservation is proven on a real population — not on a synthetic fixture.**
+
+## What was implemented
+
+| | |
+|---|---|
+| `displayTitle` | now the **identity**. One rule, one call site set, `lib/core/display/lesson_title.dart`. |
+| the old transformation | kept as `sentenceCaseAllCaps`, **explicitly not activated**, with the activation precondition written next to it and a source-guard test asserting **no file in `lib/` calls it**. |
+| the activation precondition | made **executable**: `titlesLosingCapitals(transform, titles)` returns the titles a transform strips capitals from. A normalisation may be proposed only when it returns **empty on the real population**. |
+| **HO-1** | `LessonDocument.titleCase` **deleted**. `lessonLabel` delegates to `displayLessonLabel` — one rule, so the two cannot diverge on the day normalisation is activated. |
+| **HO-2** | `NextAction.label` no longer returns «Về mục lục» when `view == null`; it returns **«Xem tiếp bài này»** — the same words as WS-R's `LessonNextKind.keepGoing`, so the two layers cannot contradict each other on one screen. The **`reason` was fixed too**: «đã đi qua … hoặc về mục lục chọn bài khác» → «Con đã mở đủ ba cách học SAM có cho bài này. Mở không phải là đã hiểu…». Fixing the label alone would have left the screen saying the sentence that caused the defect. |
+
+## The measurement the decision rests on (MEASURED, real population)
+
+Population: **every `title` in `assets/pack/lesson-index-g*.json`** — 2 623 titles, **2 382 unique**.
+Not a fixture.
+
+| | |
+|---|---|
+| ALL-CAPS titles | 190 |
+| …single letter-word (acronyms — «GDTC 5») | 82 |
+| …**multi-word — the Founder's 108** | **108** (107 unique) |
+| titles the candidate normalisation **strips capitals from** | **107 of 107** |
+| titles `displayTitle` changes | **0 of 2 382** |
+
+Three named casualties, verbatim from the shipping pack:
+
+```
+ASEAN AND VIET NAM                        → Asean and viet nam
+BÁC HÔ VỚI THIÊU NHI                      → Bác hô với thiêu nhi
+CHIẾN TRANH VÀ HOA BÌNH TRONG THẾ KỈ XX   → … trong thế kỉ xx
+```
+
+An acronym, a person's name, a Roman numeral. **No shape-based rule separates them from ordinary
+lowercase**, because Vietnamese does not encode «proper noun» in a word's shape. The only cure is
+**data** — the printed table of contents (`lesson-title-v1`) or a sourced proper-noun lexicon — and
+both sit upstream of display.
+
+## The round's own lesson, turned into a test
+
+WS-R found that `titleCase` stayed green for four rounds because **it was only ever fed ALL-CAPS
+strings — only its own precondition**. A lowercasing function cannot go red on input that has no
+lowercase to destroy. So the new suite has a **population-adequacy guard**: it asserts the test
+population actually *contains* the cases that could make the rule red — mixed-case titles,
+multi-word ALL-CAPS titles, acronyms embedded in a mixed-case title, Roman numerals. Degenerate the
+population back to ALL-CAPS-only and **that guard goes red before the other tests can go quietly
+green** (mutation-checked).
+
+## Mutation checks — each red in the intended test, green on revert
+
+| mutation | goes red in |
+|---|---|
+| `displayTitle` normalises again | the identity test, the 108-title test, the label test, WS-R's known-limitation test |
+| the proof-obligation measure always returns empty | both proof-obligation tests |
+| `NextAction.label` says «Về mục lục» again | both next-action tests |
+| the `reason` invites leaving again | the 8-subset sweep |
+| the population degenerates to ALL-CAPS only | **the population-adequacy guard** |
+| the source guard reads prose as code | caught during construction — it now strips Dart comments, and a self-check asserts the scanner finds an identifier that really is in `lib/` |
+
+## What this cost, stated
+
+**«MỞ ĐẦU» now reads «MỞ ĐẦU» on screen, not «Mở đầu».** 108 lesson titles and some chapter names are
+louder than they were. That is the price of the fail-safe and it is not hidden: a test pins it.
+
+**13 tests across 6 files encoded the overruled premise** and were corrected in place, each expectation
+moved to the string its own fixture actually carries — never loosened to a weaker matcher. One
+*negative* assertion («the sentence-cased form must not appear») was deliberately **left lowercase**:
+uppercasing it would have turned a guard into a tautology.
+
+## Announced changes to `lib/core/**`
+
+- `lib/core/display/lesson_title.dart` — `displayTitle` is now the identity; `isAllUpperCase` kept;
+  `_letterWords` → **`letterWordCount`** (public); new `capitalsOf`, `titlesLosingCapitals`,
+  `sentenceCaseAllCaps`.
+- `lib/core/lesson_model/lesson_document.dart` — **`static String titleCase(String)` REMOVED.**
+  `lessonLabel` kept, now delegating. New import of `../display/lesson_title.dart`.
+- `lib/core/lesson_model/next_action.dart` — `NextAction.label` and the `seen.all` `reason` changed.
+
+**Nothing became servable.** `ROLE_MAP` untouched; the bridge's default output is still **byte-identical
+across all 238 lessons** (re-verified against the integration bridge after the merge); `trusted = 0`
+remains a type invariant.
+
+CI on the composed tree: `flutter analyze` clean · **1120** Dart tests green · **775** Python tests green.
