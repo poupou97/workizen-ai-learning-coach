@@ -191,8 +191,24 @@ Lane C's ledger `run` block carries only `{lane, book, lesson}` — no `baseline
 recorded no `restore` row, so there was nothing to cap. **A `run_gold.py`-style ledger WOULD be
 capped**: it restores in place (`Outcome.restore_entry` → `TRUSTED`), and every such row is turned
 into `VALIDATED_REPAIR` + `caps: ['trust_gate:founder_decision_absent']`, with the cap written onto
-the region's reasons as well. Verified on KHTN 7 Bài 20 against `tc2-p3-lin`: 1 repair crossed,
-`cappedLaboratoryRestores: 1`.
+the region's reasons as well.
+
+**Demonstrated, not asserted** — KHTN 7 Bài 20 (`tc2-p1`/`sdm-v2`) against Lane A1's `tc2-p3-lin`
+ledger, which restores in place:
+
+```
+poc-out/round6/ws-c/cap-demo/{khtn7-bai20.tsl.json, khtn7-bai20.lesson.json, projection-report.json}
+
+validated 1 · crossed 1 · trusted 0 · cappedLaboratoryRestores 1
+region 07-sgk-khoa-hoc-tu-nhien-7:p097:tc2-p1:011
+  type "withheld" · NO `text` field
+  reasons ["agree_text", "trust_gate:founder_decision_absent"]
+  repair.caps ["trust_gate:founder_decision_absent"]
+```
+
+The laboratory said TRUSTED; what crossed is `VALIDATED_REPAIR` with the reason it was held back.
+This lesson's own generation check reads `labelsAgree: true` (directory `tc2-p1`, pipeline field
+`tc2-p1`, `sdm-v2`) — the check is not vacuous, and it says so on a well-labelled artefact too.
 
 ## 5. Doctrine that shaped the design
 
@@ -324,6 +340,20 @@ is what a **reader of a dispose row** sees — which is exactly what a downstrea
 **Round 5's report stands as published.** The join in `tsl_projection._final_rows` also pairs the
 dispose row with the `validate` row for the same candidate id, so a *historical* ledger is read
 correctly without being rewritten.
+
+## 7b. CI
+
+| suite | result |
+|---|---|
+| `python3 -m unittest discover -s tool/tests` | **672 passed, 14 skipped** — 30 new |
+| `flutter analyze` | **No issues found** |
+| `flutter test` | **1073 passed, 2 skipped, 1 failed** |
+
+The single failure is `test/features/subjects/lesson_index_test.dart`, which compares two files that
+are **not in git at all** — `assets/pack/lesson-index-g*.json` against
+`poc-out/units/exercise-case-map.json`. No tracked change on this branch can affect it, and it
+reproduces identically in a clean isolated worktree. Reported as pre-existing and left alone: it is
+WS-D / pack territory.
 
 ## 8. Where the code is
 
