@@ -107,8 +107,8 @@ List<TimetableEntry> generateTimetable({
     for (var d = 1; d <= daysPerWeek && !fixed; d++) {
       final day = perDay[d]!;
       for (var i = 0; i < day.length && !fixed; i++) {
-        if (day.indexOf(day[i]) == i)
-          continue; // lần đầu xuất hiện: không trùng
+        // Lần đầu xuất hiện trong ngày ⇒ không phải va chạm.
+        if (day.indexOf(day[i]) == i) continue;
         for (var o = 1; o <= daysPerWeek && !fixed; o++) {
           if (o == d) continue;
           final other = perDay[o]!;

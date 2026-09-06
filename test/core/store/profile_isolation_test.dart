@@ -15,7 +15,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
-import 'package:learning_coach/core/store/timetable.dart';
 import 'package:learning_coach/core/store/timetable_generator.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 
