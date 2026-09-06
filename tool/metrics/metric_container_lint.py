@@ -28,7 +28,7 @@ one nobody believes.
 import ast
 import os
 
-import leaves as L
+import metric_leaves as L
 
 BY_LESSON_FAMILIES = frozenset(k for k, v in L.ACTIVITY_SHAPES.items() if v == 'by_lesson')
 

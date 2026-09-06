@@ -23,7 +23,7 @@ import collections
 import dataclasses
 import typing
 
-import leaves as L
+import metric_leaves as L
 
 MEASURED_ON = '2026-09-06'
 
@@ -352,7 +352,7 @@ METRICS = [
         aggregation='count of declared families',
         exclusions=('`samUnits` — it appears in tool/corpus/ft_audit_sample.py FAMILIES (8) but '
                     'is not a pack key; `subjects`/`books` are catalogue, not activities'),
-        source_artefact='tool/metrics/leaves.py ACTIVITY_SHAPES, asserted equal to packs.py FAMILIES',
+        source_artefact='tool/metrics/metric_leaves.py ACTIVITY_SHAPES, asserted equal to packs.py FAMILIES',
         rederivation_command="python3 tool/metrics/cli.py verify --only ACTIVITY_FAMILY_COUNT",
         derive=_activity_family_count,
         recorded_value=7,

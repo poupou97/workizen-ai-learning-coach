@@ -18,9 +18,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-import container_lint  # noqa: E402
-import leaves as L     # noqa: E402
-import registry as R   # noqa: E402
+import metric_container_lint as container_lint  # noqa: E402
+import metric_leaves as L                       # noqa: E402
+import metric_registry as R                     # noqa: E402
 
 OK, MISMATCH, UNAVAILABLE, ERROR = 'OK', 'MISMATCH', 'UNAVAILABLE', 'ERROR'
 NO_RECORD = 'NO RECORDED VALUE'
