@@ -147,7 +147,7 @@ Attribution matters because it decides what to build.
 | Formula-labelled blocks die as `empty` for "no letters" | `tool/corpus/tc2_sdm.py:276-277` | **14 of 15** Docling formula blocks on the Toán pages, one carrying `7 8 2 8 7 - 2 8 5 8`. The reason code misstates what was lost. **4 validated math restores are blocked by `empty_block` alone** — half of A2's correct output held out by a role decision, not a math one |
 | ~~A `FORMULA` role buys trust 0.95 and waives the math/unit/chem guards~~ | was `tool/corpus/tc2_sdm.py:290-291` | **CLOSED — see §5.1** |
 | Bridge has no `formula` role | `tool/corpus/tsl_to_lesson_document.py:71-82` | A validated `MathExpression` cannot reach the app |
-| Provenance dropped on the pack path | `tool/ui/build_lesson_index.py:53,58,366` | 41 geometrically-rebuilt expressions marked `status: INFERRED` / `method: geometric-fraction-rebuild-v1` ship to g4 and g5 carrying only `['book','expr','page','skillCaseId']` — the "not verbatim" warning is stripped. **[PENDING — Lane D fix]** |
+| Provenance dropped on the pack path | `tool/ui/build_lesson_index.py` | **FIXED on `lane-d/round5-legacy-packs`, fail-closed — see §5.2** |
 
 
 ### 5.1 Founder STEM §4 — the latent formula trust hole is closed, and verified
@@ -188,6 +188,33 @@ flag; A2, working independently in another worktree, sets `formula_structured`
 **only** from a validated structure. Two lanes arrived at the same contract from
 opposite ends without coordination. The hole is closed by construction rather than
 by luck, which is exactly what §4 asked for.
+
+
+### 5.2 Founder STEM §3 — the unsafe legacy math path, closed by failing closed
+
+Verified by the coordinator on disk and on Lane D's branch.
+
+**The defect, re-confirmed live.** `tool/extract/rebuild_fractions.py:124` stamps
+every row it writes `status: 'INFERRED'`, `method: 'geometric-fraction-rebuild-v1'`,
+with the comment «dựng từ hình học ⇒ KHÔNG phải nguyên văn». All 41 rows carry it.
+The pack builder copied only `expr / skillCaseId / page / book`. On the integration
+branch's on-disk packs today: **g4 26 expressions across 6 lessons, g5 15 across 4
+lessons — 41 in total, every one carrying exactly `['book','expr','page',
+'skillCaseId']`** and no trace of `status` or `method`. Expressions rebuilt from
+geometry shipped as if printed in the book, carrying a `skillCaseId` — that is, into
+the exercise path a child is taught from. Same family as `b) 3/10 + 5/21` → `b) 10 +`.
+
+**The fix, and why this shape.** The pack schema has no provenance field for an
+activity and the app has no way to show an INFERRED caveat, so Lane D chose **fail
+closed**: a non-verbatim upstream record is not emitted at all. Nothing is deleted
+upstream, every drop is counted and logged with a reason, and the rows return the
+moment provenance can travel with them. This is the correct call — the alternative
+was to invent a provenance field on both sides mid-round, and shipping a caveat the
+UI cannot display is not a caveat.
+
+**Coverage consequence, stated rather than hidden:** 41 expressions leave the packs.
+Per the Founder's rule that a coverage drop caused by removing wrong content is a
+correctness gain, this is recorded as a gain, with the count named.
 
 ---
 
