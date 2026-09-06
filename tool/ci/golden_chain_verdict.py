@@ -21,7 +21,12 @@ and prints a coverage block that a reader cannot mistake for verification.
     of round 7's gate that printed `0/0 present · PASS` (exit 2);
   * `--require-verified` exits 1 unless every Golden obligation was exercised on
     the REAL fixture. Anything that wants to CLAIM Golden verification passes
-    that flag, and without the fixture the claim goes red.
+    that flag, and without the fixture the claim goes red;
+  * a record claiming `exercised` while no fixture is on disk is a CONTRADICTION,
+    not a pass (exit 2). That closes two doors at once: a stale ledger left by an
+    earlier run on a machine that HAD the fixture, and a gate rewritten to record
+    `exercised: true` unconditionally. Coverage is cross-checked against the
+    filesystem, never taken on the ledger's word.
 
 Synthetic mirrors are counted and printed on their own line, never added to the
 Golden total: SYNTHETIC PASS != GOLDEN CHAIN VERIFIED. A synthetic fixture proves
@@ -161,6 +166,27 @@ def main(argv=None):
 
     fixture = reg.get("fixture", "?")
     present = os.path.exists(fixture)
+
+    # ⭐ The ledger does not get to assert coverage on its own word. A row that
+    # says «exercised» while the fixture it names is not on disk is either stale
+    # (an earlier run on a machine that had it) or a gate that stopped telling
+    # the truth. Either way it is a contradiction, and a contradiction is not a
+    # pass.
+    lying = [
+        i
+        for i in exercised
+        if not present or ledger[i].get("fixturePresent") is not True
+    ]
+    if lying:
+        problems.append(
+            "record(s) claim they were exercised on the real fixture while the "
+            "fixture is not there: "
+            + ", ".join(lying)
+            + f". On-disk check of {fixture}: "
+            + ("present" if present else "ABSENT")
+            + ". A stale ledger is not coverage; re-run the whole suite."
+        )
+
     verified = declared > 0 and len(exercised) == declared and not problems
 
     print(_bar("GOLDEN CHAIN COVERAGE (WAL-218)"))
