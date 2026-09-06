@@ -147,11 +147,16 @@ void main() {
     expect(a.reason, contains('Làm muối từ nước biển'));
   });
 
-  test('R5 — đi hết ⇒ về mục lục; tự báo ⇒ nói «đã tham gia, chưa chấm»', () {
+  test('⭐ ROUND 7 · WS-R — R5: mở hết ⇒ Ở LẠI BÀI (không còn «về mục lục»); '
+      'tự báo ⇒ nói «đã tham gia, chưa chấm»', () {
+    // Vòng 3–6: R5 ⇒ backToContents. Bằng chứng duy nhất sinh ra nó là
+    // `viewsSeen` — dấu vết «đã mở tab», đánh dấu NGAY LÚC MỞ. `OPENED !=
+    // UNDERSTOOD`, nên nó không đủ để SAM mời trẻ rời bài.
     final all = {WorkspaceView.read, WorkspaceView.visual, WorkspaceView.tutor};
     final a = _act(seen: all);
     expect(a.rule, 'R5');
-    expect(a.kind, LessonNextKind.backToContents);
+    expect(a.kind, LessonNextKind.keepGoing);
+    expect(a.label, 'Xem tiếp bài này');
     final p = _act(
         seen: all,
         state: StudentLessonState.fromEvents(khtn6Bai17, [_ev(EvidenceKind.participation)]));
@@ -168,7 +173,7 @@ void main() {
         khtn6Bai17, [_ev(EvidenceKind.independentAttempt, correct: true)]);
     final a = _act(seen: all, state: hist);
     expect(a.rule, 'R5');
-    expect(a.kind, LessonNextKind.backToContents);
+    expect(a.kind, LessonNextKind.keepGoing);
     expect(a.standing, LessonEvidenceStanding.participatedUnverified);
     expect(a.reason, contains('ghi nhận trước hợp đồng mới'));
     expect(a.reason, contains('chưa tính là tự làm được'));
@@ -185,7 +190,7 @@ void main() {
     final eng = StudentLessonState.fromEvents(
         khtn6Bai17, [_ev(EvidenceKind.hintRequested)]);
     final c = _act(seen: all, state: eng);
-    expect(c.reason, contains('chưa có lần tự làm được nào được kiểm'));
+    expect(c.reason, contains('Chưa có lần tự làm được nào được kiểm'));
     expect(c.evidenceNote, contains('chưa có lần tự làm được'));
     // (d) chưa học gì ⇒ không có note; (e) đã kiểm ⇒ R1, không note
     expect(_act(seen: all).evidenceNote, isNull);

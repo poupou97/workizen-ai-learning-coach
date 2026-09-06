@@ -46,6 +46,11 @@ Checks, each printed as PASS / FAIL / UNKNOWN with the value it saw:
                     for the delivery claim, where it must not be UNKNOWN.
   L5 CROPS          every crop a block references exists beside the fixture. A crop that
                     is missing means the child sees an empty withheld card.
+  L5b CROP COVERAGE every withheld region that CAN be cropped (it carries `sourceRef.pagePdf`
+                    and a bbox) actually carries one. L5 alone is vacuous: a document with no
+                    crops references none, so it read `0/0 present · PASS` while seventeen
+                    withheld cards on a real device showed a child nothing. `--allow-missing-crops`
+                    downgrades it to UNKNOWN and says so in the row — it never makes it PASS.
   L6 DISTRIBUTION   `distribution` must still carry the D4 marker. Verbatim SGK text and
                     page crops are INTERNAL / RESEARCH ONLY.
 
@@ -114,6 +119,11 @@ def _crop_refs(doc):
     return out
 
 
+def _method_of(digests_map, value):
+    """Which hash method produced `value` for this file — the name L2b must print."""
+    return next((m for m, h in (digests_map or {}).items() if h == value), None)
+
+
 def generation_root(tsl_rel):
     """The `tc-v2/<root>/` segment of a TSL path — `tc2-p1`, `tc2-r5`, `tc2-p3`, …"""
     if not tsl_rel:
@@ -144,7 +154,27 @@ def repair_lineage(prov):
     return None, {}
 
 
-def check(fixture_path, root='.', require_repair=False, expect_source_hash=None):
+def _croppable_withheld(doc):
+    """(withheld count, croppable ids, ids without a crop) — a withheld region is croppable
+    when it carries the PDF page and the bbox a crop is cut from. Geometry, not opinion."""
+    withheld_n, croppable, uncropped = 0, [], []
+    for b in doc.get('blocks', []) or []:
+        if b.get('type') != 'withheld':
+            continue
+        withheld_n += 1
+        sr = b.get('sourceRef') or {}
+        bbox = sr.get('bbox')
+        if sr.get('pagePdf') is None or not (isinstance(bbox, (list, tuple)) and len(bbox) == 4):
+            continue
+        bid = b.get('id') or sr.get('blockId') or '(unnamed)'
+        croppable.append(bid)
+        if not b.get('crop'):
+            uncropped.append(bid)
+    return withheld_n, croppable, uncropped
+
+
+def check(fixture_path, root='.', require_repair=False, expect_source_hash=None,
+          allow_missing_crops=False):
     with open(fixture_path, encoding='utf-8') as fh:
         doc = json.load(fh)
     prov = doc.get('provenance') or {}
@@ -189,11 +219,33 @@ def check(fixture_path, root='.', require_repair=False, expect_source_hash=None)
             hash_method = method
 
     if expect_source_hash:
-        same = recorded == expect_source_hash or (actual is not None and
-                                                  expect_source_hash == actual)
+        # ROUND 7 · WS-R — PREMISE CORRECTED, GATE NOT LOOSENED.
+        #
+        # L2 already recorded (§4.2a) that TWO hash methods coexist: the committed bridge stamps
+        # `sha256_file` (bytes), the round-6 repair path stamps the canonical JSON digest. L2b then
+        # compared ONE string against ONE string, so `golden_delivery.py --tsl` — which computes the
+        # expectation as `canonical or bytes` while the bridge stamps `bytes` — FAILED L2b on a
+        # document that was in fact built from exactly the TSL demanded. MEASURED on
+        # LS&ĐL 5 Bài 8: recorded=6dc506bc… (bytes) vs expected=d7825280… (canonical), same file.
+        #
+        # The property the gate exists to hold is «the fixture was built from the generation
+        # demanded», not «two strings agree». So a cross-method match is accepted ONLY when BOTH
+        # sides are digests THIS RUN RECOMPUTED from the file at `tslPath` — i.e. the file on disk
+        # really does hash to both. Change one byte of that TSL and both digests move, so this
+        # cannot pass a substituted generation. When the TSL is not on this machine there is
+        # nothing to recompute and a string mismatch stays a FAIL, exactly as before.
+        vals = set(source_digests.values())
+        if recorded == expect_source_hash:
+            same, why = True, 'identical'
+        elif vals and recorded in vals and expect_source_hash in vals:
+            same, why = True, (
+                'recorded=' + str(_method_of(source_digests, recorded))
+                + ' expected=' + str(_method_of(source_digests, expect_source_hash))
+                + ' — DIFFERENT hash methods, SAME TSL bytes on disk (both recomputed here)')
+        else:
+            same, why = False, 'this is a DIFFERENT generation than the one demanded'
         row('L2b', 'sourceHash is the expected generation', PASS if same else FAIL,
-            f'recorded={str(recorded)[:16]}… expected={expect_source_hash[:16]}…',
-            '' if same else 'this is a DIFFERENT generation than the one demanded')
+            f'recorded={str(recorded)[:16]}… expected={expect_source_hash[:16]}…', why)
 
     # ---- L3 GENERATION ---------------------------------------------------------
     pipeline, sdm, pv = prov.get('sourcePipeline'), prov.get('sdmVersion'), prov.get('pipelineVersion')
@@ -231,6 +283,35 @@ def check(fixture_path, root='.', require_repair=False, expect_source_hash=None)
     row('L5', 'every referenced crop exists', FAIL if absent else PASS,
         f'{len(refs) - len(absent)}/{len(refs)} present',
         ('missing: ' + ', '.join(absent[:5])) if absent else '')
+
+    # ---- L5b CROP COVERAGE -----------------------------------------------------
+    # ROUND 7 · WS-R. L5 counted REFERENCES, so a document with no crops at all read
+    # `0/0 present · PASS`: the gate was green precisely because the thing it guards was
+    # absent — round 6's own lesson about the timeline test, repeated one layer down.
+    # MEASURED on the round-6 Golden #1: 17 withheld regions, 0 crops, L5 PASS, and on the
+    # device a child saw seventeen cards that said «something is missing» and showed nothing.
+    # L5b counts the POPULATION instead: every withheld region that carries the geometry a
+    # crop is cut from (`sourceRef.pagePdf` + `bbox`) must carry one.
+    withheld_n, croppable, uncropped = _croppable_withheld(doc)
+    if not withheld_n:
+        # An empty POPULATION is not the same failure as an empty REFERENCE LIST: a lesson
+        # with nothing withheld genuinely has nothing to show a crop of.
+        row('L5b', 'every croppable withheld region has a page crop', PASS,
+            '0 withheld regions', '')
+    elif not croppable:
+        row('L5b', 'every croppable withheld region has a page crop', UNKNOWN,
+            f'0/{withheld_n} croppable',
+            'withheld regions exist but none carries page + bbox — nothing a crop could be '
+            'cut from, and «I cannot tell» is not «covered»')
+    else:
+        row('L5b', 'every croppable withheld region has a page crop',
+            PASS if not uncropped else (UNKNOWN if allow_missing_crops else FAIL),
+            f'{len(croppable) - len(uncropped)}/{len(croppable)} have a crop',
+            '' if not uncropped else
+            ('WAIVED by --allow-missing-crops — ' if allow_missing_crops else '')
+            + 'a withheld card without a crop tells a child something is missing and shows '
+              'nothing: ' + ', '.join(uncropped[:5])
+            + (f' (+{len(uncropped) - 5} more)' if len(uncropped) > 5 else ''))
 
     # ---- L6 DISTRIBUTION -------------------------------------------------------
     dist = str(prov.get('distribution') or '')
@@ -281,11 +362,15 @@ def main(argv=None):
     ap.add_argument('--require-repair', action='store_true',
                     help='the delivery claim: a repair lineage must be present, not merely absent')
     ap.add_argument('--expect-source-hash', help='fail unless the fixture names this TSL hash')
+    ap.add_argument('--allow-missing-crops', action='store_true',
+                    help='downgrade L5b to UNKNOWN when the source PDF was genuinely unavailable. '
+                         'It never becomes PASS, and the waiver is printed in the row.')
     ap.add_argument('--json', dest='json_out', help='also write the machine-readable result here')
     a = ap.parse_args(argv)
 
     result = check(a.fixture, root=a.root, require_repair=a.require_repair,
-                   expect_source_hash=a.expect_source_hash)
+                   expect_source_hash=a.expect_source_hash,
+                   allow_missing_crops=a.allow_missing_crops)
     print(render(result))
     if a.json_out:
         os.makedirs(os.path.dirname(os.path.abspath(a.json_out)), exist_ok=True)

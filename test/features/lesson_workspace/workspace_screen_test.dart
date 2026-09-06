@@ -8,6 +8,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/core/agenda/lesson_next_action.dart';
 import 'package:learning_coach/core/lesson_model/next_action.dart';
 import 'package:learning_coach/features/lesson_workspace/lesson_workspace_screen.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/assist_layer.dart';
@@ -117,12 +118,12 @@ void main() {
   });
 
   test('⭐ «SAM đề xuất» đi theo thứ tự Founder A8 qua NextBestLearningAction: '
-      'Đọc → Trực quan → Học với SAM → về mục lục; không phút/%', () {
+      'Đọc → Trực quan → Học với SAM → Ở LẠI BÀI; không phút/%', () {
     final doc = loadSyntheticDoc();
-    NextAction at(Set<WorkspaceView> seen) =>
+    LessonNextAction at(Set<WorkspaceView> seen) =>
         founderNextAction(doc, seen: seen, learnerId: 'na');
     expect(at({}).view, WorkspaceView.read);
-    expect(at({}).basis, startsWith('R2'));
+    expect(at({}).rule, 'R2');
     expect(at({WorkspaceView.read}).view, WorkspaceView.visual);
     expect(
       at({WorkspaceView.read, WorkspaceView.visual}).view,
@@ -133,10 +134,19 @@ void main() {
       contains('«'),
       reason: 'R4 nêu câu hỏi đầu của sách',
     );
+    // ⭐⭐ ROUND 7 · WS-R — TIỀN ĐỀ ĐÃ SỬA. Vòng 3–6 ghim ở đây rằng mở đủ ba
+    // View ⇒ «Về mục lục». Bằng chứng duy nhất là `viewsSeen`, tức «đã mở
+    // tab», và `OPENED != UNDERSTOOD`. SAM không được lấy dấu vết mở tab làm
+    // cớ mời trẻ rời bài; đường DUY NHẤT nó chủ động mời sang bài khác là R1
+    // (`hasApprovedValidatedSuccess` — đã chấm).
     final done = at(WorkspaceView.values.toSet());
-    expect(done.view, isNull);
-    expect(done.label, 'Về mục lục');
-    expect(done.reason, isNot(contains('hiểu')));
+    expect(done.kind, LessonNextKind.keepGoing);
+    expect(done.label, 'Xem tiếp bài này');
+    expect(done.label, isNot('Về mục lục'));
+    expect(done.reason, isNot(contains('hiểu được')));
+    expect(done.reason, contains('đã mở'),
+        reason: 'nói đúng thứ nó biết: đã mở, không phải đã đi qua');
+    expect(done.reason, isNot(contains('đi qua')));
     for (final s in [
       <WorkspaceView>{},
       {WorkspaceView.read},
@@ -208,8 +218,8 @@ void main() {
     expect(find.text('SAM (kịch bản thử nghiệm)'), findsWidgets);
   });
 
-  testWidgets('đủ ba View ⇒ đề xuất «Về mục lục» (ghi nhận tham gia, không '
-      '«đã hiểu»)', (t) async {
+  testWidgets('⭐ ROUND 7 · WS-R — mở đủ ba View ⇒ đề xuất Ở LẠI BÀI, KHÔNG '
+      'phải «Về mục lục» (mở tab không phải bằng chứng)', (t) async {
     final trace = WorkspaceTrace();
     final doc = loadSyntheticDoc();
     for (final v in WorkspaceView.values) {
@@ -226,11 +236,20 @@ void main() {
     );
     await t.pumpAndSettle();
     // Phương án B: dòng hé nêu ĐÍCH ĐẾN ngay, nút mang đúng chữ ấy khi mở.
-    expect(find.text('SAM gợi ý: Về mục lục'), findsOneWidget);
+    expect(find.text('SAM gợi ý: Xem tiếp bài này'), findsOneWidget);
+    expect(find.text('SAM gợi ý: Về mục lục'), findsNothing);
     await t.tap(find.byKey(AssistPeek.peekKey));
     await t.pumpAndSettle();
-    expect(find.text('Về mục lục'), findsOneWidget);
+    expect(find.text('Xem tiếp bài này'), findsOneWidget);
     expect(find.textContaining('đã hiểu'), findsNothing);
+    // «Về mục lục» chỉ còn là nút ← trên hàng tiêu đề (tooltip), tức LỰA CHỌN
+    // của trẻ — không còn là lời SAM khuyên. `find.text` không bắt tooltip.
+    expect(find.text('Về mục lục'), findsNothing);
+    expect(
+      find.byTooltip('Về mục lục'),
+      findsOneWidget,
+      reason: 'đường về vẫn luôn có, chỉ không còn là ĐỀ XUẤT',
+    );
   });
 
   testWidgets('không có chip khi… không tồn tại: mọi fixture đều có chip', (

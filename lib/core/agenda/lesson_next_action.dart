@@ -11,8 +11,8 @@
 ///   R2 chưa Đọc                              ⇒ 📖 Đọc
 ///   R3 đã Đọc, có SemanticData, chưa Trực quan ⇒ ✨ Trực quan
 ///   R4 đã Đọc (+Trực quan nếu có), có kịch bản, chưa Học với SAM ⇒ 🦉
-///   R5 đã đi qua mọi cách học có sẵn         ⇒ về mục lục (ghi nhận THAM
-///      GIA, không nói «đã hiểu»)
+///   R5 đã MỞ mọi cách học có sẵn             ⇒ Ở LẠI BÀI (round 7: KHÔNG
+///      còn bảo trẻ về mục lục — «đã mở» không phải «đã đi qua»)
 ///
 /// Bất biến (giữ bằng test): không bịa phút / phần trăm / mastery; «sang bài
 /// tiếp» CHỈ từ [StudentLessonState.hasApprovedValidatedSuccess]; tự báo và
@@ -28,7 +28,19 @@ import '../student/student_lesson_state.dart';
 
 export '../student/student_lesson_state.dart' show LessonEvidenceStanding;
 
-enum LessonNextKind { read, visual, tutor, nextLesson, backToContents }
+enum LessonNextKind {
+  read,
+  visual,
+  tutor,
+  nextLesson,
+  backToContents,
+
+  /// ⭐ ROUND 7 · WS-R — Ở LẠI BÀI. Trẻ đã MỞ hết những cách học bài này có,
+  /// và đó là TẤT CẢ những gì SAM biết. `viewsSeen` là dấu vết «đã mở tab»,
+  /// không phải bằng chứng đã học (`OPENED != UNDERSTOOD`), nên nó không đủ
+  /// để bảo trẻ rời bài. Xem ghi chú R5 ở dưới.
+  keepGoing,
+}
 
 /// Tóm tắt MÁY ĐỌC ĐƯỢC của tài liệu bài — chỉ những dữ kiện luật cần.
 class LessonSummary {
@@ -53,6 +65,15 @@ class LessonSummary {
   /// Bài tiếp theo trong sách nếu tầng trên biết (mục lục); `null` = không
   /// biết ⇒ R1 nói «về mục lục», không đoán số bài.
   final LessonRef? nextLesson;
+
+  /// Những cách học bài NÀY thật sự có, theo thứ tự Founder A8. Dùng chung cho
+  /// luật (R5 đếm ở đây) và cho màn hình (hàng «Đã mở» không được liệt kê một
+  /// cách học mà bài không có) — MỘT nguồn, nên hai chỗ không thể mâu thuẫn.
+  List<WorkspaceView> get availableViews => [
+        if (hasReadableBlocks) WorkspaceView.read,
+        if (hasSemanticData) WorkspaceView.visual,
+        if (hasTutorScript) WorkspaceView.tutor,
+      ];
 
   static LessonSummary fromDocument(LessonDocument d, {LessonRef? nextLesson}) =>
       LessonSummary(
@@ -106,6 +127,7 @@ class LessonNextAction {
         LessonNextKind.tutor => '🦉 Học với SAM',
         LessonNextKind.nextLesson => 'Sang Bài ${nextLesson?.lessonNo}',
         LessonNextKind.backToContents => 'Về mục lục',
+        LessonNextKind.keepGoing => 'Xem tiếp bài này',
       };
 }
 
@@ -215,29 +237,48 @@ LessonNextAction nextBestLessonAction({
     );
   }
 
-  // R5 — đi hết mọi cách học có sẵn. Ba kết cục «chưa được kiểm» nói ra
-  // đúng thứ đã ghi nhận; không kết cục nào nói «đã hiểu» / «tự làm được».
-  final String r5;
+  // R5 — trẻ đã MỞ hết những cách học bài này có.
+  //
+  // ⭐⭐ ROUND 7 · WS-R — SỬA TIỀN ĐỀ, KHÔNG NỚI CỔNG. Bản vòng 3–6 kết luận
+  // «Con đã ĐI QUA các cách học của bài này» rồi bảo trẻ «về mục lục chọn bài
+  // khác». Bằng chứng duy nhất sinh ra kết luận ấy là [viewsSeen] — dấu vết
+  // UI, được đánh dấu NGAY LÚC MỞ tab (`WorkspaceTrace.markView`). «Đã mở»
+  // không phải «đã đi qua», và chính tệp này đã viết ở đầu rằng viewsSeen
+  // «không phải bằng chứng». Luật đọc nó như bằng chứng — đó là mâu thuẫn.
+  //
+  // Hệ quả đo được trên máy thật (LS&ĐL 5 Bài 8, Nokia 6.1): bài không có
+  // SemanticData và không có kịch bản, nên `availableViews` chỉ có 📖 Đọc.
+  // Trẻ mở bài, chạm Đọc — R3/R4 không bắn — R5 bắn NGAY, và SAM bảo trẻ rời
+  // bài mình vừa mở, ngay phía trên hàng «Đã mở: ● Đọc ○ Trực quan ○ Học với
+  // SAM» còn nói hai cách kia chưa mở. Hai câu trên một màn, ngược nhau.
+  //
+  // Sửa: R5 KHÔNG BAO GIỜ ra lệnh rời bài. Nó nói đúng thứ nó biết («đã MỞ»),
+  // nói thẳng MỞ chưa phải HIỂU, và đề xuất Ở LẠI. Về mục lục vẫn là quyền
+  // của trẻ (nút ← luôn có trên hàng tiêu đề) — nhưng nó là LỰA CHỌN, không
+  // phải LỜI KHUYÊN của SAM. Đường DUY NHẤT SAM chủ động mời sang bài khác là
+  // R1: `hasApprovedValidatedSuccess`, tức có bằng chứng đã chấm.
+  final ways = lesson.availableViews;
+  final opened = ways.length == 1
+      ? 'Bài này SAM chỉ có một cách học — ${ways.single.label} — và con đã mở rồi.'
+      : 'Con đã mở đủ ${ways.length} cách học SAM có cho bài này.';
+  final String standingLine;
   if (state.hasHistoricalUnvalidated) {
-    r5 = 'Con đã đi qua các cách học của bài này — có lần làm được ghi nhận '
-        'trước hợp đồng mới, SAM chưa kiểm lại nên chưa tính là tự làm được. '
-        'Con về mục lục chọn bài khác nhé.';
+    standingLine = 'Có lần làm được ghi nhận trước hợp đồng mới, SAM chưa kiểm '
+        'lại nên chưa tính là tự làm được.';
   } else if (state.mapState == LearningMapState.participation) {
-    r5 = 'Con đã đi qua các cách học của bài này — SAM ghi nhận con đã tham '
-        'gia, chưa chấm phần nào. Con về mục lục chọn bài khác nhé.';
+    standingLine = 'SAM ghi nhận con đã tham gia, chưa chấm phần nào.';
   } else if (state.mapState == LearningMapState.engaged) {
-    r5 = 'Con đã đi qua các cách học của bài này cùng SAM — chưa có lần tự làm '
-        'được nào được kiểm. Con có thể xem lại, hoặc về mục lục chọn bài khác.';
+    standingLine = 'Chưa có lần tự làm được nào được kiểm.';
   } else {
-    r5 = 'Con đã đi qua các cách học của bài này. Con có thể xem lại, hoặc '
-        'về mục lục chọn bài khác.';
+    standingLine = 'Mở bài không phải là hiểu bài — SAM chưa chấm phần nào ở đây.';
   }
   return LessonNextAction(
-    kind: LessonNextKind.backToContents,
+    kind: LessonNextKind.keepGoing,
     rule: 'R5',
     standing: standing,
     evidenceNote: note,
-    reason: r5,
-    basis: 'seen.all state=${state.mapState.name} $standingBasis',
+    reason: '$opened $standingLine Con cứ xem tiếp bài này nhé.',
+    basis: 'seen.allAvailable=${ways.length} state=${state.mapState.name} '
+        '$standingBasis',
   );
 }

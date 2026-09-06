@@ -15,13 +15,19 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/wal_tokens.dart';
+import '../../../core/display/lesson_title.dart';
 import '../../../core/lesson_model/lesson_document.dart';
 import 'tech_details.dart';
 import 'withheld_card.dart';
 
 /// Chữ IN HOA của sách → dạng thường có hoa đầu; chữ thường giữ nguyên.
-String _humanCase(String s) =>
-    s == s.toUpperCase() ? LessonDocument.titleCase(s) : s;
+///
+/// ROUND 7 · WS-R — luật này ĐÃ ĐÚNG ở đây và chỉ ở đây: sheet «Sách viết»
+/// kiểm `s == s.toUpperCase()` trước khi hạ chữ. Sáu chỗ hiển thị khác gọi
+/// thẳng `LessonDocument.titleCase` và **không** kiểm, nên tiêu đề đúng
+/// chính tả của mục lục bị hạ thành «bắc thuộc» trên máy thật. Nay tất cả
+/// dùng chung `displayTitle` — kể cả chỗ này, để không còn HAI luật.
+String _humanCase(String s) => displayTitle(s);
 
 /// «Trong mục: Nguyên tắc tách chất» — mục CON gần nhất trên đường heading
 /// của pipeline, bỏ «Bài N» và tên bài (đã ở tiêu đề). `null` khi không có

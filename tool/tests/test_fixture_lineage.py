@@ -232,3 +232,139 @@ class LineageTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class CropCoverageTest(unittest.TestCase):
+    """ROUND 7 · WS-R — the gate that would have caught the round-6 Golden #1 defect.
+
+    Round 6 placed LS&ĐL 5 Bài 8 with **17 withheld regions and no page crops**, and the
+    lineage gate said PASS. It said PASS because L5 counts crop REFERENCES: a document that
+    references none has none absent. The gate was green *because* the thing it guards was
+    missing — the same shape as the timeline test round 6 had to correct one layer up.
+
+    A withheld card without a crop tells a child «something is missing here» and shows
+    nothing. With a crop it shows the printed page. The population that must be measured is
+    therefore the withheld regions that CAN be cropped, not the paths someone remembered to
+    write down.
+    """
+
+    @staticmethod
+    def withheld(order, crop=None, page=38, bbox=(0.1, 0.2, 0.3, 0.04)):
+        b = dict(id=f'05-sgk-lich-su-va-dia-li-5:p{page:03d}:tc2-p1:{order:03d}',
+                 type='withheld', trust='withheld', reason='agree_tones',
+                 sourceRef=dict(book='05-sgk-lich-su-va-dia-li-5', pagePdf=page,
+                                pagePrinted=page - 2, bbox=list(bbox)),
+                 relations=dict(order=order))
+        if crop:
+            b['crop'] = crop
+        return b
+
+    def test_L5_reads_PASS_on_the_very_document_that_shipped_the_defect(self):
+        """⭐ The regression pin. L5 PASS and L5b FAIL on the SAME document — that gap is
+        exactly what shipped, and if L5b is ever removed this assertion is what notices."""
+        with tempfile.TemporaryDirectory() as root:
+            blocks = [self.withheld(o) for o in range(3, 20)]      # 17, as round 6 placed
+            path = write_case(root, provenance(), blocks=blocks)
+            r = fl.check(path, root=root)
+            self.assertEqual(status_of(r, 'L5'), fl.PASS, 'L5 counts references, so it passes')
+            l5 = next(x for x in r['checks'] if x['id'] == 'L5')
+            self.assertEqual(l5['value'], '0/0 present')
+            self.assertEqual(status_of(r, 'L5b'), fl.FAIL)
+            l5b = next(x for x in r['checks'] if x['id'] == 'L5b')
+            self.assertEqual(l5b['value'], '0/17 have a crop')
+            self.assertEqual(r['verdict'], fl.FAIL)
+
+    def test_L5b_passes_only_when_every_croppable_region_carries_one(self):
+        with tempfile.TemporaryDirectory() as root:
+            names = [f'crops/05-sgk-lich-su-va-dia-li-5-p038-withheld-{o:03d}.png'
+                     for o in range(3, 6)]
+            blocks = [self.withheld(o, crop=n) for o, n in zip(range(3, 6), names)]
+            path = write_case(root, provenance(), blocks=blocks)
+            for n in names:
+                open(os.path.join(root, 'assets', 'fixtures', 'real', n), 'wb').close()
+            r = fl.check(path, root=root)
+            self.assertEqual(status_of(r, 'L5'), fl.PASS)
+            self.assertEqual(status_of(r, 'L5b'), fl.PASS)
+            # remove ONE crop reference and the coverage gate must go red again
+            blocks[1].pop('crop')
+            path = write_case(root, provenance(), blocks=blocks)
+            self.assertEqual(status_of(fl.check(path, root=root), 'L5b'), fl.FAIL)
+
+    def test_the_waiver_is_UNKNOWN_and_never_PASS(self):
+        """`--allow-missing-crops` exists for a machine with no source PDF. It must not be
+        a way to write PASS where the truth is «the child sees nothing»."""
+        with tempfile.TemporaryDirectory() as root:
+            path = write_case(root, provenance(), blocks=[self.withheld(3)])
+            r = fl.check(path, root=root, allow_missing_crops=True)
+            self.assertEqual(status_of(r, 'L5b'), fl.UNKNOWN)
+            self.assertNotEqual(status_of(r, 'L5b'), fl.PASS)
+            self.assertIn('WAIVED', next(x for x in r['checks'] if x['id'] == 'L5b')['note'])
+            self.assertEqual(r['verdict'], fl.UNKNOWN)
+
+    def test_a_region_with_no_geometry_is_not_croppable(self):
+        """No page and no bbox ⇒ nothing to cut. Counting it would make the gate demand a
+        crop that cannot exist, and a gate nobody can satisfy gets deleted."""
+        with tempfile.TemporaryDirectory() as root:
+            blk = dict(id='b-nogeom', type='withheld', trust='withheld',
+                       sourceRef=dict(book='x', pagePdf=None, bbox=None))
+            path = write_case(root, provenance(), blocks=[blk])
+            r = fl.check(path, root=root)
+            self.assertEqual(status_of(r, 'L5b'), fl.UNKNOWN)
+            self.assertEqual(next(x for x in r['checks'] if x['id'] == 'L5b')['value'],
+                             '0/1 croppable')
+
+    def test_served_blocks_are_not_in_the_crop_population(self):
+        """Only WITHHELD regions are counted: a served paragraph shows its own text."""
+        with tempfile.TemporaryDirectory() as root:
+            served = dict(id='p1', type='paragraph', trust='trustedStructuredLesson',
+                          text='…', sourceRef=dict(pagePdf=38, bbox=[0, 0, 1, 0.1]))
+            path = write_case(root, provenance(), blocks=[served])
+            r = fl.check(path, root=root)
+            self.assertEqual(status_of(r, 'L5b'), fl.PASS)
+            self.assertEqual(next(x for x in r['checks'] if x['id'] == 'L5b')['value'],
+                             '0 withheld regions')
+
+
+class ExpectedGenerationAcrossHashMethodsTest(unittest.TestCase):
+    """ROUND 7 · WS-R — L2b compared one string to one string while L2 had already
+    established that TWO hash methods legitimately coexist (round 6 §4.2a). MEASURED:
+    `golden_delivery.py --tsl` computes its expectation as `canonical or bytes` and the
+    committed bridge stamps `bytes`, so L2b FAILED on a document built from precisely the
+    TSL demanded — which is why the crop-carrying rebuild could not be placed.
+
+    The gate is not loosened: a cross-method match is accepted ONLY when BOTH sides are
+    digests this run recomputed from the file at `tslPath`.
+    """
+
+    def test_cross_method_expectation_passes_for_the_same_bytes_and_says_so(self):
+        canonical = fl.sha256_canonical(json.loads(TSL_BYTES.decode()))
+        with tempfile.TemporaryDirectory() as root:
+            path = write_case(root, provenance(sourceHash=TSL_HASH))   # recorded = bytes
+            r = fl.check(path, root=root, expect_source_hash=canonical)  # expected = canonical
+            self.assertEqual(status_of(r, 'L2b'), fl.PASS)
+            note = next(x for x in r['checks'] if x['id'] == 'L2b')['note']
+            self.assertIn('recorded=bytes', note)
+            self.assertIn('expected=canonical', note)
+
+    def test_a_different_generation_still_fails_under_either_method(self):
+        """The mutation: one byte of the TSL moves BOTH digests, so no cross-method
+        reading can rescue a substituted generation."""
+        other = hashlib.sha256(TSL_BYTES + b' ').hexdigest()
+        other_canonical = fl.sha256_canonical(dict(book='other', lesson=99))
+        with tempfile.TemporaryDirectory() as root:
+            path = write_case(root, provenance(sourceHash=TSL_HASH))
+            for h in (other, other_canonical, '1' * 64):
+                with self.subTest(expected=h[:8]):
+                    self.assertEqual(
+                        status_of(fl.check(path, root=root, expect_source_hash=h), 'L2b'),
+                        fl.FAIL)
+
+    def test_without_the_tsl_on_disk_a_mismatch_is_still_a_fail(self):
+        """Nothing to recompute ⇒ nothing to reconcile. Absence must not become licence."""
+        canonical = fl.sha256_canonical(json.loads(TSL_BYTES.decode()))
+        with tempfile.TemporaryDirectory() as root:
+            path = write_case(root, provenance(sourceHash=TSL_HASH))
+            os.remove(os.path.join(root, TSL_REL))
+            r = fl.check(path, root=root, expect_source_hash=canonical)
+            self.assertEqual(status_of(r, 'L2'), fl.UNKNOWN)
+            self.assertEqual(status_of(r, 'L2b'), fl.FAIL)
