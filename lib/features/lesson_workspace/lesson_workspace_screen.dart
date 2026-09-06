@@ -171,8 +171,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: WalSpacing.md),
               child: _segmented(
-                badgeFor:
-                    showAssist && mode == AssistPresentation.inlineTab
+                badgeFor: showAssist && mode == AssistPresentation.inlineTab
                     ? next
                     : null,
               ),
@@ -253,7 +252,13 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   /// A — 💡 trong hàng tiêu đề: không tốn dòng nào, nhưng phải mang nhãn trợ
   /// năng đầy đủ (biểu tượng một mình không đủ cho trình đọc màn hình).
   Widget? _headerAssist() {
-    if (_mode != AssistPresentation.icon) return null;
+    // ROUND 5 D5 (máy thật): phương án B sau «Để sau» KHÔNG được biến mất —
+    // «hé dần, không phải giấu đi». Trạng thái thu gọn của B mượn đúng dấu
+    // hiệu của A: 💡 trong hàng tiêu đề.
+    final wantsIcon =
+        _mode == AssistPresentation.icon ||
+        (_mode == AssistPresentation.peek && _assist == AssistState.collapsed);
+    if (!wantsIcon) return null;
     if (_view == null) return null;
     if (MediaQuery.viewInsetsOf(context).bottom != 0) return null;
     final next = _proposal();
@@ -342,30 +347,6 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     ),
   );
 
-  /// Huy hiệu 💡 trên TAB được đề xuất (phương án C) — gợi ý nằm ngay trên
-  /// thứ trẻ sẽ chạm, không thêm dòng nào.
-  Widget _tabBadge(WorkspaceView v, NextAction next) => Positioned(
-    right: 2,
-    top: 2,
-    child: Semantics(
-      button: true,
-      label: AssistCopy.semanticLabel(next, _assist),
-      hint: AssistCopy.semanticHint(_assist),
-      child: InkWell(
-        key: const Key('assist-tab-badge'),
-        onTap: () => setState(
-          () => _assist = _assist == AssistState.expanded
-              ? AssistState.collapsed
-              : AssistState.expanded,
-        ),
-        child: const Padding(
-          padding: EdgeInsets.all(4),
-          child: Text('💡', style: TextStyle(fontSize: 13)),
-        ),
-      ),
-    ),
-  );
-
   Widget _segmented({NextAction? badgeFor}) => Container(
     padding: const EdgeInsets.all(4),
     decoration: BoxDecoration(
@@ -404,7 +385,11 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          '${v.icon} ${v.label}',
+                          // ROUND 5 D4 (máy thật): huy hiệu 💡 NẰM TRONG nhãn
+                          // tab — vùng chạm là cả tab (48 dp), và không còn
+                          // lơ lửng giữa hai tab như bản đo lần đầu.
+                          '${v.icon} ${v.label}'
+                          '${badgeFor?.view == v ? ' 💡' : ''}',
                           style: const TextStyle(
                             fontSize: WalType.secondary,
                             fontWeight: FontWeight.w700,
@@ -414,8 +399,6 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                     ),
                   ),
                 ),
-                if (badgeFor != null && badgeFor.view == v)
-                  _tabBadge(v, badgeFor),
               ],
             ),
           ),

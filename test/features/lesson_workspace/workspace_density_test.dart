@@ -250,9 +250,8 @@ void main() {
             ),
             AssistPresentation.icon => find.byKey(AssistIconButton.buttonKey),
             AssistPresentation.peek => find.byKey(AssistPeek.peekKey),
-            AssistPresentation.inlineTab => find.byKey(
-              const Key('assist-tab-badge'),
-            ),
+            // C: dấu hiệu nằm TRONG nhãn tab được đề xuất.
+            AssistPresentation.inlineTab => find.textContaining('💡'),
           };
           expect(
             visible,
@@ -289,6 +288,12 @@ void main() {
       await t.pumpAndSettle();
       expect(find.byKey(AssistPeek.peekKey), findsNothing);
       expect(find.byKey(AssistPeek.expandedKey), findsNothing);
+      // ⚠ «hé dần, KHÔNG phải giấu đi»: thu gọn rồi vẫn còn 💡 ở hàng tiêu đề.
+      expect(
+        find.byKey(AssistIconButton.buttonKey),
+        findsOneWidget,
+        reason: 'B thu gọn không được biến mất hoàn toàn',
+      );
       // Đổi View ⇒ đề xuất trỏ đi chỗ KHÁC ⇒ hé lại một lần.
       await t.tap(
         find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)),
@@ -323,8 +328,7 @@ void main() {
     });
 
     testWidgets(
-      '⭐ C: huy hiệu 💡 nằm trên TAB được đề xuất, không thêm dòng; chạm huy '
-      'hiệu mới mở «vì sao»',
+      '⭐ C: huy hiệu 💡 nằm TRONG nhãn tab được đề xuất, không thêm dòng nào',
       (t) async {
         AssistPresentation.debugOverride = AssistPresentation.inlineTab;
         _nokia(t);
@@ -341,11 +345,18 @@ void main() {
           find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.read)),
         );
         await t.pumpAndSettle();
-        expect(find.byKey(const Key('assist-tab-badge')), findsOneWidget);
+        // Huy hiệu nằm trong nhãn tab ⇒ vùng chạm là cả tab (48 dp), không
+        // còn nút 21 dp lơ lửng giữa hai tab (lỗi D4 đo trên máy).
+        expect(find.textContaining('💡'), findsOneWidget);
+        final label = t.widget<Text>(find.textContaining('💡'));
+        expect(
+          label.data,
+          contains(WorkspaceView.visual.label),
+          reason: 'huy hiệu phải dính vào ĐÚNG tab được đề xuất',
+        );
+        // C đánh đổi có ý thức: KHÔNG có dòng «vì sao» tại chỗ — muốn hiểu vì
+        // sao thì phải sang View đó và đọc lời giải thích của chính View.
         expect(find.byKey(AssistPeek.expandedKey), findsNothing);
-        await t.tap(find.byKey(const Key('assist-tab-badge')));
-        await t.pumpAndSettle();
-        expect(find.byKey(AssistPeek.expandedKey), findsOneWidget);
       },
     );
 
