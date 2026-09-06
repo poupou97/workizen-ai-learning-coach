@@ -197,7 +197,12 @@ def colour_of(mask, bbox):
 
 # ---------------------------------------------------------------- lexicon (deterministic Role Layer)
 STAGE = re.compile(r'^\s*(KHỞI ĐỘNG|KHÁM PHÁ|LUYỆN TẬP|VẬN DỤNG|THỰC HÀNH|MỤC TIÊU|EM ĐÃ HỌC|EM CÓ THỂ|EM CÓ BIẾT|GHI NHỚ|CÂU HỎI VÀ BÀI TẬP|Câu hỏi và bài tập|Khởi động|Khám phá|Luyện tập|Vận dụng|Thực hành|Hoạt động|HOẠT ĐỘNG|Em có biết|Em đã học|Em có thể|Ghi nhớ|Lưu ý|LƯU Ý|Chú ý|CHÚ Ý|Mở rộng|MỞ RỘNG|Kết nối|KẾT NỐI)\b\s*[\d.:]*\s*\??\s*$')
-SIDEBAR_LABEL = re.compile(r'^\s*(Em có bi[eê][tít]|EM CÓ BI[EÊ][TÍ]T?|Lưu ý|LƯU Ý|Ghi nhớ|GHI NHỚ|Chú ý|CHÚ Ý|Mở rộng|MỞ RỘNG|Kết nối|KẾT NỐI|Em đã học|EM ĐÃ HỌC|Em có th[eê]|EM CÓ TH[EÊ])\b')
+# Phase B (WAL-215). The vowel classes used to carry only the plain and circumflex forms — `bi[eê]t`,
+# `th[eê]` — and so failed on «biết» / «thể» / «THỂ», i.e. on the labels AS PRINTED. Measured on the 54
+# gold pages the pattern matched 9 of the 18 label blocks, and the 9 it matched were mostly the ones the
+# OCR had corrupted: a rule that fires where recognition is wrong and not where it is right. Every block
+# a label governs (`box_pass`) therefore lost its box context whenever the label was read correctly.
+SIDEBAR_LABEL = re.compile(r'^\s*(Em có bi[eêế][tít]|EM CÓ BI[EÊẾ][TÍ]T?|Lưu ý|LƯU Ý|Ghi nhớ|GHI NHỚ|Chú ý|CHÚ Ý|Mở rộng|MỞ RỘNG|Kết nối|KẾT NỐI|Em đã học|EM ĐÃ HỌC|Em có th[eêểế]|EM CÓ TH[EÊỂẾ])\b')
 OBJ_BOX = re.compile(r'(MỤC TIÊU|Mục tiêu|Sau bài học này|Học xong bài học này|Học xong bài này|Sau bài này|Sau bài học|em sẽ:?|HS sẽ:?)', re.IGNORECASE)
 OBJ_SENT = re.compile(r'^\s*[•·\-–▪■]?\s*(?:\d{1,2}[.)]\s*)?(Nêu|Trình bày|Mô tả|Phân biệt|Đọc|Giải thích|Xác định|Vận dụng|Nhận biết|Kể tên|So sánh|Phát biểu|Viết|Tính|Thực hiện|Sử dụng|Vẽ|Nhận ra|Chỉ ra|Kể|Tìm hiểu|Thu thập|Quan sát|Biết|Liên hệ|Đề xuất|Thiết kế|Lập|Đo|Lấy|Làm|Dự đoán|Tiến hành|Có|Hiểu|Ứng dụng|Tóm tắt|Ghi chú|Nhận thức|Thảo luận|Trình diễn|Chứng minh|Phân tích|Đánh giá|Chọn|Chế tạo|Mắc|Tạo|Hình thành|Nhận xét|Xây dựng|Rèn luyện|Thu thập|Đề ra)\b[^.?!]{0,80}\bđược\b', re.IGNORECASE)
 # generic objective shape: "<Capitalised verb> được …" as the first two words (e.g. "Chọn được nấm…", "Mắc được mạch điện…")
@@ -212,6 +217,15 @@ OPTION = re.compile(r'^\s*[A-D][.)]\s+\S')
 ENUM = re.compile(r'^\s*(?:(?:HĐ|Bài|Bước|Câu)\s*\d+[.:]?|\d{1,2}[.)]|[a-hA-H][.)])\s*')
 QHINT = layout_extract.QUESTION_HINT
 DIRECTIVE_ANY = layout_extract.DIRECTIVE_ANY
+# Phase B (WAL-215). A leading directive verb closed by a FULL STOP is not governing an object: it is a
+# label opening a remark, and what follows the stop is a statement, not a task. The SAME verb written
+# without the stop, taking a noun phrase as its object, is a real instruction — and BOTH shapes occur in
+# this corpus, measured on the 54 gold pages (D4: characterised by form; the readings stay in the
+# git-excluded corpus). The distinguishing signal is therefore the punctuation, not the word, which is why
+# this is keyed on a stop and not on a list of remark words: a word-list veto demotes the instruction.
+LEAD_VERB_STOP = re.compile(r'^\s*(?:Em hãy|Hãy|Nêu|Cho biết|Giải thích|Vì sao|Tại sao|Quan sát|So sánh'
+                            r'|Kể tên|Kể|Chọn|Tính|Viết|Đọc|Thảo luận|Trình bày|Mô tả|Xác định|Dự đoán'
+                            r'|Liệt kê|Nhận xét|Phân loại|Sắp xếp|Điền|Nối|Tìm)\s*\.', re.IGNORECASE)
 CAPTION = re.compile(r'^\s*(Hình|Bảng|Sơ đồ|Biểu đồ|Lược đồ|Tranh|Ảnh)\s*\d', re.IGNORECASE)
 FOOTNOTE = layout_extract.FOOTNOTE
 LESSON_HDR = re.compile(r'^\s*(B[ÀÁẢÃẠ]I|B[àáảãạ]i)\s+(\d{1,2})\b')   # round 4: + Ã (banner OCR «BÃI»), as tc2_attach
@@ -487,7 +501,17 @@ def assign_role(b, ctx):
     if box_ctx == 'sidebar':
         return 'sidebar', 'context', 0.85, ['inside labelled side box']
     # heading candidates
-    if lab in ('section_header', 'title') and len(t) <= 100 and not re.search(r'\?\s*$', t) and not (ENUM.match(t) and QHINT.search(t)):
+    # Phase B (WAL-215), P1. This rule used to carry `not ends with "?"`, so the extractor's OWN
+    # structural label was discarded in favour of the question lexicon, and a section title phrased as a
+    # question — the shape measured on `07-sgk-toan-7-tap-hai` p041 b03 — was served to a child as a
+    # task it was expected to answer (D4: the row is named by id, never by its reading). A question-form
+    # section title is a HEADING under ROLE-DEFINITION-SPEC-v1 (QUESTION §exclusion), so the trailing
+    # «?» no longer overrides the label. It still cannot rescue a task: an enumerated question keeps its
+    # existing exclusion, and a title that OPENS with a directive verb is a task whatever it is labelled.
+    q_tail = re.search(r'\?\s*$', t)
+    if (lab in ('section_header', 'title') and len(t) <= 100
+            and not (ENUM.match(t) and QHINT.search(t))
+            and not (q_tail and QHINT.search(t[:q_tail.start()]))):
         return 'heading', 'native', 0.85, ['docling section_header']
     if upper_ratio(t) >= 0.7 and 3 <= len(t) <= 90 and not re.search(r'\?\s*$', t) and not re.match(r'^\s*[(\[]', t):
         return 'heading', 'typography', 0.85, ['uppercase run']
@@ -501,7 +525,11 @@ def assign_role(b, ctx):
     lead_ctx = bool(dash) and (prev == 'question' or QUESTION_LEAD.search((ctx.get('prev_text') or '').strip()) is not None)
     core = ENUM.sub('', t[dash.end():] if lead_ctx else t, count=1)
     is_q = re.search(r'\?\s*$', t) is not None
-    directive = (QHINT.search(core) is not None or QUESTION_LEAD.search(t) is not None) and len(t) < 400
+    # Phase B (WAL-215), P2. `LEAD_VERB_STOP` — a leading directive verb closed by a full stop opens a
+    # remark, not a task (see the pattern). `is_q` is deliberately left alone: a block that actually ends
+    # in «?» is still a question however it opens.
+    directive = ((QHINT.search(core) is not None or QUESTION_LEAD.search(t) is not None)
+                 and len(t) < 400 and LEAD_VERB_STOP.match(core) is None)
     # Round 4 correctness review (F5): `num_directive` tested `ENUM.match(t)` on the UN-stripped text while
     # `core` was dash-stripped, so «– 1. Em thử vẽ lại sơ đồ trên» — a dash sub-item carrying its OWN
     # enumerator — could only be promoted by the `^`-anchored QHINT and never by DIRECTIVE_ANY, and stayed

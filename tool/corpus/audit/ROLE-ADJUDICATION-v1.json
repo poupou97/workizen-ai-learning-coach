@@ -1,0 +1,66 @@
+{
+  "schema": "role-adjudication/v1",
+  "date": "2026-09-06",
+  "authority": "docs/research/ROLE-DEFINITION-SPEC-v1.md §7 (R1–R7) and the §4 role entries it cites",
+  "why": "Founder standing rule from round 5: role spec before tuning. The five gold role labels under the five ROLE DISAMBIGUATION rows of PHASE-A-ROOT-CAUSE-AUDIT.md §3 had never been put through §7 — the round-5 re-annotation sampled 26 rows and none of these. Phase B adjudicates them BEFORE any rule is written, because the adjudication can move the target count in either direction.",
+  "status": "PROPOSED — this overlay is applied by measurement, never written into tool/corpus/tc_gold/*.json. The committed gold is unchanged, so every published number over the 643-row plane still reproduces byte-identically. Founder ruling required before the gold itself is corrected.",
+  "d4": "No printed or served string appears in this file. Rows are named by book, page and gold block id only.",
+  "rulings": [
+    {
+      "row": 3,
+      "book": "07-sgk-toan-7-tap-hai", "page": 41, "gold_id": "b03",
+      "gold_role": "heading", "verdict": "UPHELD", "adjudicated_role": "heading",
+      "basis": "QUESTION §exclusion — «A question-form section title (→ HEADING)». §7 R2: the region carries one printed unit whose job is to name the section that follows it; HEADING §semantic — «It asserts nothing a child could be tested on; it locates».",
+      "spec_defect": "HEADING §exclusion says «A line that ends in ? (→ QUESTION)» and QUESTION §exclusion says «A question-form section title (→ HEADING)». For this shape the two clauses contradict each other. The more specific clause is applied. Recorded as Q-ROLE-6.",
+      "effect_on_count": 0
+    },
+    {
+      "row": 7,
+      "book": "09-sgk-toan-9-tap-mot", "page": 29, "gold_id": "b01",
+      "gold_role": "body", "verdict": "UPHELD", "adjudicated_role": "body",
+      "basis": "ANSWER §exclusion — «A Nhận xét/Kết luận that generalises rather than answering (→ RULE or BODY)». The printed unit is a remark that generalises the method of the preceding worked example into two named steps; the book expects no response, so QUESTION §semantic does not admit it.",
+      "residual_ambiguity": "BODY vs RULE is not decided by §7. It does not move any count: both are in tc_sdm.NOT_A_QUESTION, and the pipeline can emit neither RULE nor a RULE guard.",
+      "effect_on_count": 0
+    },
+    {
+      "row": 9,
+      "book": "10-sgk-vat-li-10", "page": 30, "gold_id": "b03",
+      "gold_role": "body", "verdict": "OVERTURNED", "adjudicated_role": "question",
+      "basis": "ANSWER §exclusion is explicit — «The *statement* of the worked example (its data and its question) — that is QUESTION or FORMULA». §7 R3 scopes ANSWER to the worked example's SOLUTION («Ví dụ N» + its computation); on this page the solution is a separate gold block under its own «Giải» heading, so R3 does not reach this block. The region carries the marker, the data and an interrogative closing in «?»; QUESTION §inclusion — «Any line ending in ?».",
+      "counter_argument_considered": "QUESTION §exclusion also lists «A worked example's lead-in (→ ANSWER)». A lead-in in this codebase is the enumerated line ending in «:» that introduces the example (see the `stem` comment in tc2_sdm.assign_role); this block is not that — it is the whole statement. Where the two clauses overlap the ANSWER §exclusion is the specific one and it names this shape exactly.",
+      "spec_defect": "ROLE-DEFINITION-SPEC-v1 §4 QUESTION lists this very block among its «BODY → QUESTION, 4» measured confusions, i.e. as a pipeline error. That illustrative list contradicts the spec's own normative ANSWER §exclusion. Recorded as Q-ROLE-7.",
+      "effect_on_count": -1,
+      "consequence": "The served role QUESTION is CORRECT on this row. It is not a teaching-critical error and never was. Adjudicated baseline: teaching-critical 11, not 12; as-question 5, not 6."
+    },
+    {
+      "row": 10,
+      "book": "10-sgk-vat-li-10", "page": 30, "gold_id": "b19",
+      "gold_role": "sidebar", "verdict": "UPHELD", "adjudicated_role": "sidebar",
+      "basis": "SIDEBAR §semantic names «Em có thể» among the sidebar labels, and the block is geometrically inside that labelled box (SIDEBAR §inclusion).",
+      "residual_ambiguity": "SIDEBAR §exclusion — «A tinted box listing what the child will be able to do (→ OBJECTIVE)» — points the other way, and the sentence is `verb + được`, OBJECTIVE §inclusion. OBJECTIVE §exclusion sends «Em đã học» to SIDEBAR but is silent on «Em có thể». Not decided by §7; it moves no count, because sidebar and objective are both in tc_sdm.NOT_A_QUESTION. Recorded as Q-ROLE-8.",
+      "effect_on_count": 0
+    },
+    {
+      "row": 11,
+      "book": "10-sgk-vat-li-10", "page": 89, "gold_id": "b06",
+      "gold_role": "body", "verdict": "UPHELD", "adjudicated_role": "body",
+      "basis": "QUESTION §inclusion admits «an ENUMERATED item opening with a directive verb»; this region carries no enumerator, does not end in «?», owns no options and follows no «… em hãy:» lead. Under QUESTION §semantic the response the section expects is produced by the activity and the numbered questions that follow it, not by this line, which states the aim of the section its heading opens.",
+      "residual_ambiguity": "BODY vs ACTIVITY is not decided by §7 — the line is the stated aim of a procedure. It moves no count: both are in tc_sdm.NOT_A_QUESTION.",
+      "effect_on_count": 0,
+      "consequence": "The served role QUESTION is WRONG. This row stays a teaching-critical error and no rule in this change touches it."
+    }
+  ],
+  "summary": {
+    "rows_adjudicated": 5,
+    "upheld": 4,
+    "overturned": 1,
+    "decided_on_the_question_axis": 5,
+    "decided_on_the_fine_role": 2,
+    "residual_fine_role_ambiguities": 3,
+    "net_effect_on_teaching_critical_baseline": -1,
+    "new_open_spec_questions": ["Q-ROLE-6", "Q-ROLE-7", "Q-ROLE-8"]
+  },
+  "overlay": [
+    {"book": "10-sgk-vat-li-10", "page": 30, "gold_id": "b03", "from": "body", "to": "question"}
+  ]
+}

@@ -5,6 +5,22 @@ Founder order 47 §PHASE A · branch `audit/phase-a-root-cause`, based on `main`
 are unchanged.** No SGK page, crop, reading or served string appears in this document or in
 anything this work committed.
 
+> ### ⚠ WHAT PHASE B DID TO THIS DOCUMENT (2026-09-06, `docs/research/PHASE-B-QUESTION-VETO.md`)
+> This audit's classification stands. **Two of its conclusions do not**, and are corrected here so
+> that nobody acts on the version below:
+> 1. **Row #9 (`10-sgk-vat-li-10` p030 `b03`) is NOT a pipeline error.** The adjudication this
+>    document deferred overturned its gold label: under `ROLE-DEFINITION-SPEC-v1`'s ANSWER
+>    §exclusion the *statement* of a worked example is a QUESTION, and the served role is correct.
+>    **The ROLE class holds 4 rows, not 5; the baseline is 11 teaching-critical, not 12; the honest
+>    served-error count is 9 on 9 blocks, not 10 on 10.**
+> 2. **§5's `P2` is FALSIFIED as written.** Its `Ví dụ` clause removes the row just named, which is
+>    a regression; and measured on these same 54 pages its `Nhận xét` clause demotes a block where
+>    the same verb governs an object — a real task — which is invisible here only because that block
+>    is WITHHELD. P2 shipped in a different form, keyed on punctuation rather than on a word list.
+> `P1` and `P3` shipped as recommended. The §5 measured table (12 → 7, 26 → 22) is reproducible but
+> its −5 includes the regression; the shipped change measures **11 → 7 · 25 → 22** on the
+> adjudicated plane, and that gain is **in-sample** and does not reproduce out of sample.
+
 ---
 
 ## 0 · The one-paragraph answer
