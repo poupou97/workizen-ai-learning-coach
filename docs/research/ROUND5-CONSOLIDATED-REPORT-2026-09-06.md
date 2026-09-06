@@ -692,6 +692,44 @@ deterministic validation — not more rules over text that was never captured.
 
 ---
 
+---
+
+## 11.3 Does the round compose? — an integration check with nothing merged
+
+Because merging is a Founder gate, the composition was verified in a **throw-away
+worktree** built from `integration/round5-2026-09-06` with all seven lane branches
+merged into it. No PR was touched, no branch was pushed, and the worktree is
+disposable. Gitignored assets (321 pack files, 24 fixtures) were synced from the main
+checkout first, so a missing-asset failure could not be mistaken for a defect.
+
+| Check | Result |
+|---|---|
+| Git merge, 7 lane branches | **0 conflicts** |
+| Python suite | **520 tests OK** (19 skipped) |
+| Dart suite | **1038 of 1039 pass**, 3 skipped |
+| `flutter analyze` | **10 errors, all in one file** |
+
+**One integration defect, and it is instructive.** Lane B's PR #87 is green alone;
+Lane E2's PR #86 is green alone; **composed, they do not compile.**
+
+E2's §8 provenance fix made the field `required List<ComparisonValue> cells` and kept
+`values` as a **getter** for backward compatibility
+(`lib/core/lesson_model/semantic_data.dart:317-323`). That claim — «backward
+compatible, Lane B and Lane C compile unchanged» — is **true for every site that reads
+`values[i]`, and false for a site that constructs with `values:`**, because a getter is
+not a constructor parameter. Lane B's new `round5_visual_test.dart` is the repo's only
+such constructor, and it did not exist when E2 measured compatibility. Five sites,
+lines 210, 268, 310–312.
+
+Neither lane erred. **This is the defect class that per-lane CI structurally cannot
+see**, and it is the argument for running this composition check every round rather
+than trusting six green badges. Routed to Lane B, which owns `test/features/**`, with
+the instruction to pass a real `sourceBlockId` rather than add a convenience
+constructor — a shim in `lib/core` would re-open the very hole E2 closed.
+
+**Everything else in the round composes cleanly**, including four lanes touching
+`lib/core/lesson_model/` in the same round.
+
 ## 12. Round-5 pull requests — all open, none merged
 
 | PR | Branch | Lane | CI |
