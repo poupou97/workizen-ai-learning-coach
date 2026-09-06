@@ -70,6 +70,35 @@ class LineageTest(unittest.TestCase):
             self.assertEqual(r['verdict'], fl.PASS, r)
             self.assertEqual(r['repairVersion'], 'repair@v1')
             self.assertEqual(r['recomputedSourceHash'], TSL_HASH)
+            self.assertEqual(r['hashMethod'], 'bytes')
+
+    def test_canonical_json_hash_is_accepted_and_NAMED(self):
+        """⭐ MEASURED: the committed bridge records file-BYTE digests; the round-6 repair
+        path records CANONICAL-JSON digests. Both are legitimate and they differ, so a
+        reviewer running `shasum -a 256` on a repair-path artefact gets a number that does
+        not match and concludes it was tampered with. The gate accepts either and SAYS
+        WHICH — an unnamed hash method is how a good artefact gets called a forgery.
+        """
+        canonical = fl.sha256_canonical(json.loads(TSL_BYTES.decode()))
+        self.assertNotEqual(canonical, TSL_HASH)
+        with tempfile.TemporaryDirectory() as root:
+            path = write_case(root, provenance(sourceHash=canonical))
+            r = fl.check(path, root=root)
+            self.assertEqual(status_of(r, 'L2'), fl.PASS)
+            self.assertEqual(r['hashMethod'], 'canonical')
+            self.assertEqual(r['sourceDigests']['bytes'], TSL_HASH)
+
+    def test_repair_lineage_accepts_the_projection_stamp(self):
+        """The round-6 repair path stamps `projection` + `framework`, not `version`."""
+        with tempfile.TemporaryDirectory() as root:
+            prov = provenance()
+            del prov['repairVersion']
+            prov['repair'] = dict(projection='tsl-repair-projection-v1', framework='repair-v1',
+                                  validatedRepairs=9, onBlocks=6, trusted=0)
+            path = write_case(root, prov)
+            r = fl.check(path, root=root, require_repair=True)
+            self.assertEqual(status_of(r, 'L4'), fl.PASS)
+            self.assertEqual(r['repairVersion'], 'tsl-repair-projection-v1')
 
     def test_wrong_source_hash_is_a_hard_fail(self):
         """⭐ The round-5 stale-fixture trap: the file claims a TSL it was not built from."""
@@ -77,6 +106,7 @@ class LineageTest(unittest.TestCase):
             path = write_case(root, provenance(sourceHash='0' * 64))
             r = fl.check(path, root=root)
             self.assertEqual(status_of(r, 'L2'), fl.FAIL)
+            self.assertIsNone(r['hashMethod'], 'neither method may be claimed')
             self.assertEqual(r['verdict'], fl.FAIL)
 
     def test_absent_tsl_is_unknown_not_pass(self):
@@ -88,14 +118,33 @@ class LineageTest(unittest.TestCase):
             self.assertEqual(status_of(r, 'L2'), fl.UNKNOWN)
             self.assertEqual(r['verdict'], fl.UNKNOWN)
 
-    def test_mixed_generations_fail(self):
-        """⭐ A tc2-p1/sdm-v2 document must not pass as a current-pipeline one."""
+    def test_pipeline_name_alone_never_passes_a_generation(self):
+        """⭐ MEASURED 2026-09-06: the pipeline NAME does not discriminate generations.
+
+        The round-5 rerun of LS&ĐL 5 Bài 8 sits under `tc-v2/tc2-r5/` yet DECLARES
+        `pipeline: tc2-p1`, and its block ids still embed `tc2-p1`. So two documents
+        can both read `sourcePipeline: tc2-p1` and be different generations. The gate
+        must surface the disagreement instead of quietly passing on the name.
+        """
         with tempfile.TemporaryDirectory() as root:
-            # pipelineVersion still says the old pair while the TSL path says the new one
             path = write_case(root, provenance(sourcePipeline='tc2-p1', sdmVersion='sdm-v2',
                                                pipelineVersion='tc2-p1/sdm-v2'))
-            r = fl.check(path, root=root)
-            self.assertEqual(status_of(r, 'L3'), fl.FAIL)
+            r = fl.check(path, root=root)          # TSL path says tc2-p3, document says tc2-p1
+            self.assertEqual(status_of(r, 'L3'), fl.PASS)   # internally consistent…
+            self.assertEqual(status_of(r, 'L3b'), fl.UNKNOWN)  # …but NOT a verified generation
+            self.assertEqual(r['verdict'], fl.UNKNOWN)
+            # the sha256 is the authority, and it is what pins the generation
+            self.assertEqual(status_of(fl.check(path, root=root,
+                                                expect_source_hash='1' * 64), 'L2b'), fl.FAIL)
+
+    def test_generation_root_is_read_from_the_tsl_path(self):
+        for rel, want in (
+            ('poc-out/trusted-corpus/tc-v2/tc2-p1/lessons/x/bai-01.tsl.json', 'tc2-p1'),
+            ('poc-out/round5/lane-c/x/root/poc-out/trusted-corpus/tc-v2/tc2-r5/lessons/y/'
+             'bai-08.tsl.json', 'tc2-r5'),
+            ('somewhere/else/bai-01.tsl.json', None),
+        ):
+            self.assertEqual(fl.generation_root(rel), want, rel)
 
     def test_pipeline_version_must_equal_pipeline_slash_sdm(self):
         with tempfile.TemporaryDirectory() as root:

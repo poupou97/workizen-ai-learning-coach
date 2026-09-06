@@ -18,12 +18,28 @@ they are holding is the record inside the file. This tool is the machine that ch
 Checks, each printed as PASS / FAIL / UNKNOWN with the value it saw:
 
   L1 FIELDS         the five required version fields are present and non-empty.
-  L2 SOURCE HASH    `provenance.tslPath` re-read from disk and sha256'd; it must equal
-                    `provenance.sourceHash`. A TSL that is absent is UNKNOWN, not PASS —
-                    an unverifiable claim is not a verified one.
-  L3 GENERATION     `pipelineVersion` must be exactly `<sourcePipeline>/<sdmVersion>`,
-                    and `tslPath` must name that same pipeline. This is the check that
-                    catches a round-4 document being passed off as a round-6 one.
+  L2 SOURCE HASH    `provenance.tslPath` re-read from disk and hashed TWO ways, because
+                    two are in use and they disagree:
+                      `bytes`     sha256 of the file as it sits on disk — what
+                                  `shasum -a 256` gives, and what the committed bridge
+                                  records (`tsl_to_lesson_document.py` `sha256_file`);
+                      `canonical` sha256 of `json.dumps(sort_keys, separators=(',',':'),
+                                  ensure_ascii=False)` — what the round-6 repair path
+                                  records.
+                    `provenance.sourceHash` must equal ONE of them, and the report NAMES
+                    which. Without the name, a reviewer who reproduces it the obvious way
+                    gets a different number and concludes the artefact was tampered with.
+                    A TSL that is absent is UNKNOWN, not PASS — an unverifiable claim is
+                    not a verified one.
+  L3 GENERATION     `pipelineVersion` must be exactly `<sourcePipeline>/<sdmVersion>`.
+  L3b GENERATION ROOT  MEASURED, 2026-09-06: the pipeline NAME does not discriminate
+                    generations here. The round-5 rerun of LS&ĐL 5 Bài 8 lives under
+                    `tc-v2/tc2-r5/` but still DECLARES `pipeline: tc2-p1`, and its block
+                    ids still embed `tc2-p1` — so two documents four months apart can
+                    both say `sourcePipeline: tc2-p1` and differ only in `sdmVersion`.
+                    The generation root is visible ONLY in `tslPath`, and the sole
+                    authority is the sha256. This check surfaces the root and says so;
+                    it never passes a document on the pipeline name alone.
   L4 REPAIR         repair lineage: version + the counts the ledger claims. Absent ⇒
                     UNKNOWN («no repair crossed into this document»), which is a truthful
                     answer and stays truthful — `--require-repair` turns it into a FAIL
@@ -60,11 +76,30 @@ PASS, FAIL, UNKNOWN = 'PASS', 'FAIL', 'UNKNOWN'
 
 
 def sha256_file(path):
+    """sha256 of the file bytes — what `shasum -a 256` gives."""
     h = hashlib.sha256()
     with open(path, 'rb') as fh:
         for chunk in iter(lambda: fh.read(1 << 20), b''):
             h.update(chunk)
     return h.hexdigest()
+
+
+def sha256_canonical(obj):
+    """sha256 of the canonical JSON — sorted keys, compact, no ASCII escaping."""
+    return hashlib.sha256(
+        json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
+    ).hexdigest()
+
+
+def digests(path):
+    """{'bytes': …, 'canonical': …} — 'canonical' is absent when the file is not JSON."""
+    out = {'bytes': sha256_file(path)}
+    try:
+        with open(path, encoding='utf-8') as fh:
+            out['canonical'] = sha256_canonical(json.load(fh))
+    except (ValueError, UnicodeDecodeError):
+        pass
+    return out
 
 
 def _crop_refs(doc):
@@ -79,6 +114,17 @@ def _crop_refs(doc):
     return out
 
 
+def generation_root(tsl_rel):
+    """The `tc-v2/<root>/` segment of a TSL path — `tc2-p1`, `tc2-r5`, `tc2-p3`, …"""
+    if not tsl_rel:
+        return None
+    parts = tsl_rel.replace(os.sep, '/').split('/')
+    for i, seg in enumerate(parts[:-1]):
+        if seg.startswith('tc-v') and i + 1 < len(parts):
+            return parts[i + 1]
+    return None
+
+
 def repair_lineage(prov):
     """(version, detail dict) — version is None when no repair lineage is recorded."""
     for k in REPAIR_KEYS:
@@ -86,10 +132,15 @@ def repair_lineage(prov):
             return str(prov[k]), {}
     for k in REPAIR_BLOCK_KEYS:
         blk = prov.get(k)
-        if isinstance(blk, dict) and blk.get('version'):
-            return str(blk['version']), {
-                x: blk[x] for x in blk if x != 'version' and not isinstance(blk[x], (dict, list))
-            }
+        if not isinstance(blk, dict):
+            continue
+        # the round-6 repair path stamps `projection` + `framework` rather than `version`
+        for vk in ('version', 'projection', 'framework'):
+            if blk.get(vk):
+                return str(blk[vk]), {
+                    x: blk[x] for x in blk
+                    if x != vk and not isinstance(blk[x], (dict, list))
+                }
     return None, {}
 
 
@@ -111,6 +162,8 @@ def check(fixture_path, root='.', require_repair=False, expect_source_hash=None)
     # ---- L2 SOURCE HASH --------------------------------------------------------
     tsl_rel = prov.get('tslPath')
     recorded = prov.get('sourceHash')
+    hash_method = None
+    source_digests = {}
     if not tsl_rel or not recorded:
         row('L2', 'source TSL re-hashes to sourceHash', UNKNOWN,
             f'tslPath={tsl_rel!r} sourceHash={recorded!r}', 'nothing to verify against')
@@ -122,27 +175,43 @@ def check(fixture_path, root='.', require_repair=False, expect_source_hash=None)
                 'TSL not on this machine — the claim cannot be checked here')
             actual = None
         else:
-            actual = sha256_file(tsl_abs)
-            same = actual == recorded
-            row('L2', 'source TSL re-hashes to sourceHash', PASS if same else FAIL,
-                f'recorded={recorded[:16]}… actual={actual[:16]}…',
-                '' if same else 'THE FIXTURE WAS NOT BUILT FROM THE TSL IT NAMES')
+            d = digests(tsl_abs)
+            method = next((m for m, h in d.items() if h == recorded), None)
+            actual = d.get(method) or d['bytes']
+            source_digests = d
+            shown = ' '.join(f'{m}={h[:16]}…' for m, h in d.items())
+            row('L2', 'source TSL re-hashes to sourceHash',
+                PASS if method else FAIL,
+                f'recorded={recorded[:16]}… · {shown}',
+                f'hashMethod = {method}' if method
+                else 'THE FIXTURE WAS NOT BUILT FROM THE TSL IT NAMES '
+                     '(neither hash method matches)')
+            hash_method = method
 
     if expect_source_hash:
-        same = recorded == expect_source_hash
+        same = recorded == expect_source_hash or (actual is not None and
+                                                  expect_source_hash == actual)
         row('L2b', 'sourceHash is the expected generation', PASS if same else FAIL,
             f'recorded={str(recorded)[:16]}… expected={expect_source_hash[:16]}…',
             '' if same else 'this is a DIFFERENT generation than the one demanded')
 
     # ---- L3 GENERATION ---------------------------------------------------------
     pipeline, sdm, pv = prov.get('sourcePipeline'), prov.get('sdmVersion'), prov.get('pipelineVersion')
-    notes = []
-    if pipeline and sdm and pv and pv != f'{pipeline}/{sdm}':
-        notes.append(f'pipelineVersion should be {pipeline}/{sdm}')
-    if pipeline and tsl_rel and f'/{pipeline}/' not in tsl_rel.replace(os.sep, '/'):
-        notes.append(f'tslPath does not name pipeline {pipeline} — generations may be mixed')
-    row('L3', 'one generation, consistently named', FAIL if notes else PASS,
-        f'sourcePipeline={pipeline} sdmVersion={sdm} pipelineVersion={pv}', '; '.join(notes))
+    bad = pipeline and sdm and pv and pv != f'{pipeline}/{sdm}'
+    row('L3', 'pipelineVersion == sourcePipeline/sdmVersion', FAIL if bad else PASS,
+        f'sourcePipeline={pipeline} sdmVersion={sdm} pipelineVersion={pv}',
+        f'pipelineVersion should be {pipeline}/{sdm}' if bad else '')
+
+    root_seg = generation_root(tsl_rel)
+    if not tsl_rel:
+        row('L3b', 'generation root is visible', FAIL, '(no tslPath)',
+            'without tslPath the generation cannot be named at all')
+    elif root_seg and pipeline and root_seg != pipeline:
+        row('L3b', 'generation root is visible', UNKNOWN,
+            f'tslPath root={root_seg} but the TSL declares pipeline={pipeline}',
+            'the pipeline NAME does not discriminate generations — sdmVersion + sha256 do')
+    else:
+        row('L3b', 'generation root is visible', PASS, f'tslPath root={root_seg or "(none)"}')
 
     # ---- L4 REPAIR -------------------------------------------------------------
     rv, detail = repair_lineage(prov)
@@ -179,6 +248,8 @@ def check(fixture_path, root='.', require_repair=False, expect_source_hash=None)
         semantic=len(doc.get('semantic') or []),
         tutorSteps=len(((doc.get('tutorScript') or {}).get('steps')) or []),
         recomputedSourceHash=actual,
+        hashMethod=hash_method,
+        sourceDigests=source_digests,
         repairVersion=rv,
         checks=rows,
         verdict=FAIL if any(r['status'] == FAIL for r in rows)
@@ -188,7 +259,8 @@ def check(fixture_path, root='.', require_repair=False, expect_source_hash=None)
 
 def render(result):
     L = [f"LINEAGE · {result['book']} Bài {result['lesson']} · {result['fixture']}",
-         f"  document sha256 {result['documentSha256']}",
+         f"  document sha256 {result['documentSha256']} (canonical JSON)",
+         f"  source TSL hashMethod = {result.get('hashMethod') or '(unmatched)'}",
          f"  blocks={result['blocks']} semantic={result['semantic']} tutorSteps={result['tutorSteps']}",
          '']
     for r in result['checks']:
