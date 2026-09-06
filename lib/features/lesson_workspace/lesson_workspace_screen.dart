@@ -29,6 +29,7 @@ import '../../core/lesson_model/tutor_script.dart';
 import 'smart_book_view.dart';
 import 'tutor_view.dart';
 import 'visual_view.dart';
+import 'widgets/assist_layer.dart';
 import 'widgets/fixture_chip.dart';
 import 'widgets/mode_picker.dart';
 import 'widgets/trust_sheet.dart';
@@ -74,6 +75,21 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   String? _tutorAnchor;
   String? _readAnchor;
   int _fontStep = 0;
+
+  /// ROUND 5 — lớp trợ giúp ngữ cảnh (phản hồi Founder «thẻ đề xuất chiếm chỗ
+  /// thường trực»). Trạng thái ở ĐÂY, không ở widget con, vì «đề xuất mới» là
+  /// việc của màn: khi View được đề xuất ĐỔI, gợi ý hé lại một lần.
+  AssistState _assist = AssistState.peek;
+  WorkspaceView? _assistFor;
+
+  AssistPresentation get _mode => AssistPresentation.current;
+
+  /// Đề xuất đổi sang View KHÁC ⇒ hé lại (không nhắc lại cùng một điều).
+  void _syncAssist(NextAction next) {
+    if (_assistFor == next.view) return;
+    _assistFor = next.view;
+    _assist = AssistState.peek;
+  }
 
   LessonDocument get doc => widget.doc;
   Set<WorkspaceView> get _seen => widget.trace.viewsFor(doc.slotKey);
@@ -124,6 +140,14 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     final landscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
     final picking = _view == null;
+    // ROUND 5 (phản hồi Founder): bốn cách TRÌNH BÀY cùng một `next` — chọn
+    // lúc build (`--dart-define=WAL_ASSIST=…`), mặc định giữ nguyên bản cũ để
+    // so A/B trên máy. Không có động cơ đề xuất thứ hai: `next` vẫn là
+    // `_proposal()` duy nhất.
+    _syncAssist(next);
+    final mode = _mode;
+    final keyboardUp = MediaQuery.viewInsetsOf(context).bottom != 0;
+    final showAssist = !picking && !keyboardUp;
     return Scaffold(
       backgroundColor: WalColors.surface,
       body: SafeArea(
@@ -146,8 +170,50 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
               ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: WalSpacing.md),
-              child: _segmented(),
+              child: _segmented(
+                badgeFor:
+                    showAssist && mode == AssistPresentation.inlineTab
+                    ? next
+                    : null,
+              ),
             ),
+            // A — 💡 nằm trong hàng tiêu đề (xem `_header`), không tốn dòng.
+            // B — một dòng hé dưới tab; mở tại chỗ khi trẻ chạm.
+            // C — huy hiệu trên tab; dòng «vì sao» chỉ hiện khi trẻ chạm.
+            if (showAssist &&
+                mode != AssistPresentation.card &&
+                mode != AssistPresentation.icon &&
+                !(mode == AssistPresentation.inlineTab &&
+                    _assist != AssistState.expanded) &&
+                !(mode == AssistPresentation.peek &&
+                    _assist == AssistState.collapsed))
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  WalSpacing.md,
+                  WalSpacing.sm,
+                  WalSpacing.md,
+                  0,
+                ),
+                child: AssistPeek(
+                  action: next,
+                  state: _assist,
+                  onToggle: () => setState(
+                    () => _assist = _assist == AssistState.expanded
+                        ? AssistState.peek
+                        : AssistState.expanded,
+                  ),
+                  onGo: () {
+                    final v = next.view;
+                    if (v == null) {
+                      Navigator.of(context).maybePop();
+                    } else {
+                      _switch(v);
+                    }
+                  },
+                  onDismiss: () =>
+                      setState(() => _assist = AssistState.collapsed),
+                ),
+              ),
             // Bàn phím lên (trẻ đang gõ trả lời SAM) ⇒ tạm ẩn thẻ đề xuất để
             // thân View còn chỗ (Nokia n3 D8). Bàn phím xuống ⇒ thẻ trở lại.
             // Ở màn «Vào bài học» lý do nằm trên thẻ được đề xuất ⇒ không lặp.
@@ -159,10 +225,11 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
             // sách); ghim lại thì chrome chiếm 920/1920 px và NÚT TRUNG TÂM
             // của sơ đồ tư duy nằm khuất sau thẻ — đúng thứ sơ đồ sinh ra để
             // cho thấy. Đo trên máy: 48 % → 73 % chiều cao cho sơ đồ.
-            if (!picking &&
+            if (mode == AssistPresentation.card &&
+                !picking &&
                 _view != WorkspaceView.read &&
                 _view != WorkspaceView.visual &&
-                MediaQuery.viewInsetsOf(context).bottom == 0)
+                !keyboardUp)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   WalSpacing.md,
@@ -180,6 +247,34 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  /// A — 💡 trong hàng tiêu đề: không tốn dòng nào, nhưng phải mang nhãn trợ
+  /// năng đầy đủ (biểu tượng một mình không đủ cho trình đọc màn hình).
+  Widget? _headerAssist() {
+    if (_mode != AssistPresentation.icon) return null;
+    if (_view == null) return null;
+    if (MediaQuery.viewInsetsOf(context).bottom != 0) return null;
+    final next = _proposal();
+    return AssistIconButton(
+      action: next,
+      unseen: _assist != AssistState.collapsed,
+      onOpen: () {
+        setState(() => _assist = AssistState.collapsed);
+        showAssistSheet(
+          context,
+          action: next,
+          onGo: () {
+            final v = next.view;
+            if (v == null) {
+              Navigator.of(context).maybePop();
+            } else {
+              _switch(v);
+            }
+          },
+        );
+      },
     );
   }
 
@@ -242,11 +337,36 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
             ],
           ),
         ),
+        ?_headerAssist(),
       ],
     ),
   );
 
-  Widget _segmented() => Container(
+  /// Huy hiệu 💡 trên TAB được đề xuất (phương án C) — gợi ý nằm ngay trên
+  /// thứ trẻ sẽ chạm, không thêm dòng nào.
+  Widget _tabBadge(WorkspaceView v, NextAction next) => Positioned(
+    right: 2,
+    top: 2,
+    child: Semantics(
+      button: true,
+      label: AssistCopy.semanticLabel(next, _assist),
+      hint: AssistCopy.semanticHint(_assist),
+      child: InkWell(
+        key: const Key('assist-tab-badge'),
+        onTap: () => setState(
+          () => _assist = _assist == AssistState.expanded
+              ? AssistState.collapsed
+              : AssistState.expanded,
+        ),
+        child: const Padding(
+          padding: EdgeInsets.all(4),
+          child: Text('💡', style: TextStyle(fontSize: 13)),
+        ),
+      ),
+    ),
+  );
+
+  Widget _segmented({NextAction? badgeFor}) => Container(
     padding: const EdgeInsets.all(4),
     decoration: BoxDecoration(
       color: Colors.white,
@@ -256,39 +376,47 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
       children: [
         for (final v in WorkspaceView.values)
           Expanded(
-            child: Semantics(
-              button: true,
-              selected: _view == v,
-              label: v.label,
-              child: SizedBox(
-                height: WalSpacing.minTouch + 4,
-                child: TextButton(
-                  key: LessonWorkspaceScreen.tabKey(v),
-                  onPressed: () => _switch(v),
-                  style: TextButton.styleFrom(
-                    backgroundColor: _view == v
-                        ? WalColors.primary500
-                        : Colors.transparent,
-                    foregroundColor: _view == v ? Colors.white : WalColors.ink,
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        WalSpacing.radiusChip,
+            child: Stack(
+              children: [
+                Semantics(
+                  button: true,
+                  selected: _view == v,
+                  label: v.label,
+                  child: SizedBox(
+                    height: WalSpacing.minTouch + 4,
+                    child: TextButton(
+                      key: LessonWorkspaceScreen.tabKey(v),
+                      onPressed: () => _switch(v),
+                      style: TextButton.styleFrom(
+                        backgroundColor: _view == v
+                            ? WalColors.primary500
+                            : Colors.transparent,
+                        foregroundColor: _view == v
+                            ? Colors.white
+                            : WalColors.ink,
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            WalSpacing.radiusChip,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      '${v.icon} ${v.label}',
-                      style: const TextStyle(
-                        fontSize: WalType.secondary,
-                        fontWeight: FontWeight.w700,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          '${v.icon} ${v.label}',
+                          style: const TextStyle(
+                            fontSize: WalType.secondary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+                if (badgeFor != null && badgeFor.view == v)
+                  _tabBadge(v, badgeFor),
+              ],
             ),
           ),
       ],
@@ -402,6 +530,17 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     ],
   );
 
+  /// Thẻ đề xuất đi vào đầu vùng cuộn của Đọc/Trực quan — CHỈ ở phương án
+  /// «card». Ba phương án kia đặt gợi ý ở chỗ khác, nên không nhồi thêm.
+  Widget? _scrollHeader() {
+    if (_mode != AssistPresentation.card) return null;
+    if (MediaQuery.viewInsetsOf(context).bottom != 0) return null;
+    return _nextActionCard(
+      _proposal(),
+      compact: MediaQuery.orientationOf(context) == Orientation.landscape,
+    );
+  }
+
   Widget _body(WorkspaceView view) => switch (view) {
     WorkspaceView.read => SmartBookView(
       doc: doc,
@@ -411,25 +550,13 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
       scrollToBlockId: _readAnchor,
       // Thẻ đề xuất cuộn cùng trang sách ở màn Đọc (xem chú thích ở build).
       // Bàn phím lên ⇒ ẩn như các màn khác.
-      header: MediaQuery.viewInsetsOf(context).bottom == 0
-          ? _nextActionCard(
-              _proposal(),
-              compact:
-                  MediaQuery.orientationOf(context) == Orientation.landscape,
-            )
-          : null,
+      header: _scrollHeader(),
     ),
     WorkspaceView.visual => VisualView(
       doc: doc,
       onShowInRead: (id) => _switch(WorkspaceView.read, readAnchor: id),
       // ROUND 5 D1: thẻ đề xuất cuộn cùng sơ đồ (xem chú thích ở build).
-      header: MediaQuery.viewInsetsOf(context).bottom == 0
-          ? _nextActionCard(
-              _proposal(),
-              compact:
-                  MediaQuery.orientationOf(context) == Orientation.landscape,
-            )
-          : null,
+      header: _scrollHeader(),
     ),
     WorkspaceView.tutor => TutorView(
       doc: doc,
