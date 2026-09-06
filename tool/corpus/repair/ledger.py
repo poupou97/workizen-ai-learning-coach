@@ -152,3 +152,44 @@ def read(path):
             if line:
                 out.append(json.loads(line))
     return out
+
+
+def entry_from_json(row):
+    """Rebuild a `LedgerEntry` from one row `to_json()` wrote (or one line of the JSONL file).
+
+    Round 6 (workstream C): the ledger had a write side and a raw read side but no way back to the
+    typed row, so a consumer wanting the *trace* had to re-implement the model. That is how a fourth
+    provenance universe starts. Structure -> structure only: the row must carry the whole trace.
+    """
+    obs = tuple(model.Observation(block_id=o['block_id'], source=o['source'], value=o['value'],
+                                  provenance=o.get('provenance') or {},
+                                  observation_id=o.get('observation_id') or '')
+                for o in row.get('observations') or ())
+    cand = None
+    c = row.get('candidate')
+    if c:
+        cand_obs = tuple(model.Observation(block_id=o['block_id'], source=o['source'], value=o['value'],
+                                           provenance=o.get('provenance') or {},
+                                           observation_id=o.get('observation_id') or '')
+                         for o in c.get('original_observations') or ())
+        cand = model.RepairCandidate(
+            block_id=c['block_id'], failure_class=c['failure_class'],
+            original_observations=cand_obs or obs, proposed_value=c['proposed_value'],
+            rule_id=c['rule_id'],
+            supporting_signals=tuple(model.Signal(s['signal_id'], s['verdict'], s.get('strength', 0.0),
+                                                  s.get('detail') or {})
+                                     for s in c.get('supporting_signals') or ()),
+            confidence=c.get('confidence', 0.0), provenance=c.get('provenance') or {},
+            detected=c.get('detected') or {}, candidate_id=c.get('candidate_id') or '')
+    val = None
+    v = row.get('validation')
+    if v:
+        val = model.ValidationResult(v['validator_id'], v['verdict'],
+                                     evidence=tuple(v.get('evidence') or ()), detail=v.get('detail') or {})
+    return model.LedgerEntry(
+        block_id=row['block_id'], failure_class=row['failure_class'], disposition=row['disposition'],
+        observations=obs, candidate=cand, validation=val, final_value=row.get('final_value'),
+        reasons=tuple(row.get('reasons') or ()), stage=row.get('stage') or 'dispose',
+        prior_entry_id=row.get('prior_entry_id'),
+        framework_version=row.get('framework_version') or model.FRAMEWORK_VERSION,
+        entry_id=row.get('entry_id') or '', ts=row.get('ts') or '')
