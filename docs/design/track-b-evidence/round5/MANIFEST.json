@@ -1,16 +1,16 @@
 {
   "schema": "wal-evidence-manifest-v1",
   "round": "round5",
-  "generatedAt": "2026-09-05T16:29:07.498970+00:00",
+  "generatedAt": "2026-09-06T01:47:09.552967+00:00",
   "git": {
-    "sha": "9a743203afe6d0f24d474bcdc9b86d2bb93026bc",
+    "sha": "406e897b22d4542763addd40bc24f81cbb6dac1c",
     "branch": "lane-b/round5-experience",
-    "dirty": false
+    "dirty": true
   },
   "apk": {
     "file": "build/app/outputs/flutter-apk/app-debug.apk",
-    "sha256": "8c386b6ce64c29597ca8a2afb60953a90d1e8f708f746f723245c3a07bf2bf7e",
-    "bytes": 270040905
+    "sha256": "e3b3b43399ad90d583685bd0058b4ff13efffb9235626cdbf141629ff626870e",
+    "bytes": 270053980
   },
   "packs": [
     {
@@ -286,6 +286,66 @@
       "sha256": "a2b2f1bd164198aa4988cbbdc3c93ca32f757d78561eba0775d4ebd607a79ceb",
       "bytes": 302905,
       "mtime": "2026-09-05T16:27:58.463398+00:00"
+    },
+    {
+      "file": "round5-4-card-tutor.png",
+      "sha256": "e2a57b655c330be106bc8cf129188101e33de739117a4b29ac06c6b16f62b4eb",
+      "bytes": 386497,
+      "mtime": "2026-09-06T01:29:16.323905+00:00"
+    },
+    {
+      "file": "round5-4-card-visual.png",
+      "sha256": "83ed2098dd35c4b8aa5d7b25a1a9022c3c868fbec744f47ad9a79c30653b18ef",
+      "bytes": 255017,
+      "mtime": "2026-09-06T01:29:35.370562+00:00"
+    },
+    {
+      "file": "round5-4-icon-sheet.png",
+      "sha256": "157556a1c892aa86c68828ad21085dbc1702466efc99f0704d8d5401ae333b0b",
+      "bytes": 299160,
+      "mtime": "2026-09-06T01:31:43.577849+00:00"
+    },
+    {
+      "file": "round5-4-icon-tutor.png",
+      "sha256": "6343700ce3e714529e2f7f3fbe53986c884c8c9f97ac2cfd5773cdd304b7048b",
+      "bytes": 361788,
+      "mtime": "2026-09-06T01:31:17.715076+00:00"
+    },
+    {
+      "file": "round5-4-inline-expanded.png",
+      "sha256": "be297036fc6c5a7e345bea9a513d8fe4d21505bece09408e0a0c6bcfbff10e25",
+      "bytes": 361252,
+      "mtime": "2026-09-06T01:35:21.386455+00:00"
+    },
+    {
+      "file": "round5-4-inline-tutor.png",
+      "sha256": "39a666c2d9a50d39c06e662b3f73bedb8f88c69fffa4ec6adc22a4d217fe680f",
+      "bytes": 371856,
+      "mtime": "2026-09-06T01:35:00.590568+00:00"
+    },
+    {
+      "file": "round5-4-peek-expanded.png",
+      "sha256": "bf90121f1970c4fbc4c35241e8a25c15e3159a270cebbc9e85d4ace1410c3b99",
+      "bytes": 359061,
+      "mtime": "2026-09-06T01:33:29.066399+00:00"
+    },
+    {
+      "file": "round5-4-peek-tutor.png",
+      "sha256": "f2d5c9aa63a28c3bdcc531669f743d1ba1f84e1a6a840954043c32647f811c77",
+      "bytes": 349949,
+      "mtime": "2026-09-06T01:33:09.279393+00:00"
+    },
+    {
+      "file": "round5-5-inline-tutor-fixed.png",
+      "sha256": "accd2eafa8385a445144e978af811bb9a6168a13bf9aa47ca5226531d5a06da0",
+      "bytes": 372100,
+      "mtime": "2026-09-06T01:40:27.539489+00:00"
+    },
+    {
+      "file": "round5-5-peek-collapsed-fixed.png",
+      "sha256": "26a667d3b810968b6b0e8bf4cac91eee40ca974ab87b84db3795d84e04226cea",
+      "bytes": 361069,
+      "mtime": "2026-09-06T01:41:54.528662+00:00"
     }
   ],
   "iterations": [
@@ -526,12 +586,118 @@
           "downgraded": false
         }
       ]
+    },
+    {
+      "iter": 4,
+      "build": {
+        "gitSha": "d8147c9 (cùng cây, bốn cờ WAL_ASSIST)",
+        "note": "bốn bản build từ CÙNG một commit, chỉ khác --dart-define=WAL_ASSIST"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "HIỆN TẠI (card) · Học với SAM: thẻ đề xuất ghim, CTA «Đọc» lặp lại tab, hàng «Đã mở»",
+          "result": "PASS",
+          "note": "Y nội dung bài đầu tiên = 820 px (42.7 % màn hình).",
+          "frames": [
+            "round5-4-card-tutor.png",
+            "round5-4-card-visual.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "02",
+          "expect": "A icon · biểu tượng gợi ý + chấm báo ở hàng tiêu đề, không còn thẻ",
+          "result": "PASS",
+          "note": "Y = 634 px (33.0 %). Ghi thẳng: nút lấy mất bề ngang ⇒ TIÊU ĐỀ BÀI xuống hai dòng.",
+          "frames": [
+            "round5-4-icon-tutor.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "03",
+          "expect": "A icon · bottom sheet «Gợi ý của SAM» có lý do + một CTA + «Để sau»",
+          "result": "PASS",
+          "frames": [
+            "round5-4-icon-sheet.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "04",
+          "expect": "B peek · một dòng «SAM gợi ý: Xem Đọc», tiêu đề vẫn một dòng",
+          "result": "PASS",
+          "note": "Y = 712 px (37.1 %).",
+          "frames": [
+            "round5-4-peek-tutor.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "05",
+          "expect": "B peek · bung tại chỗ: lý do + CTA + «Để sau»",
+          "result": "PASS",
+          "frames": [
+            "round5-4-peek-expanded.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "06",
+          "expect": "C inlineTab · huy hiệu trên tab đích, không thêm dòng nào",
+          "result": "PASS",
+          "note": "Y = 565 px (29.4 %) — gọn nhất. D4 phát hiện ở đây: huy hiệu ~21 dp lơ lửng giữa hai tab, dưới ngưỡng chạm 48 dp.",
+          "frames": [
+            "round5-4-inline-tutor.png",
+            "round5-4-inline-expanded.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        }
+      ]
+    },
+    {
+      "iter": 5,
+      "build": {
+        "gitSha": "7b1420e",
+        "note": "hai bản vá D4 và D5, đi lại đúng hai bề mặt đã đổi"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "D4 ĐÃ SỬA: huy hiệu nằm trong nhãn tab, vùng chạm là cả tab",
+          "result": "PASS",
+          "note": "Y = 565 px, không đổi.",
+          "frames": [
+            "round5-5-inline-tutor-fixed.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "02",
+          "expect": "D5 ĐÃ SỬA: sau «Để sau», dòng hé biến mất nhưng biểu tượng CÒN ở hàng tiêu đề",
+          "result": "PASS",
+          "note": "Y = 634 px (33.0 %) — bằng A.",
+          "frames": [
+            "round5-5-peek-collapsed-fixed.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        }
+      ]
     }
   ],
   "summary": {
-    "frames": 26,
+    "frames": 36,
     "steps": {
-      "PASS": 20,
+      "PASS": 28,
       "FAIL": 0,
       "SKIP": 0,
       "UNVERIFIED": 0,
