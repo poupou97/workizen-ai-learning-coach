@@ -90,6 +90,26 @@ research slot, để bài thuộc về lớp của nó; Minh (lớp 5) nhận LS
 bài của mình, Na (lớp 6) không thấy nó nữa. Việc này cũng đóng luôn §6 của
 lệnh 50 (cấm hạ các môn khác xuống hạng «sách khác»).
 
+### C-1b. C-1 QUAN SÁT ĐƯỢC TRÊN MÁY THẬT — và máy đã có sẵn hồ sơ lớp 5
+
+Đọc `learner-store.jsonl` trên Nokia (chỉ-đọc, không sửa): máy của Founder **đã
+có ba hồ sơ thật** — **Lớp 6 · Lớp 7 · Lớp 5** — và chỉ hồ sơ lớp 6 có phiên
+học (một phiên KHTN, `06-sgk-khoa-hoc-tu-nhien-6`). Nghĩa là kịch bản §4 không
+cần dàn dựng: **nó đang tồn tại trên máy.**
+
+Trên Home của học sinh **lớp 6**, thẻ **ĐẦU TIÊN** dưới «HÔM NAY» là bài **lớp
+5**, kèm dòng «Sách lớp 5 · không phải sách lớp con». Cùng lúc, hồ sơ **lớp 5**
+trên chính máy ấy không nhận được bài nào. C-1 không phải suy luận từ code — nó
+đang hiển thị ở vị trí nổi bật nhất của sản phẩm.
+
+⚠️ **Giới hạn của lượt quan sát này:** agent «Multi-subject Home» đang điều
+khiển CÙNG thiết bị trong cùng phút đó (30 lượt adb). Ảnh chụp vì thế bị đánh
+dấu `CONTAMINATED` và **không dùng làm bằng chứng trạng thái**. Hai dữ kiện trên
+vẫn đứng vì chúng đối chiếu độc lập được với `learner-store.jsonl` và với code,
+không phụ thuộc ảnh. Một quan sát khác — «thẻ tự đổi trạng thái» — **đã bị loại
+bỏ**, vì nguồn hợp lý nhất là thao tác của agent kia. Lượt device sạch cho §15
+sẽ chạy lại sau khi agent đáp.
+
 ### C-2. `knownBookTitles` — **BUG (hiển thị phụ thuộc thứ tự mở hồ sơ)**
 
 *Đã tự đính chính: bản đầu của tài liệu này gọi C-2 là «rò nhãn giữa hồ sơ».
