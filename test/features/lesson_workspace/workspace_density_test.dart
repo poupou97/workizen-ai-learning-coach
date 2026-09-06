@@ -354,7 +354,10 @@ void main() {
         find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)),
       );
       await t.pumpAndSettle();
-      final shape = find.byKey(VisualView.shapeKey('Sơ đồ quy trình'));
+      // ROUND 7 V1: hàng chip hình dạng đã xoá — đo bằng THẺ sơ đồ đầu tiên.
+      final shape = find.byKey(
+        VisualView.cardKey(loadSyntheticDoc().semantic.first.id),
+      );
       final peeking = t.getTopLeft(shape).dy;
       await t.tap(find.byKey(AssistPeek.peekKey));
       await t.pumpAndSettle();

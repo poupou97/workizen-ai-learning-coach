@@ -46,6 +46,12 @@ void main() {
     }
     expect(find.textContaining('Bước này SAM chưa đọc được'), findsOneWidget);
     expect(find.textContaining('Bước hai'), findsOneWidget);
+    // ROUND 7 V1: lời về CÔNG CỤ rời khỏi màn — một dòng ⓘ mở sheet.
+    expect(find.text('Vì sao SAM chọn sơ đồ này'), findsNothing);
+    final proc = loadSyntheticDoc().semantic.first;
+    await t.ensureVisible(find.byKey(VisualView.whyKey(proc.id)));
+    await t.tap(find.byKey(VisualView.whyKey(proc.id)));
+    await t.pumpAndSettle();
     expect(find.text('Vì sao SAM chọn sơ đồ này'), findsOneWidget);
     // ROUND 3 B5: mã luật rời màn trẻ đọc — nằm trong sheet «Nguồn & luật xếp».
     expect(find.textContaining('luật: synthetic'), findsNothing);
@@ -80,6 +86,7 @@ void main() {
     await t.tap(find.textContaining('Bước hai'));
     await t.pumpAndSettle();
     expect(find.text('Sách viết'), findsOneWidget);
+    await t.ensureVisible(find.text('📖 Xem trong Đọc'));
     await t.tap(find.text('📖 Xem trong Đọc'));
     await t.pumpAndSettle();
     expect(shown, isNotNull);
@@ -98,8 +105,7 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    await t.tap(find.byKey(VisualView.shapeKey('Bảng so sánh')));
-    await t.pumpAndSettle();
+    // ROUND 7 V1: KHÔNG phải chọn chip mới thấy — sơ đồ so sánh đã ở trên màn.
     expect(find.byKey(MindmapView.viewKey), findsOneWidget);
     expect(find.byKey(MindmapView.hubKey), findsOneWidget);
     expect(find.text('Các cách tách chất (mẫu)'), findsOneWidget);
@@ -121,14 +127,14 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    await t.tap(find.byKey(VisualView.shapeKey('Bảng so sánh')));
-    await t.pumpAndSettle();
+    await t.ensureVisible(find.byKey(VisualView.comparisonViewKey('table')));
     await t.tap(find.byKey(VisualView.comparisonViewKey('table')));
     await t.pumpAndSettle();
     expect(find.byKey(MindmapView.viewKey), findsNothing);
     expect(find.text('Dùng để tách'), findsOneWidget);
     expect(find.text('Lọc (mẫu)'), findsOneWidget);
     expect(find.textContaining('hạt rắn không tan'), findsOneWidget);
+    await t.ensureVisible(find.byKey(VisualView.comparisonViewKey('mindmap')));
     await t.tap(find.byKey(VisualView.comparisonViewKey('mindmap')));
     await t.pumpAndSettle();
     expect(find.byKey(MindmapView.viewKey), findsOneWidget);
@@ -146,7 +152,8 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    await t.tap(find.textContaining('Bảng tóm tắt'));
+    await t.ensureVisible(find.byKey(const Key('visual-summary-toggle')));
+    await t.tap(find.byKey(const Key('visual-summary-toggle')));
     await t.pumpAndSettle();
     final blocks = VisualView.summaryBlocks(d);
     expect(blocks.whereType<ActivityBlock>().length, 1);
@@ -199,8 +206,8 @@ void main() {
     );
   }
 
-  testWidgets('ROUND 3 B3: hai sơ đồ cùng hình dạng ⇒ MỘT tab hình dạng + hàng '
-      'chọn «1 · …» «2 · …»; dải tổng quan 1→2→3', (t) async {
+  testWidgets('ROUND 7 V1: hai sơ đồ cùng hình dạng ⇒ HAI THẺ trên cùng màn '
+      'cuộn (không còn hàng chọn «1 · …» «2 · …»)', (t) async {
     final d = loadSyntheticDoc();
     final proc = d.semantic.whereType<ProcessSemantic>().first;
     final second = ProcessSemantic(
@@ -215,13 +222,17 @@ void main() {
       fixtureHost(Scaffold(body: VisualView(doc: doc, onShowInRead: (_) {}))),
     );
     await t.pumpAndSettle();
-    expect(find.byKey(VisualView.shapeKey('Sơ đồ quy trình')), findsOneWidget);
-    expect(find.byKey(VisualView.instanceKey('process-2')), findsOneWidget);
-    expect(find.byKey(const Key('visual-process-strip')), findsOneWidget);
-    await t.tap(find.byKey(VisualView.instanceKey('process-2')));
-    await t.pumpAndSettle();
+    expect(find.byKey(VisualView.cardKey(proc.id)), findsOneWidget);
+    expect(find.byKey(VisualView.cardKey('process-2')), findsOneWidget);
+    // hai thẻ quy trình ⇒ hai dải tổng quan, không phải một cái đổi nội dung
+    expect(find.byKey(const Key('visual-process-strip')), findsNWidgets(2));
     expect(find.text('Quy trình thứ hai (mẫu)'), findsOneWidget);
     expect(find.textContaining('2 bước'), findsOneWidget);
+    // sơ đồ thứ hai nằm DƯỚI sơ đồ thứ nhất — thứ tự tài liệu
+    expect(
+      t.getTopLeft(find.byKey(VisualView.cardKey('process-2'))).dy,
+      greaterThan(t.getTopLeft(find.byKey(VisualView.cardKey(proc.id))).dy),
+    );
   });
 
   testWidgets('ROUND 3 B3: ConceptRelation[] ⇒ sơ đồ khái niệm: nút trung tâm '
@@ -255,7 +266,8 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.byKey(VisualView.shapeKey('Sơ đồ khái niệm')), findsOneWidget);
+    expect(find.byKey(VisualView.cardKey('cm-1')), findsOneWidget);
+    expect(find.textContaining('Sơ đồ khái niệm'), findsOneWidget);
     expect(find.byKey(const Key('visual-concept-map')), findsOneWidget);
     expect(find.text('Hỗn hợp'), findsOneWidget, reason: 'nút trung tâm');
     for (final leaf in ['Lọc', 'Cô cạn', 'Chiết']) {
@@ -269,6 +281,7 @@ void main() {
     await t.tap(find.text('Cô cạn'));
     await t.pumpAndSettle();
     expect(find.text('Sách viết'), findsOneWidget);
+    await t.ensureVisible(find.text('📖 Xem trong Đọc'));
     await t.tap(find.text('📖 Xem trong Đọc'));
     await t.pumpAndSettle();
     expect(shown, src);
@@ -301,7 +314,8 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.byKey(VisualView.shapeKey('Dòng thời gian')), findsOneWidget);
+    expect(find.byKey(VisualView.cardKey('tl-1')), findsOneWidget);
+    expect(find.textContaining('Dòng thời gian'), findsOneWidget);
     expect(find.byKey(const Key('visual-timeline')), findsOneWidget);
     final y0 = t.getTopLeft(find.text('Bước đầu')).dy;
     final y1 = t.getTopLeft(find.text('Sau đó')).dy;

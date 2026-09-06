@@ -131,7 +131,8 @@ void main() {
       await t.tap(find.byKey(ProcessFlowView.stepKey(2)));
       await t.pumpAndSettle();
       expect(find.text('Sách viết'), findsOneWidget);
-      await t.tap(find.text('📖 Xem trong Đọc'));
+      await t.ensureVisible(find.text('📖 Xem trong Đọc'));
+    await t.tap(find.text('📖 Xem trong Đọc'));
       await t.pumpAndSettle();
       expect(shown, proc.steps[1].sourceBlockId);
     });
@@ -464,12 +465,24 @@ void main() {
         ),
       );
       await t.pumpAndSettle();
-      await t.tap(find.byKey(VisualView.shapeKey('Bảng so sánh')));
-      await t.pumpAndSettle();
+      // ROUND 7 V1: «vì sao» rời màn vào sheet — mở nó rồi mới đọc lời.
+      final cmp = loadSyntheticDoc().semantic
+          .whereType<ComparisonSemantic>()
+          .first;
+      Future<void> openWhy() async {
+        await t.ensureVisible(find.byKey(VisualView.whyKey(cmp.id)));
+        await t.tap(find.byKey(VisualView.whyKey(cmp.id)));
+        await t.pumpAndSettle();
+      }
+      await openWhy();
       expect(find.textContaining('mỗi cách một ô xung quanh'), findsOneWidget);
       expect(find.textContaining('xếp thành bảng'), findsNothing);
+      await t.tapAt(const Offset(10, 10)); // đóng sheet
+      await t.pumpAndSettle();
+      await t.ensureVisible(find.byKey(VisualView.comparisonViewKey('table')));
       await t.tap(find.byKey(VisualView.comparisonViewKey('table')));
       await t.pumpAndSettle();
+      await openWhy();
       expect(find.textContaining('xếp thành bảng'), findsOneWidget);
     });
   });
