@@ -1,0 +1,20 @@
+{
+ "round": "round4-lane-c",
+ "device": "Nokia 6.1 · 192.168.1.3:5555 · learner «Na · Lớp 6» (grade-6 profile; the slice is a grade-5 book → Home research card)",
+ "protocol": "read-only focus/power check before any input; two screencaps ≥ 20 s apart; never interrupt the Founder; NEVER unlock. Checks at 13:23:04Z and 13:24:17Z: mWakefulness=Dozing, mCurrentFocus=StatusBar, isStatusBarKeyguard=true, deviceLocked=1 — the device is locked ⇒ the walk is QUEUED, no input was sent, no install was attempted. Idle-check frames (screen off) kept on the Mac at ~/Desktop/wal-evidence/round4-lane-c/idle-check-{1,2}.png (sha256 28195d24…, identical).",
+ "build": "debug APK built from this branch after the slice commit (sha256 in MANIFEST.json); not installed",
+ "iterations": [
+  {
+   "iter": 1,
+   "build": "see MANIFEST.json git.sha",
+   "steps": [
+    {"step": "01", "expect": "Home shows «BÀI HỌC SAM · BẢN THỬ NGHIỆM» (Bài 17, grade 6) AND a second card «LÁT CẮT NGHIÊN CỨU · SÁCH LỚP 5 · BẢN THỬ NGHIỆM» — Bài 8 · Đấu tranh giành độc lập thời kì Bắc thuộc · SGK LS&ĐL 5 · trang 36–39", "result": "QUEUED", "frames": [], "note": "device locked at check time"},
+    {"step": "02", "expect": "«Mở bài học» on the research card → workspace picker: breadcrumb «Giá sách › LS&ĐL 5», chip «nguồn SGK có cấu trúc, chưa kiểm định (nội bộ)», three cards with counts (1 dòng thời gian · 7 mốc)", "result": "QUEUED", "frames": []},
+    {"step": "03", "expect": "Trực quan → tab «🕰️ Dòng thời gian»: 7 mốc in book order (40 - 43 … 938), each tap opens «Sách viết» with page 37; «NGUỒN KỂ CHUYỆN» shows 3 cards (2017 / 2005 «có phần SAM chưa đọc được» / 2014); «THỬ XẾP THỨ TỰ» chips; a wrong order returns «Theo sách, … diễn ra trước …», a right one «Thứ tự khớp với năm sách nêu»; no praise, no score", "result": "QUEUED", "frames": []},
+    {"step": "04", "expect": "Đọc: p38 shows headings + stage labels and 14 withheld cards (reason «trang nhiều màu» / page_feature:color_heavy) with crops for adults; p39 paragraph with the 7 events; story boxes with the «(Theo …)» line as a paragraph; p41 timeline table as an image", "result": "QUEUED", "frames": []},
+    {"step": "05", "expect": "Học với SAM: header «SAM (kịch bản thử nghiệm)», 7 steps: e1 → q1 (options 40 - 43 / 248 / 542 - 602) → q2 (Bà Triệu / Lý Bí - Triệu Quang Phục) → q3 free text → e2 (nguồn) → q4 verbatim Luyện tập 1 → n1 «Xem dòng thời gian trong Trực quan»; hints never contain the answer; scaffold then continue", "result": "QUEUED", "frames": []},
+    {"step": "06", "expect": "Sessions / evidence unchanged after the walk (EvidencePolicy none)", "result": "QUEUED", "frames": []}
+   ]
+  }
+ ]
+}

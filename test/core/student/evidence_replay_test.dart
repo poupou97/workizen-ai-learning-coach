@@ -8,8 +8,14 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/student/evidence_weighting.dart';
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
+
+/// ROUND 4 (strict default): sự kiện CÓ CHẤM trong test này mô phỏng đường
+/// Deep (TutorSession) — mang dấu `fraction-check-v1` như emitter thật.
+const _r4Stamp =
+    EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
 
 void main() {
   const p = BktParams.freeResponse;
@@ -26,6 +32,7 @@ void main() {
         correct: correct,
         at: t0.add(Duration(minutes: seq)),
         format: format,
+        validation: correct == null ? null : _r4Stamp,
       );
 
   EvidenceLog log(List<LearningEvent> events) =>
@@ -130,6 +137,33 @@ void main() {
     expect(naive.pMastery, greaterThan(conservative.pMastery),
         reason: '⭐⭐ chênh lệch này CHÍNH LÀ kích thước của vòng tự xác nhận '
             'mà policy bảo thủ chặn lại');
+  });
+
+  test('⭐⭐ ROUND 4 — luật đọc MẶC ĐỊNH là siết: sự kiện có chấm KHÔNG dấu '
+      '(historicalUnvalidated) không đẩy belief, không đếm; chỉ luật đọc-cũ '
+      'tường minh (ConservativeBktPolicy) mới đếm — và đó là audit, không '
+      'phải màn hình', () {
+    final unstamped = [
+      for (var i = 0; i < 3; i++)
+        LearningEvent(
+            eventId: 'legacy$i',
+            skillCaseId: kase,
+            kind: EvidenceKind.independentAttempt,
+            correct: true,
+            at: t0.add(Duration(minutes: i))),
+    ];
+    for (final e in unstamped) {
+      expect(e.readClass, EvidenceReadClass.historicalUnvalidated);
+    }
+    final l = log(unstamped);
+    final strict = replayMastery(l, p);
+    expect(strict.evidenceCount, 0,
+        reason: '⭐⭐ đột biến đếm dữ liệu cũ không dấu ở mặc định ⇒ đỏ');
+    expect(strict.pMastery, p.prior);
+    expect(defaultEvidencePolicy.policyId, 'validated-only-bkt-v1');
+    final legacy = replayMastery(l, p, policy: const ConservativeBktPolicy());
+    expect(legacy.evidenceCount, 3, reason: 'luật cũ vẫn tính lại được — log nguyên');
+    expect(l.events.length, 3, reason: 'không viết lại, không xoá');
   });
 
   test('tương thích: observeWithSupport cho CÙNG số với replay tương đương', () {

@@ -1,7 +1,7 @@
 /// ROUND 3 B1 — «VÀO BÀI HỌC»: chọn cách học (concept learning-view khung 3).
 ///
 /// Lần ĐẦU mở một bài trong phiên, thay vì rơi thẳng vào một View, trẻ thấy
-/// ba tấm thẻ [1 Đọc như sách] [2 Trực quan hoá] [3 Học cùng SAM] — mỗi thẻ
+/// ba tấm thẻ [1 📖 Đọc] [2 ✨ Trực quan] [3 🦉 Học với SAM] — mỗi thẻ
 /// nói bài này CÓ GÌ theo cách đó (đếm từ dữ liệu bài, không bịa), và thẻ SAM
 /// đề xuất mang lý do. Đây là chỗ Founder cầm máy thấy ngay câu 3 («học được
 /// bằng những cách nào») và câu 5 («vì sao SAM đề xuất cách đó»).
@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/band_density_scope.dart';
 import '../../../app/theme/wal_tokens.dart';
 import '../../../core/lesson_model/lesson_document.dart';
+import '../../../core/agenda/lesson_next_action.dart';
 import '../../../core/lesson_model/next_action.dart';
 
 class ModePicker extends StatelessWidget {
@@ -25,7 +26,7 @@ class ModePicker extends StatelessWidget {
   });
 
   final LessonDocument doc;
-  final NextAction proposal;
+  final LessonNextAction proposal;
   final void Function(WorkspaceView view) onPick;
 
   static Key cardKey(WorkspaceView v) => Key('workspace-pick-${v.name}');
@@ -69,12 +70,6 @@ class ModePicker extends StatelessWidget {
     }
   }
 
-  static String _tagline(WorkspaceView v) => switch (v) {
-    WorkspaceView.read => 'Đọc như sách',
-    WorkspaceView.visual => 'Trực quan hoá',
-    WorkspaceView.tutor => 'Học cùng SAM',
-  };
-
   @override
   Widget build(BuildContext context) {
     final size = densityOf(context).mascotChip;
@@ -104,7 +99,9 @@ class ModePicker extends StatelessWidget {
                   padding: const EdgeInsets.all(WalSpacing.md),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
+                    borderRadius: BorderRadius.circular(
+                      WalSpacing.radiusButton,
+                    ),
                   ),
                   child: const Text(
                     'Con muốn học bài này theo cách nào? Mỗi cách giúp con '
@@ -175,8 +172,14 @@ class ModePicker extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // ROUND 6 · WS-D — MỘT BỘ CHỮ DUY NHẤT cho ba View.
+                        // Vòng 5 đo được: ba View mang HAI bộ chữ («Học VỚI
+                        // SAM» trên tab, «Học CÙNG SAM» trên thẻ) ⇒ trẻ đọc
+                        // sáu nhãn cho ba thứ, hai trong số đó khác chữ. Nhãn
+                        // ở đây nay lấy đúng `WorkspaceView.label` — cùng
+                        // nguồn với tab, nên không thể lệch lại lần nữa.
                         Text(
-                          '${v.icon} ${_tagline(v)}',
+                          '${v.icon} ${v.label}',
                           style: const TextStyle(
                             fontSize: WalType.title - 2,
                             fontWeight: FontWeight.w700,
@@ -194,10 +197,7 @@ class ModePicker extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: WalColors.primaryText,
-                  ),
+                  const Icon(Icons.chevron_right, color: WalColors.primaryText),
                 ],
               ),
               if (proposed) ...[

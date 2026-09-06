@@ -7,6 +7,7 @@ import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
 import 'package:learning_coach/features/subjects/subject_home_screen.dart';
 import 'package:learning_coach/features/subjects/subjects_screen.dart';
@@ -23,7 +24,20 @@ LessonIndex idx() => LessonIndex.fromJsonString('''
  "toanExercises":{"6":[{"expr":"1/2 - 1/5","page":21,"book":"05-sgk-toan-5-tap-mot"}]}}
 ''')!;
 
+/// ROUND 4 (A-runtime, Founder §4 — strict validation default): the graded
+/// events this test seeds simulate the Deep path (TutorSession), which has
+/// stamped `fraction-check-v1` since round 3; unstamped graded events now read
+/// as `historicalUnvalidated` and never as «Tự làm được». Fixture-only change,
+/// no assertion changed. — lane A-runtime touched this Lane B test file.
+const _r4Stamp =
+    EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
+
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   testWidgets('grid môn sinh từ data; thiếu index ⇒ nói thật', (t) async {
     await t.pumpWidget(MaterialApp(
         home: SubjectsScreen(
@@ -46,14 +60,15 @@ void main() {
             store: JsonlLearnerStore(),
             index: idx(),
             subject: 'Toán')));
-    expect(find.textContaining('Cộng, trừ hai phân số khác mẫu số'),
-        findsOneWidget, reason: 'title mined thật, đổi về câu thường');
+    expect(find.textContaining('CỘNG, TRỪ HAI PHÂN SỐ KHÁC MẪU SỐ'),
+        findsOneWidget,
+        reason: 'title mined thật, NGUYÊN VĂN nguồn (quyết định Founder vòng 7)');
     expect(find.textContaining('1 bài tập từ SGK'), findsOneWidget);
     expect(find.textContaining('SAM đang học bài này'), findsOneWidget,
         reason: 'bài 9 chưa có exercises — nói thật');
 
     // ⭐ WAL-175 — bấm bài ra bộ chọn Ý ĐỊNH, không phải danh sách việc.
-    await t.tap(find.textContaining('Cộng, trừ hai phân số'));
+    await t.tap(find.textContaining('CỘNG, TRỪ HAI PHÂN SỐ'));
     await t.pumpAndSettle();
     expect(find.text('Con muốn bắt đầu thế nào?'), findsOneWidget,
         reason: 'không có thời khoá biểu, không có bằng chứng ⇒ SAM HỎI, '
@@ -72,7 +87,7 @@ void main() {
     expect(find.textContaining('sách nói'), findsNothing);
     await t.tapAt(const Offset(400, 50)); // đóng sheet
     await t.pumpAndSettle();
-    await t.tap(find.textContaining('Cộng, trừ hai phân số'));
+    await t.tap(find.textContaining('CỘNG, TRỪ HAI PHÂN SỐ'));
     await t.pumpAndSettle();
     await t.tap(find.text('Con có bài tập'));
     await t.pumpAndSettle();
@@ -114,7 +129,9 @@ void main() {
             skillCaseId: 'denominator-non-divisible',
             kind: EvidenceKind.independentAttempt,
             // WAL-210 D1: «Tự làm được» chỉ từ tự làm ĐÃ CHẤM đúng.
+            // ROUND 4: … và ĐÃ KIỂM (dấu validator được duyệt).
             correct: true,
+            validation: _r4Stamp,
             at: DateTime(2026, 9, 4),
             sourceDocumentId: '05-sgk-toan-5-tap-mot',
             lessonNo: 6,

@@ -6,6 +6,7 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/coach/parent_session_summary.dart';
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/learning_map_state.dart';
@@ -24,12 +25,15 @@ LearningSession _session(
       events: events,
     );
 
+/// Sự kiện CÓ CHẤM ở đây mang dấu `fraction-check-v1` (đường Deep thật);
+/// dữ liệu cũ không dấu: `stamped: false` (nhóm ROUND 4).
 LearningEvent _ev(
   EvidenceKind kind,
   DateTime at, {
   String? sourceDocumentId,
   int? lessonNo,
   bool? correct,
+  bool stamped = true,
 }) =>
     LearningEvent(
       eventId: 'e-${at.millisecondsSinceEpoch}',
@@ -39,10 +43,16 @@ LearningEvent _ev(
       at: at,
       sourceDocumentId: sourceDocumentId,
       lessonNo: lessonNo,
+      validation: (correct != null && stamped) ? _r4Stamp : null,
     );
 
 RecentLessonTouch _touch(LearningMapState s) => RecentLessonTouch(
     sourceDocumentId: 'b', lessonNo: 1, state: s, at: DateTime(2026, 9, 4));
+
+/// ROUND 4 (strict default): sự kiện CÓ CHẤM trong test này mô phỏng đường
+/// Deep (TutorSession) — mang dấu `fraction-check-v1` như emitter thật.
+const _r4Stamp =
+    EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
 
 void main() {
   test('⭐ event thiếu lineage bị bỏ qua, không đoán bài nào', () {
@@ -118,6 +128,32 @@ void main() {
     expect(touches.map((t) => t.lessonNo), [3, 2],
         reason: '⭐ đột biến giữ bài CŨ thay vì MỚI ⇒ đỏ — phụ huynh cần '
             'biết gần đây, không phải lịch sử xa');
+  });
+
+  test('⭐⭐ ROUND 4: dữ liệu cũ có chấm-không-dấu ⇒ Parent thấy engaged + '
+      'câu «ghi nhận trước hợp đồng mới», KHÔNG «Con đã tự làm được», không giấu',
+      () {
+    final touches = recentLessonTouches([
+      _session('s1', DateTime(2026, 9, 4), [
+        _ev(EvidenceKind.independentAttempt, DateTime(2026, 9, 4),
+            sourceDocumentId: '05-sgk-khoa-hoc-5',
+            lessonNo: 1,
+            correct: true,
+            stamped: false),
+      ]),
+    ]);
+    final t = touches.single;
+    expect(t.state, LearningMapState.engaged,
+        reason: '⭐⭐ đột biến đọc dữ liệu cũ thành independentEvidence ⇒ đỏ');
+    expect(t.hasHistoricalUnvalidated, isTrue);
+    final line = parentLineFor(t);
+    expect(line.startsWith('Con đã tự làm được'), isFalse, reason: line);
+    expect(line, contains('ghi nhận trước hợp đồng mới'));
+    expect(line, contains('chưa tính là tự làm được'));
+    expect(line, contains('Bài 1'));
+    // Engaged KHÔNG có dữ liệu cũ ⇒ câu cũ (không nhắc «hợp đồng»).
+    expect(parentLineFor(_touch(LearningMapState.engaged)),
+        isNot(contains('hợp đồng')));
   });
 
   test('parentLineFor: "tự làm được" khác câu "mới học cùng SAM"', () {

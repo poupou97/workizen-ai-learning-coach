@@ -213,8 +213,12 @@ class BridgeTests(unittest.TestCase):
 
     def test_no_crops_means_no_image_blocks_but_all_text_and_withheld_survive(self):
         d = br.convert(make_tsl())
+        # Round 6 (WS-C): `unknownRoleWithheld` split off `noCarrierWithheld` (a role the bridge KNOWS
+        # and has no carrier for is not a role it fails to recognise), and the repair counters joined.
         self.assertEqual(d['provenance']['blockCounts'], {'byTrust': {'trustedStructuredLesson': 14, 'withheld': 4}, 'tslTrusted': 15, 'tslWithheld': 2,
-                                                          'unknownRoleWithheld': 2, 'imagesKept': 0, 'imagesWithoutCrop': 1, 'figuresInTsl': 2})
+                                                          'unknownRoleWithheld': 2, 'noCarrierWithheld': 0,
+                                                          'validatedRepairsInTsl': 0, 'validatedRepairsOnBlocks': 0,
+                                                          'imagesKept': 0, 'imagesWithoutCrop': 1, 'figuresInTsl': 2})
         self.assertIsNone(d['chapter']); self.assertEqual(d['chapters'], [])
 
     def test_real_tsl_if_present(self):

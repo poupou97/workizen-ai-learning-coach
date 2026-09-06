@@ -4,6 +4,7 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/coach/parent_explanation.dart';
 import 'package:learning_coach/core/student/concept_summary.dart';
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/core/student/evidence_weighting.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/mastery.dart';
@@ -30,6 +31,9 @@ void main() {
           eventId: 'e${seq++}', skillCaseId: id,
           kind: EvidenceKind.independentAttempt,
           correct: answers[i],
+          // ROUND 4 (strict default): đường Deep thật đóng dấu validator.
+          validation: const EvidenceValidation(
+              validatorId: 'fraction-check-v1', validatorVersion: '1'),
           at: now.subtract(age).add(Duration(minutes: i))));
     }
     return replayMastery(log, p);

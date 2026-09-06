@@ -8,16 +8,24 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/core/agenda/lesson_next_action.dart';
 import 'package:learning_coach/core/lesson_model/next_action.dart';
 import 'package:learning_coach/features/lesson_workspace/lesson_workspace_screen.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/assist_layer.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/mode_picker.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/runtime_plan.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/tech_details.dart';
 import 'package:learning_coach/features/lesson_workspace/workspace_trace.dart';
 
 import 'support.dart';
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   testWidgets('⭐ ba View nhìn thấy + tiêu đề «Bài 17 · …» + chip thử nghiệm + '
       'đường dẫn', (t) async {
     await t.pumpWidget(
@@ -26,7 +34,7 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.textContaining('Bài 17 · Tách chất'), findsOneWidget);
+    expect(find.textContaining('Bài 17 · TÁCH CHẤT'), findsOneWidget);
     for (final v in WorkspaceView.values) {
       expect(find.byKey(LessonWorkspaceScreen.tabKey(v)), findsOneWidget);
       expect(find.textContaining(v.label), findsWidgets);
@@ -46,9 +54,7 @@ void main() {
 
   testWidgets('⭐ lần đầu mở ⇒ màn «Vào bài học»: 3 thẻ đếm từ dữ liệu, thẻ '
       'Đọc được đề xuất (thứ tự Founder A8) kèm lý do; chưa View nào bị đánh '
-      'dấu', (
-    t,
-  ) async {
+      'dấu', (t) async {
     final trace = WorkspaceTrace();
     final doc = loadSyntheticDoc();
     await t.pumpWidget(
@@ -64,10 +70,11 @@ void main() {
     expect(find.textContaining('SAM đề xuất cách này'), findsOneWidget);
     expect(find.textContaining('đọc bài trong sách trước'), findsOneWidget);
     expect(
-      find.byKey(LessonWorkspaceScreen.nextActionKey),
+      find.byKey(AssistPeek.peekKey),
       findsNothing,
       reason: 'lý do đã nằm trên thẻ đề xuất — không lặp',
     );
+    expect(find.byKey(AssistIconButton.buttonKey), findsNothing);
     expect(trace.viewsFor(doc.slotKey), isEmpty);
     expect(trace.opened(doc.slotKey), isTrue);
   });
@@ -98,18 +105,30 @@ void main() {
     await t.pumpAndSettle();
     expect(trace.viewsFor(doc.slotKey), {WorkspaceView.read});
     expect(find.text('Cỡ chữ'), findsOneWidget);
-    expect(find.byKey(LessonWorkspaceScreen.nextActionKey), findsOneWidget);
-    expect(find.text('SAM đề xuất'), findsOneWidget);
+    // ROUND 6 · phương án B: mặc định là MỘT DÒNG nêu ĐÍCH ĐẾN — trẻ biết đi
+    // đâu mà không phải chạm. Lý do dài chỉ mở khi trẻ hỏi.
+    expect(find.byKey(AssistPeek.peekKey), findsOneWidget);
+    expect(
+      find.text('SAM gợi ý: Xem ${WorkspaceView.visual.label}'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('xem sơ đồ / bảng'),
+      findsNothing,
+      reason: 'lý do là thứ MỞ THEO YÊU CẦU, không chiếm chỗ thường trực',
+    );
+    await t.tap(find.byKey(AssistPeek.peekKey));
+    await t.pumpAndSettle();
     expect(find.textContaining('xem sơ đồ / bảng'), findsOneWidget);
   });
 
   test('⭐ «SAM đề xuất» đi theo thứ tự Founder A8 qua NextBestLearningAction: '
-      'Đọc → Trực quan → Học với SAM → về mục lục; không phút/%', () {
+      'Đọc → Trực quan → Học với SAM → Ở LẠI BÀI; không phút/%', () {
     final doc = loadSyntheticDoc();
-    NextAction at(Set<WorkspaceView> seen) =>
+    LessonNextAction at(Set<WorkspaceView> seen) =>
         founderNextAction(doc, seen: seen, learnerId: 'na');
     expect(at({}).view, WorkspaceView.read);
-    expect(at({}).basis, startsWith('R2'));
+    expect(at({}).rule, 'R2');
     expect(at({WorkspaceView.read}).view, WorkspaceView.visual);
     expect(
       at({WorkspaceView.read, WorkspaceView.visual}).view,
@@ -120,10 +139,19 @@ void main() {
       contains('«'),
       reason: 'R4 nêu câu hỏi đầu của sách',
     );
+    // ⭐⭐ ROUND 7 · WS-R — TIỀN ĐỀ ĐÃ SỬA. Vòng 3–6 ghim ở đây rằng mở đủ ba
+    // View ⇒ «Về mục lục». Bằng chứng duy nhất là `viewsSeen`, tức «đã mở
+    // tab», và `OPENED != UNDERSTOOD`. SAM không được lấy dấu vết mở tab làm
+    // cớ mời trẻ rời bài; đường DUY NHẤT nó chủ động mời sang bài khác là R1
+    // (`hasApprovedValidatedSuccess` — đã chấm).
     final done = at(WorkspaceView.values.toSet());
-    expect(done.view, isNull);
-    expect(done.label, 'Về mục lục');
-    expect(done.reason, isNot(contains('hiểu')));
+    expect(done.kind, LessonNextKind.keepGoing);
+    expect(done.label, 'Xem tiếp bài này');
+    expect(done.label, isNot('Về mục lục'));
+    expect(done.reason, isNot(contains('hiểu được')));
+    expect(done.reason, contains('đã mở'),
+        reason: 'nói đúng thứ nó biết: đã mở, không phải đã đi qua');
+    expect(done.reason, isNot(contains('đi qua')));
     for (final s in [
       <WorkspaceView>{},
       {WorkspaceView.read},
@@ -195,8 +223,8 @@ void main() {
     expect(find.text('SAM (kịch bản thử nghiệm)'), findsWidgets);
   });
 
-  testWidgets('đủ ba View ⇒ đề xuất «Về mục lục» (ghi nhận tham gia, không '
-      '«đã hiểu»)', (t) async {
+  testWidgets('⭐ ROUND 7 · WS-R — mở đủ ba View ⇒ đề xuất Ở LẠI BÀI, KHÔNG '
+      'phải «Về mục lục» (mở tab không phải bằng chứng)', (t) async {
     final trace = WorkspaceTrace();
     final doc = loadSyntheticDoc();
     for (final v in WorkspaceView.values) {
@@ -212,8 +240,21 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.text('Về mục lục'), findsOneWidget);
+    // Phương án B: dòng hé nêu ĐÍCH ĐẾN ngay, nút mang đúng chữ ấy khi mở.
+    expect(find.text('SAM gợi ý: Xem tiếp bài này'), findsOneWidget);
+    expect(find.text('SAM gợi ý: Về mục lục'), findsNothing);
+    await t.tap(find.byKey(AssistPeek.peekKey));
+    await t.pumpAndSettle();
+    expect(find.text('Xem tiếp bài này'), findsOneWidget);
     expect(find.textContaining('đã hiểu'), findsNothing);
+    // «Về mục lục» chỉ còn là nút ← trên hàng tiêu đề (tooltip), tức LỰA CHỌN
+    // của trẻ — không còn là lời SAM khuyên. `find.text` không bắt tooltip.
+    expect(find.text('Về mục lục'), findsNothing);
+    expect(
+      find.byTooltip('Về mục lục'),
+      findsOneWidget,
+      reason: 'đường về vẫn luôn có, chỉ không còn là ĐỀ XUẤT',
+    );
   });
 
   testWidgets('không có chip khi… không tồn tại: mọi fixture đều có chip', (
@@ -244,10 +285,18 @@ void main() {
     await t.pumpAndSettle();
     expect(find.byKey(const Key('trust-sheet')), findsOneWidget);
     expect(find.textContaining('MẪU GIẢ LẬP'), findsOneWidget);
+    // ROUND 4: mã luật chỉ trong nếp gấp «Chi tiết kỹ thuật» (đóng mặc định).
+    for (final s in doc.semantic) {
+      expect(find.textContaining('luật ${s.derivation}'), findsNothing);
+    }
+    await t.ensureVisible(find.byKey(TechDetails.foldKey));
+    await t.tap(find.byKey(TechDetails.foldKey));
+    await t.pumpAndSettle();
     for (final s in doc.semantic) {
       expect(find.textContaining('luật ${s.derivation}'), findsWidgets);
     }
     expect(find.textContaining('kịch bản viết sẵn'), findsOneWidget);
+    expect(find.textContaining('Dành cho bố mẹ'), findsOneWidget);
     expect(find.textContaining('KHÔNG ghi'), findsOneWidget);
     for (final s in [
       'MOCK ≠ EVIDENCE',

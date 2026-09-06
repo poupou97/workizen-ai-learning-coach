@@ -4,11 +4,15 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/app/theme/wal_tokens.dart';
+import 'package:learning_coach/core/lesson_model/next_action.dart'
+    show WorkspaceView;
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/features/lesson_workspace/book_screen.dart';
 import 'package:learning_coach/features/lesson_workspace/chapter_screen.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/lesson_row.dart';
 import 'package:learning_coach/features/lesson_workspace/workspace_trace.dart';
 import 'package:learning_coach/features/subjects/book_shelf_screen.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
@@ -36,6 +40,11 @@ LessonIndex _idx() => LessonIndex.fromJsonString('''
 ''')!;
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   testWidgets(
     '⭐ giá sách: cuốn CÓ workspace mở BookScreen; cuốn khác giữ lối cũ',
     (t) async {
@@ -54,9 +63,9 @@ void main() {
       );
       await t.pumpAndSettle();
       expect(
-        find.textContaining('✨ SAM'),
+        find.text('✨ 1 bài học SAM'),
         findsOneWidget,
-        reason: 'chỉ cuốn có workspace được đánh dấu',
+        reason: 'chỉ cuốn có workspace được đánh dấu — cùng chữ ở giá/sách',
       );
       await t.tap(find.text('Toán 6 · Tập 1'));
       await t.pumpAndSettle();
@@ -89,7 +98,28 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.textContaining('Chương IV · Hỗn hợp'), findsOneWidget);
+    // ROUND 7 · WS-R — TIỀN ĐỀ ĐÃ SỬA, KHÔNG PHẢI CỔNG BỊ NỚI.
+    // Trước: màn hạ chữ thường TOÀN CHUỖI rồi viết hoa lại ⇒ «Chương IV ·
+    // Hỗn hợp…». Luật ấy phá danh từ riêng («… thời kì Bắc thuộc» → «bắc
+    // thuộc», lỗi máy thật vòng 6), nên nay chỉ chuỗi KHÔNG CÓ MỘT CHỮ THƯỜNG
+    // NÀO mới được viết hoa lại. Tên chương của fixture MẪU mang chú thích
+    // «(mẫu)» — chữ thường — nên nó là chuỗi HỖN HỢP hoa/thường và được giữ
+    // NGUYÊN VĂN. Đó là hành vi fail-closed đúng: thà hiện chữ in hoa của
+    // sách còn hơn khẳng định sai rằng một danh từ riêng không phải danh từ
+    // riêng. Tên chương THẬT (OCR mục lục in) KHÔNG có chữ thường nào, nên
+    // vẫn được viết hoa lại — test fixture THẬT ở dưới ghim điều đó.
+    expect(
+      find.textContaining('Chương IV · HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP'),
+      findsOneWidget,
+    );
+    // và luật vẫn ÁP cho chuỗi in hoa thuần: chương I của fixture MẪU là
+    // «MỞ ĐẦU (mẫu)» ⇒ cũng hỗn hợp ⇒ nguyên văn. Không có chương nào của
+    // fixture mẫu bị viết hoa lại, và đó là điều đang được ghim.
+    // ⭐ ROUND 7 · WS-S — kỳ vọng PHỦ ĐỊNH: dạng ĐÃ HẠ CHỮ không được xuất
+    // hiện. Nó vẫn đúng nguyên văn dưới quyết định «giữ nguyên văn nguồn», và
+    // nó KHÔNG được «sửa» cùng các kỳ vọng khẳng định ở trên — viết hoa nó lên
+    // sẽ biến một canh gác thành một phép trùng lặp luôn đỏ.
+    expect(find.textContaining('Chương IV · Hỗn hợp'), findsNothing);
     expect(find.textContaining('bài · ✨ 1 bài học SAM'), findsOneWidget);
     // ROUND 3 B1/B5: dải số bài từ mục lục; tên chương OCR nói rõ nguồn.
     expect(find.textContaining('Bài 16–17 · '), findsOneWidget);
@@ -98,8 +128,10 @@ void main() {
     expect(find.textContaining('mục lục in của sách'), findsNothing);
     expect(find.textContaining('Bài khác'), findsOneWidget);
     expect(find.textContaining('✨ 1 bài học SAM: Bài 17'), findsOneWidget);
-    await t.ensureVisible(find.text('Mục lục & hoạt động (bản hiện tại)'));
-    await t.tap(find.text('Mục lục & hoạt động (bản hiện tại)'));
+    // ROUND 4: không nói «bản hiện tại» với trẻ.
+    expect(find.textContaining('bản hiện tại'), findsNothing);
+    await t.ensureVisible(find.text('Các bài khác trong sách'));
+    await t.tap(find.text('Các bài khác trong sách'));
     expect(legacyTaps, 1);
   });
 
@@ -126,20 +158,39 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    expect(find.textContaining('Bài 16 · Hỗn hợp'), findsOneWidget);
-    expect(find.textContaining('Bài 17 · Tách chất'), findsOneWidget);
+    expect(find.textContaining('Bài 16 · HỖN HỢP'), findsOneWidget);
+    expect(find.textContaining('Bài 17 · TÁCH CHẤT'), findsOneWidget);
     expect(
       find.textContaining('Bài 18'),
       findsNothing,
       reason: 'chương chỉ hiện bài của chương',
     );
     expect(find.textContaining('Chưa xem'), findsOneWidget);
+    // ROUND 4: trạng thái bài = số cách học + dấu vết mở, lời trẻ
+    expect(find.textContaining('3 cách học · Chưa xem'), findsOneWidget);
     expect(find.textContaining('Chưa có Bài học SAM'), findsOneWidget);
+    expect(find.textContaining('mục lục hiện tại'), findsNothing);
 
-    await t.tap(find.textContaining('Bài 16 · Hỗn hợp'));
+    // ⭐ ROUND 4 (lỗi thấy trên Nokia, đã sửa): MỘT vốn từ màu cho cả hành
+    // trình — nền tím oải hương = NHẤN MẠNH. Hàng CÓ Bài học SAM phải là hàng
+    // được nhấn; trước đây tô ngược (bài không có thì tím, bài có thì trắng).
+    Color rowColor(String label) => t
+        .widget<Material>(
+          find.ancestor(
+            of: find.textContaining(label),
+            matching: find.byType(Material),
+          ).first,
+        )
+        .color!;
+    expect(rowColor('Bài 17 · TÁCH CHẤT'), WalColors.surfaceLavender,
+        reason: 'bài CÓ Bài học SAM được nhấn');
+    expect(rowColor('Bài 16 · HỖN HỢP'), Colors.white,
+        reason: 'bài chưa có Bài học SAM KHÔNG được nhấn hơn bài có');
+
+    await t.tap(find.textContaining('Bài 16 · HỖN HỢP'));
     expect(legacyTaps, 1);
 
-    await t.tap(find.textContaining('Bài 17 · Tách chất'));
+    await t.tap(find.textContaining('Bài 17 · TÁCH CHẤT'));
     await t.pumpAndSettle();
     // ROUND 3 B1: lần đầu ⇒ màn «Vào bài học», thẻ đề xuất mang lý do.
     expect(find.byKey(const Key('mode-picker')), findsOneWidget);
@@ -148,6 +199,53 @@ void main() {
     await t.pumpAndSettle();
     expect(find.textContaining('Đã xem (phiên này)'), findsOneWidget);
     expect(trace.opened(doc.slotKey), isTrue);
+  });
+
+  testWidgets('ROUND 4: đã mở View nào ⇒ hàng bài nói «Đã xem (phiên này): '
+      'Đọc · Trực quan» (trace, không phải trạng thái học); Sách cũng thấy', (
+    t,
+  ) async {
+    final doc = loadSyntheticDoc();
+    final idx = _idx();
+    final lessons = idx.subjects['KHTN']!.first.lessons;
+    final trace = WorkspaceTrace()
+      ..markView(doc.slotKey, WorkspaceView.read)
+      ..markView(doc.slotKey, WorkspaceView.visual);
+    await t.pumpWidget(
+      fixtureHost(
+        ChapterScreen(
+          book: idx.bookById('06-sgk-khoa-hoc-tu-nhien-6')!,
+          chapter: doc.chapter!,
+          lessons: lessons,
+          docs: [doc],
+          trace: trace,
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(
+      find.textContaining('Đã xem (phiên này): Đọc · Trực quan'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Học với SAM'), findsNothing,
+        reason: 'chỉ liệt kê cách ĐÃ mở');
+    await t.pumpWidget(
+      fixtureHost(
+        BookScreen(
+          book: idx.bookById('06-sgk-khoa-hoc-tu-nhien-6')!,
+          lessons: lessons,
+          docs: [doc],
+          trace: trace,
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(
+      find.textContaining('✨ 1 bài học SAM · Đã xem (phiên này)'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('trạng thái bài không dùng sao/%/«đã học»', (t) async {
@@ -201,6 +299,116 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.textContaining('Từ tề bào đền cơ thể'), findsOneWidget);
+    expect(find.textContaining('TỪ TỀ BÀO ĐỀN CƠ THỂ'), findsOneWidget);
+  });
+
+  // ── ROUND 5 B: hai tab «Chương | Bài học» (concept-chuong khung 3) ──
+
+  testWidgets('⭐ màn Sách có hai tab; «Bài học» liệt kê THẲNG mọi bài của '
+      'mục lục, cùng vốn từ với màn Chương', (t) async {
+    final catalog = WorkspaceCatalog.withDocs([loadSyntheticDoc()]);
+    final book = _idx().books.first;
+    final lessons = _idx().subjects['KHTN']!.first.lessons;
+    await t.pumpWidget(
+      fixtureHost(
+        BookScreen(
+          book: book,
+          lessons: lessons,
+          docs: catalog.docsForBook(book.sourceDocumentId),
+          trace: WorkspaceTrace(),
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(find.byKey(BookScreen.tocModeKey('chapters')), findsOneWidget);
+    expect(find.byKey(BookScreen.tocModeKey('lessons')), findsOneWidget);
+    // mặc định: theo chương
+    expect(find.textContaining('Chương IV'), findsOneWidget);
+    await t.tap(find.byKey(BookScreen.tocModeKey('lessons')));
+    await t.pumpAndSettle();
+    expect(find.textContaining('Chương IV'), findsNothing);
+    for (final no in [16, 17, 18, 99]) {
+      expect(
+        find.byKey(LessonRow.keyFor(no)),
+        findsOneWidget,
+        reason: 'tab «Bài học» phải liệt kê ĐỦ mục lục, kể cả bài 99 ngoài '
+            'chương — không giấu bài nào',
+      );
+    }
+    // cùng vốn từ với màn Chương
+    expect(find.textContaining('✨ Bài học SAM · 3 cách học'), findsOneWidget);
+    expect(
+      find.text('Chưa có Bài học SAM — mở trong Môn học'),
+      findsNWidgets(3),
+    );
+    // KHÔNG có sao / % / «đã học» (doctrine, giữ nguyên ở màn thứ hai)
+    for (final banned in ['⭐', '%', 'đã học']) {
+      for (final w in t.widgetList<Text>(find.byType(Text))) {
+        expect(w.data ?? '', isNot(contains(banned)));
+      }
+    }
+  });
+
+  testWidgets('tab «Bài học» mở đúng Workspace của bài đó', (t) async {
+    final catalog = WorkspaceCatalog.withDocs([loadSyntheticDoc()]);
+    final book = _idx().books.first;
+    await t.pumpWidget(
+      fixtureHost(
+        BookScreen(
+          book: book,
+          lessons: _idx().subjects['KHTN']!.first.lessons,
+          docs: catalog.docsForBook(book.sourceDocumentId),
+          trace: WorkspaceTrace(),
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(BookScreen.tocModeKey('lessons')));
+    await t.pumpAndSettle();
+    await t.ensureVisible(find.byKey(LessonRow.keyFor(17)));
+    await t.tap(find.byKey(LessonRow.keyFor(17)));
+    await t.pumpAndSettle();
+    expect(find.textContaining('Bài 17 · TÁCH CHẤT'), findsWidgets);
+  });
+
+  testWidgets('⭐ D3 (máy thật, lượt 2): tab «Bài học» có chip lọc CÙNG VỐN TỪ '
+      'với giá sách — 54 hàng «chưa có» không được che hàng duy nhất đáng mở; '
+      'lọc chỉ ẩn hàng, KHÔNG sắp lại mục lục', (t) async {
+    final catalog = WorkspaceCatalog.withDocs([loadSyntheticDoc()]);
+    final book = _idx().books.first;
+    await t.pumpWidget(
+      fixtureHost(
+        BookScreen(
+          book: book,
+          lessons: _idx().subjects['KHTN']!.first.lessons,
+          docs: catalog.docsForBook(book.sourceDocumentId),
+          trace: WorkspaceTrace(),
+          onOpenLegacy: () {},
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(BookScreen.tocModeKey('lessons')));
+    await t.pumpAndSettle();
+    expect(find.byKey(BookScreen.lessonFilterKey('all')), findsOneWidget);
+    expect(find.text('Tất cả (4)'), findsOneWidget);
+    expect(find.text('✨ Bài học SAM (1)'), findsOneWidget);
+    await t.tap(find.byKey(BookScreen.lessonFilterKey('sam')));
+    await t.pumpAndSettle();
+    expect(find.byKey(LessonRow.keyFor(17)), findsOneWidget);
+    for (final no in [16, 18, 99]) {
+      expect(find.byKey(LessonRow.keyFor(no)), findsNothing);
+    }
+    await t.tap(find.byKey(BookScreen.lessonFilterKey('all')));
+    await t.pumpAndSettle();
+    // thứ tự mục lục giữ nguyên sau khi bỏ lọc
+    var last = -1.0;
+    for (final no in [16, 17, 18, 99]) {
+      final y = t.getTopLeft(find.byKey(LessonRow.keyFor(no))).dy;
+      expect(y, greaterThan(last));
+      last = y;
+    }
   });
 }

@@ -10,9 +10,10 @@ import 'package:flutter/scheduler.dart' show SchedulerBinding, SchedulerPhase;
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
+import '../../core/display/lesson_title.dart';
 import '../subjects/lesson_index.dart';
-import 'lesson_workspace_screen.dart';
 import 'widgets/fixture_chip.dart';
+import 'widgets/lesson_row.dart';
 import 'workspace_trace.dart';
 
 class ChapterScreen extends StatefulWidget {
@@ -119,7 +120,7 @@ class _ChapterScreenState extends State<ChapterScreen> {
               ),
             ),
             Text(
-              LessonDocument.titleCase(widget.chapter.title),
+              displayTitle(widget.chapter.title),
               style: const TextStyle(
                 fontSize: WalType.display,
                 fontWeight: FontWeight.w700,
@@ -130,7 +131,14 @@ class _ChapterScreenState extends State<ChapterScreen> {
             const SizedBox(height: WalSpacing.sm),
             if (fixture != null) FixtureChip(trust: fixture.trust),
             const SizedBox(height: WalSpacing.md),
-            for (final l in widget.lessons) _row(context, l),
+            for (final l in widget.lessons)
+              LessonRow(
+                lesson: l,
+                doc: _docFor(l.no),
+                trace: widget.trace,
+                onOpenLegacy: widget.onOpenLegacy,
+                learnerId: widget.learnerId,
+              ),
             if (widget.lessons.isEmpty)
               const Text(
                 'Chương này chưa có bài nào trong mục lục trên máy.',
@@ -140,61 +148,6 @@ class _ChapterScreenState extends State<ChapterScreen> {
                 ),
               ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _row(BuildContext context, LessonRef l) {
-    final doc = _docFor(l.no);
-    final title = l.title == null
-        ? 'Bài ${l.no}'
-        : 'Bài ${l.no} · ${LessonDocument.titleCase(l.title!)}';
-    final opened = doc != null && widget.trace.opened(doc.slotKey);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: WalSpacing.sm),
-      child: Material(
-        color: doc != null ? Colors.white : WalColors.surfaceLavender,
-        borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-        child: ListTile(
-          minVerticalPadding: WalSpacing.sm,
-          title: Text(
-            title,
-            style: const TextStyle(
-              fontSize: WalType.body,
-              fontWeight: FontWeight.w600,
-              color: WalColors.ink,
-            ),
-          ),
-          subtitle: Text(
-            doc != null
-                ? '✨ Bài học SAM · Đọc · Trực quan · Học với SAM · '
-                      '${widget.trace.childLabel(doc.slotKey)}'
-                : 'Chưa có Bài học SAM — mở mục lục hiện tại',
-            style: TextStyle(
-              fontSize: WalType.secondary,
-              color: opened ? WalColors.primaryText : WalColors.inkSoft,
-            ),
-          ),
-          trailing: Icon(
-            doc != null ? Icons.chevron_right : Icons.open_in_new,
-            color: WalColors.primaryText,
-          ),
-          onTap: () async {
-            if (doc == null) {
-              widget.onOpenLegacy();
-              return;
-            }
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => LessonWorkspaceScreen(
-                  doc: doc,
-                  trace: widget.trace,
-                  learnerId: widget.learnerId,
-                ),
-              ),
-            );
-          },
         ),
       ),
     );

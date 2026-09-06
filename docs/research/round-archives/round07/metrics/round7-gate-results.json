@@ -1,0 +1,115 @@
+{
+  "schema": "wal-round-gate-results-v1",
+  "round": "07",
+  "closeDate": "2026-09-06",
+  "classification": "INTERNAL / RESEARCH ONLY - DO NOT PUBLISH (Founder rule D4)",
+  "note": "Assembled by the archive builder from ROUND7-CONSOLIDATED-REPORT-2026-09-06.md and the six workstream documents. Every value carries the source that produced it. Nothing here is computed by this file.",
+  "gatesFixedBeforeTheRound": true,
+  "gatesSource": "docs/research/ROUND7-PLAN.md @ 1e31512 (committed before any result)",
+  "tally": "4 PASS + 1 PREPARED, UNACTIVATED",
+  "statusLegend": {
+    "TECHNICALLY_VALIDATED": "measured, re-derivable, verified in an artefact or by a committed command",
+    "HARDWARE_UNVERIFIED": "true in the artefact; no device walk happened. Widget tests and lineage gates are not real-device evidence",
+    "LICENSING_DISTRIBUTION_BLOCKED": "verbatim SGK page imagery; internal validation only, not distribution-ready under D4"
+  },
+  "gates": [
+    {
+      "id": "A", "name": "METRIC TRUTH",
+      "requirement": "No ambiguous major metric; critical totals re-derivable from leaf records by a committed command",
+      "verdict": "PASS", "archiveBuilderVerdict": "PASS",
+      "label": "MEASURED (WS-M)",
+      "status": "TECHNICALLY_VALIDATED",
+      "key": {
+        "metricsInRegistry": 18, "metricsReDeriving": 18,
+        "fieldsPerMetric": 9,
+        "totalActivitiesResolution": {"248": "SUPERSEDED - a correct earlier value of ACTIVITY_LEAF_COUNT (207+41)", "217": "DEPRECATED - 207 leaf rows + 10 container KEYS, a sum of two different units", "161": "DEPRECATED - three of seven families under a whole-corpus name, dropping 87 rows", "phrase": "DEPRECATED"},
+        "exactReDerivations": ["recognition REGION census 312/548=0.569, 196/548=0.358, 40/548=0.073 to four decimals", "WS-D census 238 lessons / 11971 served / 2032 withheld / 3864 figures, all four exact"]
+      },
+      "evidence": ["reports/ws-m-metric-truth/METRIC-REGISTRY-ROUND7.md"]
+    },
+    {
+      "id": "B", "name": "TRUST CALIBRATION",
+      "requirement": "Policy and bound frozen and hashed BEFORE any admitted lesson is inspected, provable by artefact order",
+      "verdict": "PASS - provable by artefact", "archiveBuilderVerdict": "PASS",
+      "label": "PROVEN - the archive builder read LEDGER.jsonl",
+      "status": "TECHNICALLY_VALIDATED",
+      "key": {
+        "ledgerEntries": 3,
+        "chain": [
+          {"seq": 1, "kind": "policy", "sha256": "0dfc5032...", "frozen": "2026-09-06T06:41:54Z"},
+          {"seq": 2, "kind": "population", "name": "BLIND-CORE", "sha256": "dbadf4ad...", "bindsPolicy": "0dfc5032...", "frozen": "2026-09-06T06:47:21Z"},
+          {"seq": 3, "kind": "population", "name": "BLIND-TEACHING", "sha256": "69d1cacc...", "bindsPolicy": "0dfc5032...", "frozen": "2026-09-06T06:47:21Z"}
+        ],
+        "approvalEntries": 0, "admittedEntries": 0,
+        "adversarialCheck": "an admitted write with no recorded approval is refused with a PermissionError",
+        "identityLeakChecks": {"calibrationDocuments": 3, "identityShapedMatches": 0, "note": "the frozen POPULATIONS do name 120 lessons each (84 and 72 distinct books) with titles hashed - that is the evaluation frame, not an admission context"},
+        "designGuarantee": "TRUST = SERVED n admit(...) so trusted subset-of served by construction; activation cannot serve one new block",
+        "recommendation": "C2 PROSE under BOUND-2, whose own predicted outcome - a truthful zero - is sealed inside the frozen payload"
+      },
+      "evidence": ["metrics/frozen-calibration/LEDGER.jsonl", "reports/ws-t-trust-calibration/", "evidence/structural-spot-checks.md#2"]
+    },
+    {
+      "id": "C", "name": "BLIND VALIDATION",
+      "requirement": "Audit machinery exists, proven on a dry run that does not use the frozen bound to admit anything",
+      "verdict": "PASS", "archiveBuilderVerdict": "PASS",
+      "label": "MEASURED (WS-T)", "status": "TECHNICALLY_VALIDATED",
+      "key": {"newTests": 52, "dryRunOutcomes": "one PASS and three refusal modes on fabricated rows", "admitted": 0}
+    },
+    {
+      "id": "D", "name": "TRUST DELIVERY",
+      "requirement": "Not attemptable this round by design; the honest outcome is a prepared, unactivated gate",
+      "verdict": "PREPARED, UNACTIVATED",
+      "archiveBuilderVerdict": "PREPARED, UNACTIVATED - neither PASS nor FAIL, exactly as the plan defines it",
+      "label": "by design",
+      "key": {
+        "thresholdActivated": false, "contentAdmitted": 0, "trusted": 0,
+        "whyNotPass": "grading it PASS would redefine a gate after seeing results",
+        "whyNotFail": "grading it FAIL would penalise a workstream for obeying a hard stop written in advance",
+        "andActivationWouldNotHelp": "achievable teaching-critical bound ~0.021 vs 0.0035 required - a factor of six"
+      }
+    },
+    {
+      "id": "E", "name": "NO REGRESSION",
+      "requirement": "Round 6 invariants hold: UNACCOUNTED=0, served set unchanged, trusted=0, repair records only on withheld blocks, honesty guards red under mutation",
+      "verdict": "PASS (one item hardware-unverified)",
+      "archiveBuilderVerdict": "PASS, with one invariant NOT RE-RUN and one HARDWARE UNVERIFIED - both named",
+      "label": "PROVEN by the archive builder from the artefact, except where noted",
+      "status": "TECHNICALLY_VALIDATED except R-1 on hardware",
+      "key": {
+        "servedTextBlocks": {"round6": 35, "round7": 35, "idSetIdentical": true},
+        "withheldRegions": {"round6": 17, "round7": 17, "idSetIdentical": true},
+        "withheldCarryingCrop": {"round6": 0, "round7": 17},
+        "newImageBlocks": 5, "imageBlocksCarryingText": 0,
+        "cropsOnDisk": 22,
+        "repairBearingBlocks": 6, "allValidatedRepair": true, "allServableFalse": true, "trusted": 0,
+        "withheldBlocksCarryingText": 0,
+        "honestyGuards": "RED under both mutations",
+        "UNACCOUNTED": "NOT RE-RUN - needs a batch of SDM artefacts; no accounting workstream this round. Region dispositions are unchanged, which is the property the audit measures",
+        "hardware": "NOT PROVEN - no device walk, no frames"
+      },
+      "evidence": ["evidence/round7-artefact-verification.txt", "evidence/structural-spot-checks.md#1", "screenshots/NO-DEVICE-FRAMES-THIS-ROUND.md"]
+    }
+  ],
+  "theRoundsResult": {
+    "statement": "The blocker is recognition and role disambiguation, not calibration",
+    "teachingCriticalErrors": 12,
+    "mechanisms": {"digit corruption": 6, "non-question served as a question": 6},
+    "digitCorruptionsSurvivingCharacterExactTwoStackAgreement": 3,
+    "bestAchievableBound": 0.0213,
+    "boundRequiredForA90PercentCleanLessonPromise": 0.0035,
+    "gapFactor": 6,
+    "lessonLevelProbabilityAt30Blocks": 0.48,
+    "lessonLevelCaveat": "assumes independence between blocks; page-level 0.1026 observed vs 0.0975 expected on 39 pages / 4 events shows no measurable clustering at this n",
+    "bound4Consequence": "45 percent of lessons carrying a teaching-critical error - not sayable to a parent",
+    "bound5": "per-lesson certification of a bounded slice - not a threshold, and must never be reported as one"
+  },
+  "productDelivery": {"child": "NOTHING", "parent": "NOTHING NEW", "sam": "NOTHING NEW"},
+  "mergeStatus": {
+    "round7PRs": [94, 95, 96, 97], "allOpen": true, "allCiGreen": true, "merged": 0, "thresholdActivated": false,
+    "alsoStillOpen": [73, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93],
+    "commitsAheadOfMain": {"round4": 73, "round5": 89, "round6": 208, "round7": 259},
+    "reportSaid254": "measured at the re-audit commit 457a970 it is 255; 259 at the final head 74d9db6 - the four documentation commits that closed the round",
+    "recommendation": "MERGE #79 - CLOSE #73 AS SUBSUMED - HOLD the rest",
+    "label": "PROVEN - GitHub API and git, 2026-09-06"
+  }
+}

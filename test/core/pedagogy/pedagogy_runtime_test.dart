@@ -7,6 +7,11 @@
 /// máy thật; kiểm: chế độ TỪNG BƯỚC đúng; act ngoài phương pháp được phép bị
 /// từ chối; lời nói ngoài hợp đồng bị từ chối; không bước nào có validator;
 /// không ký hiệu LLM / kho / mạng trong runtime.
+///
+/// ⭐⭐ ROUND 4 (Founder §5): năng lực MỚI duy nhất là kiểm trích dẫn «…»
+/// (`SourceQuoteIndex`). Nhóm «fixture THẬT» ĐO số bước đổi nhãn trên Bài 17
+/// thật (bỏ qua ở máy không có fixture) và GHIM từng mã lý do — con số
+/// Pedagogy Reality trong báo cáo được trích từ đây, không đặt tay.
 library;
 
 import 'dart:convert';
@@ -52,9 +57,13 @@ String? _blockText(LessonDocument d, String id) => switch (d.blockById(id)) {
     };
 
 RuntimePlan _plan(LessonDocument d,
-        {ResolvedBinding? binding, bool noBinding = false, LearningContext? ctx}) =>
+        {ResolvedBinding? binding,
+        bool noBinding = false,
+        LearningContext? ctx,
+        bool withQuoteIndex = true,
+        TutorScript? script}) =>
     PedagogyRuntime.planForScript(
-      script: d.tutorScript!,
+      script: script ?? d.tutorScript!,
       binding: noBinding
           ? null
           : binding ??
@@ -63,7 +72,23 @@ RuntimePlan _plan(LessonDocument d,
       studentState: StudentLessonState.unseen(khtn6Bai17),
       context: ctx ?? _ctx,
       blockText: (id) => _blockText(d, id),
+      quoteIndex: withQuoteIndex ? SourceQuoteIndex.fromLessonDocument(d) : null,
     );
+
+const _realFixture = 'assets/fixtures/real/lesson-06-sgk-khoa-hoc-tu-nhien-6-b17.json';
+
+LessonDocument? _realDocOrSkip() {
+  final f = File(_realFixture);
+  if (!f.existsSync()) {
+    markTestSkipped('fixture thật chưa có trên máy này (gitignored)');
+    return null;
+  }
+  final j = jsonDecode(f.readAsStringSync()) as Map;
+  return LessonDocument.fromJson(j.cast<String, Object?>(), assetBase: 'x/')!;
+}
+
+String _key(PlannedStep s) =>
+    '${s.stepId}/${s.phase.name}${s.hintIndex == null ? '' : '#${s.hintIndex}'}';
 
 void main() {
   late LessonDocument doc;
@@ -104,6 +129,11 @@ void main() {
       }
       expect(p.runtimeGuidedCount, 4, reason: 'e1 + q1 + q2 + n1');
       expect(p.prototypeCount, 8, reason: '2×(2 hint + feedback + scaffold)');
+      // ROUND 4: có chỉ mục trích dẫn hay không, fixture mẫu vẫn 4/12 — gợi
+      // ý mẫu không trích «…» nào ⇒ HINT_UNSOURCED; không đổi nhãn.
+      expect(_plan(doc, withQuoteIndex: false).runtimeGuidedCount, 4);
+      expect(PlannedStepMode.runtimeGuided.samMode.name, 'runtimeGuided');
+      expect(PlannedStepMode.prototypeScripted.samMode.name, 'prototypeScripted');
     });
 
     // Lịch sử: guard từng LỘ RA ba chỗ rò đáp án trong gợi ý prototype của
@@ -254,10 +284,160 @@ void main() {
     });
   });
 
+  group('ROUND 4 §5(a) — trích dẫn «…» nguyên văn: NĂNG LỰC THẬT, không hard-code', () {
+    /// Kịch bản đối chứng DƯƠNG: gợi ý trích NGUYÊN VĂN một block của fixture
+    /// mẫu (không lộ đáp án) ⇒ đổi nhãn runtimeGuided. Chứng minh luật áp cho
+    /// MỌI bước theo dữ liệu, không theo id bước.
+    test('⭐⭐ gợi ý trích nguyên văn block (không rò đáp án) ⇒ runtimeGuided, '
+        'ghi đúng sourceBlockId; gợi ý không trích ⇒ HINT_UNSOURCED', () {
+      const q = AskStep(
+          id: 'qx',
+          prompt: '[MẪU] Làm muối từ nước biển dùng cách tách chất nào?',
+          promptBlockId: '06-sgk-khoa-hoc-tu-nhien-6:p063:synthetic:020',
+          acceptable: ['^cô cạn\$'],
+          hints: [
+            'Sách viết: «Các chất trong một hỗn hợp có tính chất khác nhau» — '
+                'muối và nước khác nhau ở chỗ nào?',
+            'Con nghĩ xem muối có bay hơi không.',
+          ],
+          feedbackMatched: 'ok',
+          scaffold: 'x',
+          keySource: 'prototype');
+      final p = _plan(doc, script: const TutorScript(steps: [q]));
+      final hints = p.steps.where((s) => s.phase == PlannedStepPhase.hint).toList();
+      expect(hints[0].isRuntimeGuided, isTrue, reason: hints[0].refusals.join(','));
+      expect(hints[0].sourceBlockId, '06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:006');
+      expect(hints[0].quotes!.isSourced, isTrue);
+      expect(hints[0].act.methodId, khtn6TachChatMethodId,
+          reason: 'gợi ý vẫn cần phương pháp được phép');
+      expect(hints[1].isRuntimeGuided, isFalse);
+      expect(hints[1].refusals, ['HINT_UNSOURCED']);
+      // Không có chỉ mục ⇒ không chứng minh được ⇒ prototype (fail closed).
+      final noIdx = _plan(doc, script: const TutorScript(steps: [q]), withQuoteIndex: false);
+      expect(noIdx.steps.where((s) => s.phase == PlannedStepPhase.hint).every((s) => !s.isRuntimeGuided),
+          isTrue);
+    });
+
+    test('⭐⭐ trích nguyên văn nhưng RÒ ĐÁP ÁN ⇒ vẫn prototype (GUARD:REVEAL); '
+        'trích không có trong bài ⇒ QUOTE_NOT_IN_SOURCE; trích lược ⇒ QUOTE_ELIDED',
+        () {
+      const q = AskStep(
+          id: 'qy',
+          prompt: '[MẪU] Làm muối từ nước biển dùng cách tách chất nào?',
+          promptBlockId: '06-sgk-khoa-hoc-tu-nhien-6:p063:synthetic:020',
+          acceptable: ['^cô cạn\$'],
+          hints: [
+            // nguyên văn block :023 nhưng chứa «Cô cạn» = đáp án
+            'Sách viết: «Cô cạn (tách chất rắn đã tan bằng cách làm bay hơi chất lỏng)».',
+            'Sách viết: «muối tan trong nước còn cát thì không».',
+          ],
+          feedbackMatched: 'ok',
+          scaffold: 'x',
+          keySource: 'prototype');
+      final p = _plan(doc, script: const TutorScript(steps: [q]));
+      final hints = p.steps.where((s) => s.phase == PlannedStepPhase.hint).toList();
+      expect(hints[0].quotes!.isSourced, isTrue, reason: 'trích có thật…');
+      expect(hints[0].isRuntimeGuided, isFalse, reason: '…nhưng guard chặn rò');
+      expect(hints[0].refusals.any((r) => r.startsWith('GUARD:REVEAL:côcạn')), isTrue);
+      expect(hints[1].refusals.single, startsWith('QUOTE_NOT_IN_SOURCE:'));
+      const z = AskStep(
+          id: 'qz',
+          prompt: 'p',
+          acceptable: [r'(x|y)+'], // regex phức ⇒ không có dạng đáp án để chặn
+          hints: ['«Các chất trong một hỗn hợp… để tách chúng ra»'],
+          feedbackMatched: 'ok',
+          scaffold: 'x',
+          keySource: 'prototype');
+      final pz = _plan(doc, script: const TutorScript(steps: [z]));
+      expect(pz.steps.firstWhere((s) => s.phase == PlannedStepPhase.hint).refusals.single,
+          startsWith('QUOTE_ELIDED:'));
+    });
+
+    test('phản hồi «khớp» và scaffold vẫn prototype dù trích đúng — khoá đáp án '
+        'không có validator (A3); block trích vẫn ghi để UI hiện «Sách viết»', () {
+      const q = AskStep(
+          id: 'qf',
+          prompt: '[MẪU] 1. Vì sao hạt cát lắng xuống đáy cốc?',
+          promptBlockId: '06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:008',
+          acceptable: ['nặng'],
+          hints: [],
+          feedbackMatched: 'Khớp với «Nước đục để yên thì hạt nặng lắng xuống».',
+          scaffold: 'Sách: «Nước đục để yên thì hạt nặng lắng xuống». Đi tiếp nhé.',
+          keySource: 'prototype');
+      final p = _plan(doc, script: const TutorScript(steps: [q]));
+      final fb = p.steps.singleWhere((s) => s.phase == PlannedStepPhase.feedbackMatched);
+      final sc = p.steps.singleWhere((s) => s.phase == PlannedStepPhase.scaffold);
+      for (final s in [fb, sc]) {
+        expect(s.isRuntimeGuided, isFalse);
+        expect(s.refusals, contains('KEY_NOT_VALIDATED'));
+        expect(s.sourceBlockId, '06-sgk-khoa-hoc-tu-nhien-6:p061:synthetic:007');
+        expect(s.validator, isNull);
+      }
+      expect(sc.refusals, contains('OVER_CAP_WITHOUT_VALIDATOR'));
+    });
+  });
+
+  group('ROUND 4 — fixture THẬT Bài 17 (bỏ qua nếu thiếu): ĐO, không đặt tay', () {
+    /// ⭐ ROUND 4 · Lane B đã SỬA kịch bản (không sửa luật): q1#1 bỏ trích dẫn
+    /// «trang 62» tự chế và trích liền một mạch; q3#1 trả lại hai chữ «các»
+    /// đúng như sách. Hai gợi ý đó nay QUA được luật ⇒ 5 → 7 / 17. Con số này
+    /// là ĐO SAU KHI SỬA NGUỒN CHỮ, không phải nới luật: q2#1 vẫn trượt vì
+    /// lỗi OCR nằm trong nguồn (A-pipeline), ba gợi ý #0 vẫn không trích gì.
+    test('⭐⭐ 17 bước: 5 runtimeGuided KHÔNG kiểm trích dẫn → 7 khi kiểm; '
+        'từng mã lý do nói đúng chỗ hỏng còn lại của kịch bản/nguồn', () {
+      final d = _realDocOrSkip();
+      if (d == null) return;
+      final before = _plan(d, withQuoteIndex: false);
+      final after = _plan(d);
+      expect(before.steps.length, 17);
+      expect(before.runtimeGuidedCount, 5, reason: 'e1 + q1 + q2 + q3 + n1');
+      expect(after.runtimeGuidedCount, 7,
+          reason: '⭐ + q1/hint#1 + q3/hint#1 sau khi kịch bản trích ĐÚNG NGUYÊN '
+              'VĂN sách — con số phải ĐO, không đặt tay');
+      expect(after.runtimeGuidedIn(PlannedStepPhase.hint), 2);
+      expect(after.runtimeGuidedIn(PlannedStepPhase.ask), 3);
+      expect(after.runtimeGuidedIn(PlannedStepPhase.explain), 1);
+      expect(after.runtimeGuidedIn(PlannedStepPhase.next), 1);
+      expect(after.steps.every((s) => s.validator == null), isTrue,
+          reason: 'không validator mới — Evidence Reality Bài 17 = 0, trung thực');
+
+      final by = {for (final s in after.steps) _key(s): s};
+      // q1#1 (ĐÃ SỬA): trích liền một mạch từ block «Phương pháp cô cạn dùng
+      // để …», KHÔNG còn «…» và KHÔNG còn số trang tự chế ⇒ hết lý do từ chối.
+      expect(by['q1/hint#1']!.refusals, isEmpty);
+      expect(by['q1/hint#1']!.mode, PlannedStepMode.runtimeGuided);
+      expect(by['q1/hint#1']!.sourceBlockId,
+          '06-sgk-khoa-hoc-tu-nhien-6:p063:tc2-p1:005');
+      // q2#1: kịch bản trích «khoá» đúng chính tả, nguồn OCR đọc «khóa … khoa»
+      // ⇒ không nguyên văn — lỗi FIDELITY của nguồn (A-pipeline), runtime không sửa hộ.
+      expect(by['q2/hint#1']!.refusals.single, startsWith('QUOTE_NOT_IN_SOURCE:Khi phần dầu ăn'));
+      // q3#1 (ĐÃ SỬA): cả hai trích đều nguyên văn (Lọc 4:004, Cô cạn 4:006).
+      expect(by['q3/hint#1']!.refusals, isEmpty);
+      expect(by['q3/hint#1']!.mode, PlannedStepMode.runtimeGuided);
+      expect(by['q3/hint#1']!.sourceBlockId, '06-sgk-khoa-hoc-tu-nhien-6:p064:tc2-p1:004');
+      // ba gợi ý còn lại không trích gì.
+      for (final k in ['q1/hint#0', 'q2/hint#0', 'q3/hint#0']) {
+        expect(by[k]!.refusals, ['HINT_UNSOURCED'], reason: k);
+      }
+      // scaffold q1/q3 trích đúng («cô cạn» = tiêu đề mục; «Em đã học») nhưng
+      // vẫn prototype: lộ đáp án từ khoá prototype, quá trần không validator.
+      expect(by['q1/scaffold']!.sourceBlockId, '06-sgk-khoa-hoc-tu-nhien-6:p063:tc2-p1:002');
+      expect(by['q3/scaffold']!.sourceBlockId, '06-sgk-khoa-hoc-tu-nhien-6:p064:tc2-p1:002');
+      for (final k in ['q1/scaffold', 'q2/scaffold', 'q3/scaffold']) {
+        expect(by[k]!.refusals, containsAll(['KEY_NOT_VALIDATED', 'OVER_CAP_WITHOUT_VALIDATOR']));
+      }
+      // ignore: avoid_print
+      print('ROUND4-PEDAGOGY real Bài 17: before=${before.runtimeGuidedCount}/'
+          '${before.steps.length} after=${after.runtimeGuidedCount}/${after.steps.length}; '
+          '${[for (final s in after.steps) '${_key(s)}=${s.mode.samModeName}${s.refusals.isEmpty ? '' : s.refusals}'].join(' | ')}');
+    });
+  });
+
   group('KHÔNG LLM / KHÔNG KHO trong runtime + binding (cấu trúc)', () {
     test('⭐⭐ không import mạng/kho, không ký hiệu LLM, không LearningEvent(', () {
       const files = [
         'lib/core/pedagogy/pedagogy_runtime.dart',
+        'lib/core/pedagogy/source_quote_index.dart',
         'lib/core/curriculum/semantic_binding.dart',
         'lib/core/curriculum/semantic_binding_registry.dart',
         'lib/core/curriculum/khtn6_bai17.dart',

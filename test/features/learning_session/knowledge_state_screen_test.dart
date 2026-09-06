@@ -9,6 +9,7 @@ import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/features/learning_session/slice_flow.dart';
 
 import '../../support/curriculum.dart';
@@ -35,7 +36,16 @@ LearningEvent _correct(String id, DateTime at) => LearningEvent(
     skillCaseId: 'denominator-non-divisible',
     kind: EvidenceKind.independentAttempt,
     correct: true,
+    validation: _r4Stamp,
     at: at);
+
+/// ROUND 4 (A-runtime, Founder §4 — strict validation default): the graded
+/// events this test seeds simulate the Deep path (TutorSession), which has
+/// stamped `fraction-check-v1` since round 3; unstamped graded events now read
+/// as `historicalUnvalidated` and never as «Tự làm được». Fixture-only change,
+/// no assertion changed. — lane A-runtime touched this Lane B test file.
+const _r4Stamp =
+    EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
 
 void main() {
   testWidgets('⭐ chưa có bằng chứng ⇒ không icon 🌱/🎯/🚀 nào trên tile',

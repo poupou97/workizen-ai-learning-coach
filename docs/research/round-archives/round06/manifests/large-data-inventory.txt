@@ -1,0 +1,26 @@
+# Large / external data NOT included in this archive — inventory only
+# generated 2026-09-06T05:11:25Z by the archive builder
+#
+# Rule: the SGK corpus and every derivative of it are copyright-restricted and gitignored.
+# This archive records path, size, version and reproduction instructions — never the bytes.
+
+## Top-level
+9.8G	nguon-chi-thuc
+ 14G	poc-out
+
+## Round-6 artefact trees (gitignored)
+144M	poc-out/round6
+172K	poc-out/round6/accounting
+ 31M	poc-out/round6/golden
+103M	poc-out/round6/legacy
+9.1M	poc-out/round6/recognition
+324K	poc-out/round6/ws-c
+876K	poc-out/round6/ws-d
+
+## Round-5 artefact trees, still referenced by round 6
+341M	poc-out/round5
+
+## Gitignored build inputs that ARE archived (small, and load-bearing)
+  assets/pack/*.json                -> evidence/round6-artefacts/packs/           (12 files, the GATE E set)
+  assets/pack/*.json (stale copy)   -> evidence/round6-artefacts/packs-STALE-before/
+  assets/fixtures/real/*.json       -> evidence/round6-artefacts/fixtures-real/   (2 files: Golden #1 + Bài 17)

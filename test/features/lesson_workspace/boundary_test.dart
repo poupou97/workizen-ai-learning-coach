@@ -85,6 +85,11 @@ Iterable<File> _dartFiles(String dir) => Directory(dir)
     .where((f) => f.path.endsWith('.dart'));
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   test('⭐⭐ MÃ: workspace + lesson_model không import kho/bằng chứng/LLM, không '
       'gọi recordSession/appendSession', () {
     const forbiddenImports = [
@@ -177,9 +182,15 @@ void main() {
       await t.pumpAndSettle();
       await t.tap(find.text('KHTN 6'));
       await t.pumpAndSettle();
+      // ROUND 5: màn Sách có thêm hàng tab «Chương | Bài học» ⇒ hàng chương
+      // tụt xuống; cuộn tới trước khi chạm (không phải lỗi, là bố cục mới).
+      await t.ensureVisible(find.textContaining('Chương IV'));
+      await t.pumpAndSettle();
       await t.tap(find.textContaining('Chương IV'));
       await t.pumpAndSettle();
-      await t.tap(find.textContaining('Bài 17 · Tách chất'));
+      await t.ensureVisible(find.textContaining('Bài 17 · TÁCH CHẤT'));
+      await t.pumpAndSettle();
+      await t.tap(find.textContaining('Bài 17 · TÁCH CHẤT'));
       await t.pumpAndSettle();
       expect(find.byType(LessonWorkspaceScreen), findsOneWidget);
       // ba View
@@ -215,8 +226,13 @@ void main() {
     await t.ensureVisible(back);
     await t.tap(back);
       await t.pumpAndSettle();
+      await t.ensureVisible(find.byTooltip('Về sách'));
       await t.tap(find.byTooltip('Về sách'));
       await t.pumpAndSettle();
+      // màn Sách còn giữ vị trí cuộn của lượt trước ⇒ đưa nút quay lại vào
+      // khung trước khi chạm (nếu không, `tap` chạm trúng widget khác và chỉ
+      // cảnh báo — hành trình đứt im lặng).
+      await t.ensureVisible(find.byTooltip('Về giá sách'));
       await t.tap(find.byTooltip('Về giá sách'));
       await t.pumpAndSettle();
       expect(find.text('Sách của con · Lớp 6'), findsOneWidget);

@@ -53,23 +53,37 @@ RuntimePlan? planForDoc(LessonDocument doc, {String? learnerId}) {
       final b = doc.blockById(id);
       return b == null ? null : LessonDocument.textOf(b);
     },
+    // ⭐ ROUND 4 (A-runtime R4.10): chỉ mục trích dẫn của CHÍNH bài này. Mỗi
+    // «…» trong gợi ý / phản hồi / scaffold phải là chữ NGUYÊN VĂN của một
+    // block chữ trong bài; không truyền vào ⇒ không kiểm được ⇒ mọi bước như
+    // vậy ở lại nhãn «kịch bản thử nghiệm» (fail closed). Truyền vào là điều
+    // kiện để một gợi ý trích đúng sách được nâng lên «runtime có kiểm» —
+    // và để «Sách viết» chỉ đúng block sách đã kiểm.
+    quoteIndex: SourceQuoteIndex.fromLessonDocument(doc),
   );
 }
 
 /// «SAM đề xuất» theo thứ tự Founder A8 (Đọc → Trực quan → Học với SAM) —
 /// thay luật prototype «có sơ đồ ⇒ Trực quan trước» của `nextActionFor`.
-/// Trả về [NextAction] để thẻ đề xuất / màn chọn cách học dùng chung.
-NextAction founderNextAction(
+///
+/// ⭐ ROUND 7 · WS-R — trả thẳng [LessonNextAction], không ép xuống
+/// [NextAction] nữa. Phép ép ấy làm RƠI `kind`, và `NextAction.label` chỉ có
+/// hai kết cục: một View, hoặc **«Về mục lục»**. Nên kết cục R5 «ở lại bài»
+/// không diễn đạt được, và lớp trợ giúp in ra «SAM gợi ý: Về mục lục» ngay
+/// trên bài trẻ vừa mở — lỗi máy thật vòng 6. Kiểu giàu hơn là kiểu đúng.
+LessonNextAction founderNextAction(
   LessonDocument doc, {
   required Set<WorkspaceView> seen,
   String? learnerId,
-}) {
-  final ref = lessonRefOf(doc);
-  final a = nextBestLessonAction(
-    state: StudentLessonState.unseen(ref),
-    context: learningContextFor(doc, learnerId: learnerId),
-    lesson: LessonSummary.fromDocument(doc),
-    viewsSeen: seen,
-  );
-  return NextAction(view: a.view, reason: a.reason, basis: '${a.rule} · ${a.basis}');
-}
+}) =>
+    nextBestLessonAction(
+      state: StudentLessonState.unseen(lessonRefOf(doc)),
+      context: learningContextFor(doc, learnerId: learnerId),
+      lesson: LessonSummary.fromDocument(doc),
+      viewsSeen: seen,
+    );
+
+/// Những cách học bài này thật sự có — MỘT nguồn với luật (xem
+/// [LessonSummary.availableViews]).
+List<WorkspaceView> availableViewsOf(LessonDocument doc) =>
+    LessonSummary.fromDocument(doc).availableViews;

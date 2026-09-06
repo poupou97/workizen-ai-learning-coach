@@ -1,0 +1,294 @@
+{
+  "device": "Nokia 6.1 · Android 10 (192.168.1.3:5555), học sinh «Na · Lớp 6», dọc, adb qua WiFi",
+  "protocol": "Trước mỗi lượt: dumpsys window (đúng gói ai.workizen.learningcoach) + dumpsys power (Awake/ON) + HAI screencap cách nhau ≥ 20 s. Vòng 5 so bằng PIXEL, không chỉ bằng hash: lượt 1 hai frame khác nhau ĐÚNG ô đồng hồ thanh trạng thái (bbox 117,19–135,47) và giống hệt từng byte dưới y=70 ⇒ Founder KHÔNG chạm máy; lượt 2 và 3 hai frame giống nhau tuyệt đối. Không đánh thức, không mở khoá, không đổi hồ sơ/cài đặt/dữ liệu; com.workizen.tongtai không bị chạm. Một frame lỡ chụp trúng bảng chọn hồ sơ của Founder đã bị xoá ngay. Lượt 4–5 (2026-09-06): hai screencap cách nhau ≥ 20 s chỉ khác ô đồng hồ (bbox 95,19–114,47), giống hệt từng byte dưới y=70 ⇒ Founder không cầm máy. Một frame lỡ chụp trúng bảng chọn hồ sơ của Founder đã bị xoá ngay.",
+  "iterations": [
+    {
+      "iter": 1,
+      "build": {
+        "gitSha": "2a87b889466e6807a54bd12d2f608b4792aa8701",
+        "apkSha256": "471f03eb83d28d999d9b6d61f15994ecc45654c2eb5dfaab94a970893d4b20f0"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "Home «Chào Na!» + dòng SAM + khu HÔM NAY",
+          "result": "PASS",
+          "frames": [
+            "round5-1-01-home.png",
+            "round5-1-02-home-scrolled.png"
+          ]
+        },
+        {
+          "step": "02",
+          "expect": "Vào bài học → Đọc, chip thử nghiệm, thẻ «SAM đề xuất» có trace «Đã mở»",
+          "result": "PASS",
+          "frames": [
+            "round5-1-03-read.png"
+          ]
+        },
+        {
+          "step": "03",
+          "expect": "Trực quan: dải tổng quan 1→2→3 CÓ MÀU, chip hình dạng",
+          "result": "PASS",
+          "frames": [
+            "round5-1-04-visual-process.png"
+          ]
+        },
+        {
+          "step": "04",
+          "expect": "Quy trình là SƠ ĐỒ: nút + trục liên tục + mũi tên + vạch màu; chip «Sách chỉ tới Hình 17.3»",
+          "result": "PASS",
+          "frames": [
+            "round5-1-05-visual-flow.png",
+            "round5-1-06-visual-flow-end.png"
+          ],
+          "note": "Bước 3 nêu «Hình 17.4» và KHÔNG có chip — fail closed đúng như thiết kế."
+        },
+        {
+          "step": "05",
+          "expect": "Bảng so sánh mở ra SƠ ĐỒ TƯ DUY: nút trung tâm + 4 nút nhánh có màu",
+          "result": "PASS",
+          "frames": [
+            "round5-1-07-visual-mindmap.png",
+            "round5-1-08-visual-mindmap-hub.png",
+            "round5-1-09-visual-mindmap-hub-hidden.png"
+          ],
+          "note": "D1 phát hiện ở đây: thẻ «SAM đề xuất» ghim 6 dòng ⇒ chrome 920/1920 px (48 %) và NÚT TRUNG TÂM bị che. D2: lời «Vì sao SAM chọn sơ đồ này» vẫn nói «xếp thành BẢNG» trong khi trẻ đang nhìn sơ đồ."
+        },
+        {
+          "step": "06",
+          "expect": "Chạm một nút sơ đồ tư duy ⇒ sheet «Sách viết» nguyên văn + «Xem trong Đọc» + nếp gấp kỹ thuật đóng",
+          "result": "PASS",
+          "frames": [
+            "round5-1-10-mindmap-source-sheet.png"
+          ]
+        },
+        {
+          "step": "07",
+          "expect": "Chip hình trên nút bước 2 nhảy về Đọc ĐÚNG chỗ chú thích «Hình 17.3»",
+          "result": "PASS",
+          "frames": [
+            "round5-1-11-figure-chip.png",
+            "round5-1-12-figure-chip-to-read.png"
+          ]
+        },
+        {
+          "step": "08",
+          "expect": "Học với SAM: dòng runtime lời trẻ «Máy đã kiểm 7/17 bước…»",
+          "result": "PASS",
+          "frames": [
+            "round5-1-13-tutor.png"
+          ],
+          "note": "Pedagogy Reality 7/17 đọc trên máy, không đổi so với vòng 4 (làn này không đổi runtime)."
+        },
+        {
+          "step": "09",
+          "expect": "Home có khu riêng «SAM ĐANG TẬP ĐỌC SÁCH KHÁC» cho lát cắt nghiên cứu",
+          "result": "PASS",
+          "frames": [
+            "round5-1-14-home-research.png"
+          ]
+        },
+        {
+          "step": "10",
+          "expect": "Lát cắt LS&ĐL 5 → Trực quan → Dòng thời gian (Lane C) vẫn nguyên vẹn",
+          "result": "PASS",
+          "frames": [
+            "round5-1-15-research-timeline.png"
+          ],
+          "note": "Lane B không sửa timeline_view.dart."
+        }
+      ]
+    },
+    {
+      "iter": 2,
+      "build": {
+        "gitSha": "65c68d0",
+        "apkSha256": "d98ffcd27f0bec53a17788993b378f32bc2d90c436cf67e208343d2489d8ca06"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "Home sau khi cài lại",
+          "result": "PASS",
+          "frames": [
+            "round5-2-01-home.png"
+          ]
+        },
+        {
+          "step": "02",
+          "expect": "Màn «Vào bài học»: ba thẻ đếm từ dữ liệu (khung concept 3)",
+          "result": "PASS",
+          "frames": [
+            "round5-2-02-picker.png"
+          ]
+        },
+        {
+          "step": "03",
+          "expect": "D1 ĐÃ SỬA: thẻ «SAM đề xuất» cuộn cùng sơ đồ ⇒ chrome ghim còn ~525/1920 px (73 % cho sơ đồ)",
+          "result": "PASS",
+          "frames": [
+            "round5-2-03-visual-top.png"
+          ]
+        },
+        {
+          "step": "04",
+          "expect": "D1+D2 ĐÃ SỬA: CẢ sơ đồ tư duy nằm gọn trong một màn — nút trung tâm ở giữa, 2 nhánh trên, 2 nhánh dưới; lời «vì sao» nói «mỗi cách một ô xung quanh», không còn «xếp thành bảng»",
+          "result": "PASS",
+          "frames": [
+            "round5-2-04-mindmap-whole.png"
+          ]
+        },
+        {
+          "step": "05",
+          "expect": "Giá sách có ô «Tìm sách, môn học…» + chip «Tất cả · ✨ Có bài học SAM · <môn>»",
+          "result": "PASS",
+          "frames": [
+            "round5-2-05-shelf-search.png"
+          ]
+        },
+        {
+          "step": "06",
+          "expect": "Chip «Có bài học SAM» lọc còn đúng KHTN 6",
+          "result": "PASS",
+          "frames": [
+            "round5-2-06-shelf-sam-filter.png"
+          ]
+        },
+        {
+          "step": "07",
+          "expect": "Màn Sách có hai tab «Chương | Bài học»",
+          "result": "PASS",
+          "frames": [
+            "round5-2-07-book-tabs.png"
+          ]
+        },
+        {
+          "step": "08",
+          "expect": "Tab «Bài học» liệt kê thẳng mục lục",
+          "result": "PASS",
+          "frames": [
+            "round5-2-08-book-lessons-tab.png",
+            "round5-2-09-book-lessons-b17.png"
+          ],
+          "note": "D3 phát hiện ở đây: 55 bài, 54 hàng «Chưa có Bài học SAM» che mất hàng duy nhất đáng mở."
+        }
+      ]
+    },
+    {
+      "iter": 3,
+      "build": {
+        "gitSha": "9a743203afe6d0f24d474bcdc9b86d2bb93026bc",
+        "apkSha256": "8c386b6ce64c29597ca8a2afb60953a90d1e8f708f746f723245c3a07bf2bf7e"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "D3 ĐÃ SỬA: tab «Bài học» có chip «Tất cả (55) | ✨ Bài học SAM (1)»",
+          "result": "PASS",
+          "frames": [
+            "round5-3-01-book-lessons-filter.png"
+          ]
+        },
+        {
+          "step": "02",
+          "expect": "Lọc SAM ⇒ đúng một hàng Bài 17, nền nhấn, kèm trace «Đã xem (phiên này): Đọc»",
+          "result": "PASS",
+          "frames": [
+            "round5-3-02-book-sam-only.png"
+          ]
+        }
+      ]
+    },
+    {
+      "iter": 4,
+      "build": {
+        "gitSha": "d8147c9 (cùng cây, bốn cờ WAL_ASSIST)",
+        "note": "bốn bản build từ CÙNG một commit, chỉ khác --dart-define=WAL_ASSIST"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "HIỆN TẠI (card) · Học với SAM: thẻ đề xuất ghim, CTA «Đọc» lặp lại tab, hàng «Đã mở»",
+          "result": "PASS",
+          "frames": [
+            "round5-4-card-tutor.png",
+            "round5-4-card-visual.png"
+          ],
+          "note": "Y nội dung bài đầu tiên = 820 px (42.7 % màn hình)."
+        },
+        {
+          "step": "02",
+          "expect": "A icon · biểu tượng gợi ý + chấm báo ở hàng tiêu đề, không còn thẻ",
+          "result": "PASS",
+          "frames": [
+            "round5-4-icon-tutor.png"
+          ],
+          "note": "Y = 634 px (33.0 %). Ghi thẳng: nút lấy mất bề ngang ⇒ TIÊU ĐỀ BÀI xuống hai dòng."
+        },
+        {
+          "step": "03",
+          "expect": "A icon · bottom sheet «Gợi ý của SAM» có lý do + một CTA + «Để sau»",
+          "result": "PASS",
+          "frames": [
+            "round5-4-icon-sheet.png"
+          ]
+        },
+        {
+          "step": "04",
+          "expect": "B peek · một dòng «SAM gợi ý: Xem Đọc», tiêu đề vẫn một dòng",
+          "result": "PASS",
+          "frames": [
+            "round5-4-peek-tutor.png"
+          ],
+          "note": "Y = 712 px (37.1 %)."
+        },
+        {
+          "step": "05",
+          "expect": "B peek · bung tại chỗ: lý do + CTA + «Để sau»",
+          "result": "PASS",
+          "frames": [
+            "round5-4-peek-expanded.png"
+          ]
+        },
+        {
+          "step": "06",
+          "expect": "C inlineTab · huy hiệu trên tab đích, không thêm dòng nào",
+          "result": "PASS",
+          "frames": [
+            "round5-4-inline-tutor.png",
+            "round5-4-inline-expanded.png"
+          ],
+          "note": "Y = 565 px (29.4 %) — gọn nhất. D4 phát hiện ở đây: huy hiệu ~21 dp lơ lửng giữa hai tab, dưới ngưỡng chạm 48 dp."
+        }
+      ]
+    },
+    {
+      "iter": 5,
+      "build": {
+        "gitSha": "7b1420e",
+        "note": "hai bản vá D4 và D5, đi lại đúng hai bề mặt đã đổi"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "D4 ĐÃ SỬA: huy hiệu nằm trong nhãn tab, vùng chạm là cả tab",
+          "result": "PASS",
+          "frames": [
+            "round5-5-inline-tutor-fixed.png"
+          ],
+          "note": "Y = 565 px, không đổi."
+        },
+        {
+          "step": "02",
+          "expect": "D5 ĐÃ SỬA: sau «Để sau», dòng hé biến mất nhưng biểu tượng CÒN ở hàng tiêu đề",
+          "result": "PASS",
+          "frames": [
+            "round5-5-peek-collapsed-fixed.png"
+          ],
+          "note": "Y = 634 px (33.0 %) — bằng A."
+        }
+      ]
+    }
+  ]
+}

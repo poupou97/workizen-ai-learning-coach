@@ -44,9 +44,17 @@ void main() {
     final reloaded = JsonlLearnerStore.fromJsonl(store.toJsonl());
     final log = await reloaded.evidenceFor(
         learnerId: 'l1', skillCaseId: 'lkc-nhan-biet-lap-tu');
-    final m = replayMastery(log, BktParams.freeResponse);
+    // ROUND 4 (A-runtime, Founder §4): quiz-select (Scale) has NO registered
+    // validator (Founder decision pending: `pack-option-key-v1`), so under the
+    // default strict policy this event reads as `historicalUnvalidated`
+    // (independentCorrect 0). The round-trip is asserted with the explicit
+    // legacy read rule; the strict truth is asserted alongside.
+    expect(replayMastery(log, BktParams.freeResponse).independentCorrect, 0,
+        reason: 'mặc định siết: quiz-select chưa có validator ⇒ không phải năng lực');
+    final m = replayMastery(log, BktParams.freeResponse,
+        policy: const ConservativeBktPolicy());
     expect(m.independentCorrect, 1,
-        reason: 'bằng chứng TỰ LÀM sống qua surface → kho → replay');
+        reason: 'bằng chứng TỰ LÀM sống qua surface → kho → replay (luật đọc-cũ)');
   });
 
   test('không có sự kiện ⇒ KHÔNG tạo phiên rỗng', () async {

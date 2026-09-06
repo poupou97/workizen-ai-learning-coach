@@ -85,6 +85,13 @@ abstract class EvidenceWeightingPolicy {
 ///
 /// ⚠️ Là GIẢ THUYẾT có lý do, chưa phải kết quả thực nghiệm. Khi có dữ liệu học
 /// sinh thật: khớp lại bằng pyBKT (offline), giữ nguyên log, thay policy.
+///
+/// ⭐⭐ ROUND 4: lớp này giữ NGUYÊN luật đọc-cũ (#63: sự kiện có chấm không dấu
+/// vẫn đẩy belief) dưới id `conservative-bkt-v1` — vì đổi hành vi dưới cùng
+/// một `policyId` là REPLAY SILENTLY REINTERPRET. Nó KHÔNG còn là mặc định:
+/// [replayMastery] mặc định dùng [ValidatedOnlyBktPolicy]. Dùng lớp này
+/// tường minh chỉ để ĐỐI CHIẾU/audit («mastery sẽ ra sao nếu đếm dữ liệu
+/// cũ») — không cho màn hình trẻ/phụ huynh.
 class ConservativeBktPolicy implements EvidenceWeightingPolicy {
   const ConservativeBktPolicy();
 
@@ -167,10 +174,14 @@ class ConservativeBktPolicy implements EvidenceWeightingPolicy {
 
 /// ⭐⭐ WAL-210 round 3 (Founder A3) — luật SIẾT: mastery CHỈ từ sự kiện mang
 /// dấu validator được đăng ký (`hasApprovedValidation`). Sự kiện có chấm
-/// nhưng không dấu (dữ liệu trước hợp đồng, emitter chưa đóng dấu) ⇒ noOp.
-/// Là policy THAY ĐƯỢC (ADR-004): đổi luật = replay, không migration. Chưa là
-/// mặc định — bật mặc định là quyết định Founder (mất «Tự làm được» của toàn
-/// bộ lịch sử trước hợp đồng); xem ROUND3-RUNTIME-CONTRACTS.md §A3.
+/// nhưng không dấu (dữ liệu trước hợp đồng, emitter chưa đóng dấu) ⇒ noOp —
+/// đọc là `historicalUnvalidated`, giữ trong lịch sử, không viết lại.
+/// Là policy THAY ĐƯỢC (ADR-004): đổi luật = replay, không migration.
+///
+/// ⭐⭐ ROUND 4 (Founder §4): ĐÂY LÀ MẶC ĐỊNH của [replayMastery] — mọi màn
+/// đọc mastery qua `masteryFromStore` (Home, Progress, Learning Map, Parent,
+/// Knowledge State, Assessment result) nhận luật này mà không đổi mã gọi.
+/// Hệ quả từng màn: docs/architecture/ROUND4-RUNTIME-CONTRACTS.md.
 class ValidatedOnlyBktPolicy extends ConservativeBktPolicy {
   const ValidatedOnlyBktPolicy();
 
@@ -181,14 +192,19 @@ class ValidatedOnlyBktPolicy extends ConservativeBktPolicy {
   String get policyId => 'validated-only-bkt-v1';
 }
 
+/// ⭐ Luật đọc bằng chứng MẶC ĐỊNH của toàn app (ROUND 4): siết.
+const EvidenceWeightingPolicy defaultEvidencePolicy = ValidatedOnlyBktPolicy();
+
 /// ⭐⭐ Mastery là **giá trị suy ra** = replay log thô qua một policy.
 ///
 /// Đây là điểm F3 khác về chất so với bản vá `SupportLevel`: đổi luật ⇒ tính
 /// lại toàn bộ từ sự kiện gốc. Không gì bị nghiền mất.
+///
+/// ROUND 4: mặc định [defaultEvidencePolicy] (`validated-only-bkt-v1`).
 CaseMastery replayMastery(
   EvidenceLog log,
   BktParams p, {
-  EvidenceWeightingPolicy policy = const ConservativeBktPolicy(),
+  EvidenceWeightingPolicy policy = defaultEvidencePolicy,
 }) {
   var m = CaseMastery.initial(log.skillCaseId, p);
   for (final e in log.events) {

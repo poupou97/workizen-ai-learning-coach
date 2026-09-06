@@ -1,0 +1,56 @@
+{
+  "batch": "batch-1",
+  "pipeline": "legacy-b1",
+  "created": "2026-09-05",
+  "purpose": "Round 4 Lane D — P0 legacy reprocess: Toán two-column + fractions (incl. the geometry-rebuilt expressions case), TV5 two-column reading order / +2 attachment offset, one KHTN two-column lesson. Chosen by failure class from the round-3 false-trust audit (FALSE-TRUST-AUDIT-RESULT-2026-09-05.md §4, §6), not for convenience.",
+  "rules": [
+    "reprocess from the ORIGINAL SOURCE (PDF page + Apple-Vision OCR lines), never from the old units or packs",
+    "REPROCESSED != TRUSTED — the new output is a candidate until independently audited; eligible-for-teaching stays 0 until Founder thresholds",
+    "pages the pipeline cannot process are WITHHELD, never guessed",
+    "nothing in poc-out/ outside poc-out/round4/legacy/ is written; old outputs stay side by side"
+  ],
+  "lessons": [
+    {
+      "book": "04-sgk-toan-4-tap-hai", "lesson": 61, "title": "Phép trừ phân số",
+      "pages_pdf": [80, 81, 82, 83],
+      "risk": ["toan", "two_col", "formula", "order_suspect"],
+      "why": "round-3 rows s20260905-0130..0133 = 4/4 teaching-critical (fractions 3/8, 1/4, 7/12, 1/3 lost; speech bubbles spliced across columns); toanExercises 0418 OK — the one Toán activity that was right, a regression check",
+      "in_113": true, "in_sam_units": true
+    },
+    {
+      "book": "04-sgk-toan-4-tap-hai", "lesson": 73, "title": "Ôn tập chung",
+      "pages_pdf": [116, 117, 118, 119, 120, 121, 122],
+      "risk": ["toan", "two_col", "formula", "attachment_suspect", "geometry_rebuilt_expr"],
+      "why": "the geometry-rebuilt expressions case (0419 «19/33 − 3/5» pairs two printed items); 0149 «1/5 giờ»→«5 giờ» flips an MCQ answer; 0150 the BACK COVER served as an exercise of Bài 73 (attachment class); 0147 table flattened to headers",
+      "in_113": true, "in_sam_units": true
+    },
+    {
+      "book": "05-sgk-toan-5-tap-mot", "lesson": 6, "title": "Cộng, trừ hai phân số khác mẫu số",
+      "pages_pdf": [20, 21, 22, 23, 24],
+      "risk": ["toan", "two_col", "formula", "geometry_rebuilt_expr"],
+      "why": "0424 «2/5 + 1/4» served for printed «2/5 − 1/4» (wrong operator) and 0423 «1/9 + 7/12» assembled from two different items — the second geometry-rebuilt case; 0384/0385 derivations and Tính a)–d) flattened; role error 0385 (exercise as section_text)",
+      "in_113": true, "in_sam_units": true
+    },
+    {
+      "book": "05-sgk-tieng-viet-5-tap-mot", "lesson": 25, "title": "Tiếng đàn ba-la-lai-ca trên sông Đà",
+      "pages_pdf": [122, 123, 124, 125, 126, 127, 128],
+      "risk": ["tv5", "two_col", "order_suspect", "attachment_suspect"],
+      "why": "0311 the two-column poem interleaved line by line (reading-order class); 0312 the counted key word «bỗng» ×3 served with three different tone marks (term class); TV5 TOC pageStart offset (+1..+3) — attachment must come from the printed header, not the TOC",
+      "in_113": true, "in_sam_units": true
+    },
+    {
+      "book": "05-sgk-tieng-viet-5-tap-hai", "lesson": 1, "title": "Tiếng hát của người đá",
+      "pages_pdf": [8, 9, 10, 11, 12, 13, 14],
+      "risk": ["tv5", "two_col", "attachment_suspect", "role_suspect"],
+      "why": "0196 Ghi nhớ definition «vế câu»→«về câu» ×2 (term class in a RULE block); 0197 watermark spliced into a passage; 0427 an «Đọc mở rộng» task served as a comprehension question (role class); tvReadings passage at printed 8 while the TOC says 10 (+2 offset)",
+      "in_113": true, "in_sam_units": true
+    },
+    {
+      "book": "06-sgk-khoa-hoc-tu-nhien-6", "lesson": 11, "title": "Oxygen. Không khí",
+      "pages_pdf": [36, 37, 38, 39, 40, 41, 42],
+      "risk": ["khtn", "two_col", "figure_caption", "role_suspect"],
+      "why": "the pack's khoaExperiments entry serves figure labels («Ống nghiệm», «Nước pha màu-») as Tiến hành steps and drops the experiment index (0077); tc2-p1 already covers these pages, so this lesson doubles as a determinism check (same code, same input, new version directory) and as the figure/caption class",
+      "in_113": true, "in_sam_units": false
+    }
+  ]
+}

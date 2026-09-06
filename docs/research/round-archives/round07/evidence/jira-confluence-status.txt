@@ -1,0 +1,12 @@
+# Atlassian tracker status for ROUND 7 — read by the archive builder on 2026-09-06T07:54:39Z
+# site: workizen.atlassian.net · Jira project WAL · Confluence space WAL (per .workforce.json)
+
+## Jira — JQL: project = WAL AND updated >= "2026-09-06"
+RESULT: 0 issues (re-queried for round 7). Unchanged from the round-6 archive.
+        Newest WAL activity of any kind: 2026-09-05T16:29 (+0700).
+
+## Confluence — space WAL
+RESULT: newest page last-modified 2026-09-02. No page for rounds 3, 4, 5, 6 or 7.
+
+## Consequence
+THREE consecutive rounds have now closed with no tracker artefact of any kind.

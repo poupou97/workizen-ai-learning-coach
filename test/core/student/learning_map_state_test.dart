@@ -6,16 +6,20 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/pedagogy/pedagogy_model.dart'
     show TeachingAct;
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
 import 'package:learning_coach/core/student/learning_map_state.dart';
 
 const _book = '05-sgk-khoa-hoc-5';
 
+/// Sự kiện CÓ CHẤM ở đây mang dấu `fraction-check-v1` (đường Deep thật);
+/// dữ liệu cũ không dấu được dựng riêng ở nhóm ROUND 4 bên dưới.
 LearningEvent _ev(
   EvidenceKind kind, {
   String? sourceDocumentId,
   int? lessonNo,
   bool? correct,
+  bool stamped = true,
 }) =>
     LearningEvent(
       eventId: 'e',
@@ -26,11 +30,17 @@ LearningEvent _ev(
       sourceDocumentId: sourceDocumentId,
       lessonNo: lessonNo,
       act: TeachingAct.askExplanation,
+      validation: (correct != null && stamped) ? _r4Stamp : null,
     );
 
 LearningMapState _state(List<LearningEvent> events, {int lessonNo = 1}) =>
     learningMapStateFor(
         sourceDocumentId: _book, lessonNo: lessonNo, allEvents: events);
+
+/// ROUND 4 (strict default): sự kiện CÓ CHẤM trong test này mô phỏng đường
+/// Deep (TutorSession) — mang dấu `fraction-check-v1` như emitter thật.
+const _r4Stamp =
+    EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
 
 void main() {
   test('⭐ không event nào khớp lineage ⇒ unseen', () {
@@ -150,6 +160,59 @@ void main() {
             allEvents: events),
         LearningMapState.unseen,
         reason: 'cùng số bài, khác sách ⇒ không lẫn');
+  });
+
+  // ---- ROUND 4 / Founder §4 — STRICT EVIDENCE là mặc định ------------------
+
+  test('⭐⭐ ROUND 4: tự làm ĐÚNG nhưng KHÔNG DẤU (dữ liệu trước hợp đồng) ⇒ '
+      'engaged (historicalUnvalidated), KHÔNG «Tự làm được» — không viết lại',
+      () {
+    final legacy = _ev(EvidenceKind.independentAttempt,
+        sourceDocumentId: _book, lessonNo: 1, correct: true, stamped: false);
+    expect(legacy.readClass, EvidenceReadClass.historicalUnvalidated);
+    expect(legacy.isValidatedIndependentSuccess, isFalse);
+    expect(legacy.isLegacyUnstampedSuccess, isTrue);
+    expect(_state([legacy]), LearningMapState.engaged,
+        reason: '⭐⭐ đột biến đọc dữ liệu cũ thành 🔵 ở mặc định ⇒ đỏ');
+    expect(childLabelFor(_state([legacy])).$2.contains('Tự làm'), isFalse);
+    // Luật đọc-cũ chỉ khi GỌI TƯỜNG MINH (audit) — không phải mặc định.
+    expect(
+        learningMapStateFor(
+            sourceDocumentId: _book,
+            lessonNo: 1,
+            allEvents: [legacy],
+            requireValidation: false),
+        LearningMapState.independentEvidence);
+  });
+
+  test('ROUND 4: selfCorrection đúng KHÔNG dấu cũng là historicalUnvalidated ⇒ '
+      'engaged', () {
+    final s = _state([
+      _ev(EvidenceKind.selfCorrection,
+          sourceDocumentId: _book, lessonNo: 1, correct: true, stamped: false),
+    ]);
+    expect(s, LearningMapState.engaged);
+  });
+
+  test('ROUND 4: có dấu được duyệt ⇒ vẫn 🔵 — đường Deep thật không mất gì', () {
+    final s = _state([
+      _ev(EvidenceKind.independentAttempt,
+          sourceDocumentId: _book, lessonNo: 1, correct: true),
+    ]);
+    expect(s, LearningMapState.independentEvidence);
+  });
+
+  test('ROUND 4: nhãn lịch sử của lớp đọc — không «đúng», không «tự làm được»',
+      () {
+    expect(EvidenceReadClass.historicalUnvalidated.historyLabel,
+        historicalUnvalidatedLabel);
+    expect(historicalUnvalidatedLabel, 'ghi nhận trước hợp đồng mới');
+    for (final c in EvidenceReadClass.values) {
+      final l = c.historyLabel.toLowerCase();
+      expect(l.contains('tự làm được'), isFalse, reason: c.name);
+      expect(l.contains('đúng'), isFalse, reason: c.name);
+      expect(RegExp(r'\d|%').hasMatch(l), isFalse, reason: c.name);
+    }
   });
 
   test('⭐ không % hay số nào trong nhãn — chỉ chữ/icon', () {

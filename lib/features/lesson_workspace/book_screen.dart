@@ -5,17 +5,26 @@
 /// mang chương, nên khi không có fixture nào cho cuốn này thì màn này không
 /// được mở (giá sách giữ hành vi cũ) — không có nhóm «bịa».
 ///
+/// ROUND 5 B: khung concept-chuong 3 có ĐÚNG hai tab «Chương | Bài học».
+/// Vòng 4 chỉ có danh sách chương, nên muốn tới một bài trẻ phải đoán nó nằm
+/// chương nào. Tab «Bài học» liệt kê THẲNG mọi bài của cuốn, theo thứ tự mục
+/// lục, dùng chung `LessonRow` với màn Chương ⇒ một vốn từ, một luật màu.
+/// Không thêm dữ liệu nào: cùng `lessons` mục lục và cùng `docs`.
+///
 /// Đường cũ (Book Home + bài đọc / thí nghiệm) vẫn còn, một chạm.
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart' show SchedulerBinding, SchedulerPhase;
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
+import '../../core/display/lesson_title.dart';
 import '../../core/lesson_model/content_trust.dart';
 import '../subjects/lesson_index.dart';
 import 'chapter_screen.dart';
 import 'widgets/fixture_chip.dart';
+import 'widgets/lesson_row.dart';
 import 'workspace_trace.dart';
 
 class BookScreen extends StatelessWidget {
@@ -41,6 +50,9 @@ class BookScreen extends StatelessWidget {
 
   /// Mở Book Home hiện tại (SubjectHomeScreen) — tầng trên dựng.
   final VoidCallback onOpenLegacy;
+
+  static Key tocModeKey(String mode) => Key('book-toc-$mode');
+  static Key lessonFilterKey(String id) => Key('book-lesson-filter-$id');
 
   /// Chương của cuốn: từ fixture đầu tiên có `chapters`; bài không thuộc
   /// chương nào ⇒ nhóm «Bài khác» (nói thật là mục lục chưa xếp được).
@@ -138,14 +150,39 @@ class BookScreen extends StatelessWidget {
                 )
               else
                 const SizedBox(height: WalSpacing.sm - 2),
-              for (final c in chapters) _chapterRow(context, c),
+              // ROUND 4: hàng chương nghe trace ⇒ «Đã xem (phiên này)» hiện
+              // ngay khi quay lại từ Chương/Workspace (dấu vết mở, không
+              // phải trạng thái học).
+              // ROUND 5: hai tab «Chương | Bài học» (khung concept-chuong 3).
+              _TraceRebuilder(
+                trace: trace,
+                builder: (context) => _TocTabs(
+                  chapters: [for (final c in chapters) _chapterRow(context, c)],
+                  lessons: [
+                    for (final l in lessons)
+                      (
+                        hasSam: docs.any((d) => d.lessonNo == l.no),
+                        row: LessonRow(
+                          lesson: l,
+                          doc: docs
+                              .where((d) => d.lessonNo == l.no)
+                              .firstOrNull,
+                          trace: trace,
+                          onOpenLegacy: onOpenLegacy,
+                          learnerId: learnerId,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
               const SizedBox(height: WalSpacing.md),
               Material(
                 color: WalColors.surfaceLavender,
                 borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
                 child: ListTile(
+                  // ROUND 4: không nói «bản hiện tại» với trẻ — chỉ nói có gì.
                   title: const Text(
-                    'Mục lục & hoạt động (bản hiện tại)',
+                    'Các bài khác trong sách',
                     style: TextStyle(
                       fontSize: WalType.body,
                       fontWeight: FontWeight.w600,
@@ -153,7 +190,7 @@ class BookScreen extends StatelessWidget {
                     ),
                   ),
                   subtitle: const Text(
-                    'Danh sách bài + bài đọc / thí nghiệm như trước',
+                    'Danh sách bài + bài đọc / thí nghiệm — như trong Môn học',
                     style: TextStyle(
                       fontSize: WalType.secondary,
                       color: WalColors.inkSoft,
@@ -252,6 +289,9 @@ class BookScreen extends StatelessWidget {
   Widget _chapterRow(BuildContext context, ChapterRef c) {
     final ls = _lessonsOf(c);
     final withSam = docs.where((d) => c.contains(d.lessonNo)).length;
+    final opened = docs.any(
+      (d) => c.contains(d.lessonNo) && trace.opened(d.slotKey),
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: WalSpacing.sm),
       child: Material(
@@ -260,7 +300,7 @@ class BookScreen extends StatelessWidget {
         child: ListTile(
           minVerticalPadding: WalSpacing.sm,
           title: Text(
-            '${c.label} · ${LessonDocument.titleCase(c.title)}',
+            '${c.label} · ${displayTitle(c.title)}',
             style: const TextStyle(
               fontSize: WalType.body,
               fontWeight: FontWeight.w600,
@@ -272,6 +312,7 @@ class BookScreen extends StatelessWidget {
             // đâu trong sách — từ mục lục, không suy thêm.
             withSam > 0
                 ? '${_range(c)}${ls.length} bài · ✨ $withSam bài học SAM'
+                      '${opened ? ' · Đã xem (phiên này)' : ''}'
                 : '${_range(c)}${ls.length} bài',
             style: TextStyle(
               fontSize: WalType.secondary,
@@ -299,4 +340,163 @@ class BookScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Dựng lại con khi trace đổi — HOÃN tới sau khung hình khi trace bắn giữa
+/// lúc build (Workspace mở trong pha build của route mới; cùng lý do
+/// `ChapterScreen._changed`). `ListenableBuilder` gọi setState ngay ⇒ lỗi
+/// «markNeedsBuild during build» (bắt được ở boundary_test).
+class _TraceRebuilder extends StatefulWidget {
+  const _TraceRebuilder({required this.trace, required this.builder});
+  final WorkspaceTrace trace;
+  final WidgetBuilder builder;
+
+  @override
+  State<_TraceRebuilder> createState() => _TraceRebuilderState();
+}
+
+class _TraceRebuilderState extends State<_TraceRebuilder> {
+  @override
+  void initState() {
+    super.initState();
+    widget.trace.addListener(_changed);
+  }
+
+  @override
+  void didUpdateWidget(_TraceRebuilder old) {
+    super.didUpdateWidget(old);
+    if (old.trace != widget.trace) {
+      old.trace.removeListener(_changed);
+      widget.trace.addListener(_changed);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.trace.removeListener(_changed);
+    super.dispose();
+  }
+
+  void _changed() {
+    if (!mounted) return;
+    final phase = SchedulerBinding.instance.schedulerPhase;
+    if (phase == SchedulerPhase.idle ||
+        phase == SchedulerPhase.postFrameCallbacks) {
+      setState(() {});
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context);
+}
+
+/// Hai tab «Chương | Bài học» — chỉ đổi CÁCH XẾP cùng một mục lục.
+///
+/// ROUND 5 D3 (Nokia, lượt 2): KHTN 6 có 55 bài và ĐÚNG MỘT bài có Bài học
+/// SAM. Danh sách thẳng thành ra 54 hàng «Chưa có Bài học SAM» che mất hàng
+/// duy nhất đáng mở — chính điều màn Sách vừa hứa ở đầu trang («✨ 1 bài học
+/// SAM: Bài 17»). Thêm chip lọc CÙNG VỐN TỪ với giá sách. KHÔNG sắp xếp lại
+/// mục lục: lọc chỉ ẩn hàng, thứ tự vẫn là thứ tự sách.
+class _TocTabs extends StatefulWidget {
+  const _TocTabs({required this.chapters, required this.lessons});
+  final List<Widget> chapters;
+  final List<({bool hasSam, Widget row})> lessons;
+
+  @override
+  State<_TocTabs> createState() => _TocTabsState();
+}
+
+class _TocTabsState extends State<_TocTabs> {
+  bool _byLesson = false;
+  bool _samOnly = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final sam = widget.lessons.where((e) => e.hasSam).length;
+    final rows = [
+      for (final e in widget.lessons)
+        if (!_samOnly || e.hasSam) e.row,
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (widget.lessons.isNotEmpty) ...[
+          Row(
+            children: [
+              _tab('Chương', 'chapters', !_byLesson),
+              const SizedBox(width: WalSpacing.sm),
+              _tab('Bài học', 'lessons', _byLesson),
+            ],
+          ),
+          const SizedBox(height: WalSpacing.sm),
+        ],
+        if (_byLesson && sam > 0 && sam < widget.lessons.length) ...[
+          SizedBox(
+            height: WalSpacing.minTouch,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _filter('Tất cả (${widget.lessons.length})', 'all', !_samOnly),
+                _filter('✨ Bài học SAM ($sam)', 'sam', _samOnly),
+              ],
+            ),
+          ),
+          const SizedBox(height: WalSpacing.sm),
+        ],
+        ...(_byLesson ? rows : widget.chapters),
+      ],
+    );
+  }
+
+  Widget _filter(String label, String id, bool selected) => Padding(
+    padding: const EdgeInsets.only(right: WalSpacing.sm),
+    child: ChoiceChip(
+      key: BookScreen.lessonFilterKey(id),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: WalType.secondary,
+          fontWeight: FontWeight.w600,
+          color: selected ? Colors.white : WalColors.ink,
+        ),
+      ),
+      selected: selected,
+      selectedColor: WalColors.primary500,
+      backgroundColor: Colors.white,
+      showCheckmark: false,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+      ),
+      onSelected: (_) => setState(() => _samOnly = id == 'sam'),
+    ),
+  );
+
+  Widget _tab(String label, String id, bool selected) => Expanded(
+    child: SizedBox(
+      height: WalSpacing.minTouch,
+      child: Material(
+        color: selected ? WalColors.primary500 : Colors.white,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
+        child: InkWell(
+          key: BookScreen.tocModeKey(id),
+          borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
+          onTap: () => setState(() => _byLesson = id == 'lessons'),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: WalType.body,
+                fontWeight: FontWeight.w700,
+                color: selected ? Colors.white : WalColors.ink,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

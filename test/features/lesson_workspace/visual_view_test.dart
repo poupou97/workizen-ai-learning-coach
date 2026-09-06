@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/content_trust.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
 import 'package:learning_coach/core/lesson_model/semantic_data.dart';
+import 'package:learning_coach/features/lesson_workspace/views/mindmap_view.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_view.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/tech_details.dart';
 
 import 'support.dart';
 
@@ -52,6 +54,11 @@ void main() {
     await t.tap(find.byKey(const Key('visual-trust-link')));
     await t.pumpAndSettle();
     expect(find.byKey(const Key('trust-sheet')), findsOneWidget);
+    // ROUND 4: mã luật sau nếp gấp kỹ thuật (đóng mặc định).
+    expect(find.textContaining('luật synthetic'), findsNothing);
+    await t.ensureVisible(find.byKey(TechDetails.foldKey));
+    await t.tap(find.byKey(TechDetails.foldKey));
+    await t.pumpAndSettle();
     expect(find.textContaining('luật synthetic'), findsWidgets);
   });
 
@@ -79,7 +86,10 @@ void main() {
     expect(shown, contains(':synthetic:'));
   });
 
-  testWidgets('bảng so sánh: thực thể × chiều, chữ sách', (t) async {
+  testWidgets('ROUND 5: hình dạng so sánh mở ra SƠ ĐỒ TƯ DUY (khung concept) '
+      '— nút trung tâm là tiêu đề dữ liệu, mỗi cách một nút mang chữ sách', (
+    t,
+  ) async {
     await t.pumpWidget(
       fixtureHost(
         Scaffold(
@@ -88,11 +98,40 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    await t.tap(find.textContaining('Bảng so sánh'));
+    await t.tap(find.byKey(VisualView.shapeKey('Bảng so sánh')));
     await t.pumpAndSettle();
+    expect(find.byKey(MindmapView.viewKey), findsOneWidget);
+    expect(find.byKey(MindmapView.hubKey), findsOneWidget);
+    expect(find.text('Các cách tách chất (mẫu)'), findsOneWidget);
+    expect(find.text('Lọc (mẫu)'), findsOneWidget);
+    expect(find.text('Cô cạn (mẫu)'), findsOneWidget);
+    expect(find.textContaining('hạt rắn không tan'), findsOneWidget);
+    // màu là trang trí, và màn NÓI ĐÚNG THẾ với trẻ
+    expect(find.textContaining('màu chỉ để phân biệt'), findsOneWidget);
+  });
+
+  testWidgets('ROUND 5: nút chuyển «Bảng» vẫn cho bảng cũ, cùng dữ liệu', (
+    t,
+  ) async {
+    await t.pumpWidget(
+      fixtureHost(
+        Scaffold(
+          body: VisualView(doc: loadSyntheticDoc(), onShowInRead: (_) {}),
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(VisualView.shapeKey('Bảng so sánh')));
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(VisualView.comparisonViewKey('table')));
+    await t.pumpAndSettle();
+    expect(find.byKey(MindmapView.viewKey), findsNothing);
     expect(find.text('Dùng để tách'), findsOneWidget);
     expect(find.text('Lọc (mẫu)'), findsOneWidget);
     expect(find.textContaining('hạt rắn không tan'), findsOneWidget);
+    await t.tap(find.byKey(VisualView.comparisonViewKey('mindmap')));
+    await t.pumpAndSettle();
+    expect(find.byKey(MindmapView.viewKey), findsOneWidget);
   });
 
   testWidgets('bảng tóm tắt (fallback) = mục tiêu + «Em đã học» nguyên văn', (
@@ -223,6 +262,7 @@ void main() {
       expect(find.text(leaf), findsOneWidget);
     }
     expect(find.text('tách bằng'), findsNWidgets(2));
+    expect(find.byKey(MindmapView.viewKey), findsOneWidget);
     // quan hệ không chạm nút trung tâm ⇒ thẻ bên dưới, không bị bỏ
     expect(find.textContaining('Giấy lọc'), findsOneWidget);
     expect(find.textContaining('4 quan hệ'), findsOneWidget);

@@ -38,10 +38,15 @@ Future<void> _pump(WidgetTester t) async {
 }
 
 void main() {
+// ⭐ ROUND 7 · WS-S — QUYẾT ĐỊNH CỦA FOUNDER: tiêu đề hiển thị NGUYÊN VĂN NGUỒN.
+// Các kỳ vọng dưới đây từng ghim chuỗi ĐÃ ĐƯỢC HẠ CHỮ; nay chúng ghim đúng chuỗi
+// mà fixture của chính test này mang. Sửa TIỀN ĐỀ, không nới assertion: mỗi kỳ
+// vọng vẫn đòi một chuỗi CỤ THỂ, chỉ là chuỗi thật thay vì chuỗi biến đổi.
+
   testWidgets('bài CHỈ có đọc ⇒ mở thẳng Reader, không sheet', (t) async {
     await _pump(t);
     expect(find.textContaining('1 bài đọc từ SGK'), findsOneWidget);
-    await t.tap(find.textContaining('Thanh âm của gió'));
+    await t.tap(find.textContaining('THANH ÂM CỦA GIÓ'));
     await t.pumpAndSettle();
     expect(find.text('Con đọc xong rồi 📖'), findsOneWidget,
         reason: 'một hoạt động ⇒ vào thẳng, không hỏi thừa');
@@ -52,7 +57,7 @@ void main() {
     await _pump(t);
     expect(find.textContaining('1 bài đọc · 1 đề viết'), findsOneWidget,
         reason: 'subtitle kể ĐỦ hoạt động — không nuốt');
-    await t.tap(find.textContaining('Luyện viết').first.hitTestable(),
+    await t.tap(find.textContaining('LUYỆN VIẾT').first.hitTestable(),
         warnIfMissed: false);
     // tile title là «Bài 4 · Luyện viết» — tap tile:
     await t.tap(find.textContaining('Bài 4'));

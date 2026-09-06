@@ -9,7 +9,9 @@
 /// - `fromJson` fail-closed: JSON lệch ⇒ `null`, không tài liệu nửa vời.
 library;
 
+import '../display/lesson_title.dart';
 import 'content_trust.dart';
+import 'repair_record.dart';
 import 'semantic_data.dart';
 import 'tutor_script.dart';
 
@@ -83,6 +85,66 @@ class SourceRef {
 /// cầu nguyên trạng từ TSL (`heading_path`, `refers_figure`, `caption` của
 /// figure, `order`, `enumerator_restored`). Thiếu ⇒ rỗng: đây là siêu dữ liệu
 /// dẫn đường, KHÔNG phải trust — không có nó tài liệu vẫn parse.
+/// ⭐ ROUND 7 (WS-S) — MỘT NHÓM CẤU TRÚC, mang như XUẤT XỨ, không phải nội dung.
+///
+/// Lỗi số 8 của vòng 5: *giữ lại MỘT phương án của câu trắc nghiệm khiến câu
+/// ĐƯỢC PHỤC VỤ trở nên SAI, chứ không phải ngắn đi.* Nên với block có anh em
+/// cấu trúc (OPTION ⊂ QUESTION, chú thích ⊂ hình, hàng của bảng, bước của quy
+/// trình) thì NHÓM mới là đơn vị định đoạt. Một nhóm phục vụ thiếu thành viên
+/// là **cấu trúc bị cắt xén** — và đó là lỗi dạy học do chính cơ chế an toàn
+/// gây ra.
+///
+/// Kiểu này KHÔNG mở thêm đường nào cho chữ. Nó chỉ mang bốn con số: nhóm nào,
+/// loại gì, mấy thành viên, mấy thành viên bị giữ lại. Nhờ vậy app (và một test
+/// canh) **NHÌN THẤY và ĐẾM ĐƯỢC** rằng một block đang phục vụ thuộc một cấu
+/// trúc bị cắt xén, mà không hề có cách nào đọc thành viên còn thiếu — đúng
+/// khuôn `ValidatedRepair` của vòng 6: thấy được, đếm được, vẫn không đọc được.
+///
+/// `withheldMembers` mô tả TÀI LIỆU ĐANG CẦM, không phải một trạng thái trước
+/// đó. Vòng 5 đã bắt được đúng lỗi này ở khâu tuần tự hoá: một bản ghi lặng lẽ
+/// nói nội dung có nền tảng chắc hơn thực tế.
+class BlockGroup {
+  const BlockGroup({
+    required this.id,
+    required this.kind,
+    required this.members,
+    required this.withheldMembers,
+  });
+
+  final String id;
+
+  /// `question_options` · `figure_caption` · `table_rows` · `procedure_steps` —
+  /// NGUYÊN VĂN mã máy, không dịch, không gộp. Mã máy KHÔNG BAO GIỜ hiện cho trẻ.
+  final String kind;
+  final int members;
+  final int withheldMembers;
+
+  /// Nhóm này có thành viên bị giữ lại ⇒ nếu còn thành viên được phục vụ thì
+  /// cấu trúc đang BỊ CẮT XÉN.
+  bool get hasWithheldMember => withheldMembers > 0;
+  bool get isComplete => withheldMembers == 0;
+
+  /// Fail-closed: thiếu trường, sai kiểu, số âm, hoặc `withheldMembers` lớn hơn
+  /// `members` ⇒ `null`. Một nhóm khai bậy không được phép thành một nhóm lành.
+  static BlockGroup? fromJson(Object? v) {
+    if (v is! Map) return null;
+    final id = v['id'], kind = v['kind'];
+    final m = v['members'], w = v['withheldMembers'];
+    if (id is! String || id.isEmpty || kind is! String || kind.isEmpty) return null;
+    if (m is! num || w is! num) return null;
+    final mi = m.toInt(), wi = w.toInt();
+    if (mi < 1 || wi < 0 || wi > mi) return null;
+    return BlockGroup(id: id, kind: kind, members: mi, withheldMembers: wi);
+  }
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'kind': kind,
+    'members': members,
+    'withheldMembers': withheldMembers,
+  };
+}
+
 class BlockRelations {
   const BlockRelations({
     this.headingPath = const [],
@@ -90,6 +152,7 @@ class BlockRelations {
     this.captionOf,
     this.order,
     this.enumeratorRestored = false,
+    this.group,
   });
 
   static const empty = BlockRelations();
@@ -107,12 +170,19 @@ class BlockRelations {
   final int? order;
   final bool enumeratorRestored;
 
+  /// ⭐ Round 7 (WS-S): nhóm cấu trúc block này thuộc về. `null` ⇒ **chưa đo**,
+  /// KHÔNG phải «không thuộc nhóm nào» và KHÔNG phải «nhóm còn nguyên». Cầu nối
+  /// chỉ ghi trường này khi được bảo chạy máy đo nhóm; vắng mặt là cách nói thật
+  /// rằng câu hỏi chưa được đặt ra.
+  final BlockGroup? group;
+
   bool get isEmpty =>
       headingPath.isEmpty &&
       !refersFigure &&
       captionOf == null &&
       order == null &&
-      !enumeratorRestored;
+      !enumeratorRestored &&
+      group == null;
 
   static BlockRelations fromJson(Object? v) {
     if (v is! Map) return empty;
@@ -125,6 +195,7 @@ class BlockRelations {
       captionOf: v['captionOf'] as String?,
       order: (v['order'] as num?)?.toInt(),
       enumeratorRestored: v['enumeratorRestored'] == true,
+      group: BlockGroup.fromJson(v['group']),
     );
   }
 
@@ -134,6 +205,7 @@ class BlockRelations {
     if (captionOf != null) 'captionOf': captionOf,
     if (order != null) 'order': order,
     if (enumeratorRestored) 'enumeratorRestored': true,
+    if (group != null) 'group': group!.toJson(),
   };
 }
 
@@ -194,6 +266,60 @@ sealed class LessonBlock {
     if (!relations.isEmpty) 'relations': relations.toJson(),
   };
 
+  /// Các `type` mô hình này BIẾT. Dùng để phân biệt «pack mới hơn app»
+  /// (lệch phiên bản) với «block hỏng» (vi phạm toàn vẹn) — hai chuyện khác
+  /// nhau, và gộp chúng lại là lý do một bài học lành bị từ chối trọn vẹn.
+  static const knownTypes = <String>{
+    'heading',
+    'paragraph',
+    'image',
+    'caption',
+    'table',
+    'question',
+    'activity',
+    'withheld',
+    'sourceRef',
+  };
+
+  /// ⭐ Round 6 (WS-C) — CHẾ ĐỘ HỎNG THEO TỪNG BLOCK, chỉ cho LỆCH PHIÊN BẢN.
+  ///
+  /// `LessonDocument.fromJson` fail-closed ở mức TÀI LIỆU: một block hỏng ⇒
+  /// không tài liệu nửa vời. Đó là thiết kế CỐ Ý và vẫn giữ nguyên cho mọi vi
+  /// phạm toàn vẹn. Nhưng nó cũng có nghĩa: một pack sinh bởi cầu MỚI HƠN app
+  /// làm CẢ BÀI HỌC biến mất — «pack và app phải ra cùng nhau», một luật giao
+  /// hàng, không phải một luật an toàn.
+  ///
+  /// Hàm này hạ đúng MỘT trường hợp đó xuống mức block: một `type` app chưa
+  /// biết trở thành một VÙNG BỊ GIỮ LẠI có lý do thật, được ĐẾM. Nó KHÔNG thể
+  /// thành đường sống cho nội dung xấu, vì:
+  /// - kết quả luôn là `WithheldBlock`, kiểu KHÔNG CÓ trường chữ — không byte
+  ///   chữ nào của block lạ đọc được, dù JSON có `text`;
+  /// - `trust` bị ÉP về `withheld`, bất kể pack khai gì;
+  /// - lý do `unsupported_block_type:<type>` nằm trên thẻ và được đếm ở
+  ///   `LessonDocument.unsupportedBlockTypes` — không có mất mát im lặng;
+  /// - mọi vi phạm toàn vẹn (thiếu id/sourceRef, `withheld` mà có chữ, block
+  ///   phục vụ mang `repair`, `withheld` không lý do…) VẪN từ chối cả tài liệu.
+  static WithheldBlock? unsupported(Map<String, Object?> j) {
+    final type = j['type'];
+    if (type is! String || type.isEmpty || knownTypes.contains(type)) {
+      return null; // không phải lệch phiên bản ⇒ không cứu
+    }
+    if (j['repair'] != null) return null; // dấu vết sửa chữa chỉ ở trên `withheld`
+    final id = j['id'];
+    final ref = SourceRef.fromJson(j['sourceRef']);
+    if (id is! String || id.isEmpty || ref == null) return null;
+    return WithheldBlock(
+      id: id,
+      sourceRef: ref,
+      trust: ContentTrust.withheld, // ÉP, không đọc từ pack
+      sourceRole: j['sourceRole'] is String ? j['sourceRole'] as String : null,
+      relations: BlockRelations.fromJson(j['relations']),
+      reasons: ['unsupported_block_type:$type'],
+      status: 'WITHHELD',
+      crop: j['crop'] is String ? j['crop'] as String : null,
+    );
+  }
+
   static LessonBlock? fromJson(Map<String, Object?> j) {
     final id = j['id'];
     final ref = SourceRef.fromJson(j['sourceRef']);
@@ -202,6 +328,10 @@ sealed class LessonBlock {
     // ⭐⭐ WITHHELD ≠ TRUSTED: trust `withheld` chỉ được đứng trên block
     // KHÔNG CÓ CHỮ. Block chữ mà khai `withheld` ⇒ tài liệu bị từ chối.
     if (!trust.mayCarryText && j['type'] != 'withheld') return null;
+    // ⭐ Round 6 (WS-C): CHỈ vùng bị giữ lại được mang dấu vết sửa chữa. Một
+    // block PHỤC VỤ mang `repair` chính là hình dạng của «một sửa chữa chưa
+    // được cổng nào duyệt đã được đem phục vụ» ⇒ từ chối cả tài liệu.
+    if (j['repair'] != null && j['type'] != 'withheld') return null;
     final conf = (j['roleConfidence'] as num?)?.toDouble();
     final role = j['sourceRole'] is String ? j['sourceRole'] as String : null;
     final method = j['roleMethod'] is String ? j['roleMethod'] as String : null;
@@ -325,6 +455,14 @@ sealed class LessonBlock {
         }
         if (reasons.isEmpty) return null;
         final status = j['status'];
+        // ⭐ Round 6 (WS-C): có `repair` mà đọc không được ⇒ `null` ⇒ tài liệu
+        // bị từ chối. Một bản ghi sửa chữa hỏng KHÔNG được im lặng biến mất:
+        // đó lại đúng là «mất im lặng» mà R13 đã tìm ra ở đầu kia đường ống.
+        ValidatedRepairRef? repair;
+        if (j['repair'] != null) {
+          repair = ValidatedRepairRef.fromJson(j['repair']);
+          if (repair == null) return null;
+        }
         // ⭐ Cố ý KHÔNG đọc `text` dù JSON có — bị giữ lại là bị giữ lại.
         return WithheldBlock(
           id: id,
@@ -335,6 +473,7 @@ sealed class LessonBlock {
           reasons: reasons,
           status: status is String && status.isNotEmpty ? status : null,
           crop: j['crop'] as String?,
+          repair: repair,
         );
       case 'sourceRef':
         final t = text();
@@ -521,6 +660,7 @@ final class WithheldBlock extends LessonBlock {
     required this.reasons,
     this.status,
     this.crop,
+    this.repair,
   });
 
   /// Mã lý do của pipeline (`page_feature:diagram`, `math_guard`,
@@ -530,6 +670,16 @@ final class WithheldBlock extends LessonBlock {
   /// `WITHHELD` / `CONFLICT` theo TSL; `null` ⇒ fixture cũ / mẫu.
   final String? status;
   final String? crop;
+
+  /// ⭐ Round 6 (WS-C): dấu vết một sửa chữa ĐÃ ĐƯỢC KIỂM CHỨNG cho vùng này.
+  /// `null` ⇒ không có. Có ⇒ **vùng vẫn bị giữ lại, vẫn không có chữ** — cái nó
+  /// thêm vào là: nhìn thấy được và đếm được. NỐI ≠ TIN.
+  /// Trường này CHỈ có trên `WithheldBlock`, cố ý: một block phục vụ không có
+  /// chỗ để đặt nó, nên không có đường nào để nó phục vụ giá trị được sửa.
+  final ValidatedRepairRef? repair;
+
+  /// Có một sửa chữa đã kiểm chứng đang chờ cổng tin của Founder.
+  bool get hasValidatedRepair => repair != null;
 
   /// Dạng chuỗi «a,b» — giữ cho UI cũ (`withheld_card.dart`).
   String get reason => reasons.join(',');
@@ -541,6 +691,8 @@ final class WithheldBlock extends LessonBlock {
     'reasons': reasons,
     if (status != null) 'status': status,
     if (crop != null) 'crop': crop,
+    if (repair != null) 'repair': repair!.toJson(),
+    if (repair != null) 'disposition': repair!.disposition.wire,
   };
 }
 
@@ -822,6 +974,7 @@ class LessonDocument {
     this.evidencePolicy = EvidencePolicy.none,
     this.licence = ContentLicence.internalResearchOnly,
     this.assetBase = '',
+    this.unsupportedBlockTypes = const [],
   });
 
   static const schemaV1 = 'wal-lesson-fixture-v1';
@@ -850,6 +1003,70 @@ class LessonDocument {
   /// đặt; `ImageBlock.crop` nối vào đây.
   final String assetBase;
 
+  /// ⭐ Round 6 (WS-C): các `type` block pack này mang mà app CHƯA BIẾT, mỗi cái
+  /// một lần, theo thứ tự gặp. Chúng đã thành `WithheldBlock` có lý do
+  /// `unsupported_block_type:*` — KHÔNG bị bỏ. Danh sách này là để chuyện đó
+  /// **đếm được**: một pack mới hơn app là một sự kiện phải nhìn thấy, không
+  /// phải một bài học lặng lẽ nghèo đi. Rỗng ⇒ pack và app cùng phiên bản.
+  final List<String> unsupportedBlockTypes;
+
+  /// Pack này mới hơn app.
+  bool get hasUnsupportedBlocks => unsupportedBlockTypes.isNotEmpty;
+
+  /// ⭐ Round 6 (WS-C): các vùng bị giữ lại đã có một sửa chữa ĐƯỢC KIỂM CHỨNG
+  /// đang chờ cổng tin của Founder. NỐI ≠ TIN: đếm được, nhìn thấy được, vẫn
+  /// không có chữ.
+  List<WithheldBlock> get validatedRepairs => [
+    for (final b in blocks)
+      if (b is WithheldBlock && b.hasValidatedRepair) b,
+  ];
+
+  /// Bất biến, không phải phép đo: KHÔNG sửa chữa nào ở đây là tin được.
+  int get trustedRepairCount => 0;
+
+  /// ⭐ Round 7 (WS-S): các NHÓM CẤU TRÚC bài học này mang, theo thứ tự gặp.
+  /// Rỗng có HAI nghĩa khác nhau và tài liệu không được phép trộn chúng: pack
+  /// chưa hề đo nhóm (`hasGroupMeasurement == false`), hay pack đo rồi và bài
+  /// này không có nhóm nào. Luôn hỏi `hasGroupMeasurement` trước khi đọc số 0.
+  Map<String, BlockGroup> get structuralGroups {
+    final m = <String, BlockGroup>{};
+    for (final b in blocks) {
+      final g = b.relations.group;
+      if (g != null) m.putIfAbsent(g.id, () => g);
+    }
+    return m;
+  }
+
+  /// Pack có mang phép đo nhóm hay không. `false` ⇒ mọi con số nhóm bên dưới là
+  /// «chưa đo», không phải «bằng không».
+  bool get hasGroupMeasurement => blocks.any((b) => b.relations.group != null);
+
+  /// ⭐⭐ CẤU TRÚC BỊ CẮT XÉN: nhóm có ÍT NHẤT MỘT thành viên đang được phục vụ
+  /// và ít nhất một thành viên bị giữ lại. Đây là lỗi số 8 của vòng 5 — một lỗi
+  /// dạy học do chính cơ chế an toàn gây ra — nên nó phải ĐẾM ĐƯỢC ở tầng mô
+  /// hình, chứ không chỉ trong một script đo ngoài repo.
+  ///
+  /// Đếm được KHÔNG phải sửa được: mô hình không có cách nào lấy lại thành viên
+  /// bị giữ lại, và không được phép có. Việc quyết định phục vụ cả nhóm hay giữ
+  /// cả nhóm nằm ở cầu nối và ở cổng của Founder.
+  List<BlockGroup> get mutilatedGroups {
+    final served = <String, bool>{};
+    final byId = <String, BlockGroup>{};
+    for (final b in blocks) {
+      final g = b.relations.group;
+      if (g == null) continue;
+      byId.putIfAbsent(g.id, () => g);
+      served[g.id] = (served[g.id] ?? false) || b is! WithheldBlock;
+    }
+    return [
+      for (final e in byId.entries)
+        if (e.value.hasWithheldMember && (served[e.key] ?? false)) e.value,
+    ];
+  }
+
+  /// Bài học này có đang phục vụ một cấu trúc bị cắt xén không.
+  bool get hasMutilatedStructure => mutilatedGroups.isNotEmpty;
+
   ContentTrust get trust => provenance.trust;
   bool get isFixture => trust.requiresFixtureChip;
   String get slotKey => '$book#$lessonNo';
@@ -864,14 +1081,19 @@ class LessonDocument {
     return m;
   }
 
-  /// «HỖN HỢP. TÁCH CHẤT…» → «Hỗn hợp. Tách chất…»: viết hoa đầu chuỗi và
-  /// sau dấu kết câu (Nokia n1 D1: «Hỗn hợp. tách chất» — chữ thường sau «.»).
-  static String titleCase(String upper) => upper.toLowerCase().replaceAllMapped(
-    RegExp(r'(^\s*|[.!?]\s*)(\S)', unicode: true),
-    (m) => '${m[1]}${m[2]!.toUpperCase()}',
-  );
-
-  String get lessonLabel => 'Bài $lessonNo · ${titleCase(title)}';
+  /// ⭐ ROUND 7 (WS-S, HO-1 từ WS-R) — `titleCase` ĐÃ BỊ XOÁ.
+  ///
+  /// Nó `toLowerCase()` TOÀN CHUỖI rồi mới viết hoa lại đầu câu, và đó là
+  /// nguyên nhân gốc của «thời kì **b**ắc thuộc» trên máy thật. Quyết định của
+  /// Founder ở vòng 7 là **GIỮ NGUYÊN VĂN NGUỒN**, nên phép biến đổi ấy không
+  /// còn được phép chạy ở đâu cả — và **một phép biến đổi không bao giờ được
+  /// chạy thì tốt hơn là bị xoá, chứ không phải để đó nạp sẵn.** Ứng viên chuẩn
+  /// hoá (chưa bật, có điều kiện bật) nằm ở `lib/core/display/lesson_title.dart`
+  /// dưới tên `sentenceCaseAllCaps`, cùng nghĩa vụ chứng minh của nó.
+  ///
+  /// Nhãn bài học uỷ quyền cho LUẬT DUY NHẤT. Không dựng chuỗi tại chỗ: hai chỗ
+  /// dựng một nhãn là cách để chúng lệch nhau vào ngày phép chuẩn hoá được bật.
+  String get lessonLabel => displayLessonLabel(lessonNo, title);
 
   /// «SGK KHTN 6 · trang 60–63» — chỉ từ trang IN; thiếu ⇒ nói thật.
   String get pageRangeLine {
@@ -996,9 +1218,13 @@ class LessonDocument {
     return rows;
   }
 
+  /// `strictBlockTypes: true` khôi phục hành vi cũ hoàn toàn: một `type` lạ
+  /// cũng từ chối cả tài liệu. Dùng cho cổng đóng gói — nơi «pack mới hơn app»
+  /// phải là LỖI, không phải một thẻ giữ lại.
   static LessonDocument? fromJson(
     Map<String, Object?> j, {
     String assetBase = '',
+    bool strictBlockTypes = false,
   }) {
     if (j['schema'] != schemaV1) return null;
     final book = j['book'], bt = j['bookTitle'], subj = j['subject'];
@@ -1013,10 +1239,21 @@ class LessonDocument {
     final licence = ContentLicence.parse(j['licence']);
     if (licence == null) return null;
     final blocks = <LessonBlock>[];
+    final unsupported = <String>[];
     for (final b in (j['blocks'] as List? ?? const []).whereType<Map>()) {
-      final blk = LessonBlock.fromJson(b.cast<String, Object?>());
-      if (blk == null) return null; // một block hỏng ⇒ không tài liệu nửa vời
-      blocks.add(blk);
+      final raw = b.cast<String, Object?>();
+      final blk = LessonBlock.fromJson(raw);
+      if (blk != null) {
+        blocks.add(blk);
+        continue;
+      }
+      // ⭐ Round 6 (WS-C): CHỈ lệch phiên bản mới được hạ xuống mức block. Mọi
+      // vi phạm toàn vẹn vẫn ⇒ không tài liệu nửa vời (bất biến gốc, dòng 9).
+      final salvaged = strictBlockTypes ? null : LessonBlock.unsupported(raw);
+      if (salvaged == null) return null;
+      final t = raw['type'] as String;
+      if (!unsupported.contains(t)) unsupported.add(t);
+      blocks.add(salvaged);
     }
     if (blocks.isEmpty) return null;
     final semantic = <SemanticData>[];
@@ -1055,6 +1292,7 @@ class LessonDocument {
       semantic: semantic,
       tutorScript: script,
       assetBase: assetBase,
+      unsupportedBlockTypes: unsupported,
     );
   }
 

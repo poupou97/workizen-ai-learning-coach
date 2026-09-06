@@ -30,6 +30,22 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from common import FAMILY_ORDER, dump, family_of, load_census_pages, load_curriculum, load_pack_index, pct, root, shape_hits, write_md  # noqa: E402
 
+
+def _leaves(v):
+    """Leaf records of a pack family, whether it is a flat list or a dict of lists.
+
+    Round 7 permanent rule: a derived metric must be re-derivable from LEAF records. Reading a
+    count off a keyed container without checking the container's shape produces a number that is
+    the right type and the wrong quantity, which passes every check that is not a re-derivation.
+    """
+    if isinstance(v, dict):
+        out = []
+        for x in v.values():
+            out.extend(x if isinstance(x, list) else [x])
+        return out
+    return v or []
+
+
 FEATURES = ['formula', 'table', 'diagram', 'sidebar', 'side_by_side', 'color_heavy', 'figure', 'colored_box', 'two_col', 'continuation']
 PACK_KEYS = ['toanExercises', 'tvReadings', 'tvWritings', 'suSources', 'khoaExperiments', 'diaMaps']
 
@@ -140,8 +156,13 @@ def main():
         if not p:
             continue
         for key in PACK_KEYS:
-            for e in p.get(key) or []:
-                if not isinstance(e, dict):  # some packs carry bare ids (e.g. toanExercises)
+            # Round 7 (WS-M): `toanExercises` is a DICT keyed by lesson number whose values are
+            # LISTS of expressions. Iterating it yielded lesson-number STRINGS, every one of which
+            # failed `isinstance(e, dict)` and was filed as a phantom `_non_dict_entries` — the old
+            # comment here («some packs carry bare ids») was a misdiagnosis of this very bug.
+            # `_leaves` flattens a keyed container to its leaf records; a flat list is unchanged.
+            for e in _leaves(p.get(key)):
+                if not isinstance(e, dict):
                     wired['_non_dict_entries'][key] += 1
                     continue
                 book = e.get('book') or e.get('sourceDocumentId')

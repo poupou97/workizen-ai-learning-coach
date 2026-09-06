@@ -16,7 +16,7 @@ Every pack now carries a top-level ``buildProvenance`` (schema 1):
      "grade": N,
      "flags": {"PATTERN_ROUTER": "0|1", "UNITS_SOURCE": "<value or ''>", "ROUTE_EXPLAIN": "0|1"},
      "experimental": true iff PATTERN_ROUTER=1 or any activity source starts with "pattern-router",
-     "attachmentRule": "capped-toc-v1",
+     "attachmentRule": "capped-toc-v2",
      "contentHash": "<sha256 hex of the canonical JSON (sort_keys, separators=(',',':'),
                       ensure_ascii=False) of the pack with buildProvenance removed>",
      "packVersion": "g<N>-<builtAt as YYYYMMDDTHHMMZ>-<gitSha[:8]>"}
@@ -41,7 +41,12 @@ import sys
 from datetime import datetime, timezone
 
 SCHEMA = 1
-ATTACHMENT_RULE = 'capped-toc-v1'
+# Round 4: the rule name is owned by lesson_attach, not duplicated here — a pack that
+# stamps a rule it was not built with is a provenance lie (found by the round-4 review).
+try:  # pragma: no cover - import shape depends on caller
+    from lesson_attach import RULE as ATTACHMENT_RULE
+except ImportError:
+    from tool.ui.lesson_attach import RULE as ATTACHMENT_RULE
 BUILDER_NAME = 'build_lesson_index.py'
 ROUTER_FAMILIES = ('tvReadings', 'tvWritings')
 ROUTER_PREFIX = 'pattern-router'

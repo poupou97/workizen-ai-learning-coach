@@ -5,6 +5,7 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/pedagogy/pedagogy_model.dart'
     show TeachingAct;
+import 'package:learning_coach/core/student/evidence_validation.dart';
 import 'package:learning_coach/core/store/learner_profile.dart';
 import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
@@ -24,7 +25,13 @@ LearningEvent _ev(String id, EvidenceKind k,
       support: support,
       policyId: 'tutor-session-v1',
       priorEventId: prior,
+      validation: correct == null ? null : _r4Stamp,
     );
+
+/// ROUND 4 (strict default): sự kiện CÓ CHẤM trong test này mô phỏng đường
+/// Deep (TutorSession) — mang dấu `fraction-check-v1` như emitter thật.
+const _r4Stamp =
+    EvidenceValidation(validatorId: 'fraction-check-v1', validatorVersion: '1');
 
 void main() {
   group('§1 profile — ba bất biến', () {

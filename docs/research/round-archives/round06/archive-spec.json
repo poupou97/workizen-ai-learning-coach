@@ -1,0 +1,57 @@
+{
+  "schema": "wal-round-archive-spec-v1",
+  "round": "06",
+  "roundLabel": "Round 6 — VERIFIED ACCURACY -> REAL PRODUCT",
+  "closeDate": "2026-09-06",
+  "closeDateEvidence": "Consolidated report dated 2026-09-06; last round-6 commit d5a9946 (composition CI) on 2026-09-06; PRs #89-#93 all opened and CI-green the same day; device evidence manifest generatedAt 2026-09-06T04:30:13Z; GATE E packs built 2026-09-06T04:24:15Z. No round-6 PR was merged, so no merge date exists.",
+  "classification": "INTERNAL / RESEARCH ONLY - DO NOT PUBLISH. Contains verbatim SGK text (device frames, two real lesson fixtures, twelve lesson packs) under Founder rule D4.",
+  "rootDir": "ROUND-06",
+  "archiveNameTemplate": "HOC-CUNG-SAM-ROUND-{round}-{closeDate}.zip",
+
+  "requiredDocs": [
+    "00-START-HERE.md",
+    "01-ROUND-OBJECTIVE.md",
+    "02-PLAN-VS-ACTUAL.md",
+    "03-WORK-COMPLETED.md",
+    "04-FAILURES-AND-FALSIFICATIONS.md",
+    "05-METRICS-BEFORE-AFTER.md",
+    "06-PRODUCT-REALITY.md",
+    "07-TEST-CI-PR-EVIDENCE.md",
+    "08-DEVICE-EVIDENCE.md",
+    "09-ARCHITECTURE-DATA-CHANGES.md",
+    "10-OPEN-RISKS-BLOCKERS.md",
+    "11-FOUNDER-ACCEPTANCE-CARD.md",
+    "12-NEXT-ROUND-PLAN.md",
+    "13-REMAINING-ROADMAP.md",
+    "14-JIRA-CONFLUENCE-STATUS.md",
+    "15-FILE-MANIFEST.md"
+  ],
+  "generatedDocs": ["15-FILE-MANIFEST.md"],
+  "requiredDirs": ["evidence", "metrics", "screenshots", "reports", "manifests"],
+
+  "copy": [
+    { "dest": "reports", "src": "docs/research/ROUND6-CONSOLIDATED-REPORT-2026-09-06.md" },
+    { "dest": "reports", "src": "docs/research/ROUND6-PLAN.md" },
+    { "dest": "reports", "src": "docs/research/ROUND6-MERGE-DEBT-AUDIT.md" },
+    { "dest": "reports", "src": "docs/research/ROUND5-ACCEPTANCE-CRITERIA.md" },
+
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND5-CONSOLIDATED-REPORT-2026-09-06.md" },
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND5-PLAN.md" },
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND5-AUDIT-97-EVALUATION-SET.md" },
+    { "dest": "reports/context-previous-rounds", "src": "docs/research/ROUND4-CONSOLIDATED-REPORT-2026-09-06.md" },
+
+    { "dest": "metrics", "src": "docs/research/METRIC-DENOMINATORS.md" },
+    { "dest": "metrics", "src": "docs/research/DATA-ACCURACY-SCOREBOARD-LANE-D.md" },
+    { "dest": "metrics", "src": "docs/research/legacy-reprocess/LEGACY-REPROCESS-SCOREBOARD.md" },
+    { "dest": "metrics", "src": "docs/research/legacy-reprocess/THRESHOLDS.example.json" },
+
+    { "dest": "manifests", "src": ".workforce.json", "rename": "workforce-config.json" }
+  ],
+
+  "excluded": [
+    { "what": "SGK PDF source", "path": "nguon-chi-thuc/", "size": "9.8 GB", "reason": "copyright; never committed, never archived" },
+    { "what": "all derived pipeline artefacts", "path": "poc-out/", "size": "14 GB", "reason": "derivative works of copyrighted source; gitignored" },
+    { "what": "round-6 artefact trees", "path": "poc-out/round6/", "size": "144 MB", "reason": "inventory only - see manifests/large-data-inventory.txt; reproduction instructions in 10-OPEN-RISKS-BLOCKERS.md section 6" },
+    { "what": "round-5 artefact trees, still referenced by round 6", "path": "poc-out/round5/", "size": "341 MB", "reason": "inventory only" }
+  ]
+}

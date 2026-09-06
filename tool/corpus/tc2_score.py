@@ -18,6 +18,7 @@ Short-Answer surface would consume).
 Usage: <venv python> tool/corpus/tc2_score.py --pipeline tc2-p1 [--json out] [--md out]
 """
 import argparse
+import glob
 import json
 import os
 import sys
@@ -29,6 +30,7 @@ import tc_sdm  # noqa: E402
 import tc_score  # noqa: E402
 import tc2_sdm  # noqa: E402
 import tc2_attach  # noqa: E402
+import tc2_paths  # noqa: E402
 
 ROOT = tc_sdm.ROOT
 SLICE = set(tc2_sdm.__dict__.get('SLICE_BOOKS', [])) or {'04-sgk-khoa-hoc-4', '05-sgk-khoa-hoc-5', '06-sgk-khoa-hoc-tu-nhien-6', '07-sgk-khoa-hoc-tu-nhien-7', '08-sgk-khoa-hoc-tu-nhien-8', '09-sgk-khoa-hoc-tu-nhien-9'}
@@ -41,7 +43,7 @@ GOLD_CANON = {'question': 'QUESTION', 'answer': 'ANSWER', 'activity': 'ACTIVITY'
               'caption': 'CAPTION', 'option': 'OPTION', 'answer_slot': 'ANSWER_SLOT', 'table': 'TABLE', 'formula': 'FORMULA', 'footnote': 'FOOTNOTE',
               'figure_label': 'FIGURE_TEXT', 'diagram': 'FIGURE_TEXT', 'page_number': 'PAGENUM'}
 PIPE_CANON = {'question': 'QUESTION', 'answer': 'ANSWER', 'model_answer': 'ANSWER', 'activity': 'ACTIVITY', 'instruction': 'INSTRUCTION', 'objective': 'OBJECTIVE', 'sidebar': 'SIDEBAR',
-              'heading': 'HEADING', 'stage_label': 'HEADING', 'running_head': 'HEADING', 'body': 'BODY', 'teacher_text': 'BODY', 'rule': 'BODY', 'teacher_prompt': 'TEACHER_PROMPT',
+              'heading': 'HEADING', 'stage_label': 'HEADING', 'running_head': 'HEADING', 'body': 'BODY', 'teacher_text': 'BODY', 'rule': 'BODY', 'attribution': 'BODY', 'teacher_prompt': 'TEACHER_PROMPT',
               'caption': 'CAPTION', 'option': 'OPTION', 'answer_slot': 'ANSWER_SLOT', 'table': 'TABLE', 'formula': 'FORMULA', 'footnote': 'FOOTNOTE',
               'figure_text': 'FIGURE_TEXT', 'figure': 'FIGURE_TEXT', 'page_number': 'PAGENUM', 'empty': 'EMPTY'}
 
@@ -91,6 +93,29 @@ def score_page(gold, sdm, attach_rec):
     r['attach_toc_ok'] = (r['lesson_toc'] == gl)
     r['gold_set'] = gold.get('gold_set', 'tc-v1'); r['held_out'] = bool(gold.get('held_out'))
     r['trust_reasons'] = dict(Counter(x for b in v1['blocks'] for x in (b.get('reasons') or []) if b['text']))
+    # Round 4 — narrowest reading of teaching-critical fidelity: among TRUSTED matched gold blocks that carry digits,
+    # how many deliver a different digit/operator sequence than the gold text (gold text present only on some pages)
+    enum_re = tc_score.re.compile(r'^\s*(?:(?:HĐ|Bài|Bước)\s*\d+[.:]?|\d{1,2}[.)]|[a-dA-D][.)])\s*')
+    dn = dw = 0; wrong_ids = []
+    for g in gold['blocks']:
+        c = m.get(g['id'])
+        if not c or not g.get('text') or c.get('trusted') is not True:
+            continue
+        gd = tc_score.digits_seq(enum_re.sub('', tc_score.nfc(g['text']), count=1))
+        if not gd:
+            continue
+        dn += 1
+        ct = c['text']
+        if len(tc_score.nfc(ct)) < 0.7 * len(tc_score.nfc(g['text'])):   # same extension rule as tc_score.score: a gold block that spans several pipeline blocks
+            for c2 in v1['blocks']:
+                if c['order'] < c2['order'] <= c['order'] + 8 and c2['text']:
+                    ct += ' ' + c2['text']
+                    if len(tc_score.nfc(ct)) >= len(tc_score.nfc(g['text'])):
+                        break
+        cd = tc_score.digits_seq(enum_re.sub('', tc_score.nfc(ct), count=1))
+        if not (gd == cd[:len(gd)] or all(d in cd for d in gd)):
+            dw += 1; wrong_ids.append(g['id'])
+    r['digits_trusted_n'] = dn; r['digits_trusted_wrong'] = dw; r['digits_trusted_wrong_ids'] = wrong_ids
     r['blocks_trusted_all'] = sum(1 for b in v1['blocks'] if b.get('trusted') is True and b['text'])
     r['blocks_withheld_all'] = sum(1 for b in v1['blocks'] if b.get('trusted') is False and b['text'])
     return r
@@ -118,7 +143,9 @@ def aggregate(rows, name):
     for r in rs:
         reasons.update(r['trust_reasons'])
     att_h = [r['attach_header']['ok'] for r in rs if r['attach_header']['ok'] is not None]
+    dtn = sum(r.get('digits_trusted_n', 0) for r in rs); dtw = sum(r.get('digits_trusted_wrong', 0) for r in rs)
     return dict(name=name, pages=len(rs), learning_blocks=L, trusted=T, coverage=round(T / max(1, L), 3), tlsr=round(sum(r['tlsr'] * r['learning_blocks'] for r in rs) / max(1, L), 3),
+                digits_trusted_n=dtn, digits_trusted_wrong=dtw, digits_trusted_wrong_rate=(round(dtw / dtn, 4) if dtn else None),
                 false_trusted=W, ftr=round(W / max(1, T), 4), safe_rejected=sum(r['safe_rejected'] for r in rs), wrong_kinds=dict(Counter(k for r in rs for _, ks in r['wrong_examples'] for k in ks)),
                 found=mean('found'), order=mean('order'), meaning_inversions=sum(r['order_meaning_inversions'] for r in rs), text_acc=mean('text_acc'), cer_notone=mean('cer_notone'), cer_nodiacritic=mean('cer_nodiacritic'),
                 fidelity=mean('fidelity'), splices=sum(r['splices'] for r in rs), caption_assoc=mean('caption_assoc'), table_role=mean('table_role'), formula_role=mean('formula_role'), digits_ok=mean('digits_ok'), provenance=mean('provenance_bbox'),
@@ -134,12 +161,18 @@ def fmt(x):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--pipeline', default='tc2-p1'); ap.add_argument('--json', default=None); ap.add_argument('--md', default=None)
+    ap.add_argument('--out', default=None, help='pipeline output root (default poc-out/trusted-corpus/tc-v2/<pipeline>; env TC2_OUT_ROOT)')
+    ap.add_argument('--gold-dir', default=None, help='score a different gold directory (e.g. tool/corpus/tc_gold_bai17); pages are read from sdm/ when sdm-gold/ lacks them')
     a = ap.parse_args()
-    golds = tc_sdm.all_gold()
+    if a.out:
+        tc2_paths.set_out_root(a.out)
+    golds = tc_sdm.all_gold() if not a.gold_dir else [json.load(open(f)) for f in sorted(glob.glob(f'{a.gold_dir}/*.json'))]
     attach_cache = {}
     rows = []
     for g in golds:
         p = tc2_sdm.sdm_path(a.pipeline, g['book'], g['page'], gold=True)
+        if not os.path.exists(p):
+            p = tc2_sdm.sdm_path(a.pipeline, g['book'], g['page'], gold=False)
         if not os.path.exists(p):
             rows.append(dict(book=g['book'], page=g['page'], error='no sdm-gold')); continue
         sdm = json.load(open(p))
@@ -154,12 +187,12 @@ def main():
     if a.json:
         json.dump(out, open(a.json, 'w'), ensure_ascii=False, indent=1)
     L = [f'# TC-v2 pipeline {a.pipeline} on the gold set (MEASURED)', '',
-         '| set | pages | learning blk | trusted (cov) | TLSR | false trusted | FTR | safe rej | found | order | inv | text acc | CER no-tone | fidelity | splices | CTE | CTE pages | attach TOC ok | attach header ok |',
-         '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|']
+         '| set | pages | learning blk | trusted (cov) | TLSR | false trusted | FTR | safe rej | found | order | inv | text acc | CER no-tone | fidelity | splices | CTE | CTE pages | attach TOC ok | attach header ok | trusted digit blocks wrong |',
+         '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|']
     for k, v in agg.items():
         if not v.get('pages'):
             continue
-        L.append(f"| {k} | {v['pages']} | {v['learning_blocks']} | {v['trusted']} ({v['coverage']:.3f}) | {v['tlsr']:.3f} | {v['false_trusted']} | {v['ftr']:.4f} | {v['safe_rejected']} | {fmt(v['found'])} | {fmt(v['order'])} | {v['meaning_inversions']} | {fmt(v['text_acc'])} | {fmt(v['cer_notone'])} | {fmt(v['fidelity'])} | {v['splices']} | {v['cte_total']} | {v['cte_pages']} | {v['attach_toc_ok']}/{v['pages']} | {v['attach_header_ok']}/{v['attach_header_n']} |")
+        L.append(f"| {k} | {v['pages']} | {v['learning_blocks']} | {v['trusted']} ({v['coverage']:.3f}) | {v['tlsr']:.3f} | {v['false_trusted']} | {v['ftr']:.4f} | {v['safe_rejected']} | {fmt(v['found'])} | {fmt(v['order'])} | {v['meaning_inversions']} | {fmt(v['text_acc'])} | {fmt(v['cer_notone'])} | {fmt(v['fidelity'])} | {v['splices']} | {v['cte_total']} | {v['cte_pages']} | {v['attach_toc_ok']}/{v['pages']} | {v['attach_header_ok']}/{v['attach_header_n']} | {v['digits_trusted_wrong']}/{v['digits_trusted_n']} |")
     L += ['', '## Role Layer — precision / recall per role (matched blocks; "(n)" = gold blocks of that role)', '']
     for k, v in agg.items():
         if not v.get('pages'):

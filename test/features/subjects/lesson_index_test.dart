@@ -1,6 +1,7 @@
 /// WAL-136 — LessonIndex parser: dữ liệu thật, fail-closed khi vỡ.
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -62,7 +63,14 @@ void main() {
     final idx = LessonIndex.fromJsonString(f.readAsStringSync());
     expect(idx, isNotNull, reason: 'parser phải nuốt được file THẬT');
     expect(idx!.subjects['Toán'], isNotEmpty);
-    expect(idx.exercisesForToan(6), isNotEmpty, reason: 'B6 có bài tập thật');
+    // ⛔ Founder §3 (2026-09-06): dòng cũ ở đây là
+    //     expect(idx.exercisesForToan(6), isNotEmpty, reason: 'B6 có bài tập thật');
+    // Tiền đề của nó SAI. 41 biểu thức `toanExercises` trong pack — gồm cả 7 của Toán 5 Bài 6 —
+    // đều đến từ poc-out/units/exercise-case-map.json, nơi MỌI dòng mang
+    // `status: INFERRED, method: geometric-fraction-rebuild-v1` («dựng từ hình học ⇒ KHÔNG phải
+    // nguyên văn»). Chúng chưa bao giờ là «bài tập thật»; vòng 3 đã bắt được một trong số đó phục vụ
+    // «2/5 + 1/4» cho «2/5 − 1/4» in trong sách. Test này đang GHIM chính lỗi đó.
+    // Không nới test để pack đi qua: sửa tiền đề, và luật mới nằm ở test «không INFERRED» bên dưới.
     // WAL-113: file thật phải mang cross-subject data (build từ poc-out).
     expect(idx.tvReadings, isNotEmpty, reason: 'TV5 có bài đọc mined thật');
     expect(idx.tvWritings.length, greaterThan(30),
@@ -71,6 +79,58 @@ void main() {
         reason: '2 khối TƯ LIỆU thật (đội Hoàng Sa + Chiếu dời đô)');
     expect(idx.suSources.every((s) => s.attribution.endsWith(')')), isTrue,
         reason: 'mọi tư liệu bundle đều có attribution đầy đủ');
+  });
+
+  test('⛔⛔ FILE THẬT — KHÔNG pack nào được chở biểu thức INFERRED mà mất provenance '
+      '(Founder §3: giữ status/provenance hoặc fail closed)', () {
+    // Vì sao test này tồn tại: tool/extract/rebuild_fractions.py đóng dấu mọi dòng
+    // `status: INFERRED, method: geometric-fraction-rebuild-v1` — biểu thức DỰNG TỪ HÌNH HỌC, không
+    // phải chữ in trong sách. build_lesson_index.py từng chỉ chép expr/skillCaseId/page/book, nên
+    // dấu INFERRED bị RƠI và 41 biểu thức lên pack như thể nguyên văn, lại còn mang skillCaseId —
+    // tức là đi thẳng vào đường dạy Toán của trẻ. Pack không có chỗ cho provenance ⇒ FAIL CLOSED.
+    // Nếu sau này pack mang được provenance, các dòng này được phép trở lại CÙNG status/method.
+    final caseMap = File('poc-out/units/exercise-case-map.json');
+    if (!caseMap.existsSync()) {
+      markTestSkipped('exercise-case-map.json chưa có trên máy này');
+      return;
+    }
+    final raw = jsonDecode(caseMap.readAsStringSync());
+    final items = (raw is List ? raw : (raw as Map)['items'] as List).cast<Map>();
+    final inferred = <String>{};
+    for (final e in items) {
+      final status = (e['status'] ?? '').toString().toUpperCase();
+      if (status.isEmpty || status == 'VERBATIM') continue;
+      inferred.add('${e['book']}|${e['printed']}|${e['expr']}');
+    }
+    expect(inferred, isNotEmpty,
+        reason: 'nguồn phải còn dòng INFERRED, nếu không test này xanh giả');
+
+    var packsSeen = 0;
+    final leaks = <String>[];
+    for (var g = 1; g <= 12; g++) {
+      final f = File('assets/pack/lesson-index-g$g.json');
+      if (!f.existsSync()) continue;
+      packsSeen++;
+      final pack = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+      final te = (pack['toanExercises'] as Map?) ?? {};
+      for (final entry in te.entries) {
+        for (final x in (entry.value as List).cast<Map>()) {
+          final key = '${x['book']}|${x['page']}|${x['expr']}';
+          final hasProvenance =
+              x.containsKey('status') && x.containsKey('method');
+          if (inferred.contains(key) && !hasProvenance) {
+            leaks.add('g$g Bài ${entry.key}: ${x['expr']}');
+          }
+        }
+      }
+    }
+    if (packsSeen == 0) {
+      markTestSkipped('chưa có pack nào trên máy này');
+      return;
+    }
+    expect(leaks, isEmpty,
+        reason: '⛔ ${leaks.length} biểu thức INFERRED lên pack mà không mang status/method: '
+            '${leaks.take(5).join(' · ')}');
   });
 
   test('⭐ WAL-113: tvReadings + suSources parse; tư liệu THIẾU attribution '

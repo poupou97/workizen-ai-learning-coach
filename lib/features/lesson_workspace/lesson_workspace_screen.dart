@@ -12,23 +12,38 @@
 /// 3. NHỮNG CÁCH NÀO: lần đầu mở ⇒ màn «Vào bài học» ba thẻ (concept khung 3),
 ///    mỗi thẻ nói bài này có gì theo cách đó; ba tab vẫn luôn ở trên.
 /// 4./5. SAM ĐANG LÀM GÌ, VÌ SAO: thẻ được đề xuất mang lý do; sau khi vào
-///    View, thẻ «SAM đề xuất» giữ lý do + một nút.
-/// 6. LÀM GÌ TIẾP: nút trên thẻ đề xuất / thẻ kết của Tutor.
+///    View, một dòng «💡 SAM gợi ý: …» giữ ĐÍCH ĐẾN, chạm ⇒ lý do tại chỗ.
+/// 6. LÀM GÌ TIẾP: nút trong gợi ý đã mở / thẻ kết của Tutor.
 /// Chip thử nghiệm gọn một dòng, chạm ⇒ sheet «Nguồn & độ tin».
+///
+/// ROUND 6 · WS-D — **PHƯƠNG ÁN B ĐÃ ĐƯỢC FOUNDER CHỌN, ĐÃ THI HÀNH.**
+/// Vòng 5 dựng bốn cách trình bày cùng một `NextAction` từ một commit và đo
+/// trên Nokia 6.1: nội dung bài đầu tiên ở «Học với SAM» 820 px (card) →
+/// 712 px (B đang hé) → 634 px (B đã thu gọn); nhãn View 7 → 4. Vòng 6 gỡ cờ
+/// `--dart-define=WAL_ASSIST`, xoá ba phương án còn lại, và xoá luôn ba thứ
+/// bản đồ trùng lặp gọi tên: **CTA đổi View trên thẻ đề xuất** (lặp đúng cái
+/// tab ngay phía trên), **chân dung SAM ở chỗ SAM không nói**, và **hàng
+/// «Đã mở ● ○ ○» thường trực** (nay nằm trong trạng thái EXPANDED).
+///
+/// ⚠ Gợi ý vẫn là TRÌNH BÀY của Next Action — không có động cơ đề xuất thứ
+/// hai. `_proposal()` là nguồn duy nhất; `assist_layer` không đọc bài,
+/// không đọc trace (có test soi mã).
 ///
 /// Màn này KHÔNG nhận `LearnerStore` — theo cấu trúc, không ghi được gì.
 library;
 
 import 'package:flutter/material.dart';
 
-import '../../app/theme/band_density_scope.dart';
 import '../../app/theme/wal_tokens.dart';
+import '../../core/agenda/lesson_next_action.dart';
+import '../../core/display/lesson_title.dart';
 import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/next_action.dart';
 import '../../core/lesson_model/tutor_script.dart';
 import 'smart_book_view.dart';
 import 'tutor_view.dart';
 import 'visual_view.dart';
+import 'widgets/assist_layer.dart';
 import 'widgets/fixture_chip.dart';
 import 'widgets/mode_picker.dart';
 import 'widgets/trust_sheet.dart';
@@ -61,7 +76,6 @@ class LessonWorkspaceScreen extends StatefulWidget {
   final String? learnerId;
 
   static Key tabKey(WorkspaceView v) => Key('workspace-tab-${v.name}');
-  static const nextActionKey = Key('workspace-next-action');
   static const breadcrumbKey = Key('workspace-breadcrumb');
 
   @override
@@ -74,6 +88,19 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   String? _tutorAnchor;
   String? _readAnchor;
   int _fontStep = 0;
+
+  /// PHƯƠNG ÁN B — trạng thái của lớp trợ giúp. Ở ĐÂY, không ở widget con, vì
+  /// «đề xuất mới» là việc của màn: khi View được đề xuất ĐỔI, gợi ý hé lại
+  /// một lần. Mặc định PEEK: trẻ biết ĐÍCH ĐẾN mà không phải chạm gì.
+  AssistState _assist = AssistState.peek;
+  WorkspaceView? _assistFor;
+
+  /// Đề xuất đổi sang View KHÁC ⇒ hé lại (không nhắc lại cùng một điều).
+  void _syncAssist(LessonNextAction next) {
+    if (_assistFor == next.view) return;
+    _assistFor = next.view;
+    _assist = AssistState.peek;
+  }
 
   LessonDocument get doc => widget.doc;
   Set<WorkspaceView> get _seen => widget.trace.viewsFor(doc.slotKey);
@@ -107,16 +134,12 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
   /// từ `NextBestLearningAction` (Lane A-runtime, PR #69) — luật prototype
   /// «có sơ đồ ⇒ Trực quan trước» của `nextActionFor` không còn dùng ở UI.
   /// Xung đột thứ tự này được TRẢ VỀ Founder trong PR, không tự quyết ở đây.
-  NextAction _proposal() =>
+  LessonNextAction _proposal() =>
       founderNextAction(doc, seen: _seen, learnerId: widget.learnerId);
 
   List<String> get _crumbs =>
       widget.breadcrumb ??
-      [
-        'Giá sách',
-        doc.bookTitle,
-        if (doc.chapter != null) doc.chapter!.label,
-      ];
+      ['Giá sách', doc.bookTitle, if (doc.chapter != null) doc.chapter!.label];
 
   @override
   Widget build(BuildContext context) {
@@ -128,6 +151,11 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
     final landscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
     final picking = _view == null;
+    // ROUND 6: MỘT cách trình bày duy nhất (phương án B, Founder chọn). Không
+    // có động cơ đề xuất thứ hai: `next` vẫn là `_proposal()` duy nhất.
+    _syncAssist(next);
+    final keyboardUp = MediaQuery.viewInsetsOf(context).bottom != 0;
+    final showAssist = !picking && !keyboardUp;
     return Scaffold(
       backgroundColor: WalColors.surface,
       body: SafeArea(
@@ -152,10 +180,10 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
               padding: const EdgeInsets.symmetric(horizontal: WalSpacing.md),
               child: _segmented(),
             ),
-            // Bàn phím lên (trẻ đang gõ trả lời SAM) ⇒ tạm ẩn thẻ đề xuất để
-            // thân View còn chỗ (Nokia n3 D8). Bàn phím xuống ⇒ thẻ trở lại.
-            // Ở màn «Vào bài học» lý do nằm trên thẻ được đề xuất ⇒ không lặp.
-            if (!picking && MediaQuery.viewInsetsOf(context).bottom == 0)
+            // PHƯƠNG ÁN B — một dòng hé dưới tab, mở TẠI CHỖ khi trẻ chạm.
+            // Trạng thái COLLAPSED không vẽ dòng này: dấu hiệu 💡 chuyển lên
+            // hàng tiêu đề (`_headerAssist`) — thấy được, không tốn dòng nào.
+            if (showAssist && _assist != AssistState.collapsed)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   WalSpacing.md,
@@ -163,8 +191,40 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                   WalSpacing.md,
                   0,
                 ),
-                child: _nextActionCard(next, compact: landscape),
+                child: AssistPeek(
+                  action: next,
+                  state: _assist,
+                  onToggle: () => setState(
+                    () => _assist = _assist == AssistState.expanded
+                        ? AssistState.peek
+                        : AssistState.expanded,
+                  ),
+                  onGo: () {
+                    final v = next.view;
+                    if (v == null) {
+                      Navigator.of(context).maybePop();
+                    } else {
+                      _switch(v);
+                    }
+                  },
+                  onDismiss: () =>
+                      setState(() => _assist = AssistState.collapsed),
+                  // Dấu vết phiên, đã dựng thành CHUỖI ở đây — lớp trợ giúp
+                  // không được tự hỏi trace (có test soi mã). Chỉ hiện khi
+                  // trẻ đã chủ động mở «vì sao»: vòng 4/5 ghim nó thường
+                  // trực và bản đồ trùng lặp §2 mục 11 xếp nó vào nhóm «gộp
+                  // được vào lớp trợ giúp».
+                  seenLine: _assist == AssistState.expanded ? _seenLine : null,
+                ),
               ),
+            // Bàn phím lên (trẻ đang gõ trả lời SAM) ⇒ tạm ẩn gợi ý để thân
+            // View còn chỗ (Nokia n3 D8). Bàn phím xuống ⇒ gợi ý trở lại.
+            // Ở màn «Vào bài học» lý do nằm trên thẻ được đề xuất ⇒ không lặp.
+            //
+            // ROUND 6: thẻ «SAM đề xuất» thường trực ĐÃ BỊ XOÁ ở cả ba View —
+            // đó chính là quyết định B. Vòng 4 §6.3 và vòng 5 D1 đã phải đẩy
+            // nó vào vùng cuộn của Đọc rồi Trực quan để trang sách và nút
+            // trung tâm của sơ đồ không bị che; B bỏ hẳn nhu cầu ấy.
             Expanded(
               child: picking
                   ? ModePicker(doc: doc, proposal: next, onPick: _switch)
@@ -174,6 +234,52 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
         ),
       ),
     );
+  }
+
+  /// COLLAPSED — 💡 trong hàng tiêu đề: không tốn dòng nào, nhưng phải mang
+  /// nhãn trợ năng đầy đủ (biểu tượng một mình không đủ cho trình đọc màn
+  /// hình).
+  ///
+  /// ROUND 5 D5 (lỗi máy thật tìm ra): sau «Để sau» gợi ý KHÔNG được biến mất
+  /// — «hé dần, không phải giấu đi». Đây là chỗ nó đi về. Chạm ⇒ mở thẳng
+  /// EXPANDED tại chỗ (trẻ chạm 💡 là đang hỏi «vì sao»), không mở sheet:
+  /// bottom sheet là phương án A và A đã bị loại.
+  Widget? _headerAssist() {
+    if (_assist != AssistState.collapsed) return null;
+    if (_view == null) return null;
+    if (MediaQuery.viewInsetsOf(context).bottom != 0) return null;
+    return AssistIconButton(
+      action: _proposal(),
+      // Thu gọn rồi thì không còn «chưa xem» — chấm báo tắt cho đến khi đề
+      // xuất trỏ sang View khác (`_syncAssist` đưa về PEEK).
+      unseen: false,
+      onOpen: () => setState(() => _assist = AssistState.expanded),
+    );
+  }
+
+  /// «Đã mở: ● Đọc ○ Trực quan ○ Học với SAM» — dấu vết PHIÊN, không phải
+  /// bằng chứng học. MỞ ≠ HIỂU. Dựng ở đây vì lớp trợ giúp không được đọc
+  /// trace.
+  ///
+  /// ⭐ ROUND 7 · WS-R — hàng này từng duyệt `WorkspaceView.values` VÔ ĐIỀU
+  /// KIỆN, nên nó vẽ «○ Trực quan ○ Học với SAM» cho cả bài KHÔNG CÓ hai thứ
+  /// đó. Trên LS&ĐL 5 Bài 8 (Nokia 6.1) nó nằm ngay dưới câu SAM nói trẻ đã
+  /// đi qua mọi cách học của bài — hai câu ngược nhau trên một màn, và «○»
+  /// mời trẻ đi tìm thứ không tồn tại. Màn «Vào bài học» đã nói thật từ vòng
+  /// 3 («Chưa có sơ đồ cho bài này»); hàng này thì chưa. Nay nó chỉ chấm
+  /// ●/○ cho những cách học bài NÀY có, và NÊU TÊN những cách không có.
+  String get _seenLine {
+    final have = availableViewsOf(doc);
+    final missing = [
+      for (final v in WorkspaceView.values)
+        if (!have.contains(v)) v.label,
+    ];
+    final marks = [
+      'Đã mở:',
+      for (final v in have) '${_seen.contains(v) ? '●' : '○'} ${v.label}',
+    ].join(' ');
+    if (missing.isEmpty) return marks;
+    return '$marks · Bài này chưa có ${missing.join(', ')}';
   }
 
   Widget _header(BuildContext context, {bool compact = false}) => Padding(
@@ -215,7 +321,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                 ),
               ),
               Text(
-                doc.lessonLabel,
+                displayLessonLabel(doc.lessonNo, doc.title),
                 maxLines: compact ? 1 : 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -235,6 +341,7 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
             ],
           ),
         ),
+        ?_headerAssist(),
       ],
     ),
   );
@@ -272,6 +379,8 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
                   ),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
+                    // MỘT BỘ CHỮ DUY NHẤT cho ba View: nhãn tab và nhãn thẻ ở
+                    // màn «Vào bài học» đều lấy từ `WorkspaceView.label`.
                     child: Text(
                       '${v.icon} ${v.label}',
                       style: const TextStyle(
@@ -284,85 +393,6 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
               ),
             ),
           ),
-      ],
-    ),
-  );
-
-  Widget _nextActionCard(NextAction next, {bool compact = false}) => Container(
-    key: LessonWorkspaceScreen.nextActionKey,
-    padding: EdgeInsets.all(compact ? WalSpacing.xs : WalSpacing.sm),
-    decoration: BoxDecoration(
-      color: WalColors.surfaceLavender,
-      borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        if (!compact) ...[
-          Image.asset(
-            'assets/mascot/sam-probe@64.png',
-            width: densityOf(context).mascotChip * 0.7,
-            height: densityOf(context).mascotChip * 0.7,
-            errorBuilder: (_, _, _) => const SizedBox.shrink(),
-          ),
-          const SizedBox(width: WalSpacing.sm),
-        ],
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'SAM đề xuất',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: WalColors.primaryText,
-                ),
-              ),
-              // Lý do đọc trọn (câu hỏi trích nguyên văn) — chỉ cắt 1 dòng
-              // khi màn ngang (Nokia n2 D3); cắt 3 dòng giữa câu trích làm
-              // mất «vì sao» (round 3 n1 D-R3-03).
-              Text(
-                next.reason,
-                maxLines: compact ? 1 : null,
-                overflow: compact ? TextOverflow.ellipsis : null,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: WalColors.ink,
-                  height: 1.35,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: WalSpacing.xs),
-        SizedBox(
-          height: WalSpacing.minTouch,
-          child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: WalColors.primary500,
-              padding: const EdgeInsets.symmetric(horizontal: WalSpacing.sm),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
-              ),
-            ),
-            onPressed: () {
-              final v = next.view;
-              if (v == null) {
-                Navigator.of(context).maybePop();
-              } else {
-                _switch(v);
-              }
-            },
-            child: Text(
-              next.label,
-              style: const TextStyle(
-                fontSize: WalType.secondary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
       ],
     ),
   );

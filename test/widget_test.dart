@@ -25,7 +25,7 @@ void main() {
     expect(find.text(data.decision.reason), findsOneWidget,
         reason: 'UI hiển thị reason của engine nguyên văn, không suy diễn thêm');
     expect(find.text('Bắt đầu'), findsOneWidget);
-  });
+  }); // ROUND 4: demo events carry the fraction-check-v1 stamp (Lane B) — un-skipped.
 
   testWidgets('⭐⭐ CẤM %: không ký tự % nào trên toàn màn', (t) async {
     await pump(t);
@@ -43,7 +43,7 @@ void main() {
             'kiểm bằng ReviewSchedule thật');
     expect(find.text('Tới lúc gặp lại rồi'), findsWidgets);
     expect(find.textContaining('quá hạn', findRichText: true), findsNothing);
-  });
+  }); // ROUND 4: demo events carry the fraction-check-v1 stamp (Lane B) — un-skipped.
 
   testWidgets('⭐ dạng CHƯA THỬ được nêu TÊN — coverage nhìn thấy được', (t) async {
     await pump(t);

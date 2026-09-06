@@ -1,0 +1,42 @@
+# Round-6 device frame verification — recomputed by the archive builder
+# generated 2026-09-06T05:11:07+00:00
+# manifest: /Users/alexnguyen/Desktop/wal-evidence/round6-ws-d/MANIFEST.json (schema wal-evidence-manifest-v1, generatedAt 2026-09-06T04:30:13.992205+00:00)
+# device: Nokia 6.1 (192.168.1.3:5555) · Android 10 / SDK 29 · ai.workizen.learningcoach
+# build:  git eac69ea1ad37a6b343e162be9e55d82df7f6db7e (branch ws-d/round6-golden-delivery, dirty=False)
+# apk:    sha256 7b2b2b79a5518a16b9c1605412ebc6064b14326325cdc2d52d1786289e1c1237  (245952191 bytes)
+# fixture: lesson-05-sgk-lich-su-va-dia-li-5-b8.json sha256 a904d0052aa9ff7d0516d99539ac7009d90b1868990a39f6b84da8d7dca91a91  blocks=52 semantic=0 tutorSteps=0
+
+FRAME                              HASH       SHA256
+round6-01-home.png                 OK         6306f4c04d8a554d93a1998fbe8d7c408b31365c06c3f1e36ed4cb520c96f32b
+round6-02-home-research.png        OK         55995d3208168d025feaefa8a6f55008b797515ee269d44b9affa67c2b3dac14
+round6-03-picker.png               OK         4459e6cbae2139971ecd14f536bd8af268befe3c6491bc929cf987633a46d84a
+round6-04-read-peek.png            OK         90702ff15028a82f0cae9a1e581bb1fc31578457dd4e29ec9f0a08ccdc1469fa
+round6-05-read-expanded.png        OK         7b25ab210198819f34f1aa8f454d916d45121028e5436dff8f903df070b6b0d6
+round6-06-read-collapsed.png       OK         70b2aa303ebdf044e1f04071ac8c9ff3e7e99a48599a69b26e321c73293ccdc9
+round6-07-tutor.png                OK         7a27eb8ea6f80815b6aed1a9f38b2a2555724f2bd62594992b3a52efde2dc309
+
+FRAMES: 7 in manifest · hash OK 7 · mismatch 0
+SUMMARY (from the manifest, authoritative): {"PASS": 7, "FAIL": 1, "SKIP": 0, "UNVERIFIED": 1, "OTHER": 0} · downgraded 1
+
+STEPS, as recorded:
+  01  PASS                       frames=['round6-01-home.png'] downgraded=False
+       expect: Home «Chào Na!» — hồ sơ Founder giữ nguyên (cài bằng -r)
+  02  PASS                       frames=['round6-02-home-research.png'] downgraded=False
+       expect: Thẻ LÁT CẮT NGHIÊN CỨU · Bài 8 với tiêu đề THẬT từ mục lục in, trang 36–39
+  03  PASS                       frames=['round6-03-picker.png'] downgraded=False
+       expect: Màn «Vào bài học»: MỘT bộ tên cho ba View; ba thẻ đếm từ chính bài; chip thử nghiệm
+  04  PASS                       frames=['round6-04-read-peek.png'] downgraded=False
+       expect: PHƯƠNG ÁN B · PEEK: một dòng «💡 SAM gợi ý: …», không thẻ đề xuất, không chân dung, không CTA lặp
+  05  PASS                       frames=['round6-05-read-expanded.png'] downgraded=False
+       expect: PHƯƠNG ÁN B · EXPANDED: vì sao + «Đã mở ● ○ ○» + CTA + «Để sau», mở TẠI CHỖ
+  06  PASS                       frames=['round6-06-read-collapsed.png'] downgraded=False
+       expect: PHƯƠNG ÁN B · COLLAPSED: 💡 lên hàng tiêu đề, KHÔNG biến mất (lỗi D5 vòng 5)
+  07  PASS                       frames=['round6-07-tutor.png'] downgraded=False
+       expect: «Học với SAM» nói thật là chưa có kịch bản; phần ghim BẰNG với hai View kia
+  08  UNVERIFIED (missing frame) frames=[] downgraded=True
+       expect: kiểm tĩnh từng điểm ảnh: máy không có ai đang dùng
+  09  FAIL                       frames=['round6-04-read-peek.png'] downgraded=False
+       expect: 17 chỗ SAM để trống có ẢNH CẮT TRANG
+
+RETENTION RULES: ["no lock-screen / personal-notification frames", "no raw PDF pages; SGK crops inside frames are internal (Founder D4)", "a PASS without an existing frame is downgraded to UNVERIFIED"]
+MANIFEST WARNINGS: []

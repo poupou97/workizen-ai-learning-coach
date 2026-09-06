@@ -1,0 +1,13 @@
+{
+  "_what_this_is": "A TEMPLATE, not a decision. Copy to THRESHOLDS.json ONLY by Founder authorisation. While THRESHOLDS.json does not exist, tool/corpus/legacy/scoreboard.py reports trusted = 0 and eligible_for_teaching = 0 and prints that the record is absent.",
+  "_what_setting_it_does": "With the record present, a reprocessed lesson counts as `trusted` when (a) every learning block is sourceable (state FULL), (b) it has been independently audited, and (c) its audited false-trust rate is <= max_false_trust_rate. `eligible_for_teaching` counts those lessons only when teachingAuthorised is also true.",
+  "_what_it_does_not_do": "It does not change any measurement. Rates, samples and κ are computed the same way with or without this file; only the two Founder-gated counts move.",
+  "_before_setting_it_read": "docs/research/legacy-reprocess/ROUND4-BATCH-1-REPORT.md §8 (the honest verdict), §11 (what is still not measured), and docs/research/METRIC-DENOMINATORS.md (D5).",
+  "_caveat_from_batch_1": "On batch 1 the audited false-trust rate is 0.365 (legacy-b1) / 0.268 (tc2-p2) with n = 74 / 56 and wide Wilson intervals, and 0 of 6 lessons reached state FULL. Any max_false_trust_rate below 0.27 would leave the count at 0 regardless of how the audit sample fell.",
+
+  "max_false_trust_rate": null,
+  "teachingAuthorised": false,
+  "setBy": null,
+  "setOn": null,
+  "rationale": null
+}

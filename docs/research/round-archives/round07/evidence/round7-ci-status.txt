@@ -1,0 +1,23 @@
+# Round-7 CI + merge state — read from the GitHub API on 2026-09-06T07:52:21Z
+PR#94 OPEN mergedAt=null Analyze & Test=SUCCESS
+PR#95 OPEN mergedAt=null Analyze & Test=SUCCESS
+PR#96 OPEN mergedAt=null Analyze & Test=SUCCESS
+PR#97 OPEN mergedAt=null Analyze & Test=SUCCESS
+
+# Every earlier round's PRs, re-checked in the same pass
+PR#73 OPEN mergedAt=null
+PR#79 OPEN mergedAt=null
+PR#80 OPEN mergedAt=null
+PR#81 OPEN mergedAt=null
+PR#82 OPEN mergedAt=null
+PR#83 OPEN mergedAt=null
+PR#84 OPEN mergedAt=null
+PR#85 OPEN mergedAt=null
+PR#86 OPEN mergedAt=null
+PR#87 OPEN mergedAt=null
+PR#88 OPEN mergedAt=null
+PR#89 OPEN mergedAt=null
+PR#90 OPEN mergedAt=null
+PR#91 OPEN mergedAt=null
+PR#92 OPEN mergedAt=null
+PR#93 OPEN mergedAt=null

@@ -1,0 +1,690 @@
+{
+  "schema": "wal-evidence-manifest-v1",
+  "round": "round4",
+  "generatedAt": "2026-09-05T14:32:13.685316+00:00",
+  "git": {
+    "sha": "746627f624753ce2e43ac6dbb7068f23107689fb",
+    "branch": "lane-b/round4-experience",
+    "dirty": true
+  },
+  "apk": {
+    "file": "build/app/outputs/flutter-apk/app-debug.apk",
+    "sha256": "ca21ef1d48af854ad61531ba3bddd3f1223f5f0cd399a7ef40edec9bce44165d",
+    "bytes": 269988911
+  },
+  "packs": [
+    {
+      "file": "lesson-index-g1.json",
+      "sha256": "7fbf8523beadca7f76a9a52130886e19b37006ba106f0a223f187954b06b8fb8",
+      "packVersion": "g1-20260905T0437Z-07a24504",
+      "contentHash": "d17e5771cd4c414f55130e42cb84ef531d1676446e75176cbbdc29b4224464bc",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g10.json",
+      "sha256": "ebc710ddf63196f3b2fc9b7164ed0f8cb9b0ae3c616fed64a67076f4bcda4df9",
+      "packVersion": "g10-20260905T0437Z-07a24504",
+      "contentHash": "463a97fa9a8b19d3675eaf50ff2091232a16c12ca96edc56840dc0907688e321",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g11.json",
+      "sha256": "05ded31ee311242987c74326478b4f6f09e85f039533cbea08ed16211fd43bfa",
+      "packVersion": "g11-20260905T0437Z-07a24504",
+      "contentHash": "44d3e5bdf9a2a5288720fb67d026541d413a4ab70be8b646d11868898efca075",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g12.json",
+      "sha256": "eac127a867f25f95461ceb068533c0f1030b9012eed245529a035435d730a03b",
+      "packVersion": "g12-20260905T0437Z-07a24504",
+      "contentHash": "53d72fed07e092ef385fc9b378d4eddf2535d880d1b0b298eae8c780cfcc6c40",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g2.json",
+      "sha256": "960bdd44a232a1dc90c8fca16446f997329e71da2888880890aa72b4af6476cc",
+      "packVersion": "g2-20260905T0437Z-07a24504",
+      "contentHash": "d2ec6283ac45383de7cb8dc1e6a4859e8cf232ba195a36550d9d78a8eb3d9659",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g3.json",
+      "sha256": "e41e43195b2d8cfa101e98a20bdb1577326bfac07e3b7b7cb7182ddc9288e0de",
+      "packVersion": "g3-20260905T0437Z-07a24504",
+      "contentHash": "ed7882ab5def086cc2467b5fae4cca948796c343541157885ec9d861d27bac80",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g4.json",
+      "sha256": "21afc9d177f97885f3b4bcbe1f5c503106c3f3885c2e2ba2bd6b6223c2e06c75",
+      "packVersion": "g4-20260905T0437Z-07a24504",
+      "contentHash": "dd96716ce0537e366a788630c05c78b1a005eedcf9fbe0427d05e7751cc6652b",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g5.json",
+      "sha256": "b01467a96d504e691822c75930936bca77708612815973ec5f96651e32ab1212",
+      "packVersion": "g5-20260905T0437Z-07a24504",
+      "contentHash": "a3244d3cfe4138342235c98e60f5159e4b92c5f34e84f54cf4ce90f9c9d174a6",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g6.json",
+      "sha256": "eeb9422c2489790440b7570784439539d8ab48fd885ce6c9a6001e56356a2929",
+      "packVersion": "g6-20260905T0437Z-07a24504",
+      "contentHash": "846ccc69fa88a319197e08d8c0d84d5ea02b8f3f68798bbe48ddeabe6e4e5772",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g7.json",
+      "sha256": "afb72e42061150bcec64e2085f9acf2f484ede2905cbc37b6080f25847717b5e",
+      "packVersion": "g7-20260905T0437Z-07a24504",
+      "contentHash": "d4a11e89297a08779702805ba1d7e7b7c9dfda12b2fc8b1eb9189c71f5c96e98",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g8.json",
+      "sha256": "d389198f32782a5b931c680b7355c0d1336ed4886875154664b33d7d0d82f968",
+      "packVersion": "g8-20260905T0437Z-07a24504",
+      "contentHash": "d5843ed818ae78518c4b211500c370024867fde11a57fa991c2b20f3624f3b14",
+      "experimental": false,
+      "provenance": true
+    },
+    {
+      "file": "lesson-index-g9.json",
+      "sha256": "cf7cc454c9b720c9f7b472fa1643df529602dc0736e358cd92775722fa78a622",
+      "packVersion": "g9-20260905T0437Z-07a24504",
+      "contentHash": "d5ddc1e7569b000b450442e69a7d0dd5212d1f24d718a3589ca7ae957ba4d2a8",
+      "experimental": false,
+      "provenance": true
+    }
+  ],
+  "fixture": {
+    "file": "lesson-06-sgk-khoa-hoc-tu-nhien-6-b17.json",
+    "sha256": "30e51c76837d08156be14a09ba2631076c1575e09282c74f3de5511fed18c136",
+    "book": "06-sgk-khoa-hoc-tu-nhien-6",
+    "lesson": 17,
+    "trust": "trustedStructuredLesson",
+    "sourcePipeline": "tc2-p1",
+    "generator": "tool/corpus/tsl_to_lesson_document.py@v1",
+    "blocks": 73,
+    "semantic": 3,
+    "tutorSteps": 5
+  },
+  "device": {
+    "serial": "192.168.1.3:5555",
+    "model": "Nokia 6.1",
+    "androidRelease": "10",
+    "sdk": "29",
+    "reachable": true
+  },
+  "declaredDevice": "Nokia 6.1 (Android 10) · adb over WiFi 192.168.1.3:5555 · learner «Na · Lớp 6» · portrait 1080x1920 @ density 420 (411 logical px wide)",
+  "frames": [
+    {
+      "file": "round4-1-01-home.png",
+      "sha256": "afb62a3de196ca2cf669e500db48a787477f2bc94bfac2d0d5442eacd4d28356",
+      "bytes": 257064,
+      "mtime": "2026-09-05T13:56:43.456002+00:00"
+    },
+    {
+      "file": "round4-1-01b-home.png",
+      "sha256": "cb9d97764a8e2b7c1360c515fc299c492e226a6622142431798c76d7add2f9d8",
+      "bytes": 256662,
+      "mtime": "2026-09-05T13:35:25.557126+00:00"
+    },
+    {
+      "file": "round4-1-02-home-secondary.png",
+      "sha256": "70c1eae570cfbccfbf2436b9b8f0640eb27f0be948a4fe2f496599ef94164ad6",
+      "bytes": 235378,
+      "mtime": "2026-09-05T13:57:04.226021+00:00"
+    },
+    {
+      "file": "round4-1-02-home-today.png",
+      "sha256": "fcfc8fcb43cd2f698b8d73e0b35c2a7951d791c1bdc71fa127592e3c9ef155eb",
+      "bytes": 226337,
+      "mtime": "2026-09-05T13:35:25.558000+00:00"
+    },
+    {
+      "file": "round4-1-03-home-research.png",
+      "sha256": "96816ac8741e1104431eaf9be794e5ca3c2a1347a5f98c59bb55d3bd3068a979",
+      "bytes": 217495,
+      "mtime": "2026-09-05T13:57:19.691032+00:00"
+    },
+    {
+      "file": "round4-1-03-picker.png",
+      "sha256": "662731e4028683e1e71bf1309e91407be00ff8f585701732191d1bcd26d3f159",
+      "bytes": 292859,
+      "mtime": "2026-09-05T13:35:25.559076+00:00"
+    },
+    {
+      "file": "round4-1-04-bookshelf.png",
+      "sha256": "dd2f08e4dcd9d532d31f03ba6bda479fb64e0d73df4515845c44f2f56d178901",
+      "bytes": 1390946,
+      "mtime": "2026-09-05T13:58:30.229794+00:00"
+    },
+    {
+      "file": "round4-1-05-book.png",
+      "sha256": "ca1ab92f090eed66f592b4cb82cb6c1abc4a7e1e5bdae4efcd6ecdb31d2c5624",
+      "bytes": 311505,
+      "mtime": "2026-09-05T13:58:47.155524+00:00"
+    },
+    {
+      "file": "round4-1-06-chapter.png",
+      "sha256": "0e1e87a967248244798112a83aa3240d4487ef1343367945e60e0b77578ae204",
+      "bytes": 124464,
+      "mtime": "2026-09-05T13:59:22.309076+00:00"
+    },
+    {
+      "file": "round4-1-07-picker.png",
+      "sha256": "247c044f60428439a9e413b175e783b9e8f0e69560b5b8e049cacbea80287cca",
+      "bytes": 293421,
+      "mtime": "2026-09-05T13:59:40.304380+00:00"
+    },
+    {
+      "file": "round4-1-08-next-action.png",
+      "sha256": "6bcbae3b349072395a8253fb653cfe0d3e690408edd57a36b36b186fa29a3a79",
+      "bytes": 244063,
+      "mtime": "2026-09-05T13:59:57.972651+00:00"
+    },
+    {
+      "file": "round4-1-09-read.png",
+      "sha256": "e6c94d49a0132eb1a8aca97be43263bd6b21946fe4804492e95afdf9a70fd6f3",
+      "bytes": 236387,
+      "mtime": "2026-09-05T14:00:28.494228+00:00"
+    },
+    {
+      "file": "round4-1-10-read-figure.png",
+      "sha256": "7dbc3dc82a5c4784ec1cd9213a6acf659337fd45a4809af55e923cbe87ea9fbd",
+      "bytes": 300722,
+      "mtime": "2026-09-05T14:00:50.322900+00:00"
+    },
+    {
+      "file": "round4-1-11-read-withheld.png",
+      "sha256": "a218038919598a469ecaa0f1c51b25a827f7c016790af7ea39868d7298035475",
+      "bytes": 269761,
+      "mtime": "2026-09-05T14:05:11.429122+00:00"
+    },
+    {
+      "file": "round4-1-12-visual.png",
+      "sha256": "405e5e4df634c437591c6be259867d17f05642e8acbfbda2b71cdb7793b41cc8",
+      "bytes": 273412,
+      "mtime": "2026-09-05T14:06:34.568765+00:00"
+    },
+    {
+      "file": "round4-1-13-visual-steps.png",
+      "sha256": "09a729726b18d47d218702084df39d024a1afe8da7859050bcba9495077bf122",
+      "bytes": 302429,
+      "mtime": "2026-09-05T14:06:55.846173+00:00"
+    },
+    {
+      "file": "round4-1-14-source-sheet.png",
+      "sha256": "8b771f5350435d9bfb374c694eea39b86932f832dc202901611de2868815b00c",
+      "bytes": 237800,
+      "mtime": "2026-09-05T14:07:12.938869+00:00"
+    },
+    {
+      "file": "round4-1-15-tech-fold.png",
+      "sha256": "18a89d5cce4e87fc34998c733dfe5d1e2c8f7e567b8f03bf3dba4babbc1ae439",
+      "bytes": 246290,
+      "mtime": "2026-09-05T14:07:30.679663+00:00"
+    },
+    {
+      "file": "round4-1-16-tutor.png",
+      "sha256": "c187176ccfde032ee1749ffcb240b3ff1c51f441629a8212759beeec72f31e20",
+      "bytes": 380223,
+      "mtime": "2026-09-05T14:17:10.523875+00:00"
+    },
+    {
+      "file": "round4-1-17-tutor-hint.png",
+      "sha256": "523909219ce782739fdd578531f603b2f5384aa5e247929f07727c862d5ffc30",
+      "bytes": 272091,
+      "mtime": "2026-09-05T14:19:16.877416+00:00"
+    },
+    {
+      "file": "round4-1-18-tutor-ask.png",
+      "sha256": "8fbcd37eba4842881138cf85f1dffd5259e7e37f867c968612aefffd64aac61f",
+      "bytes": 262596,
+      "mtime": "2026-09-05T14:19:36.302808+00:00"
+    },
+    {
+      "file": "round4-1-19-tutor-hints.png",
+      "sha256": "1e5a5174044b97f87d1d529d846b83db7c2e64cef78586d6cdabdbb4eaaf3251",
+      "bytes": 276795,
+      "mtime": "2026-09-05T14:19:57.535861+00:00"
+    },
+    {
+      "file": "round4-1-20-history-picker.png",
+      "sha256": "e8b49e87aa94bbbd1f532ebd62130271c177cffc40251ea1e77191b5d3153ed8",
+      "bytes": 286622,
+      "mtime": "2026-09-05T14:21:20.346056+00:00"
+    },
+    {
+      "file": "round4-1-21-history-timeline.png",
+      "sha256": "f4f8235f64523f6c111cc26b1febdf3bfc851b08c346453f1d79dcfcaaa56643",
+      "bytes": 249665,
+      "mtime": "2026-09-05T14:21:46.094615+00:00"
+    },
+    {
+      "file": "round4-1-22-history-sources.png",
+      "sha256": "5da8776cfe6402acc5c9bd9b522702295d7106dbbba4ef39d0ac67ebe0a3ccb2",
+      "bytes": 271976,
+      "mtime": "2026-09-05T14:22:14.056849+00:00"
+    },
+    {
+      "file": "round4-1-23-history-storysources.png",
+      "sha256": "0c0ff32f104e08f2733923e001fd6d379ac1a06ce39a27d6f1b68cad562bf7c9",
+      "bytes": 335846,
+      "mtime": "2026-09-05T14:22:39.545977+00:00"
+    },
+    {
+      "file": "round4-1-24-history-tutor.png",
+      "sha256": "50e49dd54362a5e6a0aea80808aaa997f58f2cc69bbaadeb1f351c9945196112",
+      "bytes": 372754,
+      "mtime": "2026-09-05T14:23:04.950366+00:00"
+    },
+    {
+      "file": "round4-2-01-read-headroom.png",
+      "sha256": "b2973ef103695514c8c344101cff879dc7cbbc17b9cdc68c786fda26b0e71033",
+      "bytes": 236226,
+      "mtime": "2026-09-05T14:27:23.176475+00:00"
+    },
+    {
+      "file": "round4-2-02-read-scrolled.png",
+      "sha256": "b9e0fbeec88279631e04feca2b49b4d794a99027b088cf4f8a5eea7aa1806cf5",
+      "bytes": 508502,
+      "mtime": "2026-09-05T14:27:44.665497+00:00"
+    },
+    {
+      "file": "round4-2-03-tutor-line.png",
+      "sha256": "735a6ee1621fdd9c5fcfbb55e9654d0d36c946a4d4a54d58d95975e0ddf01a1b",
+      "bytes": 392997,
+      "mtime": "2026-09-05T14:28:05.693820+00:00"
+    },
+    {
+      "file": "round4-2-04-chapter-emphasis.png",
+      "sha256": "fb26cbb861888f425b71464120cf571c8765d4958af201dfd29aa319505ca5c2",
+      "bytes": 131380,
+      "mtime": "2026-09-05T14:29:14.095280+00:00"
+    },
+    {
+      "file": "round4-2-05-timeline-no-repeat.png",
+      "sha256": "134853cf0b402383c8fba5e02fb785fb2a4e201615ae2faa14dc40b67b422d0e",
+      "bytes": 249673,
+      "mtime": "2026-09-05T14:30:33.096310+00:00"
+    }
+  ],
+  "iterations": [
+    {
+      "iter": 1,
+      "build": {
+        "gitSha": "4d870e1c4012bb0d1505181d2197de99eb214949",
+        "apkSha256": "f0fd35534e32ec76fc6ec99f8e4597d98c5ae09634c47df578a8f354a33f9fc3",
+        "installedAt": "2026-09-05T20:55Z+07",
+        "contains": "Lane A-runtime merge, Lane C Golden Slice #2 merge, evidence stamps, SourceQuoteIndex wiring + the two script quote fixes, research Home area, timeline Wrap fix"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "Home «Hôm nay»: «Chào Na!» + SAM line naming Bài 17 + label HÔM NAY + primary lavender «BÀI HỌC SAM · BẢN THỬ NGHIỆM» card with «Vì sao bài này?»; no mic placeholder, nothing promising chat",
+          "result": "PASS",
+          "note": "SAM line: «Hôm nay mình học Bài 17 · Tách chất khỏi hỗn hợp nhé — bài này SAM đã xếp sẵn ba cách học từ sách. Bấm «Mở bài học» là vào.»",
+          "frames": [
+            "round4-1-01-home.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "02",
+          "expect": "below it, the secondary white «CÒN CÓ THỂ MỞ» card («Có 4 bài để học ở Môn học» + «Vào Môn học ▸»), then the new research section label",
+          "result": "PASS",
+          "frames": [
+            "round4-1-02-home-secondary.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "03",
+          "expect": "research area «SAM ĐANG TẬP ĐỌC SÁCH KHÁC» + child line «Đây không phải bài của lớp con …» + «LÁT CẮT NGHIÊN CỨU · SÁCH LỚP 5 · BẢN THỬ NGHIỆM» card (Bài 8, SGK LS&ĐL 5 · trang 36–39). Also Lane C step 01.",
+          "result": "PASS",
+          "note": "defect: lesson title renders «thời kì bắc thuộc» (lower-case proper noun) — LessonDocument.titleCase over the printed TOC title; returned, not fixed here",
+          "frames": [
+            "round4-1-03-home-research.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "04",
+          "expect": "Giá sách «Sách của con · Lớp 6»: KHTN 6 tile «55 bài» + «✨ 1 bài học SAM»; the grade-5 research book is NOT on the grade-6 shelf",
+          "result": "PASS",
+          "frames": [
+            "round4-1-04-bookshelf.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "05",
+          "expect": "Book: «✨ 1 bài học SAM: Bài 17», trust chip, «Mục lục» with the child-language OCR caveat",
+          "result": "PASS",
+          "frames": [
+            "round4-1-05-book.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "06",
+          "expect": "Chapter IV: «Bài 16 · … Chưa có Bài học SAM — mở trong Môn học» and «Bài 17 · … ✨ Bài học SAM · 3 cách học · Chưa xem»",
+          "result": "PASS",
+          "note": "DEFECT: the lavender emphasis background sat on Bài 16 (no SAM lesson) and Bài 17 was white — inverted vs Home. Fixed in iteration 2.",
+          "frames": [
+            "round4-1-06-chapter.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "07",
+          "expect": "«Vào bài học» picker: breadcrumb «Giá sách › KHTN 6 › Chương IV», chip, three mode cards with counts, «SAM đề xuất cách này — vì sao?» carrying the runtime reason",
+          "result": "PASS",
+          "frames": [
+            "round4-1-07-picker.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "08",
+          "expect": "picker scrolled: the three cards and their counts read fully; reason not truncated",
+          "result": "PASS",
+          "frames": [
+            "round4-1-08-next-action.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "09",
+          "expect": "Đọc: «SAM đề xuất» card with the reason and the «Đã mở: ● Đọc ○ Trực quan ○ Học với SAM» trace row; page chips 60–63; font control; «— trang 60 —»",
+          "result": "PASS",
+          "frames": [
+            "round4-1-09-read.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "10",
+          "expect": "Đọc scrolled: continuous prose, in-book questions, figure block",
+          "result": "PASS",
+          "note": "DEFECT measured here: fixed chrome = 820 of 1920 px (43 %), so the page had 57 % of the screen and text scrolled under the pinned card. Fixed in iteration 2.",
+          "frames": [
+            "round4-1-10-read-figure.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "11",
+          "expect": "figure + caption «Hình 17.3» + source line as ONE block, crops free of the neighbouring text line (bleedScale)",
+          "result": "PASS",
+          "note": "source OCR defects visible in the prose: «Trong không khi», «lăng xuông» — A-pipeline fidelity class, reported not patched",
+          "frames": [
+            "round4-1-11-read-withheld.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "12",
+          "expect": "Trực quan: shape chips, instance chips, process diagram, legend «Mỗi số là một bước sách viết · chạm một bước để tra cứu lời sách»; trace row now ● Đọc ● Trực quan",
+          "result": "PASS",
+          "frames": [
+            "round4-1-12-visual.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "13",
+          "expect": "process steps with a 📖 affordance on every node",
+          "result": "PASS",
+          "frames": [
+            "round4-1-13-visual-steps.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "14",
+          "expect": "tap a step ⇒ «Sách viết» sheet: «📖 Tra cứu · SGK KHTN 6 · Bài 17 · trang 61», «Trong mục: …», verbatim quote, «Xem trong Đọc», tech fold CLOSED and no machine id visible",
+          "result": "PASS",
+          "frames": [
+            "round4-1-14-source-sheet.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "15",
+          "expect": "open the fold ⇒ the machine ids are there (block id, role, pipeline, extraction, trust, heading path) — moved for adults, not deleted",
+          "result": "PASS",
+          "frames": [
+            "round4-1-15-tech-fold.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "16",
+          "expect": "Học với SAM: header runtime line in child words with the MEASURED count",
+          "result": "PASS",
+          "note": "reads «Máy đã kiểm 7/17 bước …» — 5/17 → 7/17 after the quote fixes, live on the device. DEFECT: the parenthetical «(giải thích, câu hỏi, bước tiếp)» was a hard-coded string and no longer matched (2 of the 7 are hints). Fixed in iteration 2.",
+          "frames": [
+            "round4-1-16-tutor.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "17",
+          "expect": "explain step + «SÁCH VIẾT» card quoting the source verbatim with «chạm để tra cứu»",
+          "result": "PASS",
+          "frames": [
+            "round4-1-17-tutor-hint.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "18",
+          "expect": "ask step: «SAM (runtime có kiểm)  Câu 1/3», the SGK question verbatim, four options, visible hint ladder «Bậc gợi ý ① ② · Gợi ý cho tớ ✋»",
+          "result": "PASS",
+          "frames": [
+            "round4-1-18-tutor-ask.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "19",
+          "expect": "hint 2/2 for q1 carries the GREEN «runtime có kiểm» label, quotes the book verbatim, has no fabricated page citation and does not name the method",
+          "result": "PASS",
+          "note": "the step this lane fixed; it flipped from «kịch bản thử nghiệm» to «runtime có kiểm» on the device",
+          "frames": [
+            "round4-1-19-tutor-hints.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "20",
+          "expect": "LANE C 01+02 — research card → picker: breadcrumb «Giá sách › LS&ĐL 5», chip, three cards with counts (14 đoạn · 6 hình · 4 câu hỏi trong sách · 17 chỗ SAM để trống; Dòng thời gian · Bảng tóm tắt; hỏi 4 câu)",
+          "result": "PASS",
+          "frames": [
+            "round4-1-20-history-picker.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "21",
+          "expect": "LANE C 03 — Trực quan opens on «🕰️ Dòng thời gian»: «7 mốc · SGK LS&ĐL 5 · trang 37 · chữ sách, SAM chỉ xếp lại», mốc in book order (40 - 43 …)",
+          "result": "PASS",
+          "note": "DEFECT: every mốc card said the same thing three times («40 - 43» / «Hai Bà Trưng» / «Hai Bà Trưng (40 - 43)»). Fixed in iteration 2.",
+          "frames": [
+            "round4-1-21-history-timeline.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "22",
+          "expect": "LANE C 03 — «THỬ XẾP THỨ TỰ» chips + «Kiểm với sách» / «Làm lại» (disabled until two mốc picked), «Vì sao SAM chọn sơ đồ này» + «Nguồn & độ tin»; no praise, no score",
+          "result": "PASS",
+          "frames": [
+            "round4-1-22-history-sources.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "23",
+          "expect": "LANE C 03 — «NGUỒN KỂ CHUYỆN» cards with «Kể theo: NXB …, year» and the verbatim «(Theo …)» attribution; the 2005 one says «Câu chuyện này có phần SAM chưa đọc được»",
+          "result": "PASS",
+          "note": "visible source tone-mark defects: «Lý bĩ», «Ngô quyền đại phả quân nam hãn» — exactly the class tc2-p2 would withhold; returned to A-pipeline / Founder",
+          "frames": [
+            "round4-1-23-history-storysources.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "24",
+          "expect": "LANE C 05 — Học với SAM on the research slice",
+          "result": "PASS",
+          "note": "honest fail-closed: «Máy chưa ràng buộc được bài này với sách — mọi bước là lời viết sẵn để thử» ⇒ Pedagogy Reality 0/7 for the slice (no SemanticBinding registered). Minor Lane C copy defect: the explain step says «mình thử ba câu» while the script has 4 asks.",
+          "frames": [
+            "round4-1-24-history-tutor.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "25",
+          "expect": "LANE C 04 — Đọc on the research slice (p38 withheld cards, story boxes, p41 timeline table)",
+          "result": "NOT WALKED",
+          "note": "iteration 1 ran out of session budget before this step; the slice's Đọc view is covered by no_machine_ids_test on the real fixture but has no device frame. Carried to the next round.",
+          "frames": [],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "26",
+          "expect": "LANE C 06 — Sessions / evidence unchanged after the walk (EvidencePolicy none)",
+          "result": "PASS (BY CONSTRUCTION, NOT BY FRAME)",
+          "note": "the workspace emits no LearningEvent — held by boundary_test with a throwing store across the journey; no on-device store inspection was performed, so this is a code claim, not a device claim",
+          "frames": [],
+          "missingFrames": [],
+          "downgraded": false
+        }
+      ]
+    },
+    {
+      "iter": 2,
+      "build": {
+        "gitSha": "746627f624753ce2e43ac6dbb7068f23107689fb",
+        "apkSha256": "ca21ef1d48af854ad61531ba3bddd3f1223f5f0cd399a7ef40edec9bce44165d",
+        "installedAt": "2026-09-05T21:26Z+07",
+        "contains": "iteration 1 plus the four defect fixes: read-view headroom, chapter emphasis, measured runtime-line phase list, timeline card de-duplication"
+      },
+      "steps": [
+        {
+          "step": "01",
+          "expect": "Đọc at scroll 0 looks unchanged — the «SAM đề xuất» card is still the first thing the child sees",
+          "result": "PASS",
+          "frames": [
+            "round4-2-01-read-headroom.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "02",
+          "expect": "Đọc scrolled: the SAM card has scrolled away with the page; fixed chrome now ends at ~525 px instead of 820 px",
+          "result": "PASS",
+          "note": "reading area 1100 px → 1395 px, i.e. 57 % → 73 % of the screen; iteration-1 defect closed",
+          "frames": [
+            "round4-2-02-read-scrolled.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "03",
+          "expect": "tutor runtime line lists the step kinds it actually measured",
+          "result": "PASS",
+          "note": "now «7/17 … (giải thích, câu hỏi, gợi ý, bước tiếp) · 10 … (gợi ý, phản hồi, chỉ từng bước)» — consistent with its own number",
+          "frames": [
+            "round4-2-03-tutor-line.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "04",
+          "expect": "Chapter IV: the row WITH a Bài học SAM is the emphasised one; trace reads «Đã xem (phiên này): Đọc · Học với SAM»",
+          "result": "PASS",
+          "note": "iteration-1 inversion closed; the session trace also propagated to the book's chapter row",
+          "frames": [
+            "round4-2-04-chapter-emphasis.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        },
+        {
+          "step": "05",
+          "expect": "History timeline: each mốc shows its year and its name once — no third repeating line",
+          "result": "PASS",
+          "note": "three mốc now fit where two did; a clause that adds something is still shown in full (pinned by timeline_view_test)",
+          "frames": [
+            "round4-2-05-timeline-no-repeat.png"
+          ],
+          "missingFrames": [],
+          "downgraded": false
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "frames": 32,
+    "steps": {
+      "PASS": 30,
+      "FAIL": 0,
+      "SKIP": 0,
+      "UNVERIFIED": 0,
+      "OTHER": 1
+    },
+    "downgraded": 0
+  },
+  "retentionRules": [
+    "no lock-screen / personal-notification frames",
+    "no raw PDF pages; SGK crops inside frames are internal (Founder D4)",
+    "a PASS without an existing frame is downgraded to UNVERIFIED"
+  ],
+  "warnings": []
+}

@@ -39,7 +39,8 @@ void main() {
         expect(b.sourceRef.book, d.book);
         expect(b.trust, ContentTrust.fixtureSynthetic);
       }
-      expect(d.lessonLabel, startsWith('Bài 17 · Tách chất'));
+      // vòng 7: nguyên văn nguồn, không còn hạ chữ (quyết định của Founder)
+      expect(d.lessonLabel, 'Bài 17 · ${d.title}');
       expect(d.pageRangeLine, 'SGK KHTN 6 · trang 60–63');
     },
   );
@@ -107,14 +108,17 @@ void main() {
     },
   );
 
-  test('titleCase: hoa đầu chuỗi và sau dấu kết câu (Nokia n1 D1)', () {
-    expect(
-      LessonDocument.titleCase('HỖN HỢP. TÁCH CHẤT RA KHỎI HỖN HỢP'),
-      'Hỗn hợp. Tách chất ra khỏi hỗn hợp',
-    );
-    expect(LessonDocument.titleCase('TÁCH CHẤT KHỎI HỖN HỢP'),
-        'Tách chất khỏi hỗn hợp');
-    expect(LessonDocument.titleCase(''), '');
+  // ⭐ ROUND 7 · WS-S (HO-1) — `LessonDocument.titleCase` ĐÃ BỊ XOÁ.
+  //
+  // Test cũ ở đây là ví dụ giáo khoa của lỗi chọn quần thể: cả BA đầu vào đều
+  // IN HOA, tức chỉ nạp đúng tiền đề mà phép biến đổi giả định, nên nó không
+  // thể đỏ dù hàm phá mọi danh từ riêng trong một chuỗi đã có chữ thường —
+  // đúng cái đã xảy ra với «thời kì Bắc thuộc» trên máy thật. Thay bằng bất
+  // biến của quyết định Founder: nhãn bài mang NGUYÊN VĂN tiêu đề. Quần thể
+  // thật (2 382 tiêu đề) ở `test/core/display/title_fidelity_test.dart`.
+  test('nhãn bài học mang NGUYÊN VĂN tiêu đề nguồn', () {
+    final d = loadSyntheticDoc();
+    expect(d.lessonLabel, 'Bài ${d.lessonNo} · ${d.title}');
   });
 
   test('bảng điều tra năng lực (census) đếm theo trust từng phần tử', () {
