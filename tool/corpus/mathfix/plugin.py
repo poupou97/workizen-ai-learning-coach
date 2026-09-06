@@ -159,10 +159,19 @@ def validate_candidate(candidate, ctx):
 _REGISTERED = False
 
 
-def register(registry=None):
-    """Register with Lane A1's registry (or the stand-in). Idempotent."""
+def register(registry=None, with_signal=True):
+    """Register with Lane A1's registry (or the stand-in). Idempotent.
+
+    Also installs this lane's provider in A1's third-signal **layer C** slot
+    (`repair.signals.numeric.register_provider`), which A1 left for the lane that can tell a
+    validated digit repair from a text lane moving a digit. Silently skipped when the framework is
+    not on the branch — this lane must remain runnable on its own.
+    """
     global _REGISTERED
     reg = registry or REGISTRY
+    if with_signal:
+        from . import signal_numeric
+        signal_numeric.register()
     if _REGISTERED and registry is None:
         return reg
     reg.repairer(FAILURE_CLASS, REPAIRER_ID)(propose)

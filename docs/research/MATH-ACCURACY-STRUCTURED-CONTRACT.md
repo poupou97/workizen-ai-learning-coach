@@ -10,6 +10,14 @@ Implemented in `tool/corpus/mathfix/nodes.py`, `expression.py`, `build.py`, `gly
 
 ---
 
+> **UPDATE 2026-09-06 — both requests in this section were shipped by Lane A1 in PR #83, and A2 now
+> reads them.** §1's geometry arrives as `block['geometry']['lines']` (plus `geometry['tokens']`,
+> explicitly `estimated: true`); `mathfix/expression.py:geometry_from_sdm_block` reads that shape,
+> the bare `lines` shape, and still falls back to the OCR body file. §1b's `formula_structured`
+> arrives at `tc2_sdm.py:762-781`; `mathfix/expression.py:formula_structured` is the one thing that
+> sets it, and only for an expression an independent validator confirmed. The requests are kept
+> below as written, because the reasoning is what made them the right requests.
+
 ## 1 · Request to Lane A1 — per-line geometry on the SDM block (§2)
 
 **The gap, in one line of code.** `tool/corpus/tc2_sdm.py:1060` computes `under` — the OCR lines
@@ -207,3 +215,32 @@ The validators that would earn a restore, none of which is world knowledge dress
 
 Until those exist, chemistry stays withheld with its crop, and the audit's recommendation stands:
 the fix that generalises is the same as §1b — **key on structure, not on shape.**
+
+---
+
+## 5 · Two notes back to Lane A1
+
+**① Layer C is filled.** `mathfix/signal_numeric.py` installs a provider in
+`repair.signals.numeric.register_provider`. Its contract is one sentence — *support only from the
+page, object from the strings, never relax the fail-closed default without evidence* — because a
+provider that answered SUPPORTS from two strings would hand a text lane a licence to move digits,
+which is what layer C exists to prevent. With page evidence in `ctx.extra['mathfix_page']` it
+re-derives the expression from the raster and answers with the six validators' verdict; without it,
+it can still object to an invented digit or an operator that changed identity, and otherwise returns
+`None` so A1's default stands.
+
+**② `still_wrong` is not a lesser category for this failure class.**
+`ledger.false_correction_report` counts `false_correction` only when *the observation was already
+correct and the repair made it wrong*. That is right for Vietnamese text. It is blind here: a
+flattened expression is **always** wrong before, so every bad math repair lands in `still_wrong`.
+
+Both of this lane's real bad repairs prove it. `04-sgk-toan-4-tap-hai:p118:…:012` observed
+`'16 21 3 5'` and proposed `16/21 - 3/5` for a printed `16/21 × 3/5`;
+`05-sgk-toan-5-tap-mot:p022:…:020` observed `'d) 20 18 2 5'` and proposed `d) 20/18 2/5` for a
+printed `d) 20/18 − 2/5`. Under the strict definition both score
+**`false_correction` = 0** — and both would have shown a child arithmetic the book does not contain.
+
+Asked for: report **`1 − correction_precision`** beside `false_correction_rate` for
+`formula_flattened`, or split `still_wrong` by whether the served value is *structurally* wrong. No
+code change is needed — `correction_precision` is already in the returned dict; it is the one to
+read for this class.

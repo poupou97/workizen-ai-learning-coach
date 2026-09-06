@@ -214,15 +214,50 @@ class TestMathExpressionObject(unittest.TestCase):
             self.assertIn(k, j)
 
 
+class TestFormulaStructuredFlag(unittest.TestCase):
+    """A1's guard exemption (PR #83) is earned by a validated structure, never by a role name."""
+
+    def expr(self, ast, disposition):
+        e = X.MathExpression(source_block_id='b', book='x', page_pdf=1, ast=ast)
+        e.disposition = disposition
+        return e
+
+    def test_only_a_validated_repair_earns_it(self):
+        self.assertTrue(X.formula_structured(self.expr(frac('1', '5'), X.VALIDATED_REPAIR)))
+
+    def test_a_candidate_does_not_earn_it(self):
+        self.assertFalse(X.formula_structured(self.expr(frac('1', '5'), X.REPAIRED_CANDIDATE)))
+
+    def test_a_withheld_region_does_not_earn_it(self):
+        self.assertFalse(X.formula_structured(self.expr(frac('1', '5'), X.WITHHELD)))
+
+    def test_a_validated_row_with_no_structure_does_not_earn_it(self):
+        """The flag names a STRUCTURE. A disposition without an AST is a label again."""
+        self.assertFalse(X.formula_structured(self.expr(None, X.VALIDATED_REPAIR)))
+
+    def test_nothing_at_all_does_not_earn_it(self):
+        self.assertFalse(X.formula_structured(None))
+
+
 class TestSourceGeometryContract(unittest.TestCase):
     """§2: geometry must survive OCR → SDM → TSL. One reader, so A1's field and the fallback
     cannot drift."""
 
     def test_lane_a1_s_field_is_used_when_the_block_carries_it(self):
-        blk = dict(bbox=[0, 0, 1, 1], lines=[dict(text='3', bbox=[0.1, 0.2, 0.01, 0.02], index=4)])
+        """A1 ships it as `geometry.lines` (PR #83): [{text, bbox:[x,y,w,h], conf}], printed order."""
+        blk = dict(bbox=[0, 0, 1, 1],
+                   geometry=dict(source='apple-vision lines (ocr-body)',
+                                 lines=[dict(text='3', bbox=[0.1, 0.2, 0.01, 0.02], conf=1.0)],
+                                 tokens=[dict(text='3', line=0, estimated=True,
+                                              bbox=[0.1, 0.2, 0.01, 0.02])]))
         g = X.geometry_from_sdm_block(blk)
         self.assertEqual(len(g), 1)
-        self.assertEqual((g[0].text, g[0].index, g[0].bbox), ('3', 4, (0.1, 0.2, 0.01, 0.02)))
+        self.assertEqual((g[0].text, g[0].bbox), ('3', (0.1, 0.2, 0.01, 0.02)))
+
+    def test_the_bare_lines_shape_is_accepted_too(self):
+        blk = dict(bbox=[0, 0, 1, 1], lines=[dict(text='3', bbox=[0.1, 0.2, 0.01, 0.02], index=4)])
+        g = X.geometry_from_sdm_block(blk)
+        self.assertEqual((g[0].text, g[0].index), ('3', 4))
 
     def test_the_fallback_reads_the_ocr_tokens_under_the_block(self):
         from mathfix.tokens import Token

@@ -136,6 +136,21 @@ The six checks, each an independent signal that did not produce the candidate it
 RESTORE requires ≥1 PASS and **no** FAIL. A candidate whose every validator abstained is withheld:
 «nothing contradicted it» is not evidence.
 
+### Reported through Lane A1's own metric — and one thing it cannot see
+
+A1's `ledger.false_correction_report` (PR #83) is the P0 measure. On this lane's 10 restores:
+`repaired` **10**, `false_correction` **0**, `still_wrong` **0** → **`false_correction_rate` 0.0000,
+`correction_precision` 1.0000.**
+
+But the strict metric would have scored **0 false corrections on both of the bad repairs too**, and
+that is worth stating plainly. It counts `false_correction` only when the observation was *already
+correct* and the repair made it wrong. A flattened expression is **always** wrong before:
+`p118:…:012` observed `'16 21 3 5'`, `p022:…:020` observed `'d) 20 18 2 5'`. Both bad repairs are
+therefore `still_wrong`, not `false_correction` — and both would have shown a child arithmetic the
+book does not contain. **For `formula_flattened` the number to read is `1 − correction_precision`,
+not `false_correction_rate`.** Requested of A1 in the contract doc §5 ②; no code change needed, the
+value is already in the returned dict.
+
 ---
 
 ## 5 · The five directions, before → after
@@ -273,10 +288,14 @@ is adopted. That is the floor, and nothing here lowers it.
 
 ## 10 · Requests
 
-1. **`formula_structured`** — Lane A1, `tc2_sdm.py`: the guard exemption keys on a validated
-   structure rather than a role name (contract §1b).
-2. **Per-line geometry on the SDM block** — Lane A1, one additive `lines` field (contract §1); A2
-   already reads it when present.
+1. ~~**`formula_structured`**~~ — **shipped by Lane A1 (PR #83, `tc2_sdm.py:762-781`).** A
+   `formula`-role block is now exempt from the math/unit/chem guards only when it carries the flag,
+   and `mathfix/expression.py:formula_structured` is the single thing that sets it: an expression an
+   independent validator confirmed. Not a candidate, not a label.
+2. ~~**Per-line geometry on the SDM block**~~ — **shipped by Lane A1 (PR #83)** as
+   `block['geometry']['lines']` plus `geometry['tokens']` marked `estimated: true`. A2 reads that
+   shape; its own atom boxes are estimated the same way and are checked against the raster before
+   any of them earns a verdict.
 3. **`empty_block` on a formula-labelled region** is a different disposition from `empty_block` on
    a blank one. Four correct expressions are blocked by the conflation (§8 ②).
 4. **The renderer** — Lane B, option A (image fallback only, zero app work, available today) or
@@ -285,7 +304,22 @@ is adopted. That is the floor, and nothing here lowers it.
 5. **The recogniser** — approve the in-corpus template recogniser first (§6), with CodeFormulaV2 as
    a fallback, and confirm that a VLM's output stays a `RepairCandidate` behind the §4 checks.
 6. **The pack path** — `rebuild_fractions.py` → `build_lesson_index.py` still ships geometrically
-   reconstructed expressions with `status: INFERRED` stripped (audit §0 ①). Lane D is fixing it;
-   noted here because it is the same failure family and a different code path.
+   reconstructed expressions with `status: INFERRED` stripped (audit §0 ①). **Lane D is fixing it on
+   that code path; this lane does not duplicate the fix.** Noted here because it is the same failure
+   family, and because the structured path is what eventually makes that reconstruction unnecessary.
+7. **Read `1 − correction_precision` for `formula_flattened`**, not `false_correction_rate` (§4).
+
+## 11 · Against the Founder's §10 success criteria
+
+| criterion | state |
+|---|---|
+| structure survives `OCR → SDM → TSL → LessonDocument` | **partial** — A1 shipped the SDM end (`geometry.lines/tokens`); A2 carries it into `MathExpression.sourceGeometry`. TSL and LessonDocument still carry flat text only: the bridge has no `formula` key, which is request 4. |
+| `3/10 + 5/21` stays structurally correct | **it is withheld, correctly** — both regions are FOUND, both refused, because the numerator «3» is absent from the OCR output. It cannot be made correct without recognition (§6); it can no longer be served as `b) 10 +`, because a dangling operator cannot parse. |
+| `10⁸` cannot silently become `10°` | **detected, not yet repaired** — 8 blocks found, 3 of them TRUSTED today; and in the model a destroyed exponent has no representation at all. Repair needs the recogniser. |
+| validated expressions can be safely RESTORED | **yes** — 10 restored, precision 1.000, 8/8 on holdout |
+| mobile renders them | **not built** — contract §3; option A costs zero app work because the withheld crop already reaches the child |
+| pedagogy receives AST rather than flat text | **the AST exists and is canonical**; no consumer is wired yet (`lib/**` is Lane B's) |
+| false correction is measured | **yes** — 2 produced, both hand-found, both now refused; and §4 names the blind spot in the strict metric |
+| provenance end-to-end | **yes on the corpus side** — every value cites the OCR lines and raster bars that produced it, keeps `originalText` beside the proposal, and a refusal is an object with a bbox and a crop. **No** on the pack side (audit §8 E). |
 
 **NO MERGE.**

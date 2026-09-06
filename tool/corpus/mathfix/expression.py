@@ -124,14 +124,35 @@ def withheld(source_block_id, book, page_pdf, *, bbox=None, crop=None, reasons=(
                           disposition=WITHHELD, **kw)
 
 
+def formula_structured(expr):
+    """Does this expression earn Lane A1's `formula_structured` exemption?
+
+    A1 shipped the flag in PR #83 (`tc2_sdm.py:762-781`): a `formula`-role block is exempt from the
+    math / unit / chem guards **only** when the block carries `formula_structured=True`, and is
+    guarded like any other block otherwise. Before that change the exemption was granted by the role
+    NAME, with confidence 0.95 on a Docling label alone — and it was dead only by accident.
+
+    Exactly one thing sets it: an expression an independent validator confirmed. Not a candidate,
+    not a label, not a confident recogniser.
+    """
+    return bool(expr is not None and expr.ast is not None
+                and expr.disposition == VALIDATED_REPAIR)
+
+
 def geometry_from_sdm_block(block, ocr_tokens=None):
     """The per-line geometry under one SDM block.
 
-    Reads Lane A1's additive `lines` field when the block carries it (§2), and falls back to the
-    OCR body file otherwise. One reader, so the two lanes cannot drift: when A1 ships the field this
-    function starts using it with no change here.
+    Reads Lane A1's additive field (§2) when the block carries it, and falls back to the OCR body
+    file otherwise. A1 shipped it as `block['geometry']['lines']` — `[{text, bbox:[x,y,w,h], conf}]`,
+    in printed order — alongside `geometry['tokens']`, per-token boxes explicitly marked
+    `estimated: true` because Apple Vision reports geometry per LINE and a token box is the line's
+    width shared out by character advance. This lane treats those as an estimate and never as a
+    measurement: its own atom boxes are derived the same way and are checked against the raster
+    (`glyphs.classify`) before any of them earns a verdict.
+
+    One reader for both shapes and the fallback, so the two lanes cannot drift.
     """
-    lines = block.get('lines')
+    lines = (block.get('geometry') or {}).get('lines') or block.get('lines')
     if lines:
         return tuple(TokenGeometry(text=l.get('text', ''),
                                    bbox=tuple(l['bbox']) if 'bbox' in l
