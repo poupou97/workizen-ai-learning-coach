@@ -1,0 +1,1044 @@
+{
+ "schema": "trust-policy-freeze-v1",
+ "frozen_for": "round 7 · WS-T · step A — candidate policy and bound, before any application",
+ "invariant": "TRUST = SERVED ∩ admit(...). Activation cannot serve one new block.",
+ "blocks_per_lesson": 30,
+ "clauses": {
+  "served_only": {
+   "id": "served_only",
+   "kind": "structural",
+   "reason": "trusted ⊆ served. Activation may not serve one block that is withheld today.",
+   "evidence": "ROUND6 §3 «the served set is byte-identical before and after, in every population».",
+   "available": true
+  },
+  "no_repair": {
+   "id": "no_repair",
+   "kind": "doctrine",
+   "reason": "A repaired, restored or validated-repaired block is never trusted by this policy.",
+   "evidence": "ROUND5 doctrine; ROUND6 §3 — 9 validated repairs crossed the pipeline, trusted: 0.",
+   "available": true
+  },
+  "two_stack_exact": {
+   "id": "two_stack_exact",
+   "kind": "fidelity",
+   "reason": "Both OCR stacks must agree character-exactly, with no tone disagreement. NECESSARY, NEVER SUFFICIENT — agreement does not imply truth.",
+   "evidence": "ROUND4 falsified OCR_A==OCR_B => TRUE. A3 §3: adding this floor to today's guards moves 26 wrong served to 22, i.e. it removes some wrong blocks and no more than some.",
+   "available": true
+  },
+  "role_known": {
+   "id": "role_known",
+   "kind": "role",
+   "reason": "Refuse a block whose role the role layer could not determine (confidence 0.60 is the `body` fallback, i.e. «we could not tell»).",
+   "evidence": "A3 §4 «role confidence is a step function, not a dial»; the 0.60→0.70 step removes 84 served blocks. MEASURED CONSEQUENCE: it removes ALL continuous prose.",
+   "available": true
+  },
+  "role_not_teaching_shaped": {
+   "id": "role_not_teaching_shaped",
+   "kind": "role",
+   "reason": "Refuse the roles whose errors are teaching-critical BY CONSTRUCTION: a question (a non-question served as a question is a teaching error), an option (an incomplete multiple choice is wrong, not merely smaller), an activity, a caption (bound to a figure the child is not shown).",
+   "evidence": "ROUND5 97-row defect 8 (sibling withholding is itself teaching-critical); gold plane: `as_question` is 6 of 26 wrong served blocks and 6 of 12 teaching-critical ones.",
+   "available": true
+  },
+  "role_not_interactive": {
+   "id": "role_not_interactive",
+   "kind": "role",
+   "reason": "Refuse question/option/activity only — prose and captions stay eligible.",
+   "evidence": "The relaxation of `role_not_teaching_shaped` used by candidate C2.",
+   "available": true
+  },
+  "role_is_question_high_confidence": {
+   "id": "role_is_question_high_confidence",
+   "kind": "role",
+   "reason": "Admit ONLY blocks the role layer calls a question, at role confidence >= 0.90. This is a SECOND gate for a question surface, not a stricter setting of the reading gate.",
+   "evidence": "TC-19 #3 requires QUESTION precision >= 0.95 before an auto-labelled question is graded. A3 measured trusted-QUESTION precision 0.903 at n=72 — the requirement is NOT MET, and role is the least reproducible class measured (kappa 0.423-0.713).",
+   "available": true
+  },
+  "no_figure_dependence": {
+   "id": "no_figure_dependence",
+   "kind": "policy",
+   "reason": "Refuse a block whose meaning depends on a figure the product does not render.",
+   "evidence": "A3 §2: `figure_dependent` sole-withholds 13 blocks, clean share 0.615.",
+   "available": true
+  },
+  "not_mathematical": {
+   "id": "not_mathematical",
+   "kind": "subject",
+   "reason": "Refuse mathematics until a structured formula representation exists. Flattened mathematics is not a fidelity question the gate can answer.",
+   "evidence": "A3 §2: `math_guard` is the only guard whose sole-withheld blocks split evenly (4 clean, 4 wrong) — a detector with no discrimination. Round-3 audit: Toán false trust 0.878. ROUND6 §7: 41 fabricated Toán expressions removed; the app ships zero Toán exercises.",
+   "available": true
+  },
+  "order_ok": {
+   "id": "order_ok",
+   "kind": "fidelity",
+   "reason": "Refuse a block the verifier says moved.",
+   "evidence": "Gold plane: `order_ok=False` carries wrong 2/14 (0.143) vs 24/340 (0.071). WEAK — reading-order inversion is the LARGEST wrongness class (14 of 26) and this signal does not see most of it.",
+   "available": true
+  },
+  "sibling_complete": {
+   "id": "sibling_complete",
+   "kind": "structure",
+   "reason": "Refuse a block if any member of its structural group (OPTION ⊂ QUESTION, a caption bound to its figure, a table row, a step in a procedure) is withheld. Withholding one member must withhold the whole group.",
+   "evidence": "ROUND5 97-row defect 8 — a teaching-critical failure produced by the safety mechanism itself. MACHINERY DOES NOT EXIST: no group key is carried on an evidence row.",
+   "available": false
+  },
+  "digit_sequence_verified": {
+   "id": "digit_sequence_verified",
+   "kind": "fidelity",
+   "reason": "If the block contains digits, an INDEPENDENT check must confirm the digit sequence.",
+   "evidence": "Gold plane: 6 of 12 teaching-critical served blocks are digit corruptions, and 3 of them survive character-exact two-stack agreement — both stacks agreed on the same wrong digits. No signal a gate can read separates them. MACHINERY DOES NOT EXIST.",
+   "available": false
+  }
+ },
+ "candidates": [
+  {
+   "schema": "trust-policy-v1",
+   "name": "C0 · NULL",
+   "base": "pipeline_served",
+   "headline": "Admit nothing. The reference point, and a legitimate outcome.",
+   "clauses": [],
+   "derived_from": [
+    "ROUND6-CONSOLIDATED-REPORT §1 Gate D — TRUTHFUL ZERO, accepted."
+   ],
+   "notes": null,
+   "bound_id": "BOUND-0"
+  },
+  {
+   "schema": "trust-policy-v1",
+   "name": "C1 · NAVIGATION-ONLY",
+   "base": "pipeline_served",
+   "headline": "Every available signal, stacked as necessary conditions. Admits headings, objectives, stage labels, sidebars — and no continuous prose at all.",
+   "clauses": [
+    "served_only",
+    "no_repair",
+    "two_stack_exact",
+    "role_known",
+    "role_not_teaching_shaped",
+    "no_figure_dependence",
+    "not_mathematical",
+    "order_ok"
+   ],
+   "derived_from": [
+    "TRUST-GATE-SENSITIVITY §2 (guard costs), §3 (curve), §4 (role confidence is a step function, OCR confidence is dead)",
+    "ROUND5-AUDIT-97-EVALUATION-SET defect 8 (sibling withholding is teaching-critical)"
+   ],
+   "notes": "The role-confidence floor removes every `body` block, because 0.60 is the fallback confidence meaning «we could not tell». What survives is the part of a page that teaches least.",
+   "bound_id": "BOUND-2"
+  },
+  {
+   "schema": "trust-policy-v1",
+   "name": "C2 · PROSE",
+   "base": "pipeline_served",
+   "headline": "C1 without the role-confidence floor and without the caption exclusion, so continuous prose is eligible. MEASURED TO DOMINATE C1: more content AND a lower teaching-critical rate.",
+   "clauses": [
+    "served_only",
+    "no_repair",
+    "two_stack_exact",
+    "role_not_interactive",
+    "no_figure_dependence",
+    "not_mathematical",
+    "order_ok"
+   ],
+   "derived_from": [
+    "TRUST-GATE-SENSITIVITY §4 — role confidence is a step function, not a dial",
+    "this workstream's own re-decision of the same frozen evidence rows"
+   ],
+   "notes": "The falsification that matters most in this file: tightening role confidence LOWERS false trust and RAISES the teaching-critical rate. A dial that looks like safety and is not.",
+   "bound_id": "BOUND-2"
+  },
+  {
+   "schema": "trust-policy-v1",
+   "name": "C3 · QUESTION SURFACE",
+   "base": "pipeline_served",
+   "headline": "A second, separate gate for a surface that asks a child a question. Not a stricter setting of the reading gate.",
+   "clauses": [
+    "served_only",
+    "no_repair",
+    "two_stack_exact",
+    "role_is_question_high_confidence",
+    "no_figure_dependence",
+    "not_mathematical"
+   ],
+   "derived_from": [
+    "TRUST-GATE-SENSITIVITY §7 #2 and THRESHOLDS.example.json scenario F",
+    "TC-19 #3 — QUESTION precision >= 0.95 required; A3 measured 0.903 at n = 72"
+   ],
+   "notes": "UNAVAILABLE ON PRE-EXISTING EVIDENCE: the precision requirement this surface already has is not met, and it was not met before this round started. A question surface is out of scope for a first trusted slice regardless of what any bound says.",
+   "bound_id": "BOUND-1"
+  },
+  {
+   "schema": "trust-policy-v1",
+   "name": "C4 · C1 + THE MACHINERY THAT DOES NOT EXIST",
+   "base": "pipeline_served",
+   "headline": "C1 plus structural-sibling completeness and independent digit-sequence verification — the two clauses that would address the measured teaching-critical mechanisms.",
+   "clauses": [
+    "served_only",
+    "no_repair",
+    "two_stack_exact",
+    "role_known",
+    "role_not_teaching_shaped",
+    "no_figure_dependence",
+    "not_mathematical",
+    "order_ok",
+    "sibling_complete",
+    "digit_sequence_verified"
+   ],
+   "derived_from": [
+    "gold plane: 6 of 12 teaching-critical served blocks are digit corruptions and 3 of them survive character-exact two-stack agreement; the other 6 are non-questions served as questions",
+    "ROUND5-AUDIT-97-EVALUATION-SET defect 8"
+   ],
+   "notes": "FROZEN AS A CANDIDATE, NOT AS AN OPTION. Both added clauses have no implementation, so this policy cannot be evaluated and `policy.evaluate` marks its numbers MEASUREMENT INVALID. It is here because it names the only work that would move the bound.",
+   "bound_id": "BOUND-2"
+  }
+ ],
+ "bounds": {
+  "BOUND-0": {
+   "id": "BOUND-0",
+   "kind": "none",
+   "promise": "nothing is admitted; trusted = 0",
+   "blocks_per_lesson": 30,
+   "tc_rate_upper95_max": 0.0,
+   "ft_rate_upper95_max": 0.0,
+   "min_audited_trusted_blocks_if_zero_observed": 0,
+   "decision_rule": "the status quo. No audit, no admission, no claim.",
+   "rationale": "ROUND6 graded Gate D a TRUTHFUL ZERO and the Founder accepted it. Keeping it is a legitimate outcome of this calibration, not a failure of it.",
+   "prediction_from_pre_existing_evidence": "holds by construction."
+  },
+  "BOUND-1": {
+   "id": "BOUND-1",
+   "kind": "lesson-promise",
+   "promise": "P(a lesson's trusted blocks contain no teaching-critical error) >= 0.95",
+   "blocks_per_lesson": 30,
+   "tc_rate_upper95_max": 0.00171,
+   "ft_rate_upper95_max": 0.02,
+   "min_audited_trusted_blocks_if_zero_observed": 2245,
+   "decision_rule": "PASS iff, on the frozen blind population, the Wilson 95 % UPPER bound on the teaching-critical rate among admitted blocks is <= 0.00171 AND the upper bound on false trust is <= 0.02. Otherwise the result is trusted = 0 and a truthful zero is reported.",
+   "rationale": "The strongest promise anyone could state to a parent without qualification: 19 lessons in 20 carry no teaching-critical error.",
+   "prediction_from_pre_existing_evidence": "PREDICTED FAIL. The best measured candidate has a teaching-critical rate of 0.0213 on the gold plane; the expected number of such errors in the required audit is ~48, and the rule requires 0."
+  },
+  "BOUND-2": {
+   "id": "BOUND-2",
+   "kind": "lesson-promise",
+   "promise": "P(a lesson's trusted blocks contain no teaching-critical error) >= 0.9",
+   "blocks_per_lesson": 30,
+   "tc_rate_upper95_max": 0.00351,
+   "ft_rate_upper95_max": 0.05,
+   "min_audited_trusted_blocks_if_zero_observed": 1092,
+   "decision_rule": "PASS iff, on the frozen blind population, the Wilson 95 % UPPER bound on the teaching-critical rate among admitted blocks is <= 0.00351 AND the upper bound on false trust is <= 0.05. Otherwise the result is trusted = 0 and a truthful zero is reported.",
+   "rationale": "Nine lessons in ten clean. Still a promise that survives being said out loud, and roughly an order of magnitude better than anything measured.",
+   "prediction_from_pre_existing_evidence": "PREDICTED FAIL. Expected ~23 teaching-critical errors in the required audit against a rule that permits 0."
+  },
+  "BOUND-3": {
+   "id": "BOUND-3",
+   "kind": "lesson-promise",
+   "promise": "P(a lesson's trusted blocks contain no teaching-critical error) >= 0.8",
+   "blocks_per_lesson": 30,
+   "tc_rate_upper95_max": 0.00741,
+   "ft_rate_upper95_max": 0.08,
+   "min_audited_trusted_blocks_if_zero_observed": 515,
+   "decision_rule": "PASS iff, on the frozen blind population, the Wilson 95 % UPPER bound on the teaching-critical rate among admitted blocks is <= 0.00741 AND the upper bound on false trust is <= 0.08. Otherwise the result is trusted = 0 and a truthful zero is reported.",
+   "rationale": "The weakest lesson-level promise this workstream is willing to write down: one lesson in five carries a teaching-critical error.",
+   "prediction_from_pre_existing_evidence": "PREDICTED FAIL. Expected ~11 teaching-critical errors against a rule that permits 0. Even this is ~3x better than measured."
+  },
+  "BOUND-4": {
+   "id": "BOUND-4",
+   "kind": "block-rate",
+   "promise": "block-level teaching-critical rate, upper 95 % bound <= 0.02. NO lesson-level promise is implied and none may be quoted.",
+   "blocks_per_lesson": 30,
+   "tc_rate_upper95_max": 0.02,
+   "ft_rate_upper95_max": 0.1,
+   "min_audited_trusted_blocks_if_zero_observed": 189,
+   "decision_rule": "PASS iff tc_upper95 <= 0.02 and ft_upper95 <= 0.10 on the blind population. n = 189 with zero observed, 437 with three observed.",
+   "rationale": "The only bound on this list the pre-existing evidence does not predict will fail. It is included so the Founder can see what «achievable» costs.",
+   "prediction_from_pre_existing_evidence": "BORDERLINE. The measured point estimate is 0.0213 — on the wrong side of the bound by a hair, well inside sampling noise. CONSEQUENCE, stated because the bound hides it: at 0.02 and L=30, 45 % of lessons carry at least one teaching-critical error. This bound is passable and its consequence is not sayable to a parent."
+  },
+  "BOUND-5": {
+   "id": "BOUND-5",
+   "kind": "per-lesson-certification",
+   "promise": "a lesson is trusted only when EVERY one of its blocks has been verified against the printed page by a human. The bound is per lesson, not per block.",
+   "blocks_per_lesson": 30,
+   "tc_rate_upper95_max": null,
+   "ft_rate_upper95_max": null,
+   "min_audited_trusted_blocks_if_zero_observed": 30,
+   "decision_rule": "PASS for a given lesson iff every block in it was verified and none was found wrong. There is no sampling and therefore no confidence interval.",
+   "rationale": "NOT A THRESHOLD, and that is precisely why the arithmetic permits it. A threshold spends a measured error rate across content nobody looked at; certification spends human attention and produces no residual rate to bound. ROUND7-PLAN already prefers this shape: «prefer the already-measured Golden lessons. Do not scale to the whole corpus.»",
+   "prediction_from_pre_existing_evidence": "ACHIEVABLE for a bounded slice, at ~30 human verifications per lesson. It does not generalise, it does not produce a corpus-level claim, and it must never be described as a trust threshold having been met."
+  }
+ },
+ "recommendation": {
+  "candidate": "C2 · PROSE",
+  "bound": "BOUND-2",
+  "expected_outcome": "TRUTHFUL ZERO",
+  "statement": "Freeze C2 under BOUND-2 and run the blind evaluation expecting it to fail. C2 because it is measurably better than C1 on both axes at once; BOUND-2 because it is derived from a promise about a lesson rather than from what the pipeline happens to achieve, and it is the weakest such promise that is still worth making. The pre-existing evidence predicts a truthful zero, and predicting the outcome before measuring it is what distinguishes a calibration from a selection. If it passes, that is news; if it fails, the round ends exactly where round 6 ended, with one difference: the zero will have been MEASURED against a predeclared bound instead of asserted from the absence of a threshold.",
+  "what_would_actually_move_it": "Not a threshold. All 12 measured teaching-critical errors in the served set fall into exactly two mechanisms — digit corruption (6) and a non-question served as a question (6) — and neither is visible to any signal a gate can read; 3 of the 6 digit corruptions survive character-exact agreement between two independent OCR stacks. An independent digit-sequence check and a question/non-question discriminator would each attack half of the measured harm. A tighter threshold attacks neither.",
+  "if_a_non_zero_is_required": "BOUND-5, per-lesson certification of a bounded slice — every block of one lesson verified against the print by a human, ~30 verifications. It is not a threshold, it produces no corpus claim, and it must never be reported as one."
+ },
+ "expected_tradeoffs_no_identities": {
+  "C0 · NULL": {
+   "n_served": 354,
+   "n_trusted": 0,
+   "trusted_share_of_served": 0.0,
+   "ft_k": 0,
+   "ft_rate": null,
+   "ft_upper95": null,
+   "tc_k": 0,
+   "tc_rate": null,
+   "tc_upper95": null,
+   "harm_k": 0,
+   "harm_rate": null,
+   "harm_split": {
+    "ft_and_tc": 0,
+    "ft_only": 0,
+    "tc_only": 0,
+    "union": 0
+   },
+   "by_role": {},
+   "by_subject": {},
+   "page_incidence": null,
+   "refused_by": {},
+   "unavailable_clauses": [],
+   "evaluated_on": "gold plane (54 hard pages) — NOT a corpus estimate"
+  },
+  "C1 · NAVIGATION-ONLY": {
+   "n_served": 354,
+   "n_trusted": 129,
+   "trusted_share_of_served": 0.3644,
+   "ft_k": 4,
+   "ft_rate": 0.031,
+   "ft_upper95": 0.077,
+   "tc_k": 3,
+   "tc_rate": 0.0233,
+   "tc_upper95": 0.0661,
+   "harm_k": 7,
+   "harm_rate": 0.0543,
+   "harm_split": {
+    "ft_and_tc": 0,
+    "ft_only": 4,
+    "tc_only": 3,
+    "union": 7
+   },
+   "by_role": {
+    "heading": {
+     "n": 65,
+     "ft": 4,
+     "tc": 3,
+     "ft_rate": 0.0615,
+     "tc_rate": 0.0462,
+     "ft_upper95": 0.1478
+    },
+    "sidebar": {
+     "n": 26,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1287
+    },
+    "objective": {
+     "n": 18,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1759
+    },
+    "stage_label": {
+     "n": 16,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1936
+    },
+    "attribution": {
+     "n": 2,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.6576
+    },
+    "footnote": {
+     "n": 2,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.6576
+    }
+   },
+   "by_subject": {
+    "KHTN": {
+     "n": 45,
+     "ft": 3,
+     "tc": 0,
+     "ft_rate": 0.0667,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1786
+    },
+    "Khoa học": {
+     "n": 31,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1103
+    },
+    "Tin học": {
+     "n": 18,
+     "ft": 0,
+     "tc": 1,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0556,
+     "ft_upper95": 0.1759
+    },
+    "Ngữ văn": {
+     "n": 13,
+     "ft": 1,
+     "tc": 2,
+     "ft_rate": 0.0769,
+     "tc_rate": 0.1538,
+     "ft_upper95": 0.3331
+    },
+    "LS&ĐL": {
+     "n": 7,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.3543
+    },
+    "Vật lí": {
+     "n": 7,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.3543
+    },
+    "Tiếng Việt": {
+     "n": 4,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.4899
+    },
+    "Địa lí": {
+     "n": 4,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.4899
+    }
+   },
+   "page_incidence": {
+    "groups": 36,
+    "median_trusted_blocks_per_group": 3,
+    "mean_trusted_blocks_per_group": 3.58,
+    "groups_with_teaching_critical": 3,
+    "p_group_has_teaching_critical": 0.0833,
+    "p_group_has_teaching_critical_upper95": 0.2183,
+    "groups_with_any_harm": 5,
+    "p_group_has_any_harm": 0.1389
+   },
+   "refused_by": {
+    "role_not_teaching_shaped": 102,
+    "role_known": 84,
+    "not_mathematical": 46,
+    "two_stack_exact": 31,
+    "no_figure_dependence": 27,
+    "order_ok": 14
+   },
+   "unavailable_clauses": [],
+   "evaluated_on": "gold plane (54 hard pages) — NOT a corpus estimate"
+  },
+  "C2 · PROSE": {
+   "n_served": 354,
+   "n_trusted": 188,
+   "trusted_share_of_served": 0.5311,
+   "ft_k": 7,
+   "ft_rate": 0.0372,
+   "ft_upper95": 0.0749,
+   "tc_k": 4,
+   "tc_rate": 0.0213,
+   "tc_upper95": 0.0534,
+   "harm_k": 10,
+   "harm_rate": 0.0532,
+   "harm_split": {
+    "ft_and_tc": 1,
+    "ft_only": 6,
+    "tc_only": 3,
+    "union": 10
+   },
+   "by_role": {
+    "heading": {
+     "n": 65,
+     "ft": 4,
+     "tc": 3,
+     "ft_rate": 0.0615,
+     "tc_rate": 0.0462,
+     "ft_upper95": 0.1478
+    },
+    "body": {
+     "n": 57,
+     "ft": 2,
+     "tc": 1,
+     "ft_rate": 0.0351,
+     "tc_rate": 0.0175,
+     "ft_upper95": 0.1192
+    },
+    "sidebar": {
+     "n": 26,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1287
+    },
+    "objective": {
+     "n": 18,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1759
+    },
+    "stage_label": {
+     "n": 16,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1936
+    },
+    "caption": {
+     "n": 2,
+     "ft": 1,
+     "tc": 0,
+     "ft_rate": 0.5,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.9055
+    },
+    "attribution": {
+     "n": 2,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.6576
+    },
+    "footnote": {
+     "n": 2,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.6576
+    }
+   },
+   "by_subject": {
+    "KHTN": {
+     "n": 58,
+     "ft": 5,
+     "tc": 1,
+     "ft_rate": 0.0862,
+     "tc_rate": 0.0172,
+     "ft_upper95": 0.1864
+    },
+    "Khoa học": {
+     "n": 35,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.0989
+    },
+    "Ngữ văn": {
+     "n": 29,
+     "ft": 1,
+     "tc": 2,
+     "ft_rate": 0.0345,
+     "tc_rate": 0.069,
+     "ft_upper95": 0.1718
+    },
+    "Tin học": {
+     "n": 21,
+     "ft": 0,
+     "tc": 1,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0476,
+     "ft_upper95": 0.1546
+    },
+    "Tiếng Việt": {
+     "n": 15,
+     "ft": 1,
+     "tc": 0,
+     "ft_rate": 0.0667,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.2982
+    },
+    "Vật lí": {
+     "n": 14,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.2153
+    },
+    "LS&ĐL": {
+     "n": 9,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.2992
+    },
+    "Địa lí": {
+     "n": 7,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.3543
+    }
+   },
+   "page_incidence": {
+    "groups": 39,
+    "median_trusted_blocks_per_group": 4,
+    "mean_trusted_blocks_per_group": 4.82,
+    "groups_with_teaching_critical": 4,
+    "p_group_has_teaching_critical": 0.1026,
+    "p_group_has_teaching_critical_upper95": 0.2358,
+    "groups_with_any_harm": 7,
+    "p_group_has_any_harm": 0.1795
+   },
+   "refused_by": {
+    "role_not_interactive": 78,
+    "not_mathematical": 46,
+    "two_stack_exact": 31,
+    "no_figure_dependence": 27,
+    "order_ok": 14
+   },
+   "unavailable_clauses": [],
+   "evaluated_on": "gold plane (54 hard pages) — NOT a corpus estimate"
+  },
+  "C3 · QUESTION SURFACE": {
+   "n_served": 354,
+   "n_trusted": 37,
+   "trusted_share_of_served": 0.1045,
+   "ft_k": 1,
+   "ft_rate": 0.027,
+   "ft_upper95": 0.1382,
+   "tc_k": 1,
+   "tc_rate": 0.027,
+   "tc_upper95": 0.1382,
+   "harm_k": 1,
+   "harm_rate": 0.027,
+   "harm_split": {
+    "ft_and_tc": 1,
+    "ft_only": 0,
+    "tc_only": 0,
+    "union": 1
+   },
+   "by_role": {
+    "question": {
+     "n": 37,
+     "ft": 1,
+     "tc": 1,
+     "ft_rate": 0.027,
+     "tc_rate": 0.027,
+     "ft_upper95": 0.1382
+    }
+   },
+   "by_subject": {
+    "Tiếng Việt": {
+     "n": 13,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.2281
+    },
+    "Khoa học": {
+     "n": 8,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.3244
+    },
+    "KHTN": {
+     "n": 8,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.3244
+    },
+    "Tin học": {
+     "n": 3,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.5615
+    },
+    "Ngữ văn": {
+     "n": 3,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.5615
+    },
+    "Vật lí": {
+     "n": 2,
+     "ft": 1,
+     "tc": 1,
+     "ft_rate": 0.5,
+     "tc_rate": 0.5,
+     "ft_upper95": 0.9055
+    }
+   },
+   "page_incidence": {
+    "groups": 15,
+    "median_trusted_blocks_per_group": 2,
+    "mean_trusted_blocks_per_group": 2.47,
+    "groups_with_teaching_critical": 1,
+    "p_group_has_teaching_critical": 0.0667,
+    "p_group_has_teaching_critical_upper95": 0.2982,
+    "groups_with_any_harm": 1,
+    "p_group_has_any_harm": 0.0667
+   },
+   "refused_by": {
+    "role_is_question_high_confidence": 312,
+    "not_mathematical": 46,
+    "two_stack_exact": 31,
+    "no_figure_dependence": 27
+   },
+   "unavailable_clauses": [],
+   "evaluated_on": "gold plane (54 hard pages) — NOT a corpus estimate"
+  },
+  "C4 · C1 + THE MACHINERY THAT DOES NOT EXIST": {
+   "n_served": 354,
+   "n_trusted": 0,
+   "trusted_share_of_served": 0.0,
+   "ft_k": 0,
+   "ft_rate": null,
+   "ft_upper95": null,
+   "tc_k": 0,
+   "tc_rate": null,
+   "tc_upper95": null,
+   "harm_k": 0,
+   "harm_rate": null,
+   "harm_split": {
+    "ft_and_tc": 0,
+    "ft_only": 0,
+    "tc_only": 0,
+    "union": 0
+   },
+   "by_role": {},
+   "by_subject": {},
+   "page_incidence": null,
+   "refused_by": {
+    "sibling_complete": 354,
+    "digit_sequence_verified": 354,
+    "role_not_teaching_shaped": 102,
+    "role_known": 84,
+    "not_mathematical": 46,
+    "two_stack_exact": 31,
+    "no_figure_dependence": 27,
+    "order_ok": 14
+   },
+   "unavailable_clauses": [
+    "sibling_complete",
+    "digit_sequence_verified"
+   ],
+   "MEASUREMENT_INVALID": "this policy names clause(s) whose machinery does not exist: sibling_complete, digit_sequence_verified. The rates above were computed with those clauses REFUSING EVERYTHING, so they are a lower bound on trusted count and say nothing about what the clause would catch.",
+   "evaluated_on": "gold plane (54 hard pages) — NOT a corpus estimate"
+  }
+ },
+ "plane_disagreement": {
+  "gold": {
+   "source": "round 5 Lane A3 frozen evidence rows, gold plane",
+   "caveat": "54 DELIBERATELY HARD pages, not a sample. No rate here transfers to the corpus.",
+   "n_rows": 643,
+   "n_served": 354,
+   "coverage": 0.5505,
+   "harm_split": {
+    "ft_and_tc": 7,
+    "ft_only": 19,
+    "tc_only": 5,
+    "union": 31
+   },
+   "ft_rate": 0.0734,
+   "tc_rate": 0.0339,
+   "by_subject": {
+    "KHTN": {
+     "n": 95,
+     "ft": 7,
+     "tc": 2,
+     "ft_rate": 0.0737,
+     "tc_rate": 0.0211,
+     "ft_upper95": 0.1444
+    },
+    "Khoa học": {
+     "n": 58,
+     "ft": 0,
+     "tc": 1,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0172,
+     "ft_upper95": 0.0621
+    },
+    "Toán": {
+     "n": 46,
+     "ft": 11,
+     "tc": 3,
+     "ft_rate": 0.2391,
+     "tc_rate": 0.0652,
+     "ft_upper95": 0.3794
+    },
+    "Ngữ văn": {
+     "n": 38,
+     "ft": 1,
+     "tc": 2,
+     "ft_rate": 0.0263,
+     "tc_rate": 0.0526,
+     "ft_upper95": 0.135
+    },
+    "Tiếng Việt": {
+     "n": 35,
+     "ft": 2,
+     "tc": 0,
+     "ft_rate": 0.0571,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1861
+    },
+    "Tin học": {
+     "n": 29,
+     "ft": 0,
+     "tc": 1,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0345,
+     "ft_upper95": 0.117
+    },
+    "Vật lí": {
+     "n": 24,
+     "ft": 3,
+     "tc": 3,
+     "ft_rate": 0.125,
+     "tc_rate": 0.125,
+     "ft_upper95": 0.31
+    },
+    "LS&ĐL": {
+     "n": 19,
+     "ft": 2,
+     "tc": 0,
+     "ft_rate": 0.1053,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.3139
+    },
+    "Địa lí": {
+     "n": 10,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.2775
+    }
+   },
+   "by_role": {
+    "heading": {
+     "n": 87,
+     "ft": 4,
+     "tc": 3,
+     "ft_rate": 0.046,
+     "tc_rate": 0.0345,
+     "ft_upper95": 0.1123
+    },
+    "body": {
+     "n": 84,
+     "ft": 10,
+     "tc": 1,
+     "ft_rate": 0.119,
+     "tc_rate": 0.0119,
+     "ft_upper95": 0.2055
+    },
+    "question": {
+     "n": 71,
+     "ft": 6,
+     "tc": 6,
+     "ft_rate": 0.0845,
+     "tc_rate": 0.0845,
+     "ft_upper95": 0.1724
+    },
+    "sidebar": {
+     "n": 33,
+     "ft": 1,
+     "tc": 1,
+     "ft_rate": 0.0303,
+     "tc_rate": 0.0303,
+     "ft_upper95": 0.1532
+    },
+    "caption": {
+     "n": 24,
+     "ft": 3,
+     "tc": 0,
+     "ft_rate": 0.125,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.31
+    },
+    "objective": {
+     "n": 21,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1546
+    },
+    "stage_label": {
+     "n": 20,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.1611
+    },
+    "option": {
+     "n": 4,
+     "ft": 1,
+     "tc": 0,
+     "ft_rate": 0.25,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.6994
+    },
+    "footnote": {
+     "n": 4,
+     "ft": 0,
+     "tc": 1,
+     "ft_rate": 0.0,
+     "tc_rate": 0.25,
+     "ft_upper95": 0.4899
+    },
+    "activity": {
+     "n": 3,
+     "ft": 1,
+     "tc": 0,
+     "ft_rate": 0.3333,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.7923
+    },
+    "attribution": {
+     "n": 2,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.6576
+    },
+    "instruction": {
+     "n": 1,
+     "ft": 0,
+     "tc": 0,
+     "ft_rate": 0.0,
+     "tc_rate": 0.0,
+     "ft_upper95": 0.7935
+    }
+   },
+   "teaching_critical_mechanisms": {
+    "digit_corruption": 6,
+    "nonquestion_served_as_question": 6
+   }
+  },
+  "round3-484": {
+   "source": "round 5 Lane A3 frozen evidence rows, audit plane",
+   "n_rows": 484,
+   "n_served": 480,
+   "ft_rate": 0.65,
+   "tc_rate": 0.2917,
+   "harm_split": {
+    "ft_and_tc": 140,
+    "ft_only": 172,
+    "tc_only": 0,
+    "union": 312
+   },
+   "signals_present": {
+    "role_confidence": 60,
+    "text_sim": 408,
+    "layout_family": 480,
+    "has_math": 480,
+    "multi_line": 480
+   },
+   "note": "NOT POOLED with any other plane (D5)."
+  },
+  "legacy-b1-new": {
+   "source": "round 5 Lane A3 frozen evidence rows, audit plane",
+   "n_rows": 104,
+   "n_served": 74,
+   "ft_rate": 0.3649,
+   "tc_rate": 0.0676,
+   "harm_split": {
+    "ft_and_tc": 5,
+    "ft_only": 22,
+    "tc_only": 0,
+    "union": 27
+   },
+   "signals_present": {
+    "role_confidence": 74,
+    "text_sim": 0,
+    "layout_family": 0,
+    "has_math": 74,
+    "multi_line": 74
+   },
+   "note": "NOT POOLED with any other plane (D5)."
+  },
+  "legacy-b1-old": {
+   "source": "round 5 Lane A3 frozen evidence rows, audit plane",
+   "n_rows": 55,
+   "n_served": 55,
+   "ft_rate": 0.7273,
+   "tc_rate": 0.4727,
+   "harm_split": {
+    "ft_and_tc": 26,
+    "ft_only": 14,
+    "tc_only": 0,
+    "union": 40
+   },
+   "signals_present": {
+    "role_confidence": 0,
+    "text_sim": 0,
+    "layout_family": 0,
+    "has_math": 55,
+    "multi_line": 55
+   },
+   "note": "NOT POOLED with any other plane (D5)."
+  }
+ },
+ "guard_free_observations": {
+  "role_confidence_floor_is_not_a_safety_dial": "raising the floor to 0.70 lowers false trust 0.0734 -> 0.0593 and RAISES the teaching-critical rate 0.0339 -> 0.0407, while removing every block of continuous prose (the `body` role carries the 0.60 «could not tell» confidence).",
+  "teaching_critical_is_not_a_subset_of_false_trust": "on the gold plane the two sets overlap but neither contains the other; on the audit plane teaching-critical is a strict subset. The two planes do not even agree on the SET RELATION, because they use different definitions of «wrong».",
+  "no_single_false_trust_number_exists": "the same quantity measures between 0.073 and 0.727 across the five populations this repository has annotated. A bound quoted without its plane, pipeline version and population is not a bound."
+ },
+ "derivation_inputs": [
+  {
+   "name": "gold-evidence",
+   "path": "poc-out/round5/lane-a3/evidence-gold-tc2-p2.jsonl",
+   "sha256": "27d17c8adbfd51e7d15e78cdaed6348b5160e8a60ce3b4155987a0f673c04431",
+   "gitignored": true
+  },
+  {
+   "name": "audit-evidence",
+   "path": "poc-out/round5/lane-a3/evidence-audit.jsonl",
+   "sha256": "8c97f699e7ac17feeff7a4aa5a1216f3bc10538231a4c036708cff3d4b335fa8",
+   "gitignored": true
+  }
+ ],
+ "declared_limitations": [
+  "The gold plane is 54 DELIBERATELY HARD pages, not a sample (A3 §5.2). No rate in this payload transfers to the corpus, and none is offered as a corpus estimate.",
+  "Teaching-critical is defined NARROWLY on the gold plane (corrupted digits, a non-question served as a question). The audit protocol also counts truncation, in-sentence contamination and term-level tone slips. The two are not comparable and are never summed.",
+  "Every candidate was derived on evidence rows that ALREADY EXISTED before this round. The 181 rows marked held_out in that file were pooled into A3's published curve, so they are NOT a blind holdout and are not used as one here.",
+  "The 97-row independent audit exists in this repository only as a published summary table, not as row-level data. Disjointness of the blind population from it can be argued from book coverage but CANNOT BE PROVEN. Recorded as a known weakness.",
+  "Independence between blocks in a lesson is assumed by the bound arithmetic and is optimistic: errors cluster by page and by book."
+ ]
+}
