@@ -57,6 +57,35 @@ and **zero producer**. Building a second one would be building for data that doe
 The compiler emits `conceptMap` sections and the registry has no binding for them, so the app
 fails closed with «SAM có dữ liệu … nhưng chưa biết vẽ thành hình» — which is true, and visible.
 
+## Identity leaks through values, not field names
+
+The first version of this document claimed the anti-pattern was *untypable* because `VisualSpec`
+has no `book` / `lessonNo` / `slotKey` field and `VisualRenderContext` carries no
+`LessonDocument`, both pinned by source scans. **That claim was nominal.** Lane E1's guard work
+surfaced the channel both lanes had missed, and an audit of all 5 built specs confirmed it here:
+every element a renderer holds carried
+
+    06-sgk-khoa-hoc-tu-nhien-6:p062:synthetic:015
+
+in `ProvenanceRef.blockIds` — on nodes, edges, groups and `titleProvenance` alike. One
+`startsWith` and a renderer branches on lesson identity while every field-name guard stays green.
+
+**Fixed structurally.** At the render boundary, `VisualRenderContext` replaces each `blockIds`
+value with an opaque handle (`h0`, `h1`, …) and keeps the handle→ref map itself; `pageOf` and
+`openSource` resolve it. The renderer does not *refrain* from reading identity — it has nothing
+left to read. The artefact on disk keeps the real block ids, because the provenance chain must
+stay auditable; only the renderer's view is redacted.
+
+Verified by mutation: disabling the redaction fails 2 of the 6 guard tests. The suite also pins
+that the leak still exists in the artefact (so the guard cannot go vacuous) and constrains
+compiler-minted ids by **shape**, closing a second latent channel — `VisualSection.id` is copied
+from `SemanticData.id`, so an upstream `khtn6-bai17-process` would otherwise flow straight
+through.
+
+**One channel remains open by necessity, and is not a defect:** `title`, `label`, `detail` and
+`badge` carry the book's own words, which may say «Bài 22». That is *content the child reads*,
+not an identifier — it cannot be redacted without deleting the lesson from the screen.
+
 ## No constructor from a presentation form
 
 Lane A2's precedent (PR #84): `MathExpression` has `from_json` and deliberately no `from_latex`.
