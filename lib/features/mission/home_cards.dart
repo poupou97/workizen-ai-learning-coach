@@ -414,9 +414,18 @@ List<HomeLessonThread> continueLearning(List<HomeLessonThread> threads) => [
 /// này chỉ được nói điều có bằng chứng. Order 50 §5 đã liệt kê nhãn cấm:
 /// ĐÃ HIỂU / 70% / GIỎI / MASTERED. «Tốt» thuộc đúng họ ấy.
 class HomeSubjectChip {
-  const HomeSubjectChip({required this.subject, required this.hasSamLesson});
+  const HomeSubjectChip({
+    required this.subject,
+    required this.hasSamLesson,
+    this.coverAsset,
+  });
 
   final String subject;
+
+  /// ⭐ BÌA SÁCH THẬT của môn (`assets/pack/covers/…`) — cùng ảnh Giá sách đang
+  /// dùng, không phải icon vẽ thêm. `null` = pack chưa có bìa cho môn này ⇒ ô
+  /// rơi về chữ cái đầu, KHÔNG bịa một hình khác.
+  final String? coverAsset;
 
   /// Môn này có ít nhất một bài SAM đã xếp sẵn (khác với «có sách trên giá»).
   final bool hasSamLesson;
@@ -431,6 +440,7 @@ List<HomeSubjectChip> homeSubjectChips({
   required List<HomeLessonThread> threads,
   required List<HomeShelfSubject> shelf,
   required int learnerGrade,
+  Map<String, String> coverBySubject = const {},
 }) {
   final withLesson = <String>{
     for (final t in threads)
@@ -451,8 +461,29 @@ List<HomeSubjectChip> homeSubjectChips({
   // Môn có bài SAM nhưng vắng mặt trên giá (mục lục chưa nạp) vẫn phải có ô.
   for (final s in withLesson) {
     if (seen.add(s)) {
-      out.add(HomeSubjectChip(subject: s, hasSamLesson: true));
+      out.add(
+        HomeSubjectChip(
+          subject: s,
+          hasSamLesson: true,
+          coverAsset: coverBySubject[s],
+        ),
+      );
     }
   }
   return out;
+}
+
+/// ⭐ Ảnh đại diện của MỘT BÀI: crop đầu tiên của chính bài ấy trong sách.
+///
+/// Không icon vẽ thêm — thẻ mang đúng hình trẻ sẽ thấy khi mở bài. Bài không
+/// có hình nào ⇒ `null`, và thẻ vẽ như cũ (không placeholder giả).
+///
+/// ⚠ Ảnh crop là nội dung SGK: INTERNAL / RESEARCH ONLY. Chúng nằm ngoài git
+/// (`assets/fixtures/real/crops/`) và chỉ hiện trong app trên máy nghiên cứu —
+/// đúng như màn Đọc đang làm. Đây KHÔNG phải quyết định phát hành.
+String? lessonThumbnailAsset(LessonDocument doc) {
+  for (final b in doc.blocks) {
+    if (b is ImageBlock) return '${doc.assetBase}${b.crop}';
+  }
+  return null;
 }

@@ -92,6 +92,7 @@ class MissionCenterScreen extends StatelessWidget {
     this.upcoming = const [],
     this.subjectChips = const [],
     this.continueThreads = const [],
+    this.subjectLabelOf,
   });
 
   final MissionData data;
@@ -175,6 +176,12 @@ class MissionCenterScreen extends StatelessWidget {
 
   /// Dải TIẾP TỤC HỌC — bài đang học DỞ.
   final List<HomeLessonThread> continueThreads;
+
+  /// ⭐ MÃ môn → TÊN hiển thị. Thời khoá biểu lưu MÃ (`ngu-van`) chứ không lưu
+  /// tên — đúng thiết kế WAL-176, vì mọi phép so khớp chạy trên mã. Nhưng trẻ
+  /// đọc thẻ, không đọc mã. `null` hoặc không tra được ⇒ hiện MÃ TRẦN: thà xấu
+  /// còn hơn bịa một cái tên không có trong mục lục.
+  final String Function(String subjectId)? subjectLabelOf;
 
   // ── KHOÁ WIDGET ─────────────────────────────────────────────────────────
   /// TẦNG 1 — hàng Smart Card trượt ngang.
@@ -288,12 +295,6 @@ class MissionCenterScreen extends StatelessWidget {
                 _pad(_samSeenCard(promoted.thread!)),
               ],
               // ── THỨ CẤP ────────────────────────────────────────────────
-              const SizedBox(height: WalSpacing.lg),
-              _pad(_sectionLabel('CÁC MÔN CỦA CON')),
-              if (subjectChips.isEmpty)
-                _pad(_shelfCard())
-              else
-                _subjectChipRow(),
             ] else ...[
               const SizedBox(height: WalSpacing.sm),
               _pad(_samLine()),
@@ -303,19 +304,35 @@ class MissionCenterScreen extends StatelessWidget {
               _pad(_sectionLabel('HÔM NAY')),
               _pad(_nextActionCard()),
             ],
-            // ⭐ Concept «05 Home» — BA DẢI NGANG, ba ngữ nghĩa khác nhau.
+            // ⭐ Concept «05 Home» — BA DẢI NGANG theo ĐÚNG thứ tự concept:
+            // SẮP TỚI → CÁC MÔN CỦA CON → TIẾP TỤC HỌC. Ba ngữ nghĩa khác
+            // nhau, không phải ba biến thể của một thứ.
+            //
             // Dòng chữ «Sắp tới ở trường» cũ đã bị gỡ: nó liệt kê môn của
-            // CHÍNH HÔM NAY dưới nhãn «sắp tới» — sai tên thứ nó hiện.
+            // CHÍNH HÔM NAY dưới nhãn «sắp tới» — gọi sai tên thứ nó hiện.
             if (upcoming.isNotEmpty) ...[
               const SizedBox(height: WalSpacing.lg),
               _pad(_sectionLabel('SẮP TỚI')),
               _upcomingDaysRow(),
+            ],
+            // Dải icon hiện khi CÓ môn. Không có môn thì giữ NGUYÊN hành vi
+            // cũ: thẻ giá sách chỉ thuộc Home-nhiều-môn, không lấn sang trạng
+            // thái «chưa có bài nào» — test cũ khoá đúng điều đó.
+            if (subjectChips.isNotEmpty) ...[
+              const SizedBox(height: WalSpacing.lg),
+              _pad(_sectionLabel('CÁC MÔN CỦA CON')),
+              _subjectChipRow(),
+            ] else if (row.cards.isNotEmpty) ...[
+              const SizedBox(height: WalSpacing.lg),
+              _pad(_sectionLabel('CÁC MÔN CỦA CON')),
+              _pad(_shelfCard()),
             ],
             if (continueThreads.isNotEmpty) ...[
               const SizedBox(height: WalSpacing.lg),
               _pad(_sectionLabel('TIẾP TỤC HỌC')),
               _continueLearningRow(),
             ],
+
             if (todayStory != null || didYouKnowStory != null) ...[
               const SizedBox(height: WalSpacing.md),
               _pad(_discoveryCard()),
@@ -1133,17 +1150,18 @@ class MissionCenterScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
                   ),
                   alignment: Alignment.center,
-                  child: Text(
-                    // Chữ đầu của môn — không bịa icon cho môn chưa có.
-                    c.subject.characters.first.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: c.hasSamLesson
-                          ? WalColors.primary500
-                          : WalColors.inkSoft,
-                    ),
-                  ),
+                  clipBehavior: Clip.antiAlias,
+                  // ⭐ BÌA SÁCH THẬT của môn — cùng ảnh Giá sách đang dùng,
+                  // không phải icon vẽ thêm. Thiếu bìa ⇒ chữ cái đầu.
+                  child: c.coverAsset == null
+                      ? _subjectInitial(c)
+                      : Image.asset(
+                          'assets/pack/${c.coverAsset}',
+                          fit: BoxFit.cover,
+                          width: 60,
+                          height: 60,
+                          errorBuilder: (_, _, _) => _subjectInitial(c),
+                        ),
                 ),
                 const SizedBox(height: WalSpacing.xs),
                 Text(
@@ -1165,12 +1183,21 @@ class MissionCenterScreen extends StatelessWidget {
     ),
   );
 
+  Widget _subjectInitial(HomeSubjectChip c) => Text(
+    c.subject.characters.first.toUpperCase(),
+    style: TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.w700,
+      color: c.hasSamLesson ? WalColors.primary500 : WalColors.inkSoft,
+    ),
+  );
+
   /// ⭐ DẢI «TIẾP TỤC HỌC» — bài đang học DỞ.
   ///
   /// KHÔNG phần trăm. Thẻ nói ĐÃ MỞ GÌ và CÒN GÌ CHƯA MỞ — cùng lượng thông
   /// tin, nhưng không nói dối rằng SAM đo được mức hiểu bài.
   Widget _continueLearningRow() => SizedBox(
-    height: 150,
+    height: 206,
     child: ListView.separated(
       key: MissionCenterScreen.continueLearningRowKey,
       scrollDirection: Axis.horizontal,

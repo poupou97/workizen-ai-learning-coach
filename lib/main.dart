@@ -22,6 +22,8 @@ import 'core/store/learner_profile.dart';
 import 'core/store/learner_store.dart';
 import 'features/camera/education_ocr_adapter.dart';
 import 'features/camera/mlkit_ocr_adapter.dart';
+import 'core/curriculum/subject_id.dart';
+import 'features/subjects/grade_subjects.dart';
 import 'features/mission/home_cards.dart';
 import 'features/mission/home_upcoming.dart';
 import 'features/mission/mission_center_screen.dart';
@@ -663,6 +665,31 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     };
   }
 
+  /// MÃ môn (`ngu-van`) → TÊN như mục lục pack ghi («Ngữ văn»).
+  ///
+  /// Tra ngược trong chính danh sách môn của lớp đang học — không bảng cứng.
+  /// Không khớp môn nào ⇒ trả lại MÃ: mục lục đổi thì thà hiện mã còn hơn hiện
+  /// một cái tên không còn đúng.
+  String _subjectLabelOf(String subjectId) {
+    final idx = _lessonIndex;
+    if (idx == null) return subjectId;
+    for (final s in gradeSubjectNames(idx)) {
+      if (subjectIdOf(s) == subjectId) return s;
+    }
+    return subjectId;
+  }
+
+  /// MÔN → BÌA SÁCH THẬT trong pack. Lấy cuốn ĐẦU TIÊN của môn (Tập 1 trước
+  /// Tập 2 nhờ `gradeSubjects` đã xếp), đúng ảnh Giá sách đang vẽ.
+  Map<String, String> _coverBySubject() {
+    final idx = _lessonIndex;
+    if (idx == null) return const {};
+    return {
+      for (final g in gradeSubjects(idx))
+        if (g.books.isNotEmpty) g.subject: g.books.first.cover,
+    };
+  }
+
   Widget _homeChild() => _loading
       ? (_splashQuote == null
             // ROUND 3 B5 (audit O1): khung trắng lúc chờ hồ sơ ⇒ màn
@@ -707,8 +734,12 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                   threads: _lessonThreads(_profile!),
                   shelf: _shelfSubjects(),
                   learnerGrade: _profile!.grade,
+                  coverBySubject: _coverBySubject(),
                 ),
                 continueThreads: continueLearning(_lessonThreads(_profile!)),
+                // MÃ môn trong TKB → TÊN trong mục lục thật. Không
+                // tra được ⇒ giữ mã trần, không bịa tên.
+                subjectLabelOf: _subjectLabelOf,
                 // ⭐ ROUND 7 · V1 — nút Home mang tên một cách học ⇒
                 // mở ĐÚNG cách học ấy. Lỗi máy thật vòng 1: «📖 Đọc ▸»
                 // mở ra màn hỏi «con muốn học theo cách nào?».
