@@ -179,9 +179,11 @@ AnswerDiagnosis _forChoice(
     ],
     links: ex.links,
     linksEmptyNote: ex.linksEmptyNote,
-    retry:
-        'Con đọc lại câu hỏi, rồi soi vào đúng dòng sách ở trên: việc câu hỏi '
-        'cần làm có phải việc này không? Chưa khớp thì con chọn lại nhé.',
+    // LỖI MÁY THẬT VÒNG 2, LƯỢT 1: bản dài ba dòng lặp gần hết với băng «Đến
+    // lượt con thử lại» ngay dưới, và vì nó GIỐNG NHAU ở mọi đáp án sai nên
+    // trên máy nó trông như một câu an ủi mặc định — đúng thứ Founder bác.
+    // Băng lo việc HÀNH ĐỘNG; dòng này chỉ nói VIỆC CẦN SO.
+    retry: 'Con so dòng sách ở trên với câu hỏi — có khớp không?',
     sourceBlockId: entity.sourceBlockId,
   );
 }

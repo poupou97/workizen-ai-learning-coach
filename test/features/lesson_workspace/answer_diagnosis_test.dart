@@ -239,7 +239,10 @@ void main() {
     test('mời THỬ LẠI, và trỏ về block sách của chính cái trẻ chọn', () {
       final d = _d(_mcq(), 'Chiết')!;
       expect(d.retry, isNotNull);
-      expect(d.retry, contains('chọn lại'));
+      // LƯỢT 1 MÁY THẬT: bản dài lặp với băng «Đến lượt con thử lại» ngay
+      // dưới ⇒ rút còn việc cần SO, không phải việc cần LÀM.
+      expect(d.retry, contains('so dòng sách'));
+      expect(d.retry!.length, lessThan(60), reason: 'một dòng trên máy');
       expect(d.sourceBlockId, 'b-chiet');
     });
 

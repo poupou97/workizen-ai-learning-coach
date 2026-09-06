@@ -204,6 +204,37 @@ void main() {
     expect(screen, isNot(contains('con chưa hiểu')));
   });
 
+  test('⭐⭐ LỖI MÁY THẬT (lượt 1): neo cuộn phải rơi vào lượt PHẢN HỒI, không '
+      'phải lượt gợi ý — nếu không, vòng lặp bị đảo ngay trên màn', () {
+    final d = loadSyntheticDoc();
+    final r = TutorRunner(
+      d.tutorScript!,
+      diagnose: (step, answer, earlier) => diagnoseAnswer(
+        step: step,
+        answer: answer,
+        semantic: d.semantic,
+        earlierAnswers: earlier,
+      )?.headline,
+    )..advance();
+    r.submit('Lọc');
+    // ba lượt cuối: con trả lời · phản hồi · gợi ý
+    final i = TutorView.debugAnchorIndex(r);
+    expect(
+      r.transcript[i].kind,
+      TurnKind.diagnose,
+      reason: 'màn phải mở ra ở câu SAM nói về ĐÁP ÁN CỦA TRẺ',
+    );
+    expect(i, lessThan(r.transcript.length - 1), reason: 'gợi ý nằm SAU nó');
+
+    // Không có phản hồi (không hook) ⇒ giữ hành vi cũ: lượt SAM cuối.
+    final plain = TutorRunner(d.tutorScript!)..advance();
+    plain.submit('Lọc');
+    expect(
+      plain.transcript[TutorView.debugAnchorIndex(plain)].kind,
+      TurnKind.hint,
+    );
+  });
+
   testWidgets('⭐ bài mẫu KHÔNG có sơ đồ mang đúng tên ấy ⇒ SAM nói thẳng, '
       'không gợi bừa một liên hệ', (t) async {
     // Bảng mẫu đặt tên thực thể là «Lọc (mẫu)» còn quy trình tên «Lọc nước

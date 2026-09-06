@@ -142,8 +142,8 @@ class TutorView extends StatefulWidget {
       buf.write(
         tries == 0
             ? 'Con chưa trả lời câu này'
-            : 'Con đã thử $tries lần; SAM chưa khớp được câu nào nên đã chỉ '
-                  'chỗ trong sách',
+            : 'Con đã thử $tries lần; SAM chưa khớp được câu trả lời nào nên '
+                  'đã chỉ chỗ trong sách',
       );
     }
     if (opened != null) buf.write(' — trước đó con đã mở $opened');
@@ -164,6 +164,10 @@ class TutorView extends StatefulWidget {
     ];
     return out.isEmpty ? null : out.join(' và ');
   }
+
+  /// Neo cuộn — công khai cho test (xem `_TutorViewState._anchorIndex`).
+  @visibleForTesting
+  static int debugAnchorIndex(TutorRunner r) => _TutorViewState._anchorIndex(r);
 
   /// «Câu n/N» của một bước hỏi; không phải bước hỏi ⇒ `null`.
   static String? askCaption(TutorScript script, String? stepId) {
@@ -394,8 +398,30 @@ class _TutorViewState extends State<TutorView> {
     });
   }
 
-  /// Chỉ số lượt SAM (không phải «next») mới nhất trong transcript.
-  static int _latestSamIndex(TutorRunner r) {
+  /// Lượt SAM mà màn phải đưa lên ĐẦU sau mỗi thao tác.
+  ///
+  /// ⭐ LỖI MÁY THẬT VÒNG 2, LƯỢT 1 (`05-wrong-loc.png`): sau một đáp án sai,
+  /// runner thêm HAI lượt — phản hồi theo lỗi rồi gợi ý — và neo cũ (lượt SAM
+  /// CUỐI) đưa **gợi ý** lên đầu màn. Trẻ thấy «Gợi ý 1/2» trước, còn câu nói
+  /// về ĐÁP ÁN CỦA CHÍNH MÌNH nằm khuất phía trên và phải cuộn ngược lên mới
+  /// đọc được. Thế là đúng vòng lặp order 49 §2 bị đảo ngay trên màn: giải
+  /// thích khác đến TRƯỚC phản hồi.
+  ///
+  /// Nên: nếu sau lượt trả lời gần nhất có một lượt PHẢN HỒI THEO LỖI, neo
+  /// vào lượt ấy. Không có thì giữ hành vi cũ (lượt SAM cuối).
+  static int _anchorIndex(TutorRunner r) {
+    var lastLearner = -1;
+    for (var i = r.transcript.length - 1; i >= 0; i--) {
+      if (r.transcript[i].kind == TurnKind.learner) {
+        lastLearner = i;
+        break;
+      }
+    }
+    if (lastLearner >= 0) {
+      for (var i = lastLearner + 1; i < r.transcript.length; i++) {
+        if (r.transcript[i].kind == TurnKind.diagnose) return i;
+      }
+    }
     for (var i = r.transcript.length - 1; i >= 0; i--) {
       final t = r.transcript[i];
       if (t.isSam && t.kind != TurnKind.next) return i;
@@ -543,7 +569,7 @@ class _TutorViewState extends State<TutorView> {
               children: [
                 for (var i = 0; i < r.transcript.length; i++) ...[
                   KeyedSubtree(
-                    key: i == _latestSamIndex(r) ? _latestSamKey : null,
+                    key: i == _anchorIndex(r) ? _latestSamKey : null,
                     child: _turn(
                       r.transcript[i],
                       TutorView.stepForTurn(_plan, r.transcript, i),
