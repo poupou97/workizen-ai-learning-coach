@@ -32,19 +32,20 @@ ENUM_RX = [
 STAGE_SEQ_RX = re.compile(r'^\s*(?:chuẩn\s+bị|tiến\s+hành|thực\s+hiện|quan\s+sát|'
                           r'nhận\s+xét|kết\s+luận|thảo\s+luận)', re.I)
 
-# a causal connective must sit INSIDE one block, with text on both sides of it
+# A causal connective must sit INSIDE one block, with text on both sides of it.
+# re.I matters: a sentence-initial connective is capitalised ("Vì … nên …"), and the
+# first version silently found nothing on exactly those sentences.
 CAUSAL_RX = [
-    ('vi_nen',     re.compile(r'(?<![\wÀ-ỹ])vì\s+(?P<c>.{4,90}?)\s+nên\s+(?P<e>.{4,120})')),
-    ('do_nen',     re.compile(r'(?<![\wÀ-ỹ])do\s+(?P<c>.{4,90}?)\s+nên\s+(?P<e>.{4,120})')),
+    ('vi_nen',     re.compile(r'(?<![\wÀ-ỹ])vì\s+(?P<c>.{4,90}?)\s+nên\s+(?P<e>.{4,120})',
+                              re.I)),
+    ('do_nen',     re.compile(r'(?<![\wÀ-ỹ])do\s+(?P<c>.{4,90}?)\s+nên\s+(?P<e>.{4,120})',
+                              re.I)),
     ('dan_den',    re.compile(r'(?P<c>.{6,90}?)\s+(?:dẫn\s+đến|dẫn\s+tới|gây\s+ra|'
-                              r'làm\s+cho)\s+(?P<e>.{4,120})')),
+                              r'làm\s+cho)\s+(?P<e>.{4,120})', re.I)),
     ('nho_do',     re.compile(r'(?P<c>.{6,90}?)\s*[,.]?\s+(?:nhờ\s+đó|vì\s+vậy|do\s+đó)\s+'
-                              r'(?P<e>.{4,120})')),
+                              r'(?P<e>.{4,120})', re.I)),
 ]
-DEFN_RX = [
-    ('goi_la', re.compile(r'(?P<t>[^.;:]{2,60}?)\s+(?:được\s+)?gọi\s+là\s+(?P<d>[^.;]{2,90})')),
-    ('la_def', re.compile(r'^(?P<t>[A-ZÀ-Ỹ][^.;:]{2,60}?)\s+là\s+(?P<d>[^.;]{6,140})')),
-]
+DEFN_RX = None  # built below, after UPPER is defined
 CONTRAST_RX = [
     ('khac_nhau', re.compile(r'(?:khác\s+nhau|điểm\s+khác|sự\s+khác\s+biệt|phân\s+biệt|'
                              r'so\s+sánh)\s+(?:giữa\s+)?(?P<a>[^.;?]{2,80})')),
@@ -53,13 +54,34 @@ FIG_REF_RX = re.compile(r'(?:hình|Hình|HÌNH)\s+(\d{1,2}(?:[.,]\d{1,2})?)')
 FIG_LABEL_RX = re.compile(r'^\s*(?:hình|Hình|HÌNH)\s+(\d{1,2}(?:[.,]\d{1,2})?)\s*[.:]?\s*$')
 YEAR_RX = re.compile(r'(?<![\d])(?:năm\s+)?(\d{3,4})(?:\s*[-–—]\s*(\d{3,4}))?'
                      r'(\s*(?:TCN|tcn|trước\s+Công\s+nguyên))?')
+# Inside a parenthesis the context is already narrow, so a 1-2 digit year counts —
+# Vietnamese history needs it ("Hai Bà Trưng (40 - 43)"). The guard against matching
+# "(hình 2)" is that the WHOLE parenthesis must look like a date expression.
+WHEN_DATE_RX = re.compile(r'^(?:năm|ngày|tháng|thế\s+k[iỉíỷỳ]|tcn|trước\s+công\s+nguyên|'
+                          r'[\d\s\-–—/.,]|[IVXivx])+$', re.I)
+WHEN_HAS_DIGIT_RX = re.compile(r'\d')
+# ⚠️ `[A-ZÀ-Ỹ]` LOOKS like "an uppercase Vietnamese letter" and is not. As a RANGE it
+# spans U+00C0..U+1EF8, which contains every lowercase accented Vietnamese letter too
+# (á U+00E1, ă U+0103, ủ U+1EE7 …). The first version used it and produced event titles
+# like 'ăm' (from "năm") and 'ủa Ngô Quyền' (from "của") — a mid-word start that reads as
+# a real name in the output. So the class is built from Unicode case, not from a range.
+_VN_UPPER = ''.join(chr(c) for c in list(range(0x41, 0x5B)) + list(range(0xC0, 0x1F00))
+                    if chr(c).isupper() and chr(c).isalpha())
+_VN_LETTER = r'\w'          # Python 3 \w is already Unicode-aware for Vietnamese
+UPPER = '[' + re.escape(_VN_UPPER) + ']'
+
 # A capitalised run may itself contain a hyphen ("Lý Bí - Triệu Quang Phục"), and a
 # `when` may be a single bare year ("(248)"). Both were missed by a stricter first
 # version; the miss was found by comparing against Lane C's hand-checked 7/7 on this
 # very lesson, which is why that comparison is part of the test suite.
 DATED_EVENT_RX = re.compile(
-    r'(?P<title>[A-ZÀ-Ỹ][\wÀ-ỹ]*(?:\s*[-–—]?\s*[A-ZÀ-Ỹ][\wÀ-ỹ]*){0,5})\s*'
-    r'\((?P<when>[^()]{2,44})\)')
+    r'(?P<title>' + UPPER + _VN_LETTER + r'*(?:\s*[-–—]?\s*' + UPPER + _VN_LETTER +
+    r'*){0,5})\s*\((?P<when>[^()]{2,44})\)')
+
+DEFN_RX = [
+    ('goi_la', re.compile(r'(?P<t>[^.;:]{2,60}?)\s+(?:được\s+)?gọi\s+là\s+(?P<d>[^.;]{2,90})')),
+    ('la_def', re.compile(r'^(?P<t>' + UPPER + r'[^.;:]{2,60}?)\s+là\s+(?P<d>[^.;]{6,140})')),
+]
 
 # roles whose text the source itself marks as procedural / structural
 PROCEDURAL_ROLES = ('instruction', 'activity', 'stage_label')
@@ -196,7 +218,7 @@ def rule_dated_events(les, graph):
         text = b['text'] or ''
         for m in DATED_EVENT_RX.finditer(text):
             when, title = m.group('when').strip(), m.group('title').strip()
-            if not YEAR_RX.search(when):
+            if not (WHEN_HAS_DIGIT_RX.search(when) and WHEN_DATE_RX.match(when)):
                 continue
             nid = _nid('evt', graph.book, graph.lesson, title[:40], when[:20])
             if nid in graph.nodes:

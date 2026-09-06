@@ -46,13 +46,35 @@ CHECKPOINT = [
 ]
 
 
+def _pipeline_of(path):
+    """The TSL build a file came from — tc2-p1 / tc2-r5 / ... — read from its own path.
+
+    Two builds of the SAME lesson must not overwrite each other's output: the whole
+    point of keeping both is to compare them.
+    """
+    parts = path.split(os.sep)
+    # the build id is the directory immediately under `tc-v2/`; several *other*
+    # directories on these paths also start with `tc2-` (e.g. a lane's work dir
+    # `tc2-lsdl5`), and taking the first match silently merged two builds into one.
+    if 'tc-v2' in parts:
+        i = parts.index('tc-v2')
+        if i + 1 < len(parts):
+            return parts[i + 1]
+    for part in reversed(parts):
+        if part.startswith('tc2-'):
+            return part
+    return 'tc2-unknown'
+
+
 def run_one(path, subject, grade, out_root, write=True):
     les = cio.load_tsl(path)
+    les['pipeline'] = _pipeline_of(path)
     g = ex.extract(les, subject=subject, grade=grade)
     fams, prims, rels = ex.families_present(g)
     specs = vs.compile_all(g)
     rec = {
         'lesson': '%s#%s' % (g.book, g.lesson),
+        'pipeline': g.pipeline,
         'subject': subject, 'grade': grade, 'title': g.title,
         'sourceBlocks': len(les['blocks']),
         'withheldRegions': len(les.get('withheld') or []),
@@ -63,7 +85,7 @@ def run_one(path, subject, grade, out_root, write=True):
         'specElements': {f: len(s.elements) for f, s in specs.items()},
     }
     if write:
-        d = os.path.join(out_root, g.book)
+        d = os.path.join(out_root, g.pipeline, g.book)
         os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, 'bai-%s.graph.json' % g.lesson), 'w',
                   encoding='utf-8') as fh:
@@ -79,7 +101,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument('--all-science', action='store_true')
     ap.add_argument('--all-history', action='store_true')
-    ap.add_argument('--quiet', action='store_true')
+    ap.add_argument('--quiet', action='store_true',
+                    help='suppress the per-lesson dump; outputs are always written')
     args = ap.parse_args(argv)
 
     out_root = cp.out_dir('poc')
@@ -95,9 +118,9 @@ def main(argv=None):
         if not os.path.exists(path):
             print('MISSING %s' % path, file=sys.stderr)
             continue
-        rec, _, _ = run_one(path, subject, grade, out_root, write=not args.quiet)
+        rec, _, _ = run_one(path, subject, grade, out_root, write=True)
         recs.append(rec)
-        if len(jobs) <= 6:
+        if len(jobs) <= 6 and not args.quiet:
             print(json.dumps(rec, ensure_ascii=False, indent=1))
 
     summary = {
