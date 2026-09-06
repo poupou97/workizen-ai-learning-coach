@@ -48,7 +48,7 @@ python3 tool/metrics/cli.py verify        # re-derive every metric; non-zero on 
 python3 tool/metrics/cli.py report        # the nine fields, per metric, with a live re-derivation
 python3 tool/metrics/cli.py deprecated    # what «total activities» actually was
 python3 tool/metrics/cli.py lint          # the container-shape lint over tool/
-python3 -m unittest discover -s tool/tests   # 784 OK, 19 skipped
+python3 -m unittest discover -s tool/tests   # 787 OK, 19 skipped
 ```
 
 `verify` on the 2026-09-06 artefacts: **18 of 18 metrics re-derive to their recorded
@@ -142,7 +142,7 @@ agreement that hides a grouping-key bug: *a neighbouring metric agreeing is not 
 
 ## 4 · The regression — and two more live occurrences of the same defect
 
-`tool/tests/test_metric_registry.py` · **36 tests.** The incident is committed as a
+`tool/tests/test_metric_registry.py` · **39 tests.** The incident is committed as a
 regression in both directions:
 
 - **the wrong route is BLOCKED** — `count_leaves()` raises `ContainerShapeError` on **any**
@@ -159,11 +159,12 @@ re-enable `len()`-on-a-mapping (2 failures) · compute `ACTIVITY_LEAF_COUNT` as 
 the 217 error (5) · disable lint rule B (4) · add one new `len()`-on-container site
 anywhere under `tool/` (1).
 
-### 4.1 · HISTORICAL CORRECTION TO ROUND 3 — two live occurrences
+### 4.1 · HISTORICAL CORRECTION TO ROUND 3 — two occurrences, AS FOUND
 
 `tool/metrics/metric_container_lint.py` walks all of `tool/`. **Two findings, both real,
-zero false positives.** Both are round-3-era research scripts, both still live, and both are
-the round-6 incident **two rounds earlier**:
+zero false positives.** Both are round-3-era research scripts and both are the round-6
+incident **two rounds earlier**. *This section is the state as found; §4.2 is what happened
+to them.*
 
 **① `tool/research/lane_c/subject_family_census.py`**
 
@@ -175,10 +176,11 @@ for key in PACK_KEYS:              # PACK_KEYS includes 'toanExercises'
             continue
 ```
 
-The comment on that line reads *«some packs carry bare ids (e.g. toanExercises)»* — **a
-misdiagnosis of this exact bug.** They are not bare ids; they are dict keys. Effect: the
-subject-family pack-wiring census recorded **0** `toanExercises` for every family and **10
-phantom `_non_dict_entries`**, against a true **41 leaves in 10 lessons**.
+The comment on that line read *«some packs carry bare ids (e.g. toanExercises)»* — **a
+misdiagnosis of this exact bug, written into the code as if it were a property of the
+data.** They are not bare ids; they are dict keys. Effect: the subject-family pack-wiring
+census recorded **0** `toanExercises` for every family and **10 phantom
+`_non_dict_entries`**, against a true **41 leaves in 10 lessons**.
 
 **② `tool/research/lane_c/second_lesson_candidates.py`**
 
@@ -191,16 +193,66 @@ for e in xs:
         wiring[key] += 1
 ```
 
-The shape check is present and the flatten stops **one level short**. Effect:
-`pack_wiring['toanExercises']` is **0** for every candidate in the second-golden-lesson
+The shape check was present and the flatten stopped **one level short**. Effect:
+`pack_wiring['toanExercises']` was **0** for every candidate in the second-golden-lesson
 census. *A shape check that stops one level early is worse than none, because it reads as if
 the shape had been handled.*
 
-**Reported, not silently repaired.** Both scripts produced **published** census outputs;
-WS-M does not own those outputs, and rewriting the code now would change what a reader
-finds without changing what was published. Both are baselined in `KNOWN_FINDINGS` with a
-written verdict, so a **third** occurrence fails CI. **Recommended owner: the coordinator,
-as a round-7 or round-8 debt item.**
+### 4.2 · Both were FIXED during the round — and the guard caught the baseline going stale
+
+WS-M reported these findings recommending the coordinator as owner, and **the coordinator
+fixed both forward** on `integration/round7-2026-09-06`, recording the correction as **C3**
+in `docs/research/ROUND7-HISTORICAL-CORRECTIONS.md`. We worked in parallel and neither saw
+the other's change.
+
+**The anti-rot guard fired on its first real encounter, on the composed tree, and it was
+right.** `test_the_baseline_does_not_rot` failed because `KNOWN_FINDINGS` was still
+asserting two defects that no longer existed. *A baseline that outlives its defects is a
+second-order version of the error this workstream exists for: a record of the right shape
+that no longer describes anything.*
+
+**WS-M accepted the fix only after verifying it behaviourally**, not by reading the diff —
+`_leaves()` yields 3 leaf dicts from a 2-key container; the candidates flatten yields
+`pack_wiring['toanExercises'] = 2` for a lesson with 2 expressions, where it was 0.
+
+**WS-M does NOT ask for a revert.** The original comment weighed reproducibility of
+published output against leaving a live defect in code, and on the evidence the fix wins:
+
+1. **`second_lesson_candidates.py` is a generator, not an archive.** It is the
+   second-golden-lesson census tool and round 7 may re-run it. A live defect in a script
+   that will run again is worse than a reproducibility gap in a dated artefact, because the
+   artefact is immutable while the script produces **new** wrong numbers on every future run.
+2. **The registry's own rule decides it.** «Re-derivable from leaf records **by a committed
+   command**» — leaving the committed command broken means those census numbers were, by
+   WS-M's own doctrine, *not re-derivable*. The defect was itself a GATE A violation inside
+   the scripts. Fixing forward is the only action consistent with the rule.
+3. Nothing published was rewritten, so the archive's authority is intact either way.
+
+**But the concern the baseline carried is real and is preserved, not deleted.** The entries
+MOVED to a new `REPAIRED_FINDINGS` record rather than being removed, on the principle:
+
+> ### A REPAIR IS ALSO A CHANGE TO WHAT OLD NUMBERS MEAN.
+
+Each repaired entry carries what was wrong · who repaired it · where the correction is
+recorded · and **what the repair does to numbers published from the broken code**:
+
+- the **round-3 subject-family census** is **not reproducible** from the fixed script — it
+  recorded 0 `toanExercises` wiring and 10 phantom `_non_dict_entries` against a true 41
+  leaves in 10 lessons;
+- the **second-golden-lesson candidate census** is **not reproducible** — its
+  `pack_wiring['toanExercises']` column was 0 for *every* candidate, a column of zeroes that
+  looked like an absence of data and was an absence of flattening. **Any candidate ranked or
+  dismissed on that column was ranked on a wrong input.**
+
+Both published censuses stand as what was believed at the time and must be read with that
+note beside them, never re-cited as current. **A reader who re-runs either script and gets
+different numbers than the report in their hand now finds out why at the code**, instead of
+inferring a contradiction nobody recorded.
+
+Each entry is a **live assertion, not a note**: a repaired defect that reappears at the same
+site fails by name (`test_repaired_findings_stay_repaired`) and the lint reports it as
+returned. Mutation-checked — reintroducing the census defect turns two tests red;
+blanking an entry's «what it means for old numbers» field turns one red.
 
 ---
 
@@ -278,7 +330,8 @@ Not errors. Traps, recorded so the next reader does not walk into one.
 | D3 | resolve or deprecate «total activities» | **DONE** | §3 — 248 SUPERSEDED · 217 DEPRECATED (unit error) · 161 DEPRECATED (undeclared subset) · the phrase itself DEPRECATED |
 | D4 | the incident as a committed regression, general | **DONE** | §4 — blocked route + leaf route + shape-change refusal + an AST lint over all of `tool/`, mutation-checked |
 | D5 | sweep round 6's important derived numbers | **DONE** | §5 — ten items; nine PROVEN, one FALSIFIED (the original incident); one re-derivation defect found and fixed |
-| D6 | new wrong numbers reported as `HISTORICAL CORRECTION`, originals left standing | **DONE** | §4.1 — two live round-3 occurrences; nothing rewritten, nothing silently repaired |
+| D6 | new wrong numbers reported as `HISTORICAL CORRECTION`, originals left standing | **DONE** | §4.1 — two round-3 occurrences found; nothing published rewritten |
+| D7 | *(unplanned)* both were fixed mid-round; baseline reconciled | **DONE** | §4.2 — verified behaviourally, moved to `REPAIRED_FINDINGS` with what each repair means for old numbers |
 
 **GATE A · METRIC TRUTH.** No ambiguous major metric remains: «total activities» is
 deprecated with all three values ruled on, and every critical total in §2 and §5 is
@@ -288,21 +341,25 @@ census defects left open as reported findings under another owner.**
 ### PROVEN
 The ten sweep verdicts in §5. The four lesson denominators are one population under four
 grouping keys. `sourceAssets` is 36 rows and 3 assets. 41 upstream Toán records, all
-`INFERRED`, 0 shipped — a decision, not a loss. Two live round-3 container-shape defects.
+`INFERRED`, 0 shipped — a decision, not a loss. Two round-3 container-shape defects, found by lint and — after the coordinator's fix —
+verified repaired behaviourally, not by reading the diff.
 
 ### FALSIFIED
 «10 toanExercises» (it is 41). «`41 → 0` is NOT CAPTURED» (it is settled and re-derivable
 today). «`3 679` and `3 650` are two figures awaiting reconciliation» (one population, two
 grouping keys). «`ledger.py audit` reproduces round 6's §7 accounting totals» (it did not,
-until §5.1).
+until §5.1). «`KNOWN_FINDINGS` describes the repository» — for one composed-tree run it did
+not, and WS-M's own guard is what said so (§4.2).
 
 ### STILL HYPOTHESIS
 That `ACTIVITY_LEAF_COUNT`'s seven-family definition is the one the **product** wants — the
 registry records both sets rather than ruling, because that is a Founder question.
 That the 238 extra bridge blocks in ⑦ are one `sourceRef` per lesson (the arithmetic closes
-exactly; the mechanism is INFERRED, not read). That the two round-3 census defects changed
-no downstream decision — the outputs were published and were **not** re-run here.
+exactly; the mechanism is INFERRED, not read). That the two round-3 census defects changed no downstream decision. Both
+published censuses are now **not reproducible** from the fixed scripts, and neither was
+re-run here; the second-golden-lesson candidate ranking in particular used a column that was
+0 for every row.
 
 ### Not for this workstream
 `tool/corpus/thresholds/**` (WS-T) · `lib/**` and the 118-block model gap (WS-S) ·
-round-6 debt (WS-R) · merge debt (coordinator).
+round-6 debt (WS-R) · merge debt and the lane_c repairs (coordinator, §4.2).
