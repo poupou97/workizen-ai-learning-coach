@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """Lane E1 — tests for the semantic foundation (no corpus needed).
 
+⭐ Every fixture string here is INVENTED. Founder D4: verbatim SGK text and page crops
+are internal/research only and never reach the repo. These tests exercise the SHAPE of
+Vietnamese enumerations, connectives and dated names, which invented names do exactly as
+well as the real page does — and the measurements that DID come from the real corpus are
+recorded in docs/research/semantic-graph/, not carried as strings in a test.
+
 Run:  python3 -m unittest discover -s tool/tests -v
 """
 import os
@@ -252,9 +258,9 @@ def _lesson(blocks, book='06-sgk-khoa-hoc-tu-nhien-6', lesson=17):
 class ExtractorTests(unittest.TestCase):
     def test_ordered_steps_ground_the_edge_in_the_enumerator(self):
         les = _lesson([_tsl_block('x:0', 'stage_label', 'Tiến hành', order=0),
-                       _tsl_block('x:1', 'body', '1. Gấp giấy lọc', order=1),
-                       _tsl_block('x:2', 'body', '2. Đặt phễu lên giá', order=2),
-                       _tsl_block('x:3', 'body', '3. Rót từ từ hỗn hợp', order=3)])
+                       _tsl_block('x:1', 'body', '1. Đặt vật thứ nhất lên bàn', order=1),
+                       _tsl_block('x:2', 'body', '2. Đặt vật thứ hai lên giá', order=2),
+                       _tsl_block('x:3', 'body', '3. Rót từ từ chất lỏng vào', order=3)])
         gr = ex.extract(les)
         nexts = [r for r in gr.relations if r.relation == 'next']
         self.assertEqual(len(nexts), 2)
@@ -265,7 +271,7 @@ class ExtractorTests(unittest.TestCase):
 
     def test_causal_edge_is_grounded_in_the_connective_not_the_clauses(self):
         les = _lesson([_tsl_block('x:1', 'body',
-                                  'Vì hạt bụi nặng hơn không khí nên chúng lắng xuống đáy')])
+                                  'Vì vật thứ nhất nặng hơn vật thứ hai nên nó chìm xuống')])
         gr = ex.extract(les)
         causes = [r for r in gr.relations if r.relation == 'causes']
         self.assertEqual(len(causes), 1)
@@ -276,9 +282,9 @@ class ExtractorTests(unittest.TestCase):
         # measured defect: the lesson OBJECTIVES ("MỤC TIÊU" + bulleted "· Trình bày
         # được…") and a pair of numbered QUESTIONS were both compiled as procedures.
         les = _lesson([_tsl_block('x:0', 'stage_label', 'MỤC TIÊU', order=0),
-                       _tsl_block('x:1', 'objective', '· Trình bày được cách tách chất',
+                       _tsl_block('x:1', 'objective', '· Trình bày được điều thứ nhất',
                                   order=1),
-                       _tsl_block('x:2', 'objective', '· Sử dụng được dụng cụ cơ bản',
+                       _tsl_block('x:2', 'objective', '· Sử dụng được dụng cụ giả định',
                                   order=2)])
         gr = ex.extract(les)
         self.assertEqual([n for n in gr.nodes.values() if n.primitive == 'Step'], [])
@@ -296,8 +302,8 @@ class ExtractorTests(unittest.TestCase):
         # regression: the first version missed "(248)" and "Lý Bí - Triệu Quang Phục",
         # found by comparing against Lane C's hand-checked 7/7 on LS&DL 5 Bai 8.
         les = _lesson([_tsl_block('h:1', 'body',
-                                  'Hai Bà Trưng (40 - 43), Bà Triệu (248), '
-                                  'Lý Bí - Triệu Quang Phục (542 - 602).')],
+                                  'Nhân Vật Một (40 - 43), Bà Hai (248), '
+                                  'Ông Ba - Ông Bốn (542 - 602).')],
                       book='05-sgk-lich-su-va-dia-li-5', lesson=8)
         gr = ex.extract(les)
         events = [n for n in gr.nodes.values() if n.primitive == 'Event']
@@ -310,12 +316,13 @@ class ExtractorTests(unittest.TestCase):
         # accented letters too, so the first version emitted 'ăm' (from "năm") and
         # 'ủa Ngô Quyền' (from "của") as event names. They read like real names.
         les = _lesson([_tsl_block('h:1', 'body',
-                                  'Diễn ra năm 938. Chiến thắng của Ngô Quyền (938) '
-                                  'đã kết thúc thời kì Bắc thuộc.')],
+                                  'Diễn ra năm 938. Chiến thắng của Ông Năm (938) '
+                                  'đã kết thúc giai đoạn giả định.')],
                       book='05-sgk-lich-su-va-dia-li-5', lesson=8)
         titles = [n.label for n in ex.extract(les).nodes.values()
                   if n.primitive == 'Event']
-        self.assertEqual(titles, ['Ngô Quyền'])
+        # 'ủa Ông Năm' would be the mid-word fragment the range-based class produced
+        self.assertEqual(titles, ['Ông Năm'])
         for t in titles:
             self.assertTrue(t[0].isupper(), t)
 
