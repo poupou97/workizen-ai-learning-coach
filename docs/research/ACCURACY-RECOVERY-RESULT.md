@@ -339,8 +339,8 @@ And the cost is real. A1's engine converts «TRUSTED block, failure detected, no
 `SUSPECT`, which is a withhold — and `false_correction_report` **structurally cannot see it**, because no
 value changed. On this set that is **3 correct blocks lost to catch 1 wrong one**. The one caught
 (`p040:008`, «NGÔ QUYỀN ĐẠI PHẢ QUÂN NAM HÃN» — printed PHÁ/HÁN) is a real teaching-relevant slip; the
-three lost are Bài 8's poetry and narrative («Phất cờ khởi nghĩa giết người tà gian», «Tiếng thơm dài tạc
-đá vàng nước ta»).
+three lost are `p038:012`, `p038:014` and `p041:000` — two verse lines and one narrative paragraph, whose
+deciding tokens were `tà`, `tạc` and `đắm` (D4: token-level only, no SGK sentence reproduced here).
 
 **So: on rare literary History prose, this signal costs more than it earns, and the honest report is that
 it should not be run there without the human layer attached.** That is consistent with, and explains, the
