@@ -128,6 +128,16 @@ having:
 - **When a published archive turns out to be wrong, regenerate as `-vN` and keep the earlier one**,
   with the correction recorded *inside* the new archive rather than silently applied. A superseded
   archive is still evidence — of what was believed at the time.
+- **A required directory with nothing to put in it takes a `NOT CAPTURED` note, not a filler.**
+  Round 7 performed no device walk, so its `screenshots/` holds one document explaining why, what
+  was observed read-only, and what walk is still owed. **Do not pad the directory with images of
+  something else** — round 7's 22 SGK page crops went to `evidence/`, deliberately, so that no later
+  reader could mistake a picture of a *book* for a picture of the *product*.
+- **If you rebuild a lost archive, say so inside it.** A rebuild is never byte-identical — the
+  manifest records build time and commit — so its SHA-256 will not match any hash previously
+  published for it. Ship a `manifests/REGENERATION-NOTE.md` naming the original's size and hash, or
+  the mismatch will read as tampering to the next person who checks. **A rebuilt archive is a new
+  artefact carrying old information; it restores the contents, not the identity.**
 - **Label claims:** **PROVEN** (re-verified first-hand — a command, a hash, an API read) ·
   **MEASURED** (an instrument's number, recorded in a committed report) · **OBSERVED** (seen on a
   real device or a page render) · **INFERRED** · **HYPOTHESIS** · **UNKNOWN**.
@@ -159,5 +169,6 @@ having:
 |---|---|
 | `build_round_archive.py` | the generator |
 | `examples/round05-archive-spec.json` | the spec that built the round-5 archive |
-| `examples/round06-archive-spec.json` | the spec that built the round-6 archive — **the better starting point**, since it also shows how to archive small gitignored artefacts a gate depends on |
+| `examples/round06-archive-spec.json` | the spec that built the round-6 archive — shows how to archive the small gitignored artefacts a gate depends on |
+| `examples/round07-archive-spec.json` | the spec that built the round-7 archive — **the best starting point.** It shows an `excluded` entry for evidence that *does not exist* (round 7 captured no device frames), and a round whose `screenshots/` holds a `NOT CAPTURED` note instead of images |
 | `README.md` | this file |
