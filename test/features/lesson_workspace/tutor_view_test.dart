@@ -34,7 +34,10 @@ void main() {
       findsOneWidget,
       reason: 'PEDAGOGY REALITY nhìn thấy: 4 runtimeGuided / 8 prototype',
     );
-    expect(find.byKey(const Key('tutor-label-legend')), findsOneWidget);
+    // ROUND 7 V2 — chú giải nhãn về sheet «Nguồn & độ tin»; đầu màn giữ một
+    // dòng ngắn + ⓘ (xem `runtimeLineShort`: 232 dp chữ về MÁY ở 360 dp).
+    expect(find.byKey(const Key('tutor-label-legend')), findsNothing);
+    expect(find.byKey(const Key('tutor-runtime-info')), findsOneWidget);
     expect(find.text('SÁCH VIẾT'), findsOneWidget, reason: 'trích block nguồn');
     await t.tap(find.text('Tiếp ▸'));
     await t.pumpAndSettle();

@@ -249,7 +249,12 @@ void main() {
       final line = t.widget<Text>(find.byKey(const Key('tutor-runtime-line')));
       expect(line.data, contains('lời lấy đúng trong sách'));
       expect(line.data, isNot(contains('Runtime')));
-      expect(find.text(TutorView.labelLegend), findsOneWidget);
+      // ⭐ ROUND 7 V2 — chú giải nhãn KHÔNG còn ở đầu màn «Học với SAM»: đo ở
+      // 360 dp nó chiếm 96 dp, và cùng dòng runtime đầy đủ đẩy nội dung dạy
+      // đầu tiên xuống 63 % chiều cao màn. Sự thật không mất: dòng ngắn + ⓘ
+      // mở sheet «Nguồn & độ tin», nơi đã có sẵn bản đầy đủ.
+      expect(find.text(TutorView.labelLegend), findsNothing);
+      expect(find.byKey(const Key('tutor-runtime-info')), findsOneWidget);
       await t.tap(find.text('Tiếp ▸'));
       await t.pumpAndSettle();
       expect(find.byKey(const Key('tutor-hint-ladder')), findsOneWidget);

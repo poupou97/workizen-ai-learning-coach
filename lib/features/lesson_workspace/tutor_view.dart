@@ -25,6 +25,7 @@ import 'teaching/answer_diagnosis.dart';
 import 'teaching/diagnosis_card.dart';
 import 'widgets/sam_bubble.dart';
 import 'widgets/source_sheet.dart';
+import 'widgets/trust_sheet.dart';
 import '../../core/pedagogy/pedagogy_runtime.dart';
 import 'widgets/runtime_plan.dart';
 
@@ -266,6 +267,25 @@ class TutorView extends StatefulWidget {
         '${proto == null ? '' : ' ($proto)'}.';
   }
 
+  /// ⭐ ROUND 7 · V2 — bản NGẮN cho ĐẦU MÀN. Con số giữ nguyên; danh sách
+  /// loại bước trong ngoặc đi vào sheet «Nguồn & độ tin» (nơi đã có sẵn bản
+  /// đầy đủ).
+  ///
+  /// Vì sao rút: đo ở 360 dp (khổ Nokia), bản đầy đủ chiếm **136 dp** và chú
+  /// giải nhãn thêm **96 dp** — 232 dp nói về MÁY trước khi SAM kịp nói một
+  /// câu nào về BÀI, trên một màn cao 640 dp. Nội dung dạy đầu tiên rơi xuống
+  /// 63 % chiều cao màn. Sự thật không mất đi: nó nằm sau một ⓘ, đúng cách
+  /// vòng 1 đã làm với «Vì sao SAM chọn sơ đồ này».
+  static String runtimeLineShort(RuntimePlan? plan) {
+    if (plan == null) return 'Bài này không có kịch bản.';
+    if (!plan.isBound) {
+      return 'Máy chưa ràng buộc được bài này với sách — mọi bước là lời viết '
+          'sẵn để thử.';
+    }
+    return 'Máy đã kiểm ${plan.runtimeGuidedCount}/${plan.steps.length} bước '
+        'là lời lấy đúng trong sách.';
+  }
+
   /// Dòng runtime KỸ THUẬT (mã từ chối) — chỉ trong nếp gấp «Chi tiết kỹ
   /// thuật» của sheet «Nguồn & độ tin».
   static String runtimeLineTechnical(RuntimePlan? plan) {
@@ -444,20 +464,35 @@ class _TutorViewState extends State<TutorView> {
                         ),
                       ),
                       // A7.2 — PEDAGOGY REALITY nhìn thấy được: bao nhiêu
-                      // bước runtime kiểm được, bao nhiêu bước còn là kịch bản.
-                      Text(
-                        TutorView.runtimeLine(_plan),
-                        key: const Key('tutor-runtime-line'),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: WalColors.mintText,
+                      // bước runtime kiểm được, bao nhiêu bước còn là kịch
+                      // bản. ROUND 7 V2: một DÒNG + ⓘ, phần còn lại ở sheet
+                      // «Nguồn & độ tin» (xem `runtimeLineShort`).
+                      InkWell(
+                        key: const Key('tutor-runtime-info'),
+                        onTap: () =>
+                            showTrustSheet(context, doc: widget.doc),
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                TutorView.runtimeLineShort(_plan),
+                                key: const Key('tutor-runtime-line'),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: WalColors.mintText,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Text(
+                              'ⓘ',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: WalColors.primaryText,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      // ROUND 4 §6.6 — chú giải nhãn theo bước bằng lời trẻ.
-                      const Text(
-                        TutorView.labelLegend,
-                        key: Key('tutor-label-legend'),
-                        style: TextStyle(fontSize: 11, color: WalColors.inkSoft),
                       ),
                     ],
                   ),
