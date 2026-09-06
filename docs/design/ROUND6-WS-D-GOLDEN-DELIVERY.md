@@ -30,7 +30,8 @@ nhìn thấy được: **41 bài tập Toán biến mất, `toanExercises` còn 
 | 2c | Golden #2 Toán 4 t2 Bài 61 | **DEFERRED** | Founder giao WS-A/WS-B; không phải đích giao hàng cho trẻ |
 | 2d | Regression Bài 17 | **DONE** | lineage L2 PASS — fixture KHÔNG cũ; L4 UNKNOWN (không có bản sửa nào) |
 | 3 | Cổng **lineage** năm trường phiên bản | **DONE** | `tool/evidence/fixture_lineage.py`, 16 test |
-| 4 | Visual grammar (giới hạn) | **NOT STARTED** | §8 — ngân sách vòng này dồn cho §2 |
+| 4 | Visual grammar (giới hạn) — **điều tra hình thái** | **DONE** | §8 · `ROUND6-WS-D-LEARNING-VIEW-CENSUS.md` |
+| 4b | Visual grammar — POC giới hạn | **NOT STARTED** | census kết luận: **chưa nên** thêm họ renderer nào |
 
 ---
 
@@ -328,12 +329,51 @@ Nhỏ, nhưng đây là **tên riêng lịch sử** trong một app cho trẻ.
 
 ---
 
-## 8. Visual grammar — **NOT STARTED**, và nói thẳng
+## 8. Visual grammar — ĐIỀU TRA HÌNH THÁI trước, và nó nói «đừng thêm renderer»
 
-Ngân sách vòng này dồn vào Option B và Golden #1. Điều tra hình thái (forms census),
-điều tra mẫu ngữ nghĩa, kiến trúc xuất xứ và POC giới hạn **chưa bắt đầu**. Không có
-renderer nào được thêm — đúng chỉ đạo «không mở rộng họ renderer», nhưng vì **chưa
-làm**, không phải vì đã đo rồi kết luận.
+`tool/evidence/learning_view_census.py` chạy **chính cầu của sản phẩm** trên **238 TSL
+chuẩn** (`tc-v2/tc2-p1`, sáu sách Khoa học/KHTN lớp 4–9): 238 bắc cầu được, 0 bị từ
+chối. Báo cáo đầy đủ: `docs/design/ROUND6-WS-D-LEARNING-VIEW-CENSUS.md`.
+
+**Con số sản phẩm xoay quanh nó:**
+
+| | bài | phần trong 238 |
+|---|---|---|
+| **✨ Trực quan có thứ để trưng** | **73** | **0.307** |
+| 🦉 Học với SAM có kịch bản | **1** | **0.004** |
+
+Tức **165 bài (0.693)** mở Trực quan là đọc «Chưa có sơ đồ cho bài này». Và tầm với dạy
+học của SAM trên corpus chuẩn là **đúng một bài**.
+
+**Bốn họ renderer, hai họ KHÔNG có dữ liệu thật nào:**
+
+| kind | số thể hiện | luật | renderer |
+|---|---|---|---|
+| `process` | **181** (96.8 %) | `tsl-enumerated-steps-v1` | `ProcessFlowView` |
+| `comparison` | **6** (0.025 / bài) | `tsl-summary-parenthesis-v1` | `MindmapView` |
+| `conceptMap` | **0** | — | `MindmapView` |
+| `timeline` | **0** | — | `TimelineView` |
+
+Đây là lập luận chống mở rộng họ renderer, nói bằng chính số của corpus. Thêm họ thứ năm
+trước khi điều tra hình thái là lặp lại đúng kết quả vòng 5 mà Founder dặn đừng lặp.
+
+**Chỗ có khối lượng thật lại KHÔNG phải một renderer mới.** Trong 2 170 khối bị giữ lại
+(0.152 của 14 241 khối học):
+
+- `agree_text` **824 (0.380)** — hai bộ OCR bất đồng; đất của WS-B.
+- `figure_dependent` **632 (0.291)** — chữ không đứng được nếu thiếu hình, trên 3 864
+  hình trong corpus. Đây là **hậu thuẫn đo được** cho đề cử **LABELED_FIGURE** của E1 —
+  nhưng là bước 2 của `FORM CENSUS → CLUSTER → REPRESENTATIVE EXAMPLES → RULE →
+  HOLDOUT → MEASURE → GENERALIZE`, chưa phải giấy phép dựng.
+- **`unknown_role:*` 118** (`footnote` 64 · `activity` 50 · `option` 4) — bị giữ lại vì
+  **người tiêu thụ không có kiểu**, không phải vì chữ không tin được. Đó là **lỗ hổng mô
+  hình, không phải lỗ hổng dữ liệu**, và là món rẻ nhất trên bàn: ba loại khối trong
+  `lib/core/lesson_model/**` (tệp của WS-C). Riêng `option` chỉ 4 khối nhưng đúng hình
+  dạng defect #8 của bản kiểm 97 dòng: **bộ đáp án trắc nghiệm khuyết** — chỗ mà giữ lại
+  KHÔNG phải nước đi an toàn.
+
+**Khuyến nghị: vòng này KHÔNG thêm họ renderer nào.** Bước đo tiếp theo là 118 khối
+`unknown_role:*`, và nó thuộc WS-C.
 
 ---
 
