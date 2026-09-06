@@ -229,16 +229,17 @@ Refuted as primitives — each expressible by composition, and no lesson was fou
 `Property` (= `Entity --hasProperty--> Statement|Quantity`) · `TimePoint` (a field of `Event`) ·
 `Place` (= `Entity` + `locatedAt`) · `Person` (= `Entity` + a role tag).
 
-**Nine relations** were declared; **six carried all the measured work**:
+**Nine relations** were declared; **six carried all the measured work**. Edge counts below
+are over the two distinct checkpoint lessons (KHTN 6 Bài 17 + LS&ĐL 5 Bài 8, `tc2-p1`):
 
-| relation | edges built (checkpoint) | verdict |
+| relation | edges built | verdict |
 |---|---:|---|
-| `hasPart` | 24 | **essential** — the highest-yield signal in the corpus |
-| `next` | 15 | **essential** |
-| `hasProperty` | 3 | essential |
+| `hasPart` | 21 | **essential** — the highest-yield signal in the corpus |
+| `next` | 13 | **essential** |
+| `atTime` | 7 (carried as claims on `Event`) | essential |
+| `hasProperty` | 2 | essential |
 | `depicts` | 2 | essential |
 | `causes` | 2 | essential |
-| `atTime` | 7 (as claims) | essential |
 | `isA` | 0 | **not yet separable from `hasPart`** — no rule distinguished them |
 | `contrastsWith` | 0 | **unproven** — no extractor written |
 | `locatedAt` | 0 | **unproven** — no extractor written |
