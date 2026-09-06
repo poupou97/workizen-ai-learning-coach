@@ -20,6 +20,22 @@
 ///
 /// `family` là CHUỖI MỞ, không phải enum: thêm một họ hình = đăng ký một
 /// renderer, không phải sửa một `sealed class` và bốn `switch` vét cạn.
+///
+/// ⭐ **KHÔNG CÓ HÀM DỰNG TỪ MỘT DẠNG TRÌNH BÀY** (tiền lệ làn A2, PR #84:
+/// `MathExpression` có `from_json` nhưng CỐ Ý không có `from_latex`).
+/// Ở đây cũng vậy: không có `VisualSpec.fromSvg`, `.fromMarkdown`,
+/// `.fromMermaid`, `.fromLatex`, `.fromRendered…`. Một chuỗi để VẼ không được
+/// phép quay ngược thành CẤU TRÚC — đó đúng là cái lỗ để nội dung chưa kiểm
+/// định rửa mình thành «sơ đồ tin được». `VisualSpec` chỉ dựng được từ:
+/// (a) `fromJson` của artefact đã dựng sẵn, hoặc (b) bộ biên dịch chạy trên
+/// cấu trúc ngữ nghĩa đã có nguồn. Ràng buộc này do
+/// `test/core/visual_spec/no_presentation_constructor_test.dart` quét mã giữ.
+///
+/// **Phiên bản TÁCH khỏi pack bài học.** `LessonDocument.fromJson` là một
+/// union kín: một loại block lạ làm hỏng CẢ tài liệu, không phải một block.
+/// `VisualSpec` cố ý nằm trong artefact RIÊNG: một họ hình mới mà app cũ
+/// chưa biết chỉ làm mất HÌNH («SAM chưa biết vẽ kiểu đó»), không làm mất
+/// BÀI. Không có loại block mới nào được thêm vào pack cho làn này.
 library;
 
 import '../lesson_model/content_trust.dart';
@@ -107,7 +123,14 @@ class ProvenanceRef {
     required this.trust,
     this.claimId,
     this.charSpan,
-  }) : assert(blockIds.length > 0, 'không nguồn thì không vẽ');
+  });
+
+  /// «Không nguồn thì không vẽ». KHÔNG đặt được thành `assert` trong hàm dựng
+  /// `const` (Dart không tính được `length` của list literal lúc biên dịch),
+  /// nên bất biến này được giữ ở HAI cửa thật sự có dữ liệu lạ đi qua:
+  /// `ProvenanceRef.fromJson` (đường vào từ artefact) và
+  /// `VisualSection.fromJson`. Test `visual_spec_test.dart` khoá cả hai.
+  bool get isGrounded => blockIds.isNotEmpty;
 
   /// Các block nguồn (≥1). Mã máy — KHÔNG BAO GIỜ hiện cho trẻ.
   final List<String> blockIds;
