@@ -248,11 +248,138 @@ formula rows is reporting a number that is true and misleading at once.
 
 ## 8. Data Accuracy Scoreboard — BEFORE → AFTER
 
-**[PENDING — Lane D REPAIRED stage + Lane A4 router]**
+Lane D, PR #82, CI PASS on head `0113019`. Batch 2 is six lessons across five failure
+classes and includes **History/Geography, never measured before**. Batch 1 is the
+holdout.
+
+| Founder direction | Round 4 | Round 5 REPAIRED | Note |
+|---|---|---|---|
+| **FALSE TRUST ↓** | 0.297 [0.199, 0.418] | **0.318** [0.218, 0.438] vs OLD **0.619** | 10/13 = 0.769 of batch 1's false-trust rows no longer served as before (was 7/13) |
+| **TEACHING-CRITICAL ↓** | 0.176 [0.062, 0.410] | **0.100** [0.043, 0.214] vs OLD 0.476 | 2/5 closed; **9 and 13 mutilated structures unchanged** |
+| **CORRECT SERVED ↑** | 221 served, ≈155 correct | **239 served**, ≈163 correct — 0.632 as reported, **0.589 once silent loss is in the denominator** | −8 colophon, +1 guard fix; **no served text changed** |
+| **OVER-WITHHOLD ↓** | 12/30 = 0.400 | **19/30 = 0.633** [0.455, 0.781] | **Moved the wrong way.** 1 of the 19 restored |
+| **RESTORE PRECISION ↑** | not measured | **3/6 = 0.500** [0.188, 0.812]; the one NEW restore is **0/1 — wrong** | |
+| **ATTACHMENT** (added) | 5/8 = 0.625 rescued | **8/8 = 1.000 — closed** | Every attachment defect closed, credited to Lane A1 |
+| Display fidelity | — | 0.595 → **0.164** | |
+| Reading order | — | 0.455 → **0.000** | |
+| Role | — | 0.116 → **0.151** | **Not better** |
+| `trusted` / `eligible for teaching` | 0 / 0 | **0 / 0** | Unchanged, by design |
+
+### 8.1 The result the Founder most needs to see: REPAIR is built and NOT CONNECTED
+
+Attachment closed completely; **nothing else moved, and it could not have.** Lane A1's
+Vietnamese repairers and group rule live in the repair harness
+(`tool/corpus/repair/run_gold.py`) and are **not wired into the path that produces a
+lesson**.
+
+The coordinator verified this structurally rather than accepting it: on Lane D's
+branch, **no file outside `tool/corpus/repair/` and `tool/tests/` imports the `repair`
+package at all.** So "no served text changed anywhere" is not a measurement outcome —
+it is a certainty of the current wiring. What reached the pipeline this round is two
+guard/attach fixes.
+
+This is the correct state given the Founder gate on production trust thresholds, and
+it must not be read as accuracy having improved for a child. **The repair path is a
+validated laboratory with a measured false-correction rate and no connection to the
+product.** Connecting it is a Founder decision, not a lane's.
+
+### 8.2 R13 — SILENT LOSS: the structural finding of the round
+
+Two lanes found the same hole from opposite ends without coordinating. Lane A2 found
+Docling formula blocks dying at `tc2_sdm.py:276-277` as role `empty` / reason
+`empty_block` / evidence "no letters". Lane D checked it against its own denominators
+and found something worse:
+
+> A block whose role is `empty` reaches **neither** `blocks` **nor** `withheld` of the
+> Trusted Structured Lesson.
+
+Withholding is a decision a lesson can be audited for. **This is a disappearance, and
+it carries no reason code.** Every rate published by every lane is blind to it:
+`learning blocks = trusted + withheld` has already dropped it, so served share is
+computed over a base that shrank; and the over-withhold rate cannot see it at all,
+because it reviews only regions that *were* withheld.
+
+| batch | trusted | withheld | **silently lost** | of those, digits | expressions | served share as reported | **corrected** |
+|---|---|---|---|---|---|---|---|
+| batch 2 (evaluation set) | 232 | 135 | **27** | 17 | 8 | 0.632 | **0.589** |
+| batch 1 (**holdout**) | 196 | 124 | **55** | 21 | 10 | 0.613 | **0.523** |
+
+| lesson | trusted | withheld | silently lost | as reported | corrected |
+|---|---|---|---|---|---|
+| **Toán 4 tập hai Bài 61** | 4 | 15 | **32** | 0.211 | **0.078** |
+| Toán 4 tập một Bài 37 | 23 | 24 | 15 | 0.489 | 0.371 |
+| Toán 5 tập một Bài 6 | 12 | 13 | 9 | 0.480 | 0.353 |
+| LS&ĐL 4 Bài 12 | 24 | 22 | 8 | 0.522 | 0.444 |
+
+**The lost blocks are the printed exercises** — `40 613 + 47 519`, `3 675 + 2 918`,
+`7 641 - 2 815`, `62 748 - 35 261`, `2 667 + 3 825`, `74 165 : 5`, the flattened
+`3 7 + 11 12`, and A2's `7 8 2 8 7 - 2 8 5 8`. On LS&ĐL 4 Bài 12 they are map and
+table figures (`0,6`, `1408`, `1010`) — **not a Toán-only effect.**
+
+Every served-share figure elsewhere in this report is the "as reported" column. Those
+figures are not withdrawn: they correctly answer *"of the blocks the pipeline
+classified, what share did it serve?"* They do **not** answer *"of what was extracted
+from the page, what share reached a child?"* Until this round nothing distinguished
+the two.
+
+**R13, filed to the pipeline lanes:** a block the role layer drops must arrive in the
+TSL as a withheld region with a truthful reason, not vanish. `empty_block` on a block
+reading `7 8 2 8 7 - 2 8 5 8` also misstates what was lost.
+
+### 8.3 The 97-row audit's OVER/SAFE classification is predictive
+
+Of the restores measured: **3 of 4** regions the audit had called **OVER**-withheld
+came back **correct**; **both** regions it had called **SAFE refusals** came back
+**wrong**. The Founder's own audit labels, applied blind, predicted restore outcomes.
+That is a usable routing rule — restore from OVER, do not restore from SAFE without a
+repair — and it is independent evidence that the 97-row set is a sound evaluation set.
 
 ## 9. Legacy Reprocess Scoreboard
 
-**[PENDING — Lane D]**
+**Pack rebuild (§13) — snapshot discipline enforced in code.** `packs.py`: a snapshot
+never overwrites; a rebuild refuses unless a snapshot matches the packs on disk by
+sha256; a restore re-checks every hash. Three snapshots under `poc-out/round5/legacy/`
+(`packs-before-round5`, `-before-inferred-fix`, `-before-a1`), each with `SHA256SUMS`,
+full `buildProvenance`, baseline metrics, pipeline version and README.
+
+| Measure | Result |
+|---|---|
+| Pack `verify` | **0/12 FAIL → 12/12 PASS** |
+| OLD baseline reproduced | **three times** — twice by `restore`, once by re-deriving metrics, identical to stored `BASELINE-METRICS.json` field for field |
+| Content delta of the provenance rebuild | **exactly zero** (248/248 unchanged, 12/12 hashes identical), confirmed by byte-comparing canonical JSON independently of the tool |
+| Blind badge audit of the diagnostic delta | **27/27 = 1.000**; four unbadged pages scored *unjudgeable*, and all three newly-flagged rows are among them — reported as **unmeasurable**, not as 0.964 |
+| Founder §3 fail-closed | **−41 of 248** activities; 10 grades byte-identical; **10 lessons lose their exercise list entirely**; defect 6 on shipped packs **ABSENT** (0 of 207) |
+| Tests | Dart **948 pass / 15 skipped**; Python **348 OK**; `flutter analyze` clean |
+
+The zero content delta has a cause worth stating: `range_mismatch` is **counted, never
+dropped**, so `capped-toc-v2` can only change the diagnosis, not the output.
+
+**Surviving defects:** R1 **FIXED** and the class closed on a second book (tail-scan
+1/6 → 0/6), credited to Lane A1. R2 and R3 **PRESENT** on a fourth build. R7c
+**PARTIAL** — Lane D's own probe first reported it FIXED and the blind audit caught
+the error.
+
+**Two open items raised to the Founder, not decided by a lane:**
+
+- **R15 — attach provenance does not reproduce.** The stored artefact differs from a
+  fresh run on **950 of 6,176** page verdicts, 896 of them unexplained. Batch
+  comparisons never touch it; the **pack build does**, and rebuilding against a fresh
+  attach gives 207/207 and 12/12 identical. Filed as a Founder decision.
+- **Defect 8 is not closed on the lesson path.** Lane A1 measures 7 → 0 on the gold
+  set; Lane D measures **9 → 9** and **13 → 13** on the lesson path, with the Founder's
+  option group byte-identical. Both lanes are right about their own population — the
+  mutilated-structure class is closed where A1 looks and open where a child reads.
+
+**Lane D's corrections against its own tooling** (recorded because they bear on how
+much weight its other numbers carry): a false FIXED verdict on R7c; blank restore
+sheets that the annotator refused to score, which is why there is no fabricated 6/6; a
+sandbox guarantee that silently depended on alphabetical file order; an orphan detector
+that **missed the exact case the Founder named** by grouping on the wrong field; and a
+mechanism string that named a branch and went stale, now checked.
+
+**Operational fact:** the main checkout's packs are still the old ones. **No APK built
+on this Mac carries any of these corrections** until the PR is merged and packs are
+rebuilt there.
 
 ## 10. The five product scores
 
