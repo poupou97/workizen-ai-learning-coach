@@ -10,10 +10,9 @@ import 'package:flutter/scheduler.dart' show SchedulerBinding, SchedulerPhase;
 
 import '../../app/theme/wal_tokens.dart';
 import '../../core/lesson_model/lesson_document.dart';
-import '../../core/lesson_model/next_action.dart' show WorkspaceView;
 import '../subjects/lesson_index.dart';
-import 'lesson_workspace_screen.dart';
 import 'widgets/fixture_chip.dart';
+import 'widgets/lesson_row.dart';
 import 'workspace_trace.dart';
 
 class ChapterScreen extends StatefulWidget {
@@ -73,23 +72,6 @@ class _ChapterScreenState extends State<ChapterScreen> {
   LessonDocument? _docFor(int no) =>
       widget.docs.where((d) => d.lessonNo == no).firstOrNull;
 
-  /// ROUND 4 — trạng thái bài bằng lời trẻ, chỉ từ TRACE (đã mở cách nào
-  /// trong phiên), không sao/%/«đã học»: «3 cách học · Chưa xem» hoặc «Đã xem
-  /// (phiên này): Đọc · Trực quan».
-  String _lessonState(LessonDocument doc) {
-    final seen = widget.trace.viewsFor(doc.slotKey);
-    final ways = WorkspaceView.values.length;
-    if (!widget.trace.opened(doc.slotKey)) {
-      return '$ways cách học · ${widget.trace.childLabel(doc.slotKey)}';
-    }
-    if (seen.isEmpty) return widget.trace.childLabel(doc.slotKey);
-    final names = [
-      for (final v in WorkspaceView.values)
-        if (seen.contains(v)) v.label,
-    ];
-    return '${widget.trace.childLabel(doc.slotKey)}: ${names.join(' · ')}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final fixture = widget.docs.where((d) => d.isFixture).firstOrNull;
@@ -148,7 +130,14 @@ class _ChapterScreenState extends State<ChapterScreen> {
             const SizedBox(height: WalSpacing.sm),
             if (fixture != null) FixtureChip(trust: fixture.trust),
             const SizedBox(height: WalSpacing.md),
-            for (final l in widget.lessons) _row(context, l),
+            for (final l in widget.lessons)
+              LessonRow(
+                lesson: l,
+                doc: _docFor(l.no),
+                trace: widget.trace,
+                onOpenLegacy: widget.onOpenLegacy,
+                learnerId: widget.learnerId,
+              ),
             if (widget.lessons.isEmpty)
               const Text(
                 'Chương này chưa có bài nào trong mục lục trên máy.',
@@ -158,64 +147,6 @@ class _ChapterScreenState extends State<ChapterScreen> {
                 ),
               ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _row(BuildContext context, LessonRef l) {
-    final doc = _docFor(l.no);
-    final title = l.title == null
-        ? 'Bài ${l.no}'
-        : 'Bài ${l.no} · ${LessonDocument.titleCase(l.title!)}';
-    final opened = doc != null && widget.trace.opened(doc.slotKey);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: WalSpacing.sm),
-      child: Material(
-        // ⭐ ROUND 4 (lỗi nhìn thấy trên Nokia): nền tím oải hương là NHẤN
-        // MẠNH — Home dùng nó cho thẻ chính. Ở đây nó đang tô cho bài KHÔNG
-        // có Bài học SAM, còn bài CÓ thì trắng: ngược hẳn. Một vốn từ màu cho
-        // cả hành trình ⇒ có Bài học SAM = nền nhấn.
-        color: doc != null ? WalColors.surfaceLavender : Colors.white,
-        borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
-        child: ListTile(
-          minVerticalPadding: WalSpacing.sm,
-          title: Text(
-            title,
-            style: const TextStyle(
-              fontSize: WalType.body,
-              fontWeight: FontWeight.w600,
-              color: WalColors.ink,
-            ),
-          ),
-          subtitle: Text(
-            doc != null
-                ? '✨ Bài học SAM · ${_lessonState(doc)}'
-                : 'Chưa có Bài học SAM — mở trong Môn học',
-            style: TextStyle(
-              fontSize: WalType.secondary,
-              color: opened ? WalColors.primaryText : WalColors.inkSoft,
-            ),
-          ),
-          trailing: Icon(
-            doc != null ? Icons.chevron_right : Icons.open_in_new,
-            color: WalColors.primaryText,
-          ),
-          onTap: () async {
-            if (doc == null) {
-              widget.onOpenLegacy();
-              return;
-            }
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => LessonWorkspaceScreen(
-                  doc: doc,
-                  trace: widget.trace,
-                  learnerId: widget.learnerId,
-                ),
-              ),
-            );
-          },
         ),
       ),
     );
