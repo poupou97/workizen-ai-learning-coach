@@ -122,7 +122,7 @@ replaced or discarded. **No row in this table converts a PARTIAL into a DONE.**
 | **86** | `e2/round5-visualspec-renderer` | 5 | VisualSpec + one renderer proven across three subjects, six subjects in the §19 proof | **CAN WAIT** (renderer families bounded, deliberately not expanded) · **SUPERSEDED** (unit) | #85 | The one-renderer generalisation proof | None — in `round7` |
 | **87** | `lane-b/round5-experience` | 5 | Trực quan → concept frame; Workspace density A/B/C on a real Nokia; two real-device defects fixed | **REQUIRED** (content) · **SUPERSEDED** (unit) | #79 | Device evidence manifest + the density comparison | None — in `round7` |
 | **88** | `a4/round5-multi-signal-verification` | 5 | Cross-corpus, LLM-as-verifier, external evidence, router with measured escalation. **Edge risk half confirmed, half falsified** | **REQUIRED** (content) · **SUPERSEDED** (unit) | #79, #83 | The signal matrix **and its negative results** | None — in `round7` |
-| **89** | `ws-archive/round5-retrospective` | 5→6 | Reusable per-round archive builder. **3 of its 4 commits are already in `round7`; 1 is not** (`42e28ec`, 2 files: `tool/reporting/README.md`, `examples/round07-archive-spec.json`). Verdict on its own subject: **PARTIAL — capability proven, nothing delivered to a child** (8 PASS · 1 PARTIAL · 1 FAIL) | **SUPERSEDED in part** — one commit of residue | branch is ~118 commits **behind** `round7` | The NOT-CAPTURED-note rule and the round-7 archive spec | Nil — merges clean, 2 files, verified §7 |
+| **89** | `ws-archive/round5-retrospective` | 5→6 | Reusable per-round archive builder. **3 of its 4 commits are already in `round7`; 1 is not** (`42e28ec`, 2 files: `tool/reporting/README.md`, `examples/round07-archive-spec.json`). Verdict on its own subject: **PARTIAL — capability proven, nothing delivered to a child** (8 PASS · 1 PARTIAL · 1 FAIL) | **SUPERSEDED in part** — one commit of residue | branch is 56 commits **behind** `round7` | The NOT-CAPTURED-note rule and the round-7 archive spec | Nil — merges clean, 2 files, verified §7 |
 | **90** | `ws-c/round6-repair-integration` | 6 | ValidatedRepair crosses into TSL + LessonDocument **and does not become trusted**. Historical correction to round 5's dispose-row verdict. **«no carrier for structured content» = PARTIAL; a servable structured kind = DEFERRED** | **REQUIRED** (content) · **SUPERSEDED** (unit) | round-5 lanes | The repair→product wire and the round-5 correction | None — in `round7`. **Its PARTIAL/DEFERRED rows must stay PARTIAL/DEFERRED** |
 | **91** | `ws-a/round6-accounting` | 6 | R13 zero silent loss (UNACCOUNTED 27→0, 55→0, both Golden slices→0), canonical lesson identity, ledger that **exits non-zero** | **SAFE FOUNDATION** — corrects denominators every later metric uses | round-5 lanes | The R13 correction; every later metric's denominator | None — in `round7` |
 | **92** | `ws-b/round6-recognition` | 6 | Recognition failure census + targeted re-crop (GATE B met). **Ω→S2 FALSIFIED, 0 of 22 at every scale; unigram diacritic rule falsified (26,703 false candidates)** | **REQUIRED** (content) · **SUPERSEDED** (unit) | round-5 lanes | **Two falsifications** — the most expensive kind of finding to re-earn | None — in `round7` |
@@ -358,7 +358,7 @@ makes each one redundant — not because twenty is a big number.
 
 ### STEP 4 — land #89's residue
 - **Preconditions:** Steps 1–3.
-- **Detail:** `#89` is ~118 commits **behind** `round7` and 3 of its 4 commits are already in.
+- **Detail:** `#89` is 56 commits **behind** `round7` and 3 of its 4 commits are already in.
   **Merge the branch** (verified clean, and composed green) **or** cherry-pick `42e28ec` alone.
   Prefer the merge: it is proven, and cherry-picking would create the second duplicate patch-id
   in the stack's history.
@@ -434,7 +434,7 @@ this document was being written. Each layer is composed only in a throw-away wor
 reproduces and that is deleted afterwards.
 
 **But the important correction is this:** option D's cost is *not* an argument for the prior
-recommendation. **Merging `#79` is 87 % of option D.** It moves `main` 89 commits forward,
+recommendation. **Merging `#79` leaves 66 % of the commit debt (175 of 264) and 90 % of the PRs (18 of 20) exactly where they are.** It moves `main` 89 commits forward,
 leaves 175 commits and 18 PRs in two layers, and leaves round 8 composing on an unmerged
 round 7 — which is the precise outcome §10 of the order forbids.
 
@@ -495,7 +495,7 @@ corrections are recorded beside the original. This section *is* that record.
 | **GAP-2** | **Round 5 has no explicit Founder acceptance verdict.** Rounds 4, 6 and 7 do (order 41, order 43). Round 5's conclusions were *consumed* by order 39 («Round 5 established / proved / evidence») but never accepted in their own right, and round 5 scored **1 FAIL + 1 PARTIAL** | **FOUNDER DECISION.** Step 6 merges round-5 lane code. This is the one place in the sequence where a Founder may reasonably want to look before merging |
 | **GAP-3** | Hardware **UNVERIFIED**. No device walk for round 7 — the Nokia is in the Founder's personal use. R-1 is **DONE (artefact) / PARTIAL (device)** | **OPEN by Founder constraint.** Must not become DONE |
 | **GAP-4** | Regenerating Golden #1 needs PyMuPDF + 14 GB `poc-out/` + SGK PDFs. Reproducible **only on this Mac** | **OPEN.** Provenance is recorded; the evidence body cannot enter git under D4 |
-| **GAP-5** | `#89` is ~118 commits behind `round7`; its own subject verdict is **PARTIAL** (capability proven, nothing delivered to a child) | Handled by Step 4. **The PARTIAL stands** |
+| **GAP-5** | `#89` is 56 commits behind `round7`; its own subject verdict is **PARTIAL** (capability proven, nothing delivered to a child) | Handled by Step 4. **The PARTIAL stands** |
 
 ---
 
