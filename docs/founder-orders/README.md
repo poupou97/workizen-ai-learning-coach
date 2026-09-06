@@ -83,3 +83,5 @@ below is now the full text it was reconstructing.
 begins. An order that exists only in a chat window is an order that can be lost — and this project
 has already lost four Desktop archives and had to grade a whole round against reconstructed
 criteria.
+
+| 44 | [`44-founder-authorization-full-autonomy-reconcile-and-merge-main.md`](44-founder-authorization-full-autonomy-reconcile-and-merge-main.md) | 5,900 | FOUNDER AUTHORIZATION — FULL AUTONOMY TO RECONCILE AND MERGE MAIN |
