@@ -79,6 +79,13 @@ class Policy:
     pn_min_alt_books: int = 10
     pn_max_observed_unigram: int = 5
     pn_allow_dominant: bool = False       # names get the strict rule only
+    #: **name-internal evidence.** Evidence about a name must come from the name, not from the function
+    #: word beside it. When the context partner is itself an informatively capitalised token — «Thái» in
+    #: «Lý Thái Tô» — the pair is part of the name and the bar can be the ordinary strict one at this
+    #: level. When it is not — «Theo» in «(Theo Đăng Khoa, …)» — the signal must abstain, which is exactly
+    #: what stops Lane C's measured false correction «Đăng Khoa» → «Đặng Khoa» from happening here.
+    pn_internal_min_alt_ctx: int = 20
+    pn_internal_min_alt_books: int = 3
     #: fallback when a token has no usable context at all (block of one word, first token of a fragment)
     unigram_fallback: bool = True
     unigram_max_observed: int = 0         # the form must be absent from the whole corpus
@@ -187,9 +194,11 @@ class CrossCorpusVerifier:
                 # CONTRADICTING EVIDENCE WINS. The corpus itself writes this phrase; whatever the other
                 # side of the token looks like, the observed text is not an anomaly.
                 continue
-            rule, ok, reason = self._decide(is_proper, obs_count, obs_ctx, alt_ctx, alt_books)
+            partner = i - 1 if side == 'left' else i + 1
+            internal = self._informative_caps(raw, toks, partner)
+            rule, ok, reason = self._decide(is_proper, obs_count, obs_ctx, alt_ctx, alt_books, internal)
             if is_proper and why_proper:
-                reason = f'{reason} [{why_proper}]'
+                reason = f'{reason} [{why_proper}{"; name-internal context" if internal else ""}]'
             if ok:
                 out.append(Finding(i, t, alt, rule, ctx_label, obs_ctx, alt_ctx, alt_books, eff_pr,
                                    is_proper, sup, con, self._strength(obs_ctx, alt_ctx, alt_books,
@@ -231,6 +240,22 @@ class CrossCorpusVerifier:
             return eff_pr, True, 'capitalised before a capitalised word'
         return eff_pr, False, ''
 
+    @staticmethod
+    def _informative_caps(raw, toks, j):
+        """Is token `j` capitalised in a position where a capital *means* something?
+
+        Not at index 0, not in an ALL-CAPS run, and not the first word after a sentence end — in all three
+        the capital is forced by orthography and carries no information about proper-nounhood. This is the
+        test that separates «Thái» in «Lý Thái Tô» (informative → the pair is part of the name, and
+        name-internal evidence may be used) from «Theo» in «(Theo Đăng Khoa, …)» (block-initial → the
+        pair says nothing about the name, and the signal must abstain).
+        """
+        if j <= 0 or j >= len(raw) or len(raw) != len(toks):
+            return False
+        if all(w.upper() == w for w in raw):
+            return False
+        return bool(raw[j][:1].isupper())
+
     def _best_context(self, toks, adj, i, t, variants):
         """→ (best alternative tuple, `obs_support`).
 
@@ -258,14 +283,27 @@ class CrossCorpusVerifier:
                     best = (f, side, label, obs, n, books)
         return best, obs_support
 
-    def _decide(self, is_proper, obs_count, obs_ctx, alt_ctx, alt_books):
+    def _decide(self, is_proper, obs_count, obs_ctx, alt_ctx, alt_books, name_internal=False):
         p = self.policy
         if is_proper:
-            if (obs_ctx <= p.max_observed_ctx and alt_ctx >= p.pn_min_alt_ctx
-                    and alt_books >= min(p.pn_min_alt_books, 3) and obs_count <= p.pn_max_observed_unigram):
+            if obs_ctx > p.max_observed_ctx:
+                return RULE_STRICT, False, (f'proper noun: the corpus attests the OBSERVED name in this '
+                                            f'context {obs_ctx}×; a name may legitimately be rare')
+            if name_internal:
+                # evidence drawn from inside the name itself («Thái —»), which is the only kind that says
+                # anything about a name. Still stricter than a common word, and still needs independent
+                # confirmation before the engine will validate it.
+                if alt_ctx >= p.pn_internal_min_alt_ctx and alt_books >= p.pn_internal_min_alt_books:
+                    return RULE_STRICT, True, ('proper noun, name-internal context: the observed form is '
+                                               f'unattested and «{alt_ctx}» attests the alternative')
+                return RULE_STRICT, False, (f'proper noun with name-internal context below the bar '
+                                            f'(alt {alt_ctx} in {alt_books} books)')
+            if (alt_ctx >= p.pn_min_alt_ctx and alt_books >= min(p.pn_min_alt_books, 3)
+                    and obs_count <= p.pn_max_observed_unigram):
                 return RULE_STRICT, True, 'proper noun: unattested in context AND near-absent corpus-wide'
-            return RULE_STRICT, False, ('proper noun below the stricter bar '
-                                        f'(alt {alt_ctx}, observed unigram {obs_count})')
+            return RULE_STRICT, False, ('proper noun, context word is not part of the name: evidence about '
+                                        f'a name must come from the name (alt {alt_ctx}, '
+                                        f'observed unigram {obs_count})')
         if obs_ctx <= p.max_observed_ctx and alt_ctx >= p.min_alt_ctx and alt_books >= p.min_alt_books:
             return RULE_STRICT, True, 'context unattested corpus-wide; alternative well attested'
         if (p.dominant_ratio and obs_ctx <= p.dominant_max_observed
@@ -396,6 +434,69 @@ def cross_corpus_signal(value, ctx):
                             max(f.strength for f in fs), dict(findings=[f.to_json() for f in fs]))
     return model.Signal(SIGNAL_ID, model.SignalVerdict.ABSTAINS, 0.0,
                         dict(reason='the corpus does not attest this particular proposal'))
+
+
+@registry.token_signal_provider('xcorpus.token-v1')
+def token_signal(observed, proposed, ctx):
+    """**The registration that matters most.** A1's repairer consults every registered token provider for
+    every token it is about to change, and an `objects` reading from a provider **vetoes** the repair.
+
+    This is where cross-corpus consistency does its highest-value work, and it is *not* the work of
+    proposing: A1's Vietnamese repairer already runs at precision 1.000 / false-correction 0.000 with
+    detection recall 0.040, so what it needs from A4 is not more proposals but an independent layer that
+    can say «the corpus attests the alternative» (support, layer D, letting a candidate clear the
+    independent-support bar) or «the corpus attests the text exactly as observed» (objection, killing a
+    repair that would have been a false correction).
+
+    Returns `None` when there is no index installed, so a run without A4's index behaves exactly as A1's
+    own run did — an absent signal must never look like a supporting one.
+    """
+    v = _STATE['verifier']
+    if v is None or not isinstance(observed, str) or not isinstance(proposed, str):
+        return None
+    o, pr = ix.norm_token(observed), ix.norm_token(proposed)
+    if o == pr:
+        return None
+    text = ctx.primary().value if ctx.primary() else ''
+    fs = {f.i: f for f in v.analyse(text, where=ctx.page)} if isinstance(text, str) else {}
+    hit = next((f for f in fs.values() if f.observed == o), None)
+    if hit is None:
+        # the corpus was asked and had nothing to say about this token — recorded as an abstention, never
+        # as support (A1's `SignalContribution` can only measure a layer if its silences are counted).
+        return model.Signal(SIGNAL_ID, model.SignalVerdict.ABSTAINS, 0.0,
+                            dict(reason='no cross-corpus finding at this token', observed=o, proposed=pr))
+    if hit.proposes and hit.proposed == pr:
+        return model.Signal(SIGNAL_ID, model.SignalVerdict.SUPPORTS, hit.strength,
+                            dict(finding=hit.to_json(),
+                                 supporting=[e.to_json() for e in hit.supporting],
+                                 contradicting=[e.to_json() for e in hit.contradicting]))
+    if hit.proposes and hit.proposed != pr:
+        return model.Signal(SIGNAL_ID, model.SignalVerdict.OBJECTS, hit.strength,
+                            dict(reason=f'the corpus attests «{hit.proposed}» here, not «{pr}»',
+                                 finding=hit.to_json()))
+    return model.Signal(SIGNAL_ID, model.SignalVerdict.ABSTAINS, 0.0,
+                        dict(reason='cross-corpus detected an anomaly but proposes nothing',
+                             finding=hit.to_json()))
+
+
+@registry.block_signal_provider('xcorpus.block-v1')
+def block_signal(observed_text, proposed_text, ctx):
+    """Per-block reading: does the corpus attest the whole proposed text, and does it attest the observed
+    text as it stands? An objection here is the «do not touch this block» vote."""
+    v = _STATE['verifier']
+    if v is None or not isinstance(observed_text, str):
+        return None
+    fs = v.analyse(observed_text, where=ctx.page)
+    if not fs:
+        return model.Signal(SIGNAL_ID, model.SignalVerdict.ABSTAINS, 0.0,
+                            dict(reason='no cross-corpus finding anywhere in the block'))
+    if isinstance(proposed_text, str) and apply_findings(observed_text, [f for f in fs if f.proposes]) == proposed_text:
+        return model.Signal(SIGNAL_ID, model.SignalVerdict.SUPPORTS,
+                            max(f.strength for f in fs if f.proposes) if any(f.proposes for f in fs) else 0.3,
+                            dict(findings=[f.to_json() for f in fs]))
+    return model.Signal(SIGNAL_ID, model.SignalVerdict.ABSTAINS, 0.0,
+                        dict(reason='the corpus does not attest this particular block-level proposal',
+                             findings=[f.to_json() for f in fs]))
 
 
 @registry.repairer(FC_TONE, repairer_id='xcorpus.context-v1')
