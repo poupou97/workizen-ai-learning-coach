@@ -106,21 +106,31 @@ def ledger_lesson(batch_dir, pipeline, book, lesson):
             else:
                 disp, reason = D.disposition_for_unaccounted_role(role, b.get('text'), D.ocr_line_texts(b))
             cls = (D.classify_unread(b.get('text'), D.ocr_line_texts(b)) if role == 'empty' else None)
+            txt = (b.get('text') or '')
             by_disp[disp] += 1
             by_reason[reason] += 1
             if cls:
                 by_class[cls] += 1
             rows.append(dict(id=bid, page=page, role=role, disposition=disp, reason=reason,
-                             unreadClass=cls, chars=len((b.get('text') or '').strip()),
+                             unreadClass=cls, chars=len(txt.strip()),
+                             digits=bool(D.DIGIT.search(txt)), expression=bool(D.EXPRESSION.search(txt)),
                              ocrLines=len([x for x in D.ocr_line_texts(b) if (x or '').strip()])))
     inp = len(rows)
     s, w, e, u = by_disp[D.SERVED], by_disp[D.WITHHELD], by_disp[D.EXCLUDED], by_disp[D.UNACCOUNTED]
+    # An exclusion is a claim that a region is not learning content. When the excluded region carries an
+    # arithmetic expression the claim deserves a second look — it does not fail the invariant (the region
+    # IS accounted, with a reason and its evidence), but it is exactly where a diagram-aware recogniser
+    # would find printed exercises. Surfaced as a work queue, never as a licence to serve it.
+    cbe = [r for r in rows if r['disposition'] == D.EXCLUDED and r['expression']]
     return dict(
         book=book, lesson=int(lesson), pages=sorted(pages),
         inputSourceRegions=inp, served=s, withheld=w, excludedWithReason=e, unaccounted=u,
         conserves=(s + w + e + u == inp) and u == 0,
         excludedSource=('tsl.excluded' if excluded_in_tsl else 'derived-from-sdm'),
         byReason=dict(by_reason), byUnreadClass=dict(by_class),
+        excludedCarryingDigits=sum(1 for r in rows if r['disposition'] == D.EXCLUDED and r['digits']),
+        excludedCarryingAnExpression=len(cbe),
+        contentBearingExclusionsByReason=dict(collections.Counter(r['reason'] for r in cbe)),
         # Round 5 published `trusted / (trusted + withheld)`. The honest denominator is every region the
         # pipeline extracted that is not a defined non-learning region.
         servedShareAsReported=(round(s / (s + w), 4) if (s + w) else None),
@@ -138,11 +148,13 @@ def ledger_batch(batch_dir, pipeline):
         if r:
             lessons.append(r)
     tot = {k: sum(l[k] for l in lessons) for k in
-           ('inputSourceRegions', 'served', 'withheld', 'excludedWithReason', 'unaccounted')}
-    by_reason, by_class = collections.Counter(), collections.Counter()
+           ('inputSourceRegions', 'served', 'withheld', 'excludedWithReason', 'unaccounted',
+            'excludedCarryingDigits', 'excludedCarryingAnExpression')}
+    by_reason, by_class, by_cbe = collections.Counter(), collections.Counter(), collections.Counter()
     for l in lessons:
         by_reason.update(l['byReason'])
         by_class.update(l['byUnreadClass'])
+        by_cbe.update(l['contentBearingExclusionsByReason'])
     inp, s, w, u = (tot['inputSourceRegions'], tot['served'], tot['withheld'], tot['unaccounted'])
     return dict(
         schema=SCHEMA, invariant=INVARIANT, batchDir=os.path.abspath(batch_dir), pipeline=pipeline,
@@ -150,6 +162,7 @@ def ledger_batch(batch_dir, pipeline):
         conserves=all(l['conserves'] for l in lessons) and u == 0,
         **tot,
         byReason=dict(by_reason), byUnreadClass=dict(by_class),
+        contentBearingExclusionsByReason=dict(by_cbe),
         servedShareAsReported=(round(s / (s + w), 4) if (s + w) else None),
         servedShareOfLearningRegions=(round(s / (s + w + u), 4) if (s + w + u) else None),
         servedShareOfAllInputRegions=(round(s / inp, 4) if inp else None),
@@ -182,6 +195,9 @@ def cmd_audit(a):
           f"+ excluded {out['excludedWithReason']} + UNACCOUNTED {out['unaccounted']}")
     if out['byUnreadClass']:
         print('  unread classes: ' + ', '.join(f'{k}={v}' for k, v in sorted(out['byUnreadClass'].items())))
+    if out['excludedCarryingAnExpression']:
+        print(f"  note: {out['excludedCarryingAnExpression']} excluded region(s) carry an arithmetic "
+              f"expression — accounted, but a recognition work queue, not a licence to serve")
     if a.out:
         os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
         json.dump(out, open(a.out, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
