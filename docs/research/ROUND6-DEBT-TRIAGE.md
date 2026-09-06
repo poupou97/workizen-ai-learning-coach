@@ -438,6 +438,20 @@ withheld card and that tapping it shows the printed page. When the device is fre
 
 ---
 
+## 4.1 · ⚠ A TRAP FOR WHOEVER COMPOSES THIS ROUND
+
+`assets/fixtures/` is gitignored, so **the fixed Golden #1 does not travel with this branch.**
+The main checkout still holds round 6's crop-less copy. Rsyncing `assets/fixtures/` from it — the
+standing procedure for composition — **re-introduces the defect this workstream fixed**, and the
+fixture will read as current because its lineage fields are all intact. That is round 5's stale-
+fixture trap wearing a new hat.
+
+It cannot pass silently any more: **L5b goes FAIL on the stale copy** (`0/17 have a crop`). But do
+not rely on noticing. **Regenerate rather than rsync**, with the two commands in §1, and check the
+line `L5b … 17/17 have a crop` before building any APK.
+
+---
+
 ## 5 · Hand-offs — changes another workstream must make
 
 | # | Change | Owner | Why it is not made here |
