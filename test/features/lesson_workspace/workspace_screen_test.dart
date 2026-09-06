@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/next_action.dart';
 import 'package:learning_coach/features/lesson_workspace/lesson_workspace_screen.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/assist_layer.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/fixture_chip.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/mode_picker.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/runtime_plan.dart';
@@ -47,9 +48,7 @@ void main() {
 
   testWidgets('⭐ lần đầu mở ⇒ màn «Vào bài học»: 3 thẻ đếm từ dữ liệu, thẻ '
       'Đọc được đề xuất (thứ tự Founder A8) kèm lý do; chưa View nào bị đánh '
-      'dấu', (
-    t,
-  ) async {
+      'dấu', (t) async {
     final trace = WorkspaceTrace();
     final doc = loadSyntheticDoc();
     await t.pumpWidget(
@@ -65,10 +64,11 @@ void main() {
     expect(find.textContaining('SAM đề xuất cách này'), findsOneWidget);
     expect(find.textContaining('đọc bài trong sách trước'), findsOneWidget);
     expect(
-      find.byKey(LessonWorkspaceScreen.nextActionKey),
+      find.byKey(AssistPeek.peekKey),
       findsNothing,
       reason: 'lý do đã nằm trên thẻ đề xuất — không lặp',
     );
+    expect(find.byKey(AssistIconButton.buttonKey), findsNothing);
     expect(trace.viewsFor(doc.slotKey), isEmpty);
     expect(trace.opened(doc.slotKey), isTrue);
   });
@@ -99,8 +99,20 @@ void main() {
     await t.pumpAndSettle();
     expect(trace.viewsFor(doc.slotKey), {WorkspaceView.read});
     expect(find.text('Cỡ chữ'), findsOneWidget);
-    expect(find.byKey(LessonWorkspaceScreen.nextActionKey), findsOneWidget);
-    expect(find.text('SAM đề xuất'), findsOneWidget);
+    // ROUND 6 · phương án B: mặc định là MỘT DÒNG nêu ĐÍCH ĐẾN — trẻ biết đi
+    // đâu mà không phải chạm. Lý do dài chỉ mở khi trẻ hỏi.
+    expect(find.byKey(AssistPeek.peekKey), findsOneWidget);
+    expect(
+      find.text('SAM gợi ý: Xem ${WorkspaceView.visual.label}'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('xem sơ đồ / bảng'),
+      findsNothing,
+      reason: 'lý do là thứ MỞ THEO YÊU CẦU, không chiếm chỗ thường trực',
+    );
+    await t.tap(find.byKey(AssistPeek.peekKey));
+    await t.pumpAndSettle();
     expect(find.textContaining('xem sơ đồ / bảng'), findsOneWidget);
   });
 
@@ -212,6 +224,10 @@ void main() {
         ),
       ),
     );
+    await t.pumpAndSettle();
+    // Phương án B: dòng hé nêu ĐÍCH ĐẾN ngay, nút mang đúng chữ ấy khi mở.
+    expect(find.text('SAM gợi ý: Về mục lục'), findsOneWidget);
+    await t.tap(find.byKey(AssistPeek.peekKey));
     await t.pumpAndSettle();
     expect(find.text('Về mục lục'), findsOneWidget);
     expect(find.textContaining('đã hiểu'), findsNothing);

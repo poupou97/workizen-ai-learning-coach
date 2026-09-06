@@ -19,6 +19,7 @@ import 'package:learning_coach/features/lesson_workspace/lesson_workspace_screen
 import 'package:learning_coach/features/lesson_workspace/smart_book_view.dart';
 import 'package:learning_coach/features/lesson_workspace/tutor_view.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_view.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/assist_layer.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/source_sheet.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/tech_details.dart';
 import 'package:learning_coach/features/lesson_workspace/widgets/withheld_card.dart';
@@ -80,7 +81,10 @@ void main() {
       final scale = t.widget<Transform>(
         find.descendant(of: fig, matching: find.byType(Transform)).first,
       );
-      expect(scale.transform.storage[0], closeTo(SmartBookView.bleedScale, 1e-6));
+      expect(
+        scale.transform.storage[0],
+        closeTo(SmartBookView.bleedScale, 1e-6),
+      );
     });
 
     test('dòng nguồn cuối bài: mã pipeline rời chữ trẻ đọc (chỉ khi tài liệu '
@@ -110,7 +114,10 @@ void main() {
       expect(find.textContaining('nội bộ'), findsNothing);
       expect(find.text('Xem ảnh chụp trang sách'), findsWidgets);
       expect(withheldWhyForChild('page_feature:diagram'), contains('sơ đồ'));
-      expect(withheldWhyForChild('unknown_role:footnote'), contains('không đoán'));
+      expect(
+        withheldWhyForChild('unknown_role:footnote'),
+        contains('không đoán'),
+      );
       expect(withheldWhyForChild('x'), contains('không đoán'));
     });
   });
@@ -120,11 +127,14 @@ void main() {
         'nếp gấp (fixture thật, nếu có)', (t) async {
       final d = loadRealDocOrSkip();
       if (d == null) return;
-      final para = d.blocks
-          .whereType<ParagraphBlock>()
-          .firstWhere((b) => b.relations.headingPath.length >= 3);
+      final para = d.blocks.whereType<ParagraphBlock>().firstWhere(
+        (b) => b.relations.headingPath.length >= 3,
+      );
       expect(sectionLineFor(d, para), 'Trong mục: Nguyên tắc tách chất');
-      expect(lookupLineFor(d, para), '📖 Tra cứu · SGK KHTN 6 · Bài 17 · trang 60');
+      expect(
+        lookupLineFor(d, para),
+        '📖 Tra cứu · SGK KHTN 6 · Bài 17 · trang 60',
+      );
       await t.pumpWidget(
         fixtureHost(
           Scaffold(
@@ -141,7 +151,11 @@ void main() {
       await t.pumpAndSettle();
       expect(find.byKey(const Key('source-lookup-line')), findsOneWidget);
       expect(find.byKey(const Key('source-section-line')), findsOneWidget);
-      expect(find.textContaining('tc2-p1'), findsNothing, reason: 'nếp gấp đóng');
+      expect(
+        find.textContaining('tc2-p1'),
+        findsNothing,
+        reason: 'nếp gấp đóng',
+      );
       await t.ensureVisible(find.byKey(TechDetails.foldKey));
       await t.tap(find.byKey(TechDetails.foldKey));
       await t.pumpAndSettle();
@@ -173,7 +187,10 @@ void main() {
       expect(find.textContaining('«Chưa kiểm định» nghĩa là'), findsOneWidget);
       expect(find.textContaining('mở sách giấy ra so'), findsOneWidget);
       expect(find.textContaining('Dành cho bố mẹ'), findsOneWidget);
-      expect(find.textContaining('chưa có giấy phép phát hành'), findsOneWidget);
+      expect(
+        find.textContaining('chưa có giấy phép phát hành'),
+        findsOneWidget,
+      );
       expect(find.textContaining('TAP ≠ COMPETENCE'), findsOneWidget);
       for (final s in ['tc2-p1', 'tsl-', 'HINT_UNSOURCED', '.py']) {
         expect(find.textContaining(s), findsNothing, reason: '$s lộ khi gấp');
@@ -191,7 +208,11 @@ void main() {
         'hướng dẫn; link «Nguồn & độ tin»', (t) async {
       final d = loadSyntheticDoc();
       await t.pumpWidget(
-        fixtureHost(Scaffold(body: VisualView(doc: d, onShowInRead: (_) {}))),
+        fixtureHost(
+          Scaffold(
+            body: VisualView(doc: d, onShowInRead: (_) {}),
+          ),
+        ),
       );
       await t.pumpAndSettle();
       final legend = t.widget<Text>(find.byKey(const Key('visual-legend')));
@@ -217,7 +238,9 @@ void main() {
         'theo bậc đã dùng, hết thang nói SAM chỉ chỗ trong sách', (t) async {
       await t.pumpWidget(
         fixtureHost(
-          Scaffold(body: TutorView(doc: loadSyntheticDoc(), onNext: (_, _) {})),
+          Scaffold(
+            body: TutorView(doc: loadSyntheticDoc(), onNext: (_, _) {}),
+          ),
         ),
       );
       await t.pumpAndSettle();
@@ -250,9 +273,14 @@ void main() {
     });
   });
 
-  group('§6.7 thẻ «SAM đề xuất»', () {
-    testWidgets('hàng «Đã mở» ● / ○ theo trace của phiên', (t) async {
-      // Màn dọc (Nokia): ở màn ngang thẻ đề xuất là chế độ gọn, không có hàng.
+  group('§6.7 gợi ý của SAM', () {
+    testWidgets('hàng «Đã mở» ● / ○ theo trace của phiên — ROUND 6: nay nằm '
+        'trong trạng thái ĐÃ MỞ của gợi ý, không còn thường trực', (t) async {
+      // Vòng 4 ghim hàng này thường trực trên thẻ «SAM đề xuất». Bản đồ trùng
+      // lặp vòng 5 (§2 mục 11) xếp nó vào nhóm «gộp được vào lớp trợ giúp»:
+      // nó là DẤU VẾT PHIÊN, không phải bằng chứng học (MỞ ≠ HIỂU), nên nó
+      // không đáng chiếm chỗ khi trẻ chưa hỏi. Nội dung KHÔNG đổi.
+      // Màn dọc (Nokia).
       t.view.physicalSize = const Size(1080, 1920);
       t.view.devicePixelRatio = 2.75;
       addTearDown(t.view.reset);
@@ -268,11 +296,23 @@ void main() {
         ),
       );
       await t.pumpAndSettle();
-      final row = t.widget<Text>(find.byKey(const Key('workspace-seen-row')));
-      expect(row.data, 'Đã mở: ● Đọc ○ Trực quan ○ Học với SAM');
-      await t.tap(find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)));
+      expect(
+        find.byKey(AssistPeek.seenKey),
+        findsNothing,
+        reason: 'chưa hỏi thì chưa hiện — hé dần',
+      );
+      await t.tap(find.byKey(AssistPeek.peekKey));
       await t.pumpAndSettle();
-      final row2 = t.widget<Text>(find.byKey(const Key('workspace-seen-row')));
+      final row = t.widget<Text>(find.byKey(AssistPeek.seenKey));
+      expect(row.data, 'Đã mở: ● Đọc ○ Trực quan ○ Học với SAM');
+      await t.tap(
+        find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.visual)),
+      );
+      await t.pumpAndSettle();
+      // Đổi View ⇒ đề xuất trỏ chỗ khác ⇒ gợi ý hé lại; mở ra vẫn đúng trace.
+      await t.tap(find.byKey(AssistPeek.peekKey));
+      await t.pumpAndSettle();
+      final row2 = t.widget<Text>(find.byKey(AssistPeek.seenKey));
       expect(row2.data, 'Đã mở: ● Đọc ● Trực quan ○ Học với SAM');
     });
   });

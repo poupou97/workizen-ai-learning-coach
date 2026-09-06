@@ -265,25 +265,36 @@ class AssistPeek extends StatelessWidget {
         const SizedBox(height: WalSpacing.xs),
         Row(
           children: [
-            SizedBox(
-              height: WalSpacing.minTouch - 8,
-              child: FilledButton(
-                key: goKey,
-                style: FilledButton.styleFrom(
-                  backgroundColor: WalColors.primary500,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: WalSpacing.md,
+            // ROUND 6 (lỗi test bắt được, chưa từng lộ ở vòng 5): nhãn CTA
+            // dài nhất — «🦉 Học với SAM» — làm hàng nút TRÀN 2.2 px ở khung
+            // Nokia. Vòng 5 chỉ mở EXPANDED khi đích là «✨ Trực quan» nên
+            // không chạm phải. `Flexible` + cắt một dòng: vùng chạm vẫn 40 dp
+            // cao, cả hàng vẫn vừa mọi bề ngang.
+            Flexible(
+              child: SizedBox(
+                height: WalSpacing.minTouch - 8,
+                child: FilledButton(
+                  key: goKey,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: WalColors.primary500,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: WalSpacing.md,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        WalSpacing.radiusChip,
+                      ),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
-                  ),
-                ),
-                onPressed: onGo,
-                child: Text(
-                  action.label,
-                  style: const TextStyle(
-                    fontSize: WalType.secondary,
-                    fontWeight: FontWeight.w700,
+                  onPressed: onGo,
+                  child: Text(
+                    action.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: WalType.secondary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),

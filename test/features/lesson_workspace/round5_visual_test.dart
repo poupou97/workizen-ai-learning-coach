@@ -25,7 +25,9 @@ import 'package:learning_coach/core/lesson_model/semantic_data.dart';
 import 'package:learning_coach/features/lesson_workspace/lesson_workspace_screen.dart';
 import 'package:learning_coach/features/lesson_workspace/views/mindmap_view.dart';
 import 'package:learning_coach/features/lesson_workspace/views/process_flow_view.dart';
+import 'package:learning_coach/features/lesson_workspace/tutor_view.dart';
 import 'package:learning_coach/features/lesson_workspace/visual_view.dart';
+import 'package:learning_coach/features/lesson_workspace/widgets/assist_layer.dart';
 import 'package:learning_coach/features/lesson_workspace/workspace_trace.dart';
 
 import 'support.dart';
@@ -401,10 +403,16 @@ void main() {
   });
 
   group('§6 lỗi máy thật tìm ra (vòng 5, lượt 1)', () {
-    testWidgets('⭐ D1: ở TRỰC QUAN thẻ «SAM đề xuất» cuộn CÙNG sơ đồ (như màn '
-        'Đọc từ vòng 4) — ghim lại thì nút trung tâm nằm khuất sau thẻ', (
+    testWidgets('⭐ D1 — ĐÃ ĐÓNG BẰNG PHƯƠNG ÁN B: không còn thẻ đề xuất để '
+        'che nút trung tâm, và ba View nay có CÙNG chiều cao phần ghim', (
       t,
     ) async {
+      // Vòng 5 vá D1 bằng cách đẩy thẻ đề xuất vào vùng cuộn của Trực quan
+      // (như đã làm với Đọc ở vòng 4). Vòng 6 bỏ hẳn thẻ ấy: Founder chọn
+      // phương án B, nên chỗ này ghim SỰ THẬT MỚI chứ không ghim bản vá cũ —
+      // (a) không có gì của lớp trợ giúp nằm trong vùng cuộn của Trực quan,
+      // (b) phần ghim của Học với SAM KHÔNG còn cao hơn Trực quan, đúng cái
+      // Founder gọi là «tốn chiều dọc» (411 dp so với 225 dp ở vòng 5).
       t.view.physicalSize = const Size(1080, 1920);
       t.view.devicePixelRatio = 2.75;
       addTearDown(t.view.reset);
@@ -424,24 +432,26 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(VisualView),
-          matching: find.byKey(LessonWorkspaceScreen.nextActionKey),
+          matching: find.byKey(AssistPeek.peekKey),
         ),
-        findsOneWidget,
-        reason: 'thẻ đề xuất phải nằm TRONG vùng cuộn của Trực quan',
+        findsNothing,
+        reason: 'gợi ý không nằm trong vùng cuộn của sơ đồ nữa',
       );
-      // màn Học với SAM vẫn ghim như cũ — thay đổi này chỉ cho Trực quan
+      expect(find.byKey(AssistPeek.peekKey), findsOneWidget);
+      final chromeVisual = t.getTopLeft(find.byType(VisualView)).dy;
+
       await t.tap(
         find.byKey(LessonWorkspaceScreen.tabKey(WorkspaceView.tutor)),
       );
       await t.pumpAndSettle();
+      final chromeTutor = t.getTopLeft(find.byType(TutorView)).dy;
       expect(
-        find.descendant(
-          of: find.byType(VisualView),
-          matching: find.byKey(LessonWorkspaceScreen.nextActionKey),
-        ),
-        findsNothing,
+        chromeTutor,
+        chromeVisual,
+        reason:
+            'phần ghim của Học với SAM phải bằng Trực quan — thẻ đề xuất '
+            'thường trực đã bị xoá ở CẢ BA View',
       );
-      expect(find.byKey(LessonWorkspaceScreen.nextActionKey), findsOneWidget);
     });
 
     testWidgets('⭐ D2: «Vì sao SAM chọn sơ đồ này» nói ĐÚNG thứ trẻ đang nhìn '
