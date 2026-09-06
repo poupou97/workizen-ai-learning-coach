@@ -75,18 +75,25 @@ def gold_pages(gold_dir, plane):
 
 
 def lesson_spans():
-    """(book, lesson_no) -> the pdf pages a TSL claims for the lesson. Used only to enumerate
-    the LESSON scope; its emptiness must be MEASURED, not assumed (§2)."""
-    spans = {}
-    for f in glob.glob(os.path.join(REPO, 'poc-out', 'trusted-corpus', 'tc-v2', 'tc2-p1',
-                                    'lessons', '*', '*.tsl.json')):
+    """(book, lesson_no) -> every distinct pdf page span any TSL in `poc-out` claims for the
+    lesson. Used only to enumerate the LESSON scope; §2 of the rule says its emptiness must be
+    MEASURED, not assumed.
+
+    Every TSL under `poc-out` is read, not only the canonical `tc2-p1` run: a lesson counts as
+    fully covered if ANY declared span is covered, which is the most generous reading available
+    and therefore the one a zero has to survive. `find -L` matters here — `poc-out` is a symlink
+    on a worktree, and the first version of this function globbed one pipeline and reported 30
+    lessons as having no authoritative span when other runs had declared one.
+    """
+    spans = collections.defaultdict(set)
+    for f in glob.glob(os.path.join(REPO, 'poc-out', '**', '*.tsl.json'), recursive=True):
         try:
             d = json.load(open(f))
         except Exception:
             continue
         b = d.get('boundary') or {}
         if d.get('book') and d.get('lesson') is not None and b.get('pages'):
-            spans[(d['book'], d['lesson'])] = sorted(b['pages'])
+            spans[(d['book'], d['lesson'])].add(tuple(sorted(b['pages'])))
     return spans
 
 
@@ -311,13 +318,25 @@ def main():
     # ---- LESSON scope. §2 of the rule: enumerate it so its emptiness is MEASURED, never assumed.
     spans = lesson_spans()
     lesson_scope = dict(lessons_touched_by_gold=len(lesson_pages), fully_covered=[],
-                        partially_covered=0, no_authoritative_span=0)
+                        partially_covered=0, no_authoritative_span=0, spans_contested=[])
     for (book, no), pages in sorted(lesson_pages.items()):
-        span = spans.get((book, no))
-        if not span:
+        declared = spans.get((book, no))
+        if not declared:
             lesson_scope['no_authoritative_span'] += 1
             continue
-        if set(span) <= pages:
+        if len(declared) > 1:
+            # A lesson whose page span the corpus states two incompatible ways has no
+            # authoritative boundary, and a LESSON unit built on the narrower of the two is a
+            # FALSE POSITIVE, not a covered lesson. Measured instance: LS&DL 5 bai 8 — the
+            # Golden #1 lesson — is (38,39,40,41) in the lane-C runs and (41,) in the legacy
+            # reprocessing runs. Taking the generous span made it read `fully covered` off a
+            # single gold page. Contested is NOT covered.
+            lesson_scope['spans_contested'].append(
+                f'{book}#bai{no}:' + '|'.join('-'.join(str(x) for x in sorted(sp))
+                                              for sp in sorted(declared)))
+            continue
+        span = next((sorted(sp) for sp in sorted(declared) if set(sp) <= pages), None)
+        if span:
             lesson_scope['fully_covered'].append(f'{book}#bai{no}')
             members, gmaps, merged = [], {}, {}
             for pg in span:
@@ -385,7 +404,10 @@ def main():
     print(f"LESSON scope: touched={lesson_scope['lessons_touched_by_gold']} "
           f"fully_covered={len(lesson_scope['fully_covered'])} "
           f"partial={lesson_scope['partially_covered']} "
-          f"no_span={lesson_scope['no_authoritative_span']}")
+          f"no_span={lesson_scope['no_authoritative_span']} "
+          f"contested={len(lesson_scope['spans_contested'])}")
+    for c in lesson_scope['spans_contested']:
+        print(f'    CONTESTED BOUNDARY: {c}')
     print(f'adequacy: {checked}')
 
 
