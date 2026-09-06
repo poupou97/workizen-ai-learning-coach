@@ -96,11 +96,65 @@ jobs:
       - name: flutter analyze
         run: flutter analyze
 
+      # ⭐⭐ WAL-218 — SỔ GHI PHẢI SẠCH TRƯỚC KHI CHẠY.
+      # Một bản ghi còn sót từ lần chạy trước (ở máy CÓ fixture) không được nói
+      # thay cho lần chạy này. Trên runner thì thừa; ở máy thì đây chính là chỗ
+      # «xanh giả» quay lại.
+      - name: Reset Golden-chain ledger (WAL-218)
+        run: rm -rf build/golden-chain build/golden-chain-verdict.json
+
       # Toàn bộ suite. Test cần corpus thật (lesson-index, pack bench) tự
       # markTestSkipped khi thiếu asset — corpus KHÔNG BAO GIỜ vào repo (WAL-43),
       # nên runner không có nó là đúng thiết kế, không phải thiếu sót.
+      #
+      # ⚠ NHƯNG «đúng thiết kế» KHÔNG có nghĩa là «đã kiểm chứng». Đo ngày
+      # 2026-09-06 trên main (6fd728d): fixture CÓ ⇒ 1108 passed / 33 skipped;
+      # fixture KHÔNG (đúng trạng thái runner này) ⇒ 1099 passed / 42 skipped.
+      # Chín test rơi xuống, và DÒNG CUỐI CỦA SUITE GIỐNG HỆT NHAU ở cả hai lần:
+      # «All tests passed!». Bước dưới đây tồn tại vì dòng ấy nói dối theo cách
+      # không có test nào bắt được.
       - name: flutter test
         run: flutter test
+
+      # ⭐⭐ WAL-218 — CI TỰ NÓI ĐỘ PHỦ CỦA MÌNH.
+      # Chín khẳng định Golden chain ghi lại «đã kiểm» hay «UNVERIFIED vì vắng
+      # fixture» vào build/golden-chain/. Bước này đọc sổ ấy, đối chiếu với
+      # tool/ci/golden-chain-obligations.json, và in ra một khối độ phủ mà người
+      # đọc KHÔNG thể nhầm 1099-passed thành đã kiểm chứng.
+      #
+      # `--min-obligations 9`: mẫu số có SÀN. Xoá một test ⇒ thiếu bản ghi ⇒ đỏ;
+      # xoá luôn dòng nghĩa vụ ⇒ tụt dưới sàn ⇒ đỏ. Chín là con số ĐO ĐƯỢC, và
+      # test/ci/golden_chain_registry_test.dart khoá sàn này lại với bản đăng ký.
+      - name: Golden chain coverage (WAL-218)
+        run: |
+          python3 tool/ci/golden_chain_verdict.py \
+            --min-obligations 9 \
+            --out build/golden-chain-verdict.json
+
+      # ⭐ VÀ CỔNG PHẢI CÒN SỐNG.
+      # Một cổng xanh vì hình dạng đã đổi, chứ không vì tính chất còn đúng, thì
+      # gần như vô giá trị — repo này đã bắt đúng chuyện đó hai lần. Nên ở đây
+      # CI tự thử một lần: chạy verdict ở chế độ «lần chạy này KHẲNG ĐỊNH Golden
+      # chain đã verified». Trên runner không có fixture (D4: không bao giờ có),
+      # khẳng định ấy PHẢI ĐỎ. Nếu nó xanh, cổng đã chết và bước này đỏ thay.
+      - name: Prove the Golden-claim gate is live (WAL-218)
+        run: |
+          set +e
+          python3 tool/ci/golden_chain_verdict.py \
+            --min-obligations 9 --require-verified >/dev/null 2>&1
+          rc=$?
+          set -e
+          fixture="$(python3 -c "import json;print(json.load(open('tool/ci/golden-chain-obligations.json'))['fixture'])")"
+          if [ -f "$fixture" ]; then
+            want=0; what="fixture PRESENT => a Golden-verified claim must pass"
+          else
+            want=1; what="fixture ABSENT => a Golden-verified claim must FAIL"
+          fi
+          if [ "$rc" != "$want" ]; then
+            echo "::error::Golden-claim gate is dead — $what, but exit was $rc"
+            exit 1
+          fi
+          echo "Golden-claim gate live: $what (exit $rc)"
 
       # WAL-210 (audit G2/G3/G5): test Python cho tầng DỰNG PACK — gắn bài có
       # chặn (capped-toc-v1), cổng định danh bài, và provenance của pack.
