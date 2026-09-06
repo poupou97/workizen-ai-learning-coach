@@ -381,9 +381,75 @@ mechanism string that named a branch and went stale, now checked.
 on this Mac carries any of these corrections** until the PR is merged and packs are
 rebuilt there.
 
-## 10. The five product scores
+## 10. The five product scores — never averaged
 
-**[PENDING — requires Lane B device evidence and Lane D packs]**
+Lane B, **PR #87**, CI pass (2m16s), `flutter analyze` clean, `flutter test` **995
+passed / 1 skipped**. Device: **Nokia 6.1, «Na · Lớp 6», 5 iterations, 36 frames, 28
+steps, 0 downgraded.**
+
+| Score | Round 4 | Round 5 | Basis |
+|---|---|---|---|
+| **Experience Fidelity** | 80–85 % | **85–88 %** | Trực quan **70–80 % → 85–90 %** (reached the board), Bookshelf 65–75 % → 80–85 %, Book 70–80 % → 80–88 % |
+| **Source Reality** | 97 | **97** | unchanged |
+| **Source Trust** | 0 / 97 | **0 / 97** | unchanged — no trust threshold set, by Founder gate |
+| **Pedagogy Reality** | 7 / 17 | **7 / 17** | unchanged |
+| **Evidence Reality** | 0 of 0 | **0 of 0** | unchanged |
+
+Only Experience Fidelity moved. The four data-side scores are flat, and §8.1 is why:
+the repair path is not wired into the product, so nothing this round could have moved
+Source Trust or Pedagogy Reality even in principle.
+
+### 10.1 The Lesson Workspace duplication problem — measured, then fixed
+
+The Founder's complaint («thấy lặp lại, quá nhiều biểu diễn của ba Learning View, SAM
+chiếm chỗ cố định, CTA trùng») was quantified two independent ways before anything was
+designed:
+
+- Widget tree at the exact Nokia viewport (392.7 × 698.2 dp): pinned chrome in «Học
+  với SAM» = **411 dp = 58.9 % of the viewport**, with **7 occurrences** of the three
+  view names on one screen.
+- On the device, real Bài 17 fixture, template match error 0.0: **first lesson content
+  at y = 820 px — 42.7 % of the screen consumed before content.**
+
+A 13-entry duplication map found **4 genuine duplicates**: the picker's SAM bubble; the
+view-changing CTA on the recommendation card, repeating the tab directly above it;
+SAM's portrait where SAM is not speaking; and the tutor end-card's «Về mục lục». Plus a
+finding nobody had named: the three views carry **two different word sets** — «Học
+**với** SAM» on the tab versus «Học **cùng** SAM» on the card — **six labels for three
+things.**
+
+**Three substantially different concepts, four builds from one commit**
+(`--dart-define=WAL_ASSIST=…`, default = current behaviour):
+
+| | first content (device) | % screen | view labels | «why» in place |
+|---|---|---|---|---|
+| CURRENT (card) | 820 px | 42.7 % | 7 | 0 taps |
+| A · icon | 634 px | 33.0 % | 3 | 1 tap (sheet) |
+| **B · peek** | **712 px** (634 collapsed) | 37.1 % | 4 | **1 tap, in place** |
+| C · inlineTab | **565 px** | **29.4 %** | 3 | **none** |
+
+**Recommended: B — and deliberately not on pixels.** C is tightest but leaves only a
+symbol; A does the same *and* pushes the lesson title onto two lines. Only B states the
+destination at **zero taps** («SAM gợi ý: Xem Đọc»), returns 186 px once dismissed, and
+has three genuine states COLLAPSED → PEEK → EXPANDED with re-peek when the
+recommendation moves to a different view. Space saved 820 → 712 px peeking (−13.2 %),
+→ 634 px collapsed (−22.7 %); labels **7 → 4**; the duplicate CTA, the portrait and the
+«Đã mở ● ○ ○» row are gone. AI discoverability is **better**, not traded away.
+
+Pinned by test: no second recommendation engine (a source grep bans `LessonDocument` /
+`WorkspaceTrace` / `nextActionFor` inside `assist_layer`), no option may hide the
+recommendation in any of the three views, 48 dp targets and screen-reader labels.
+
+**This is a Founder choice, not a lane's.** A / B / C are all built and measured.
+
+### 10.2 Five defects the device found that no test did
+
+**D1** the pinned card hid the mindmap's hub (48 % → 27 % chrome) · **D2** the «why»
+said «bảng» while showing a mindmap · **D3** 54 «chưa có» rows buried the one SAM
+lesson · **D4** a 21 dp badge floating between tabs · **D5** dismissing made SAM vanish
+entirely. All five fixed and re-walked. Protocol held: idle checks compared
+**per-pixel**, so a clock tick was distinguishable from the Founder picking up the
+phone, and one frame that caught the profile sheet was deleted.
 
 ## 11. Answers to the Founder's ten checkpoint questions (§18)
 
@@ -477,7 +543,15 @@ open on the lesson path. The pack machinery, by contrast, *is* ready — verify 
 0/12 FAIL → **12/12 PASS**, the old baseline reproduced three times, and the rebuild's
 content delta was **exactly zero**.
 
-**8 · Bài 17 thật hơn ở đâu?** **[PENDING — Lane B]**
+**8 · Bài 17 thật hơn ở đâu?**
+In what it now *shows*, not in what it claims. Typed `SemanticData` renders as a real
+**mindmap** (hub + four coloured branches + curved edges) and a real **process flow**
+(nodes / edges / arrows) instead of a text stand-in, plus a source-grounded figure chip
+that **fails closed**. The device walk used the real Bài 17 fixture with template match
+error 0.0. Lane E2 independently compiled Bài 17's `process` family through the shared
+`OrderedStepsRenderer` — so Bài 17 is now the lesson that proves a *general* renderer
+rather than the lesson that has a bespoke one. Its trust status is unchanged: still
+`WITHHELD`-heavy, still 0 trusted.
 
 **9 · History đã phá/chứng minh gì?**
 Lane C falsified its own round-4 rule, which is the most valuable thing it could have
@@ -495,11 +569,20 @@ correcting an attribution, **two independent signals objected and the candidate 
 rejected — so the attribution stopped being served rather than being half-corrected.**
 That is `DETECT → REPAIR → VALIDATE → WITHHOLD` completing correctly.
 
-**10 · Trẻ nhìn thấy sản phẩm tốt hơn ở đâu?** **[PENDING — Lane B device evidence.]**
-One thing can be said now, and it should be said plainly: **no APK built on this Mac
-carries any of this round's corrections.** The main checkout's packs are still the old
-ones, and nothing merges. Every accuracy result in this report is a result about the
-pipeline and the corpus, not about what a child currently sees.
+**10 · Trẻ nhìn thấy sản phẩm tốt hơn ở đâu?**
+In three concrete places, all verified on a real Nokia 6.1 across 36 frames:
+**Trực quan finally reached the board** (70–80 % → **85–90 %**) — a lesson's structure
+renders as an actual mindmap and process flow rather than as text pretending to be a
+diagram; **the workspace stops repeating itself** — first content moves from 820 px to
+712 px (peek) or 634 px (collapsed), and six labels for three views become four; and
+**five defects only the device could find** were fixed, including a pinned card that was
+covering the very hub of the mindmap it was recommending.
+
+**But the boundary must be stated exactly:** this is better *presentation of the same
+data*. **No APK built on this Mac carries any of this round's accuracy corrections** —
+the main checkout's packs are still the old ones, and nothing merges. Every accuracy
+result in this report is about the pipeline and the corpus, not about what a child sees
+today.
 
 ---
 
@@ -621,8 +704,8 @@ deterministic validation — not more rules over text that was never captured.
 | #84 | `a2/round5-math-formula-accuracy` | A2 math / formula / number | PASS |
 
 | #86 | `e2/round5-visualspec-renderer` | E2 VisualSpec + cross-subject renderer | PASS |
+| #87 | `lane-b/round5-experience` | B experience + workspace UX + Visual | PASS |
 
-Lanes still running with pushed branches not yet raised as PRs: A4
-(`a4/round5-multi-signal-verification`), Lane B (`lane-b/round5-experience`), E1.
+Lanes still running: A4 (`a4/round5-multi-signal-verification`) and E1.
 
 **No standing merge authority. READY FOR FOUNDER REVIEW.**
