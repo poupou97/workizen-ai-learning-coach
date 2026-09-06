@@ -32,18 +32,58 @@ ENUM_RX = [
 STAGE_SEQ_RX = re.compile(r'^\s*(?:chuẩn\s+bị|tiến\s+hành|thực\s+hiện|quan\s+sát|'
                           r'nhận\s+xét|kết\s+luận|thảo\s+luận)', re.I)
 
+# ⭐ AN ENUMERATION IS NOT A PROCEDURE.
+# Measured on KHTN 6 Bai 17: treating every run of >=2 same-marked siblings as a
+# process produced 7 "procedures", of which the first two were the lesson's OBJECTIVES
+# ("· Trình bày được…") and a pair of numbered QUESTIONS. Both are ordered on the page
+# and neither is a process. So ordinal succession (`next`) and procedurality are
+# separated: the enumerator asserts ORDER, the governing stage label / heading asserts
+# PROCEDURE. Only a run with a procedural governor yields `Step` primitives; the rest
+# yield `Statement`s that are still `next`-linked and feed no visual family.
+# ⭐ The governor test runs on a DIACRITIC-STRIPPED string, and that is not a
+# convenience. Measured on this very lesson: the block that governs Bai 17's filtering
+# procedure reads «Chuẩn bị: … Tiền hành:» — OCR turned «Tiến hành» into «Tiền hành»
+# (round 4 names this exact slip as one of the four that survive because BOTH OCR
+# stacks make it). Matching the accented form only, one tone slip deletes the sole
+# signal that a bulleted run is a procedure, and the lesson silently loses its whole
+# PROCESS family. Comparing without tones is a general repair for that class, not a
+# special case for one typo.
+_DIA = str.maketrans(
+    'àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ'
+    'ÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ',
+    'a' * 17 + 'e' * 11 + 'i' * 5 + 'o' * 17 + 'u' * 11 + 'y' * 5 + 'd'
+    + 'A' * 17 + 'E' * 11 + 'I' * 5 + 'O' * 17 + 'U' * 11 + 'Y' * 5 + 'D')
+
+
+def strip_tones(text):
+    return (text or '').translate(_DIA).lower()
+
+
+PROCEDURAL_CTX_RX = re.compile(
+    r'(?:tien\s+hanh|thuc\s+hien|cach\s+(?:lam|tien\s+hanh)|cac\s+buoc|quy\s+trinh|'
+    r'thi\s+nghiem|thuc\s+hanh|chuan\s+bi|trinh\s+tu|huong\s+dan|thao\s+tac)')
+NON_PROCEDURAL_CTX_RX = re.compile(
+    r'(?:muc\s+tieu|em\s+se|luyen\s+tap|van\s+dung|cau\s+hoi|khoi\s+dong|'
+    r'em\s+da\s+hoc|ghi\s+nho|tim\s+hieu\s+them)')
+
 # A causal connective must sit INSIDE one block, with text on both sides of it.
 # re.I matters: a sentence-initial connective is capitalised ("Vì … nên …"), and the
 # first version silently found nothing on exactly those sentences.
+# `_CB` anchors a cause clause at a real clause boundary. Without it `.{6,90}?` starts
+# wherever the regex engine finds it cheapest, and the extracted cause began mid-word —
+# "h 17.1, hạt phù sa …" out of "Hình 17.1, hạt phù sa …". A cause that starts mid-word
+# is not a quotation of the book, whatever its span says.
+_CB = r'(?:^|(?<=[.;:!?])\s|(?<=,)\s)'
 CAUSAL_RX = [
-    ('vi_nen',     re.compile(r'(?<![\wÀ-ỹ])vì\s+(?P<c>.{4,90}?)\s+nên\s+(?P<e>.{4,120})',
-                              re.I)),
-    ('do_nen',     re.compile(r'(?<![\wÀ-ỹ])do\s+(?P<c>.{4,90}?)\s+nên\s+(?P<e>.{4,120})',
-                              re.I)),
-    ('dan_den',    re.compile(r'(?P<c>.{6,90}?)\s+(?:dẫn\s+đến|dẫn\s+tới|gây\s+ra|'
-                              r'làm\s+cho)\s+(?P<e>.{4,120})', re.I)),
-    ('nho_do',     re.compile(r'(?P<c>.{6,90}?)\s*[,.]?\s+(?:nhờ\s+đó|vì\s+vậy|do\s+đó)\s+'
-                              r'(?P<e>.{4,120})', re.I)),
+    ('vi_nen',     re.compile(r'(?<![\wÀ-ỹ])vì\s+(?P<c>[^.;:!?]{4,90}?)\s+nên\s+'
+                              r'(?P<e>[^.;:!?]{4,120})', re.I)),
+    ('do_nen',     re.compile(r'(?<![\wÀ-ỹ])do\s+(?P<c>[^.;:!?]{4,90}?)\s+nên\s+'
+                              r'(?P<e>[^.;:!?]{4,120})', re.I)),
+    ('dan_den',    re.compile(_CB + r'(?P<c>[^.;:!?]{6,90}?)\s+(?:dẫn\s+đến|dẫn\s+tới|'
+                              r'gây\s+ra|làm\s+cho)\s+(?P<e>[^.;:!?]{4,120})', re.I)),
+    ('nho_do',     re.compile(_CB + r'(?P<c>[^.;:!?]{6,90}?)\s*[,]?\s+'
+                              r'(?:nhờ\s+đó|vì\s+vậy|do\s+đó)\s+'
+                              r'(?P<e>[^.;:!?]{4,120})', re.I)),
 ]
 DEFN_RX = None  # built below, after UPPER is defined
 CONTRAST_RX = [
@@ -101,14 +141,35 @@ def _nid(prefix, *parts):
 #   the page prints to assert the order. Grounding it in the step texts would be the
 #   §5 mistake: two grounded steps do not make a grounded ordering.
 # ---------------------------------------------------------------------------
+def _is_procedural(governor, items):
+    """Does the SOURCE mark this run as a procedure, or merely as a list?"""
+    gov = strip_tones(governor or '')
+    if NON_PROCEDURAL_CTX_RX.search(gov):
+        return False
+    if PROCEDURAL_CTX_RX.search(gov):
+        return True
+    # no governor signal: fall back to the items themselves — a procedure's items are
+    # instructions, and the pipeline already role-tags those.
+    roles = {b['role'] for b, _ in items}
+    return bool(roles & {'instruction', 'activity'})
+
+
 def rule_ordered_steps(les, graph):
     rule = 'e1-ordered-steps-v1'
-    runs, cur, cur_kind = [], [], None
+    runs, cur, cur_kind, gov = [], [], None, ''
     for b in les['blocks']:
-        if b['role'] in ('heading',):
+        # A governor is whatever the page prints to introduce what follows. On Bai 17
+        # that is an `instruction` block («Chuẩn bị: … Tiến hành:»), NOT the section
+        # heading («Lọc nước từ hỗn hợp nước lẫn đất») — reading only headings found no
+        # procedure at all in a lesson that plainly contains two.
+        is_governor = (b['role'] in ('heading', 'stage_label', 'instruction')
+                       or PROCEDURAL_CTX_RX.search(strip_tones(b['text'] or ''))
+                       is not None)
+        if is_governor:
             if len(cur) >= 2:
-                runs.append((cur_kind, cur))
+                runs.append((cur_kind, cur, gov))
             cur, cur_kind = [], None
+            gov = b['text'] or ''
             continue
         kind = None
         for name, rx in ENUM_RX:
@@ -125,26 +186,31 @@ def rule_ordered_steps(les, graph):
             cur.append((b, kind[1]))
         else:
             if len(cur) >= 2:
-                runs.append((cur_kind, cur))
+                runs.append((cur_kind, cur, gov))
             cur, cur_kind = [(b, kind[1])], kind[0]
     if len(cur) >= 2:
-        runs.append((cur_kind, cur))
+        runs.append((cur_kind, cur, gov))
 
     made = 0
-    for ri, (kind, items) in enumerate(runs):
-        # a run of >=2 same-marked siblings under one heading is a procedure candidate
+    for ri, (kind, items, governor) in enumerate(runs):
+        procedural = _is_procedural(governor, items)
+        primitive = 'Step' if procedural else 'Statement'
         node_ids = []
         for i, (b, m) in enumerate(items):
-            nid = _nid('step', graph.book, graph.lesson, ri, i)
+            nid = _nid('step' if procedural else 'item', graph.book, graph.lesson, ri, i)
             claim = SemanticClaim(
                 kind='node', subject=nid,
-                assertion='step %d of a printed enumeration (%s)' % (i + 1, kind),
+                assertion=('%s %d of a printed enumeration (%s) under "%s"'
+                           % ('step' if procedural else 'item', i + 1, kind,
+                              (governor or '?')[:40])),
                 # the book DEMONSTRATES the procedure by printing marked items; it does
                 # not STATE "this is step 1 of a process".
                 support='sourceDemonstrated', derivation=rule,
-                grounding=[_g(b, quote=b['text'][:160])], confidence=0.7)
-            graph.add_node(SemanticNode(nid, 'Step', b['text'], claims=[claim],
-                                        order=i + 1, enumerator=kind))
+                grounding=[_g(b, quote=b['text'][:160])],
+                confidence=0.7 if procedural else 0.5)
+            graph.add_node(SemanticNode(nid, primitive, b['text'], claims=[claim],
+                                        order=i + 1, enumerator=kind,
+                                        governor=(governor or None)[:60] if governor else None))
             node_ids.append(nid)
         for i in range(len(node_ids) - 1):
             b, m = items[i]
@@ -152,7 +218,8 @@ def rule_ordered_steps(les, graph):
             rc = SemanticClaim(
                 kind='relation', subject={'from': node_ids[i], 'rel': 'next',
                                           'to': node_ids[i + 1]},
-                assertion='the page marks these items in order with "%s" enumerators' % kind,
+                assertion=('the page marks these items in order with "%s" enumerators'
+                           ' (procedural context: %s)' % (kind, procedural)),
                 # a deterministic rule over the printed marker, not a book sentence
                 support='systemDerived', derivation=rule,
                 grounding=[_g(b, span=span, quote=(b['text'] or '')[m.start():m.end()])],

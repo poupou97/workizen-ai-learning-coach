@@ -41,6 +41,18 @@ Provenance first; do not duplicate enums").
   and which is load-bearing (TOC order is not a prerequisite — provenance.dart:28-33).
   It is kept.
 
+NO `from_<presentation>` CONSTRUCTOR — EVER (adopted from Lane A2, PR #84).
+    A2's `MathExpression` has `from_json` and deliberately NO `from_latex`: `latex` and
+    `text` are computed properties with no setter, so a rendering string cannot become
+    structure. The same rule binds here and is enforced by a test that scans this
+    package: a semantic object may be built from validated structure carrying its
+    provenance, never from a rendered or serialised PRESENTATION form. A
+    `SemanticClaim.from_markdown` / `VisualSpec.from_svg` / `..._from_latex` would be
+    exactly the hole through which a model's output launders itself into TrustedText.
+    `SourceGrounding.from_tsl_block` is allowed because a TSL block is not a rendering:
+    it is the validated source record, and it carries the page, bbox and pipeline that
+    make the claim auditable.
+
 No LLM is called anywhere in this module.
 """
 import hashlib

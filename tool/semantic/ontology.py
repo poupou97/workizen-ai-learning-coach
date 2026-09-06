@@ -39,6 +39,11 @@ PRIMITIVES = {
     'Event':      'a happening that carries a time anchor',
     'Quantity':   'a number with a unit (and optionally a symbol)',
     'Figure':     'a source image region with bbox, optional caption, optional labels',
+    'Formula':    'a VALIDATED structured expression (Lane A2 MathExpression / a chemical '
+                  'reaction). Carrier only — the AST itself is A2\'s, tool/corpus/mathfix/. '
+                  'Listed as a primitive because the census must be able to say "this '
+                  'lesson needs one", and because today it has NO PATH: see the bridge '
+                  'gap in docs/research/semantic-graph/01-AUDIT-CLASSIFICATION.md',
 }
 
 # Deliberately NOT primitives — measured as expressible by composition:

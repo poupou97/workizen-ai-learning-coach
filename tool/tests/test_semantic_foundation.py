@@ -168,6 +168,49 @@ class ProvenanceBridgeTests(unittest.TestCase):
                       ln['trustedLearningSource']['gate'])
 
 
+class NoPresentationConstructorTests(unittest.TestCase):
+    """Lane A2's rule (PR #84), adopted: a RENDERING can never become STRUCTURE.
+
+    A2's MathExpression has `from_json` and deliberately no `from_latex`. The same
+    invariant must hold across the whole semantic package, because a
+    `from_<presentation>` constructor anywhere is the hole through which a model's
+    output launders itself into TrustedText.
+    """
+
+    ALLOWED = {
+        'from_json',        # validated structure, round-trips this package's own output
+        'from_tsl_block',   # the validated SOURCE record, carrying page/bbox/pipeline
+    }
+    BANNED_SUBSTRINGS = ('latex', 'html', 'svg', 'markdown', 'text', 'string',
+                         'rendered', 'display', 'prose', 'ocr')
+
+    def test_no_constructor_builds_semantics_from_a_rendering(self):
+        import ast
+        import glob
+        pkg = os.path.join(HERE, '..', 'semantic')
+        found = []
+        for path in sorted(glob.glob(os.path.join(pkg, '*.py'))):
+            with open(path, encoding='utf-8') as fh:
+                tree = ast.parse(fh.read(), filename=path)
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    if node.name.startswith('from_'):
+                        found.append((os.path.basename(path), node.name))
+        for mod, name in found:
+            self.assertIn(name, self.ALLOWED,
+                          '%s defines %s — every from_* constructor must be reviewed '
+                          'against the no-rendering rule' % (mod, name))
+            for bad in self.BANNED_SUBSTRINGS:
+                self.assertNotIn(bad, name.lower().replace('from_tsl_block', ''),
+                                 '%s.%s builds structure from a presentation form'
+                                 % (mod, name))
+
+    def test_the_rule_is_documented_where_a_future_author_will_look(self):
+        with open(os.path.join(HERE, '..', 'semantic', 'graph.py'),
+                  encoding='utf-8') as fh:
+            self.assertIn('from_<presentation>', fh.read())
+
+
 class OntologyTests(unittest.TestCase):
     def test_every_family_names_only_declared_primitives_and_relations(self):
         for fam, spec in onto.FAMILIES.items():
@@ -208,7 +251,8 @@ def _lesson(blocks, book='06-sgk-khoa-hoc-tu-nhien-6', lesson=17):
 
 class ExtractorTests(unittest.TestCase):
     def test_ordered_steps_ground_the_edge_in_the_enumerator(self):
-        les = _lesson([_tsl_block('x:1', 'body', '1. Gấp giấy lọc', order=1),
+        les = _lesson([_tsl_block('x:0', 'stage_label', 'Tiến hành', order=0),
+                       _tsl_block('x:1', 'body', '1. Gấp giấy lọc', order=1),
                        _tsl_block('x:2', 'body', '2. Đặt phễu lên giá', order=2),
                        _tsl_block('x:3', 'body', '3. Rót từ từ hỗn hợp', order=3)])
         gr = ex.extract(les)
@@ -227,6 +271,20 @@ class ExtractorTests(unittest.TestCase):
         self.assertEqual(len(causes), 1)
         q = causes[0].claim.grounding[0].quote
         self.assertIn('nên', q)
+
+    def test_an_enumeration_without_a_procedural_governor_is_not_a_process(self):
+        # measured defect: the lesson OBJECTIVES ("MỤC TIÊU" + bulleted "· Trình bày
+        # được…") and a pair of numbered QUESTIONS were both compiled as procedures.
+        les = _lesson([_tsl_block('x:0', 'stage_label', 'MỤC TIÊU', order=0),
+                       _tsl_block('x:1', 'objective', '· Trình bày được cách tách chất',
+                                  order=1),
+                       _tsl_block('x:2', 'objective', '· Sử dụng được dụng cụ cơ bản',
+                                  order=2)])
+        gr = ex.extract(les)
+        self.assertEqual([n for n in gr.nodes.values() if n.primitive == 'Step'], [])
+        # the ORDER is still a fact of the page, so `next` survives
+        self.assertTrue([r for r in gr.relations if r.relation == 'next'])
+        self.assertIsNone(vs.compile_process(gr))
 
     def test_no_causal_edge_without_a_connective(self):
         les = _lesson([_tsl_block('x:1', 'body', 'Hạt bụi nặng hơn không khí.'),
@@ -274,11 +332,30 @@ class ExtractorTests(unittest.TestCase):
                           if n.primitive == 'Event'], [])
 
     def test_extractor_never_branches_on_subject(self):
-        with open(os.path.join(HERE, '..', 'semantic', 'extract.py'),
-                  encoding='utf-8') as fh:
-            src = fh.read()
-        for banned in ('subject ==', "subject in (", 'if book ==', 'khtn', 'lich_su'):
-            self.assertNotIn(banned, src.lower().replace('subject=subject', ''))
+        # The reuse claim, asserted on CODE only: comments name KHTN and LS&DL all the
+        # time (that is where the measurements come from), so strip comments and
+        # docstrings first, then look for a branch on subject / book / grade.
+        import io
+        import tokenize
+        path = os.path.join(HERE, '..', 'semantic', 'extract.py')
+        with open(path, encoding='utf-8') as fh:
+            raw = fh.read()
+        code = []
+        prev_type = tokenize.INDENT
+        for tok in tokenize.generate_tokens(io.StringIO(raw).readline):
+            if tok.type == tokenize.COMMENT:
+                continue
+            if tok.type == tokenize.STRING and prev_type in (
+                    tokenize.INDENT, tokenize.NEWLINE, tokenize.NL, tokenize.DEDENT):
+                continue                      # a docstring
+            code.append(tok.string)
+            if tok.type not in (tokenize.NL, tokenize.COMMENT):
+                prev_type = tok.type
+        body = ' '.join(code).lower()
+        for banned in ('subject ==', 'subject in', 'book ==', 'book in',
+                       'grade ==', 'khtn', 'khoa-hoc', 'lich-su', 'lich_su',
+                       'bai17', 'bai-17'):
+            self.assertNotIn(banned, body, 'extract.py branches on %r' % banned)
 
     def test_a_failing_rule_does_not_take_the_lesson_down(self):
         les = _lesson([_tsl_block('x:1', 'body', None)])   # text is None
@@ -288,8 +365,12 @@ class ExtractorTests(unittest.TestCase):
 
 class VisualSpecTests(unittest.TestCase):
     def _process_graph(self):
-        les = _lesson([_tsl_block('x:%d' % i, 'body', '%d. bước %d' % (i, i), order=i)
-                       for i in (1, 2, 3)])
+        # a procedural GOVERNOR is required now — an enumeration alone is a list, not a
+        # procedure (measured: 7 "procedures" on Bai 17, of which 2 were the objectives
+        # and a question pair).
+        les = _lesson([_tsl_block('x:0', 'stage_label', 'Tiến hành', order=0)]
+                      + [_tsl_block('x:%d' % i, 'body', '%d. bước %d' % (i, i), order=i)
+                         for i in (1, 2, 3)])
         return ex.extract(les)
 
     def test_every_drawable_element_names_its_claim(self):
@@ -322,9 +403,10 @@ class VisualSpecTests(unittest.TestCase):
             self.assertTrue(set(fields) <= allowed, '%s read %s' % (compiler, fields))
 
     def test_multiple_procedures_are_kept_as_groups_not_dropped(self):
-        les = _lesson([_tsl_block('x:1', 'body', '1. a', order=1),
+        les = _lesson([_tsl_block('x:g', 'stage_label', 'Tiến hành', order=0),
+                       _tsl_block('x:1', 'body', '1. a', order=1),
                        _tsl_block('x:2', 'body', '2. b', order=2),
-                       _tsl_block('x:h', 'heading', 'II Phần hai', order=3),
+                       _tsl_block('x:h', 'heading', 'Cách làm thứ hai', order=3),
                        _tsl_block('x:3', 'body', '1. c', order=4),
                        _tsl_block('x:4', 'body', '2. d', order=5)])
         spec = vs.compile_process(ex.extract(les))
