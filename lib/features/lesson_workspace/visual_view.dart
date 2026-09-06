@@ -63,10 +63,16 @@ class VisualView extends StatefulWidget {
     required this.doc,
     required this.onShowInRead,
     this.header,
+    this.scrollToSemanticId,
   });
 
   final LessonDocument doc;
   final void Function(String blockId) onShowInRead;
+
+  /// ROUND 7 · V2 — vào Trực quan và DỪNG ĐÚNG ở một sơ đồ. Lời phản hồi của
+  /// SAM («bài này dùng cách ấy ở đây») chỉ giữ được lời hứa nếu cú chạm rơi
+  /// vào đúng thẻ, không phải vào đầu màn.
+  final String? scrollToSemanticId;
 
   /// ROUND 5 D1 — thẻ «SAM đề xuất» đi vào ĐẦU VÙNG CUỘN thay vì bị ghim trên
   /// đầu màn: lý do dài 6 dòng ghim lại thì che mất nút trung tâm của sơ đồ.
@@ -160,6 +166,27 @@ class _VisualViewState extends State<VisualView> {
   bool _summaryOpen = false;
 
   GlobalKey _anchorFor(String id) => _anchors.putIfAbsent(id, GlobalKey.new);
+
+  @override
+  void initState() {
+    super.initState();
+    _jumpAfterFrame();
+  }
+
+  @override
+  void didUpdateWidget(VisualView old) {
+    super.didUpdateWidget(old);
+    if (old.scrollToSemanticId != widget.scrollToSemanticId) _jumpAfterFrame();
+  }
+
+  /// Neo chỉ tồn tại sau khi thẻ được dựng ⇒ cuộn ở khung hình sau.
+  void _jumpAfterFrame() {
+    final id = widget.scrollToSemanticId;
+    if (id == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _scrollTo(id);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

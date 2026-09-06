@@ -233,7 +233,20 @@ class TutorScript {
 }
 
 /// Ai nói, nói gì, thuộc loại gì — để UI vẽ và test quét.
-enum TurnKind { explain, ask, learner, hint, matched, scaffold, next }
+/// ⭐ ROUND 7 · V2 — `diagnose` là lượt PHẢN HỒI PHỤ THUỘC LỖI (order 49 §2):
+/// SAM nói về ĐÚNG câu trả lời vừa nhận, trước khi giải thích khác. Nó KHÁC
+/// `hint` (thang gợi ý viết sẵn của kịch bản, không nhìn câu trả lời) và
+/// KHÁC `scaffold` (chỉ chỗ trong sách rồi đi tiếp khi hết thang).
+enum TurnKind {
+  explain,
+  ask,
+  learner,
+  diagnose,
+  hint,
+  matched,
+  scaffold,
+  next,
+}
 
 class TutorTurn {
   const TutorTurn({
@@ -253,6 +266,9 @@ class TutorTurn {
     TurnKind.explain => 'sam-explain',
     TurnKind.ask => 'sam-probe',
     TurnKind.learner => '',
+    // Phản hồi theo lỗi KHÔNG phải lời chê: mascot «thử lại», không phải
+    // mascot buồn — vòng lặp còn tiếp, trẻ còn lượt.
+    TurnKind.diagnose => 'sam-try-again',
     TurnKind.hint => 'sam-hint',
     // KHÔNG dùng CELEBRATE: khớp mẫu kịch bản không phải claim có bằng chứng
     // (MASCOT-STATE: celebrate chỉ khi claim THẬT — Nokia n4 D9).
@@ -281,8 +297,17 @@ bool answerMatches(String answer, List<String> acceptable) {
 
 /// Máy trạng thái TẤT ĐỊNH chạy [TutorScript]. Không có tham số ngẫu nhiên,
 /// không có kho, không có mạng.
+/// ⭐ ROUND 7 · V2 — lời SAM đáp lại ĐÚNG câu trả lời vừa nhận.
+///
+/// Runner ở `core` cố ý KHÔNG biết `SemanticData` của bài: nó nhận một hàm.
+/// Hàm ấy phải TẤT ĐỊNH (cùng đầu vào ⇒ cùng đầu ra) vì màn hình dựng lại nó
+/// khi vẽ thay vì giữ một bản sao. `null` ⇒ không có căn cứ nào ⇒ KHÔNG thêm
+/// lượt nào (thà nói ít còn hơn bịa).
+typedef AnswerDiagnoser =
+    String? Function(AskStep step, String answer, List<String> earlierAnswers);
+
 class TutorRunner {
-  TutorRunner(this.script, {String? startAtBlockId}) {
+  TutorRunner(this.script, {String? startAtBlockId, this.diagnose}) {
     if (startAtBlockId != null) {
       final i = script.steps.indexWhere(
         (s) => switch (s) {
@@ -300,6 +325,10 @@ class TutorRunner {
   }
 
   final TutorScript script;
+
+  /// `null` ⇒ hành vi trước vòng 7 V2 (chỉ gợi ý, không phản hồi theo lỗi).
+  final AnswerDiagnoser? diagnose;
+
   final List<TutorTurn> transcript = [];
 
   /// Vào từ «Hỏi SAM về đoạn này» và kịch bản CÓ bước cho đoạn đó.
@@ -318,6 +347,29 @@ class TutorRunner {
     AskStep(:final hints) => _hintLevel < hints.length,
     _ => false,
   };
+
+  // ── ROUND 7 · V2 — ĐỌC LẠI TRANSCRIPT ─────────────────────────────────────
+  //
+  // `CORRECT ANSWER != MASTERY`: chỗ duy nhất SAM được phép nói về «con làm
+  // thế nào» là những gì transcript ĐO ĐƯỢC — mấy lần thử, mấy gợi ý. Ba hàm
+  // dưới đây là toàn bộ nguồn cho câu ấy; không có biến đếm nào khác.
+
+  /// Những câu trẻ đã trả lời ở một bước, theo thứ tự.
+  List<String> answersFor(String stepId) => [
+    for (final t in transcript)
+      if (t.kind == TurnKind.learner && t.stepId == stepId) t.text,
+  ];
+
+  /// Số gợi ý SAM đã đưa ở một bước (xin trước khi trả lời cũng tính).
+  int hintsUsedFor(String stepId) => [
+    for (final t in transcript)
+      if (t.kind == TurnKind.hint && t.stepId == stepId) t,
+  ].length;
+
+  /// Bước ấy đã có lượt KHỚP mẫu chưa.
+  bool matchedStep(String stepId) => transcript.any(
+    (t) => t.kind == TurnKind.matched && t.stepId == stepId,
+  );
 
   void _enter() {
     _hintLevel = 0;
@@ -378,6 +430,9 @@ class TutorRunner {
   TurnKind submit(String answer) {
     final s = current;
     if (s is! AskStep) return TurnKind.learner;
+    // Những lần trẻ ĐÃ thử ở đúng bước này — thu TRƯỚC khi thêm lượt mới, để
+    // lời phản hồi biết được «con vẫn chọn cái cũ».
+    final earlier = answersFor(s.id);
     transcript.add(
       TutorTurn(kind: TurnKind.learner, text: answer, stepId: s.id),
     );
@@ -392,6 +447,15 @@ class TutorRunner {
       );
       advance();
       return TurnKind.matched;
+    }
+    // ⭐ ORDER 49 §2 — PHẢN HỒI THEO CÂU TRẢ LỜI đứng TRƯỚC «giải thích khác».
+    // Thứ tự này là nội dung của yêu cầu: trẻ phải nghe về LỖI CỦA MÌNH rồi
+    // mới nghe cách giải thích khác, không phải nhận cùng một lời an ủi.
+    final d = diagnose?.call(s, answer, earlier);
+    if (d != null && d.trim().isNotEmpty) {
+      transcript.add(
+        TutorTurn(kind: TurnKind.diagnose, text: d, stepId: s.id),
+      );
     }
     if (_hintLevel < s.hints.length) {
       requestHint();
