@@ -8,11 +8,46 @@ THẬT. Cả hai phải xanh trước khi mở rộng semantic ingestion (Founde
 """
 import json, sys
 
+# ⭐⭐ WAL-223 S5/S6/S7 — VẮNG MẶT KHÔNG THOẢ MÃN ĐƯỢC NGHĨA VỤ DƯƠNG.
+#
+# Trước đây phán quyết cuối chỉ đọc `FAILS`, nên MỘT PHÉP KIỂM KHÔNG BAO GIỜ
+# CHẠY KHÔNG PHÂN BIỆT ĐƯỢC VỚI MỘT PHÉP KIỂM ĐÃ ĐẠT. Bốn họ cổng (G5–G8) biến
+# mất khi thiếu tệp, và script vẫn in «🟢 TẤT CẢ XANH» rồi exit 0.
+#
+# Ba sổ, không phải một:
+#   FAILS    — đã kiểm, và SAI
+#   VACUOUS  — đã chạy, nhưng mẫu số = 0 nên câu trả lời rỗng nghĩa
+#   SKIPPED  — chưa từng chạy vì thiếu tệp
+# Chỉ khi cả ba đều rỗng thì «TẤT CẢ XANH» mới là một câu đúng.
 FAILS = []
+VACUOUS = []
+SKIPPED = []
+
+
 def check(name, ok, detail=''):
     print(f"  {'✅' if ok else '❌'} {name}" + (f' — {detail}' if detail else ''))
     if not ok:
         FAILS.append(name)
+
+
+def check_over(name, population, ok, detail=''):
+    """A check whose truth only means anything over a NON-EMPTY population.
+
+    `all(...)` and `len(x) == 0` are both true of an empty list — which is also
+    exactly what a broken extractor produces. So the population comes first and
+    the verdict second.
+    """
+    if population == 0:
+        print(f'  ⚪ {name} — KHÔNG KIỂM ĐƯỢC: mẫu số = 0'
+              + (f' ({detail})' if detail else ''))
+        VACUOUS.append(name)
+        return
+    check(name, ok, f'{detail} · mẫu số {population}' if detail else f'mẫu số {population}')
+
+
+def skip(family, reason):
+    print(f'\n⚪ {family} — KHÔNG CHẠY: {reason}')
+    SKIPPED.append(family)
 
 def load(p):
     return json.load(open(p))
@@ -50,17 +85,22 @@ def main():
         return (u['lesson'] or 10**6) <= lesson
     phanso = [u for u in rules if 'phân số' in u['text'][:80].lower()]
     at_b57 = [u for u in phanso if visible(u, 4, 2, 57)]
-    check('học sinh ở B57-L4: 0 rule phân số lọt',
-          len(at_b57) == 0, f'chặn {len(phanso)} rule (B60+ L4 và L5)')
+    # Mẫu số là SỐ RULE PHÂN SỐ tìm được. Extraction hỏng ⇒ 0 rule ⇒ «0 rule
+    # lọt» đúng một cách rỗng, và mọi cổng rò tri thức đều xanh.
+    check_over('học sinh ở B57-L4: 0 rule phân số lọt',
+               len(phanso), len(at_b57) == 0,
+               f'chặn {len(phanso)} rule (B60+ L4 và L5)')
     at_b6_l5 = [u for u in phanso if visible(u, 5, 1, 6)]
-    check('học sinh ở B6-L5: thấy rule lớp 4 (đã học), KHÔNG thấy lớp 5 sau đó',
-          all(u['grade'] == 4 or (u['grade'] == 5 and (u['lesson'] or 0) <= 6)
-              for u in at_b6_l5), f'{len(at_b6_l5)} rule hợp lệ')
+    check_over('học sinh ở B6-L5: thấy rule lớp 4 (đã học), KHÔNG thấy lớp 5 sau đó',
+               len(at_b6_l5),
+               all(u['grade'] == 4 or (u['grade'] == 5 and (u['lesson'] or 0) <= 6)
+                   for u in at_b6_l5), f'{len(at_b6_l5)} rule hợp lệ')
     tv = [u for u in rules if u['book'].startswith('05-sgk-tieng-viet')]
     at_tv_b9 = [u for u in tv if visible(u, 5, 2, 9)]
-    check('TV5 ở b9-t2: rule b11/b13 (liên kết bằng kết-từ/đại-từ) bị chặn',
-          all((u['lesson'] or 0) <= 9 or u['vol'] == 1 for u in at_tv_b9),
-          f'{len(at_tv_b9)}/{len(tv)} rule hiện')
+    check_over('TV5 ở b9-t2: rule b11/b13 (liên kết bằng kết-từ/đại-từ) bị chặn',
+               len(tv),
+               all((u['lesson'] or 0) <= 9 or u['vol'] == 1 for u in at_tv_b9),
+               f'{len(at_tv_b9)}/{len(tv)} rule hiện')
 
     # G3 — EXERCISE → SkillCase: đúng theo SỰ THẬT BÀI HỌC, unmapped trung thực
     print('\nG3 exercise → skill case')
@@ -120,7 +160,9 @@ def main():
     for _objp in _objfiles:
         if _os.path.exists(_objp):
             objs += load(_objp)
-    if objs:
+    if not objs:
+        skip('G5 learning objectives', f'không có tệp nào trong {_objfiles}')
+    else:
         print('\nG5 learning objectives (SGV MỤC TIÊU, Toán 4-5)')
         check('mọi objective gán được bài', all(o['lesson'] for o in objs))
         check('mọi objective mang sourceStated',
@@ -131,22 +173,30 @@ def main():
 
     # G6 — cross-grade graph (WAL-77): thứ-tự không được đội lốt lời-sách
     _gp = 'poc-out/graph/crossgrade-graph.json'
-    if _os.path.exists(_gp):
+    if not _os.path.exists(_gp):
+        skip('G6 cross-grade graph', f'thiếu {_gp}')
+    else:
         g = json.load(open(_gp))
         print('\nG6 cross-grade graph')
-        check('mọi cạnh mang origin', all(e.get('origin') for e in g['edges']))
-        check('BUILDS_ON không bao giờ tự nhận sourceStated',
-              all(e['origin'] != 'sourceStated' for e in g['edges']
-                  if e['kind'] == 'BUILDS_ON'))
-        check('REQUIRES chỉ tồn tại khi sourceStated',
-              all(e['origin'] == 'sourceStated' for e in g['edges']
-                  if e['kind'] == 'REQUIRES'))
-        check('mọi cạnh có evidence lần ngược được',
-              all(e.get('evidence') for e in g['edges']))
+        # Đồ thị 0 cạnh làm cả bốn câu dưới đúng — và 0 cạnh cũng chính là thứ
+        # một builder hỏng sinh ra. Mẫu số đi trước.
+        _E = g['edges']
+        _bo = [e for e in _E if e['kind'] == 'BUILDS_ON']
+        _rq = [e for e in _E if e['kind'] == 'REQUIRES']
+        check_over('mọi cạnh mang origin', len(_E),
+                   all(e.get('origin') for e in _E))
+        check_over('BUILDS_ON không bao giờ tự nhận sourceStated', len(_bo),
+                   all(e['origin'] != 'sourceStated' for e in _bo))
+        check_over('REQUIRES chỉ tồn tại khi sourceStated', len(_rq),
+                   all(e['origin'] == 'sourceStated' for e in _rq))
+        check_over('mọi cạnh có evidence lần ngược được', len(_E),
+                   all(e.get('evidence') for e in _E))
 
     # G7 — method catalogue (WAL-78): không method nào thiếu trang nguồn
     _mp = 'poc-out/units/method-catalogue.json'
-    if _os.path.exists(_mp):
+    if not _os.path.exists(_mp):
+        skip('G7 method catalogue', f'thiếu {_mp}')
+    else:
         ms = load(_mp)
         print('\nG7 method catalogue')
         check('mọi method có trang nguồn', all(m.get('pagePrinted') for m in ms))
@@ -157,7 +207,9 @@ def main():
 
     # G8 — Q-matrix (WAL-79): bất định được GIỮ, không ép đầy-đủ-biết
     _qp = 'poc-out/units/qmatrix.json'
-    if _os.path.exists(_qp):
+    if not _os.path.exists(_qp):
+        skip('G8 Q-matrix', f'thiếu {_qp}')
+    else:
         q = load(_qp)
         print('\nG8 Q-matrix')
         check('mọi entry mang mapping version', all(e.get('version') for e in q))
@@ -175,10 +227,13 @@ def main():
     # G9 — WAL-80: ba lớp lỗi còn thiếu của bộ 9 + tổng kết harness
     print('\nG9 knowledge QA (WAL-80)')
     # (7) nguồn mâu thuẫn: không hai method trùng định danh
-    if _os.path.exists('poc-out/units/method-catalogue.json'):
+    if not _os.path.exists('poc-out/units/method-catalogue.json'):
+        skip('G9 (7) nguồn mâu thuẫn', 'thiếu method-catalogue.json')
+    else:
         mc = load('poc-out/units/method-catalogue.json')
         ids = [m['methodId'] for m in mc]
-        check('không nguồn mâu thuẫn: methodId duy nhất', len(ids) == len(set(ids)))
+        check_over('không nguồn mâu thuẫn: methodId duy nhất',
+                   len(ids), len(ids) == len(set(ids)))
     # (8) knowledge-bịa-từ-OCR: đối-chứng-âm — không expr nào từ trang đầu sách
     # (mục lục/hướng dẫn, trang in < 6) lọt vào exercise-case-map
     check('đối-chứng-âm: 0 biểu thức từ trang mục-lục/hướng-dẫn (in < 6)',
@@ -197,9 +252,33 @@ def main():
           ' ③sai-concept=G3-B60 ④sai-case=G3 ⑤tiên-quyết-giả=G6 ⑥thiếu-provenance='
           'G1/G4/G7 ⑦nguồn-mâu-thuẫn=G9 ⑧bịa-từ-OCR=G9-đối-chứng-âm ⑨LLM-không-căn-cứ=G9')
 
-    print('\n' + ('🟢 SCALE GATE: TẤT CẢ XANH' if not FAILS
-                  else f'🔴 GATE ĐỎ: {FAILS}'))
-    sys.exit(1 if FAILS else 0)
+    # ⭐⭐ PHÁN QUYẾT. Trước đây câu này chỉ đọc `FAILS`, nên một lần chạy mà bốn
+    # họ cổng không hề tồn tại vẫn in ra «TẤT CẢ XANH». Chính DÒNG CHỮ ẤY là lời
+    # nói dối, chứ không phải các phép kiểm.
+    print()
+    if FAILS:
+        print(f'🔴 GATE ĐỎ: {FAILS}')
+    elif SKIPPED or VACUOUS:
+        print('🟡 SCALE GATE: KHÔNG ĐẦY ĐỦ — không có phép kiểm nào SAI, '
+              'nhưng cũng KHÔNG đủ căn cứ để nói «tất cả xanh».')
+        if SKIPPED:
+            print(f'   chưa từng chạy ({len(SKIPPED)}): {SKIPPED}')
+        if VACUOUS:
+            print(f'   mẫu số = 0 ({len(VACUOUS)}): {VACUOUS}')
+        print('   Dựng đủ artefact rồi chạy lại, hoặc gọi với --require-complete '
+              'nếu chỗ gọi có KHẲNG ĐỊNH là đã kiểm đầy đủ.')
+    else:
+        print('🟢 SCALE GATE: TẤT CẢ XANH')
+
+    if FAILS:
+        sys.exit(1)
+    # Một lần chạy không đầy đủ KHÔNG phải lỗi — corpus nằm ngoài git nên máy
+    # thiếu artefact là chuyện thường. Nó chỉ không được phép đội lốt «đã kiểm».
+    if (SKIPPED or VACUOUS) and '--require-complete' in sys.argv:
+        print('   --require-complete: chỗ gọi khẳng định đã kiểm đầy đủ, '
+              'nhưng lần chạy này thì không.')
+        sys.exit(2)
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()
