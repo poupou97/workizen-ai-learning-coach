@@ -154,10 +154,7 @@ class TutorView extends StatefulWidget {
   /// Tên các cách học trẻ ĐÃ MỞ trong phiên (TRACE ≠ EVIDENCE: «mở», không
   /// phải «hiểu»). `null` khi chưa mở gì ngoài chính màn này.
   static String? _openedWords(Set<WorkspaceView> views) {
-    const word = {
-      WorkspaceView.read: 'Đọc',
-      WorkspaceView.visual: 'Trực quan',
-    };
+    const word = {WorkspaceView.read: 'Đọc', WorkspaceView.visual: 'Trực quan'};
     final out = [
       for (final v in word.keys)
         if (views.contains(v)) word[v]!,
@@ -178,6 +175,34 @@ class TutorView extends StatefulWidget {
   }
 
   /// Số câu hỏi con ĐÃ ĐI QUA (có lượt trả lời) — đếm THAM GIA, không chấm.
+  /// ⭐⭐ MỘT hành động tiếp theo, CHỌN THEO NHỮNG GÌ PHIÊN ĐO ĐƯỢC.
+  ///
+  /// Trước đây thẻ kết luôn đưa đúng `NextStep` của kịch bản, bất kể buổi học
+  /// vừa diễn ra thế nào — một đứa trẻ còn bỏ dở một câu và một đứa trẻ làm
+  /// trọn vẹn nhận CÙNG một lời mời. Đó là gợi ý giả, dù chỉ có một cái.
+  ///
+  /// Nguồn duy nhất ở đây là transcript: câu nào đã trả lời, câu nào chưa
+  /// từng khớp. Không có model, không suy CORRECT = MASTERED.
+  ///
+  /// `null` ⇒ không có căn cứ để đổi ⇒ dùng `NextStep` của kịch bản.
+  static ({String label, NextTarget target, String? anchor})? nextFromSession(
+    TutorRunner r,
+  ) {
+    for (final a in r.script.asks) {
+      final tried = r.answersFor(a.id).isNotEmpty;
+      if (tried && !r.matchedStep(a.id)) {
+        // Còn một câu đã thử mà chưa khớp ⇒ đưa trẻ về ĐÚNG chỗ sách của câu
+        // ấy, không mời sang việc mới. Thiếu neo thì vẫn về màn Đọc.
+        return (
+          label: 'Xem lại chỗ này trong sách',
+          target: NextTarget.read,
+          anchor: a.promptBlockId,
+        );
+      }
+    }
+    return null;
+  }
+
   static int askedCount(TutorRunner r) => {
     for (final t in r.transcript)
       if (t.kind == TurnKind.learner && t.stepId != null) t.stepId!,
@@ -350,13 +375,16 @@ class _TutorViewState extends State<TutorView> {
   /// ⭐ ROUND 7 · V2 — lời phản hồi cho MỘT câu trả lời, dựng từ dữ liệu có
   /// kiểu của CHÍNH bài này. Hàm THUẦN và TẤT ĐỊNH ⇒ `_diagnosisFor` dựng lại
   /// đúng nó khi vẽ, không cần giữ bản sao trong transcript.
-  AnswerDiagnosis? _diagnose(AskStep step, String answer, List<String> earlier) =>
-      diagnoseAnswer(
-        step: step,
-        answer: answer,
-        semantic: widget.doc.semantic,
-        earlierAnswers: earlier,
-      );
+  AnswerDiagnosis? _diagnose(
+    AskStep step,
+    String answer,
+    List<String> earlier,
+  ) => diagnoseAnswer(
+    step: step,
+    answer: answer,
+    semantic: widget.doc.semantic,
+    earlierAnswers: earlier,
+  );
 
   void _start() {
     final s = widget.doc.tutorScript;
@@ -495,8 +523,7 @@ class _TutorViewState extends State<TutorView> {
                       // «Nguồn & độ tin» (xem `runtimeLineShort`).
                       InkWell(
                         key: const Key('tutor-runtime-info'),
-                        onTap: () =>
-                            showTrustSheet(context, doc: widget.doc),
+                        onTap: () => showTrustSheet(context, doc: widget.doc),
                         child: Row(
                           children: [
                             Flexible(
@@ -614,11 +641,8 @@ class _TutorViewState extends State<TutorView> {
       itemCount: TutorView.phases.length,
       // Nokia 360dp (round 3 n1 D-R3-08): sáu pha phải vừa một hàng — đệm
       // hẹp, mũi tên nhỏ; vẫn cuộn ngang được nếu chữ to hơn.
-      separatorBuilder: (_, _) => const Icon(
-        Icons.chevron_right,
-        size: 12,
-        color: WalColors.inkSoft,
-      ),
+      separatorBuilder: (_, _) =>
+          const Icon(Icons.chevron_right, size: 12, color: WalColors.inkSoft),
       itemBuilder: (_, i) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 6),
         alignment: Alignment.center,
@@ -861,13 +885,11 @@ class _TutorViewState extends State<TutorView> {
                         // Đáp án ĐÃ THỬ được đánh dấu — vẫn bấm được (không
                         // phạt, không khoá), chỉ để trẻ khỏi lặp lại vô tình.
                         if (tried.any(
-                          (a) => normalizeAnswer(a) ==
-                              normalizeAnswer(options[i]),
+                          (a) =>
+                              normalizeAnswer(a) == normalizeAnswer(options[i]),
                         ))
                           Padding(
-                            padding: const EdgeInsets.only(
-                              left: WalSpacing.xs,
-                            ),
+                            padding: const EdgeInsets.only(left: WalSpacing.xs),
                             child: Text(
                               'đã thử',
                               key: Key('tutor-option-tried-$i'),
@@ -1021,6 +1043,7 @@ class _TutorViewState extends State<TutorView> {
     final next = r.current is NextStep
         ? r.current as NextStep
         : r.script.steps.whereType<NextStep>().lastOrNull;
+    final fromSession = TutorView.nextFromSession(r);
     return Container(
       key: TutorView.endCardKey,
       padding: const EdgeInsets.all(WalSpacing.lg),
@@ -1102,7 +1125,13 @@ class _TutorViewState extends State<TutorView> {
             ),
           ),
           const SizedBox(height: WalSpacing.md),
-          if (next != null)
+          // Hành động chính bám PHIÊN trước, kịch bản sau.
+          if (fromSession != null)
+            _primary(
+              '${_targetIcon(fromSession.target)} ${fromSession.label}',
+              () => widget.onNext(fromSession.target, fromSession.anchor),
+            )
+          else if (next != null)
             _primary(
               '${_targetIcon(next.target)} ${next.label}',
               () => widget.onNext(next.target, next.anchorBlockId),
