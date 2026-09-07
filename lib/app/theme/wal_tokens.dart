@@ -9,12 +9,22 @@ import 'dart:ui';
 
 abstract final class WalColors {
   // ── Nền ──
-  static const surface = Color(0xFFF7F7FC);
-  static const surfaceLavender = Color(0xFFF3EEFF);
+  // ⭐ Lệnh 57 §8.1/§8.2 — ĐO TỪ CONCEPT, không chọn bằng mắt.
+  // `concept/concept-ai-first/05 Home.png`, vùng nền trang: #F9F9FD.
+  static const surface = Color(0xFFF9F9FD);
+  // Đo trên thẻ «Việc SAM đề xuất hôm nay»: #F5F1FE (9.7k px).
+  static const surfaceLavender = Color(0xFFF5F1FE);
   static const white = Color(0xFFFFFFFF);
 
   // ── -500: NỀN/ICON/BIỂU ĐỒ — cấm làm chữ trên nền sáng ──
-  static const primary500 = Color(0xFF7C4DFF); // tím SAM
+  /// ⭐⭐ TÍM THƯƠNG HIỆU — đo trên BỐN màn concept độc lập, mode từng màn:
+  /// 05 Home #6A34EE · 04 Timetable #6B38EB · 07 Subject Home #6934F2 ·
+  /// 02 Learner Profile #693AED. Cụm rất chặt ⇒ chốt #6A36EE.
+  ///
+  /// Trước lệnh 57 token này là #7C4DFF — sáng và ngả xanh hơn concept rõ rệt.
+  /// Không tìm được quyết định nào của Founder thay thế màu concept, nên theo
+  /// §8.13 «chưa supersede thì ƯU TIÊN BÁM CONCEPT».
+  static const primary500 = Color(0xFF6A36EE); // tím SAM
   static const accent500 = Color(0xFFFFB800); // vàng ấm — KHÔNG BAO GIỜ làm chữ
   static const pink500 = Color(0xFFFF7AC8);
   static const mint500 = Color(0xFF4CD4B0);
@@ -32,7 +42,10 @@ abstract final class WalColors {
 /// không trang trí. Ánh xạ đủ ConceptClaim + ReviewUrgency + 2 state hệ thống.
 enum LearningStateToken {
   mastered(bg: Color(0xFFE9FBF5), fg: WalColors.mintText), // đầy + ấm
-  strongOnObserved(bg: Color(0xFFF3EEFF), fg: WalColors.primaryText), // một phần
+  strongOnObserved(
+    bg: Color(0xFFF3EEFF),
+    fg: WalColors.primaryText,
+  ), // một phần
   developing(bg: Color(0xFFF7F7FC), fg: WalColors.inkSoft), // đang lớn
   needsWork(bg: Color(0xFFFFF4E0), fg: WalColors.warnText), // ấm, KHÔNG đỏ
   insufficientEvidence(bg: Color(0xFFF7F7FC), fg: WalColors.inkSoft), // dấu hỏi
@@ -47,7 +60,12 @@ enum LearningStateToken {
 
 abstract final class WalSpacing {
   static const xs = 4.0, sm = 8.0, md = 16.0, lg = 24.0, xl = 32.0;
-  static const radiusCard = 20.0, radiusButton = 16.0, radiusChip = 12.0;
+
+  /// ⭐ Lệnh 57 §8.7 — đo trên concept 05 Home:
+  /// nút CTA r≈15 trên nền cao 48 (token 16 ⇒ KHỚP);
+  /// thẻ trắng lớn r≈15, thẻ tím nhạt r≈12 ⇒ thẻ ~14, KHÔNG phải 20.
+  /// Bo 20 là thứ implementation tự nới qua các vòng, không có trong concept.
+  static const radiusCard = 14.0, radiusButton = 16.0, radiusChip = 12.0;
   static const minTouch = 48.0; // luật Hub: chạm một tay
 }
 
@@ -55,7 +73,6 @@ abstract final class WalType {
   // Tiểu học đọc trước: thân bài ≥16, tối thiểu tuyệt đối 14 (chữ phụ).
   static const display = 28.0, title = 22.0, body = 17.0, secondary = 15.0;
 }
-
 
 /// WAL-50 — DARK PALETTE: cặp chữ/nền tối, CÙNG LUẬT contrast-test ≥4.5:1
 /// (không thêm màu nào thiếu cặp). Nền tối ấm — không đen tuyệt đối (OLED
@@ -96,11 +113,12 @@ abstract final class WalMotion {
 /// WAL-50 — CHẾ ĐỘ GỌN THCS (band 6-9): «âm lượng» mascot/hiệu ứng thấp hơn
 /// (MASCOT-AUDIT rủi ro #1: lệch tiểu học). Một design system — N policy band.
 class WalBandDensity {
-  const WalBandDensity._(
-      {required this.mascotChip,
-      required this.mascotHero,
-      required this.celebrateScale,
-      required this.showStickers});
+  const WalBandDensity._({
+    required this.mascotChip,
+    required this.mascotHero,
+    required this.celebrateScale,
+    required this.showStickers,
+  });
 
   final double mascotChip; // size mascot cạnh lời thoại
   final double mascotHero; // size mascot màn kết quả
@@ -108,19 +126,67 @@ class WalBandDensity {
   final bool showStickers;
 
   static const primary = WalBandDensity._(
-      mascotChip: 56, mascotHero: 96, celebrateScale: 1.0, showStickers: true);
+    mascotChip: 56,
+    mascotHero: 96,
+    celebrateScale: 1.0,
+    showStickers: true,
+  );
 
   /// THCS: mascot nhỏ hơn, celebrate tiết chế, không sticker.
   static const lowerSecondary = WalBandDensity._(
-      mascotChip: 40, mascotHero: 64, celebrateScale: 0.5, showStickers: false);
+    mascotChip: 40,
+    mascotHero: 64,
+    celebrateScale: 0.5,
+    showStickers: false,
+  );
 
   /// THPT: tối giản — mascot chỉ còn dấu hiệu, không hiệu ứng.
   static const upperSecondary = WalBandDensity._(
-      mascotChip: 32, mascotHero: 48, celebrateScale: 0.0, showStickers: false);
+    mascotChip: 32,
+    mascotHero: 48,
+    celebrateScale: 0.0,
+    showStickers: false,
+  );
 
   static WalBandDensity forGradeBandLabel(String label) => switch (label) {
-        '6-9' => lowerSecondary,
-        '10-12' => upperSecondary,
-        _ => primary, // '1-2' và '3-5' giữ mặc định tiểu học
-      };
+    '6-9' => lowerSecondary,
+    '10-12' => upperSecondary,
+    _ => primary, // '1-2' và '3-5' giữ mặc định tiểu học
+  };
+}
+
+/// ⭐ Lệnh 57 §8.10 — MÀU THEO MÔN, ĐO TỪ CONCEPT.
+///
+/// `concept/concept-ai-first/05 Home.png`, hàng «Các môn của con» — mỗi ô có
+/// một sắc nền riêng. Đây là quy định của concept, không phải bảng màu tự chế:
+///
+///   Toán #F2EDFD · Tiếng Việt #EBF9F3 · Khoa học #E9F1FE
+///   Sử & Địa #FEEFE2 · GDCD #F4F0FE · AI học #E5E8FD
+///
+/// Môn KHÔNG có trong concept (KHTN, Ngữ văn, Tin học… của cấp 2) chưa có màu
+/// nào được duyệt. Chúng rơi về một sắc trung tính TẤT ĐỊNH theo tên môn —
+/// và điều đó được ghi ra, không giả vờ là màu concept.
+class WalSubjectColors {
+  const WalSubjectColors._();
+
+  /// Màu concept, khoá theo MÃ môn (`subjectIdOf`).
+  static const fromConcept = <String, Color>{
+    'toan': Color(0xFFF2EDFD),
+    'tieng-viet': Color(0xFFEBF9F3),
+    'khoa-hoc': Color(0xFFE9F1FE),
+    'ls-dl': Color(0xFFFEEFE2),
+    'gdcd': Color(0xFFF4F0FE),
+  };
+
+  /// Sắc trung tính cho môn concept chưa quy định — tất định theo tên.
+  static const fallback = <Color>[
+    Color(0xFFF2EDFD),
+    Color(0xFFE9F1FE),
+    Color(0xFFEBF9F3),
+    Color(0xFFFEEFE2),
+    Color(0xFFE5E8FD),
+  ];
+
+  /// `null` ⇒ môn này CHƯA có màu concept (gọi [fallback] bằng seed).
+  static Color? conceptColor(String subjectId) => fromConcept[subjectId];
 }

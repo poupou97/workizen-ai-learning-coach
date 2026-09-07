@@ -2006,7 +2006,7 @@ class _SmartCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: _subjectGradient(v.seed),
+              colors: _subjectGradient(v.seed, v.subjectId),
             ),
           ),
         )
@@ -2021,7 +2021,7 @@ class _SmartCard extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: _subjectGradient(v.seed),
+                colors: _subjectGradient(v.seed, v.subjectId),
               ),
             ),
           ),
@@ -2039,16 +2039,16 @@ class _SmartCard extends StatelessWidget {
     ],
   );
 
-  /// Dải màu TẤT ĐỊNH theo môn — cùng môn, cùng màu, mọi lần mở app.
-  /// Lấy trong bảng màu WAL, không sinh màu ngẫu nhiên.
-  static List<Color> _subjectGradient(int seed) {
-    const palette = <List<Color>>[
-      [Color(0xFFEDE7FF), Color(0xFFD9CCFF)],
-      [Color(0xFFE3F1FF), Color(0xFFC7E2FF)],
-      [Color(0xFFFFF1DB), Color(0xFFFFE0B2)],
-      [Color(0xFFE6F7EE), Color(0xFFC8EBD8)],
-      [Color(0xFFFFE9EC), Color(0xFFFFCDD5)],
-    ];
-    return palette[seed % palette.length];
+  /// ⭐ Lệnh 57 §8.10 — MÀU THEO MÔN LẤY TỪ CONCEPT, không phải bảng tự chế.
+  ///
+  /// Bảng cũ ở đây là năm cặp màu tôi tự chọn. Concept CÓ quy định sắc nền
+  /// theo môn (đo ở hàng «Các môn của con»), nên bảng tự chế bị thay bằng
+  /// đúng những màu ấy. Môn concept chưa quy định thì rơi về sắc trung tính
+  /// tất định — và `WalSubjectColors` ghi rõ điều đó.
+  static List<Color> _subjectGradient(int seed, String subjectId) {
+    final c =
+        WalSubjectColors.conceptColor(subjectId) ??
+        WalSubjectColors.fallback[seed % WalSubjectColors.fallback.length];
+    return [c, c];
   }
 }

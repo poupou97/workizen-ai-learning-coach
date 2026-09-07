@@ -22,6 +22,7 @@
 /// Không tầng nào bịa ảnh, và không tầng nào mượn ảnh của bài/môn khác.
 library;
 
+import '../../core/curriculum/subject_id.dart';
 import '../../core/lesson_model/content_trust.dart';
 import '../../core/lesson_model/lesson_document.dart';
 
@@ -38,7 +39,15 @@ enum LessonVisualKind {
 }
 
 class LessonVisual {
-  const LessonVisual({required this.kind, this.asset, required this.seed});
+  const LessonVisual({
+    required this.kind,
+    this.asset,
+    required this.seed,
+    this.subjectId = '',
+  });
+
+  /// MÃ môn — để tầng dải màu tra được màu CONCEPT của môn ấy (lệnh 57 §8.10).
+  final String subjectId;
 
   final LessonVisualKind kind;
 
@@ -75,11 +84,13 @@ LessonVisual lessonVisual(
   String? heroAsset,
 }) {
   final seed = subjectSeed(doc.subject);
+  final id = subjectIdOf(doc.subject);
   if (heroAsset != null && mayDecorateWithLessonImagery(doc)) {
     return LessonVisual(
       kind: LessonVisualKind.hero,
       asset: heroAsset,
       seed: seed,
+      subjectId: id,
     );
   }
   if (coverAsset != null) {
@@ -87,7 +98,12 @@ LessonVisual lessonVisual(
       kind: LessonVisualKind.cover,
       asset: 'assets/pack/$coverAsset',
       seed: seed,
+      subjectId: id,
     );
   }
-  return LessonVisual(kind: LessonVisualKind.gradient, seed: seed);
+  return LessonVisual(
+    kind: LessonVisualKind.gradient,
+    seed: seed,
+    subjectId: id,
+  );
 }
