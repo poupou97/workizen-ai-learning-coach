@@ -29,6 +29,7 @@ import '../shell/compose_lite_screen.dart';
 import '../shell/reader_screen.dart';
 import '../shell/session_recorder.dart';
 import 'lesson_index.dart';
+import 'lesson_pages_screen.dart';
 import 'source_gallery_screen.dart';
 
 class SubjectHomeScreen extends StatelessWidget {
@@ -457,6 +458,8 @@ class SubjectHomeScreen extends StatelessWidget {
         WritingActivity() => '1 đề viết',
         SourceActivity() => '1 tư liệu gốc',
         ExperimentActivity() => '1 thí nghiệm',
+        LessonPagesActivity(:final pages) =>
+          '${pages.pageCount} trang sách',
       };
 
   void _openLesson(BuildContext context, BookLessons b, LessonRef l,
@@ -639,6 +642,8 @@ class SubjectHomeScreen extends StatelessWidget {
     int rank(LessonActivity a) => switch (intent) {
           // Chuẩn bị: quan sát/dự đoán trước, đọc sau, bài tập cuối.
           LearningIntent.prepare => switch (a) {
+              // Chuẩn bị bài: đọc chính trang sách trước đã.
+              LessonPagesActivity() => 0,
               ExperimentActivity() => 0,
               ReadingActivity() => 1,
               SourceActivity() => 2,
@@ -648,6 +653,7 @@ class SubjectHomeScreen extends StatelessWidget {
           // Ôn / bài tập: việc sinh bằng chứng trước.
           LearningIntent.review || LearningIntent.practice => switch (a) {
               ExerciseActivity() => 0,
+              LessonPagesActivity() => 1,
               ExperimentActivity() => 1,
               ReadingActivity() => 2,
               WritingActivity() => 3,
@@ -656,6 +662,8 @@ class SubjectHomeScreen extends StatelessWidget {
           // Tra cứu: nguồn trước, và KHÔNG mời bài tập (không sinh bằng chứng).
           LearningIntent.lookup => switch (a) {
               SourceActivity() => 0,
+              // Tra cứu: trang sách CHÍNH là thứ cần tra.
+              LessonPagesActivity() => 0,
               ReadingActivity() => 1,
               ExperimentActivity() => 2,
               WritingActivity() => 3,
@@ -694,6 +702,10 @@ class SubjectHomeScreen extends StatelessWidget {
         SourceActivity(:final source) => (
             '📜 Đọc tư liệu gốc',
             () => _openSource(context, source, ctx)
+          ),
+        LessonPagesActivity(:final pages) => (
+            '📖 Đọc trang sách',
+            () => _openLessonPages(context, l, pages)
           ),
         ExperimentActivity(:final experiment) => (
             '🔬 Làm thí nghiệm',
@@ -909,6 +921,22 @@ class SubjectHomeScreen extends StatelessWidget {
                   events: events,
                   trigger: SessionTrigger.manual),
             )));
+  }
+
+  /// Trang sách của chính bài. KHÔNG phát bằng chứng: `OPENED != UNDERSTOOD`
+  /// — mở bài ra đọc là một dấu vết, không phải chứng cứ trẻ đã hiểu. Không
+  /// chấm, không hỏi, vì ở đây không có chìa khoá đáp án nào.
+  void _openLessonPages(BuildContext context, LessonRef l, LessonPages pages) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => LessonPagesScreen(
+            pages: pages,
+            lessonLabel: l.title == null
+                ? 'Bài ${l.no}'
+                : 'Bài ${l.no} · ${displayTitle(l.title!)}',
+            bookTitle: index.books
+                .where((b) => b.sourceDocumentId == pages.book)
+                .map((b) => b.title)
+                .firstOrNull)));
   }
 
   /// WAL-113 B2 — Sử: TƯ LIỆU gốc → SourceReader (NGUỒN ≠ SAM ≠ EM).

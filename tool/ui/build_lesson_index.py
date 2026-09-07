@@ -24,6 +24,8 @@ Log lý do: poc-out/b-lane/attach-log/lesson-index-g<N>.attach-log.json
 import glob
 import json, os, re, sys, collections
 from experiment_steps import step_body, is_real_step, continues_step
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'corpus'))
+from lesson_reading import lesson_reading  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lesson_attach import AttachRegistry  # noqa: E402
@@ -490,6 +492,65 @@ if PATTERN_BOOKS.get(GRADE) and os.environ.get('PATTERN_ROUTER') == '1':
     tv_writings += _pw
     print(f'  pattern-router: +{len(_pr)} readings, +{len(_pw)} writings — {dict(_ps)}')
 
+# ---- lessonReadings: TRANG SÁCH CỦA CHÍNH BÀI (họ hoạt động thứ sáu) --------
+# Census toàn corpus: 3.142 bài có nội dung đọc được, sản phẩm mở được 117 — vì
+# `activitiesFor` không có họ nào là «đọc trang sách». Lớp 1, 2, 3, 11, 12 có
+# ĐÚNG 0 bài mở được. Đây là chỗ nối dữ liệu đã có vào sản phẩm.
+#
+# Nguồn dải trang + tên bài đọc-từ-trang là đầu ra của `tool/corpus/tc2_attach.py`.
+# Không có nó ⇒ KHÔNG phát mục nào (pack vẫn dựng được, chỉ là không có họ này) —
+# đoán dải trang để bài «mở được» là cho trẻ mở nhầm chỗ.
+ATTACH_ROOT = os.environ.get('ATTACH_ROOT', 'poc-out/trusted-corpus/tc-v2/tc2-p1')
+lesson_readings = []
+_lr_reasons = collections.Counter()
+for _subj, _books in subjects.items():
+    for _b in _books:
+        _bid = _b['sourceDocumentId']
+        _ap = os.path.join(ATTACH_ROOT, 'attach', f'{_bid}.json')
+        if not os.path.exists(_ap):
+            _lr_reasons['NO_ATTACH'] += len(_b['lessons'])
+            continue
+        _ad = json.load(open(_ap, encoding='utf-8'))
+        _npages = len(_ad.get('pages') or [])
+        _Ls = sorted([L for L in _ad.get('lessons') or [] if L.get('page_pdf')],
+                     key=lambda x: x['page_pdf'])
+        _range = {}
+        for _i, _L in enumerate(_Ls):
+            _s = _L['page_pdf']
+            _e = (_Ls[_i + 1]['page_pdf'] - 1) if _i + 1 < len(_Ls) else _npages
+            _range[_L['number']] = (_s, max(_s, min(_e, _npages)), _L.get('title'))
+        # Bài trùng số trong cùng cuốn: KHÔNG phát. `(book, lessonNo)` không phân
+        # biệt được chúng (đo được: 310 bài thật sự khác nhau dùng chung số), nên
+        # phát ra sẽ gắn nội dung của bài này vào tên của bài kia.
+        _dupes = {n for n, c in collections.Counter(
+            l['no'] for l in _b['lessons']).items() if c > 1}
+        for _L in _b['lessons']:
+            _no = _L['no']
+            if _no in _dupes:
+                _lr_reasons['AMBIGUOUS_IDENTITY'] += 1
+                continue
+            if _no not in _range:
+                _lr_reasons['SOURCE_RANGE'] += 1
+                continue
+            _s, _e, _atitle = _range[_no]
+            _title = (_L.get('title') or _atitle or '').strip()
+            if not _title:
+                _lr_reasons['LESSON_IDENTITY_TITLE'] += 1
+                continue
+            _d, _why = lesson_reading(_bid, _s, _e,
+                                      printed_start=_L.get('pageStart'), title=_title)
+            if not _d:
+                _lr_reasons[_why] += 1
+                continue
+            lesson_readings.append(dict(
+                book=_bid, lesson=_no, title=_title,
+                pageStart=_L.get('pageStart'), pagePdfStart=_s, pagePdfEnd=_e,
+                text=' '.join(p['text'] for p in _d['pages']),
+                extraction=_d['extraction']))
+            # Tên đọc-từ-trang bù vào mục lục: chữ của SÁCH, không phải chữ máy đặt.
+            if not (_L.get('title') or '').strip():
+                _L['title'] = _title
+
 for v in subjects.values():
     v.sort(key=lambda b: (b['volume'] or '9', b['sourceDocumentId']))
 out = dict(grade=GRADE, version='lesson-index-v2',
@@ -499,6 +560,7 @@ out = dict(grade=GRADE, version='lesson-index-v2',
            tvWritings=tv_writings,
            suSources=su_sources,
            khoaExperiments=khoa_experiments,
+           lessonReadings=lesson_readings,
            diaMaps=dia_maps,
            sourceAssets=source_assets,
            books=books)
@@ -525,6 +587,8 @@ print(f"  provenance: {_prov['packVersion']} {_prov['builderVersion']} flags={_p
 print(f"  attach ({_att['rule']}): dropped {_att['dropped']}, flagged {_att['flagged']} — "
       + '; '.join(f'{fam}: {reasons}' for fam, reasons in _att['counts'].items()))
 n_les = sum(len(l['lessons']) for v in subjects.values() for l in v)
+print(f'  lessonReadings: {len(lesson_readings)}/{n_les} bài mở đọc được — '
+      f'không phát: {dict(_lr_reasons)}')
 print(f'{path}: {len(subjects)} môn, {n_les} bài, exToán '
       f'{sum(len(v) for v in ex_by_lesson.values())}, '
       f'tvReadings {len(tv_readings)}, tvWritings {len(tv_writings)}, '
