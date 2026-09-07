@@ -144,8 +144,7 @@ AnswerDiagnosis _forChoice(
       limitNote:
           'Không có lời sách để đối chiếu thì SAM không giải thích thêm — và '
           'SAM cũng KHÔNG kết luận gì về việc con hiểu hay chưa hiểu.',
-      retry:
-          'Con xin SAM một gợi ý, hoặc đọc lại câu hỏi rồi chọn lại nhé.',
+      retry: 'Con xin SAM một gợi ý, hoặc đọc lại câu hỏi rồi chọn lại nhé.',
     );
   }
 
@@ -157,7 +156,9 @@ AnswerDiagnosis _forChoice(
   final chosenNames = {for (final h in chosen) h.name};
   final shared = chosenNames.intersection(keyedNames);
 
-  if (shared.isNotEmpty) return _nearMissChoice(chosen, shared, keyedNames, semantic);
+  if (shared.isNotEmpty) {
+    return _nearMissChoice(chosen, shared, keyedNames, semantic);
+  }
 
   // Sai bản chất: soi ĐÚNG cái trẻ chọn. Tên phương án đúng KHÔNG xuất hiện
   // ở đây (luật 2) — nó chỉ đến ở scaffold khi hết thang gợi ý.
@@ -179,13 +180,45 @@ AnswerDiagnosis _forChoice(
     ],
     links: ex.links,
     linksEmptyNote: ex.linksEmptyNote,
-    // LỖI MÁY THẬT VÒNG 2, LƯỢT 1: bản dài ba dòng lặp gần hết với băng «Đến
-    // lượt con thử lại» ngay dưới, và vì nó GIỐNG NHAU ở mọi đáp án sai nên
-    // trên máy nó trông như một câu an ủi mặc định — đúng thứ Founder bác.
-    // Băng lo việc HÀNH ĐỘNG; dòng này chỉ nói VIỆC CẦN SO.
-    retry: 'Con so dòng sách ở trên với câu hỏi — có khớp không?',
+    // ⭐⭐ NÓI CHO TỚI Ý CỐT LÕI, không dừng ở «con tự so đi».
+    //
+    // Bản trước dừng ở «Con so dòng sách ở trên với câu hỏi — có khớp không?»
+    // — đúng nhưng GIỐNG NHAU ở mọi đáp án sai, nên nó vẫn là một nghi thức.
+    // Trẻ đã đọc lời sách rồi mà vẫn chọn sai thì lời mời so lại không thêm gì.
+    //
+    // Nay hỏi thẳng vào ĐIỀU KIỆN của chính cách trẻ chọn: «Lắng» dùng để
+    // tách «các chất rắn lơ lửng» ⇒ SAM hỏi thứ cần tách ở câu này có đúng là
+    // thế không. Đó chính là chỗ hiểu sai — muối đã tan thì không còn hạt rắn
+    // lơ lửng nào để lắng.
+    //
+    // Vẫn KHÔNG sinh chữ nội dung (luật 1): cụm điều kiện cắt NGUYÊN VĂN từ
+    // lời sách. Vẫn KHÔNG lộ đáp án (luật 2): chỉ soi cái trẻ chọn.
+    retry:
+        _conditionCheck(lead?.value) ??
+        'Con so dòng sách ở trên với câu hỏi — có khớp không?',
     sourceBlockId: entity.sourceBlockId,
   );
+}
+
+/// Câu hỏi kiểm ĐIỀU KIỆN, cắt nguyên văn từ lời sách về cách trẻ đã chọn.
+///
+/// «tách các chất rắn lơ lửng nặng hơn ra khỏi các chất nhẹ hơn»
+///   → «thứ cần tách ở câu này có đúng là *các chất rắn lơ lửng nặng hơn* không?»
+///
+/// `null` ⇒ không cắt được cụm đủ gọn ⇒ chỗ gọi dùng lại câu cũ. Thà nói câu
+/// chung còn hơn ghép một cụm cụt nghĩa.
+String? _conditionCheck(String? value) {
+  final v = (value ?? '').trim();
+  if (v.isEmpty) return null;
+  var obj = v;
+  final m = RegExp(r'^tách\s+(.+)$', caseSensitive: false).firstMatch(obj);
+  if (m != null) obj = m.group(1)!.trim();
+  // «A ra khỏi B» — điều kiện nằm ở A, phần trẻ cần đối chiếu.
+  final cut = obj.indexOf(' ra khỏi ');
+  if (cut > 0) obj = obj.substring(0, cut).trim();
+  obj = obj.replaceAll(RegExp(r'[.;,]+$'), '').trim();
+  if (obj.length < 6 || obj.length > 60) return null;
+  return 'Con thử kiểm một điều: thứ cần tách ở câu này có đúng là «$obj» không?';
 }
 
 /// Trẻ gọi đúng MỘT PHẦN cách sách dùng ⇒ nói rõ phần nào trúng, và trúng vì
@@ -204,7 +237,9 @@ AnswerDiagnosis _nearMissChoice(
     final ex = explainForEntity(h.table, h.index, alsoIn: semantic);
     final lead = _leadFact(ex.facts);
     if (lead != null) {
-      facts.add(ExplainFact(name: '«${h.name}» — ${lead.name}', value: lead.value));
+      facts.add(
+        ExplainFact(name: '«${h.name}» — ${lead.name}', value: lead.value),
+      );
     }
     blockId ??= h.table.entities[h.index].sourceBlockId;
   }
@@ -263,8 +298,7 @@ AnswerDiagnosis _forFreeText(
   if (echoed.isEmpty) {
     return AnswerDiagnosis(
       kind: DiagnosisKind.insufficient,
-      headline:
-          'SAM chưa đủ căn cứ để nói gì về câu này của con.',
+      headline: 'SAM chưa đủ căn cứ để nói gì về câu này của con.',
       limitNote:
           'SAM chỉ đối chiếu được CHỮ con viết với lời sách trong bài. Câu của '
           'con không có chữ nào SAM đối chiếu được, nên SAM KHÔNG BIẾT con đã '
@@ -309,7 +343,9 @@ List<String> echoedWords(
   int max = 4,
 }) {
   final out = <String>[];
-  for (final w in normalizeAnswer(answer).split(RegExp(r'[^\p{L}\p{N}]+', unicode: true))) {
+  for (final w in normalizeAnswer(
+    answer,
+  ).split(RegExp(r'[^\p{L}\p{N}]+', unicode: true))) {
     if (w.length < 2 || _functionWords.contains(w)) continue;
     if (out.contains(w)) continue;
     if (mentionsOf(w, semantic).isEmpty) continue;
@@ -322,11 +358,60 @@ List<String> echoedWords(
 /// Hư từ tiếng Việt + đại từ trong lời SAM: chúng có mặt ở mọi trang sách nên
 /// «đối chiếu được» chúng KHÔNG nói lên điều gì.
 const _functionWords = {
-  'và', 'là', 'của', 'vì', 'để', 'thì', 'có', 'không', 'cho', 'một', 'các',
-  'những', 'trong', 'ra', 'vào', 'khi', 'nên', 'mà', 'với', 'này', 'đó', 'ở',
-  'bị', 'được', 'con', 'em', 'sách', 'sam', 'nó', 'ta', 'mình', 'rồi', 'sẽ',
-  'đã', 'cũng', 'nếu', 'hay', 'hoặc', 'thế', 'ấy', 'lại', 'từ', 'về', 'theo',
-  'bằng', 'do', 'nhưng', 'chỉ', 'còn', 'phải', 'làm', 'đi', 'lên', 'xuống',
+  'và',
+  'là',
+  'của',
+  'vì',
+  'để',
+  'thì',
+  'có',
+  'không',
+  'cho',
+  'một',
+  'các',
+  'những',
+  'trong',
+  'ra',
+  'vào',
+  'khi',
+  'nên',
+  'mà',
+  'với',
+  'này',
+  'đó',
+  'ở',
+  'bị',
+  'được',
+  'con',
+  'em',
+  'sách',
+  'sam',
+  'nó',
+  'ta',
+  'mình',
+  'rồi',
+  'sẽ',
+  'đã',
+  'cũng',
+  'nếu',
+  'hay',
+  'hoặc',
+  'thế',
+  'ấy',
+  'lại',
+  'từ',
+  'về',
+  'theo',
+  'bằng',
+  'do',
+  'nhưng',
+  'chỉ',
+  'còn',
+  'phải',
+  'làm',
+  'đi',
+  'lên',
+  'xuống',
 };
 
 // ── So khớp tên: dùng lại phép của vòng 1 ───────────────────────────────────
