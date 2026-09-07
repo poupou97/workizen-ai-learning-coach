@@ -52,7 +52,8 @@ import 'core/student/concept_summary.dart';
 import 'features/discovery/splash_quote.dart';
 import 'features/subjects/lesson_index.dart';
 import 'app/theme/band_density_scope.dart';
-import 'app/theme/wal_tokens.dart' show WalBandDensity;
+import 'app/theme/wal_tokens.dart'
+    show WalBandDensity, WalColors, WalSpacing, WalType;
 import 'core/pedagogy/presentation_policy.dart' show bandForGrade;
 import 'features/subjects/book_shelf_screen.dart';
 import 'features/subjects/subjects_screen.dart';
@@ -266,7 +267,92 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
       _loading = false;
       _refreshMission();
     });
-    _loadLessonIndex();
+    // ⭐ Lệnh 56 §P0.1 — TÊN → LỚP → MÔN/SÁCH → THỜI KHOÁ BIỂU.
+    //
+    // Mục lục phải nạp XONG trước, vì lịch mẫu chỉ được lấy môn của ĐÚNG lớp
+    // vừa chọn (§P0.2). Nạp xong mới mời — mời trước thì hoặc phải chờ, hoặc
+    // phải sinh lịch từ một danh sách môn chưa có.
+    await _loadLessonIndex();
+    if (mounted) await _offerSampleTimetable(context);
+  }
+
+  /// Bước cuối của việc tạo hồ sơ: lịch. Ba lựa chọn, và «Để sau» là một lựa
+  /// chọn thật — TKB là TUỲ CHỌN (F13), không phải việc còn dở.
+  Future<void> _offerSampleTimetable(BuildContext context) async {
+    final p = _profile;
+    final idx = _lessonIndex;
+    if (p == null || idx == null || gradeSubjectNames(idx).isEmpty) return;
+    if (!context.mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: WalColors.surface,
+      builder: (c) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(WalSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Thời khoá biểu của ${p.displayName}',
+                style: const TextStyle(
+                  fontSize: WalType.title,
+                  fontWeight: FontWeight.w700,
+                  color: WalColors.ink,
+                ),
+              ),
+              const SizedBox(height: WalSpacing.sm),
+              Text(
+                'SAM có thể xếp thử một tuần từ '
+                '${gradeSubjectNames(idx).length} môn trong sách lớp '
+                '${p.grade}. Đây là THỜI KHOÁ BIỂU MẪU để sửa cho nhanh — '
+                'không phải lịch thật của trường.',
+                style: const TextStyle(
+                  fontSize: WalType.secondary,
+                  color: WalColors.inkSoft,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: WalSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                height: WalSpacing.minTouch,
+                child: FilledButton(
+                  key: const Key('onboarding-sample-timetable'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: WalColors.primary500,
+                  ),
+                  onPressed: () async {
+                    await _generateSampleTimetable();
+                    if (c.mounted) Navigator.of(c).pop();
+                  },
+                  child: const Text('✨ Tạo thời khoá biểu mẫu'),
+                ),
+              ),
+              const SizedBox(height: WalSpacing.sm),
+              SizedBox(
+                width: double.infinity,
+                height: WalSpacing.minTouch,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    Navigator.of(c).pop();
+                    if (context.mounted) await _openTimetable(context);
+                  },
+                  child: const Text('Nhập thời khoá biểu'),
+                ),
+              ),
+              const SizedBox(height: WalSpacing.xs),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.of(c).pop(),
+                  child: const Text('Để sau'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _selectProfile(String learnerId) {
@@ -370,7 +456,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (mounted) setState(_refreshMission);
   }
 
-  Future<void> _onboarded(LearnerProfile p) async {
+  Future<void> _onboarded(LearnerProfile p, BuildContext context) async {
     await widget.store.saveProfile(p);
     if (!mounted) return;
     setState(() {
@@ -598,7 +684,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
           body: SafeArea(
             child: OnboardingScreen(
               onDone: (p) async {
-                await _onboarded(p);
+                await _onboarded(p, context);
                 if (context.mounted) Navigator.of(context).pop();
               },
             ),
@@ -759,7 +845,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
             ? const BootScreen(note: 'Đang mở hồ sơ của con…')
             : SplashQuoteScreen(quote: _splashQuote!))
       : _profile == null
-      ? OnboardingScreen(onDone: _onboarded)
+      ? OnboardingScreen(onDone: (p) => _onboarded(p, context))
       : FutureBuilder<MissionData>(
           future: _mission,
           builder: (context, snap) {
