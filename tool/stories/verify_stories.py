@@ -78,6 +78,24 @@ def verify(i):
         return 'AUTO_VERIFIED', ['trích văn bản có nguồn']
     return 'REVIEW_REQUIRED', ['loại chưa có rule']
 
+def link_person_refs(items, canon):
+    """Nối mục KHÔNG-phải-PERSON (QUOTE, INVENTION_DISCOVERY…) tới người đã có.
+
+    Trả về số mục được nối. Xem chú thích ở chỗ gọi trong `main()` để biết vì
+    sao mắt xích này tồn tại và vì sao nó trả 0 trên corpus hôm nay.
+    """
+    linked = 0
+    for i in items:
+        # PERSON đã có personId từ entity resolution; mục đã có thì không đè.
+        if i['type'] == 'PERSON' or i.get('personId') or not i.get('person'):
+            continue
+        pid = slug(i['person'])
+        if pid in canon:          # CHỈ nối vào người đã có, không tạo người mới
+            i['personId'] = pid
+            linked += 1
+    return linked
+
+
 def main():
     items = json.load(open('poc-out/stories/candidates-v0.json'))
     persons = collections.defaultdict(list)
@@ -100,6 +118,30 @@ def main():
         )
         for g in group:
             g['personId'] = pid
+
+    # ⭐⭐ Lệnh 60 §6 — TÀI SẢN PHẢI CÓ ĐƯỜNG TỚI SẢN PHẨM.
+    #
+    # Chuỗi mà sản phẩm cần: QUOTE đã duyệt → NGƯỜI đã duyệt → CHÂN DUNG đã
+    # duyệt → Quote Card. Nó đứt ngay mắt đầu tiên: mục QUOTE mang `person` là
+    # một CHUỖI TÊN, không bao giờ mang `personId`, nên `PersonPortraits
+    # .forPerson(personId)` luôn được gọi với null. Ảnh đúng người, đúng quyền,
+    # đóng đúng vào APK — mà không thẻ nào tra tới nó.
+    #
+    # Nối ở đây, KHÔNG hardcode ai vào widget.
+    #
+    # ⚠ CHỈ NỐI VÀO NGƯỜI ĐÃ CÓ trong sổ canonical. KHÔNG tạo người mới từ một
+    # dòng ghi nguồn: một cái tên đứng cạnh câu trích là lời DẪN NGUỒN, không
+    # phải một hồ sơ nhân vật đã xác minh. Tạo người từ đó là bịa ra thực thể.
+    #
+    # ⚠ VÀ NÓ KHÔNG LÀM CHUỖI CHẠY ĐƯỢC HÔM NAY. Đo trên corpus hiện tại:
+    # 0/13 tên trong trích dẫn khớp với 74 người canonical. Hai tập RỜI NHAU —
+    # miner PERSON chỉ bắt người có năm sinh–mất hoặc có tiền tố «nhà văn/nhà
+    # thơ», còn tên người được trích thì không rơi vào khuôn nào trong hai
+    # khuôn ấy. Đây là cơ chế đúng cho dữ liệu về sau, không phải một con số
+    # để khoe hôm nay.
+    linked = link_person_refs(items, canon)
+    print(f'quote→person đã nối: {linked} (tên trích dẫn khớp sổ canonical)')
+
     json.dump(items, open('poc-out/stories/curated-v0.json', 'w'),
               ensure_ascii=False, indent=1)
     json.dump(list(canon.values()), open('poc-out/stories/persons-v0.json', 'w'),
