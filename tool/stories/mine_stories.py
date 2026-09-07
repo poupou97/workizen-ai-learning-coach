@@ -29,6 +29,46 @@ P_QUOTE = re.compile(r'"([^"]{15,220})"\s*[\.\s]*\(\s*(' + NAME + r')(?:\s*,\s*(
 P_EVENT = re.compile(r'([Nn]ăm\s+(\d{3,4})|[Nn]gày\s+(\d{1,2})[\-/](\d{1,2})[\-/](\d{4})|[Nn]gày\s+(\d{1,2})\s+tháng\s+(\d{1,2})\s+năm\s+(\d{4}))[\s,:]([^.]{15,180}\.)')
 P_INV = re.compile(r'(' + NAME + r')?[^.]{0,60}(phát minh ra|sáng chế ra|tìm ra|khám phá ra|phát hiện ra)\s+([^.]{5,120}\.)')
 
+# ⭐⭐ WAL-194 — CẮT THEO SỐ KÝ TỰ THÌ RƠI VÀO GIỮA TỪ.
+#
+# Cửa sổ bằng chứng cắt bằng offset ký tự cố định (`m.start()-60`, `m.end()+120`)
+# rơi vào giữa từ bất cứ khi nào nó rơi vào giữa từ. Đó là lý do phần bị mất dài
+# ngắn khác nhau (1–3 ký tự) chứ không phải một off-by-N cố định.
+#
+# Hậu quả không nhỏ: màn chuyện dán nhãn khối này là «TRÍCH NGUYÊN VĂN TỪ
+# NGUỒN». Một mảnh cụt đầu cụt đuôi thì KHÔNG phải nguyên văn.
+# Đo trên pack hiện tại: 8/38 cụt đầu, 15/38 cụt đuôi.
+_WORDCH = re.compile(r'[^\W_]', re.UNICODE)
+
+
+def snap(text, start, end):
+    """Nới cửa sổ ra HAI PHÍA tới ranh giới từ gần nhất.
+
+    CHỈ NỚI RA, không bao giờ thu vào — chữ thêm vào vẫn là chữ nguyên văn của
+    trang, và vì cửa sổ chỉ rộng thêm nên mọi mảnh mà bước curate đòi phải có
+    vẫn còn nguyên trong bằng chứng.
+    """
+    start = max(0, start)
+    end = min(len(text), end)
+    while start > 0 and _WORDCH.match(text[start - 1]):
+        start -= 1
+    while end < len(text) and _WORDCH.match(text[end]):
+        end += 1
+    return text[start:end]
+
+
+def clip(t, n):
+    """Cắt còn <= n ký tự nhưng LÙI VỀ ranh giới từ — không để cap sinh ra
+    đúng cái lỗi mà `snap` vừa sửa."""
+    if len(t) <= n:
+        return t
+    cut = t[:n]
+    i = len(cut)
+    while i > 0 and _WORDCH.match(cut[i - 1]):
+        i -= 1
+    return (cut[:i] if i else cut).rstrip()
+
+
 def viet_quality(t):
     """Tỉ lệ ký tự chữ hợp lệ + có dấu — thơ OCR vỡ rơi điểm."""
     letters = [c for c in t if c.isalpha()]
@@ -48,7 +88,7 @@ def mine(did, reg):
         out.append(dict(type=typ, status='CANDIDATE', confidence=conf,
                         source=dict(sourceDocumentId=did, grade=r['grade'],
                                     subject=r['subject'], pagePdf=page,
-                                    textEvidence=text_ev[:300],
+                                    textEvidence=clip(text_ev, 300),
                                     extractionVersion=VER), **kw))
     for fn in sorted(os.listdir(base)):
         if not fn.endswith('.json'): continue
@@ -65,13 +105,13 @@ def mine(did, reg):
             name = VERB_TAIL.sub('', name).strip()
             if DYNASTY.match(name) or EVENTISH.search(name) or len(name) < 3:
                 continue  # triều đại/sự kiện mang (năm–năm) — không phải người
-            add('PERSON', page, text[max(0,m.start()-60):m.end()+120],
+            add('PERSON', page, snap(text, m.start() - 60, m.end() + 120),
                 name=name, birthYear=b, deathYear=dth)
         for m in P_INTRO.finditer(text):
             name = VERB_TAIL.sub('', m.group(2)).strip()
             if len(name) < 3 or EVENTISH.search(name):
                 continue
-            add('PERSON', page, text[max(0,m.start()-40):m.end()+120],
+            add('PERSON', page, snap(text, m.start() - 40, m.end() + 120),
                 name=name, role=m.group(1))
         for m in P_QUOTE.finditer(text):
             person = m.group(2).strip()
@@ -81,7 +121,7 @@ def mine(did, reg):
                           or person.lower().startswith(('truyện', 'ca dao',
                               'tục ngữ', 'sách', 'báo')))
             add('SOURCE_EXCERPT' if is_excerpt else 'QUOTE', page,
-                text[max(0,m.start()-40):m.end()+40],
+                snap(text, m.start() - 40, m.end() + 40),
                 quote=m.group(1), person=person.removeprefix('Theo').strip(),
                 citedSource=m.group(3))
         for m in P_EVENT.finditer(text):
@@ -95,7 +135,7 @@ def mine(did, reg):
                 md = f'{int(m.group(4)):02d}-{int(m.group(3)):02d}'
             elif m.group(6):
                 md = f'{int(m.group(7)):02d}-{int(m.group(6)):02d}'
-            add('EVENT', page, m.group(0)[:260], year=year, monthDay=md)
+            add('EVENT', page, clip(m.group(0), 260), year=year, monthDay=md)
         for m in P_INV.finditer(text):
             ctx = text[max(0, m.start()-50):m.start(2)]
             # mục-đích/bài-tập: «em/học sinh… để tìm ra…» ⇒ không phải khám phá
