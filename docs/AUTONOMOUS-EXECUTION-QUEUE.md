@@ -27,7 +27,7 @@ Không xếp theo nhãn ưu tiên của Jira — 54/68 issue đều là `Medium`
 
 ## HÀNG ĐỢI
 
-### 1. WAL-223 — FALSE GREEN: vắng mặt đang được đọc là thành công ⭐ ĐANG CHẠY
+### 1. WAL-223 — FALSE GREEN: vắng mặt đang được đọc là thành công ✅ XONG (Code Review)
 
 Mười chỗ, bốn chỗ sống trên CI, mỗi chỗ đã đọc tận nguồn chứ không suy từ tên.
 Luật: **ABSENCE CANNOT SATISFY A POSITIVE OBLIGATION.**
@@ -50,13 +50,13 @@ denominator floor · ledger · claim gate · đối chiếu ledger↔filesystem.
 Chạy được ngay: chỉ đụng ngữ nghĩa báo cáo, **không** cần corpus, **không**
 đụng D4/WAL-43.
 
-### 2. WAL-193 — «Bạn có biết?» hiện title vô nghĩa khi thiếu năm sinh–mất
+### 2. WAL-193 — «Bạn có biết?» hiện title vô nghĩa khi thiếu năm sinh–mất ✅ VỐN ĐÃ XONG
 
 `Bug`. Trẻ đọc thấy chuỗi rác trên Home. Nhỏ, chạy được ngay, cùng vùng mã tôi
 vừa làm (Discovery/stories) nên ngữ cảnh còn nóng. Nội dung sai tệ hơn không
 có nội dung.
 
-### 3. WAL-194 — thân chuyện mất ký tự đầu («ương pháp» thay vì «Phương pháp»)
+### 3. WAL-194 — thân chuyện mất ký tự đầu («ương pháp» thay vì «Phương pháp») ✅ XONG (Code Review)
 
 `Bug`, cùng vùng. Đây là lỗi DỮ LIỆU lộ ra ở UI, nên phải truy về chỗ cắt chuỗi
 chứ không vá ở lớp hiển thị. Cần đo trên kho thật trước khi sửa.
@@ -110,3 +110,6 @@ thiết kế gốc.
 |---|---|---|
 | 2026-09-07 | WAL-226 (lát cắt) | 1/21 chân dung đã xác minh; **lộ lỗi cấu trúc**: tài sản đúng + cổng đúng vẫn = 0 vì không đường nào dẫn tới. Đã sửa, đã kiểm trên Nokia. |
 | 2026-09-07 | (ngoài hàng đợi) | `showLearningImage` nuốt `bleedScale` — bản vá hôm trước im lặng vô hiệu. Sửa + test đi đúng đường sản phẩm + kiểm-đột-biến. |
+| 2026-09-07 | **1 · WAL-223** | **10/10 xong** → Code Review. 4 cổng CI + 6 cổng chạy tay. Đo được: 5/12 pack rỗng từng được chứng nhận «bản mặc định»; 11/12 lần «đạt» của guard không kiểm mục nào; xoá một giá trị đã ghi từng làm cổng metric xanh. ⚠ Bản sửa đầu của tôi là một **false RED** (thiếu 3/6 họ hoạt động) — bắt được vì đi đo pack thật trước khi tin con số. |
+| 2026-09-07 | **2 · WAL-193** | **Đã xong từ trước** (commit `2bf7058`), ticket chỉ bị bỏ quên ở `Ideas` → Done. Suýt làm lại từ đầu; đối chiếu dữ liệu + git trước khi gõ dòng mã nào. |
+| 2026-09-07 | **3 · WAL-194** | Xong → Code Review. Ticket ước lượng «1 story · THẤP»; đo thật **8/38 cụt đầu + 15/38 cụt đuôi**, và nhãn «TRÍCH NGUYÊN VĂN» đang hứa nhiều hơn nội dung. Kèm lỗi thứ hai: pack chép **đúng một lần** nên bản vá không bao giờ tới được máy đã cài. |
