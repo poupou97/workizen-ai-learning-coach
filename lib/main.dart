@@ -13,9 +13,9 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
+import 'core/pack/pack_sync.dart';
 import 'core/stories/stories_store.dart';
 import 'core/store/file_store.dart';
 import 'core/store/learner_profile.dart';
@@ -228,41 +228,11 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     });
   }
 
-  /// So sánh byte — pack chỉ ~88KB nên rẻ hơn nhiều so với việc để một bản
-  /// chép cũ sống mãi trên máy.
-  static bool _sameBytes(List<int> a, List<int> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
-
   Future<void> _loadStories() async {
     final path = widget.storiesDbPath;
     if (path == null) return;
     try {
-      final f = File(path);
-      // ⭐⭐ WAL-194 — BẢN CHÉP CŨ TỪNG SỐNG MÃI.
-      //
-      // Điều kiện cũ là `if (!f.existsSync())`: chép ĐÚNG MỘT LẦN rồi thôi.
-      // Máy nào đã có bản cũ thì mọi pack sửa lỗi về sau đều bị bỏ qua trong
-      // im lặng — sửa xong ở repo mà trẻ vẫn đọc chữ hỏng. Đó cũng là lý do
-      // lần kiểm WAL-193 phải «xoá app data để buộc chép lại»: một cách lách
-      // lỗi bị dùng như một quy trình.
-      //
-      // Nay so sánh với asset và chỉ ghi khi KHÁC. Đây là bản chép phái sinh
-      // của nội dung đóng trong APK, không phải dữ liệu học của trẻ — ghi đè
-      // nó không đụng gì tới hồ sơ.
-      final bytes = await rootBundle.load('assets/pack/sam-stories.db');
-      final asset = bytes.buffer.asUint8List();
-      final stale = !f.existsSync() || f.lengthSync() != asset.length
-          ? true
-          : !_sameBytes(f.readAsBytesSync(), asset);
-      if (stale) {
-        await f.parent.create(recursive: true);
-        await f.writeAsBytes(asset, flush: true);
-      }
+      await syncPack(path);
       final s = StoriesStore.open(path);
       if (!mounted) return;
       setState(() {
