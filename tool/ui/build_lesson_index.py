@@ -196,6 +196,21 @@ for f in sorted(glob.glob(f'poc-out/graph/ocr-body/{su_book}/p*.json')):
 EXPERIMENT_BOOKS = {  # môn × sách theo lớp — khối «Chuẩn bị/Dụng cụ + Tiến hành»
     4: [('Khoa học', '04-sgk-khoa-hoc-4')],
     5: [('Khoa học', '05-sgk-khoa-hoc-5')],
+    # ⛔ GDTC 6 KHÔNG ĐƯỢC THÊM VÀO ĐÂY, dù nó là ứng viên hấp dẫn nhất.
+    #
+    # Cấu trúc khớp hoàn hảo — «Chuẩn bị:» + «Thực hiện:» trên 44 trang, gấp
+    # 2,7 lần toàn bộ KHTN 6 — và bộ trích đọc ra tên trò chơi thật («Tung và
+    # bắt bóng», «Ôm bóng chạy tiếp sức»). Nhưng ĐỊNH DANH BÀI thì hỏng:
+    #
+    #   mục lục GDTC 6 có 24 mục mà chỉ 4 SỐ BÀI — «Bài 1» xuất hiện 7 lần,
+    #   «Bài 2» 7 lần, «Bài 3» 7 lần. Mỗi chủ đề đánh số lại từ đầu.
+    #
+    # App địa chỉ hoá hoạt động bằng `(sách, số bài)`. Thêm GDTC vào đây thì
+    # trẻ mở «Bài 1» của chủ đề 1 (trang 8, thể dục) sẽ thấy trò bóng rổ ở
+    # trang 93 — NỘI DUNG SAI hiện cho trẻ. Không đánh đổi độ phủ lấy điều đó.
+    #
+    # Muốn mở GDTC phải đưa CHỦ ĐỀ vào khoá định danh bài — đổi mô hình ở cả
+    # pack lẫn Dart lẫn lớp gắn bài. Đó là việc thật, không phải cheap win.
     6: [('KHTN', '06-sgk-khoa-hoc-tu-nhien-6')],
     7: [('KHTN', '07-sgk-khoa-hoc-tu-nhien-7')],
     8: [('KHTN', '08-sgk-khoa-hoc-tu-nhien-8')],
@@ -223,12 +238,14 @@ for subj, bk, f in _exp_sources:
     # tiểu học: «Chuẩn bị:»; lớp 10: «Dụng cụ» — cùng vai trò chuẩn-bị.
     prep_key = 'Chuẩn bị:' if 'Chuẩn bị:' in txt else (
         'Dụng cụ' if 'Dụng cụ' in txt else None)
-    if prep_key is None or 'Tiến hành' not in txt:
+    # Mốc HÀNH ĐỘNG khác nhau theo môn: KHTN «Tiến hành», GDTC «Thực hiện».
+    act_key = next((k for k in ('Tiến hành', 'Thực hiện') if k in txt), None)
+    if prep_key is None or act_key is None:
         continue
     pdf = int(re.search(r'p(\d+)\.json', f).group(1))
     i_cb = next(i for i, t in enumerate(lines) if prep_key in t)
     i_th = next((i for i, t in enumerate(lines[i_cb:], start=i_cb)
-                 if 'Tiến hành' in t), None)
+                 if act_key in t), None)
     if i_th is None:
         continue
     # title: KHTN 6-9 tự đặt tên rõ «Thí nghiệm N: ...» ngay sát Chuẩn bị —
@@ -251,6 +268,13 @@ for subj, bk, f in _exp_sources:
                 and not c.endswith(('.', '?', '!', ':', ','))):
             title = c
             break
+        # ⭐ GDTC đặt tên bằng «Trò chơi …», thường có dấu đầu dòng và một dấu
+        # hai chấm trước TÊN THẬT: «- Trò chơi hỗ trợ khởi động: Giành cờ».
+        # Lấy phần sau dấu hai chấm — đó mới là tên trẻ đọc.
+        m = re.match(r'^[-+•–]?\s*Trò chơi\b[^:]{0,40}:\s*(\S.*)$', c)
+        if m and 3 <= len(m.group(1)) <= 60:
+            title = m.group(1).strip()
+            break
     if title is None:
         # ⚠ Vòng này TRƯỚC ĐÂY quét ngược VÔ HẠN về đầu trang, nên nó lấy được
         # cả «Hoàn thành các câu sau đây» ở dòng 0 làm tên thí nghiệm ở dòng 51.
@@ -264,8 +288,12 @@ for subj, bk, f in _exp_sources:
                 # tính chất hoá học của sắt?»). Phân biệt bằng độ dài + cụm
                 # ra-đề, không bằng dấu hỏi — bản trước chặn cả hai và làm
                 # lớp 4 mất một thí nghiệm.
-                bad_prompt = ('nào sau đây' in c.lower() or 'hãy' in c.lower())
-                if not (c.endswith('?') and (len(c) > 40 or bad_prompt)):
+                # «hãy» là dấu hiệu CÂU LỆNH cho học sinh, không phải tên thí
+                # nghiệm — «Quan sát hình 2, hãy ghi chép sự thay đổi…». Chặn
+                # nó ở mọi dạng, không chỉ khi kết bằng dấu hỏi.
+                low = c.lower()
+                bad_prompt = ('nào sau đây' in low or 'hãy' in low)
+                if not bad_prompt and not (c.endswith('?') and len(c) > 40):
                     title = c
                 break
     if title is None:
@@ -284,8 +312,11 @@ for subj, bk, f in _exp_sources:
         for k in range(i_cb - 1, max(-1, i_cb - 4), -1):
             c = lines[k].strip()
             prev = lines[k - 1].strip() if k > 0 else ''
-            starts_block = (k == 0) or prev.endswith(('.', '?', '!', ':'))
-            if (12 <= len(c) <= 70 and ' ' in c
+            # Mục con «a) b) c)» và chú thích hình cũng MỞ một khối, y như một
+            # câu trọn: «c) Trò chơi phát triển sức nhanh» / «Chạy tiếp sức».
+            starts_block = (k == 0) or prev.endswith(('.', '?', '!', ':')) \
+                or bool(re.match(r'^([a-zđ]\)|\d+\.|Hình\b)', prev))
+            if (8 <= len(c) <= 70 and ' ' in c
                     and starts_block
                     and not c.endswith(('.', '?', '!', ':', ','))
                     and not c.startswith(('•', '-', '–', '?', 'Hình', 'Chuẩn bị'))
@@ -308,7 +339,9 @@ for subj, bk, f in _exp_sources:
     steps, du_doan, quan_sat = [], None, None
     # KHTN 6-9: đôi khi bước đầu viết NGAY sau dấu hai chấm cùng dòng
     # («Tiến hành: Dùng panh kẹp...») thay vì xuống dòng rồi mới «- ...».
-    inline = re.match(r'^Tiến hành\s*:\s*(\S.*)$', lines[i_th])
+    # Dòng mốc có thể mang dấu đầu dòng: «- Thực hiện: …», «+ Tiến hành: …».
+    inline = re.match(r'^[-+•–]?\s*(?:Tiến hành|Thực hiện)\s*:\s*(\S.*)$',
+                      lines[i_th])
     if inline:
         steps.append(inline.group(1).strip())
     # ⭐⭐ SÁCH TIỂU HỌC DÙNG «- », KHTN 6-9 DÙNG «•».
