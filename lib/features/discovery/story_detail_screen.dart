@@ -46,6 +46,37 @@ class StoryDetailScreen extends StatelessWidget {
   final StoryItem item;
   final StoriesStore stories;
 
+  PersonPortrait? get _portrait => PersonPortraits.forPerson(item.personId);
+
+  static const portraitKey = Key('story-detail-portrait');
+
+  /// Ảnh + dòng lai lịch RIÊNG của ảnh (§P2.6) — dùng cho mọi loại chuyện có
+  /// nhân vật, không riêng câu nói.
+  Widget _portraitStrip(PersonPortrait p) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      ClipRRect(
+        borderRadius: BorderRadius.circular(WalSpacing.radiusBookCover),
+        child: Image.asset(
+          p.assetPath,
+          key: portraitKey,
+          width: 72,
+          height: 88,
+          fit: BoxFit.cover,
+          // Ảnh hỏng ⇒ chuyện vẫn đọc được, không để lỗ đen.
+          errorBuilder: (_, _, _) => const SizedBox.shrink(),
+        ),
+      ),
+      const SizedBox(width: WalSpacing.md),
+      Expanded(
+        child: Text(
+          '${p.portraitType.label} · ${p.sourceName} · ${p.licence}',
+          style: const TextStyle(fontSize: 12, color: WalColors.inkSoft),
+        ),
+      ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: WalColors.surface,
@@ -92,6 +123,21 @@ class StoryDetailScreen extends StatelessWidget {
           // `body` là NGỮ CẢNH quanh nó do OCR cắt ra. Hai thứ khác nhau,
           // nên thẻ lấy `title` làm câu trích và giữ `body` ở khối «trích
           // nguyên văn từ nguồn» phía dưới — không trộn.
+          // ⭐⭐ ĐƯỜNG THẬT: NGUỒN → CHUYỆN ĐÃ DUYỆT → NGƯỜI CANONICAL →
+          // CHÂN DUNG ĐÃ DUYỆT → MÀN CHUYỆN.
+          //
+          // Trước đây CHỈ `QuoteCard` tra kho chân dung, mà thẻ ấy chỉ dựng khi
+          // `type == 'QUOTE'`. Đo trên kho: 0 chuyện QUOTE nào có personId, nên
+          // ảnh đã xác minh không tới được mắt ai. Chuyện PERSON thì CÓ
+          // personId và CÓ người thật — ảnh thuộc về đây.
+          //
+          // ⚠ KHÔNG ép thành «lời danh nhân». Trang nguồn của Thạch Lam là một
+          // đoạn TRUYỆN có dẫn nguồn: tác giả VIẾT, nhân vật NÓI. Gắn nhãn
+          // «— Thạch Lam» cho lời nhân vật là sai người nói.
+          if (_portrait != null) ...[
+            _portraitStrip(_portrait!),
+            const SizedBox(height: WalSpacing.md),
+          ],
           if (item.type == 'QUOTE') ...[
             QuoteCard(
               quoteText: item.title,

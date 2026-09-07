@@ -20,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/stories/person_portrait.dart';
 import 'package:learning_coach/core/stories/stories_store.dart';
 import 'package:learning_coach/features/discovery/person_detail_screen.dart';
+import 'package:learning_coach/features/discovery/story_detail_screen.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 /// Dựng DB tối thiểu đúng lược đồ mà [StoriesStore] đọc.
@@ -99,6 +100,44 @@ void main() {
     expect(find.byKey(PersonDetailScreen.provenanceKey), findsNothing);
     expect(find.text('Tô Hoài'), findsOneWidget);
     expect(find.textContaining('TRONG SÁCH CỦA CON'), findsOneWidget);
+  });
+
+  // ⭐⭐ ĐƯỜNG THẬT tới mắt trẻ: chuyện VỀ người cũng phải mang chân dung.
+  // Trước đây chỉ `QuoteCard` tra kho chân dung, mà thẻ ấy chỉ dựng khi
+  // `type == 'QUOTE'` — trong khi 0 chuyện QUOTE nào có `personId`.
+  testWidgets('⭐⭐ màn CHUYỆN của người đã có chân dung ⇒ hiện ảnh + lai lịch', (
+    t,
+  ) async {
+    final store = StoriesStore.open(_fixtureDb('p:thạch-lam', 'Thạch Lam'));
+    final item = store.byPerson('p:thạch-lam').single;
+    await t.pumpWidget(
+      MaterialApp(
+        home: StoryDetailScreen(item: item, stories: store),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(
+      find.byKey(StoryDetailScreen.portraitKey),
+      findsOneWidget,
+      reason: 'chuyện PERSON có personId mà vẫn không tra tới chân dung',
+    );
+    expect(find.textContaining('Ảnh tư liệu'), findsOneWidget);
+    expect(find.textContaining('Gallica'), findsOneWidget);
+  });
+
+  testWidgets('người CHƯA có chân dung ⇒ màn chuyện vẫn đủ, không ô trống', (
+    t,
+  ) async {
+    final store = StoriesStore.open(_fixtureDb('p:tô-hoài', 'Tô Hoài'));
+    final item = store.byPerson('p:tô-hoài').single;
+    await t.pumpWidget(
+      MaterialApp(
+        home: StoryDetailScreen(item: item, stories: store),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(find.byKey(StoryDetailScreen.portraitKey), findsNothing);
+    expect(find.text('TRÍCH NGUYÊN VĂN TỪ NGUỒN'), findsOneWidget);
   });
 
   test('⭐⭐ cảnh báo cấu trúc: kho chân dung phải khớp personId của chuyện', () {
