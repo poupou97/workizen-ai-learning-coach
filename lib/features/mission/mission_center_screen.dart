@@ -189,6 +189,11 @@ class MissionCenterScreen extends StatelessWidget {
 
   /// Ba dải ngang của concept «05 Home» — mỗi dải một khoá riêng để test đo
   /// được ĐÚNG dải mình nói tới, không nhầm sang dải khác.
+  static const gradeLineKey = Key('home-grade-line');
+
+  /// Trạng thái C — lớp chưa có bài nào SAM xếp sẵn.
+  static const noSamLessonKey = Key('home-no-sam-lesson');
+
   static const upcomingRowKey = Key('home-row-upcoming');
   static const subjectRowKey = Key('home-row-subjects');
   static const continueLearningRowKey = Key('home-row-continue-learning');
@@ -249,7 +254,22 @@ class MissionCenterScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: WalSpacing.md),
           children: [
             _pad(_greeting()),
-            if (row.cards.isNotEmpty) ...[
+            // ⭐⭐ TRẠNG THÁI C (lệnh 55) — LỚP CHƯA CÓ BÀI NÀO SAM XẾP SẴN.
+            //
+            // Hàng «HÔM NAY» lúc ấy là sáu thẻ giống hệt nhau, mỗi thẻ nói
+            // «SAM chưa xếp sẵn bài nào ở môn này» — lặp lại một tin xấu sáu
+            // lần làm app trông như hỏng. Thay bằng MỘT câu nói thẳng, rồi
+            // để dải thời khoá biểu và kệ sách làm việc của chúng.
+            //
+            // ⛔ KHÔNG nới bộ lọc lớp để lấp chỗ trống: bài lớp khác vẫn
+            // không được bước vào đây (quyết định C-1, lệnh 54 §2).
+            // Chỉ áp dụng khi trẻ CÓ giá sách mà chưa có bài SAM. Không thẻ
+            // nào cả là chuyện khác (chưa nạp mục lục) — đường cũ xử lý.
+            if (row.cards.isNotEmpty &&
+                !row.cards.any((c) => c.isRealLesson)) ...[
+              const SizedBox(height: WalSpacing.sm),
+              _pad(_noSamLessonPanel()),
+            ] else if (row.cards.isNotEmpty) ...[
               // ── TẦNG 1: NHIỀU MÔN ───────────────────────────────────────
               const SizedBox(height: WalSpacing.sm),
               _pad(_sectionLabel('HÔM NAY')),
@@ -378,13 +398,30 @@ class MissionCenterScreen extends StatelessWidget {
             onTap: onSelectProfile == null
                 ? null
                 : () => _showSwitcher(context),
-            child: Text(
-              'Chào ${learnerName ?? data.studentName}!',
-              style: const TextStyle(
-                fontSize: WalType.title,
-                fontWeight: FontWeight.w700,
-                color: WalColors.ink,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Chào ${learnerName ?? data.studentName}!',
+                  style: const TextStyle(
+                    fontSize: WalType.title,
+                    fontWeight: FontWeight.w700,
+                    color: WalColors.ink,
+                  ),
+                ),
+                // ⭐ Máy của chung: LỚP nằm ngay dưới tên, để nhìn là biết
+                // Home này thuộc về ai — và vì sao nó chỉ có nội dung lớp ấy.
+                if (learnerGrade != null)
+                  Text(
+                    'Lớp $learnerGrade',
+                    key: MissionCenterScreen.gradeLineKey,
+                    style: const TextStyle(
+                      fontSize: WalType.secondary,
+                      color: WalColors.inkSoft,
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -1340,6 +1377,83 @@ class MissionCenterScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// ⭐ Trạng thái C — nói THẲNG cái thiếu, rồi đưa việc thật làm được.
+  ///
+  /// Lệnh 55 cấm câu «Không có gì để học», và cấm bịa bài / bịa tiến độ /
+  /// mượn bài lớp khác. Nên khối này chỉ nói hai điều đều kiểm chứng được:
+  /// SAM chưa soạn bài cho lớp này, và giá sách của lớp có bao nhiêu cuốn.
+  Widget _noSamLessonPanel() {
+    final books = subjectChips.length;
+    return Container(
+      key: MissionCenterScreen.noSamLessonKey,
+      width: double.infinity,
+      padding: const EdgeInsets.all(WalSpacing.lg),
+      decoration: BoxDecoration(
+        color: WalColors.surfaceLavender,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _samChip('assets/mascot/sam-admit-uncertainty.png', size: 36),
+              const SizedBox(width: WalSpacing.sm),
+              const Text(
+                'SAM',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: WalColors.primaryText,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: WalSpacing.sm),
+          Text(
+            learnerGrade == null
+                ? 'Chưa có bài học SAM chuẩn bị sẵn cho lớp của con.'
+                : 'Chưa có bài học SAM chuẩn bị sẵn cho lớp $learnerGrade '
+                      'của con.',
+            style: const TextStyle(
+              fontSize: WalType.body,
+              color: WalColors.ink,
+              height: 1.45,
+            ),
+          ),
+          if (books > 0) ...[
+            const SizedBox(height: WalSpacing.xs),
+            Text(
+              'Sách của con vẫn ở đây — $books môn trên giá.',
+              style: const TextStyle(
+                fontSize: WalType.secondary,
+                color: WalColors.inkSoft,
+                height: 1.4,
+              ),
+            ),
+          ],
+          if (onOpenSubjects != null) ...[
+            const SizedBox(height: WalSpacing.md),
+            SizedBox(
+              height: WalSpacing.minTouch,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: WalColors.primary500,
+                ),
+                onPressed: onOpenSubjects,
+                child: const Text(
+                  'Mở giá sách',
+                  style: TextStyle(fontSize: WalType.body),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
