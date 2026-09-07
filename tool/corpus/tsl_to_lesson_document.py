@@ -613,6 +613,42 @@ def derive_comparison(tsl):
 
 
 # ------------------------------------------------------------------ tutor script (PROTOTYPE, Bài 17 only)
+def canonical_title(book, grade, lesson):
+    """Tên bài theo MỤC LỤC IN của chính cuốn sách, hoặc None.
+
+    ⭐⭐ Tiêu đề trong TSL là một dòng OCR quét được GIỮA TRANG, nên nó dính
+    đuôi tiêu đề bài trước. Ca thật, KHTN 6 Bài 16:
+
+        TSL     : «RA KHỎI HỒN HỢP HỖN HỢP CÁC CHẤT»   ← dính đuôi Bài 15/17
+        mục lục : «Hỗn hợp các chất»                    ← đúng
+
+    Trẻ đọc tiêu đề ấy trên Home, nên đây là chữ hỏng ĐẾN TAY TRẺ.
+
+    `lib/core/display/lesson_title.dart` đã ghi sẵn cách chữa và ghi rõ nó nằm
+    ở đâu: «lấy tên từ mục lục in … nằm TRƯỚC tầng hiển thị». Đây chính là chỗ
+    ấy — sửa ở lúc SINH dữ liệu, không phải lúc vẽ.
+
+    Không có pack trên máy ⇒ None ⇒ giữ tên của TSL. Fail open có chủ ý: thà
+    một tiêu đề kém còn hơn không dựng được bài.
+    """
+    import json as _json
+    path = f'assets/pack/lesson-index-g{grade}.json'
+    if not os.path.exists(path):
+        return None
+    try:
+        idx = _json.load(open(path, encoding='utf-8'))
+    except (OSError, ValueError):
+        return None
+    for books in (idx.get('subjects') or {}).values():
+        for b in books:
+            if b.get('sourceDocumentId') != book:
+                continue
+            for l in b.get('lessons') or []:
+                if l.get('no') == lesson and (l.get('title') or '').strip():
+                    return l['title'].strip()
+    return None
+
+
 def block_key(block_id):
     """`<book>:pNNN:<pipeline>:<order>` → `<book>:pNNN:<order>`.
 
@@ -846,7 +882,7 @@ def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters
         'subject': subject,
         'grade': grade,
         'lesson': lesson,
-        'title': tsl['title'],
+        'title': canonical_title(book, grade, lesson) or tsl['title'],
         'chapter': chapter,
         'chapters': chapters,
         'provenance': {
