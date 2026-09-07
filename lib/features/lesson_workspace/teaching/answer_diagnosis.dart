@@ -156,8 +156,9 @@ AnswerDiagnosis _forChoice(
   final chosenNames = {for (final h in chosen) h.name};
   final shared = chosenNames.intersection(keyedNames);
 
-  if (shared.isNotEmpty)
+  if (shared.isNotEmpty) {
     return _nearMissChoice(chosen, shared, keyedNames, semantic);
+  }
 
   // Sai bản chất: soi ĐÚNG cái trẻ chọn. Tên phương án đúng KHÔNG xuất hiện
   // ở đây (luật 2) — nó chỉ đến ở scaffold khi hết thang gợi ý.
