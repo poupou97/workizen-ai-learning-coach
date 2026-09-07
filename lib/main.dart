@@ -25,7 +25,7 @@ import 'features/camera/mlkit_ocr_adapter.dart';
 import 'core/curriculum/subject_id.dart';
 import 'features/subjects/grade_subjects.dart';
 import 'features/mission/home_cards.dart';
-import 'features/mission/home_upcoming.dart';
+import 'features/mission/timetable_context.dart';
 import 'features/mission/mission_center_screen.dart';
 import 'features/discovery/story_detail_screen.dart';
 import 'features/parent/parent_area.dart';
@@ -33,6 +33,7 @@ import 'features/navigation/app_shell.dart';
 import 'features/navigation/sam_hub_screen.dart';
 import 'features/progress/progress_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/timetable/timetable_screen.dart';
 import 'core/context/learning_context.dart';
 import 'core/curriculum/canonical_problem.dart';
 import 'core/intent/learning_intent.dart';
@@ -40,6 +41,7 @@ import 'core/intent/next_lesson.dart';
 import 'core/knowledge/provenance.dart';
 import 'core/knowledge/slice_curriculum.dart' show curriculaForLearner;
 import 'core/store/timetable.dart';
+import 'core/store/timetable_generator.dart';
 import 'features/learning_session/slice_flow.dart';
 import 'features/assessment/assessment_screen.dart';
 import 'features/assessment/learner_confirm.dart';
@@ -50,7 +52,8 @@ import 'core/student/concept_summary.dart';
 import 'features/discovery/splash_quote.dart';
 import 'features/subjects/lesson_index.dart';
 import 'app/theme/band_density_scope.dart';
-import 'app/theme/wal_tokens.dart' show WalBandDensity;
+import 'app/theme/wal_tokens.dart'
+    show WalBandDensity, WalColors, WalSpacing, WalType;
 import 'core/pedagogy/presentation_policy.dart' show bandForGrade;
 import 'features/subjects/book_shelf_screen.dart';
 import 'features/subjects/subjects_screen.dart';
@@ -88,12 +91,18 @@ class HocCungSamApp extends StatefulWidget {
     this.ocr,
     this.storiesDbPath,
     this.indexLoader = LessonIndex.loadForGrade,
+    this.clock = DateTime.now,
   });
 
   final LearnerStore store;
 
   /// WAL-113 QA — inject được để test nạp index deterministic (mặc định: asset).
   final Future<LessonIndex?> Function(int grade) indexLoader;
+
+  /// ⭐ Lệnh 56 §P5.1 — ĐỒNG HỒ TIÊM ĐƯỢC. Test «hôm nay / ngày mai» phải
+  /// chạy ổn định bất kể ngày CI chạy, nên không chỗ nào trong luồng Home
+  /// gọi thẳng `DateTime.now()`.
+  final DateTime Function() clock;
 
   /// `null` (test/desktop) ⇒ nút chụp giữ flow demo cũ — không giả camera.
   final EducationOcrAdapter? ocr;
@@ -219,15 +228,40 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     });
   }
 
+  /// So sánh byte — pack chỉ ~88KB nên rẻ hơn nhiều so với việc để một bản
+  /// chép cũ sống mãi trên máy.
+  static bool _sameBytes(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
   Future<void> _loadStories() async {
     final path = widget.storiesDbPath;
     if (path == null) return;
     try {
       final f = File(path);
-      if (!f.existsSync()) {
-        final bytes = await rootBundle.load('assets/pack/sam-stories.db');
+      // ⭐⭐ WAL-194 — BẢN CHÉP CŨ TỪNG SỐNG MÃI.
+      //
+      // Điều kiện cũ là `if (!f.existsSync())`: chép ĐÚNG MỘT LẦN rồi thôi.
+      // Máy nào đã có bản cũ thì mọi pack sửa lỗi về sau đều bị bỏ qua trong
+      // im lặng — sửa xong ở repo mà trẻ vẫn đọc chữ hỏng. Đó cũng là lý do
+      // lần kiểm WAL-193 phải «xoá app data để buộc chép lại»: một cách lách
+      // lỗi bị dùng như một quy trình.
+      //
+      // Nay so sánh với asset và chỉ ghi khi KHÁC. Đây là bản chép phái sinh
+      // của nội dung đóng trong APK, không phải dữ liệu học của trẻ — ghi đè
+      // nó không đụng gì tới hồ sơ.
+      final bytes = await rootBundle.load('assets/pack/sam-stories.db');
+      final asset = bytes.buffer.asUint8List();
+      final stale = !f.existsSync() || f.lengthSync() != asset.length
+          ? true
+          : !_sameBytes(f.readAsBytesSync(), asset);
+      if (stale) {
         await f.parent.create(recursive: true);
-        await f.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+        await f.writeAsBytes(asset, flush: true);
       }
       final s = StoriesStore.open(path);
       if (!mounted) return;
@@ -258,7 +292,92 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
       _loading = false;
       _refreshMission();
     });
-    _loadLessonIndex();
+    // ⭐ Lệnh 56 §P0.1 — TÊN → LỚP → MÔN/SÁCH → THỜI KHOÁ BIỂU.
+    //
+    // Mục lục phải nạp XONG trước, vì lịch mẫu chỉ được lấy môn của ĐÚNG lớp
+    // vừa chọn (§P0.2). Nạp xong mới mời — mời trước thì hoặc phải chờ, hoặc
+    // phải sinh lịch từ một danh sách môn chưa có.
+    await _loadLessonIndex();
+    if (mounted) await _offerSampleTimetable(context);
+  }
+
+  /// Bước cuối của việc tạo hồ sơ: lịch. Ba lựa chọn, và «Để sau» là một lựa
+  /// chọn thật — TKB là TUỲ CHỌN (F13), không phải việc còn dở.
+  Future<void> _offerSampleTimetable(BuildContext context) async {
+    final p = _profile;
+    final idx = _lessonIndex;
+    if (p == null || idx == null || gradeSubjectNames(idx).isEmpty) return;
+    if (!context.mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: WalColors.surface,
+      builder: (c) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(WalSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Thời khoá biểu của ${p.displayName}',
+                style: const TextStyle(
+                  fontSize: WalType.title,
+                  fontWeight: FontWeight.w700,
+                  color: WalColors.ink,
+                ),
+              ),
+              const SizedBox(height: WalSpacing.sm),
+              Text(
+                'SAM có thể xếp thử một tuần từ '
+                '${gradeSubjectNames(idx).length} môn trong sách lớp '
+                '${p.grade}. Đây là THỜI KHOÁ BIỂU MẪU để sửa cho nhanh — '
+                'không phải lịch thật của trường.',
+                style: const TextStyle(
+                  fontSize: WalType.secondary,
+                  color: WalColors.inkSoft,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: WalSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                height: WalSpacing.minTouch,
+                child: FilledButton(
+                  key: const Key('onboarding-sample-timetable'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: WalColors.primary500,
+                  ),
+                  onPressed: () async {
+                    await _generateSampleTimetable();
+                    if (c.mounted) Navigator.of(c).pop();
+                  },
+                  child: const Text('✨ Tạo thời khoá biểu mẫu'),
+                ),
+              ),
+              const SizedBox(height: WalSpacing.sm),
+              SizedBox(
+                width: double.infinity,
+                height: WalSpacing.minTouch,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    Navigator.of(c).pop();
+                    if (context.mounted) await _openTimetable(context);
+                  },
+                  child: const Text('Nhập thời khoá biểu'),
+                ),
+              ),
+              const SizedBox(height: WalSpacing.xs),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.of(c).pop(),
+                  child: const Text('Để sau'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _selectProfile(String learnerId) {
@@ -362,7 +481,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     if (mounted) setState(_refreshMission);
   }
 
-  Future<void> _onboarded(LearnerProfile p) async {
+  Future<void> _onboarded(LearnerProfile p, BuildContext context) async {
     await widget.store.saveProfile(p);
     if (!mounted) return;
     setState(() {
@@ -590,7 +709,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
           body: SafeArea(
             child: OnboardingScreen(
               onDone: (p) async {
-                await _onboarded(p);
+                await _onboarded(p, context);
                 if (context.mounted) Navigator.of(context).pop();
               },
             ),
@@ -701,6 +820,49 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     };
   }
 
+  /// ⭐ Lệnh 56 §P1 + §P5.1 — ngữ cảnh lịch của người học đang mở.
+  ///
+  /// `widget.clock` cho test tiêm ngày; production dùng đồng hồ máy.
+  TimetableContext _timetableContext() =>
+      timetableContext(_timetable, now: widget.clock());
+
+  /// §P0.1 / §P1.3 — tạo nhanh MỘT tuần mẫu từ MÔN CỦA ĐÚNG LỚP.
+  ///
+  /// Seed suy từ learnerId nên hai trẻ khác nhau ra hai lịch khác nhau, mà
+  /// cùng một trẻ mở lại vẫn ra đúng lịch ấy.
+  Future<void> _generateSampleTimetable() async {
+    final p = _profile;
+    final idx = _lessonIndex;
+    if (p == null || idx == null) return;
+    final subjects = [for (final s in gradeSubjectNames(idx)) subjectIdOf(s)];
+    if (subjects.isEmpty) return;
+    final entries = generateTimetable(
+      learnerId: p.learnerId,
+      subjects: subjects,
+      seed: p.learnerId.hashCode,
+    );
+    await widget.store.saveTimetable(p.learnerId, entries);
+    if (!mounted) return;
+    setState(() => _timetable = entries);
+  }
+
+  Future<void> _openTimetable(BuildContext context) async {
+    final p = _profile;
+    final idx = _lessonIndex;
+    if (p == null) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => TimetableScreen(
+          profile: p,
+          store: widget.store,
+          subjects: idx == null ? const [] : gradeSubjectNames(idx),
+        ),
+      ),
+    );
+    final t = await widget.store.timetable(p.learnerId);
+    if (mounted) setState(() => _timetable = t);
+  }
+
   Widget _homeChild() => _loading
       ? (_splashQuote == null
             // ROUND 3 B5 (audit O1): khung trắng lúc chờ hồ sơ ⇒ màn
@@ -708,7 +870,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
             ? const BootScreen(note: 'Đang mở hồ sơ của con…')
             : SplashQuoteScreen(quote: _splashQuote!))
       : _profile == null
-      ? OnboardingScreen(onDone: _onboarded)
+      ? OnboardingScreen(onDone: (p) => _onboarded(p, context))
       : FutureBuilder<MissionData>(
           future: _mission,
           builder: (context, snap) {
@@ -739,13 +901,15 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                 learnerGrade: _profile!.grade,
                 lessonThreads: _lessonThreads(_profile!),
                 shelfSubjects: _shelfSubjects(),
-                // ⭐ Concept «05 Home» — ba dải ngang, ba nguồn KHÁC nhau.
-                upcoming: upcomingDays(_timetable, today: DateTime.now()),
+                timetable: _timetableContext(),
+                onOpenTimetable: () => _openTimetable(context),
+                onGenerateSampleTimetable: () => _generateSampleTimetable(),
                 subjectChips: homeSubjectChips(
                   threads: _lessonThreads(_profile!),
                   shelf: _shelfSubjects(),
                   learnerGrade: _profile!.grade,
                   coverBySubject: _coverBySubject(),
+                  timetable: _timetableContext(),
                 ),
                 continueThreads: continueLearning(
                   _lessonThreads(_profile!),
@@ -754,6 +918,8 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                 // MÃ môn trong TKB → TÊN trong mục lục thật. Không
                 // tra được ⇒ giữ mã trần, không bịa tên.
                 subjectLabelOf: _subjectLabelOf,
+                // ⭐ Lệnh 56 §P2 — bìa sách làm nền thẻ bài học.
+                coverOfSubject: (subject) => _coverBySubject()[subject],
                 // ⭐ ROUND 7 · V1 — nút Home mang tên một cách học ⇒
                 // mở ĐÚNG cách học ấy. Lỗi máy thật vòng 1: «📖 Đọc ▸»
                 // mở ra màn hỏi «con muốn học theo cách nào?».

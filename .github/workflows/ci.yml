@@ -163,13 +163,40 @@ jobs:
         run: python3 -m unittest discover -s tool/tests -v
 
       # Cổng «bản build mặc định»: pack trên máy CÓ pack phải mang provenance
-      # đúng hash, KHÔNG experimental, KHÔNG có nguồn pattern-router*. Runner
-      # không có corpus ⇒ không có pack ⇒ bỏ qua có chủ đích (không xanh giả:
-      # bước in rõ là bỏ qua, và test Python ở trên vẫn chạy).
-      - name: Pack provenance verify (only when packs exist)
+      # đúng hash, KHÔNG experimental, KHÔNG có nguồn pattern-router*.
+      #
+      # ⭐⭐ WAL-223 S3 — BƯỚC NÀY TỪNG TỰ BÀO CHỮA BẰNG MỘT LẬP LUẬN SAI.
+      # Chú thích cũ viết: «không xanh giả — bước in rõ là bỏ qua». Đó đúng là
+      # lập luận mà `All tests passed!` đã đưa ra, và nó hỏng vì cùng một lý do:
+      # IN RA RẰNG MÌNH BỎ QUA KHÔNG PHẢI LÀ MỘT BẢN GHI. Không thứ gì phía sau
+      # đọc được một dòng log. Một ledger thì đọc được.
+      #
+      # Runner không có pack là chuyện BÌNH THƯỜNG (corpus không bao giờ vào
+      # repo — D4/WAL-43), nên bước này KHÔNG đỏ vì thiếu pack. Nó chỉ từ chối
+      # để «thiếu pack» đọc thành «đã xác minh».
+      - name: Pack provenance verify (always records a ledger)
         run: |
-          if ls assets/pack/lesson-index-g*.json >/dev/null 2>&1; then
-            python3 tool/ui/pack_provenance.py verify assets/pack/lesson-index-g*.json
-          else
-            echo "no lesson-index packs on this runner (corpus never enters the repo) — verify skipped"
+          shopt -s nullglob
+          packs=(assets/pack/lesson-index-g*.json)
+          python3 tool/ui/pack_provenance.py verify --allow-empty \
+            --ledger build/pack-provenance/ledger.json "${packs[@]}"
+          echo "--- ledger (ran=false nghĩa là CHƯA kiểm, không phải đã đạt) ---"
+          cat build/pack-provenance/ledger.json
+
+      # Cổng phải CÒN SỐNG. Cùng khuôn với Golden-claim gate ở trên: chứng minh
+      # rằng khi không có pack mà vẫn KHẲNG ĐỊNH đã xác minh thì tool đỏ. Không
+      # có bước này, `--require-verified` có thể mục ruỗng mà không ai biết.
+      - name: Pack-provenance claim gate must be alive
+        run: |
+          # Kiểm ĐÚNG hình dạng đã hỏng: KHÔNG pack + có khẳng định «đã xác
+          # minh» ⇒ phải đỏ. Cố tình KHÔNG phụ thuộc vào pack có trên runner
+          # hay không, vì như thế phép kiểm sẽ đổi nghĩa theo từng máy.
+          set +e
+          python3 tool/ui/pack_provenance.py verify --require-verified >/dev/null 2>&1
+          rc=$?
+          set -e
+          if [ "$rc" != "1" ]; then
+            echo "::error::Pack-provenance claim gate đã chết — không có pack mà khẳng định «đã xác minh» vẫn exit $rc (phải là 1)"
+            exit 1
           fi
+          echo "Pack-provenance claim gate còn sống: vắng pack ⇒ khẳng định đỏ (exit $rc)"

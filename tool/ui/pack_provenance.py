@@ -67,14 +67,76 @@ def content_hash(pack):
 
 # ---------------------------------------------------------------- experiment detection
 def router_sources(pack):
-    """Every (family, index, source) whose source starts with 'pattern-router'."""
+    """Every (family, index, source) whose source starts with 'pattern-router'.
+
+    Scans EVERY activity family, not just the two the WAL-206 experiment happened
+    to use: a detector that only looks where the last experiment put things finds
+    only the last experiment.
+    """
     out = []
-    for fam in ROUTER_FAMILIES:
-        for i, e in enumerate(pack.get(fam) or []):
+    for fam in ACTIVITY_FAMILIES:
+        for i, e in enumerate(_entries(pack, fam)):
             src = str((e or {}).get('source', '') or '')
             if src.startswith(ROUTER_PREFIX):
                 out.append((fam, i, src))
     return out
+
+
+VACUOUS = ('no activity entries in any family — "no pattern-router source" is '
+           'vacuously true, so this pack cannot be certified a DEFAULT build')
+
+# The families the DEFAULT-build claim is actually made OVER. ROUTER_FAMILIES is
+# a strict subset: a KHTN pack legitimately carries no tvReadings at all, so the
+# denominator must be every family, never the router ones alone.
+#
+# ⚠ THIS LIST WAS WRONG ONCE, IN THIS TICKET. The first cut listed only the
+# three the router touches and reported 11 of 12 real packs as empty — a false
+# RED, which is every bit as dishonest as the false green being fixed. The two
+# sets below are exhaustive over the packs on disk, and `unknown_families()`
+# makes any future key LOUD instead of silently mis-scored either way.
+ACTIVITY_FAMILIES = (
+    'toanExercises', 'tvReadings', 'tvWritings',
+    'suSources', 'khoaExperiments', 'diaMaps',
+)
+NON_ACTIVITY_KEYS = (
+    'grade', 'version', 'subjects', 'sourceAssets', 'books', 'buildProvenance',
+)
+
+
+def _entries(pack, fam):
+    """Activity entries of one family, whatever container it uses.
+
+    ⚠ CONTAINER SHAPE. `toanExercises` is a DICT keyed by lesson number, not a
+    list: `len()` of it counts LESSONS, not exercises. Counting the wrong thing
+    here has already broken twice — flatten the inner lists.
+    """
+    v = pack.get(fam)
+    if isinstance(v, dict):
+        for entries in v.values():
+            yield from (entries or [])
+    elif isinstance(v, list):
+        yield from v
+
+
+def unknown_families(pack):
+    """Top-level keys this gate cannot classify — neither activity nor metadata.
+
+    A gate that silently ignores a key it has never seen is how a denominator
+    goes stale without anyone noticing. Make it a problem instead.
+    """
+    known = set(ACTIVITY_FAMILIES) | set(NON_ACTIVITY_KEYS)
+    return sorted(k for k in pack if k not in known)
+
+
+def activity_population(pack):
+    """How many activity ENTRIES the pack carries — the denominator of the claim.
+
+    WAL-223 S4: `router_sources()` returning [] means "no experiment sources
+    found". Over an empty pack that is not evidence of anything, yet it read as
+    a pass. Absence cannot satisfy a positive obligation, so the claim now
+    carries its own denominator.
+    """
+    return sum(1 for fam in ACTIVITY_FAMILIES for _ in _entries(pack, fam))
 
 
 def read_flags(env=None):
@@ -175,6 +237,15 @@ def verify_pack(pack, expect_grade=None, require_default=True):
     if not prov['packVersion'].startswith(f'g{prov["grade"]}-') or not prov['packVersion'].endswith(sha[:8]):
         problems.append(f'packVersion {prov["packVersion"]!r} does not match grade/gitSha')
     if require_default:
+        # ⭐ Mẫu số TRƯỚC, khẳng định SAU. Pack rỗng ⇒ không kết luận được gì.
+        if activity_population(pack) == 0:
+            problems.append(VACUOUS)
+        unknown = unknown_families(pack)
+        if unknown:
+            problems.append(
+                f'unclassified top-level key(s) {unknown} — this gate cannot tell '
+                'whether they carry activities, so the denominator may be wrong; '
+                'add each to ACTIVITY_FAMILIES or NON_ACTIVITY_KEYS')
         if prov['experimental'] is True:
             problems.append('experimental build (manifest says experimental=true)')
         srcs = router_sources(pack)
@@ -203,32 +274,113 @@ def verify_file(path, require_default=True):
     return verify_pack(pack, expect_grade=grade_from_filename(path), require_default=require_default)
 
 
+def write_ledger(path, record):
+    """Record what this run actually verified, so «never ran» stays readable.
+
+    WAL-223 S3: the CI step skipped the gate whenever the packs were absent and
+    exited 0, arguing that printing «skipped» is honest. Printing is not a
+    record — nothing downstream can read a log line. A ledger can be read, and
+    a run that produced none has not demonstrated anything.
+    """
+    os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as fh:
+        json.dump(record, fh, ensure_ascii=False, indent=2, sort_keys=True)
+        fh.write('\n')
+
+
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
-    if not argv or argv[0] not in ('verify', 'show') or len(argv) < 2:
+    ledger_path, require_verified, allow_empty = None, False, False
+    rest = []
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        if a == '--ledger' and i + 1 < len(argv):
+            ledger_path = argv[i + 1]
+            i += 2
+        elif a == '--require-verified':
+            require_verified = True
+            i += 1
+        elif a == '--allow-empty':
+            allow_empty = True
+            i += 1
+        else:
+            rest.append(a)
+            i += 1
+    argv = rest
+    if not argv or argv[0] not in ('verify', 'show'):
         print(__doc__.strip().split('\n')[0])
-        print('usage: pack_provenance.py verify <pack.json>…  |  pack_provenance.py show <pack.json>')
+        print('usage: pack_provenance.py verify [--ledger PATH] [--require-verified] <pack.json>…')
+        print('       pack_provenance.py show <pack.json>')
         return 2
     cmd, paths = argv[0], argv[1:]
+    # ⭐ «Không có pack nào» phải được KHAI BÁO, không được ngầm hiểu.
+    #
+    # CI hợp lệ khi truyền vào 0 pack (corpus không bao giờ vào repo), nhưng
+    # người gõ nhầm `verify` cụt cũng ra đúng hình dạng ấy. Bắt caller nói rõ
+    # `--allow-empty` thì hai trường hợp tách ra được, và bên nào cố tình chấp
+    # nhận sự vắng mặt thì phải viết ra điều đó.
+    if cmd == 'verify' and not paths and not (allow_empty or require_verified):
+        print('usage: pack_provenance.py verify [--ledger PATH] [--require-verified] '
+              '[--allow-empty] <pack.json>…')
+        print('  refusing to treat "no packs given" as a run; pass --allow-empty '
+              'if zero packs is an expected input here.')
+        return 2
     if cmd == 'show':
+        if not paths:
+            return 2
         for p in paths:
             pack = json.load(open(p, encoding='utf-8'))
             print(p)
             print(json.dumps(pack.get('buildProvenance'), ensure_ascii=False, indent=2))
         return 0
-    bad = 0
+
+    verified, failed, vacuous = [], [], []
     for p in paths:
         problems = verify_file(p)
         if problems:
-            bad += 1
+            (vacuous if VACUOUS in problems else failed).append(p)
             print(f'FAIL {p}')
             for x in problems:
                 print(f'     - {x}')
         else:
             prov = json.load(open(p, encoding='utf-8'))['buildProvenance']
+            verified.append(p)
             print(f'OK   {p}  {prov["packVersion"]}  {prov["builderVersion"]}  hash {prov["contentHash"][:12]}…')
-    print(f'{len(paths) - bad}/{len(paths)} pack(s) verified as DEFAULT builds' + (f'; {bad} FAILED' if bad else ''))
-    return 1 if bad else 0
+
+    # ⭐ Ba kết quả KHÁC NHAU, không gộp thành một dòng «đạt»:
+    #   verified   — đã kiểm và đạt
+    #   failed     — đã kiểm và phát hiện sai
+    #   vacuous    — KHÔNG kiểm được: pack rỗng, khẳng định không có mẫu số
+    # và trường hợp thứ tư: paths rỗng ⇒ chưa từng chạy.
+    print(f'{len(verified)}/{len(paths)} pack(s) verified as DEFAULT builds'
+          + (f'; {len(failed)} FAILED' if failed else '')
+          + (f'; {len(vacuous)} UNVERIFIABLE (empty)' if vacuous else ''))
+    if not paths:
+        print('NOT VERIFIED: no pack was given to verify. This is not a pass — '
+              'the gate did not run.')
+
+    if ledger_path:
+        write_ledger(ledger_path, {
+            'tool': 'pack_provenance',
+            'ran': bool(paths),
+            'packsGiven': len(paths),
+            'verified': sorted(verified),
+            'failed': sorted(failed),
+            'unverifiable': sorted(vacuous),
+            'claimsDefaultBuildVerified': bool(verified) and not failed and not vacuous,
+        })
+
+    if failed or vacuous:
+        return 1
+    if not verified:
+        # Nothing was verified. Ok as a recorded state; a hard failure for any
+        # caller that CLAIMS verification happened.
+        if require_verified:
+            print('  --require-verified was passed but 0 pack(s) were verified.')
+            return 1
+        return 0
+    return 0
 
 
 if __name__ == '__main__':

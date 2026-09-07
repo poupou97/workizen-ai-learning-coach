@@ -65,7 +65,15 @@ def cmd_report(args):
 
 def cmd_verify(args):
     ctx = R.Ctx(args.root)
-    rows, bad = [], 0
+    # ⭐⭐ WAL-223 S8 — XOÁ MỘT GIÁ TRỊ ĐÃ GHI TỪNG LÀ CÁCH LÀM CỔNG XANH.
+    #
+    # `NO_RECORD` không được tính vào `bad`, nên một chỉ số bị gỡ giá trị ghi
+    # nhận sẽ biến mất khỏi phần «sai» — và tệ hơn, dòng tổng kết còn đếm nó
+    # vào «re-derive to their recorded value», một câu không thể đúng khi
+    # KHÔNG CÓ giá trị nào được ghi.
+    #
+    # Đếm riêng: chưa-hỏi khác với đã-hỏi-và-đúng.
+    rows, bad, unrecorded = [], 0, 0
     for m in R.METRICS:
         if args.only and m.id != args.only:
             continue
@@ -80,6 +88,8 @@ def cmd_verify(args):
             status = MISMATCH
         if status in (MISMATCH, ERROR, UNAVAILABLE):
             bad += 1
+        elif status == NO_RECORD:
+            unrecorded += 1
         rows.append((m.id, m.recorded_value, value if err is None else '—', m.unit, status, err or ''))
 
     if not rows:
@@ -101,10 +111,22 @@ def cmd_verify(args):
         print(f'\nschema check: {"OK — every declared shape holds in every pack" if not shapes else shapes}')
     bad += len(shapes)
 
-    print(f'\n{len(rows) - bad} of {len(rows)} metrics re-derive to their recorded value.')
+    verified = len(rows) - bad - unrecorded
+    print(f'\n{verified} of {len(rows)} metrics re-derive to their recorded value.')
+    if unrecorded:
+        # Câu này TỪNG bị nuốt vào con số trên. Một chỉ số không có giá trị ghi
+        # nhận thì không «khớp» được với cái gì cả.
+        print(f'{unrecorded} metric(s) have NO RECORDED VALUE — not checked, and '
+              'not a pass. Deleting a recorded value must not be a way to go green.')
     if bad:
         print('FAIL — a recorded metric did not re-derive, or its artefact is not on this machine.')
-    return 1 if bad else 0
+    if bad:
+        return 1
+    if unrecorded and getattr(args, 'require_recorded', False):
+        print('--require-recorded: caller claims every metric is verified, but '
+              f'{unrecorded} carry no recorded value.')
+        return 1
+    return 0
 
 
 def cmd_deprecated(args):
@@ -185,6 +207,9 @@ def main(argv=None):
     ap.add_argument('command', choices=('report', 'verify', 'deprecated', 'lint', 'md'))
     ap.add_argument('--root', default=None, help='repository root (default: autodetected)')
     ap.add_argument('--only', default=None, help='a single metric id')
+    ap.add_argument('--require-recorded', action='store_true',
+                    help='verify: exit non-zero if any metric carries no recorded '
+                         'value (for callers that CLAIM every metric is verified)')
     args = ap.parse_args(argv)
     return {'report': cmd_report, 'verify': cmd_verify, 'deprecated': cmd_deprecated,
             'lint': cmd_lint, 'md': cmd_md}[args.command](args)

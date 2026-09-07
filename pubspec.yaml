@@ -73,6 +73,11 @@ flutter:
     - assets/fixtures/real/crops/
     - assets/fixtures/synthetic/
     - assets/fixtures/synthetic/crops/
+    # Lệnh 59 §P2 — chân dung nhân vật ĐÃ xác minh lai lịch + quyền dùng.
+    # Khác `assets/fixtures/real/`: thư mục này CHỈ chứa ảnh phạm vi công cộng
+    # nên được commit VÀ được phát hành. Lai lịch từng ảnh:
+    # docs/content/PERSON-PORTRAIT-PROVENANCE.md
+    - assets/people/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

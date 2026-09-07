@@ -371,7 +371,7 @@ class _BookShelfScreenState extends State<BookShelfScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(WalSpacing.radiusBookCover),
             child: AspectRatio(
               aspectRatio: 3 / 4,
               child: Image.asset(

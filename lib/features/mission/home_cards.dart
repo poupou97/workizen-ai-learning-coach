@@ -40,6 +40,7 @@ import '../../core/agenda/lesson_next_action.dart'
 import '../../core/display/lesson_title.dart';
 import '../../core/lesson_model/lesson_document.dart';
 import '../../core/lesson_model/next_action.dart' show WorkspaceView;
+import 'timetable_context.dart';
 
 /// TỪ VỰNG TRẠNG THÁI Founder cho phép (order 50 §9), nguyên văn.
 ///
@@ -290,6 +291,7 @@ HomeCardRow buildHomeCards({
   List<HomeShelfSubject> shelf = const [],
   int? learnerGrade,
   int limit = kHomeCardLimit,
+  TimetableContext timetable = TimetableContext.empty,
 }) {
   // ⭐⭐ FAIL-CLOSED (lệnh 54): bài ngoài lớp bị LOẠI ngay, trước mọi phép
   // xếp hạng. `learnerGrade == null` chỉ xảy ra ở đường gọi cũ/test không
@@ -302,11 +304,30 @@ HomeCardRow buildHomeCards({
     seenSubjects.add(t.doc.subject);
   }
 
+  // ⭐ Lệnh 56 §P1 — NGỮ CẢNH THỜI KHOÁ BIỂU xếp lại thứ tự: môn HÔM NAY lên
+  // trước, rồi NGÀY MAI, rồi phần còn lại. Xếp ỔN ĐỊNH nên trong cùng một hạng
+  // thứ tự cũ được giữ nguyên.
+  //
+  // ⛔ Đây CHỈ là xếp lại. Không thẻ nào được thêm vào vì có tiết hôm nay:
+  // TIMETABLE SUBJECT ≠ SAM LESSON AVAILABLE.
+  if (!timetable.isEmpty) {
+    own.sort((a, b) {
+      final ra = timetable.rankOfSubject(a.thread!.doc.subject);
+      final rb = timetable.rankOfSubject(b.thread!.doc.subject);
+      return ra.compareTo(rb);
+    });
+  }
+
   final rest =
       [
         for (final s in shelf)
           if (!seenSubjects.contains(s.subject)) s,
       ]..sort((a, b) {
+        // Cùng luật ngữ cảnh cho môn chưa có bài: hôm nay lên trước.
+        final byContext = timetable
+            .rankOfSubject(a.subject)
+            .compareTo(timetable.rankOfSubject(b.subject));
+        if (byContext != 0) return byContext;
         final byOpenable = b.openableLessons.compareTo(a.openableLessons);
         if (byOpenable != 0) return byOpenable;
         final byListed = b.listedLessons.compareTo(a.listedLessons);
@@ -421,7 +442,13 @@ class HomeSubjectChip {
     required this.subject,
     required this.hasSamLesson,
     this.coverAsset,
+    this.when,
   });
+
+  /// «Hôm nay» / «Ngày mai» — nhãn NHẸ theo thời khoá biểu, `null` khi môn
+  /// không có tiết trong hai ngày ấy. Đây là ngữ cảnh LỊCH, không phải trạng
+  /// thái học: nó không nói gì về việc trẻ đã hiểu tới đâu.
+  final String? when;
 
   final String subject;
 
@@ -444,6 +471,7 @@ List<HomeSubjectChip> homeSubjectChips({
   required List<HomeShelfSubject> shelf,
   required int learnerGrade,
   Map<String, String> coverBySubject = const {},
+  TimetableContext timetable = TimetableContext.empty,
 }) {
   final withLesson = <String>{
     for (final t in threads)
@@ -473,6 +501,15 @@ List<HomeSubjectChip> homeSubjectChips({
         ),
       );
     }
+  }
+  // ⭐ §P1.1 — dải môn cũng theo ngữ cảnh: HÔM NAY → NGÀY MAI → còn lại, để
+  // «môn sắp học nằm ngay trước mắt» thay vì bắt trẻ tìm trong 10–12 môn.
+  if (!timetable.isEmpty) {
+    out.sort(
+      (a, b) => timetable
+          .rankOfSubject(a.subject)
+          .compareTo(timetable.rankOfSubject(b.subject)),
+    );
   }
   return out;
 }

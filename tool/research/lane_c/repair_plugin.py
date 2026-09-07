@@ -302,7 +302,23 @@ def run():
                 continue
             blocks.append((page, b))   # TRUSTED blocks too: A1's engine turns a detected-but-unvalidated
                                        # failure on a TRUSTED block into WITHHELD (accuracy first)
-    register(evidence, verbatim, pages)
+    # ⭐⭐ WAL-223 S9 — GIÁ TRỊ TRẢ VỀ TỪNG BỊ VỨT ĐI.
+    #
+    # Ticket mô tả: framework import hỏng ⇒ `register()` trả [] thay vì ném lỗi
+    # ⇒ lần chạy 0 repairer báo «không có ứng viên sửa», không phân biệt được
+    # với «repairer đã chạy và không tìm thấy gì».
+    #
+    # Đo lại cho đúng: đường ĐÓ đã được `run()` chặn từ đầu (`available()` ⇒
+    # SystemExit), nên cơ chế ticket nêu hiện không tới được đây. Cái CÒN sống
+    # là chỗ này: giá trị trả về bị vứt, nên KHÔNG có gì bảo đảm đã đăng ký
+    # được repairer nào. Một registry im lặng đăng ký 0 cái vẫn chạy tiếp và
+    # vẫn báo cáo bình thường.
+    registered = register(evidence, verbatim, pages)
+    if not registered:
+        raise SystemExit(
+            'register() đăng ký 0 repairer. Một lần chạy không có repairer nào '
+            'sẽ báo «không có ứng viên sửa» y hệt một lần chạy đã thử và không '
+            'tìm thấy gì — vắng mặt không được đội lốt kết quả.')
     eng = engine.RepairEngine(ledger_mod.Ledger(f'{RUN}/report/repair-ledger.jsonl',
                                                 run=dict(lane='c', book=BOOK, lesson=LESSON)))
     rows = []

@@ -8,7 +8,7 @@ import 'package:learning_coach/core/store/learner_store.dart';
 import 'package:learning_coach/core/store/timetable.dart';
 import 'package:learning_coach/core/store/learning_session.dart';
 import 'package:learning_coach/core/student/learning_evidence.dart';
-import 'package:learning_coach/features/mission/home_upcoming.dart';
+import 'package:learning_coach/features/mission/timetable_context.dart';
 import 'package:learning_coach/features/mission/mission_center_screen.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
 
@@ -161,7 +161,7 @@ void main() {
       MaterialApp(
         home: MissionCenterScreen(
           data: data,
-          upcoming: upcomingDays(entries, today: today),
+          timetable: timetableContext(entries, now: today),
         ),
       ),
     );

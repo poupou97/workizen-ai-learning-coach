@@ -18,7 +18,8 @@ import 'package:learning_coach/features/subjects/lesson_index.dart';
 
 const _book = '06-sgk-khoa-hoc-tu-nhien-6';
 
-String _pack({String? provenance}) => '''
+String _pack({String? provenance}) =>
+    '''
 {"grade":6,"version":"lesson-index-v2",${provenance == null ? '' : '$provenance,'}
  "subjects":{"KHTN":[{"sourceDocumentId":"$_book","volume":null,
    "lessons":[{"no":17,"title":"Tách chất khỏi hỗn hợp","pageStart":60},
@@ -41,21 +42,31 @@ String _prov(bool experimental) =>
 
 void main() {
   group('fixture — guard theo provenance', () {
-    test('⭐⭐ KHÔNG provenance ⇒ mọi mục router bị loại, đếm 3; mục mined giữ',
-        () {
-      final idx = LessonIndex.fromJsonString(_pack())!;
-      expect(idx.buildProvenance, isNull);
-      expect(idx.droppedRouterActivities, 3,
-          reason: '1 bài đọc + 1 đề viết + 1 thí nghiệm mang source router');
-      expect(idx.tvReadings.map((r) => r.lesson), [18],
-          reason: 'bài đọc mined (không source) vẫn còn');
-      expect(idx.tvWritings, isEmpty);
-      expect(idx.khoaExperiments, isEmpty);
-      expect(idx.activitiesFor(book: _book, lessonNo: 17), isEmpty,
-          reason: '⭐⭐ Bài 17 chỉ có nội dung router ⇒ KHÔNG mở được trên bản '
-              'mặc định — đây chính là cổng');
-      expect(idx.activitiesFor(book: _book, lessonNo: 18), hasLength(1));
-    });
+    test(
+      '⭐⭐ KHÔNG provenance ⇒ mọi mục router bị loại, đếm 3; mục mined giữ',
+      () {
+        final idx = LessonIndex.fromJsonString(_pack())!;
+        expect(idx.buildProvenance, isNull);
+        expect(
+          idx.droppedRouterActivities,
+          3,
+          reason: '1 bài đọc + 1 đề viết + 1 thí nghiệm mang source router',
+        );
+        expect(idx.tvReadings.map((r) => r.lesson), [
+          18,
+        ], reason: 'bài đọc mined (không source) vẫn còn');
+        expect(idx.tvWritings, isEmpty);
+        expect(idx.khoaExperiments, isEmpty);
+        expect(
+          idx.activitiesFor(book: _book, lessonNo: 17),
+          isEmpty,
+          reason:
+              '⭐⭐ Bài 17 chỉ có nội dung router ⇒ KHÔNG mở được trên bản '
+              'mặc định — đây chính là cổng',
+        );
+        expect(idx.activitiesFor(book: _book, lessonNo: 18), hasLength(1));
+      },
+    );
 
     test('provenance khai experimental=false ⇒ vẫn loại (pack nói nó là bản '
         'mặc định thì không được chở nội dung thử nghiệm)', () {
@@ -69,8 +80,11 @@ void main() {
       final idx = LessonIndex.fromJsonString(_pack(provenance: _prov(true)))!;
       expect(idx.droppedRouterActivities, 0);
       expect(idx.tvReadings, hasLength(2));
-      expect(idx.tvReadings.first.source, 'pattern-router-v2-layout',
-          reason: 'source lộ ra để audit đọc được');
+      expect(
+        idx.tvReadings.first.source,
+        'pattern-router-v2-layout',
+        reason: 'source lộ ra để audit đọc được',
+      );
       expect(idx.tvWritings.single.source, 'pattern-router-v1');
       expect(idx.activitiesFor(book: _book, lessonNo: 17), hasLength(3));
     });
@@ -78,9 +92,11 @@ void main() {
     test('openableLessonCount đếm BÀI (không đếm việc), theo guard', () {
       expect(LessonIndex.fromJsonString(_pack())!.openableLessonCount, 1);
       expect(
-          LessonIndex.fromJsonString(_pack(provenance: _prov(true)))!
-              .openableLessonCount,
-          2);
+        LessonIndex.fromJsonString(
+          _pack(provenance: _prov(true)),
+        )!.openableLessonCount,
+        2,
+      );
     });
   });
 
@@ -95,23 +111,65 @@ void main() {
         final idx = LessonIndex.fromJsonString(f.readAsStringSync());
         expect(idx, isNotNull);
         final p = idx!.buildProvenance;
-        expect(p, isNotNull,
-            reason: '⭐⭐ pack lớp $g không khai buildProvenance — pack dựng '
-                'TRƯỚC WAL-210 hoặc builder chưa ghi (lane Python). Máy này '
-                'chưa được làm bằng chứng thiết bị.');
-        expect(p!.experimental, isFalse,
-            reason: '⭐⭐ pack lớp $g tự khai là BẢN THỬ NGHIỆM — không được '
-                'đóng vào APK mặc định');
-        expect(idx.droppedRouterActivities, 0,
-            reason: 'bản mặc định không được chứa mục router để guard phải loại');
         expect(
-            idx.tvReadings.every(
-                (r) => !(r.source?.startsWith('pattern-router') ?? false)),
-            isTrue);
+          p,
+          isNotNull,
+          reason:
+              '⭐⭐ pack lớp $g không khai buildProvenance — pack dựng '
+              'TRƯỚC WAL-210 hoặc builder chưa ghi (lane Python). Máy này '
+              'chưa được làm bằng chứng thiết bị.',
+        );
         expect(
-            idx.tvWritings.every(
-                (w) => !(w.source?.startsWith('pattern-router') ?? false)),
-            isTrue);
+          p!.experimental,
+          isFalse,
+          reason:
+              '⭐⭐ pack lớp $g tự khai là BẢN THỬ NGHIỆM — không được '
+              'đóng vào APK mặc định',
+        );
+        expect(
+          idx.droppedRouterActivities,
+          0,
+          reason: 'bản mặc định không được chứa mục router để guard phải loại',
+        );
+
+        // ⭐⭐ WAL-223 S2 — `every()` TRÊN DANH SÁCH RỖNG LUÔN ĐÚNG.
+        //
+        // Nguồn `pattern-router*` chỉ có thể xuất hiện ở tvReadings/tvWritings,
+        // nên ĐÓ là mẫu số của khẳng định này — không phải tổng hoạt động của
+        // pack. Đo trên máy này: 11/12 pack có 0 mục ở cả hai họ, nghĩa là 11
+        // lần «đạt» trước đây không hề kiểm một mục nào.
+        //
+        // Pack rỗng hai họ ấy KHÔNG phải lỗi build — lớp 1–3 và 11–12 chưa
+        // trích hoạt động. Nên đây không được đỏ; nó chỉ không được phép đọc
+        // thành ĐÃ XÁC MINH.
+        final routerPopulation = idx.tvReadings.length + idx.tvWritings.length;
+        if (routerPopulation == 0) {
+          markTestSkipped(
+            'KHÔNG XÁC MINH ĐƯỢC lớp $g: 0 mục tvReadings/'
+            'tvWritings, nên «không có nguồn pattern-router» đúng một cách '
+            'rỗng. Vắng mặt không chứng minh được điều gì — pack này CHƯA '
+            'được xác nhận là bản mặc định.',
+          );
+          return;
+        }
+        expect(
+          idx.tvReadings.every(
+            (r) => !(r.source?.startsWith('pattern-router') ?? false),
+          ),
+          isTrue,
+          reason:
+              'lớp $g: nguồn pattern-router* trong ${idx.tvReadings.length} '
+              'mục đọc',
+        );
+        expect(
+          idx.tvWritings.every(
+            (w) => !(w.source?.startsWith('pattern-router') ?? false),
+          ),
+          isTrue,
+          reason:
+              'lớp $g: nguồn pattern-router* trong ${idx.tvWritings.length} '
+              'mục viết',
+        );
       });
     }
   });

@@ -45,7 +45,8 @@ import '../parent/parent_tonight_screen.dart';
 import '../lesson_workspace/widgets/fixture_chip.dart';
 import '../lesson_workspace/widgets/trust_sheet.dart';
 import 'home_cards.dart';
-import 'home_upcoming.dart';
+import 'lesson_visual.dart';
+import 'timetable_context.dart';
 import 'mission_data.dart';
 import '../subjects/subject_display.dart';
 
@@ -89,10 +90,13 @@ class MissionCenterScreen extends StatelessWidget {
     this.lessonThreads = const [],
     this.shelfSubjects = const [],
     this.onOpenWorkspaceLesson,
-    this.upcoming = const [],
     this.subjectChips = const [],
     this.continueThreads = const [],
     this.subjectLabelOf,
+    this.coverOfSubject,
+    this.timetable = TimetableContext.empty,
+    this.onOpenTimetable,
+    this.onGenerateSampleTimetable,
   });
 
   final MissionData data;
@@ -167,10 +171,6 @@ class MissionCenterScreen extends StatelessWidget {
   final void Function(LessonDocument doc, {WorkspaceView? at})?
   onOpenWorkspaceLesson;
 
-  /// ⭐ Concept «05 Home» — dải SẮP TỚI: thời khoá biểu TỪ NGÀY MAI.
-  /// Rỗng ⇒ ẩn cả dải (F13: không có TKB là trạng thái hợp lệ).
-  final List<UpcomingDay> upcoming;
-
   /// Dải CÁC MÔN CỦA CON — cửa vào Giá sách.
   final List<HomeSubjectChip> subjectChips;
 
@@ -183,13 +183,33 @@ class MissionCenterScreen extends StatelessWidget {
   /// còn hơn bịa một cái tên không có trong mục lục.
   final String Function(String subjectId)? subjectLabelOf;
 
+  /// ⭐ Lệnh 56 §P2 — MÔN → đường dẫn bìa trong `assets/pack/`. Thẻ bài học
+  /// dùng nó làm HÌNH NỀN khi hình của chính bài bị D4 chặn (xem
+  /// `lesson_visual.dart`). `null` ⇒ thẻ rơi về dải màu theo môn.
+  final String? Function(String subject)? coverOfSubject;
+
+  /// ⭐ Lệnh 56 §P1 — ngữ cảnh lịch của CHÍNH người học đang mở.
+  final TimetableContext timetable;
+
+  /// Mở màn thời khoá biểu. `null` ⇒ ẩn lối vào.
+  final VoidCallback? onOpenTimetable;
+
+  /// §P1.3 — tạo nhanh lịch mẫu khi trẻ chưa có TKB nào.
+  final VoidCallback? onGenerateSampleTimetable;
+
   // ── KHOÁ WIDGET ─────────────────────────────────────────────────────────
   /// TẦNG 1 — hàng Smart Card trượt ngang.
   static const todayRowKey = Key('home-today-row');
 
   /// Ba dải ngang của concept «05 Home» — mỗi dải một khoá riêng để test đo
   /// được ĐÚNG dải mình nói tới, không nhầm sang dải khác.
+  static const gradeLineKey = Key('home-grade-line');
+
+  /// Trạng thái C — lớp chưa có bài nào SAM xếp sẵn.
+  static const noSamLessonKey = Key('home-no-sam-lesson');
+
   static const upcomingRowKey = Key('home-row-upcoming');
+  static const sampleTimetableKey = Key('home-sample-timetable');
   static const subjectRowKey = Key('home-row-subjects');
   static const continueLearningRowKey = Key('home-row-continue-learning');
   static Key smartCardKey(String id) => Key('home-smart-card-$id');
@@ -249,7 +269,22 @@ class MissionCenterScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: WalSpacing.md),
           children: [
             _pad(_greeting()),
-            if (row.cards.isNotEmpty) ...[
+            // ⭐⭐ TRẠNG THÁI C (lệnh 55) — LỚP CHƯA CÓ BÀI NÀO SAM XẾP SẴN.
+            //
+            // Hàng «HÔM NAY» lúc ấy là sáu thẻ giống hệt nhau, mỗi thẻ nói
+            // «SAM chưa xếp sẵn bài nào ở môn này» — lặp lại một tin xấu sáu
+            // lần làm app trông như hỏng. Thay bằng MỘT câu nói thẳng, rồi
+            // để dải thời khoá biểu và kệ sách làm việc của chúng.
+            //
+            // ⛔ KHÔNG nới bộ lọc lớp để lấp chỗ trống: bài lớp khác vẫn
+            // không được bước vào đây (quyết định C-1, lệnh 54 §2).
+            // Chỉ áp dụng khi trẻ CÓ giá sách mà chưa có bài SAM. Không thẻ
+            // nào cả là chuyện khác (chưa nạp mục lục) — đường cũ xử lý.
+            if (row.cards.isNotEmpty &&
+                !row.cards.any((c) => c.isRealLesson)) ...[
+              const SizedBox(height: WalSpacing.sm),
+              _pad(_noSamLessonPanel()),
+            ] else if (row.cards.isNotEmpty) ...[
               // ── TẦNG 1: NHIỀU MÔN ───────────────────────────────────────
               const SizedBox(height: WalSpacing.sm),
               _pad(_sectionLabel('HÔM NAY')),
@@ -259,6 +294,7 @@ class MissionCenterScreen extends StatelessWidget {
                 promotedId: promoted?.id,
                 onOpenLesson: onOpenWorkspaceLesson,
                 onOpenShelf: onOpenSubjects,
+                visualOf: _visualForCard,
               ),
               if (row.hiddenSubjects > 0)
                 _pad(
@@ -310,10 +346,17 @@ class MissionCenterScreen extends StatelessWidget {
             //
             // Dòng chữ «Sắp tới ở trường» cũ đã bị gỡ: nó liệt kê môn của
             // CHÍNH HÔM NAY dưới nhãn «sắp tới» — gọi sai tên thứ nó hiện.
-            if (upcoming.isNotEmpty) ...[
+            // ⭐ §P1.2 — SẮP TỚI: hôm nay + ngày mai, ngắn gọn. Chạm để mở
+            // thời khoá biểu đầy đủ; Home không phải dashboard lịch.
+            if (!timetable.isEmpty) ...[
               const SizedBox(height: WalSpacing.lg),
               _pad(_sectionLabel('SẮP TỚI')),
-              _upcomingDaysRow(),
+              _pad(_upcomingContext()),
+            ] else if (onGenerateSampleTimetable != null ||
+                onOpenTimetable != null) ...[
+              // §P1.3 — chưa có lịch: MỘT lời mời, không lặp trên từng thẻ.
+              const SizedBox(height: WalSpacing.lg),
+              _pad(_noTimetableCta()),
             ],
             // Dải icon hiện khi CÓ môn. Không có môn thì giữ NGUYÊN hành vi
             // cũ: thẻ giá sách chỉ thuộc Home-nhiều-môn, không lấn sang trạng
@@ -378,13 +421,30 @@ class MissionCenterScreen extends StatelessWidget {
             onTap: onSelectProfile == null
                 ? null
                 : () => _showSwitcher(context),
-            child: Text(
-              'Chào ${learnerName ?? data.studentName}!',
-              style: const TextStyle(
-                fontSize: WalType.title,
-                fontWeight: FontWeight.w700,
-                color: WalColors.ink,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Chào ${learnerName ?? data.studentName}!',
+                  style: const TextStyle(
+                    fontSize: WalType.title,
+                    fontWeight: FontWeight.w700,
+                    color: WalColors.ink,
+                  ),
+                ),
+                // ⭐ Máy của chung: LỚP nằm ngay dưới tên, để nhìn là biết
+                // Home này thuộc về ai — và vì sao nó chỉ có nội dung lớp ấy.
+                if (learnerGrade != null)
+                  Text(
+                    'Lớp $learnerGrade',
+                    key: MissionCenterScreen.gradeLineKey,
+                    style: const TextStyle(
+                      fontSize: WalType.secondary,
+                      color: WalColors.inkSoft,
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -1061,79 +1121,125 @@ class MissionCenterScreen extends StatelessWidget {
     );
   }
 
-  /// ═══ A. DẢI «SẮP TỚI» — THẺ LỊCH, NÉN, THIÊN VỀ THỜI GIAN ═══════════
+  /// ═══ A. «SẮP TỚI» — HÔM NAY + NGÀY MAI, NÉN ═════════════════════════
   ///
-  /// Lệnh 53 §3: ba dải phải KHÁC HÌNH THÁI. Thẻ lịch là thẻ nhỏ nhất, không
-  /// ảnh, có VIỀN TRÁI đánh dấu — nhìn thoáng qua đã biết «đây là lịch», khác
-  /// hẳn bìa sách dọc và thẻ bài học đầy ảnh.
+  /// §P1.2: Home chỉ cần ngữ cảnh NGẮN. Toàn bộ tuần nằm sau một chạm.
   ///
-  /// Nói đúng ba điều thời khoá biểu biết: THỨ · NGÀY · MÔN (+ tiết đầu).
-  /// KHÔNG tên bài (F4 cấm suy), KHÔNG giờ đồng hồ (dữ liệu không có).
-  Widget _upcomingDaysRow() => SizedBox(
-    height: 116,
-    child: ListView.separated(
-      key: MissionCenterScreen.upcomingRowKey,
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: WalSpacing.lg),
-      itemCount: upcoming.length,
-      separatorBuilder: (_, _) => const SizedBox(width: WalSpacing.sm),
-      itemBuilder: (_, i) {
-        final d = upcoming[i];
-        return Container(
-          width: 168,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
-            border: const Border(
-              left: BorderSide(color: WalColors.primary500, width: 3),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(
-            WalSpacing.md,
-            WalSpacing.sm,
-            WalSpacing.sm,
-            WalSpacing.sm,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                upcomingDateLabel(d.date),
-                style: const TextStyle(
+  /// KHÔNG tên bài (thời khoá biểu chỉ biết MÔN — F4), KHÔNG giờ đồng hồ
+  /// (dữ liệu có `tiết`, không có giờ).
+  Widget _upcomingContext() => Material(
+    key: MissionCenterScreen.upcomingRowKey,
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+      onTap: onOpenTimetable,
+      child: Padding(
+        padding: const EdgeInsets.all(WalSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _whenLine('Hôm nay', timetable.todaySubjectIds),
+            const SizedBox(height: WalSpacing.sm),
+            _whenLine('Ngày mai', timetable.tomorrowSubjectIds),
+            if (onOpenTimetable != null) ...[
+              const SizedBox(height: WalSpacing.sm),
+              const Text(
+                'Xem thời khoá biểu →',
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: WalColors.ink,
-                ),
-              ),
-              Text(
-                'Từ tiết ${d.firstPeriod}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.4,
                   color: WalColors.primaryText,
                 ),
               ),
-              const SizedBox(height: WalSpacing.xs),
-              Expanded(
-                child: Text(
-                  // MÃ môn → TÊN. Không tra được ⇒ giữ mã trần, không bịa.
-                  d.subjectIds
-                      .map((id) => subjectLabelOf?.call(id) ?? id)
-                      .join(' · '),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: WalColors.inkSoft,
-                    height: 1.3,
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Widget _whenLine(String label, List<String> subjectIds) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(
+        width: 78,
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: WalColors.inkSoft,
+          ),
+        ),
+      ),
+      Expanded(
+        child: Text(
+          // Ngày không có tiết ⇒ nói thẳng, không bịa môn.
+          subjectIds.isEmpty
+              ? 'Không có tiết'
+              : subjectIds
+                    .map((id) => subjectLabelOf?.call(id) ?? id)
+                    .join(' · '),
+          style: TextStyle(
+            fontSize: WalType.secondary,
+            height: 1.35,
+            color: subjectIds.isEmpty ? WalColors.inkSoft : WalColors.ink,
+          ),
+        ),
+      ),
+    ],
+  );
+
+  /// §P1.3 — chưa có thời khoá biểu: MỘT lời mời, ở MỘT chỗ.
+  Widget _noTimetableCta() => Container(
+    padding: const EdgeInsets.all(WalSpacing.md),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Thêm thời khoá biểu để SAM giúp con chuẩn bị bài mỗi ngày.',
+          style: TextStyle(
+            fontSize: WalType.secondary,
+            color: WalColors.ink,
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: WalSpacing.sm),
+        Wrap(
+          spacing: WalSpacing.sm,
+          runSpacing: WalSpacing.xs,
+          children: [
+            if (onOpenTimetable != null)
+              SizedBox(
+                height: WalSpacing.minTouch,
+                child: OutlinedButton(
+                  onPressed: onOpenTimetable,
+                  child: const Text(
+                    'Nhập thời khoá biểu',
+                    style: TextStyle(fontSize: WalType.secondary),
                   ),
                 ),
               ),
-            ],
-          ),
-        );
-      },
+            if (onGenerateSampleTimetable != null)
+              SizedBox(
+                height: WalSpacing.minTouch,
+                child: OutlinedButton(
+                  key: MissionCenterScreen.sampleTimetableKey,
+                  onPressed: onGenerateSampleTimetable,
+                  child: const Text(
+                    '✨ Tạo lịch mẫu',
+                    style: TextStyle(fontSize: WalType.secondary),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
     ),
   );
 
@@ -1169,7 +1275,7 @@ class MissionCenterScreen extends StatelessWidget {
             height: 128,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(WalSpacing.radiusBookCover),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x1A2D2D3A),
@@ -1344,6 +1450,110 @@ class MissionCenterScreen extends StatelessWidget {
     );
   }
 
+  /// ⭐ Lệnh 56 §P2 — hình cho MỘT thẻ, qua chuỗi rơi của `lesson_visual.dart`.
+  ///
+  /// Thẻ có bài ⇒ hỏi theo tài liệu (licence quyết định tầng đầu). Thẻ môn
+  /// rỗng ⇒ không có tài liệu nào, nên chỉ còn bìa/dải màu theo TÊN MÔN.
+  LessonVisual _visualForCard(HomeCard card) {
+    final doc = card.thread?.doc;
+    if (doc != null) {
+      return lessonVisual(
+        doc,
+        coverAsset: coverOfSubject?.call(doc.subject),
+        heroAsset: lessonHeroImage(doc)?.asset,
+      );
+    }
+    final subject = card.subjectLine;
+    final cover = coverOfSubject?.call(subject);
+    return cover == null
+        ? LessonVisual(
+            kind: LessonVisualKind.gradient,
+            seed: subjectSeed(subject),
+          )
+        : LessonVisual(
+            kind: LessonVisualKind.cover,
+            asset: 'assets/pack/$cover',
+            seed: subjectSeed(subject),
+          );
+  }
+
+  /// ⭐ Trạng thái C — nói THẲNG cái thiếu, rồi đưa việc thật làm được.
+  ///
+  /// Lệnh 55 cấm câu «Không có gì để học», và cấm bịa bài / bịa tiến độ /
+  /// mượn bài lớp khác. Nên khối này chỉ nói hai điều đều kiểm chứng được:
+  /// SAM chưa soạn bài cho lớp này, và giá sách của lớp có bao nhiêu cuốn.
+  Widget _noSamLessonPanel() {
+    final books = subjectChips.length;
+    return Container(
+      key: MissionCenterScreen.noSamLessonKey,
+      width: double.infinity,
+      padding: const EdgeInsets.all(WalSpacing.lg),
+      decoration: BoxDecoration(
+        color: WalColors.surfaceLavender,
+        borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _samChip('assets/mascot/sam-admit-uncertainty.png', size: 36),
+              const SizedBox(width: WalSpacing.sm),
+              const Text(
+                'SAM',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: WalColors.primaryText,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: WalSpacing.sm),
+          Text(
+            learnerGrade == null
+                ? 'Chưa có bài học SAM chuẩn bị sẵn cho lớp của con.'
+                : 'Chưa có bài học SAM chuẩn bị sẵn cho lớp $learnerGrade '
+                      'của con.',
+            style: const TextStyle(
+              fontSize: WalType.body,
+              color: WalColors.ink,
+              height: 1.45,
+            ),
+          ),
+          if (books > 0) ...[
+            const SizedBox(height: WalSpacing.xs),
+            Text(
+              'Sách của con vẫn ở đây — $books môn trên giá.',
+              style: const TextStyle(
+                fontSize: WalType.secondary,
+                color: WalColors.inkSoft,
+                height: 1.4,
+              ),
+            ),
+          ],
+          if (onOpenSubjects != null) ...[
+            const SizedBox(height: WalSpacing.md),
+            SizedBox(
+              height: WalSpacing.minTouch,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: WalColors.primary500,
+                ),
+                onPressed: onOpenSubjects,
+                child: const Text(
+                  'Mở giá sách',
+                  style: TextStyle(fontSize: WalType.body),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _sectionLabel(String t) => Padding(
     padding: const EdgeInsets.only(bottom: WalSpacing.sm),
     child: Text(
@@ -1497,6 +1707,7 @@ class _SmartCardRow extends StatefulWidget {
     this.promotedId,
     this.onOpenLesson,
     this.onOpenShelf,
+    this.visualOf,
   });
 
   final List<HomeCard> cards;
@@ -1505,6 +1716,9 @@ class _SmartCardRow extends StatefulWidget {
   final String? promotedId;
 
   final void Function(LessonDocument doc, {WorkspaceView? at})? onOpenLesson;
+
+  /// Hình nền của từng thẻ — do màn ngoài giải, vì chỉ nó biết bìa của môn.
+  final LessonVisual Function(HomeCard card)? visualOf;
   final VoidCallback? onOpenShelf;
 
   @override
@@ -1554,6 +1768,7 @@ class _SmartCardRowState extends State<_SmartCardRow> {
                 right: i == widget.cards.length - 1 ? WalSpacing.md : 0,
               ),
               child: _SmartCard(
+                visual: widget.visualOf?.call(widget.cards[i]),
                 card: widget.cards[i],
                 promoted: widget.cards[i].id == widget.promotedId,
                 onTap: () {
@@ -1603,9 +1818,13 @@ class _SmartCard extends StatelessWidget {
     required this.card,
     required this.promoted,
     required this.onTap,
+    this.visual,
   });
 
   final HomeCard card;
+
+  /// ⭐ Lệnh 56 §P2 — hình của thẻ. `null` ⇒ thẻ vẽ như cũ (đường gọi cũ/test).
+  final LessonVisual? visual;
   final bool promoted;
   final VoidCallback onTap;
 
@@ -1633,7 +1852,6 @@ class _SmartCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
         child: Container(
-          padding: const EdgeInsets.all(WalSpacing.md),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
             border: Border.all(
@@ -1643,102 +1861,131 @@ class _SmartCard extends StatelessWidget {
               width: promoted ? 2 : 1,
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
             children: [
-              // MÔN
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      card.subjectLine.toUpperCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.0,
-                        color: WalColors.primaryText,
+              // ⭐ Lệnh 56 §P2.1 — HÌNH BÊN PHẢI ~45%, mờ dần vào vùng chữ.
+              // §P2.2: chữ KHÔNG nằm trên vùng ảnh đặc — nó chỉ chồng lên
+              // phần đã tan hết, nên đọc được không phụ thuộc vào ảnh nào.
+              if (visual != null)
+                Positioned.fill(
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerRight,
+                    widthFactor: .45,
+                    child: _visualLayer(visual!),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(WalSpacing.md),
+                // ⭐ §P2.2 — CHỮ CHỈ CHIẾM 60% BỀ NGANG, không lấn vào nửa đặc
+                // của ảnh. Đo trên máy lượt 1: để chữ chạy hết bề ngang thì
+                // tiêu đề bài và nhãn «ĐANG GỢI Ý» nằm đè lên bìa sách — đọc
+                // được hay không phụ thuộc vào ảnh, đúng thứ §P2.2 cấm.
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: .60,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // MÔN
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              card.subjectLine.toUpperCase(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.0,
+                                color: WalColors.primaryText,
+                              ),
+                            ),
+                          ),
+                          // Dấu nối hai tầng: thẻ nào đang được «SAM GỢI Ý» nêu.
+                          // Chữ KHÁC nhãn của tầng 2 có chủ ý — hai chỗ, hai vai.
+                          if (promoted)
+                            const Text(
+                              'ĐANG GỢI Ý',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: .8,
+                                color: WalColors.primary500,
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
-                  ),
-                  // Dấu nối hai tầng: thẻ nào đang được «SAM GỢI Ý» nêu.
-                  // Chữ KHÁC nhãn của tầng 2 có chủ ý — hai chỗ, hai vai.
-                  if (promoted)
-                    const Text(
-                      'ĐANG GỢI Ý',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: .8,
-                        color: WalColors.primary500,
+                      const SizedBox(height: 3),
+                      // BÀI — hoặc sự thật «chưa có bài»
+                      Text(
+                        card.lessonLine ?? 'SAM chưa xếp sẵn bài nào',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: WalType.body - .5,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                          color: card.lessonLine == null
+                              ? WalColors.inkSoft
+                              : WalColors.ink,
+                        ),
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 3),
-              // BÀI — hoặc sự thật «chưa có bài»
-              Text(
-                card.lessonLine ?? 'SAM chưa xếp sẵn bài nào',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: WalType.body - .5,
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
-                  color: card.lessonLine == null
-                      ? WalColors.inkSoft
-                      : WalColors.ink,
-                ),
-              ),
-              const SizedBox(height: WalSpacing.sm),
-              // TRẠNG THÁI
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: WalSpacing.sm,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: _token.bg,
-                  borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
-                ),
-                child: Text(
-                  card.state.label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: .6,
-                    color: _token.fg,
+                      const SizedBox(height: WalSpacing.sm),
+                      // TRẠNG THÁI
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: WalSpacing.sm,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _token.bg,
+                          borderRadius: BorderRadius.circular(
+                            WalSpacing.radiusChip,
+                          ),
+                        ),
+                        child: Text(
+                          card.state.label,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: .6,
+                            color: _token.fg,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            card.detailLine,
+                            // Không còn dòng «sách lớp N» (quyết định C-1) nên dòng
+                            // chi tiết luôn có đủ hai hàng.
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12.5,
+                              color: WalColors.inkSoft,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // VIỆC TIẾP THEO
+                      Text(
+                        'Tiếp theo: ${card.nextLabel} →',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: WalColors.primaryText,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 5),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    card.detailLine,
-                    // Không còn dòng «sách lớp N» (quyết định C-1) nên dòng
-                    // chi tiết luôn có đủ hai hàng.
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      color: WalColors.inkSoft,
-                      height: 1.3,
-                    ),
-                  ),
-                ),
-              ),
-              // VIỆC TIẾP THEO
-              Text(
-                'Tiếp theo: ${card.nextLabel} →',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w700,
-                  color: WalColors.primaryText,
                 ),
               ),
             ],
@@ -1746,5 +1993,62 @@ class _SmartCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Lớp hình: ảnh (hoặc dải màu) phủ kín ô phải, rồi một lớp TRẮNG mờ dần từ
+  /// trái sang — trái đặc, phải trong — để chữ luôn nằm trên nền trắng thật.
+  Widget _visualLayer(LessonVisual v) => Stack(
+    fit: StackFit.expand,
+    children: [
+      if (v.asset == null)
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: _subjectGradient(v.seed, v.subjectId),
+            ),
+          ),
+        )
+      else
+        Image.asset(
+          v.asset!,
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+          // Thiếu tệp ⇒ về dải màu, không bao giờ ô trắng vỡ (§P2.4).
+          errorBuilder: (_, _, _) => DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: _subjectGradient(v.seed, v.subjectId),
+              ),
+            ),
+          ),
+        ),
+      const DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [Colors.white, Color(0x00FFFFFF)],
+            stops: [0.0, 0.62],
+          ),
+        ),
+      ),
+    ],
+  );
+
+  /// ⭐ Lệnh 57 §8.10 — MÀU THEO MÔN LẤY TỪ CONCEPT, không phải bảng tự chế.
+  ///
+  /// Bảng cũ ở đây là năm cặp màu tôi tự chọn. Concept CÓ quy định sắc nền
+  /// theo môn (đo ở hàng «Các môn của con»), nên bảng tự chế bị thay bằng
+  /// đúng những màu ấy. Môn concept chưa quy định thì rơi về sắc trung tính
+  /// tất định — và `WalSubjectColors` ghi rõ điều đó.
+  static List<Color> _subjectGradient(int seed, String subjectId) {
+    final c =
+        WalSubjectColors.conceptColor(subjectId) ??
+        WalSubjectColors.fallback[seed % WalSubjectColors.fallback.length];
+    return [c, c];
   }
 }
