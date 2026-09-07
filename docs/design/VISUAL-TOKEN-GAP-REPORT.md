@@ -78,9 +78,22 @@ có test khoá.
 source (Figma/Sketch), không có tệp font, và không tài liệu nào nêu tên font.
 Suy font từ hình dáng chữ trong ảnh nén là đúng thứ §8.4 cấm.
 
-⇒ **DESIGN GAP đã ghi nhận, chưa sửa được.** Cần Founder cung cấp design source
-hoặc tên font. Khi có, việc còn lại là khai font + kiểm tiếng Việt
-(ă â ê ô ơ ư đ + hỏi/ngã/sắc/huyền/nặng) trước khi đổi.
+**Verdict theo lệnh 58 §4 — giữ trung thực:**
+
+```
+FONT FAMILY
+Concept : UNRESOLVED
+App     : system Roboto
+Decision: KEEP TEMPORARILY
+Reason  : no verifiable design source
+```
+
+Không gọi MATCH. Cũng không gọi DIFFERENT — chưa biết font concept thì không
+có gì để so.
+
+⇒ Backlog: **WAL-225** «TYPOGRAPHY SOURCE / FONT FAMILY — UNRESOLVED». Cần một
+trong: Figma/design source · font specification · original editable design ·
+quyết định của Founder.
 
 ### Accent / success / warning / error
 
@@ -99,11 +112,41 @@ bóng đổ, viền mảnh). Chưa gom hết — §8.6 nói «không bắt buộ
 
 ---
 
-## §8.12 — BEFORE / AFTER
+## §8.12 — BEFORE / AFTER trên Nokia (lệnh 58 §7)
 
-BEFORE đã có. **AFTER chưa chụp được: máy tự khoá màn hình giữa chừng**
-(`mDreamingLockscreen=true`), và giao thức của tôi là **không mở khoá máy của
-Founder**. Chụp ngay khi máy được mở khoá.
+| | |
+|---|---|
+| git SHA | `0a76468` (HEAD PR #123) |
+| build | `flutter build apk --profile` (`--release` vẫn bị R8/ML Kit chặn) |
+| device | Nokia 6.1, Android, 1080×1920, gesture nav |
+| xác minh | kéo APK đã cài về, grep `libapp.so` thấy `radiusBookCover` ⇒ APK = HEAD |
+
+Ảnh: `~/Desktop/wal-evidence/order58-final-2026-09-07/`
+A1 Home BEFORE · A2 Home AFTER · B2 Timetable AFTER · C Profile AFTER ·
+D Lesson Workspace AFTER.
+
+### ⭐ Bằng chứng KHÁCH QUAN — đo trên chính ảnh chụp máy
+
+| | tím chủ đạo |
+|---|---|
+| BEFORE | `#7C4DFF` (124 027 px) |
+| AFTER | `#6A36EE` (122 472 px) |
+| CONCEPT | `#6A36EE` |
+
+Không phải «trông gần concept hơn» — **bằng đúng giá trị concept**.
+
+### Quét regression (lệnh 58 §2)
+
+| tìm | kết quả |
+|---|---|
+| `#7C4DFF` hardcode | **0** (chỉ còn trong comment lịch sử) |
+| `circular(20)` kiểu cũ | **0** |
+| `Color(0x…)` trong màn learner-facing | 6, đều là scrim/bóng/viền trong suốt — không phải màu thương hiệu |
+| cùng component khác radius | **1 đã sửa**: bìa sách bo 8 ở Giá sách vs 6 trên Home ⇒ gom về `radiusBookCover` |
+| Timetable như module lạ | không — cùng surface, cùng tím, cùng radius, cùng typography |
+| Lesson Workspace đổi ngoài ý muốn | không |
+| contrast giảm | không thấy |
+| Home quá sặc sỡ vì subject color | không — màu concept là các sắc RẤT nhạt (#F2EDFD…), dùng làm nền thẻ, không phải khối màu
 
 ---
 
