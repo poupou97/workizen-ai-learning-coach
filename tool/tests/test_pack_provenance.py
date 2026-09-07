@@ -169,3 +169,118 @@ class VerifyTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+# ---------------------------------------------------------------------------
+# WAL-223 S3 + S4 — ABSENCE CANNOT SATISFY A POSITIVE OBLIGATION.
+#
+# S4: `router_sources()` returning [] means "no experiment source found". Over a
+#     pack with nothing in it that is not evidence, yet it certified the pack a
+#     DEFAULT build. S3: the CI step skipped when packs were absent and exited 0.
+#
+# Every test below is written so that REMOVING the fix turns it red — the point
+# is the gate, not the coverage number.
+class AbsenceIsNotSuccessTests(unittest.TestCase):
+    def _empty(self):
+        p = default_pack()
+        for fam in pp.ACTIVITY_FAMILIES:
+            p[fam] = {} if isinstance(p.get(fam), dict) else []
+        return p
+
+    def _stamped(self, pack, grade=6):
+        # verify_pack() short-circuits on a missing manifest, so an unstamped
+        # pack never reaches the default-build assertions at all. Two of these
+        # tests passed vacuously until they were stamped — the same shape of
+        # mistake this whole ticket is about.
+        return pp.stamp(pack, grade, pp.read_flags({}), BUILDER)
+
+    def test_empty_pack_is_not_certified_a_default_build(self):
+        problems = pp.verify_pack(self._stamped(self._empty()), require_default=True)
+        self.assertIn(pp.VACUOUS, problems,
+                      'a pack carrying no activity at all was certified OK')
+
+    def test_the_old_evidence_really_was_vacuous(self):
+        # Documents WHY the fix is needed: the check the old code relied on
+        # returns "nothing wrong" over an empty pack.
+        self.assertEqual(pp.router_sources(self._empty()), [])
+        self.assertEqual(pp.activity_population(self._empty()), 0)
+
+    def test_a_real_pack_still_passes(self):
+        # The fix must not buy honesty with a false red.
+        self.assertGreater(pp.activity_population(default_pack()), 0)
+        self.assertEqual(pp.verify_pack(self._stamped(default_pack()), require_default=True), [])
+
+    def test_population_counts_entries_not_lessons(self):
+        # ⚠ `toanExercises` is a DICT keyed by lesson: len() counts LESSONS.
+        # Getting this wrong has broken twice, so it is pinned.
+        p = default_pack()
+        p['toanExercises'] = {'1': [{'e': 1}, {'e': 2}, {'e': 3}], '2': [{'e': 4}]}
+        base = pp.activity_population(default_pack()) - 0
+        self.assertEqual(pp.activity_population(p), base + 4,
+                         'counted lessons (2) instead of exercises (4)')
+
+    def test_every_family_counts_not_only_the_router_ones(self):
+        # The first cut of this fix listed only the three families the router
+        # touches and reported 11 of 12 real packs as empty — a false RED.
+        for fam in ('suSources', 'khoaExperiments', 'diaMaps'):
+            self.assertIn(fam, pp.ACTIVITY_FAMILIES, f'{fam} missing from the denominator')
+
+    def test_unknown_top_level_key_is_loud(self):
+        p = default_pack()
+        p['brandNewFamily'] = [{'source': 'x'}]
+        problems = pp.verify_pack(self._stamped(p), require_default=True)
+        self.assertTrue(any('brandNewFamily' in x for x in problems),
+                        'a key the gate cannot classify was silently ignored')
+
+    def test_router_detection_scans_every_family(self):
+        # A detector that only looks where the last experiment put things finds
+        # only the last experiment.
+        p = default_pack()
+        p['khoaExperiments'] = [dict(source='pattern-router-v9')]
+        self.assertTrue(pp.router_sources(p), 'router source outside tvReadings went unseen')
+
+    # ---- S3: "no packs" is a recorded state, never a silent pass ----
+    def test_bare_verify_is_still_a_usage_error(self):
+        self.assertEqual(_main(['verify']), 2)
+
+    def test_zero_packs_must_be_declared(self):
+        # CI legitimately has no packs, but it has to SAY so.
+        self.assertEqual(_main(['verify', '--allow-empty']), 0)
+
+    def test_zero_packs_cannot_claim_verification(self):
+        self.assertEqual(_main(['verify', '--require-verified']), 1,
+                         'claimed verification with nothing verified')
+
+    def test_ledger_records_that_nothing_ran(self):
+        with tempfile.TemporaryDirectory() as d:
+            led = os.path.join(d, 'sub', 'ledger.json')
+            self.assertEqual(_main(['verify', '--allow-empty', '--ledger', led]), 0)
+            rec = json.load(open(led, encoding='utf-8'))
+        # The whole point: "never ran" is readable, and is not a verification.
+        self.assertIs(rec['ran'], False)
+        self.assertEqual(rec['packsGiven'], 0)
+        self.assertIs(rec['claimsDefaultBuildVerified'], False)
+
+    def test_ledger_records_a_real_verification(self):
+        with tempfile.TemporaryDirectory() as d:
+            pk = os.path.join(d, 'lesson-index-g6.json')
+            pack = pp.stamp(default_pack(), 6, pp.read_flags({}), BUILDER)
+            json.dump(pack, open(pk, 'w', encoding='utf-8'), ensure_ascii=False)
+            led = os.path.join(d, 'ledger.json')
+            self.assertEqual(_main(['verify', '--ledger', led, pk]), 0)
+            rec = json.load(open(led, encoding='utf-8'))
+        self.assertIs(rec['ran'], True)
+        self.assertIs(rec['claimsDefaultBuildVerified'], True)
+        self.assertEqual(rec['verified'], [pk])
+
+    def test_empty_pack_does_not_claim_verification_in_the_ledger(self):
+        with tempfile.TemporaryDirectory() as d:
+            pk = os.path.join(d, 'lesson-index-g6.json')
+            pack = pp.stamp(self._empty(), 6, pp.read_flags({}), BUILDER)
+            json.dump(pack, open(pk, 'w', encoding='utf-8'), ensure_ascii=False)
+            led = os.path.join(d, 'ledger.json')
+            self.assertEqual(_main(['verify', '--ledger', led, pk]), 1)
+            rec = json.load(open(led, encoding='utf-8'))
+        self.assertEqual(rec['unverifiable'], [pk])
+        self.assertEqual(rec['verified'], [])
+        self.assertIs(rec['claimsDefaultBuildVerified'], False)
