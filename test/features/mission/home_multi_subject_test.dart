@@ -78,24 +78,23 @@ List<HomeShelfSubject> _shelf([LessonIndex? idx]) {
 HomeLessonThread _thread(
   LessonDocument d, {
   Set<WorkspaceView> opened = const {},
-}) =>
-    HomeLessonThread(
-      doc: d,
-      openedViews: opened,
-      next: founderNextAction(d, seen: opened),
-    );
+}) => HomeLessonThread(
+  doc: d,
+  openedViews: opened,
+  next: founderNextAction(d, seen: opened),
+);
 
 LessonDocument _readOnly(LessonDocument d, {int grade = 5}) => LessonDocument(
-      schema: d.schema,
-      book: '05-sgk-lich-su-va-dia-li-5',
-      bookTitle: 'LS&ĐL 5',
-      subject: 'LS&ĐL',
-      grade: grade,
-      lessonNo: 8,
-      title: 'Đấu tranh giành độc lập',
-      provenance: d.provenance,
-      blocks: d.blocks,
-    );
+  schema: d.schema,
+  book: '05-sgk-lich-su-va-dia-li-5',
+  bookTitle: 'LS&ĐL 5',
+  subject: 'LS&ĐL',
+  grade: grade,
+  lessonNo: 8,
+  title: 'Đấu tranh giành độc lập',
+  provenance: d.provenance,
+  blocks: d.blocks,
+);
 
 Future<void> _pump(
   WidgetTester t, {
@@ -130,7 +129,9 @@ Future<void> _pump(
 Future<void> _swipe(WidgetTester t, int n) async {
   for (var i = 0; i < n; i++) {
     await t.drag(
-        find.byKey(MissionCenterScreen.todayRowKey), const Offset(-400, 0));
+      find.byKey(MissionCenterScreen.todayRowKey),
+      const Offset(-400, 0),
+    );
     await t.pumpAndSettle();
   }
 }
@@ -171,8 +172,13 @@ void main() {
 
     test('⛔⭐⭐ MÔN CHƯA CÓ BÀI: thẻ NÓI THẲNG, và không được gọi mục lục là '
         '«bài học được»', () {
-      final none = cardForShelfSubject(const HomeShelfSubject(
-          subject: 'Toán', listedLessons: 43, openableLessons: 0));
+      final none = cardForShelfSubject(
+        const HomeShelfSubject(
+          subject: 'Toán',
+          listedLessons: 43,
+          openableLessons: 0,
+        ),
+      );
       expect(none.isRealLesson, isFalse);
       expect(none.lessonLine, isNull);
       expect(none.state, HomeCardState.chuaBatDau);
@@ -182,36 +188,58 @@ void main() {
       expect(none.detailLine, contains('mục lục 43 bài'));
       expect(none.nextLabel, 'Xem mục lục');
 
-      final some = cardForShelfSubject(const HomeShelfSubject(
-          subject: 'KHTN', listedLessons: 55, openableLessons: 4));
+      final some = cardForShelfSubject(
+        const HomeShelfSubject(
+          subject: 'KHTN',
+          listedLessons: 55,
+          openableLessons: 4,
+        ),
+      );
       expect(some.detailLine, contains('4 bài con mở làm được'));
       expect(some.nextLabel, 'Mở giá sách');
     });
 
-    test('⭐⭐ thứ tự hàng: bài đúng lớp → bài lớp khác → môn giá sách theo '
-        '(mở được ↓, mục lục ↓, tên môn)', () {
-      final b17 = loadSyntheticDoc(); // lớp 6
-      final b8 = _readOnly(b17); // lớp 5
-      final row = buildHomeCards(
-        // cố ý đảo: luật phải thắng thứ tự truyền vào
-        threads: [_thread(b8), _thread(b17)],
-        shelf: _shelf(),
-        learnerGrade: 6,
-      );
-      final ids = row.cards.map((c) => c.id).toList();
-      expect(ids.first, b17.slotKey, reason: 'bài của lớp con đứng đầu');
-      expect(ids[1], b8.slotKey, reason: 'bài lớp khác vẫn trong hàng');
-      // KHTN đã có bài ⇒ KHÔNG được lặp lại thành thẻ giá sách.
-      expect(ids, isNot(contains('shelf:KHTN')));
-      // Toán (3 mục lục) trước Tin học (2), Tin học trước Ngữ văn (1).
-      expect(ids.sublist(2), ['shelf:Toán', 'shelf:Tin học', 'shelf:Ngữ văn']);
-    });
+    /// ⭐ ĐỔI HÀNH VI — QUYẾT ĐỊNH C-1 (lệnh 54). Bản trước của bài kiểm này
+    /// đòi «bài lớp khác VẪN trong hàng», đứng sau bài của lớp con. Founder
+    /// đã bác: lọc theo lớp phải xảy ra TRƯỚC xếp hạng, không phải xếp xong
+    /// rồi gắn nhãn. Nên kỳ vọng đảo chiều — bài lớp khác KHÔNG có mặt.
+    test(
+      '⭐⭐ thứ tự hàng: bài của lớp con → môn giá sách; bài lớp KHÁC bị loại',
+      () {
+        final b17 = loadSyntheticDoc(); // lớp 6
+        final b8 = _readOnly(b17); // lớp 5
+        final row = buildHomeCards(
+          // cố ý đảo: luật phải thắng thứ tự truyền vào
+          threads: [_thread(b8), _thread(b17)],
+          shelf: _shelf(),
+          learnerGrade: 6,
+        );
+        final ids = row.cards.map((c) => c.id).toList();
+        expect(ids.first, b17.slotKey, reason: 'bài của lớp con đứng đầu');
+        expect(
+          ids,
+          isNot(contains(b8.slotKey)),
+          reason: 'bài lớp 5 lọt vào Home của học sinh lớp 6',
+        );
+        // KHTN đã có bài ⇒ KHÔNG được lặp lại thành thẻ giá sách.
+        expect(ids, isNot(contains('shelf:KHTN')));
+        // Toán (3 mục lục) trước Tin học (2), Tin học trước Ngữ văn (1).
+        expect(ids.sublist(1), [
+          'shelf:Toán',
+          'shelf:Tin học',
+          'shelf:Ngữ văn',
+        ]);
+      },
+    );
 
     test('⭐ trần thẻ: hàng cắt ở kHomeCardLimit và NÓI RA số môn bị cắt', () {
       final shelf = [
         for (var i = 0; i < 12; i++)
           HomeShelfSubject(
-              subject: 'Môn $i', listedLessons: 12 - i, openableLessons: 0),
+            subject: 'Môn $i',
+            listedLessons: 12 - i,
+            openableLessons: 0,
+          ),
       ];
       final row = buildHomeCards(
         threads: [_thread(loadSyntheticDoc())],
@@ -223,55 +251,64 @@ void main() {
       expect(row.hiddenSubjects, 13 - kHomeCardLimit);
     });
 
-    test('⭐⭐ CHỌN MỘT VIỆC — bậc thang, và nó chỉ XẾP HẠNG việc đã được tính',
-        () {
-      final b17 = loadSyntheticDoc();
-      final b8 = _readOnly(b17);
+    test(
+      '⭐⭐ CHỌN MỘT VIỆC — bậc thang, và nó chỉ XẾP HẠNG việc đã được tính',
+      () {
+        final b17 = loadSyntheticDoc();
+        final b8 = _readOnly(b17);
 
-      // Bậc 2 — sách đúng lớp thắng, kể cả khi bài lớp khác đứng trước VÀ
-      // đang dở còn bài của lớp con thì chưa mở gì.
-      final r1 = buildHomeCards(
-        threads: [
-          _thread(b8, opened: {WorkspaceView.read}),
-          _thread(b17),
-        ],
-        learnerGrade: 6,
-      );
-      expect(r1.cards[promotedCardIndex(r1.cards)!].id, b17.slotKey);
+        // Bậc «khác lớp» đã biến mất cùng quyết định C-1: bài lớp 5 không còn
+        // vào tới hàng, nên nó không phải THUA — nó không có mặt.
+        final r1 = buildHomeCards(
+          threads: [
+            _thread(b8, opened: {WorkspaceView.read}),
+            _thread(b17),
+          ],
+          learnerGrade: 6,
+        );
+        expect(r1.cards.where((c) => c.id == b8.slotKey), isEmpty);
+        expect(r1.cards[promotedCardIndex(r1.cards)!].id, b17.slotKey);
 
-      // Bậc 1 — thẻ rỗng-trung-thực KHÔNG BAO GIỜ được lên tầng 2: nó không
-      // có việc tiếp theo nào để nêu, và bịa ra một cái là phạm §9.
-      final onlyShelf =
-          buildHomeCards(threads: const [], shelf: _shelf(), learnerGrade: 6);
-      expect(onlyShelf.cards, isNotEmpty);
-      expect(promotedCardIndex(onlyShelf.cards), isNull);
+        // Bậc 1 — thẻ rỗng-trung-thực KHÔNG BAO GIỜ được lên tầng 2: nó không
+        // có việc tiếp theo nào để nêu, và bịa ra một cái là phạm §9.
+        final onlyShelf = buildHomeCards(
+          threads: const [],
+          shelf: _shelf(),
+          learnerGrade: 6,
+        );
+        expect(onlyShelf.cards, isNotEmpty);
+        expect(promotedCardIndex(onlyShelf.cards), isNull);
 
-      // Bậc 1 — mạch học CHƯA nối động cơ cũng không được lên: Home không tự
-      // nghĩ ra đề xuất (fail closed).
-      final noEngine = buildHomeCards(
-        threads: [HomeLessonThread(doc: b17)],
-        learnerGrade: 6,
-      );
-      expect(promotedCardIndex(noEngine.cards), isNull);
+        // Bậc 1 — mạch học CHƯA nối động cơ cũng không được lên: Home không tự
+        // nghĩ ra đề xuất (fail closed).
+        final noEngine = buildHomeCards(
+          threads: [HomeLessonThread(doc: b17)],
+          learnerGrade: 6,
+        );
+        expect(promotedCardIndex(noEngine.cards), isNull);
 
-      // Bậc 4 — cùng lớp, cùng loại việc ⇒ bài ĐANG DỞ thắng bài chưa mở.
-      final other = LessonDocument(
-        schema: b17.schema,
-        book: '06-sgk-toan-6-tap-mot',
-        bookTitle: 'Toán 6',
-        subject: 'Toán',
-        grade: 6,
-        lessonNo: 1,
-        title: 'Tập hợp',
-        provenance: b17.provenance,
-        blocks: b17.blocks,
-      );
-      final r2 = buildHomeCards(
-        threads: [_thread(other), _thread(b17, opened: {WorkspaceView.read})],
-        learnerGrade: 6,
-      );
-      expect(r2.cards[promotedCardIndex(r2.cards)!].id, b17.slotKey);
-    });
+        // Bậc 4 — cùng lớp, cùng loại việc ⇒ bài ĐANG DỞ thắng bài chưa mở.
+        final other = LessonDocument(
+          schema: b17.schema,
+          book: '06-sgk-toan-6-tap-mot',
+          bookTitle: 'Toán 6',
+          subject: 'Toán',
+          grade: 6,
+          lessonNo: 1,
+          title: 'Tập hợp',
+          provenance: b17.provenance,
+          blocks: b17.blocks,
+        );
+        final r2 = buildHomeCards(
+          threads: [
+            _thread(other),
+            _thread(b17, opened: {WorkspaceView.read}),
+          ],
+          learnerGrade: 6,
+        );
+        expect(r2.cards[promotedCardIndex(r2.cards)!].id, b17.slotKey);
+      },
+    );
 
     test('⛔⭐⭐ KHÔNG CÓ ĐỘNG CƠ THỨ HAI: `home_cards.dart` không gọi động cơ, '
         'không đọc trace — nó chỉ nhận và xếp hạng', () {
@@ -290,8 +327,11 @@ void main() {
         'WorkspaceTrace',
         'LearnerStore',
       ]) {
-        expect(src, isNot(contains(forbidden)),
-            reason: 'home_cards chỉ được TRÌNH BÀY / XẾP HẠNG NextAction có sẵn');
+        expect(
+          src,
+          isNot(contains(forbidden)),
+          reason: 'home_cards chỉ được TRÌNH BÀY / XẾP HẠNG NextAction có sẵn',
+        );
       }
     });
 
@@ -313,23 +353,24 @@ void main() {
           {WorkspaceView.read, WorkspaceView.visual, WorkspaceView.tutor},
         ])
           lessonCardState(HomeLessonThread(doc: d, openedViews: o)),
-        cardForShelfSubject(const HomeShelfSubject(
-                subject: 'Toán', listedLessons: 1, openableLessons: 0))
-            .state,
+        cardForShelfSubject(
+          const HomeShelfSubject(
+            subject: 'Toán',
+            listedLessons: 1,
+            openableLessons: 0,
+          ),
+        ).state,
       };
       expect(all, isNot(contains(HomeCardState.coTheLuyen)));
       // …và từ vựng vẫn đúng nguyên văn Founder cho phép.
-      expect(
-        HomeCardState.values.map((s) => s.label).toSet(),
-        {
-          'ĐANG HỌC',
-          'CHƯA BẮT ĐẦU',
-          'ĐÃ MỞ ĐỌC',
-          'ĐÃ XEM TRỰC QUAN',
-          'CÓ THỂ LUYỆN',
-          'TIẾP TỤC',
-        },
-      );
+      expect(HomeCardState.values.map((s) => s.label).toSet(), {
+        'ĐANG HỌC',
+        'CHƯA BẮT ĐẦU',
+        'ĐÃ MỞ ĐỌC',
+        'ĐÃ XEM TRỰC QUAN',
+        'CÓ THỂ LUYỆN',
+        'TIẾP TỤC',
+      });
     });
   });
 
@@ -353,8 +394,11 @@ void main() {
    {"no":2,"title":"Chủ đề 2 · Bài 2","pageStart":25},
    {"no":1,"title":"Chủ đề 3 · Bài 1","pageStart":40}]}]}}
 ''')!;
-      expect(idx.listedLessonCountFor('GDTC'), 5,
-          reason: 'gộp theo số bài là xoá bài của trẻ');
+      expect(
+        idx.listedLessonCountFor('GDTC'),
+        5,
+        reason: 'gộp theo số bài là xoá bài của trẻ',
+      );
       expect(idx.openableLessonCountFor('GDTC'), 0);
       // …và bản ghi TRÙNG HỆT vẫn bị bỏ (luật cũ giữ nguyên).
       final dup = LessonIndex.fromJsonString('''
@@ -368,21 +412,29 @@ void main() {
 
   // ══ MÀN HÌNH ═════════════════════════════════════════════════════════════
   group('§2 · §4 — HÀNG THẺ TRƯỢT NGANG', () {
-    testWidgets('⭐⭐ thẻ chính chiếm 75–85 % viewport và thẻ kế bên HÉ RA',
-        (t) async {
+    testWidgets('⭐⭐ thẻ chính chiếm 75–85 % viewport và thẻ kế bên HÉ RA', (
+      t,
+    ) async {
       await _pump(t, threads: [_thread(loadSyntheticDoc())], nokia: true);
       final row = find.byKey(MissionCenterScreen.todayRowKey);
       expect(row, findsOneWidget);
       final screen = t.view.physicalSize.width / t.view.devicePixelRatio;
       final page = find.descendant(of: row, matching: find.byType(PageView));
       final first = t.getRect(
-        find.byKey(MissionCenterScreen.smartCardKey(loadSyntheticDoc().slotKey)),
+        find.byKey(
+          MissionCenterScreen.smartCardKey(loadSyntheticDoc().slotKey),
+        ),
       );
       expect(page, findsOneWidget);
       final share = first.width / screen;
       expect(share, greaterThan(.70), reason: 'thẻ chính quá hẹp');
-      expect(share, lessThan(.86), reason: 'thẻ chính ăn hết chiều ngang ⇒ '
-          'trẻ không biết là có thể vuốt');
+      expect(
+        share,
+        lessThan(.86),
+        reason:
+            'thẻ chính ăn hết chiều ngang ⇒ '
+            'trẻ không biết là có thể vuốt',
+      );
       // Còn CHỖ ở mép phải cho thẻ kế bên hé ra.
       expect(first.right, lessThan(screen - 8));
     });
@@ -395,20 +447,29 @@ void main() {
       final toan = find.byKey(MissionCenterScreen.smartCardKey('shelf:Toán'));
       expect(toan, findsOneWidget);
       await t.drag(
-          find.byKey(MissionCenterScreen.todayRowKey), const Offset(-400, 0));
+        find.byKey(MissionCenterScreen.todayRowKey),
+        const Offset(-400, 0),
+      );
       await t.pumpAndSettle();
       final r = t.getRect(toan);
       final screen = t.view.physicalSize.width / t.view.devicePixelRatio;
-      expect(r.left, lessThan(screen * .2),
-          reason: 'sau khi vuốt, thẻ 2 phải thành thẻ chính');
+      expect(
+        r.left,
+        lessThan(screen * .2),
+        reason: 'sau khi vuốt, thẻ 2 phải thành thẻ chính',
+      );
       expect(
         find.descendant(
-            of: toan, matching: find.text('SAM chưa xếp sẵn bài nào')),
+          of: toan,
+          matching: find.text('SAM chưa xếp sẵn bài nào'),
+        ),
         findsOneWidget,
       );
       expect(
         find.descendant(
-            of: toan, matching: find.textContaining('mục lục 3 bài')),
+          of: toan,
+          matching: find.textContaining('mục lục 3 bài'),
+        ),
         findsOneWidget,
       );
     });
@@ -430,8 +491,9 @@ void main() {
       expect(lesson, isNull);
     });
 
-    testWidgets('⭐ chạm thẻ CÓ BÀI mở đúng bài ĐÚNG cách học động cơ nêu',
-        (t) async {
+    testWidgets('⭐ chạm thẻ CÓ BÀI mở đúng bài ĐÚNG cách học động cơ nêu', (
+      t,
+    ) async {
       LessonDocument? doc;
       WorkspaceView? at;
       await _pump(
@@ -442,42 +504,55 @@ void main() {
           at = v;
         },
       );
-      await t.tap(find.byKey(
-          MissionCenterScreen.smartCardKey(loadSyntheticDoc().slotKey)));
+      await t.tap(
+        find.byKey(
+          MissionCenterScreen.smartCardKey(loadSyntheticDoc().slotKey),
+        ),
+      );
       await t.pumpAndSettle();
       expect(doc?.slotKey, loadSyntheticDoc().slotKey);
       expect(at, WorkspaceView.read, reason: 'R2 — chưa mở gì thì Đọc trước');
     });
 
-    testWidgets('⭐ có môn không lọt vào hàng ⇒ màn NÓI RA, không lặng lẽ giấu',
-        (t) async {
-      final shelf = [
-        for (var i = 0; i < 10; i++)
-          HomeShelfSubject(
-              subject: 'Môn $i', listedLessons: 10 - i, openableLessons: 0),
-      ];
-      await _pump(t, threads: [_thread(loadSyntheticDoc())], shelf: shelf);
-      final line = find.byKey(MissionCenterScreen.rowOverflowKey);
-      expect(line, findsOneWidget);
-      expect(t.widget<Text>(line).data, contains('5 môn nữa'));
-    });
+    testWidgets(
+      '⭐ có môn không lọt vào hàng ⇒ màn NÓI RA, không lặng lẽ giấu',
+      (t) async {
+        final shelf = [
+          for (var i = 0; i < 10; i++)
+            HomeShelfSubject(
+              subject: 'Môn $i',
+              listedLessons: 10 - i,
+              openableLessons: 0,
+            ),
+        ];
+        await _pump(t, threads: [_thread(loadSyntheticDoc())], shelf: shelf);
+        final line = find.byKey(MissionCenterScreen.rowOverflowKey);
+        expect(line, findsOneWidget);
+        expect(t.widget<Text>(line).data, contains('5 môn nữa'));
+      },
+    );
   });
 
   group('§3 — THẺ TRẢ LỜI ĐÚNG BỐN CÂU', () {
     testWidgets('⭐⭐ MÔN · BÀI · TRẠNG THÁI · VIỆC TIẾP THEO, và ví dụ §3 của '
         'Founder hiện đúng như ông viết', (t) async {
       final d = loadSyntheticDoc();
-      await _pump(t, threads: [
-        _thread(d, opened: {WorkspaceView.read, WorkspaceView.visual}),
-      ]);
+      await _pump(
+        t,
+        threads: [
+          _thread(d, opened: {WorkspaceView.read, WorkspaceView.visual}),
+        ],
+      );
       final card = find.byKey(MissionCenterScreen.smartCardKey(d.slotKey));
       Finder inCard(Finder f) => find.descendant(of: card, matching: f);
       expect(inCard(find.text('KHTN 6')), findsOneWidget); // MÔN
       expect(inCard(find.textContaining('Bài 17')), findsOneWidget); // BÀI
       expect(inCard(find.text('ĐANG HỌC')), findsOneWidget); // TRẠNG THÁI
       expect(inCard(find.text('Đã mở: Đọc · Trực quan')), findsOneWidget);
-      expect(inCard(find.text('Tiếp theo: 🦉 Học với SAM →')),
-          findsOneWidget); // VIỆC TIẾP THEO
+      expect(
+        inCard(find.text('Tiếp theo: 🦉 Học với SAM →')),
+        findsOneWidget,
+      ); // VIỆC TIẾP THEO
     });
 
     testWidgets('⭐ thẻ KHÔNG mang chương / số trang / lời SAM / thanh tiến độ '
@@ -485,13 +560,18 @@ void main() {
       final d = loadSyntheticDoc();
       await _pump(t, threads: [_thread(d)]);
       final card = find.byKey(MissionCenterScreen.smartCardKey(d.slotKey));
-      expect(find.descendant(of: card, matching: find.textContaining('Chương')),
-          findsNothing);
-      expect(find.descendant(of: card, matching: find.textContaining('trang')),
-          findsNothing);
       expect(
-          find.descendant(of: card, matching: find.textContaining('đã mở 0/')),
-          findsNothing);
+        find.descendant(of: card, matching: find.textContaining('Chương')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: card, matching: find.textContaining('trang')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: card, matching: find.textContaining('đã mở 0/')),
+        findsNothing,
+      );
       // …nhưng chúng VẪN CÓ MẶT ở tầng dưới — thu nhỏ, không phải xoá.
       expect(find.textContaining('Chương IV'), findsOneWidget);
       expect(find.byKey(MissionCenterScreen.progressKey), findsOneWidget);
@@ -507,50 +587,56 @@ void main() {
       final d = loadSyntheticDoc();
       await _pump(t, threads: [_thread(d)]);
       final full = t
-          .widgetList<Text>(find.descendant(
+          .widgetList<Text>(
+            find.descendant(
               of: find.byKey(MissionCenterScreen.smartCardKey(d.slotKey)),
-              matching: find.byType(Text)))
+              matching: find.byType(Text),
+            ),
+          )
           .map((w) => w.data ?? '')
           .firstWhere((s) => s.startsWith('Bài 17'));
       final tier2 = t
-          .widgetList<Text>(find.descendant(
+          .widgetList<Text>(
+            find.descendant(
               of: find.byKey(MissionCenterScreen.samSuggestionKey),
-              matching: find.byType(Text)))
+              matching: find.byType(Text),
+            ),
+          )
           .map((w) => w.data ?? '')
           .join(' | ');
-      expect(tier2, isNot(contains(full)),
-          reason: 'tầng 2 lặp nguyên tiêu đề của thẻ — lỗi 01-home.png');
+      expect(
+        tier2,
+        isNot(contains(full)),
+        reason: 'tầng 2 lặp nguyên tiêu đề của thẻ — lỗi 01-home.png',
+      );
       expect(tier2, contains('KHTN 6 · Bài 17'));
     });
 
-    testWidgets('⭐⭐ thẻ có thêm dòng «sách lớp N» chỉ được MỘT hàng cho dòng '
-        '«đã mở gì» — chữ bị xén ngang là chữ không đọc được', (t) async {
-      // Máy thật lượt 1 (`02-swipe-card2.png`): ở chiều cao thẻ cũ, dòng này
-      // bị CẮT NGANG THÂN CHỮ trên thẻ LS&ĐL 5 — thẻ duy nhất có bốn dòng
-      // cộng dòng sự thật về lớp.
-      final b8 = _readOnly(loadSyntheticDoc());
-      await _pump(t, threads: [_thread(loadSyntheticDoc()), _thread(b8)]);
-      // Thẻ KHÔNG có dòng «sách lớp N» vẫn được hai hàng — đo trước khi vuốt,
-      // vì `PageView` huỷ thẻ đã rời màn.
-      final own = t.widget<Text>(find.descendant(
-        of: find.byKey(
-            MissionCenterScreen.smartCardKey(loadSyntheticDoc().slotKey)),
-        matching: find.textContaining('SAM đã xếp sẵn'),
-      ));
-      expect(own.maxLines, 2);
-      await _swipe(t, 1);
-      final detail = t.widget<Text>(find.descendant(
-        of: find.byKey(MissionCenterScreen.smartCardKey(b8.slotKey)),
-        matching: find.textContaining('SAM đã xếp sẵn'),
-      ));
-      expect(detail.maxLines, 1);
+    /// ⭐ ĐỔI HÀNH VI — QUYẾT ĐỊNH C-1 (lệnh 54). Bản trước khoá rằng thẻ
+    /// MANG DÒNG NHÃN KHÁC-LỚP chỉ được MỘT hàng cho dòng «đã mở gì», vì ở
+    /// chiều cao cũ nó bị cắt ngang thân chữ (đo trên máy, `02-swipe-card2`).
+    /// Dòng nhãn ấy nay không còn tồn tại, nên bất biến đổi thành: KHÔNG thẻ
+    /// nào bị bóp còn một hàng nữa — phép đo cũ vẫn được tôn trọng, chỉ là
+    /// nguyên nhân của nó đã biến mất.
+    testWidgets('⭐⭐ mọi thẻ đều đủ HAI hàng cho dòng «đã mở gì» — không thẻ '
+        'nào bị xén ngang chữ', (t) async {
+      final d = loadSyntheticDoc();
+      await _pump(t, threads: [_thread(d)]);
+      final detail = t.widget<Text>(
+        find.descendant(
+          of: find.byKey(MissionCenterScreen.smartCardKey(d.slotKey)),
+          matching: find.textContaining('SAM đã xếp sẵn'),
+        ),
+      );
+      expect(detail.maxLines, 2);
       expect(detail.overflow, TextOverflow.ellipsis);
     });
   });
 
   group('§5 — MỘT NEXT ACTION', () {
-    testWidgets('⭐⭐ cả màn ĐÚNG MỘT nút tô đặc, và nó là việc tiếp theo',
-        (t) async {
+    testWidgets('⭐⭐ cả màn ĐÚNG MỘT nút tô đặc, và nó là việc tiếp theo', (
+      t,
+    ) async {
       await _pump(t, threads: [_thread(loadSyntheticDoc())]);
       expect(find.byType(FilledButton), findsOneWidget);
       expect(find.byKey(MissionCenterScreen.nextActionCtaKey), findsOneWidget);
@@ -561,13 +647,18 @@ void main() {
       final d = loadSyntheticDoc();
       await _pump(t, threads: [_thread(d)], nokia: true);
       String cta() => t
-          .widget<Text>(find.descendant(
+          .widget<Text>(
+            find.descendant(
               of: find.byKey(MissionCenterScreen.nextActionCtaKey),
-              matching: find.byType(Text)))
+              matching: find.byType(Text),
+            ),
+          )
           .data!;
       final before = cta();
       await t.drag(
-          find.byKey(MissionCenterScreen.todayRowKey), const Offset(-400, 0));
+        find.byKey(MissionCenterScreen.todayRowKey),
+        const Offset(-400, 0),
+      );
       await t.pumpAndSettle();
       expect(cta(), before);
       expect(find.byType(FilledButton), findsOneWidget);
@@ -599,7 +690,8 @@ void main() {
       // Bài fixture KHÔNG biến mất — nó vẫn là context ở tầng 1.
       expect(
         find.byKey(
-            MissionCenterScreen.smartCardKey(loadSyntheticDoc().slotKey)),
+          MissionCenterScreen.smartCardKey(loadSyntheticDoc().slotKey),
+        ),
         findsOneWidget,
       );
     });
@@ -609,10 +701,13 @@ void main() {
     testWidgets('⛔⭐⭐ CẢ MÀN không có `ĐÃ HIỂU` · `%` · `GIỎI` · `MASTERED` · '
         'sao · điểm', (t) async {
       final d = loadSyntheticDoc();
-      await _pump(t, threads: [
-        _thread(d, opened: {WorkspaceView.read, WorkspaceView.visual}),
-        _thread(_readOnly(d)),
-      ]);
+      await _pump(
+        t,
+        threads: [
+          _thread(d, opened: {WorkspaceView.read, WorkspaceView.visual}),
+          _thread(_readOnly(d)),
+        ],
+      );
       final all = t
           .widgetList<Text>(find.byType(Text))
           .map((w) => (w.data ?? '').toLowerCase())
@@ -629,35 +724,45 @@ void main() {
         '⭐',
         '★',
       ]) {
-        expect(all, isNot(contains(banned)), reason: 'Home hứa mastery: $banned');
+        expect(
+          all,
+          isNot(contains(banned)),
+          reason: 'Home hứa mastery: $banned',
+        );
       }
     });
 
-    testWidgets('⛔⭐ mọi chữ trạng thái trên hàng thẻ đến TỪ TỪ VỰNG Founder',
-        (t) async {
+    testWidgets('⛔⭐ mọi chữ trạng thái trên hàng thẻ đến TỪ TỪ VỰNG Founder', (
+      t,
+    ) async {
       final d = loadSyntheticDoc();
-      await _pump(t, threads: [
-        _thread(d, opened: {WorkspaceView.read}),
-        _thread(_readOnly(d)),
-      ]);
+      await _pump(
+        t,
+        // Bài lớp khác đã bị loại khỏi Home (lệnh 54), nên kịch bản chỉ còn
+        // bài của chính trẻ cộng thẻ môn trên giá sách.
+        threads: [
+          _thread(d, opened: {WorkspaceView.read}),
+        ],
+      );
       final labels = HomeCardState.values.map((s) => s.label).toSet();
       // Mỗi thẻ phải mang ĐÚNG MỘT nhãn, và nhãn ấy phải nằm trong từ vựng.
       // Đi tới từng thẻ bằng cử chỉ — thẻ chưa dựng thì chưa ở trên màn.
-      for (final (i, id) in [
-        d.slotKey,
-        '05-sgk-lich-su-va-dia-li-5#8',
-        'shelf:Toán',
-      ].indexed) {
+      for (final (i, id) in [d.slotKey, 'shelf:Toán'].indexed) {
         await _swipe(t, i == 0 ? 0 : 1);
         final card = find.byKey(MissionCenterScreen.smartCardKey(id));
         expect(card, findsOneWidget, reason: id);
         final texts = t
             .widgetList<Text>(
-                find.descendant(of: card, matching: find.byType(Text)))
+              find.descendant(of: card, matching: find.byType(Text)),
+            )
             .map((w) => w.data ?? '')
             .where(labels.contains)
             .toList();
-        expect(texts.length, 1, reason: '$id mang ${texts.length} nhãn trạng thái');
+        expect(
+          texts.length,
+          1,
+          reason: '$id mang ${texts.length} nhãn trạng thái',
+        );
       }
     });
   });

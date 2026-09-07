@@ -158,7 +158,6 @@ class HomeCard {
     required this.detailLine,
     required this.nextLabel,
     this.lessonLine,
-    this.otherGradeNote,
     this.thread,
   });
 
@@ -182,11 +181,6 @@ class HomeCard {
   /// cơ ([LessonNextAction.label]); với thẻ rỗng, đó là việc thật duy nhất
   /// làm được: giở giá sách.
   final String nextLabel;
-
-  /// «Sách lớp 5 · không phải sách lớp con» — sự thật BẮT BUỘC nói khi bài
-  /// thuộc lớp khác (order 50 §6: vẫn phải nói, nhưng nói như MỘT MÔN / BÀI
-  /// HỌC KHÁC, không phải như phế phẩm nghiên cứu).
-  final String? otherGradeNote;
 
   /// `null` ⇒ thẻ RỖNG-TRUNG-THỰC: môn có trên giá sách, chưa có bài SAM.
   final HomeLessonThread? thread;
@@ -240,9 +234,11 @@ String openedDetailLine(HomeLessonThread thread) {
 }
 
 /// Thẻ cho một mạch học có thật.
-HomeCard cardForThread(HomeLessonThread thread, {int? learnerGrade}) {
+/// ⭐ Quyết định C-1 (lệnh 54): KHÔNG còn tham số `learnerGrade` ở đây, vì
+/// không còn nhãn nào để gắn. Bài ngoài lớp đã bị loại TRƯỚC khi tới hàm này
+/// ([buildHomeCards] và `_lessonThreads`), nên mọi thẻ đều là bài của trẻ.
+HomeCard cardForThread(HomeLessonThread thread) {
   final d = thread.doc;
-  final otherGrade = learnerGrade != null && d.grade != learnerGrade;
   return HomeCard(
     id: d.slotKey,
     subjectLine: d.bookTitle,
@@ -251,9 +247,6 @@ HomeCard cardForThread(HomeLessonThread thread, {int? learnerGrade}) {
     detailLine: openedDetailLine(thread),
     // NGUYÊN VĂN nhãn của động cơ. Home không đặt tên việc tiếp theo.
     nextLabel: thread.next?.label ?? 'Mở bài học',
-    otherGradeNote: otherGrade
-        ? 'Sách lớp ${d.grade} · không phải sách lớp con'
-        : null,
     thread: thread,
   );
 }
@@ -298,13 +291,15 @@ HomeCardRow buildHomeCards({
   int? learnerGrade,
   int limit = kHomeCardLimit,
 }) {
+  // ⭐⭐ FAIL-CLOSED (lệnh 54): bài ngoài lớp bị LOẠI ngay, trước mọi phép
+  // xếp hạng. `learnerGrade == null` chỉ xảy ra ở đường gọi cũ/test không
+  // khai lớp — khi ấy không có lớp để đối chiếu nên không loại được gì.
   final own = <HomeCard>[];
-  final other = <HomeCard>[];
   final seenSubjects = <String>{};
   for (final t in threads) {
-    final card = cardForThread(t, learnerGrade: learnerGrade);
+    if (learnerGrade != null && t.doc.grade != learnerGrade) continue;
+    own.add(cardForThread(t));
     seenSubjects.add(t.doc.subject);
-    (card.otherGradeNote == null ? own : other).add(card);
   }
 
   final rest =
@@ -319,7 +314,7 @@ HomeCardRow buildHomeCards({
         return a.subject.compareTo(b.subject);
       });
 
-  final all = [...own, ...other, for (final s in rest) cardForShelfSubject(s)];
+  final all = [...own, for (final s in rest) cardForShelfSubject(s)];
   final shown = all.length <= limit ? all : all.sublist(0, limit);
   return HomeCardRow(cards: shown, totalSubjects: all.length);
 }
@@ -362,11 +357,12 @@ int? promotedCardIndex(List<HomeCard> cards) {
     final t = c.thread;
     final n = c.next;
     if (t == null || n == null) continue; // bậc 1
+    // Bậc «khác lớp» đã biến mất cùng quyết định C-1: tới được đây thì thẻ
+    // nào cũng là bài của chính trẻ, không còn gì để phạt.
     final score = <int>[
-      c.otherGradeNote == null ? 0 : 1, // bậc 2
-      n.view != null ? 0 : 1, // bậc 3
-      t.openedHere.isEmpty ? 1 : 0, // bậc 4
-      i, // bậc 5
+      n.view != null ? 0 : 1, // bậc 2
+      t.openedHere.isEmpty ? 1 : 0, // bậc 3
+      i, // bậc 4
     ];
     if (bestScore == null || _less(score, bestScore)) {
       best = i;

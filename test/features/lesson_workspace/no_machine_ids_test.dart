@@ -335,18 +335,17 @@ void main() {
         MissionCenterScreen(
           data: data,
           onOpenSubjects: () {},
-          learnerGrade: 6,
-          lessonThreads: [
-            HomeLessonThread(doc: loadSyntheticDoc()),
-            HomeLessonThread(doc: d),
-          ],
+          // Bài kiểm này soi RÒ MÃ MÁY, không soi luật lớp. Từ quyết định C-1
+          // (lệnh 54) Home loại bài ngoài lớp, nên dựng học sinh ĐÚNG lớp của
+          // bài để thẻ có mặt và phép kiểm giữ nguyên mục đích của nó.
+          learnerGrade: d.grade,
+          lessonThreads: [HomeLessonThread(doc: d)],
           onOpenWorkspaceLesson: (_, {at}) {},
         ),
       ),
     );
     await t.pumpAndSettle();
-    // ROUND 7 · V2 — bài sách lớp khác nay là MỘT THẺ HỌC BÌNH THƯỜNG trong
-    // hàng «HÔM NAY» (order 50 §6), không còn thẻ «lát cắt nghiên cứu» riêng.
+    // Thẻ học bình thường trong hàng «HÔM NAY» — của chính lớp em.
     expect(
       find.byKey(MissionCenterScreen.smartCardKey(d.slotKey)),
       findsOneWidget,
