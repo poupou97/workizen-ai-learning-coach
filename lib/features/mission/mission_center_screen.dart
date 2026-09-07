@@ -1275,7 +1275,7 @@ class MissionCenterScreen extends StatelessWidget {
             height: 128,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(WalSpacing.radiusBookCover),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x1A2D2D3A),

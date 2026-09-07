@@ -66,6 +66,11 @@ abstract final class WalSpacing {
   /// thẻ trắng lớn r≈15, thẻ tím nhạt r≈12 ⇒ thẻ ~14, KHÔNG phải 20.
   /// Bo 20 là thứ implementation tự nới qua các vòng, không có trong concept.
   static const radiusCard = 14.0, radiusButton = 16.0, radiusChip = 12.0;
+
+  /// ⭐ Lệnh 58 §2 — BÌA SÁCH bo CÙNG MỘT giá trị ở mọi màn. Trước đó Giá sách
+  /// dùng 8 còn dải «Các môn của con» trên Home dùng 6: cùng một vật thể, hai
+  /// hình dạng — đúng loại bất nhất lệnh 58 yêu cầu tìm.
+  static const radiusBookCover = 8.0;
   static const minTouch = 48.0; // luật Hub: chạm một tay
 }
 
