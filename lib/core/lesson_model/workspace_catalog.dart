@@ -42,8 +42,22 @@ class WorkspaceCatalog {
   /// Bài 8 LS&ĐL 5 — Golden Slice #2 (Lane C, round 4): LÁT CẮT NGHIÊN CỨU
   /// (sách lớp 5) — Founder duyệt ứng viên §7; cổng gate ghi ở
   /// docs/research/lane-c/05-GOLDEN-SLICE-2-GATE.md. Chip thử nghiệm bắt buộc.
+  /// ⭐⭐ Bài 16 KHTN 6 — BÀI THỨ HAI, và nó là BẰNG CHỨNG chứ không phải
+  /// thêm nội dung.
+  ///
+  /// Câu hỏi cần trả lời: Bài 17 chạy được là nhờ NĂNG LỰC CHUNG hay nhờ dữ
+  /// liệu riêng của nó? Bài 16 sinh ra bằng ĐÚNG cầu TSL→LessonDocument sẵn
+  /// có, KHÔNG sửa một dòng mã nào — 77 block, 68 tin cậy, 2 sơ đồ quy trình.
+  /// Nên Đọc và Trực quan đúng là năng lực chung.
+  ///
+  /// ⚠ Còn «Học với SAM» thì KHÔNG: `tutor_script_for` trong cầu ấy mở đầu
+  /// bằng `if book != '06-sgk-khoa-hoc-tu-nhien-6' || lesson != 17 → None`,
+  /// với block id đóng cứng. Đó không phải thiếu dữ liệu mà là một nhánh mã
+  /// chỉ nhận đúng một bài. Bài 16 vì thế mở được Đọc + Trực quan, chưa mở
+  /// được SAM — và màn hình nói thẳng điều đó thay vì hiện một tab rỗng.
   static const defaultSlots = [
     FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 17),
+    FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 16),
     FixtureSlot(book: '05-sgk-lich-su-va-dia-li-5', lessonNo: 8),
   ];
 
