@@ -5,7 +5,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
-import 'package:learning_coach/features/mission/home_cards.dart';
 import 'package:learning_coach/features/mission/mission_center_screen.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
 
