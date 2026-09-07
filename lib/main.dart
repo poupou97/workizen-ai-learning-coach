@@ -25,7 +25,7 @@ import 'features/camera/mlkit_ocr_adapter.dart';
 import 'core/curriculum/subject_id.dart';
 import 'features/subjects/grade_subjects.dart';
 import 'features/mission/home_cards.dart';
-import 'features/mission/home_upcoming.dart';
+import 'features/mission/timetable_context.dart';
 import 'features/mission/mission_center_screen.dart';
 import 'features/discovery/story_detail_screen.dart';
 import 'features/parent/parent_area.dart';
@@ -33,6 +33,7 @@ import 'features/navigation/app_shell.dart';
 import 'features/navigation/sam_hub_screen.dart';
 import 'features/progress/progress_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/timetable/timetable_screen.dart';
 import 'core/context/learning_context.dart';
 import 'core/curriculum/canonical_problem.dart';
 import 'core/intent/learning_intent.dart';
@@ -40,6 +41,7 @@ import 'core/intent/next_lesson.dart';
 import 'core/knowledge/provenance.dart';
 import 'core/knowledge/slice_curriculum.dart' show curriculaForLearner;
 import 'core/store/timetable.dart';
+import 'core/store/timetable_generator.dart';
 import 'features/learning_session/slice_flow.dart';
 import 'features/assessment/assessment_screen.dart';
 import 'features/assessment/learner_confirm.dart';
@@ -88,12 +90,18 @@ class HocCungSamApp extends StatefulWidget {
     this.ocr,
     this.storiesDbPath,
     this.indexLoader = LessonIndex.loadForGrade,
+    this.clock = DateTime.now,
   });
 
   final LearnerStore store;
 
   /// WAL-113 QA — inject được để test nạp index deterministic (mặc định: asset).
   final Future<LessonIndex?> Function(int grade) indexLoader;
+
+  /// ⭐ Lệnh 56 §P5.1 — ĐỒNG HỒ TIÊM ĐƯỢC. Test «hôm nay / ngày mai» phải
+  /// chạy ổn định bất kể ngày CI chạy, nên không chỗ nào trong luồng Home
+  /// gọi thẳng `DateTime.now()`.
+  final DateTime Function() clock;
 
   /// `null` (test/desktop) ⇒ nút chụp giữ flow demo cũ — không giả camera.
   final EducationOcrAdapter? ocr;
@@ -701,6 +709,49 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     };
   }
 
+  /// ⭐ Lệnh 56 §P1 + §P5.1 — ngữ cảnh lịch của người học đang mở.
+  ///
+  /// `widget.clock` cho test tiêm ngày; production dùng đồng hồ máy.
+  TimetableContext _timetableContext() =>
+      timetableContext(_timetable, now: widget.clock());
+
+  /// §P0.1 / §P1.3 — tạo nhanh MỘT tuần mẫu từ MÔN CỦA ĐÚNG LỚP.
+  ///
+  /// Seed suy từ learnerId nên hai trẻ khác nhau ra hai lịch khác nhau, mà
+  /// cùng một trẻ mở lại vẫn ra đúng lịch ấy.
+  Future<void> _generateSampleTimetable() async {
+    final p = _profile;
+    final idx = _lessonIndex;
+    if (p == null || idx == null) return;
+    final subjects = [for (final s in gradeSubjectNames(idx)) subjectIdOf(s)];
+    if (subjects.isEmpty) return;
+    final entries = generateTimetable(
+      learnerId: p.learnerId,
+      subjects: subjects,
+      seed: p.learnerId.hashCode,
+    );
+    await widget.store.saveTimetable(p.learnerId, entries);
+    if (!mounted) return;
+    setState(() => _timetable = entries);
+  }
+
+  Future<void> _openTimetable(BuildContext context) async {
+    final p = _profile;
+    final idx = _lessonIndex;
+    if (p == null) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => TimetableScreen(
+          profile: p,
+          store: widget.store,
+          subjects: idx == null ? const [] : gradeSubjectNames(idx),
+        ),
+      ),
+    );
+    final t = await widget.store.timetable(p.learnerId);
+    if (mounted) setState(() => _timetable = t);
+  }
+
   Widget _homeChild() => _loading
       ? (_splashQuote == null
             // ROUND 3 B5 (audit O1): khung trắng lúc chờ hồ sơ ⇒ màn
@@ -739,13 +790,15 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                 learnerGrade: _profile!.grade,
                 lessonThreads: _lessonThreads(_profile!),
                 shelfSubjects: _shelfSubjects(),
-                // ⭐ Concept «05 Home» — ba dải ngang, ba nguồn KHÁC nhau.
-                upcoming: upcomingDays(_timetable, today: DateTime.now()),
+                timetable: _timetableContext(),
+                onOpenTimetable: () => _openTimetable(context),
+                onGenerateSampleTimetable: () => _generateSampleTimetable(),
                 subjectChips: homeSubjectChips(
                   threads: _lessonThreads(_profile!),
                   shelf: _shelfSubjects(),
                   learnerGrade: _profile!.grade,
                   coverBySubject: _coverBySubject(),
+                  timetable: _timetableContext(),
                 ),
                 continueThreads: continueLearning(
                   _lessonThreads(_profile!),

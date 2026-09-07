@@ -46,7 +46,7 @@ import '../lesson_workspace/widgets/fixture_chip.dart';
 import '../lesson_workspace/widgets/trust_sheet.dart';
 import 'home_cards.dart';
 import 'lesson_visual.dart';
-import 'home_upcoming.dart';
+import 'timetable_context.dart';
 import 'mission_data.dart';
 import '../subjects/subject_display.dart';
 
@@ -90,11 +90,13 @@ class MissionCenterScreen extends StatelessWidget {
     this.lessonThreads = const [],
     this.shelfSubjects = const [],
     this.onOpenWorkspaceLesson,
-    this.upcoming = const [],
     this.subjectChips = const [],
     this.continueThreads = const [],
     this.subjectLabelOf,
     this.coverOfSubject,
+    this.timetable = TimetableContext.empty,
+    this.onOpenTimetable,
+    this.onGenerateSampleTimetable,
   });
 
   final MissionData data;
@@ -169,10 +171,6 @@ class MissionCenterScreen extends StatelessWidget {
   final void Function(LessonDocument doc, {WorkspaceView? at})?
   onOpenWorkspaceLesson;
 
-  /// ⭐ Concept «05 Home» — dải SẮP TỚI: thời khoá biểu TỪ NGÀY MAI.
-  /// Rỗng ⇒ ẩn cả dải (F13: không có TKB là trạng thái hợp lệ).
-  final List<UpcomingDay> upcoming;
-
   /// Dải CÁC MÔN CỦA CON — cửa vào Giá sách.
   final List<HomeSubjectChip> subjectChips;
 
@@ -190,6 +188,15 @@ class MissionCenterScreen extends StatelessWidget {
   /// `lesson_visual.dart`). `null` ⇒ thẻ rơi về dải màu theo môn.
   final String? Function(String subject)? coverOfSubject;
 
+  /// ⭐ Lệnh 56 §P1 — ngữ cảnh lịch của CHÍNH người học đang mở.
+  final TimetableContext timetable;
+
+  /// Mở màn thời khoá biểu. `null` ⇒ ẩn lối vào.
+  final VoidCallback? onOpenTimetable;
+
+  /// §P1.3 — tạo nhanh lịch mẫu khi trẻ chưa có TKB nào.
+  final VoidCallback? onGenerateSampleTimetable;
+
   // ── KHOÁ WIDGET ─────────────────────────────────────────────────────────
   /// TẦNG 1 — hàng Smart Card trượt ngang.
   static const todayRowKey = Key('home-today-row');
@@ -197,6 +204,7 @@ class MissionCenterScreen extends StatelessWidget {
   /// Ba dải ngang của concept «05 Home» — mỗi dải một khoá riêng để test đo
   /// được ĐÚNG dải mình nói tới, không nhầm sang dải khác.
   static const upcomingRowKey = Key('home-row-upcoming');
+  static const sampleTimetableKey = Key('home-sample-timetable');
   static const subjectRowKey = Key('home-row-subjects');
   static const continueLearningRowKey = Key('home-row-continue-learning');
   static Key smartCardKey(String id) => Key('home-smart-card-$id');
@@ -318,10 +326,17 @@ class MissionCenterScreen extends StatelessWidget {
             //
             // Dòng chữ «Sắp tới ở trường» cũ đã bị gỡ: nó liệt kê môn của
             // CHÍNH HÔM NAY dưới nhãn «sắp tới» — gọi sai tên thứ nó hiện.
-            if (upcoming.isNotEmpty) ...[
+            // ⭐ §P1.2 — SẮP TỚI: hôm nay + ngày mai, ngắn gọn. Chạm để mở
+            // thời khoá biểu đầy đủ; Home không phải dashboard lịch.
+            if (!timetable.isEmpty) ...[
               const SizedBox(height: WalSpacing.lg),
               _pad(_sectionLabel('SẮP TỚI')),
-              _upcomingDaysRow(),
+              _pad(_upcomingContext()),
+            ] else if (onGenerateSampleTimetable != null ||
+                onOpenTimetable != null) ...[
+              // §P1.3 — chưa có lịch: MỘT lời mời, không lặp trên từng thẻ.
+              const SizedBox(height: WalSpacing.lg),
+              _pad(_noTimetableCta()),
             ],
             // Dải icon hiện khi CÓ môn. Không có môn thì giữ NGUYÊN hành vi
             // cũ: thẻ giá sách chỉ thuộc Home-nhiều-môn, không lấn sang trạng
@@ -1069,79 +1084,125 @@ class MissionCenterScreen extends StatelessWidget {
     );
   }
 
-  /// ═══ A. DẢI «SẮP TỚI» — THẺ LỊCH, NÉN, THIÊN VỀ THỜI GIAN ═══════════
+  /// ═══ A. «SẮP TỚI» — HÔM NAY + NGÀY MAI, NÉN ═════════════════════════
   ///
-  /// Lệnh 53 §3: ba dải phải KHÁC HÌNH THÁI. Thẻ lịch là thẻ nhỏ nhất, không
-  /// ảnh, có VIỀN TRÁI đánh dấu — nhìn thoáng qua đã biết «đây là lịch», khác
-  /// hẳn bìa sách dọc và thẻ bài học đầy ảnh.
+  /// §P1.2: Home chỉ cần ngữ cảnh NGẮN. Toàn bộ tuần nằm sau một chạm.
   ///
-  /// Nói đúng ba điều thời khoá biểu biết: THỨ · NGÀY · MÔN (+ tiết đầu).
-  /// KHÔNG tên bài (F4 cấm suy), KHÔNG giờ đồng hồ (dữ liệu không có).
-  Widget _upcomingDaysRow() => SizedBox(
-    height: 116,
-    child: ListView.separated(
-      key: MissionCenterScreen.upcomingRowKey,
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: WalSpacing.lg),
-      itemCount: upcoming.length,
-      separatorBuilder: (_, _) => const SizedBox(width: WalSpacing.sm),
-      itemBuilder: (_, i) {
-        final d = upcoming[i];
-        return Container(
-          width: 168,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
-            border: const Border(
-              left: BorderSide(color: WalColors.primary500, width: 3),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(
-            WalSpacing.md,
-            WalSpacing.sm,
-            WalSpacing.sm,
-            WalSpacing.sm,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                upcomingDateLabel(d.date),
-                style: const TextStyle(
+  /// KHÔNG tên bài (thời khoá biểu chỉ biết MÔN — F4), KHÔNG giờ đồng hồ
+  /// (dữ liệu có `tiết`, không có giờ).
+  Widget _upcomingContext() => Material(
+    key: MissionCenterScreen.upcomingRowKey,
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+      onTap: onOpenTimetable,
+      child: Padding(
+        padding: const EdgeInsets.all(WalSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _whenLine('Hôm nay', timetable.todaySubjectIds),
+            const SizedBox(height: WalSpacing.sm),
+            _whenLine('Ngày mai', timetable.tomorrowSubjectIds),
+            if (onOpenTimetable != null) ...[
+              const SizedBox(height: WalSpacing.sm),
+              const Text(
+                'Xem thời khoá biểu →',
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: WalColors.ink,
-                ),
-              ),
-              Text(
-                'Từ tiết ${d.firstPeriod}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.4,
                   color: WalColors.primaryText,
                 ),
               ),
-              const SizedBox(height: WalSpacing.xs),
-              Expanded(
-                child: Text(
-                  // MÃ môn → TÊN. Không tra được ⇒ giữ mã trần, không bịa.
-                  d.subjectIds
-                      .map((id) => subjectLabelOf?.call(id) ?? id)
-                      .join(' · '),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: WalColors.inkSoft,
-                    height: 1.3,
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Widget _whenLine(String label, List<String> subjectIds) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(
+        width: 78,
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: WalColors.inkSoft,
+          ),
+        ),
+      ),
+      Expanded(
+        child: Text(
+          // Ngày không có tiết ⇒ nói thẳng, không bịa môn.
+          subjectIds.isEmpty
+              ? 'Không có tiết'
+              : subjectIds
+                    .map((id) => subjectLabelOf?.call(id) ?? id)
+                    .join(' · '),
+          style: TextStyle(
+            fontSize: WalType.secondary,
+            height: 1.35,
+            color: subjectIds.isEmpty ? WalColors.inkSoft : WalColors.ink,
+          ),
+        ),
+      ),
+    ],
+  );
+
+  /// §P1.3 — chưa có thời khoá biểu: MỘT lời mời, ở MỘT chỗ.
+  Widget _noTimetableCta() => Container(
+    padding: const EdgeInsets.all(WalSpacing.md),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Thêm thời khoá biểu để SAM giúp con chuẩn bị bài mỗi ngày.',
+          style: TextStyle(
+            fontSize: WalType.secondary,
+            color: WalColors.ink,
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: WalSpacing.sm),
+        Wrap(
+          spacing: WalSpacing.sm,
+          runSpacing: WalSpacing.xs,
+          children: [
+            if (onOpenTimetable != null)
+              SizedBox(
+                height: WalSpacing.minTouch,
+                child: OutlinedButton(
+                  onPressed: onOpenTimetable,
+                  child: const Text(
+                    'Nhập thời khoá biểu',
+                    style: TextStyle(fontSize: WalType.secondary),
                   ),
                 ),
               ),
-            ],
-          ),
-        );
-      },
+            if (onGenerateSampleTimetable != null)
+              SizedBox(
+                height: WalSpacing.minTouch,
+                child: OutlinedButton(
+                  key: MissionCenterScreen.sampleTimetableKey,
+                  onPressed: onGenerateSampleTimetable,
+                  child: const Text(
+                    '✨ Tạo lịch mẫu',
+                    style: TextStyle(fontSize: WalType.secondary),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
     ),
   );
 

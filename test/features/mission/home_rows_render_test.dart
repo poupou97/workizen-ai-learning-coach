@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/store/timetable.dart';
 import 'package:learning_coach/features/mission/home_cards.dart';
-import 'package:learning_coach/features/mission/home_upcoming.dart';
+import 'package:learning_coach/features/mission/timetable_context.dart';
 import 'package:learning_coach/features/mission/mission_center_screen.dart';
 import 'package:learning_coach/features/mission/mission_data.dart';
 
@@ -81,7 +81,7 @@ void main() {
       t,
       MissionCenterScreen(
         data: buildDemoMission(now: DateTime(2026, 9, 7, 19)),
-        upcoming: upcomingDays(entries, today: DateTime(2026, 9, 7)),
+        timetable: timetableContext(entries, now: DateTime(2026, 9, 7)),
         subjectLabelOf: (id) => id == 'ngu-van' ? 'Ngữ văn' : id,
       ),
     );
@@ -106,7 +106,7 @@ void main() {
       t,
       MissionCenterScreen(
         data: buildDemoMission(now: DateTime(2026, 9, 7, 19)),
-        upcoming: upcomingDays(entries, today: DateTime(2026, 9, 7)),
+        timetable: timetableContext(entries, now: DateTime(2026, 9, 7)),
       ),
     );
     expect(find.textContaining('mon-la'), findsOneWidget);
@@ -162,7 +162,7 @@ void main() {
         t,
         MissionCenterScreen(
           data: buildDemoMission(now: DateTime(2026, 9, 7, 19)),
-          upcoming: upcomingDays(entries, today: DateTime(2026, 9, 7)),
+          timetable: timetableContext(entries, now: DateTime(2026, 9, 7)),
           subjectChips: const [
             HomeSubjectChip(subject: 'Toán', hasSamLesson: true),
           ],
