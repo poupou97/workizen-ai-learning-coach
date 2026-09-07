@@ -96,11 +96,18 @@ class PersonPortrait {
 
 /// Kho chân dung đã xác minh, khoá theo `personId`.
 ///
-/// ⭐ MỘT NGƯỜI, không phải hai mươi mốt. `sam-stories.db` có 21 nhân vật;
-/// đúng MỘT người đi trọn được chuỗi: nguồn gốc → giấy phép → danh tính →
-/// tệp thật. Hai mươi người còn lại KHÔNG có dòng ở đây, nên thẻ trích dẫn của
-/// họ chạy nhánh KHÔNG ẢNH — nhánh ấy là trạng thái bình thường, không phải
-/// lỗi (§P2.7). Độ phủ chân dung theo dõi ở WAL-226.
+/// ⭐ BA NGƯỜI, không phải hai mươi mốt. `sam-stories.db` có 21 nhân vật; ba
+/// người đi trọn được chuỗi: nguồn gốc → giấy phép → danh tính → tệp thật →
+/// CHỖ DÙNG THẬT. Mười tám người còn lại KHÔNG có dòng ở đây, nên màn chuyện
+/// của họ chạy nhánh KHÔNG ẢNH — nhánh ấy là trạng thái bình thường, không
+/// phải lỗi (§P2.7).
+///
+/// ⚠ MỖI NGƯỜI MỘT HỒ SƠ PHÁP LÝ. Ba ảnh này PD vì ba lý do KHÁC NHAU
+/// (PD-Vietnam 75 năm · tác giả mất >100 năm · công bố trước 1931). Không
+/// được suy từ người này sang người khác. Đã loại đúng theo luật ấy: ảnh
+/// Ta-go đẹp nhất là CC BY 4.0 — dùng được nhưng kèm nghĩa vụ ghi công, nên
+/// chọn bản PD thay thế. Tô Hoài (mất 2014), Bùi Xuân Phái (1988), Lâm Thị Mỹ
+/// Dạ (2023) đều CÒN bản quyền — không lấy.
 ///
 /// Thêm một người = thêm MỘT dòng ở đây, dùng lại cho MỌI bài có nhân vật ấy
 /// (§P2.8) — không tải lại theo từng bài.
@@ -155,6 +162,65 @@ class PersonPortraits {
       identityCheckedAgainst:
           'Chú thích in trong chính bản gốc: dòng «Thạch-Lam» đặt ngay dưới '
           'bản khắc, trang f145 bản số hoá Gallica ark:/12148/bpt6k42462606',
+    ),
+
+    // ⭐ Han Cri-xti-an An-đéc-xen (1805–1875) — Ngữ văn 6, «Cô bé bán diêm».
+    //
+    //   NGUỒN GỐC   Ảnh của Thora Hallager (1821–1884) chụp tháng 10/1869,
+    //               lưu ở Bảo tàng Odense — chính bảo tàng quê hương An-đéc-xen.
+    //   DANH TÍNH   Khác ca Thạch Lam: ảnh này là ảnh CHÍNH của bài An-đéc-xen
+    //               trên Wikipedia và được 20 wiki dùng. Có đối chiếu chéo thật,
+    //               không phải chỉ một dòng siêu dữ liệu.
+    //   GIẤY PHÉP   PD-old-100-expired: tác giả mất 1884, quá 100 năm.
+    'p:han-cri-xti-an-an-đéc-xen': PersonPortrait(
+      personId: 'p:han-cri-xti-an-an-đéc-xen',
+      personName: 'Han Cri-xti-an An-đéc-xen',
+      assetPath: 'assets/people/han-cri-xti-an-an-dec-xen.png',
+      portraitType: PortraitType.historicalPhoto,
+      usage: PortraitUsage.approvedForProduct,
+      sourcePageUrl:
+          'https://commons.wikimedia.org/wiki/'
+          'File:HCA_by_Thora_Hallager_1869_crop.jpg',
+      sourceName: 'Thora Hallager, 1869 · Bảo tàng Odense',
+      licence: 'Phạm vi công cộng (PD-old-100)',
+      licenceUrl:
+          'https://commons.wikimedia.org/wiki/Template:PD-old-100-expired',
+      retrievedAt: '2026-09-07',
+      author: 'Thora Hallager (1821–1884)',
+      identityCheckedAgainst:
+          'Ảnh chính của bài «Hans Christian Andersen» trên Wikipedia, được 20 '
+          'wiki dùng; nguồn ghi Bảo tàng Odense — bảo tàng quê hương ông',
+    ),
+
+    // ⭐ Ra-bin-đo-ra-nát Ta-go (1861–1941) — Ngữ văn 6, «Mây và sóng».
+    //
+    //   NGUỒN GỐC   Công bố 1914 trong «Les Prix Nobel 1913» tr.60 — niên giám
+    //               của chính Quỹ Nobel cho người đoạt giải Văn chương 1913.
+    //   DANH TÍNH   500 wiki dùng. Đối chiếu chéo mạnh nhất trong ba ảnh.
+    //   GIẤY PHÉP   PD-old-100-expired.
+    //
+    //   ⚠ ĐÃ LOẠI một ứng viên khác: ảnh autochrome 1926 của Georges Chevalier
+    //   là **CC BY 4.0**, KHÔNG phải phạm vi công cộng — dùng được nhưng kèm
+    //   nghĩa vụ ghi công. Không suy «Thạch Lam PD ⇒ ảnh nào cũng PD»: mỗi ảnh
+    //   một hồ sơ. Cũng đã loại một bản PD khác vì tác giả không rõ, nguồn là
+    //   một blog và 0 wiki dùng — PD nhưng lai lịch quá mỏng.
+    'p:ra-bin-đo-ra-nát-ta-go': PersonPortrait(
+      personId: 'p:ra-bin-đo-ra-nát-ta-go',
+      personName: 'Ra-bin-đo-ra-nát Ta-go',
+      assetPath: 'assets/people/ra-bin-do-ra-nat-ta-go.png',
+      portraitType: PortraitType.historicalPhoto,
+      usage: PortraitUsage.approvedForProduct,
+      sourcePageUrl:
+          'https://commons.wikimedia.org/wiki/File:Rabindranath_Tagore_in_1909.jpg',
+      sourceName: 'Les Prix Nobel 1913 (xuất bản 1914)',
+      licence: 'Phạm vi công cộng (PD-old-100)',
+      licenceUrl:
+          'https://commons.wikimedia.org/wiki/Template:PD-old-100-expired',
+      retrievedAt: '2026-09-07',
+      author: 'Generalstabens litografiska anstalt, 1909',
+      identityCheckedAgainst:
+          'Niên giám Quỹ Nobel «Les Prix Nobel 1913» tr.60 in ảnh này cho người '
+          'đoạt giải Văn chương 1913; 500 wiki dùng làm chân dung Ta-go',
     ),
   };
 

@@ -78,12 +78,53 @@ tệ hơn hẳn không có ảnh.
 
 ---
 
-## Chưa có chân dung (20/21 người trong `sam-stories.db`)
+## Han Cri-xti-an An-đéc-xen — `p:han-cri-xti-an-an-đéc-xen`
 
-Không có dòng nào trong `verified` ⇒ thẻ trích dẫn của họ chạy nhánh KHÔNG ẢNH.
+Ngữ văn 6, «Cô bé bán diêm» — trẻ Lớp 6 đang đọc.
+
+| Trường | Giá trị |
+|---|---|
+| assetPath | `assets/people/han-cri-xti-an-an-dec-xen.png` (288×352) |
+| sourcePageUrl | https://commons.wikimedia.org/wiki/File:HCA_by_Thora_Hallager_1869_crop.jpg |
+| sourceName | Thora Hallager, 1869 · Bảo tàng Odense |
+| author | Thora Hallager (1821–1884) |
+| licence | Phạm vi công cộng — **PD-old-100-expired** (tác giả mất 1884) + công bố trước 1931 (Hoa Kỳ) |
+| retrievedAt | 2026-09-07 |
+
+**Danh tính** — khác hẳn ca Thạch Lam: đây là **ảnh chính** của bài Andersen trên Wikipedia và **20 wiki** dùng. Nguồn ghi Bảo tàng Odense, tức bảo tàng quê hương ông. Đối chiếu chéo thật, không phải một dòng siêu dữ liệu đơn độc.
+
+---
+
+## Ra-bin-đo-ra-nát Ta-go — `p:ra-bin-đo-ra-nát-ta-go`
+
+Ngữ văn 6, «Mây và sóng».
+
+| Trường | Giá trị |
+|---|---|
+| assetPath | `assets/people/ra-bin-do-ra-nat-ta-go.png` (288×352) |
+| sourcePageUrl | https://commons.wikimedia.org/wiki/File:Rabindranath_Tagore_in_1909.jpg |
+| sourceName | Les Prix Nobel 1913 (xuất bản 1914) |
+| author | Generalstabens litografiska anstalt, 1909 |
+| licence | Phạm vi công cộng — **PD-old-100-expired** |
+| retrievedAt | 2026-09-07 |
+
+**Danh tính** — công bố 1914 trong **«Les Prix Nobel 1913» tr.60**, niên giám của chính Quỹ Nobel cho người đoạt giải Văn chương 1913. **500 wiki** dùng. Đây là chuỗi mạnh nhất trong ba ảnh.
+
+### ⚠ Hai ứng viên bị LOẠI — và vì sao
+
+1. **Autochrome 1926 của Georges Chevalier** (bộ sưu tập Albert-Kahn) — đẹp nhất, nhưng **CC BY 4.0**, KHÔNG phải phạm vi công cộng. Dùng được nhưng kèm **nghĩa vụ ghi công tác giả**. Chọn bản PD để không mang nghĩa vụ ấy vào sản phẩm cho trẻ.
+2. **`Rabindranath Tagore (cropped).jpg`** — PD, nhưng **tác giả không rõ**, nguồn ghi là một blog, ngày chỉ là «trước khi ông mất», và **0 wiki** dùng. PD nhưng lai lịch quá mỏng.
+
+Đây chính là lý do luật «mỗi ảnh một hồ sơ» tồn tại: ba ảnh trong kho PD vì **ba lý do khác nhau** (PD-Vietnam 75 năm · tác giả mất >100 năm · công bố trước 1931).
+
+---
+
+## Chưa có chân dung (18/21 người trong `sam-stories.db`)
+
+Không có dòng nào trong `verified` ⇒ màn chuyện của họ chạy nhánh KHÔNG ẢNH.
 Đó là hành vi ĐÚNG, không phải lỗi cần vá vội. Theo dõi ở **WAL-226**.
 
-Cạm bẫy cần tránh khi mở rộng: 20 người còn lại **không** cùng một hồ sơ pháp
+Cạm bẫy cần tránh khi mở rộng: 18 người còn lại **không** cùng một hồ sơ pháp
 lý. Nhân vật mất sau 1955 vẫn còn trong thời hạn bảo hộ; nhân vật nước ngoài
 theo luật nước khác; ảnh do nhà nước chụp lại có quy tắc riêng. Không được suy
 «Thạch Lam PD ⇒ nhà văn cùng thời cũng PD».
