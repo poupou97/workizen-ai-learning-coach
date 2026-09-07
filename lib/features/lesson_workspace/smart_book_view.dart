@@ -36,6 +36,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import 'learning_image_viewer.dart';
 import '../../core/lesson_model/lesson_document.dart';
 import 'widgets/source_sheet.dart';
 import 'widgets/withheld_card.dart';
@@ -73,7 +74,8 @@ class SmartBookView extends StatefulWidget {
   static const bleedScale = 1.14;
 
   static Key pageChipKey(int page) => Key('smart-book-page-$page');
-  static Key figureKey(String firstImageId) => Key('smart-book-figure-$firstImageId');
+  static Key figureKey(String firstImageId) =>
+      Key('smart-book-figure-$firstImageId');
 
   /// Biểu tượng cho nhãn mục của SÁCH — chỉ trang trí theo chữ có sẵn.
   static String stageIcon(String label) {
@@ -400,7 +402,9 @@ class _SmartBookViewState extends State<SmartBookView> {
     padding: EdgeInsets.only(top: first ? 0 : WalSpacing.md, bottom: 2),
     child: Row(
       children: [
-        Expanded(child: Divider(color: WalColors.inkSoft.withValues(alpha: 0.3))),
+        Expanded(
+          child: Divider(color: WalColors.inkSoft.withValues(alpha: 0.3)),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: WalSpacing.sm),
           child: Text(
@@ -413,7 +417,9 @@ class _SmartBookViewState extends State<SmartBookView> {
             ),
           ),
         ),
-        Expanded(child: Divider(color: WalColors.inkSoft.withValues(alpha: 0.3))),
+        Expanded(
+          child: Divider(color: WalColors.inkSoft.withValues(alpha: 0.3)),
+        ),
       ],
     ),
   );
@@ -572,7 +578,18 @@ class _SmartBookViewState extends State<SmartBookView> {
   Widget _imageBox(ImageBlock b) {
     final line = widget.doc.sourceLineForBlock(b);
     return InkWell(
-      onTap: () => showSourceSheet(context, doc: widget.doc, block: b),
+      // ⭐ Lệnh 59 §P0.1 — CHẠM ẢNH ⇒ XEM TOÀN MÀN HÌNH, phóng/kéo được.
+      //
+      // Trước đây chạm ảnh mở thẳng tờ NGUỒN. Provenance không mất: viewer
+      // mang dòng nguồn và một lối vào chính tờ ấy (§P0.5) — chỉ đổi thứ nằm
+      // ở cú chạm ĐẦU TIÊN, vì thứ trẻ muốn khi chạm vào hình là NHÌN RÕ HƠN.
+      onTap: () => showLearningImage(
+        context,
+        asset: '${widget.doc.assetBase}${b.crop}',
+        aspect: b.aspect,
+        sourceLine: line,
+        onOpenSource: () => showSourceSheet(context, doc: widget.doc, block: b),
+      ),
       borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
       // Giữ chỗ theo tỉ lệ ảnh: bố cục không nở ra sau khi ảnh giải mã,
       // nên neo cuộn («Xem trong Đọc») đứng đúng chỗ (Nokia n1 D4).
