@@ -660,109 +660,81 @@ def block_key(block_id):
     return ':'.join(parts[:2] + parts[3:]) if len(parts) >= 4 else block_id
 
 
-def tutor_script_bai17(tsl, by_id):
-    """Hand-written script for KHTN 6 Bài 17 — `prototype`. Prompts are VERBATIM TSL blocks (by id);
-    everything else (SAM's words, acceptable patterns, hints, scaffold) is the slice author's, NOT the
-    SGV, NOT the Pedagogy Runtime. Any other TSL ⇒ None (no invented script).
+TUTOR_SCRIPT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutor_scripts')
 
-    Blocks are looked up pipeline-agnostically (see block_key), so a versioned re-run keeps the script
-    when — and only when — every block it quotes is still TRUSTED."""
-    B = '06-sgk-khoa-hoc-tu-nhien-6:'
-    need = {
-        'principle': B + 'p061:016',
-        'q_salt': B + 'p063:011',
-        'q_funnel': B + 'p063:022',
-        'q_sand': B + 'p063:012',
-        'summary': B + 'p064:003',
-        'co_can': B + 'p063:005',
-    }
-    if tsl.get('book') != '06-sgk-khoa-hoc-tu-nhien-6' or tsl.get('lesson') != 17:
+
+def tutor_script_for(tsl, by_id, script_dir=TUTOR_SCRIPT_DIR):
+    """Kịch bản SAM cho bài này, đọc từ DỮ LIỆU. `None` ⇒ bài chưa có kịch bản.
+
+    ⭐⭐ WAL-228 — TRƯỚC ĐÂY ĐÂY LÀ MỘT NHÁNH MÃ CHỈ NHẬN ĐÚNG MỘT BÀI:
+
+        if tsl['book'] != '06-sgk-khoa-hoc-tu-nhien-6' or tsl['lesson'] != 17:
+            return None
+
+    …với block id đóng cứng và toàn bộ lời SAM viết thẳng trong Python. Nên
+    Đọc và Trực quan chạy được cho mọi bài có TSL, còn «Học với SAM» thì không
+    — không phải vì thiếu dữ liệu, mà vì một câu `if`.
+
+    Nay mỗi bài là một tệp `<book>-b<NN>.json`. Trong đó:
+      · `blocks`  — vai → KHOÁ block (bền qua các lần chạy lại pipeline)
+      · `{block:KEY}` trong bất kỳ chuỗi nào → id THẬT của block ấy
+      · `{text:KEY}`  → chữ NGUYÊN VĂN của block ấy
+    Nhờ vậy lời sách không bị chép lại lần thứ hai vào kịch bản: nó luôn được
+    lấy từ chính block đang được trích, nên không thể lệch với sách.
+
+    ⚠ FAIL CLOSED, giữ nguyên như bản cũ: thiếu bất kỳ block nào ⇒ KHÔNG sinh
+    kịch bản. Một kịch bản trỏ vào block đã biến mất là một kịch bản nói về
+    thứ không còn trong bài.
+
+    ⚠ VÀ KHÔNG SINH TỰ ĐỘNG. `acceptable` là mẫu khớp, `hints` là thang sư
+    phạm, `scaffold` là lời sách — máy tự bịa ba thứ ấy là bịa cách dạy. Tệp
+    dữ liệu ở đây để NGƯỜI soạn được, không phải để máy sinh.
+    """
+    path = os.path.join(script_dir, f"{tsl.get('book')}-b{int(tsl.get('lesson') or 0):02d}.json")
+    if not os.path.exists(path):
         return None
+    try:
+        with open(path, encoding='utf-8') as fh:
+            data = json.load(fh)
+    except (OSError, ValueError) as e:
+        print(f'  ! kịch bản {path} không đọc được ({e}) — không sinh tutorScript', file=sys.stderr)
+        return None
+    if data.get('book') != tsl.get('book') or data.get('lesson') != tsl.get('lesson'):
+        print(f'  ! kịch bản {path} khai bài khác — không sinh tutorScript', file=sys.stderr)
+        return None
+
     by_key = {block_key(k): v for k, v in by_id.items()}
-    missing = [k for k, v in need.items() if v not in by_key]
+    wanted = data.get('blocks') or {}
+    missing = [role for role, key in wanted.items() if key not in by_key]
     if missing:
-        print(f'  ! TSL thiếu block cho kịch bản Bài 17 ({", ".join(missing)}) — không sinh tutorScript', file=sys.stderr)
+        print(f'  ! TSL thiếu block cho kịch bản ({", ".join(sorted(missing))}) '
+              f'— không sinh tutorScript', file=sys.stderr)
         return None
-    need = {k: by_key[v]['id'] for k, v in need.items()}   # back to the REAL ids: they are emitted as provenance
-    q = lambda k: by_id[need[k]]['text']  # noqa: E731
+    real = {role: by_key[key]['id'] for role, key in wanted.items()}
+
+    def fill(v):
+        if isinstance(v, dict):
+            return {k: fill(x) for k, x in v.items()}
+        if isinstance(v, list):
+            return [fill(x) for x in v]
+        if not isinstance(v, str):
+            return v
+        for role, rid in real.items():
+            v = v.replace('{block:%s}' % role, rid)
+            v = v.replace('{text:%s}' % role, by_id[rid]['text'])
+        return v
+
+    steps = fill(data.get('steps') or [])
+    left = [m for st in steps for m in re.findall(r'\{(?:block|text):[^}]+\}', json.dumps(st, ensure_ascii=False))]
+    if left:
+        print(f'  ! kịch bản còn chỗ trống chưa điền {sorted(set(left))} — không sinh tutorScript',
+              file=sys.stderr)
+        return None
     return {
-        'samMode': 'prototypeScripted',
-        'trust': TRUST_PROTO,
-        'evidencePolicy': 'none',
-        'steps': [
-            {
-                'type': 'explain', 'id': 'e1', 'mascot': 'sam-explain',
-                'text': 'Bài này nói về cách tách một chất ra khỏi hỗn hợp. Sách nêu nguyên tắc: '
-                        'các chất khác nhau về tính chất, nên mình dựa vào chỗ khác nhau đó để tách. '
-                        'Con đọc đoạn sách bên dưới rồi mình thử nhé.',
-                'sourceBlockId': need['principle'],
-            },
-            {
-                'type': 'ask', 'id': 'q1',
-                'prompt': q('q_salt'), 'promptBlockId': need['q_salt'],
-                'options': ['Lọc', 'Cô cạn', 'Chiết', 'Lắng'],
-                'acceptable': [r'^cô cạn$', r'cô cạn'],
-                'hints': [
-                    'Con nghĩ xem: muối ăn không bay hơi, còn nước thì bay hơi được. Cách nào dùng đúng điều đó?',
-                    # ROUND 3 (A7 guard, Lane B hand-off): gợi ý chỉ chỗ trong sách, KHÔNG nêu tên phương pháp (dạng đáp án).
-                    # ROUND 4 (A-runtime R4.10 quote rule, coordinator-directed Lane B fix): trích NGUYÊN VĂN một
-                    # đoạn liền của block p063:tc2-p1:005 (không «…»), KHÔNG tự chèn số trang (GUARD:CITATION_FABRICATION —
-                    # trang được vẽ từ sourceBlockId), vẫn không nêu tên phương pháp (dạng đáp án).
-                    'Trong sách có một mục nói về cách «tách chất tan rắn ra khỏi dung dịch hoặc huyền phù bằng cách làm cho dung môi bay hơi» — con tìm tên mục đó nhé.',
-                ],
-                'feedbackMatched': 'Khớp với điều sách viết: làm nước biển bay hơi để thu muối là phương pháp cô cạn. '
-                                   'Con đã tự nối được ví dụ với tên phương pháp.',
-                'scaffold': 'Chưa khớp, không sao. Sách gọi cách làm muối này là «cô cạn» — mình cùng đọc lại '
-                            'đoạn đó, rồi đi tiếp nhé.',
-                'keySource': 'prototype — suy từ đoạn ' + need['co_can'] + ' (SGK trang 62); KHÔNG phải SGV',
-            },
-            {
-                'type': 'ask', 'id': 'q2',
-                'prompt': q('q_funnel'), 'promptBlockId': need['q_funnel'],
-                'options': [],
-                'acceptable': [
-                    r'dầu.*(lẫn|trộn|chảy|xuống|kịp|theo)',
-                    r'(lẫn|trộn).*dầu',
-                    r'(kịp|đúng lúc).*(khóa|khoá|vặn)',
-                    r'(tách|riêng).*(dầu|nước)',
-                ],
-                'hints': [
-                    'Nhớ lại: trong phễu, nước ở dưới, dầu ở trên. Nếu mở khoá nhanh, điều gì có thể lọt xuống cốc cùng nước?',
-                    'Sách dặn: «Khi phần dầu ăn chạm vào bề mặt khoá thì vặn khoá lại» — mở từ từ để kịp làm việc gì?',
-                ],
-                'feedbackMatched': 'SAM thấy câu trả lời của con có ý «để dầu không chảy lẫn xuống nước» — đúng với điều '
-                                   'sách dặn khi làm thí nghiệm. (Đây là kịch bản thử nghiệm; thầy cô mới là người xác nhận.)',
-                'scaffold': 'Ý trong sách là: mở từ từ để kịp vặn khoá lại đúng lúc dầu chạm khoá, nhờ vậy dầu không '
-                            'chảy lẫn xuống cốc nước. Con ghi lại ý này rồi mình đi tiếp nhé.',
-                'keySource': 'prototype — suy từ bước tiến hành ' + B + 'p063:tc2-p1:019 (SGK trang 62); KHÔNG phải SGV',
-            },
-            {
-                'type': 'ask', 'id': 'q3',
-                'prompt': q('q_sand'), 'promptBlockId': need['q_sand'],
-                'options': [
-                    'Hoà tan vào nước → lọc bỏ cát → cô cạn lấy muối',
-                    'Chiết bằng phễu chiết',
-                    'Để lắng rồi gạn lấy muối',
-                ],
-                'acceptable': [r'^hoà tan vào nước'],
-                'hints': [
-                    'Muối tan trong nước, cát thì không. Con dùng điều đó để tách hai thứ ra bằng hai bước nào?',
-                    # ROUND 4 (R4.10): trích thứ hai nguyên văn block p064:tc2-p1:006 — sách viết «các chất … các chất».
-                    'Sách viết: lọc «tách chất rắn không tan ra khỏi chất lỏng», cô cạn «tách các chất khó bay hơi ra khỏi các chất dễ bay hơi». Ghép hai bước lại xem.',
-                ],
-                'feedbackMatched': 'Khớp với hai cách sách đã nêu: lọc bỏ cát (không tan), rồi cô cạn để lấy lại muối. '
-                                   'Con đã ghép được hai phương pháp cho một bài toán mới.',
-                'scaffold': 'Cách sách gợi: hoà tan mẫu vào nước (muối tan, cát không), lọc bỏ cát, rồi cô cạn để thu muối. '
-                            'Mình đọc lại phần «Em đã học» rồi đi tiếp nhé.',
-                'keySource': 'prototype — ghép từ ' + need['summary'] + ' và các dòng «Em đã học» (SGK trang 63); KHÔNG phải SGV',
-            },
-            {
-                'type': 'next', 'id': 'n1',
-                'label': 'Đọc lại phần «Em đã học» trong sách',
-                'target': 'read',
-                'anchorBlockId': need['summary'],
-            },
-        ],
+        'samMode': data.get('samMode', 'prototypeScripted'),
+        'trust': data.get('trust', TRUST_PROTO),
+        'evidencePolicy': data.get('evidencePolicy', 'none'),
+        'steps': steps,
     }
 
 
@@ -859,7 +831,7 @@ def convert(tsl, *, tsl_rel_path=None, tsl_sha256=None, book_meta=None, chapters
     chapters = chapters if chapters is not None else []
     chapter = next((c for c in chapters if lesson in c['lessonNos']), None)
     semantic = derive_process(tsl) + derive_comparison(tsl)
-    script = tutor_script_bai17(tsl, by_id) if include_tutor_script else None
+    script = tutor_script_for(tsl, by_id) if include_tutor_script else None
 
     boundary_in = tsl.get('boundary') or {}
     boundary = None

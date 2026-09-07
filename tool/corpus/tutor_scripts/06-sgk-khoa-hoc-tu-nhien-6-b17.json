@@ -1,0 +1,96 @@
+{
+ "book": "06-sgk-khoa-hoc-tu-nhien-6",
+ "lesson": 17,
+ "_note": "Kịch bản SAM cho MỘT bài, dạng DỮ LIỆU. Trước đây nó là một nhánh mã trong tsl_to_lesson_document.py chỉ nhận đúng bài này (WAL-228). {block:KEY} → id thật của block; {text:KEY} → chữ nguyên văn của block. Thiếu bất kỳ block nào ⇒ KHÔNG sinh kịch bản (fail closed), không bịa thay.",
+ "blocks": {
+  "principle": "06-sgk-khoa-hoc-tu-nhien-6:p061:016",
+  "q_salt": "06-sgk-khoa-hoc-tu-nhien-6:p063:011",
+  "q_funnel": "06-sgk-khoa-hoc-tu-nhien-6:p063:022",
+  "q_sand": "06-sgk-khoa-hoc-tu-nhien-6:p063:012",
+  "summary": "06-sgk-khoa-hoc-tu-nhien-6:p064:003",
+  "co_can": "06-sgk-khoa-hoc-tu-nhien-6:p063:005"
+ },
+ "samMode": "prototypeScripted",
+ "trust": "prototype",
+ "evidencePolicy": "none",
+ "steps": [
+  {
+   "type": "explain",
+   "id": "e1",
+   "mascot": "sam-explain",
+   "text": "Bài này nói về cách tách một chất ra khỏi hỗn hợp. Sách nêu nguyên tắc: các chất khác nhau về tính chất, nên mình dựa vào chỗ khác nhau đó để tách. Con đọc đoạn sách bên dưới rồi mình thử nhé.",
+   "sourceBlockId": "{block:principle}"
+  },
+  {
+   "type": "ask",
+   "id": "q1",
+   "prompt": "{text:q_salt}",
+   "promptBlockId": "{block:q_salt}",
+   "options": [
+    "Lọc",
+    "Cô cạn",
+    "Chiết",
+    "Lắng"
+   ],
+   "acceptable": [
+    "^cô cạn$",
+    "cô cạn"
+   ],
+   "hints": [
+    "Con nghĩ xem: muối ăn không bay hơi, còn nước thì bay hơi được. Cách nào dùng đúng điều đó?",
+    "Trong sách có một mục nói về cách «tách chất tan rắn ra khỏi dung dịch hoặc huyền phù bằng cách làm cho dung môi bay hơi» — con tìm tên mục đó nhé."
+   ],
+   "feedbackMatched": "Khớp với điều sách viết: làm nước biển bay hơi để thu muối là phương pháp cô cạn. Con đã tự nối được ví dụ với tên phương pháp.",
+   "scaffold": "Chưa khớp, không sao. Sách gọi cách làm muối này là «cô cạn» — mình cùng đọc lại đoạn đó, rồi đi tiếp nhé.",
+   "keySource": "prototype — suy từ đoạn {block:co_can} (SGK trang 62); KHÔNG phải SGV"
+  },
+  {
+   "type": "ask",
+   "id": "q2",
+   "prompt": "{text:q_funnel}",
+   "promptBlockId": "{block:q_funnel}",
+   "options": [],
+   "acceptable": [
+    "dầu.*(lẫn|trộn|chảy|xuống|kịp|theo)",
+    "(lẫn|trộn).*dầu",
+    "(kịp|đúng lúc).*(khóa|khoá|vặn)",
+    "(tách|riêng).*(dầu|nước)"
+   ],
+   "hints": [
+    "Nhớ lại: trong phễu, nước ở dưới, dầu ở trên. Nếu mở khoá nhanh, điều gì có thể lọt xuống cốc cùng nước?",
+    "Sách dặn: «Khi phần dầu ăn chạm vào bề mặt khoá thì vặn khoá lại» — mở từ từ để kịp làm việc gì?"
+   ],
+   "feedbackMatched": "SAM thấy câu trả lời của con có ý «để dầu không chảy lẫn xuống nước» — đúng với điều sách dặn khi làm thí nghiệm. (Đây là kịch bản thử nghiệm; thầy cô mới là người xác nhận.)",
+   "scaffold": "Ý trong sách là: mở từ từ để kịp vặn khoá lại đúng lúc dầu chạm khoá, nhờ vậy dầu không chảy lẫn xuống cốc nước. Con ghi lại ý này rồi mình đi tiếp nhé.",
+   "keySource": "prototype — suy từ bước tiến hành 06-sgk-khoa-hoc-tu-nhien-6:p063:tc2-p1:019 (SGK trang 62); KHÔNG phải SGV"
+  },
+  {
+   "type": "ask",
+   "id": "q3",
+   "prompt": "{text:q_sand}",
+   "promptBlockId": "{block:q_sand}",
+   "options": [
+    "Hoà tan vào nước → lọc bỏ cát → cô cạn lấy muối",
+    "Chiết bằng phễu chiết",
+    "Để lắng rồi gạn lấy muối"
+   ],
+   "acceptable": [
+    "^hoà tan vào nước"
+   ],
+   "hints": [
+    "Muối tan trong nước, cát thì không. Con dùng điều đó để tách hai thứ ra bằng hai bước nào?",
+    "Sách viết: lọc «tách chất rắn không tan ra khỏi chất lỏng», cô cạn «tách các chất khó bay hơi ra khỏi các chất dễ bay hơi». Ghép hai bước lại xem."
+   ],
+   "feedbackMatched": "Khớp với hai cách sách đã nêu: lọc bỏ cát (không tan), rồi cô cạn để lấy lại muối. Con đã ghép được hai phương pháp cho một bài toán mới.",
+   "scaffold": "Cách sách gợi: hoà tan mẫu vào nước (muối tan, cát không), lọc bỏ cát, rồi cô cạn để thu muối. Mình đọc lại phần «Em đã học» rồi đi tiếp nhé.",
+   "keySource": "prototype — ghép từ {block:summary} và các dòng «Em đã học» (SGK trang 63); KHÔNG phải SGV"
+  },
+  {
+   "type": "next",
+   "id": "n1",
+   "label": "Đọc lại phần «Em đã học» trong sách",
+   "target": "read",
+   "anchorBlockId": "{block:summary}"
+  }
+ ]
+}
