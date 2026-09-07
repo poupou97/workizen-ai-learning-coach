@@ -41,6 +41,45 @@ P_INV = re.compile(r'(' + NAME + r')?[^.]{0,60}(phát minh ra|sáng chế ra|tì
 _WORDCH = re.compile(r'[^\W_]', re.UNICODE)
 
 
+_SENT_END = re.compile(r'[.!?…]["»\')\]]?')
+
+
+def snap_sentence(text, start, end, grow=220):
+    """Nới cửa sổ tới RANH GIỚI CÂU, trong giới hạn `grow` ký tự mỗi phía.
+
+    ⭐ Vì sao cần: `snap()` mới chỉ vá được chữ cụt (WAL-194). Mảnh vẫn mở đầu
+    và kết thúc giữa CÂU — đo trên pack: 13/38 mở giữa câu, 23/38 đóng giữa
+    câu. Màn chuyện dán nhãn khối này là «TRÍCH NGUYÊN VĂN TỪ NGUỒN»; một mảnh
+    cụt giữa câu tuy đúng từng chữ nhưng đọc ra vẫn là văn vỡ.
+
+    Chỉ NỚI RA, không bao giờ thu vào — như `snap()`, để mảnh mà bước curate
+    đòi phải có vẫn còn nguyên. Không tới được ranh giới câu trong `grow` ký tự
+    thì lùi về ranh giới TỪ; phần dư ấy được UI đánh dấu bằng dấu «…» chứ không
+    im lặng nhận là câu trọn vẹn.
+    """
+    start = max(0, start)
+    end = min(len(text), end)
+
+    # lùi đầu: tìm dấu kết câu gần nhất TRƯỚC start, rồi bắt đầu ngay sau nó
+    lo = max(0, start - grow)
+    best = None
+    for m in _SENT_END.finditer(text, lo, start):
+        best = m.end()
+    if best is not None:
+        start = best
+    elif lo == 0:
+        start = 0
+    while start < len(text) and text[start].isspace():
+        start += 1
+
+    # nới đuôi: tới dấu kết câu đầu tiên SAU end
+    m = _SENT_END.search(text, end, min(len(text), end + grow))
+    if m:
+        end = m.end()
+
+    return snap(text, start, end)
+
+
 def snap(text, start, end):
     """Nới cửa sổ ra HAI PHÍA tới ranh giới từ gần nhất.
 
@@ -105,13 +144,13 @@ def mine(did, reg):
             name = VERB_TAIL.sub('', name).strip()
             if DYNASTY.match(name) or EVENTISH.search(name) or len(name) < 3:
                 continue  # triều đại/sự kiện mang (năm–năm) — không phải người
-            add('PERSON', page, snap(text, m.start() - 60, m.end() + 120),
+            add('PERSON', page, snap_sentence(text, m.start() - 60, m.end() + 120),
                 name=name, birthYear=b, deathYear=dth)
         for m in P_INTRO.finditer(text):
             name = VERB_TAIL.sub('', m.group(2)).strip()
             if len(name) < 3 or EVENTISH.search(name):
                 continue
-            add('PERSON', page, snap(text, m.start() - 40, m.end() + 120),
+            add('PERSON', page, snap_sentence(text, m.start() - 40, m.end() + 120),
                 name=name, role=m.group(1))
         for m in P_QUOTE.finditer(text):
             person = m.group(2).strip()
@@ -121,7 +160,7 @@ def mine(did, reg):
                           or person.lower().startswith(('truyện', 'ca dao',
                               'tục ngữ', 'sách', 'báo')))
             add('SOURCE_EXCERPT' if is_excerpt else 'QUOTE', page,
-                snap(text, m.start() - 40, m.end() + 40),
+                snap_sentence(text, m.start() - 40, m.end() + 40),
                 quote=m.group(1), person=person.removeprefix('Theo').strip(),
                 citedSource=m.group(3))
         for m in P_EVENT.finditer(text):

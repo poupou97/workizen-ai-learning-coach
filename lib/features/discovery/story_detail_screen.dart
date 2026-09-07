@@ -20,6 +20,22 @@ const storyTypeLabel = {
   'SOURCE_EXCERPT': 'Trích văn bản',
 };
 
+/// ⭐ Mảnh trích chưa trọn câu thì phải TRÔNG RA chỗ cắt.
+///
+/// Cửa sổ bằng chứng nay đã nới tới ranh giới CÂU khi với tới được (13→5 mở
+/// giữa câu, 23→11 đóng giữa câu). Phần còn lại chạm trần độ dài, không nới
+/// thêm được — và một mảnh mở giữa câu đọc ra là văn vỡ, trong khi nhãn phía
+/// trên hứa «TRÍCH NGUYÊN VĂN TỪ NGUỒN».
+///
+/// KHÔNG sửa chữ. Chỉ thêm dấu «…» ở mép để chỗ cắt hiện ra đúng như nó là.
+String markExcerptEdges(String body) {
+  final t = body.trim();
+  if (t.isEmpty) return t;
+  final startsMidSentence = !RegExp(r'^[«"\(\[]?[A-ZĐÀ-Ỹ0-9]').hasMatch(t);
+  final endsMidSentence = !RegExp('[.!?…»"\\)]\$').hasMatch(t);
+  return '${startsMidSentence ? '… ' : ''}$t${endsMidSentence ? ' …' : ''}';
+}
+
 class StoryDetailScreen extends StatelessWidget {
   const StoryDetailScreen({
     super.key,
@@ -114,7 +130,7 @@ class StoryDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: WalSpacing.sm),
                 Text(
-                  item.body,
+                  markExcerptEdges(item.body),
                   style: const TextStyle(
                     fontSize: WalType.body,
                     color: WalColors.ink,
