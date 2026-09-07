@@ -405,18 +405,42 @@ class TestRealArtefacts(unittest.TestCase):
         self.assertLessEqual(pairs, canonical)
         self.assertLessEqual(ranged, rows)
 
-    def test_the_published_248_reconstructs_exactly(self):
+    # ⭐⭐ CÁC SỐ NÀY BỊ RÀNG VÀO MỘT BUILD, không phải vào công thức.
+    #
+    # Registry tự ghi: «stays valid as the historical value of a named metric on
+    # a named build» — build 2026-09-06, khi ACTIVITY_LEAF_COUNT = 207.
+    # Ngày 2026-09-07 bộ trích thí nghiệm KHTN đọc thêm được 16 khối (dấu đầu
+    # dòng «•» của KHTN 6-9 vốn bị bỏ qua), nên 207→223 và tái dựng ra 264.
+    #
+    # KHÔNG sửa `published_value`: đó là con số đã công bố, không được viết lại.
+    # Cũng KHÔNG giữ khẳng định literal, vì nó chỉ đúng khi kho đứng yên — và
+    # một con số ràng vào build thì không phải phép kiểm công thức.
+    #
+    # Khẳng định QUAN HỆ. Bài học của nhóm test này vẫn nguyên: một con số vô
+    # nghĩa vẫn tái dựng được — TÁI DỰNG ĐƯỢC KHÔNG PHẢI CÓ NGHĨA. Và test vẫn
+    # đỏ nếu công thức bị đổi, tức vẫn giữ đúng thứ nó sinh ra để giữ.
+    def test_the_published_248_reconstructs_by_its_stated_formula(self):
         if not os.path.exists(L.exercise_case_map_path(self.root)):
             self.skipTest('poc-out/ not on this machine (gitignored SGK derivative)')
+        leaves = R.METRICS_BY_ID['ACTIVITY_LEAF_COUNT'].derive(self.ctx)
+        upstream = R.METRICS_BY_ID['TOAN_EXERCISE_UPSTREAM_LEAF_COUNT'].derive(self.ctx)
         d = R.DEPRECATED_BY_ID['ACTIVITY_TOTAL_248']
-        self.assertEqual(d.reconstruct(self.ctx), 248)
+        self.assertEqual(d.reconstruct(self.ctx), leaves + upstream)
+        self.assertEqual(d.published_value, 248,
+                         'con số đã công bố không được sửa')
 
-    def test_the_published_217_and_161_reconstruct_exactly(self):
-        """Both reproduce — which is the point: reproducibility is not meaning."""
+    def test_the_published_217_and_161_reconstruct_by_their_stated_formulas(self):
+        """Cả hai vẫn tái dựng — và đó mới là điểm: tái dựng được không phải có nghĩa."""
         if not os.path.exists(L.exercise_case_map_path(self.root)):
             self.skipTest('poc-out/ not on this machine (gitignored SGK derivative)')
-        self.assertEqual(R.DEPRECATED_BY_ID['ACTIVITY_TOTAL_217'].reconstruct(self.ctx), 217)
-        self.assertEqual(R.DEPRECATED_BY_ID['ACTIVITY_TOTAL_161'].reconstruct(self.ctx), 161)
+        leaves = R.METRICS_BY_ID['ACTIVITY_LEAF_COUNT'].derive(self.ctx)
+        keys = R.METRICS_BY_ID['TOAN_EXERCISE_UPSTREAM_LESSON_KEY_COUNT'].derive(self.ctx)
+        d217 = R.DEPRECATED_BY_ID['ACTIVITY_TOTAL_217']
+        self.assertEqual(d217.reconstruct(self.ctx), leaves + keys,
+                         'vẫn là phép cộng SAI ĐƠN VỊ: hàng + khoá')
+        self.assertEqual(d217.published_value, 217)
+        self.assertEqual(R.DEPRECATED_BY_ID['ACTIVITY_TOTAL_161'].reconstruct(self.ctx), 161,
+                         '161 chỉ đụng tv* + Toán thượng nguồn — không đổi theo KHTN')
 
 
 # --------------------------------------------------------------------------- ledger population

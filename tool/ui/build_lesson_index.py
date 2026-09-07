@@ -23,6 +23,7 @@ Log lý do: poc-out/b-lane/attach-log/lesson-index-g<N>.attach-log.json
 (đổi thư mục bằng ATTACH_LOG_DIR)."""
 import glob
 import json, os, re, sys, collections
+from experiment_steps import step_body, is_real_step, continues_step
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lesson_attach import AttachRegistry  # noqa: E402
@@ -237,32 +238,99 @@ for subj, bk, f in _exp_sources:
     # lộ ra khi mở rộng sang KHTN 6-9.
     title = None
     for t in reversed(lines[max(0, i_cb - 6):i_cb]):
+        # Dấu hai chấm KHÔNG bắt buộc: KHTN 6 viết «Thí nghiệm về sự bảo toàn
+        # năng lượng» thành một dòng trần. Nhưng đòi dòng NGẮN và không kết
+        # bằng dấu câu, nếu không sẽ vơ luôn thân câu hỏi «Thí nghiệm mô tả ở
+        # Hình 42.2 giúp chúng ta khám phá…».
         m = re.match(r'^Thí nghiệm\s*\d*\s*[:.]\s*(\S.*)$', t)
         if m:
             title = m.group(1).strip()
             break
+        c = t.strip()
+        if (re.match(r'^Thí nghiệm\b', c) and 12 <= len(c) <= 70
+                and not c.endswith(('.', '?', '!', ':', ','))):
+            title = c
+            break
     if title is None:
-        for t in reversed(lines[:i_cb]):
+        # ⚠ Vòng này TRƯỚC ĐÂY quét ngược VÔ HẠN về đầu trang, nên nó lấy được
+        # cả «Hoàn thành các câu sau đây» ở dòng 0 làm tên thí nghiệm ở dòng 51.
+        # Giới hạn về cùng cửa sổ với các nhánh khác.
+        for t in reversed(lines[max(0, i_cb - 14):i_cb]):
             if re.match(r'^\d+\.\s+\S', t):
-                title = re.sub(r'^\d+\.\s+', '', t).strip()
+                c = re.sub(r'^\d+\.\s+', '', t).strip()
+                # ⚠ KHÔNG chặn mọi câu hỏi. Khoa học 4 đặt tên bài BẰNG câu
+                # hỏi và đó là tên hợp lệ («Không khí có ở đâu?»); thứ phải
+                # chặn là ĐỀ BÀI TẬP của KHTN 6 («Nhận xét nào sau đây nói về
+                # tính chất hoá học của sắt?»). Phân biệt bằng độ dài + cụm
+                # ra-đề, không bằng dấu hỏi — bản trước chặn cả hai và làm
+                # lớp 4 mất một thí nghiệm.
+                bad_prompt = ('nào sau đây' in c.lower() or 'hãy' in c.lower())
+                if not (c.endswith('?') and (len(c) > 40 or bad_prompt)):
+                    title = c
                 break
+    if title is None:
+        # ⭐ KHTN 6-9 đặt tên thí nghiệm bằng một dòng TRẦN ngay trên «Chuẩn bị:»
+        # — không đánh số, không dấu hai chấm: «Lọc nước từ hỗn hợp nước lẫn
+        # đất», «Tìm hiểu một số tính chất của đường và muối ăn». Hai mẫu trên
+        # viết cho sách tiểu học nên trượt hết. Đo được 5/16 khối KHTN 6 rớt
+        # chỉ vì thiếu tiêu đề, dù dòng tiêu đề nằm ngay đó.
+        #
+        # Fail closed vẫn giữ: dòng phải TRÔNG NHƯ tiêu đề — không kết câu bằng
+        # dấu chấm, không phải câu hỏi, không phải một bước, đủ dài để có nghĩa.
+        # ⚠ Bản đầu của tôi chỉ đòi «dài ≥12 và không kết bằng dấu câu» — nó vơ
+        # cả dòng GIỮA ĐOẠN: «Thảo luận về những ưu điểm và nhược điểm trong»,
+        # «Quả bóng này». Tín hiệu thật của một dòng tiêu đề là nó MỞ ĐẦU một
+        # khối: dòng ngay trước nó phải kết thúc trọn câu.
+        for k in range(i_cb - 1, max(-1, i_cb - 4), -1):
+            c = lines[k].strip()
+            prev = lines[k - 1].strip() if k > 0 else ''
+            starts_block = (k == 0) or prev.endswith(('.', '?', '!', ':'))
+            if (12 <= len(c) <= 70 and ' ' in c
+                    and starts_block
+                    and not c.endswith(('.', '?', '!', ':', ','))
+                    and not c.startswith(('•', '-', '–', '?', 'Hình', 'Chuẩn bị'))
+                    and c[0].isupper()):
+                title = c
+                break
+    # Tiêu đề cũng XUỐNG DÒNG như bước: «Tự làm mô hình tuabin hoạt động bằng
+    # nguồn năng / lượng tái tạo». Ghép nốt phần chạy tiếp, cùng nguyên tắc.
+    if title is not None:
+        try:
+            ti = lines.index(title, max(0, i_cb - 6), i_cb)
+        except ValueError:
+            ti = None
+        if ti is not None and ti + 1 < i_cb:
+            nxt = lines[ti + 1].strip()
+            if (nxt and nxt[0].islower() and len(nxt) <= 40
+                    and not nxt.startswith(('•', '-', '–'))):
+                title = f'{title} {nxt}'
+
     steps, du_doan, quan_sat = [], None, None
     # KHTN 6-9: đôi khi bước đầu viết NGAY sau dấu hai chấm cùng dòng
     # («Tiến hành: Dùng panh kẹp...») thay vì xuống dòng rồi mới «- ...».
     inline = re.match(r'^Tiến hành\s*:\s*(\S.*)$', lines[i_th])
     if inline:
         steps.append(inline.group(1).strip())
-    for t in lines[i_th + 1:i_th + 12]:
-        # Fail closed: một nhãn hình/ký hiệu lạc trong vùng bước («- AgNO3»)
-        # không phải một bước thật — bước thật luôn là một câu, nhiều từ.
-        if t.startswith('- ') and len(t[2:].strip()) >= 10 and ' ' in t[2:].strip():
-            steps.append(t[2:].strip())
-        elif t.startswith('Dự đoán'):
+    # ⭐⭐ SÁCH TIỂU HỌC DÙNG «- », KHTN 6-9 DÙNG «•».
+    #
+    # Bộ trích này viết cho Khoa học 4/5 rồi mở sang KHTN 6-9 mà không đổi ký
+    # tự đầu dòng. Hậu quả đo được: 8/16 khối KHTN 6 tìm thấy đủ «Chuẩn bị» +
+    # «Tiến hành» nhưng KHÔNG đọc được bước nào, nên bị bỏ — trong đó có chính
+    # Bài 17, bài đang hiện trên Home của trẻ.
+    for t in lines[i_th + 1:i_th + 14]:
+        body = step_body(t)
+        if body is not None:
+            if is_real_step(body):
+                steps.append(body)
+            continue
+        if t.startswith('Dự đoán'):
             du_doan = t.strip()
         elif re.match(r'^(Sau .{0,30})?[Qq]uan sát', t):
             quan_sat = t.strip()
-        elif t.startswith('?') or t.startswith('Hình'):
+        elif t.startswith('?') or t.startswith('Hình') or t.startswith('('):
             break
+        elif steps and continues_step(steps[-1], t):
+            steps[-1] = f'{steps[-1]} {t.strip()}'
     if not steps or title is None:
         continue  # khối không đọc được cấu trúc ⇒ bỏ, không bịa
     printed = int(lines[-1]) if lines[-1].strip().isdigit() else pdf - 1
