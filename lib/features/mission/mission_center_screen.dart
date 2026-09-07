@@ -532,9 +532,9 @@ class MissionCenterScreen extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            card.otherGradeNote == null
-                ? where
-                : '$where · ${card.otherGradeNote}',
+            // Quyết định C-1: thẻ nào tới được đây cũng là bài của chính trẻ,
+            // nên không còn phần đuôi «sách lớp N».
+            where,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 13, color: WalColors.inkSoft),
@@ -1516,12 +1516,14 @@ class _SmartCardRowState extends State<_SmartCardRow> {
 
   /// Chiều cao thẻ — cố định để hàng không nhảy khi thẻ này dài hơn thẻ kia.
   ///
-  /// ⚠ MÁY THẬT lượt 1 (`02-swipe-card2.png`): ở 172 dp, thẻ LS&ĐL 5 — thẻ
-  /// DUY NHẤT có thêm dòng «Sách lớp 5 · không phải sách lớp con» — cắt ngang
+  /// ⚠ MÁY THẬT lượt 1 (`02-swipe-card2.png`): ở 172 dp có thẻ bị cắt ngang
   /// dòng «đã mở gì», để lại một nửa hàng chữ giữa nhãn trạng thái và dòng
-  /// «Tiếp theo». Một dòng chữ bị xén ngang là chữ KHÔNG ĐỌC ĐƯỢC, và nó rơi
-  /// đúng vào thẻ mang sự thật «sách lớp khác». Nâng lên 186 + [_detailLines]
-  /// giới hạn theo đúng thẻ ấy.
+  /// «Tiếp theo». Một dòng chữ bị xén ngang là chữ KHÔNG ĐỌC ĐƯỢC. Nâng lên
+  /// 186 để dòng ấy luôn đủ chỗ.
+  ///
+  /// Thẻ gây ra phép đo đó là thẻ mang thêm một dòng nhãn khác-lớp; quyết
+  /// định C-1 (lệnh 54) đã bỏ hẳn dòng ấy, nhưng chiều cao giữ nguyên: nó
+  /// được chọn để dòng chi tiết đủ HAI hàng, và điều đó vẫn cần.
   static const double cardHeight = 186;
 
   late final PageController _controller = PageController(
@@ -1689,18 +1691,6 @@ class _SmartCard extends StatelessWidget {
                       : WalColors.ink,
                 ),
               ),
-              if (card.otherGradeNote != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  card.otherGradeNote!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: WalColors.warnText,
-                  ),
-                ),
-              ],
               const SizedBox(height: WalSpacing.sm),
               // TRẠNG THÁI
               Container(
@@ -1728,10 +1718,9 @@ class _SmartCard extends StatelessWidget {
                   alignment: Alignment.topLeft,
                   child: Text(
                     card.detailLine,
-                    // Thẻ có thêm dòng «sách lớp N» thì dòng này chỉ còn
-                    // chỗ cho MỘT hàng — cắt bằng «…» là đọc được, cắt
-                    // ngang thân chữ thì không.
-                    maxLines: card.otherGradeNote == null ? 2 : 1,
+                    // Không còn dòng «sách lớp N» (quyết định C-1) nên dòng
+                    // chi tiết luôn có đủ hai hàng.
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 12.5,

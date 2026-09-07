@@ -141,13 +141,21 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   List<HomeLessonThread> _lessonThreads(LearnerProfile p) {
     final c = WorkspaceCatalog.shared;
     if (!c.isLoaded) return const [];
-    final docs =
-        [for (final book in c.booksWithWorkspace) ...c.docsForBook(book)]
-          ..sort((a, b) {
-            final own =
-                (a.grade == p.grade ? 0 : 1) - (b.grade == p.grade ? 0 : 1);
-            return own != 0 ? own : a.slotKey.compareTo(b.slotKey);
-          });
+    // ⭐⭐ QUYẾT ĐỊNH C-1 (lệnh 54) — HOME FAIL-CLOSED THEO LỚP.
+    //
+    // Lọc xảy ra Ở ĐÂY, TRƯỚC mọi phép xếp hạng: bài ngoài lớp KHÔNG bao giờ
+    // bước vào Home, Smart Card, Tiếp tục học, hay Next Action. Trước đây danh
+    // sách nhận MỌI bài rồi chỉ SẮP bài đúng lớp lên trước và dán nhãn «không
+    // phải sách lớp con» — Founder đã bác đúng cách làm ấy: cảnh báo sau khi
+    // đã đề xuất vẫn là đã đề xuất.
+    //
+    // Bài ngoài lớp vẫn sống trong Giá sách / Bản đồ học tập / tìm kiếm —
+    // những nơi trẻ CHỦ ĐỘNG đi tới, không phải nơi SAM tự đưa ra.
+    final docs = [
+      for (final book in c.booksWithWorkspace)
+        for (final d in c.docsForBook(book))
+          if (d.grade == p.grade) d,
+    ]..sort((a, b) => a.slotKey.compareTo(b.slotKey));
     return [
       for (final d in docs)
         HomeLessonThread(

@@ -1,51 +1,37 @@
-/// ⭐⭐ FOUNDER ORDER 50 §6 — «KHÔNG ĐẨY MÔN KHÁC THÀNH SÁCH KHÁC».
+/// ⭐⭐ FOUNDER DECISION C-1 (lệnh 54) — HOME FAIL-CLOSED THEO LỚP.
 ///
-/// Tệp này TRƯỚC ĐÂY tên là `home_research_card_test.dart` và nó KHOÁ đúng
-/// thứ Founder vừa bác bỏ. Nó đòi cho bằng được rằng LS&ĐL 5 · Bài 8 phải:
+/// Tệp này đã đổi tiền đề HAI LẦN, và lần nào cũng do Founder cầm máy rồi
+/// chốt — ghi lại cả hai để không ai tưởng test bị nới:
 ///
-/// - đứng dưới một nhãn khu riêng **«SAM ĐANG TẬP ĐỌC SÁCH KHÁC»**;
-/// - mang eyebrow **«LÁT CẮT NGHIÊN CỨU · SÁCH LỚP 5 · BẢN THỬ NGHIỆM»**;
-/// - đi kèm một dòng bắt đầu bằng «Đây không phải bài của lớp con — SAM đang
-///   **tập đọc thử một cuốn sách khác**. Con xem cho biết cũng được.»
+/// 1. Ban đầu (`home_research_card_test.dart`) nó đòi LS&ĐL 5 phải đứng dưới
+///    khu riêng «SAM ĐANG TẬP ĐỌC SÁCH KHÁC» kèm eyebrow «LÁT CẮT NGHIÊN
+///    CỨU». Order 50 §6 bác: đừng đẩy môn khác thành «sách khác».
+/// 2. Rồi nó đòi bài lớp khác phải là MỘT THẺ HỌC trong hàng «HÔM NAY», mang
+///    nhãn «Sách lớp 5 · không phải sách lớp con». Lệnh 54 bác luôn cách ấy:
 ///
-/// Founder, sau khi cầm máy: «Điều này làm nó giống nội dung phụ/research.
-/// Nếu đó là một lesson có thể mở, hãy trình bày như: MỘT MÔN / BÀI HỌC KHÁC
-/// với trạng thái truth thích hợp.»
+///    «Grade filtering phải xảy ra TRƯỚC ranking/recommendation, không phải
+///     ranking xong rồi mới gắn nhãn cảnh báo.»
 ///
-/// Nên bài kiểm đổi TIỀN ĐỀ, không nới kỳ vọng. Sự thật phải nói vẫn phải
-/// nói — **đây là sách LỚP 5, không phải sách lớp con** — nhưng nó nói ở
-/// đúng nơi của một bài học: **trên chính thẻ học của nó**, trong cùng hàng
-/// «HÔM NAY» với bài của lớp con. Mỗi kỳ vọng dưới đây vẫn đòi một chuỗi CỤ
-/// THỂ; và ba chuỗi cũ ở trên nay bị cấm bằng tên.
+/// Nên hôm nay bài kiểm đòi điều NGƯỢC LẠI với bản trước: bài ngoài lớp
+/// KHÔNG được có mặt trên Home. Nó vẫn tồn tại trong Giá sách / Bản đồ học
+/// tập — nơi trẻ CHỦ ĐỘNG đi tới — nhưng không phải nơi SAM tự đưa ra.
 library;
 
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/lesson_document.dart';
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
-import 'package:learning_coach/core/store/learner_profile.dart';
-import 'package:learning_coach/core/store/learner_store.dart';
-import 'package:learning_coach/features/lesson_workspace/widgets/runtime_plan.dart';
-import 'package:learning_coach/features/mission/mission_center_screen.dart';
-import 'package:learning_coach/features/mission/mission_data.dart';
+import 'package:learning_coach/features/mission/home_cards.dart';
 
-import '../lesson_workspace/support.dart';
-
-const _g6 = LearnerProfile(learnerId: 'l6', displayName: 'Na', grade: 6);
-
-Future<MissionData> _data() => buildMissionFromStore(
-  profile: _g6,
-  store: JsonlLearnerStore(),
-  now: DateTime(2026, 9, 5, 19),
-);
-
-LessonDocument _history() {
+/// Bài LS&ĐL **lớp 5** (bản synthetic, có trong git).
+LessonDocument _history5() {
   final j = jsonDecode(
-    File('assets/fixtures/synthetic/lesson-05-sgk-lich-su-va-dia-li-5-b8.synthetic.json')
-        .readAsStringSync(),
+    File(
+      'assets/fixtures/synthetic/'
+      'lesson-05-sgk-lich-su-va-dia-li-5-b8.synthetic.json',
+    ).readAsStringSync(),
   ) as Map;
   return LessonDocument.fromJson(
     j.cast<String, Object?>(),
@@ -53,124 +39,52 @@ LessonDocument _history() {
   )!;
 }
 
-/// Một mạch học chưa mở cách nào, việc tiếp theo do ĐỘNG CƠ DUY NHẤT sinh.
-HomeLessonThread _thread(LessonDocument d) =>
-    HomeLessonThread(doc: d, next: founderNextAction(d, seen: const {}));
-
-Future<void> _pump(
-  WidgetTester t, {
-  required List<LessonDocument> docs,
-  void Function(LessonDocument)? onOpen,
-}) async {
-  t.view.physicalSize = const Size(1080, 5000);
-  t.view.devicePixelRatio = 2.75;
-  addTearDown(t.view.reset);
-  await t.pumpWidget(
-    fixtureHost(
-      MissionCenterScreen(
-        data: await _data(),
-        learnerGrade: 6,
-        onOpenSubjects: () {},
-        lessonThreads: [for (final d in docs) _thread(d)],
-        onOpenWorkspaceLesson: (d, {at}) => onOpen?.call(d),
-      ),
-    ),
-  );
-  await t.pumpAndSettle();
-}
-
 void main() {
-  testWidgets('⭐⭐ bài của lớp KHÁC là MỘT THẺ HỌC trong cùng hàng «HÔM NAY» — '
-      'không còn khu «lát cắt nghiên cứu» riêng', (t) async {
-    final b17 = loadSyntheticDoc();
-    final b8 = _history();
-    expect(WorkspaceCatalog.isResearchSlot(b8), isTrue);
-    expect(WorkspaceCatalog.isResearchSlot(b17), isFalse);
+  test('⭐⭐ học sinh LỚP 6 KHÔNG nhận thẻ Home của bài LỚP 5', () {
+    final d = _history5();
+    expect(d.grade, 5, reason: 'mẫu thử phải là bài lớp 5');
 
-    LessonDocument? opened;
-    await _pump(t, docs: [b17, b8], onOpen: (d) => opened = d);
+    final row = buildHomeCards(
+      threads: [HomeLessonThread(doc: d)],
+      learnerGrade: 6,
+    );
 
-    // ① Cả hai bài đều là thẻ của hàng «HÔM NAY», cùng một loại khoá.
-    expect(find.byKey(MissionCenterScreen.todayRowKey), findsOneWidget);
     expect(
-      find.byKey(MissionCenterScreen.smartCardKey(b17.slotKey)),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(MissionCenterScreen.smartCardKey(b8.slotKey)),
-      findsOneWidget,
-    );
-
-    // ② ⛔ Ba chuỗi Founder bác bỏ KHÔNG được quay lại — bằng tên.
-    expect(find.textContaining('SAM ĐANG TẬP ĐỌC SÁCH KHÁC'), findsNothing);
-    expect(find.textContaining('LÁT CẮT NGHIÊN CỨU'), findsNothing);
-    final all = t
-        .widgetList<Text>(find.byType(Text))
-        .map((w) => w.data ?? '')
-        .join(' | ');
-    expect(all, isNot(contains('tập đọc thử một cuốn sách khác')));
-    expect(all, isNot(contains('Con xem cho biết cũng được')));
-
-    // ③ Nhưng SỰ THẬT VẪN PHẢI NÓI — và nó nói trên chính thẻ ấy, bằng lời
-    //    trẻ, không mã máy, không %.
-    final note = find.descendant(
-      of: find.byKey(MissionCenterScreen.smartCardKey(b8.slotKey)),
-      matching: find.text('Sách lớp 5 · không phải sách lớp con'),
-    );
-    expect(note, findsOneWidget);
-    final noteText = t.widget<Text>(note).data!;
-    expect(noteText, isNot(contains('%')));
-    expect(noteText, isNot(matches(RegExp(r'[a-z]+-[a-z]+-v\d'))));
-
-    // ④ Thẻ của lớp con KHÔNG mang dòng ấy.
-    expect(
-      find.descendant(
-        of: find.byKey(MissionCenterScreen.smartCardKey(b17.slotKey)),
-        matching: find.textContaining('không phải sách lớp con'),
-      ),
-      findsNothing,
-    );
-
-    // ⑤ TRƯỢT sang thẻ 2 rồi chạm ⇒ mở ĐÚNG tài liệu ấy. Đây chính là bước
-    //    «swipe sang card 2 · chuyển sang một môn khác» của order 50 §10, đo
-    //    bằng cử chỉ thật chứ không phải bằng gọi callback.
-    await t.drag(
-      find.byKey(MissionCenterScreen.todayRowKey),
-      const Offset(-400, 0),
-    );
-    await t.pumpAndSettle();
-    await t.tap(find.byKey(MissionCenterScreen.smartCardKey(b8.slotKey)));
-    await t.pumpAndSettle();
-    expect(opened?.slotKey, b8.slotKey);
-  });
-
-  testWidgets('⭐⭐ SÁCH LỚP KHÁC KHÔNG BAO GIỜ thành việc hôm nay: «SAM GỢI Ý» '
-      'chọn bài của ĐÚNG LỚP con, kể cả khi bài lớp khác đứng trước', (t) async {
-    final b17 = loadSyntheticDoc();
-    final b8 = _history();
-    // Cố ý ĐẢO thứ tự: nếu luật chọn chỉ là «thẻ đầu tiên» thì bài lớp 5 sẽ
-    // thắng — đó là điều bậc «đúng lớp» tồn tại để chặn.
-    await _pump(t, docs: [b8, b17]);
-    final cta = find.descendant(
-      of: find.byKey(MissionCenterScreen.nextActionCtaKey),
-      matching: find.byType(Text),
-    );
-    expect(cta, findsOneWidget);
-    final suggestion = find.byKey(MissionCenterScreen.samSuggestionKey);
-    expect(
-      find.descendant(of: suggestion, matching: find.textContaining('Bài 17')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: suggestion, matching: find.textContaining('Bài 8')),
-      findsNothing,
+      row.cards.where((c) => c.isRealLesson),
+      isEmpty,
+      reason: 'bài lớp 5 lọt vào Home của học sinh lớp 6',
     );
   });
 
-  testWidgets('chỉ có bài của lớp con ⇒ một thẻ, không có dòng «sách lớp»',
-      (t) async {
-    await _pump(t, docs: [loadSyntheticDoc()]);
-    expect(find.textContaining('không phải sách lớp con'), findsNothing);
-    expect(find.textContaining('LÁT CẮT NGHIÊN CỨU'), findsNothing);
+  test('học sinh LỚP 5 thì CHÍNH bài ấy là thẻ của em', () {
+    final d = _history5();
+    final row = buildHomeCards(
+      threads: [HomeLessonThread(doc: d)],
+      learnerGrade: 5,
+    );
+    expect(row.cards.where((c) => c.isRealLesson), hasLength(1));
+  });
+
+  test('⛔ ba cách gọi tên CŨ đều đã biến mất khỏi mã nguồn', () {
+    final src = [
+      File('lib/features/mission/home_cards.dart').readAsStringSync(),
+      File(
+        'lib/features/mission/mission_center_screen.dart',
+      ).readAsStringSync(),
+      File('lib/main.dart').readAsStringSync(),
+    ].join('\n');
+    for (final banned in [
+      'SAM ĐANG TẬP ĐỌC SÁCH KHÁC',
+      'LÁT CẮT NGHIÊN CỨU',
+      'tập đọc thử một cuốn sách khác',
+      'không phải sách lớp con',
+      'otherGradeNote',
+    ]) {
+      expect(
+        src.contains(banned),
+        isFalse,
+        reason: '«$banned» vẫn còn — lệnh 54 bỏ hẳn đường gắn nhãn này',
+      );
+    }
   });
 }
