@@ -13,13 +13,24 @@ def line(text, x=0.1, y=0.5, w=0.6, h=0.02):
     return {'text': text, 'x': x, 'y': y, 'w': w, 'h': h, 'conf': 1}
 
 
+# Giãn dòng THẬT trong sách ≈ 1,2–1,5 lần chiều cao dòng (đo trên OCR: h≈0,019,
+# bước y≈0,017–0,025). Fixture giãn quá rộng sẽ làm mọi dòng thành khối riêng và
+# test đo một thứ không tồn tại trong sách.
+LH = 0.02
+STEP = 0.025
+
+
 def one_column(n=10):
-    return [line(f'câu số {i} trong một đoạn văn dài', y=0.1 + i * 0.07) for i in range(n)]
+    return [line(f'câu số {i} trong một đoạn văn dài', y=0.1 + i * STEP) for i in range(n)]
 
 
-def two_columns():
-    left = [line(f'cột trái dòng {i} của một đoạn dài', x=0.08, y=0.15 + i * 0.09) for i in range(6)]
-    right = [line(f'cột phải dòng {i} của một đoạn dài', x=0.55, y=0.15 + i * 0.09) for i in range(6)]
+def two_columns(n=12):
+    # Hai cột THẬT: mỗi cột rộng ~0,36 và KHÔNG chồng lên nhau theo x. Fixture
+    # cột rộng 0,6 sẽ chồng nhau — đó là một cột bị tách đôi, không phải hai cột.
+    left = [line(f'cột trái dòng {i} của một đoạn dài', x=0.08, y=0.15 + i * STEP, w=0.36)
+            for i in range(n)]
+    right = [line(f'cột phải dòng {i} của một đoạn dài', x=0.55, y=0.15 + i * STEP, w=0.36)
+             for i in range(n)]
     return left + right
 
 
@@ -31,7 +42,19 @@ def table():
 
 class ReadingOrderTests(unittest.TestCase):
     def test_two_text_flows_are_detected(self):
+        # Vẫn đo được bố cục (census dùng), nhưng KHÔNG còn dùng để từ chối bài.
         self.assertTrue(lr.is_two_column(two_columns()))
+
+    def test_blocks_separate_a_narrow_side_note_from_the_body(self):
+        body = [line('thân bài dòng dài ở bên trái', x=0.12, y=0.1 + i * STEP, w=0.49)
+                for i in range(5)]
+        note = [line('khung phụ hẹp bên phải', x=0.66, y=0.11 + i * STEP, w=0.22)
+                for i in range(5)]
+        bs = lr.blocks(body + note)
+        self.assertGreaterEqual(len(bs), 2, 'thân bài và khung phụ phải là hai khối')
+        for b in bs:
+            xs = {round(l['x'], 2) for l in b}
+            self.assertLessEqual(len(xs), 2, 'một khối không được trộn hai cột')
 
     def test_a_table_is_not_mistaken_for_two_columns(self):
         # Xé một bảng ra làm hai cột làm nó nát hơn là để nguyên.
@@ -55,13 +78,30 @@ class ExtractTests(unittest.TestCase):
         self.assertEqual([p['pagePdf'] for p in d['pages']], [5, 6])
         self.assertIn('câu số 0 trong một đoạn văn dài', d['pages'][0]['text'])
 
-    def test_a_two_column_page_stops_the_whole_lesson(self):
-        # Ghép theo y sẽ đan hai cột ⇒ trẻ đọc một câu ghép từ hai câu khác nhau.
-        # Thà bài chưa mở được còn hơn bài mở ra chữ lộn.
-        self.pages = {5: one_column(), 6: two_columns()}
-        d, why = lr.lesson_reading('x', 5, 6)
-        self.assertIsNone(d)
-        self.assertEqual(why, 'READING_ORDER')
+    def test_two_columns_are_read_in_order_not_interleaved(self):
+        # Ghép theo y đan hai cột ⇒ trẻ đọc một câu ghép từ hai câu khác nhau.
+        # Máy thật đã cho ra đúng lỗi ấy. Nay đọc HẾT cột trái rồi mới sang phải.
+        self.pages = {5: two_columns()}
+        d, why = lr.lesson_reading('x', 5, 5)
+        self.assertIsNone(why)
+        t = d['pages'][0]['text']
+        last_left = t.index('cột trái dòng 11')
+        first_right = t.index('cột phải dòng 0')
+        self.assertLess(last_left, first_right,
+                        'cột trái phải xong hẳn TRƯỚC khi sang cột phải')
+
+    def test_a_side_note_does_not_split_a_body_sentence(self):
+        # Ca thật trên Nokia (Công nghệ 6 Bài 1): khung niên biểu rộng 0,22 —
+        # HẸP hơn mọi ngưỡng «dòng dài» — chen vào giữa câu thân bài.
+        body = [line('Nhà ở là công trình được xây dựng với mục đích',
+                     x=0.124, y=0.093 + i * 0.019, w=0.49) for i in range(6)]
+        note = [line('Khoảng tám nghìn năm trước con người',
+                     x=0.659, y=0.112 + i * 0.017, w=0.222) for i in range(6)]
+        self.pages = {5: body + note}
+        d, _ = lr.lesson_reading('x', 5, 5)
+        t = d['pages'][0]['text']
+        self.assertLess(t.rindex('mục đích'), t.index('Khoảng tám nghìn'),
+                        'thân bài phải xong trước khi tới khung phụ')
 
     def test_a_missing_ocr_page_stops_the_lesson(self):
         # Thiếu một trang giữa bài = đưa cho trẻ một bài thủng, không nói gì.

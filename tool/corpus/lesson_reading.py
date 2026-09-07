@@ -46,6 +46,11 @@ def page_lines(book, pdf_page):
 def is_two_column(lines):
     """Hai LUỒNG VĂN BẢN song song — không phải bảng.
 
+    ⚠ KHÔNG CÒN LÀ CỔNG. Trước đây trang hai cột bị chặn thẳng vì ghép theo y
+    sẽ đan hai cột. Nay `read_order` đọc theo KHỐI nên hai cột được đọc hết cột
+    trái rồi tới cột phải — chặn nữa là bỏ đi 802 bài mà không được gì. Giữ hàm
+    để census còn đo được bố cục, không dùng để từ chối nội dung.
+
     Chỉ xét dòng DÀI: một bảng gồm nhiều ô ngắn nên không lọt vào phép đo này,
     và ta không muốn xé một bảng ra làm hai cột.
     """
@@ -61,6 +66,68 @@ def is_two_column(lines):
         return max(l['y'] for l in g) - min(l['y'] for l in g)
 
     return span(left) > MIN_SPAN and span(right) > MIN_SPAN
+
+
+BLOCK_XGAP = 0.04     # chồng x tối thiểu để hai dòng thuộc cùng khối
+BLOCK_YGAP = 1.8      # khoảng cách dọc tối đa, tính theo chiều cao dòng
+BAND_TOL = 0.01       # sai số khi gộp khối vào cùng một dải ngang
+
+
+def blocks(lines):
+    """Gom dòng thành KHỐI bố cục: cùng khối khi chồng nhau theo x VÀ liền nhau
+    theo y. Khung phụ, nhãn hình và thân bài trở thành những khối riêng.
+    """
+    ls = sorted([l for l in lines if (l.get('text') or '').strip()],
+                key=lambda l: (l['y'], l['x']))
+    out = []
+    for l in ls:
+        h = l.get('h') or 0.02
+        for b in out:
+            last = b[-1]
+            overlap = (min(l['x'] + l.get('w', 0), last['x'] + last.get('w', 0))
+                       - max(l['x'], last['x']))
+            if overlap > -BLOCK_XGAP and \
+                    0 <= l['y'] - last['y'] <= BLOCK_YGAP * max(h, last.get('h') or h):
+                b.append(l)
+                break
+        else:
+            out.append([l])
+    return out
+
+
+def read_order(lines):
+    """⭐ A5 — PAGE → LAYOUT BLOCKS → REGIONS → READING ORDER.
+
+    Ghép dòng theo y là đúng cho trang một luồng, nhưng SAI ngay khi trang có
+    khung phụ hay nhãn hình: máy thật (Nokia, Công nghệ 6 Bài 1) cho ra câu
+    «…bảo vệ con người trước những tác động KHOẢNG TÁM NGHÌN NĂM xấu của thiên
+    nhiên…» — một câu ghép từ thân bài và một khung niên biểu bên phải. Bài 17
+    cũng dính nhẹ: nhãn hình «Nước muối», «Đèn cồn» chen vào giữa câu.
+
+    Ngưỡng bề rộng dòng KHÔNG cứu được chuyện này: khung phụ ấy rộng 0,22 —
+    hẹp hơn ngưỡng «dòng dài», nên mọi luật dựa trên bề rộng đều bỏ lọt.
+
+    Ở đây: gom khối, gộp khối chồng nhau theo y thành một DẢI, rồi đọc từng dải
+    trái→phải. Khung phụ và nhãn hình ra khỏi giữa câu vì chúng là khối riêng.
+    """
+    bs = blocks(lines)
+    bands = []
+    for b in sorted(bs, key=lambda b: (min(l['y'] for l in b), min(l['x'] for l in b))):
+        y0 = min(l['y'] for l in b)
+        y1 = max(l['y'] for l in b)
+        for band in bands:
+            if not (y1 < band['y0'] - BAND_TOL or y0 > band['y1'] + BAND_TOL):
+                band['blocks'].append(b)
+                band['y0'] = min(band['y0'], y0)
+                band['y1'] = max(band['y1'], y1)
+                break
+        else:
+            bands.append(dict(y0=y0, y1=y1, blocks=[b]))
+    seq = []
+    for band in sorted(bands, key=lambda z: z['y0']):
+        for b in sorted(band['blocks'], key=lambda b: min(l['x'] for l in b)):
+            seq += b
+    return seq
 
 
 def is_furniture(line):
@@ -99,7 +166,7 @@ def running_headers(pages_lines):
 
 def page_text(lines, drop=frozenset()):
     return ' '.join((l.get('text') or '').strip()
-                    for l in lines
+                    for l in read_order(lines)
                     if not is_furniture(l) and (l.get('text') or '').strip() not in drop).strip()
 
 
@@ -145,8 +212,6 @@ def lesson_reading(book, page_pdf_start, page_pdf_end, *, printed_start=None, ti
         if lines is None:
             missing += 1
             continue
-        if is_two_column(lines):
-            return None, 'READING_ORDER'
         raw.append((pp, lines))
     if missing:
         return None, 'OCR_MISSING'
@@ -162,4 +227,4 @@ def lesson_reading(book, page_pdf_start, page_pdf_end, *, printed_start=None, ti
         return None, 'LESSON_START_UNCONFIRMED'
     return dict(book=book, pagePdfStart=page_pdf_start, pagePdfEnd=page_pdf_end,
                 pageStart=printed_start, pages=pages,
-                extraction='ocr-single-flow-v1'), None
+                extraction='ocr-layout-blocks-v1'), None
