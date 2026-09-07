@@ -236,9 +236,44 @@ class _LessonWorkspaceScreenState extends State<LessonWorkspaceScreen> {
             // nó vào vùng cuộn của Đọc rồi Trực quan để trang sách và nút
             // trung tâm của sơ đồ không bị che; B bỏ hẳn nhu cầu ấy.
             Expanded(
-              child: picking
-                  ? ModePicker(doc: doc, proposal: next, onPick: _switch)
-                  : _body(_view!),
+              // ⭐ MÉP TRÊN CỦA VÙNG CUỘN LÀ MỘT NHÁT CẮT CỨNG.
+              //
+              // Thấy trên Nokia khi cuộn giữa bài: dòng chữ ở mép bị xén NGANG
+              // THÂN CHỮ, sát ngay khối gợi ý, không có ranh giới nào. Trẻ đọc
+              // ra như chữ bị lỗi chứ không phải chữ đang trượt lên.
+              //
+              // Dải mờ ngắn cho chữ CHÌM xuống dưới phần tiêu đề. Dùng lớp phủ
+              // gradient thay vì ShaderMask: máy cũ không phải hợp thành lại
+              // cả vùng cuộn mỗi khung hình.
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: picking
+                        ? ModePicker(doc: doc, proposal: next, onPick: _switch)
+                        : _body(_view!),
+                  ),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: WalSpacing.md,
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              WalColors.surface,
+                              WalColors.surface.withValues(alpha: 0),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
