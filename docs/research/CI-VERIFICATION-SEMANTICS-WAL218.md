@@ -209,7 +209,8 @@ and a run that verified none of them.
 WAL-218's scope asked for a sweep: *"wherever an existence obligation is checked by
 consistency alone."* Run 2026-09-06 across `tool/**/*.py`, `.github/workflows/ci.yml` and the
 gate-like Dart tests. Ten instances, four of them in gates that run on CI today. Each was
-read at the source before being listed; **none is fixed by this branch.**
+read at the source before being listed; **none was fixed by this branch** — the remediation
+landed later under WAL-223, see *Status* at the end of this section.
 
 ### HIGH — live CI gates
 
@@ -245,7 +246,36 @@ is empty. There is no input for which that pair reports a problem about absence.
 
 ### Status
 
-**The sweep is DONE. The remediation is NOT** — filed separately, and deliberately not folded
-into this branch: WAL-218 asked CI to stop reporting success while a D4-gated assertion is
-skipped, and that is what shipped. Fixing ten unrelated gates under the same ticket would have
-made the before→after numbers above unreadable.
+**The sweep is DONE.** The remediation was filed separately and deliberately not folded into
+this branch: WAL-218 asked CI to stop reporting success while a D4-gated assertion is skipped,
+and that is what shipped. Fixing ten unrelated gates under the same ticket would have made the
+before→after numbers above unreadable.
+
+#### Remediation: DONE, 2026-09-07 — WAL-223, merged in `b63e15e`
+
+All ten are fixed. What the fixes measured, on this machine:
+
+| | measured |
+|---|---|
+| S4 | **5 of 12 packs** (g1, g2, g3, g11, g12) carry books but **zero activity entries** — all five were being certified as good DEFAULT builds |
+| S2 | **11 of 12** grade guards passed without inspecting a single entry (`tvReadings + tvWritings` both empty) |
+| S8 | deleting one `recorded_value` moved the summary from `18 of 18` to `17 of 18` — it had previously been counted as *re-derives to its recorded value* |
+| S5 | with G5–G8 artefacts absent the script printed `🟢 TẤT CẢ XANH` and exited 0; it now prints `🟡 KHÔNG ĐẦY ĐỦ` and names the five families that never ran |
+
+Shape of the fix, the same one WAL-218 shipped: **a denominator before the claim**, three
+ledgers instead of one (`FAILS` / `VACUOUS` / `SKIPPED`), a ledger file so *never ran* is
+readable rather than printed, and a `--require-verified` / `--require-complete` / 
+`--require-recorded` claim gate for callers that assert verification happened.
+
+Two corrections to this section's own text, from doing the work:
+
+* **S9 is only half live.** `run()` already raises `SystemExit` when `available()` is false, so
+  the failed-import path never reaches `register()`. What *was* live is the second half — the
+  caller discards the return, so nothing guaranteed any repairer registered at all.
+* **S2's denominator is not "activities".** It is `tvReadings + tvWritings` specifically, since
+  `pattern-router*` sources can only appear there. A first attempt used the wrong denominator
+  and reported 11 of 12 real packs as empty — **a false RED, which is exactly as dishonest as
+  the false green being removed.** `unknown_families()` now makes a mis-scored key loud.
+
+Test suites after: 1376 Flutter · 1011 Python · `flutter analyze` clean. Every new gate
+mutation-checked (remove the fix ⇒ the test goes red).
