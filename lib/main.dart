@@ -754,6 +754,8 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
                 // MÃ môn trong TKB → TÊN trong mục lục thật. Không
                 // tra được ⇒ giữ mã trần, không bịa tên.
                 subjectLabelOf: _subjectLabelOf,
+                // ⭐ Lệnh 56 §P2 — bìa sách làm nền thẻ bài học.
+                coverOfSubject: (subject) => _coverBySubject()[subject],
                 // ⭐ ROUND 7 · V1 — nút Home mang tên một cách học ⇒
                 // mở ĐÚNG cách học ấy. Lỗi máy thật vòng 1: «📖 Đọc ▸»
                 // mở ra màn hỏi «con muốn học theo cách nào?».

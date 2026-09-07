@@ -45,6 +45,7 @@ import '../parent/parent_tonight_screen.dart';
 import '../lesson_workspace/widgets/fixture_chip.dart';
 import '../lesson_workspace/widgets/trust_sheet.dart';
 import 'home_cards.dart';
+import 'lesson_visual.dart';
 import 'home_upcoming.dart';
 import 'mission_data.dart';
 import '../subjects/subject_display.dart';
@@ -93,6 +94,7 @@ class MissionCenterScreen extends StatelessWidget {
     this.subjectChips = const [],
     this.continueThreads = const [],
     this.subjectLabelOf,
+    this.coverOfSubject,
   });
 
   final MissionData data;
@@ -183,6 +185,11 @@ class MissionCenterScreen extends StatelessWidget {
   /// còn hơn bịa một cái tên không có trong mục lục.
   final String Function(String subjectId)? subjectLabelOf;
 
+  /// ⭐ Lệnh 56 §P2 — MÔN → đường dẫn bìa trong `assets/pack/`. Thẻ bài học
+  /// dùng nó làm HÌNH NỀN khi hình của chính bài bị D4 chặn (xem
+  /// `lesson_visual.dart`). `null` ⇒ thẻ rơi về dải màu theo môn.
+  final String? Function(String subject)? coverOfSubject;
+
   // ── KHOÁ WIDGET ─────────────────────────────────────────────────────────
   /// TẦNG 1 — hàng Smart Card trượt ngang.
   static const todayRowKey = Key('home-today-row');
@@ -259,6 +266,7 @@ class MissionCenterScreen extends StatelessWidget {
                 promotedId: promoted?.id,
                 onOpenLesson: onOpenWorkspaceLesson,
                 onOpenShelf: onOpenSubjects,
+                visualOf: _visualForCard,
               ),
               if (row.hiddenSubjects > 0)
                 _pad(
@@ -1344,6 +1352,33 @@ class MissionCenterScreen extends StatelessWidget {
     );
   }
 
+  /// ⭐ Lệnh 56 §P2 — hình cho MỘT thẻ, qua chuỗi rơi của `lesson_visual.dart`.
+  ///
+  /// Thẻ có bài ⇒ hỏi theo tài liệu (licence quyết định tầng đầu). Thẻ môn
+  /// rỗng ⇒ không có tài liệu nào, nên chỉ còn bìa/dải màu theo TÊN MÔN.
+  LessonVisual _visualForCard(HomeCard card) {
+    final doc = card.thread?.doc;
+    if (doc != null) {
+      return lessonVisual(
+        doc,
+        coverAsset: coverOfSubject?.call(doc.subject),
+        heroAsset: lessonHeroImage(doc)?.asset,
+      );
+    }
+    final subject = card.subjectLine;
+    final cover = coverOfSubject?.call(subject);
+    return cover == null
+        ? LessonVisual(
+            kind: LessonVisualKind.gradient,
+            seed: subjectSeed(subject),
+          )
+        : LessonVisual(
+            kind: LessonVisualKind.cover,
+            asset: 'assets/pack/$cover',
+            seed: subjectSeed(subject),
+          );
+  }
+
   Widget _sectionLabel(String t) => Padding(
     padding: const EdgeInsets.only(bottom: WalSpacing.sm),
     child: Text(
@@ -1497,6 +1532,7 @@ class _SmartCardRow extends StatefulWidget {
     this.promotedId,
     this.onOpenLesson,
     this.onOpenShelf,
+    this.visualOf,
   });
 
   final List<HomeCard> cards;
@@ -1505,6 +1541,9 @@ class _SmartCardRow extends StatefulWidget {
   final String? promotedId;
 
   final void Function(LessonDocument doc, {WorkspaceView? at})? onOpenLesson;
+
+  /// Hình nền của từng thẻ — do màn ngoài giải, vì chỉ nó biết bìa của môn.
+  final LessonVisual Function(HomeCard card)? visualOf;
   final VoidCallback? onOpenShelf;
 
   @override
@@ -1554,6 +1593,7 @@ class _SmartCardRowState extends State<_SmartCardRow> {
                 right: i == widget.cards.length - 1 ? WalSpacing.md : 0,
               ),
               child: _SmartCard(
+                visual: widget.visualOf?.call(widget.cards[i]),
                 card: widget.cards[i],
                 promoted: widget.cards[i].id == widget.promotedId,
                 onTap: () {
@@ -1603,9 +1643,13 @@ class _SmartCard extends StatelessWidget {
     required this.card,
     required this.promoted,
     required this.onTap,
+    this.visual,
   });
 
   final HomeCard card;
+
+  /// ⭐ Lệnh 56 §P2 — hình của thẻ. `null` ⇒ thẻ vẽ như cũ (đường gọi cũ/test).
+  final LessonVisual? visual;
   final bool promoted;
   final VoidCallback onTap;
 
@@ -1633,7 +1677,6 @@ class _SmartCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
         child: Container(
-          padding: const EdgeInsets.all(WalSpacing.md),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(WalSpacing.radiusCard),
             border: Border.all(
@@ -1643,102 +1686,131 @@ class _SmartCard extends StatelessWidget {
               width: promoted ? 2 : 1,
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
             children: [
-              // MÔN
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      card.subjectLine.toUpperCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.0,
-                        color: WalColors.primaryText,
+              // ⭐ Lệnh 56 §P2.1 — HÌNH BÊN PHẢI ~45%, mờ dần vào vùng chữ.
+              // §P2.2: chữ KHÔNG nằm trên vùng ảnh đặc — nó chỉ chồng lên
+              // phần đã tan hết, nên đọc được không phụ thuộc vào ảnh nào.
+              if (visual != null)
+                Positioned.fill(
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerRight,
+                    widthFactor: .45,
+                    child: _visualLayer(visual!),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(WalSpacing.md),
+                // ⭐ §P2.2 — CHỮ CHỈ CHIẾM 60% BỀ NGANG, không lấn vào nửa đặc
+                // của ảnh. Đo trên máy lượt 1: để chữ chạy hết bề ngang thì
+                // tiêu đề bài và nhãn «ĐANG GỢI Ý» nằm đè lên bìa sách — đọc
+                // được hay không phụ thuộc vào ảnh, đúng thứ §P2.2 cấm.
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: .60,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // MÔN
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              card.subjectLine.toUpperCase(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.0,
+                                color: WalColors.primaryText,
+                              ),
+                            ),
+                          ),
+                          // Dấu nối hai tầng: thẻ nào đang được «SAM GỢI Ý» nêu.
+                          // Chữ KHÁC nhãn của tầng 2 có chủ ý — hai chỗ, hai vai.
+                          if (promoted)
+                            const Text(
+                              'ĐANG GỢI Ý',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: .8,
+                                color: WalColors.primary500,
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
-                  ),
-                  // Dấu nối hai tầng: thẻ nào đang được «SAM GỢI Ý» nêu.
-                  // Chữ KHÁC nhãn của tầng 2 có chủ ý — hai chỗ, hai vai.
-                  if (promoted)
-                    const Text(
-                      'ĐANG GỢI Ý',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: .8,
-                        color: WalColors.primary500,
+                      const SizedBox(height: 3),
+                      // BÀI — hoặc sự thật «chưa có bài»
+                      Text(
+                        card.lessonLine ?? 'SAM chưa xếp sẵn bài nào',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: WalType.body - .5,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                          color: card.lessonLine == null
+                              ? WalColors.inkSoft
+                              : WalColors.ink,
+                        ),
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 3),
-              // BÀI — hoặc sự thật «chưa có bài»
-              Text(
-                card.lessonLine ?? 'SAM chưa xếp sẵn bài nào',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: WalType.body - .5,
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
-                  color: card.lessonLine == null
-                      ? WalColors.inkSoft
-                      : WalColors.ink,
-                ),
-              ),
-              const SizedBox(height: WalSpacing.sm),
-              // TRẠNG THÁI
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: WalSpacing.sm,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: _token.bg,
-                  borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
-                ),
-                child: Text(
-                  card.state.label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: .6,
-                    color: _token.fg,
+                      const SizedBox(height: WalSpacing.sm),
+                      // TRẠNG THÁI
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: WalSpacing.sm,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _token.bg,
+                          borderRadius: BorderRadius.circular(
+                            WalSpacing.radiusChip,
+                          ),
+                        ),
+                        child: Text(
+                          card.state.label,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: .6,
+                            color: _token.fg,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            card.detailLine,
+                            // Không còn dòng «sách lớp N» (quyết định C-1) nên dòng
+                            // chi tiết luôn có đủ hai hàng.
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12.5,
+                              color: WalColors.inkSoft,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // VIỆC TIẾP THEO
+                      Text(
+                        'Tiếp theo: ${card.nextLabel} →',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: WalColors.primaryText,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 5),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    card.detailLine,
-                    // Không còn dòng «sách lớp N» (quyết định C-1) nên dòng
-                    // chi tiết luôn có đủ hai hàng.
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      color: WalColors.inkSoft,
-                      height: 1.3,
-                    ),
-                  ),
-                ),
-              ),
-              // VIỆC TIẾP THEO
-              Text(
-                'Tiếp theo: ${card.nextLabel} →',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w700,
-                  color: WalColors.primaryText,
                 ),
               ),
             ],
@@ -1746,5 +1818,62 @@ class _SmartCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Lớp hình: ảnh (hoặc dải màu) phủ kín ô phải, rồi một lớp TRẮNG mờ dần từ
+  /// trái sang — trái đặc, phải trong — để chữ luôn nằm trên nền trắng thật.
+  Widget _visualLayer(LessonVisual v) => Stack(
+    fit: StackFit.expand,
+    children: [
+      if (v.asset == null)
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: _subjectGradient(v.seed),
+            ),
+          ),
+        )
+      else
+        Image.asset(
+          v.asset!,
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+          // Thiếu tệp ⇒ về dải màu, không bao giờ ô trắng vỡ (§P2.4).
+          errorBuilder: (_, _, _) => DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: _subjectGradient(v.seed),
+              ),
+            ),
+          ),
+        ),
+      const DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [Colors.white, Color(0x00FFFFFF)],
+            stops: [0.0, 0.62],
+          ),
+        ),
+      ),
+    ],
+  );
+
+  /// Dải màu TẤT ĐỊNH theo môn — cùng môn, cùng màu, mọi lần mở app.
+  /// Lấy trong bảng màu WAL, không sinh màu ngẫu nhiên.
+  static List<Color> _subjectGradient(int seed) {
+    const palette = <List<Color>>[
+      [Color(0xFFEDE7FF), Color(0xFFD9CCFF)],
+      [Color(0xFFE3F1FF), Color(0xFFC7E2FF)],
+      [Color(0xFFFFF1DB), Color(0xFFFFE0B2)],
+      [Color(0xFFE6F7EE), Color(0xFFC8EBD8)],
+      [Color(0xFFFFE9EC), Color(0xFFFFCDD5)],
+    ];
+    return palette[seed % palette.length];
   }
 }
