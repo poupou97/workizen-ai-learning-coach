@@ -236,14 +236,37 @@ void main() {
       }
     });
 
-    test('mời THỬ LẠI, và trỏ về block sách của chính cái trẻ chọn', () {
+    test('mời THỬ LẠI bằng ĐIỀU KIỆN của chính cái trẻ chọn, không câu chung', () {
+      // ⭐⭐ Trước đây dòng này là MỘT CÂU DUY NHẤT cho mọi đáp án sai («con so
+      // dòng sách với câu hỏi»). Đúng, nhưng giống nhau ở mọi lựa chọn nên nó
+      // vẫn là nghi thức: trẻ đã đọc lời sách rồi mà vẫn chọn sai thì lời mời
+      // so lại không thêm gì. Nay nó hỏi thẳng vào ĐIỀU KIỆN của cách trẻ chọn.
       final d = _d(_mcq(), 'Chiết')!;
       expect(d.retry, isNotNull);
-      // LƯỢT 1 MÁY THẬT: bản dài lặp với băng «Đến lượt con thử lại» ngay
-      // dưới ⇒ rút còn việc cần SO, không phải việc cần LÀM.
-      expect(d.retry, contains('so dòng sách'));
-      expect(d.retry!.length, lessThan(60), reason: 'một dòng trên máy');
+      expect(d.retry, contains('thứ cần tách ở câu này'));
+      // Cụm điều kiện phải là chữ NGUYÊN VĂN của sách về CHÍNH cái trẻ chọn.
+      expect(d.retry, contains('không tan vào nhau'));
       expect(d.sourceBlockId, 'b-chiet');
+    });
+
+    test('⭐ hai đáp án sai KHÁC NHAU ⇒ hai lời mời thử lại KHÁC NHAU', () {
+      // Đây là phép kiểm chống quay lại câu chung: nếu ai đó thay bằng một
+      // dòng cố định, test này đỏ ngay.
+      final a = _d(_mcq(), 'Chiết')!;
+      final b = _d(_mcq(), 'Lọc')!;
+      expect(a.retry, isNotNull);
+      expect(b.retry, isNotNull);
+      expect(a.retry, isNot(b.retry),
+          reason: 'lời mời thử lại phải bám điều kiện của lựa chọn, không phải '
+              'một câu dùng chung');
+    });
+
+    test('⭐ lời mời thử lại KHÔNG được lộ đáp án', () {
+      for (final wrong in const ['Chiết', 'Lọc', 'Lắng']) {
+        final d = _d(_mcq(), wrong);
+        if (d?.retry == null) continue;
+        expect(d!.retry!.toLowerCase(), isNot(contains('cô cạn')), reason: wrong);
+      }
     });
 
     test('chọn LẠI đúng cái vừa sai ⇒ SAM nói «vẫn chọn», không lặp y nguyên',
