@@ -56,11 +56,19 @@ THIN = 'CONTENT_THIN'
 UNCONFIRMED = 'IDENTITY_UNCONFIRMED'
 
 
-def canonical_lessons():
-    """Mẫu số: mọi bài trong mục lục canonical, giữ nguyên bản ghi trùng."""
+INDEX_DIR = os.path.join(ROOT, 'assets/pack')
+
+
+def canonical_lessons(index_dir=INDEX_DIR):
+    """Mẫu số: mọi bài trong mục lục canonical, giữ nguyên bản ghi trùng.
+
+    `index_dir` tiêm được: mục lục dựng tại máy và KHÔNG nằm trong git, nên một
+    test đọc thẳng nó sẽ xanh ở máy dev và đỏ trên CI — hoặc tệ hơn, xanh RỖNG
+    vì không có dữ liệu để khẳng định gì.
+    """
     out = []
     for g in range(1, 13):
-        p = os.path.join(ROOT, f'assets/pack/lesson-index-g{g}.json')
+        p = os.path.join(index_dir, f'lesson-index-g{g}.json')
         if not os.path.exists(p):
             continue
         d = json.load(open(p, encoding='utf-8'))
@@ -132,8 +140,8 @@ def tutor_index(script_dir=TUTOR_SCRIPTS):
     return have
 
 
-def build(attach_root, fixture_dirs):
-    rows = canonical_lessons()
+def build(attach_root, fixture_dirs, index_dir=INDEX_DIR):
+    rows = canonical_lessons(index_dir)
     att = attach_index(attach_root)
     sem = semantic_index(fixture_dirs)
     tut = tutor_index()
@@ -208,11 +216,12 @@ def main():
     ap.add_argument('--attach', required=True, help='thư mục gốc chứa attach/<book>.json')
     ap.add_argument('--fixtures', nargs='*', default=[os.path.join(ROOT, 'assets/fixtures/real'),
                                                      os.path.join(ROOT, 'assets/fixtures/synthetic')])
+    ap.add_argument('--index-dir', default=INDEX_DIR)
     ap.add_argument('--json', default=None)
     ap.add_argument('--csv', default=None)
     a = ap.parse_args()
 
-    rows = build(a.attach, a.fixtures)
+    rows = build(a.attach, a.fixtures, a.index_dir)
     s, by_grade, blockers = summarise(rows)
 
     print(f"DATA — mẫu số canonical: {s['canonical']:,} bài\n")
