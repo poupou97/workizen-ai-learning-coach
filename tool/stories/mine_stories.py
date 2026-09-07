@@ -20,6 +20,61 @@ NOISE = re.compile(r'NĐ-CP|QĐ-BGDĐT|QĐ-TTg|Bản quyền|NHÀ XUẤT BẢN|I
 NAME = r"[A-ZĐ][a-zà-ỹ]+(?:[\s\-][A-ZĐa-zà-ỹ][a-zà-ỹ\-]*){0,4}"
 P_BIRTH = re.compile(r'(' + NAME + r')\s*\(\s*(\d{3,4})\s*[–\-]\s*(\d{3,4})\s*\)')
 # v0.1: (năm–năm) sau TRIỀU ĐẠI/SỰ KIỆN không phải năm sinh-mất
+# ⭐ Bốn cách một THỨ bị nhận nhầm thành một NGƯỜI — đo được trên corpus thật,
+# không phải phòng xa. Mỗi cái sửa hẹp đúng chỗ nó sinh ra:
+#
+#   «Tượng Hoàng đế Sác-lơ-ma-nhơ (742–814)»  ← chú thích ảnh: BỨC TƯỢNG
+#   «Xuân Phái Bùi Xuân Phái (1920–1988)»     ← OCR dính caption vào thân bài
+#   «nhà văn Đan Mạch»                        ← QUỐC TỊCH đi sau vai
+#   «ở Thăng Long (1527–1592)»                ← ĐỊA DANH đứng trước khoảng năm
+#
+# Hai cái đầu ĐANG tới tay trẻ (nằm trong 21 người của pack); hai cái sau thì
+# chưa, nhưng cùng một họ nên sửa luôn.
+
+# Danh từ chỉ VẬT MÔ TẢ người — bức tượng không phải con người.
+DEPICTION = re.compile(r'^(Tượng|Chân dung|Bức tranh|Bức ảnh|Hình|Ảnh|Tranh)\s+')
+
+# Quốc gia/quốc tịch hay đi ngay sau «nhà văn/nhạc sĩ…» trong SGK.
+COUNTRYISH = re.compile(
+    r'^(Đan Mạch|Thuỵ Điển|Thụy Điển|Thuỵ Sĩ|Na Uy|Phần Lan|Hà Lan|Bồ Đào Nha|'
+    r'Tây Ban Nha|Hy Lạp|Ấn Độ|Trung Quốc|Nhật Bản|Hàn Quốc|Triều Tiên|'
+    r'Việt Nam|Cam-pu-chia|Cô-oét|In-đô-nê-xi-a|Ma-lai-xi-a|Xin-ga-po|'
+    r'Thái Lan|Mi-an-ma|Lào|Nga|Anh|Pháp|Đức|Ý|I-ta-li-a|Mỹ|Hoa Kỳ|Áo|Ba Lan)$')
+
+# Giới từ chỉ NƠI CHỐN ngay trước tên ⇒ tên ấy là địa danh, không phải người.
+LOCATIVE = re.compile(r'(?:^|\s)(ở|tại|vùng|kinh đô|thành phố|nước|xứ|đất)\s*$')
+
+
+# Câu dẫn có động từ nói + dấu hai chấm ⇒ người nói nằm TRONG CÂU, không nằm
+# trong ngoặc dẫn nguồn phía sau.
+SPEECH_LEAD = re.compile(
+    r'\b(tuyên bố|nói|viết|khẳng định|phát biểu|căn dặn|dạy|kể|đáp|trả lời)'
+    r'\s*:\s*$')
+
+# «Tên khác, Tác phẩm, NXB…» ⇒ trong ngoặc là DANH SÁCH BIÊN SOẠN.
+COMPILER_LIST = re.compile(r'^\s*[A-ZĐ][^,]{2,40},\s*[^,]{2,60},')
+
+
+def clean_name(name):
+    """Gỡ hai kiểu bẩn của tên do OCR/chú thích sinh ra.
+
+    1. Danh từ chỉ vật mô tả ở đầu («Tượng Hoàng đế X» → «Hoàng đế X»).
+    2. Tiền tố lặp lại đúng bằng hậu tố — OCR dính chú thích ảnh vào thân bài
+       nên tên chạy hai lần: «Bùi Xuân Phái Bùi Xuân Phái», và bản bắt lệch
+       «Xuân Phái Bùi Xuân Phái». Cả hai đều có prefix == suffix, bỏ prefix là
+       còn đúng tên.
+    """
+    name = DEPICTION.sub('', name).strip()
+    t = name.split()
+    # ⚠ Đòi khối lặp ÍT NHẤT 2 từ. Một âm tiết trùng là tín hiệu quá yếu: bản
+    # vá đầu của tôi cắt «Nguyễn Văn Nguyễn» thành «Văn Nguyễn» — một cái tên
+    # Việt hoàn toàn bình thường. Test bắt được.
+    for k in range(len(t) // 2, 1, -1):
+        if t[:k] == t[-k:] and len(t) > k:
+            return ' '.join(t[k:])
+    return name
+
+
 DYNASTY = re.compile(r'^(Nguyên|Đinh|Lý|Trần|Trân|Minh|Thanh|Tống|Đường|Hán|Tuỳ|Tùy|Ngô|Lê|Nguyễn|Hồ|Mạc|Mỹ|Anh|Pháp|Đức|Nga|Nhật)$')
 EVENTISH = re.compile(r'(Khởi nghĩa|Chiến tranh|Kháng chiến|Cách mạng|thời kì|Thời kì|triều|Triều|nhà)\b')
 # v0.1: tên bị nuốt động từ — cắt tại từ thường tiếng Việt đi sau tên
@@ -141,24 +196,46 @@ def mine(did, reg):
             name, b, dth = m.group(1), int(m.group(2)), int(m.group(3))
             if not (700 <= b <= 2010 and b < dth <= 2026 and 15 <= dth - b < 110):
                 continue  # OCR corruption / khoảng phi-nhân ⇒ loại
-            name = VERB_TAIL.sub('', name).strip()
+            name = clean_name(VERB_TAIL.sub('', name).strip())
             if DYNASTY.match(name) or EVENTISH.search(name) or len(name) < 3:
                 continue  # triều đại/sự kiện mang (năm–năm) — không phải người
+            if COUNTRYISH.match(name):
+                continue  # quốc gia, không phải người
+            if LOCATIVE.search(text[max(0, m.start() - 24):m.start()]):
+                continue  # «ở Thăng Long (1527–1592)» — khoảng năm của NƠI CHỐN
             add('PERSON', page, snap_sentence(text, m.start() - 60, m.end() + 120),
                 name=name, birthYear=b, deathYear=dth)
         for m in P_INTRO.finditer(text):
-            name = VERB_TAIL.sub('', m.group(2)).strip()
+            name = clean_name(VERB_TAIL.sub('', m.group(2)).strip())
             if len(name) < 3 or EVENTISH.search(name):
                 continue
+            if COUNTRYISH.match(name):
+                continue  # «nhà văn Đan Mạch» — bắt trúng QUỐC TỊCH, không phải tên
             add('PERSON', page, snap_sentence(text, m.start() - 40, m.end() + 120),
                 name=name, role=m.group(1))
         for m in P_QUOTE.finditer(text):
-            person = m.group(2).strip()
+            person = clean_name(m.group(2).strip())
             # «Theo X» / tên sách = TRÍCH VĂN BẢN, không phải lời danh nhân
             before = text[max(0, m.start(2)-8):m.start(2)]
             is_excerpt = ('Theo' in before or person.startswith('Theo')
                           or person.lower().startswith(('truyện', 'ca dao',
                               'tục ngữ', 'sách', 'báo')))
+            # ⭐⭐ NGƯỜI BIÊN SOẠN KHÔNG PHẢI NGƯỜI PHÁT NGÔN.
+            #
+            # Ca thật: «…ông vẫn tuyên bố: "Dù sao Trái Đất vẫn quay!". (Lê
+            # Nguyên Long, Phạm Ngọc Toàn, Tiếng Việt 4, …NXB Giáo dục…)».
+            # Người nói là Ga-li-lê, đã nêu ngay trong câu trước; ngoặc đơn là
+            # THƯ MỤC của sách giáo khoa. Gắn «— Lê Nguyên Long» làm người nói
+            # là gán lời cho người chỉ biên soạn.
+            #
+            # Hai tín hiệu, đều đọc được từ chính văn bản:
+            #   · câu trước đã có ĐỘNG TỪ NÓI + dấu hai chấm ⇒ người nói ở đó,
+            #     không ở trong ngoặc
+            #   · trong ngoặc có TỪ HAI TÊN TRỞ LÊN trước tên tác phẩm ⇒ danh
+            #     sách biên soạn, không phải một người phát ngôn
+            lead = text[max(0, m.start() - 60):m.start()]
+            if SPEECH_LEAD.search(lead) or COMPILER_LIST.match(m.group(3) or ''):
+                is_excerpt = True
             add('SOURCE_EXCERPT' if is_excerpt else 'QUOTE', page,
                 snap_sentence(text, m.start() - 40, m.end() + 40),
                 quote=m.group(1), person=person.removeprefix('Theo').strip(),
