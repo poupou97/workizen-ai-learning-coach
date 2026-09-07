@@ -34,6 +34,7 @@ Future<void> showLearningImage(
   String? caption,
   String? sourceLine,
   VoidCallback? onOpenSource,
+  double bleedScale = 1.0,
 }) => Navigator.of(context).push(
   MaterialPageRoute<void>(
     fullscreenDialog: true,
@@ -43,6 +44,12 @@ Future<void> showLearningImage(
       caption: caption,
       sourceLine: sourceLine,
       onOpenSource: onOpenSource,
+      // ⚠ Dòng này TỪNG THIẾU. Tham số có, nơi dùng có, chỉ mỗi chỗ truyền là
+      // không — nên `showLearningImage(bleedScale: 1.14)` im lặng rơi về 1.0
+      // và màn toàn màn hình vẫn lòi mép chữ, dù test vẫn xanh (test dựng
+      // thẳng widget nên đi vòng qua đúng chỗ hỏng). Cùng họ với lỗi
+      // `subjectLabelOf`: khai báo → truyền → KHÔNG AI ĐỌC.
+      bleedScale: bleedScale,
     ),
   ),
 );
@@ -55,6 +62,7 @@ class LearningImageViewer extends StatefulWidget {
     this.caption,
     this.sourceLine,
     this.onOpenSource,
+    this.bleedScale = 1.0,
   });
 
   final String asset;
@@ -70,6 +78,14 @@ class LearningImageViewer extends StatefulWidget {
 
   /// Mở tờ nguồn đầy đủ — provenance không được mất khi đổi tap sang viewer.
   final VoidCallback? onOpenSource;
+
+  /// ⭐ CHE MÉP CROP. Crop từ pipeline còn dính chữ/chú thích của hàng bên
+  /// cạnh; màn Đọc đã phóng nhẹ để cắt phần dư ấy. Xem to mà KHÔNG che thì
+  /// mép chữ lạ hiện ra và trẻ tưởng nó thuộc về hình — đo trên Nokia, lệnh
+  /// 59. Dùng CÙNG hệ số với inline để hai chỗ là một bức ảnh.
+  ///
+  /// 1.0 = không che (mặc định, cho ảnh không phải crop trang sách).
+  final double bleedScale;
 
   static const viewerKey = Key('learning-image-viewer');
   static const imageKey = Key('learning-image-viewer-image');
@@ -150,15 +166,20 @@ class _LearningImageViewerState extends State<LearningImageViewer>
                   child: Center(
                     child: AspectRatio(
                       aspectRatio: widget.aspect ?? 1,
-                      child: Image.asset(
-                        widget.asset,
-                        key: LearningImageViewer.imageKey,
-                        fit: BoxFit.contain,
-                        // Thiếu tệp ⇒ nói thật, không màn đen câm (§P7).
-                        errorBuilder: (_, _, _) => const Center(
-                          child: Text(
-                            'Máy này chưa có ảnh của bài.',
-                            style: TextStyle(color: Colors.white70),
+                      child: ClipRect(
+                        child: Transform.scale(
+                          scale: widget.bleedScale,
+                          child: Image.asset(
+                            widget.asset,
+                            key: LearningImageViewer.imageKey,
+                            fit: BoxFit.contain,
+                            // Thiếu tệp ⇒ nói thật, không màn đen câm (§P7).
+                            errorBuilder: (_, _, _) => const Center(
+                              child: Text(
+                                'Máy này chưa có ảnh của bài.',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            ),
                           ),
                         ),
                       ),

@@ -96,16 +96,67 @@ class PersonPortrait {
 
 /// Kho chân dung đã xác minh, khoá theo `personId`.
 ///
-/// ⭐ RỖNG HÔM NAY, và điều đó được ghi ra chứ không giấu: chưa bức chân dung
-/// nào đi trọn quy trình xác minh + quyền dùng. Thẻ trích dẫn vì thế chạy ở
-/// nhánh KHÔNG ẢNH — nhánh ấy phải hoạt động tốt, không phải trạng thái lỗi.
+/// ⭐ MỘT NGƯỜI, không phải hai mươi mốt. `sam-stories.db` có 21 nhân vật;
+/// đúng MỘT người đi trọn được chuỗi: nguồn gốc → giấy phép → danh tính →
+/// tệp thật. Hai mươi người còn lại KHÔNG có dòng ở đây, nên thẻ trích dẫn của
+/// họ chạy nhánh KHÔNG ẢNH — nhánh ấy là trạng thái bình thường, không phải
+/// lỗi (§P2.7). Độ phủ chân dung theo dõi ở WAL-226.
 ///
 /// Thêm một người = thêm MỘT dòng ở đây, dùng lại cho MỌI bài có nhân vật ấy
 /// (§P2.8) — không tải lại theo từng bài.
 class PersonPortraits {
   const PersonPortraits._();
 
-  static const Map<String, PersonPortrait> verified = {};
+  static const Map<String, PersonPortrait> verified = {
+    // ⭐ Thạch Lam (1910–1942), nhà văn Tự Lực văn đoàn.
+    //
+    // Chuỗi lai lịch, mỗi mắt xích kiểm riêng — lai lịch đầy đủ:
+    // docs/content/PERSON-PORTRAIT-PROVENANCE.md
+    //
+    //   NGUỒN GỐC   Không dừng ở Wikimedia Commons. Commons ghi tệp đến từ
+    //               Gallica (Thư viện Quốc gia Pháp), bản số hoá sách «Nhà Văn
+    //               Hiện Đại» của Vũ Ngọc Phan. Đã tải trang gốc ở Gallica và
+    //               đối chiếu — SEARCH RESULT != ORIGINAL SOURCE (§P2.3).
+    //
+    //   DANH TÍNH   KHÔNG suy từ tên tệp, cũng không từ chú thích Commons.
+    //               Chính bản in mang dòng chữ «Thạch-Lam» ngay dưới bản khắc.
+    //               Đó là chú thích của nhà xuất bản, không phải của người
+    //               tải ảnh lên — SEARCH RESULT != VERIFIED IDENTITY (§P2.5).
+    //
+    //   GIẤY PHÉP   PD-Vietnam: tác phẩm nhiếp ảnh công bố lần đầu quá 75 năm
+    //               (1942–45 ⇒ 81 năm tính đến 2026). Phạm vi công cộng thì
+    //               được phát hành, nên tệp này commit ĐƯỢC — khác hẳn crop
+    //               SGK vốn chặn ở D4.
+    //
+    //   ⚠ ẢNH SHIP KHÔNG PHẢI PIXEL GỐC. Đã cắt lấy phần bản khắc từ ảnh chụp
+    //   nguyên trang, lọc median để phá lưới tram của bản in ty-pô 1942, và
+    //   giãn tương phản. KHÔNG dựng lại khuôn mặt, KHÔNG upscale bằng máy —
+    //   đó sẽ là bịa chi tiết mà bản in không có.
+    'p:thạch-lam': PersonPortrait(
+      personId: 'p:thạch-lam',
+      personName: 'Thạch Lam',
+      assetPath: 'assets/people/thach-lam.png',
+      // «Ảnh tư liệu», không phải «Ảnh chân dung»: đây là bản in ty-pô 80 năm
+      // tuổi của một tấm ảnh, và trẻ nên đọc đúng như thế (§P2.6).
+      portraitType: PortraitType.historicalPhoto,
+      usage: PortraitUsage.approvedForProduct,
+      sourcePageUrl: 'https://gallica.bnf.fr/ark:/12148/bpt6k42462606/f145',
+      sourceName: 'Nhà Văn Hiện Đại (1942) · Gallica/BnF',
+      licence: 'Phạm vi công cộng (PD-Vietnam)',
+      licenceUrl: 'https://commons.wikimedia.org/wiki/Template:PD-Vietnam',
+      retrievedAt: '2026-09-07',
+      imageUrl:
+          'https://upload.wikimedia.org/wikipedia/commons/e/e0/'
+          'Portrait_of_writer_Th%E1%BA%A1ch_Lam.jpg',
+      // Người chụp KHÔNG rõ. Vũ Ngọc Phan là tác giả SÁCH, không phải người
+      // chụp ảnh — Commons ghi ông ở ô «Artist» nhưng ghi rõ «author of the
+      // book», nên chép nguyên nghĩa ấy chứ không nâng thành tác giả ảnh.
+      author: 'Không rõ người chụp · sách của Vũ Ngọc Phan',
+      identityCheckedAgainst:
+          'Chú thích in trong chính bản gốc: dòng «Thạch-Lam» đặt ngay dưới '
+          'bản khắc, trang f145 bản số hoá Gallica ark:/12148/bpt6k42462606',
+    ),
+  };
 
   /// `null` ⇒ chưa có chân dung đủ điều kiện cho người này.
   static PersonPortrait? forPerson(String? personId) {

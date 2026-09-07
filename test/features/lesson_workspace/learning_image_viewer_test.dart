@@ -136,4 +136,68 @@ void main() {
     await t.pumpAndSettle();
     expect(find.textContaining('chưa có ảnh'), findsOneWidget);
   });
+
+  testWidgets('⭐ che mép crop bằng CÙNG hệ số với màn Đọc', (t) async {
+    await t.pumpWidget(
+      const MaterialApp(
+        home: LearningImageViewer(
+          asset: 'assets/mascot/sam-hello.png',
+          aspect: 1.5,
+          bleedScale: 1.14,
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    final tr = t.widget<Transform>(
+      find
+          .ancestor(
+            of: find.byKey(LearningImageViewer.imageKey),
+            matching: find.byType(Transform),
+          )
+          .first,
+    );
+    expect(tr.transform.getMaxScaleOnAxis(), closeTo(1.14, 0.001));
+  });
+
+  // ⭐⭐ Test trên dựng THẲNG widget, nên nó không hề đi qua `showLearningImage`
+  // — và đó đúng là chỗ `bleedScale` bị rơi. Test này đi ĐÚNG đường sản phẩm:
+  // chạm ảnh trong bài ⇒ helper ⇒ viewer.
+  testWidgets('⭐ đi qua showLearningImage — hệ số che mép KHÔNG được rơi', (
+    t,
+  ) async {
+    await t.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (c) => Scaffold(
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () => showLearningImage(
+                  c,
+                  asset: 'assets/mascot/sam-hello.png',
+                  aspect: 1.5,
+                  bleedScale: 1.14,
+                ),
+                child: const Text('mở'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await t.tap(find.text('mở'));
+    await t.pumpAndSettle();
+    final tr = t.widget<Transform>(
+      find
+          .ancestor(
+            of: find.byKey(LearningImageViewer.imageKey),
+            matching: find.byType(Transform),
+          )
+          .first,
+    );
+    expect(
+      tr.transform.getMaxScaleOnAxis(),
+      closeTo(1.14, 0.001),
+      reason: 'helper nuốt mất bleedScale ⇒ toàn màn hình lại lòi mép chữ',
+    );
+  });
 }

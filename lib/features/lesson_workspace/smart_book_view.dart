@@ -588,6 +588,8 @@ class _SmartBookViewState extends State<SmartBookView> {
         asset: '${widget.doc.assetBase}${b.crop}',
         aspect: b.aspect,
         sourceLine: line,
+        // Cùng hệ số che mép với inline ⇒ hai chỗ là MỘT bức ảnh.
+        bleedScale: SmartBookView.bleedScale,
         onOpenSource: () => showSourceSheet(context, doc: widget.doc, block: b),
       ),
       borderRadius: BorderRadius.circular(WalSpacing.radiusButton),
