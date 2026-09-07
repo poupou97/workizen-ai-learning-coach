@@ -32,6 +32,7 @@ TEXT_BOX_COVERAGE = 0.10   # chữ phủ hơn ngần này ⇒ hộp chữ có n�
 INK_THRESHOLD = 235
 TEXT_PAD = 0.006
 TARGET_W = 640             # bề rộng hiển thị thật trên điện thoại, không dpi cố định
+CROP_PAD = 0.012           # nới biên: nhãn hình nằm NGOÀI khối mực, cắt sát là cụt chữ
 JPEG_Q = 72
 
 CAPTION_RE = re.compile(r'^\s*(hình|bảng|sơ\s*đồ|biểu\s*đồ)\s*[\d IVX]', re.IGNORECASE)
@@ -149,7 +150,13 @@ def crop_jpeg(pdf_path, page_pdf, bbox, target_w=TARGET_W, quality=JPEG_Q):
     try:
         pg = doc[page_pdf - 1]
         r = pg.rect
-        x, y, w, h = bbox
+        # Nới đều bốn phía: nhãn của sơ đồ («Mái nhà», «Tường nhà») là CHỮ nên đã
+        # bị xoá khỏi mặt nạ mực, nằm ngoài khung dò. Cắt sát khung là cắt cụt
+        # đúng phần nói cho trẻ biết đang nhìn cái gì — máy thật cho thấy điều đó.
+        x = max(0.0, bbox[0] - CROP_PAD)
+        y = max(0.0, bbox[1] - CROP_PAD)
+        w = min(1.0 - x, bbox[2] + 2 * CROP_PAD)
+        h = min(1.0 - y, bbox[3] + 2 * CROP_PAD)
         clip = fitz.Rect(r.x0 + x * r.width, r.y0 + y * r.height,
                          r.x0 + (x + w) * r.width, r.y0 + (y + h) * r.height)
         zoom = max(target_w / max(clip.width, 1), 1.0)

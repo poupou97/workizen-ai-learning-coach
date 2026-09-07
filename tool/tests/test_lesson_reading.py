@@ -167,3 +167,23 @@ class LessonStartTests(unittest.TestCase):
 
     def test_no_title_means_cannot_check_not_silently_pass(self):
         self.assertIsNone(lr.starts_at_lesson('bất kì', ''))
+
+
+class ContentStreamTests(unittest.TestCase):
+    """Dòng nội dung là ĐƯỜNG ĐỌC THỨ HAI — nó có thể hỏng lại theo đúng kiểu mà
+    chuỗi chữ phẳng đã được sửa. Máy thật đã bắt đúng chuyện đó một lần."""
+
+    def setUp(self):
+        self.pages = {}
+        self._real = lr.page_lines
+        lr.page_lines = lambda book, pp: self.pages.get(pp)
+        self.addCleanup(lambda: setattr(lr, 'page_lines', self._real))
+
+    def test_paragraph_order_matches_the_flat_text(self):
+        # Hai đường đọc phải kể CÙNG một câu chuyện. Nếu lệch thì đường nào đúng?
+        # Đây là bất biến giữ cho dòng nội dung không trôi khỏi chuỗi chữ đã sửa
+        # ở #141 — một đường đọc thứ hai có thể hỏng lại theo đúng kiểu cũ.
+        self.pages = {5: one_column(), 6: two_columns()}
+        d, _ = lr.lesson_reading('x', 5, 6)
+        for p in d['pages']:
+            self.assertEqual(' '.join(q['text'] for q in p['paragraphs']), p['text'])
