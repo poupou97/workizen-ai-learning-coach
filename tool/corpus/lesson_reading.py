@@ -164,6 +164,30 @@ def running_headers(pages_lines):
     return {t for t, n in seen.items() if n >= 2}
 
 
+def page_paragraphs(lines, drop=frozenset()):
+    """Từng KHỐI chữ của trang, kèm y — để hình chèn ĐÚNG CHỖ nó thuộc về.
+
+    Gom tất cả xuống cuối bài thì trẻ đọc xong mới thấy hình, và không biết hình
+    nào nói về đoạn nào. Giữ y của khối là đủ để đặt hình xen giữa.
+
+    ⚠ PHẢI theo THỨ TỰ DẢI, không phải theo y thuần. Máy thật bắt được: sắp khối
+    theo y làm khung phụ chen lại vào giữa câu — đúng lỗi #141 đã sửa cho chuỗi
+    chữ phẳng, tái xuất ở dòng nội dung vì đây là một đường đọc thứ hai.
+    """
+    order = {id(l): i for i, l in enumerate(read_order(lines))}
+    out = []
+    for b in blocks(lines):
+        keep = [l for l in b
+                if not is_furniture(l) and (l.get('text') or '').strip()
+                and (l.get('text') or '').strip() not in drop]
+        if not keep:
+            continue
+        out.append(dict(y=round(min(l['y'] for l in b), 4),
+                        seq=min(order.get(id(l), 1 << 30) for l in keep),
+                        text=' '.join((l.get('text') or '').strip() for l in keep).strip()))
+    return sorted(out, key=lambda p: p['seq'])
+
+
 def page_text(lines, drop=frozenset()):
     return ' '.join((l.get('text') or '').strip()
                     for l in read_order(lines)
@@ -220,7 +244,8 @@ def lesson_reading(book, page_pdf_start, page_pdf_end, *, printed_start=None, ti
     for pp, lines in raw:
         txt = page_text(lines, drop)
         if txt:
-            pages.append(dict(pagePdf=pp, text=txt))
+            pages.append(dict(pagePdf=pp, text=txt,
+                              paragraphs=page_paragraphs(lines, drop)))
     if not pages:
         return None, 'CONTENT_THIN'
     if title is not None and starts_at_lesson(pages[0]['text'], title) is False:

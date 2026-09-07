@@ -405,6 +405,44 @@ final class SourceActivity extends LessonActivity {
 /// bài là một luồng đọc (không hai cột ⇒ không đan chữ), và nội dung MỞ ĐẦU
 /// đúng bằng bài ấy (không bắt đầu ở giữa bài). Bài không chứng minh được thì
 /// pack không phát — nên ở đây không có nhánh «tạm coi là đọc được».
+/// Một mục trong dòng đọc: đoạn CHỮ của sách, hoặc một HÌNH của sách.
+sealed class ReadItem {
+  const ReadItem();
+}
+
+final class ReadText extends ReadItem {
+  const ReadText(this.text);
+  final String text;
+}
+
+final class ReadImage extends ReadItem {
+  const ReadImage(
+      {required this.id, required this.width, required this.height,
+      required this.page, this.caption});
+
+  final String id;
+  final int width;
+  final int height;
+
+  /// Trang PDF hình được cắt ra — để truy nguyên, không hiện cho trẻ.
+  final int page;
+
+  /// Chú thích CÓ THẬT trong sách («Hình 17.1»…). `null` = sách không có dòng
+  /// nào như thế. Máy KHÔNG đặt tên cho hình của sách giáo khoa.
+  final String? caption;
+
+  double get aspect => height <= 0 ? 1 : width / height;
+
+  static ReadImage? fromJson(Map j) {
+    final id = j['id'], w = j['w'], h = j['h'], p = j['page'];
+    if (id is! String || w is! int || h is! int || w <= 0 || h <= 0) return null;
+    return ReadImage(
+        id: id, width: w, height: h, page: p is int ? p : 0,
+        caption: (j['caption'] as String?)?.trim().isEmpty ?? true
+            ? null : (j['caption'] as String).trim());
+  }
+}
+
 class LessonPages {
   const LessonPages(
       {required this.book,
@@ -412,7 +450,8 @@ class LessonPages {
       required this.text,
       required this.pageStart,
       required this.pagePdfStart,
-      required this.pagePdfEnd});
+      required this.pagePdfEnd,
+      this.content = const []});
 
   final String book;
   final int lesson;
@@ -427,7 +466,17 @@ class LessonPages {
   final int pagePdfStart;
   final int pagePdfEnd;
 
+  /// Dòng đọc CÓ THỨ TỰ: chữ và hình xen kẽ đúng chỗ chúng đứng trong sách.
+  /// Rỗng ⇒ pack chưa dựng hình cho lớp này; UI rơi về [text] và bài vẫn đọc được.
+  final List<ReadItem> content;
+
   int get pageCount => pagePdfEnd - pagePdfStart + 1;
+
+  int get imageCount => content.whereType<ReadImage>().length;
+
+  /// Dòng để hiển thị: có `content` thì dùng nó, không thì một khối chữ.
+  List<ReadItem> get stream =>
+      content.isNotEmpty ? content : [ReadText(text)];
 
   static LessonPages? fromJson(Object? j) {
     if (j is! Map) return null;
@@ -436,13 +485,24 @@ class LessonPages {
     if (book is! String || lesson is! int || text is! String) return null;
     if (s is! int || e is! int || e < s) return null;
     if (text.trim().isEmpty) return null;
+    final content = <ReadItem>[];
+    for (final it in (j['content'] as List? ?? const []).whereType<Map>()) {
+      if (it['t'] == 'text') {
+        final v = it['v'];
+        if (v is String && v.trim().isNotEmpty) content.add(ReadText(v.trim()));
+      } else if (it['t'] == 'img') {
+        final img = ReadImage.fromJson(it);
+        if (img != null) content.add(img);   // mục hỏng bị BỎ, không dựng nửa vời
+      }
+    }
     return LessonPages(
         book: book,
         lesson: lesson,
         text: text,
         pageStart: j['pageStart'] is int ? j['pageStart'] as int : null,
         pagePdfStart: s,
-        pagePdfEnd: e);
+        pagePdfEnd: e,
+        content: content);
   }
 }
 

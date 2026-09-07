@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/core/pack/lesson_figure_store.dart';
 import 'package:learning_coach/features/subjects/lesson_index.dart';
 import 'package:learning_coach/features/subjects/lesson_pages_screen.dart';
 
@@ -29,6 +30,15 @@ const _good = '''
 {"book": "$_book", "lesson": 17, "title": "Tách chất khỏi hỗn hợp",
  "pageStart": 60, "pagePdfStart": 61, "pagePdfEnd": 64,
  "text": "TÁCH CHẤT KHỎI HỖN HỢP Bài 17 MỤC TIÊU"}''';
+
+const _withImg = '''
+{"book": "$_book", "lesson": 17, "title": "Tách chất khỏi hỗn hợp",
+ "pageStart": 60, "pagePdfStart": 61, "pagePdfEnd": 64,
+ "text": "một hai ba",
+ "content": [{"t":"text","v":"đoạn trước hình"},
+             {"t":"img","id":"$_book:p061:img03","w":640,"h":936,"page":61,
+              "caption":"Hình 17.1"},
+             {"t":"text","v":"đoạn sau hình"}]}''';
 
 void main() {
   group('pack → sản phẩm', () {
@@ -106,6 +116,55 @@ void main() {
       await t.pumpWidget(MaterialApp(
           home: LessonPagesScreen(pages: pages(), lessonLabel: 'Bài 17')));
       expect(find.textContaining('TÁCH CHẤT KHỎI HỖN HỢP'), findsOneWidget);
+    });
+  });
+  group('đọc đa phương thức', () {
+    LessonPages pagesOf(String raw) =>
+        (_idx(readings: raw).activitiesFor(book: _book, lessonNo: 17).single
+            as LessonPagesActivity).pages;
+
+    test('dòng đọc giữ ĐÚNG thứ tự chữ → hình → chữ', () {
+      // Gom hết hình xuống cuối bài thì trẻ đọc xong mới thấy hình và không
+      // biết hình nào nói về đoạn nào.
+      final c = pagesOf(_withImg).content;
+      expect(c.map((e) => e.runtimeType.toString()).toList(),
+          ['ReadText', 'ReadImage', 'ReadText']);
+      expect((c[1] as ReadImage).caption, 'Hình 17.1');
+      expect((c[1] as ReadImage).aspect, closeTo(640 / 936, 1e-9));
+    });
+
+    test('chú thích rỗng ⇒ null, KHÔNG dựng chú thích thay sách', () {
+      final raw = _withImg.replaceAll('"caption":"Hình 17.1"', '"caption":"  "');
+      expect((pagesOf(raw).content[1] as ReadImage).caption, isNull);
+    });
+
+    test('mục hình hỏng bị BỎ, phần chữ vẫn còn', () {
+      for (final bad in ['"w":640,"h":0', '"w":0,"h":936']) {
+        final raw = _withImg.replaceAll('"w":640,"h":936', bad);
+        final c = pagesOf(raw).content;
+        expect(c.whereType<ReadImage>(), isEmpty, reason: bad);
+        expect(c.whereType<ReadText>(), hasLength(2), reason: bad);
+      }
+    });
+
+    test('bài chưa dựng hình ⇒ dòng đọc rơi về một khối chữ, không rỗng', () {
+      // Thiếu hình không được làm hỏng cả bài — đọc là trạng thái hợp lệ.
+      final p = pagesOf(_good);
+      expect(p.content, isEmpty);
+      expect(p.stream, hasLength(1));
+      expect((p.stream.single as ReadText).text, contains('TÁCH CHẤT'));
+    });
+
+    testWidgets('pack lớp chưa có ảnh ⇒ không chừa ô trống câm', (t) async {
+      await t.pumpWidget(MaterialApp(
+          home: LessonPagesScreen(
+              pages: pagesOf(_withImg),
+              lessonLabel: 'Bài 17',
+              figures: LessonFigureStore.empty())));
+      expect(find.textContaining('đoạn trước hình'), findsOneWidget);
+      expect(find.textContaining('đoạn sau hình'), findsOneWidget);
+      expect(find.byType(Image), findsNothing);
+      expect(find.textContaining('Hình 17.1'), findsNothing);
     });
   });
 }
