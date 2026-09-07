@@ -55,9 +55,20 @@ class WorkspaceCatalog {
   /// với block id đóng cứng. Đó không phải thiếu dữ liệu mà là một nhánh mã
   /// chỉ nhận đúng một bài. Bài 16 vì thế mở được Đọc + Trực quan, chưa mở
   /// được SAM — và màn hình nói thẳng điều đó thay vì hiện một tab rỗng.
+  /// ⚠ CHỌN THEO THỨ TRẺ MỞ ĐƯỢC, KHÔNG THEO SỐ BÀI CÓ TSL.
+  ///
+  /// Tôi từng suy «9 bài lớp 6 có TSL ⇒ 9 bài có Đọc + Trực quan». SAI: số ấy
+  /// đếm thí nghiệm trong PACK, còn tab Trực quan của màn học lấy từ mảng
+  /// `semantic` của FIXTURE — hai đường ống khác nhau. Sinh thử cả 7 bài còn
+  /// lại thì chỉ Bài 9 và 10 có sơ đồ; 11, 12, 46, 48, 50 ra `semantic` RỖNG.
+  ///
+  /// Nên ở đây chỉ có bài đã ĐO là mở được cả hai cách học. Năm bài kia thêm
+  /// vào cũng chỉ tăng con số, còn trẻ bấm Trực quan thì gặp chỗ trống.
   static const defaultSlots = [
     FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 17),
     FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 16),
+    FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 10),
+    FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 9),
     FixtureSlot(book: '05-sgk-lich-su-va-dia-li-5', lessonNo: 8),
   ];
 
