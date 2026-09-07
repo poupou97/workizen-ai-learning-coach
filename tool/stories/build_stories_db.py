@@ -2,6 +2,7 @@
 """WAL-151 KS-D — stories.db: SQLite + FTS5 local-first theo pack
 architecture (WAL-83). CHỈ nạp VERIFIED (cổng §28); title derive tất định
 từ chính item — KHÔNG LLM, KHÔNG thêm claim."""
+import hashlib
 import json, os, re, sqlite3, time
 
 VER = 'stories-db-v1'
@@ -77,8 +78,27 @@ def main():
             ','.join(p['subjects']), len(p['sourceRefs'])))
     db.execute("INSERT INTO story_fts(rowid,title,body,personName,subject) "
                "SELECT rowid,title,body,personName,subject FROM story")
+    # ⭐ Pack cần DANH TÍNH NỘI DUNG, không chỉ số hiệu lược đồ.
+    #
+    # `VER` là phiên bản LƯỢC ĐỒ — nó không đổi khi nội dung đổi, nên máy không
+    # thể dùng nó để biết bản đóng trong APK có mới hơn bản đã cài hay không.
+    # `contentId` băm chính nội dung, nên sửa một chữ trong một story là nó đổi.
+    rows = db.execute('SELECT id,type,title,body,personId,subject,grade,status,'
+                      'sourceDocumentId,pagePdf FROM story ORDER BY id').fetchall()
+    prows = db.execute('SELECT personId,canonicalName,birthYear,deathYear,'
+                       'subjects FROM person ORDER BY personId').fetchall()
+    content_id = hashlib.sha256(
+        json.dumps([rows, prows], ensure_ascii=False, sort_keys=True,
+                   separators=(',', ':')).encode('utf-8')).hexdigest()[:16]
     db.execute("INSERT INTO meta VALUES('version', ?)", (VER,))
+    db.execute("INSERT INTO meta VALUES('contentId', ?)", (content_id,))
     db.commit()
+
+    # Sidecar để máy đọc danh tính bản đóng trong APK mà KHÔNG phải nạp cả DB
+    # (~88KB) mỗi lần mở app. Cùng do bước build này sinh ra, nên không lệch được.
+    with open('assets/pack/sam-stories.version', 'w', encoding='utf-8') as fh:
+        fh.write(f'{VER}:{content_id}\n')
+    print(f'pack identity: {VER}:{content_id}')
 
     # ── truy vấn nghiệm thu + bench nhẹ ──
     def q(sql, *a):
