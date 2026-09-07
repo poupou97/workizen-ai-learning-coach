@@ -933,6 +933,7 @@ class SubjectHomeScreen extends StatelessWidget {
             lessonLabel: l.title == null
                 ? 'Bài ${l.no}'
                 : 'Bài ${l.no} · ${displayTitle(l.title!)}',
+            grade: index.grade,
             bookTitle: index.books
                 .where((b) => b.sourceDocumentId == pages.book)
                 .map((b) => b.title)

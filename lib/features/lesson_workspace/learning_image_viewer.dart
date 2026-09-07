@@ -19,6 +19,8 @@
 /// quyền.
 library;
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../../app/theme/wal_tokens.dart';
@@ -29,7 +31,8 @@ import '../../app/theme/wal_tokens.dart';
 /// — back về là ĐÚNG vị trí đang đọc, không dựng lại bài (§P0.2).
 Future<void> showLearningImage(
   BuildContext context, {
-  required String asset,
+  String? asset,
+  Uint8List? bytes,
   double? aspect,
   String? caption,
   String? sourceLine,
@@ -40,6 +43,7 @@ Future<void> showLearningImage(
     fullscreenDialog: true,
     builder: (_) => LearningImageViewer(
       asset: asset,
+      bytes: bytes,
       aspect: aspect,
       caption: caption,
       sourceLine: sourceLine,
@@ -57,7 +61,8 @@ Future<void> showLearningImage(
 class LearningImageViewer extends StatefulWidget {
   const LearningImageViewer({
     super.key,
-    required this.asset,
+    this.asset,
+    this.bytes,
     this.aspect,
     this.caption,
     this.sourceLine,
@@ -65,7 +70,11 @@ class LearningImageViewer extends StatefulWidget {
     this.bleedScale = 1.0,
   });
 
-  final String asset;
+  /// Ảnh từ ASSET (crop fixture) hoặc từ BYTE (hình cắt trong pack theo lớp —
+  /// hàng nghìn hình nên nằm trong SQLite, không phải hàng nghìn tệp asset).
+  /// Đúng một trong hai; không có cái nào thì không có gì để xem.
+  final String? asset;
+  final Uint8List? bytes;
 
   /// width/height của ảnh — giữ ĐÚNG tỉ lệ, không kéo méo (§P0.3).
   final double? aspect;
@@ -143,6 +152,28 @@ class _LearningImageViewerState extends State<LearningImageViewer>
     _animateTo(m);
   }
 
+  /// Ảnh từ byte (pack theo lớp) hoặc từ asset (crop fixture). Không có cái
+  /// nào ⇒ nói thật, không màn đen câm (§P7).
+  Widget _image() {
+    const missing = Center(
+      child: Text('Máy này chưa có ảnh của bài.',
+          style: TextStyle(color: Colors.white70)),
+    );
+    if (widget.bytes != null) {
+      return Image.memory(widget.bytes!,
+          key: LearningImageViewer.imageKey,
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => missing);
+    }
+    if (widget.asset != null) {
+      return Image.asset(widget.asset!,
+          key: LearningImageViewer.imageKey,
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => missing);
+    }
+    return missing;
+  }
+
   @override
   Widget build(BuildContext context) {
     final caption = widget.caption;
@@ -169,18 +200,7 @@ class _LearningImageViewerState extends State<LearningImageViewer>
                       child: ClipRect(
                         child: Transform.scale(
                           scale: widget.bleedScale,
-                          child: Image.asset(
-                            widget.asset,
-                            key: LearningImageViewer.imageKey,
-                            fit: BoxFit.contain,
-                            // Thiếu tệp ⇒ nói thật, không màn đen câm (§P7).
-                            errorBuilder: (_, _, _) => const Center(
-                              child: Text(
-                                'Máy này chưa có ảnh của bài.',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                            ),
-                          ),
+                          child: _image(),
                         ),
                       ),
                     ),
