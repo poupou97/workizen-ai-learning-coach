@@ -393,6 +393,64 @@ final class SourceActivity extends LessonActivity {
   final SuSource source;
 }
 
+/// ⭐ TRANG SÁCH CỦA CHÍNH BÀI ẤY — họ hoạt động thứ sáu.
+///
+/// Census toàn corpus đo được: 3.142 bài có nội dung đọc được, nhưng sản phẩm
+/// chỉ mở được 117. Không phải vì thiếu dữ liệu, mà vì `activitiesFor` chỉ có
+/// năm họ (Toán bài tập · TV đọc · TV viết · Sử nguồn · Khoa thí nghiệm) và
+/// KHÔNG có họ nào là «đọc trang sách». Lớp 1, 2, 3, 11, 12 vì thế có ĐÚNG 0
+/// bài mở được — trẻ mở app ra không thấy gì.
+///
+/// Bộ dựng pack chỉ phát mục này khi CHỨNG MINH ĐƯỢC hai điều: mọi trang của
+/// bài là một luồng đọc (không hai cột ⇒ không đan chữ), và nội dung MỞ ĐẦU
+/// đúng bằng bài ấy (không bắt đầu ở giữa bài). Bài không chứng minh được thì
+/// pack không phát — nên ở đây không có nhánh «tạm coi là đọc được».
+class LessonPages {
+  const LessonPages(
+      {required this.book,
+      required this.lesson,
+      required this.text,
+      required this.pageStart,
+      required this.pagePdfStart,
+      required this.pagePdfEnd});
+
+  final String book;
+  final int lesson;
+
+  /// Chữ NGUYÊN VĂN của sách, đã bỏ số trang và tiêu đề chạy. Không tóm tắt,
+  /// không viết lại — nếu chỗ này là chữ do máy sinh thì trẻ đang đọc SAM
+  /// tưởng là đọc sách.
+  final String text;
+
+  /// Trang IN (thứ trẻ thấy ở chân trang), có thể `null` khi mục lục không nói.
+  final int? pageStart;
+  final int pagePdfStart;
+  final int pagePdfEnd;
+
+  int get pageCount => pagePdfEnd - pagePdfStart + 1;
+
+  static LessonPages? fromJson(Object? j) {
+    if (j is! Map) return null;
+    final book = j['book'], lesson = j['lesson'], text = j['text'];
+    final s = j['pagePdfStart'], e = j['pagePdfEnd'];
+    if (book is! String || lesson is! int || text is! String) return null;
+    if (s is! int || e is! int || e < s) return null;
+    if (text.trim().isEmpty) return null;
+    return LessonPages(
+        book: book,
+        lesson: lesson,
+        text: text,
+        pageStart: j['pageStart'] is int ? j['pageStart'] as int : null,
+        pagePdfStart: s,
+        pagePdfEnd: e);
+  }
+}
+
+final class LessonPagesActivity extends LessonActivity {
+  const LessonPagesActivity(this.pages);
+  final LessonPages pages;
+}
+
 final class ExperimentActivity extends LessonActivity {
   const ExperimentActivity(this.experiment);
   final KhoaExperiment experiment;
@@ -407,6 +465,7 @@ class LessonIndex {
       this.tvWritings = const [],
       this.suSources = const [],
       this.khoaExperiments = const [],
+      this.lessonReadings = const [],
       this.diaMaps = const [],
       this.sourceAssets = const [],
       this.books = const [],
@@ -414,6 +473,9 @@ class LessonIndex {
       this.droppedRouterActivities = 0});
 
   final int grade;
+
+  /// Trang sách của từng bài — họ hoạt động mở được nhiều bài nhất.
+  final List<LessonPages> lessonReadings;
 
   /// WAL-210 — `null` = pack chưa khai provenance (pack cũ / chưa dựng lại).
   final BuildProvenance? buildProvenance;
@@ -551,6 +613,9 @@ class LessonIndex {
         if (s.book == book && s.lesson == lessonNo) SourceActivity(s),
       for (final e in khoaExperiments)
         if (e.book == book && e.lesson == lessonNo) ExperimentActivity(e),
+      // Trang sách của chính bài — đặt CUỐI để không đổi thứ tự các họ đã có.
+      for (final p in lessonReadings)
+        if (p.book == book && p.lesson == lessonNo) LessonPagesActivity(p),
     ];
   }
 
@@ -821,8 +886,16 @@ class LessonIndex {
             pageCount: (b['pageCount'] as num?)?.toInt()));
       }
     }
+    // Trang sách của từng bài. Mục hỏng bị BỎ, không dựng nửa vời — một mục
+    // thiếu dải trang hay rỗng chữ mà vẫn cho qua sẽ làm bài «mở được» rồi
+    // hiện ra trang trắng.
+    final lp = <LessonPages>[
+      for (final e in (j['lessonReadings'] as List? ?? const []))
+        ?LessonPages.fromJson(e),
+    ];
     return LessonIndex(
         grade: grade,
+        lessonReadings: lp,
         subjects: subjects,
         toanExercises: ex,
         tvReadings: tv,
