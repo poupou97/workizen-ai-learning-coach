@@ -50,11 +50,17 @@ class WorkspaceCatalog {
   /// có, KHÔNG sửa một dòng mã nào — 77 block, 68 tin cậy, 2 sơ đồ quy trình.
   /// Nên Đọc và Trực quan đúng là năng lực chung.
   ///
-  /// ⚠ Còn «Học với SAM» thì KHÔNG: `tutor_script_for` trong cầu ấy mở đầu
-  /// bằng `if book != '06-sgk-khoa-hoc-tu-nhien-6' || lesson != 17 → None`,
-  /// với block id đóng cứng. Đó không phải thiếu dữ liệu mà là một nhánh mã
-  /// chỉ nhận đúng một bài. Bài 16 vì thế mở được Đọc + Trực quan, chưa mở
-  /// được SAM — và màn hình nói thẳng điều đó thay vì hiện một tab rỗng.
+  /// ⚠ «Học với SAM» TỪNG bị chặn ở đây: `tutor_script_for` trong cầu ấy mở
+  /// đầu bằng `if book != '06-sgk-khoa-hoc-tu-nhien-6' || lesson != 17 → None`,
+  /// với block id đóng cứng — không phải thiếu dữ liệu mà là một nhánh mã chỉ
+  /// nhận đúng một bài. WAL-228 đã bỏ nhánh ấy: kịch bản nay là DỮ LIỆU
+  /// (`tool/corpus/tutor_scripts/<book>-b<NN>.json`), thêm bài không cần sửa mã.
+  ///
+  /// Nhưng CƠ CHẾ MỞ KHÔNG PHẢI LÀ NỘI DUNG ĐÃ CÓ. Hôm nay vẫn đúng MỘT tệp
+  /// kịch bản (Bài 17), nên Bài 16/9/10 vẫn chỉ có Đọc + Trực quan — giờ là vì
+  /// chưa ai soạn kịch bản cho chúng, không phải vì mã từ chối. Soạn kịch bản
+  /// là việc của NGƯỜI: `acceptable`/`hints`/`scaffold` mà máy tự sinh là máy
+  /// bịa cách dạy. Màn hình vẫn nói thẳng thay vì hiện một tab rỗng.
   /// ⚠ CHỌN THEO THỨ TRẺ MỞ ĐƯỢC, KHÔNG THEO SỐ BÀI CÓ TSL.
   ///
   /// Tôi từng suy «9 bài lớp 6 có TSL ⇒ 9 bài có Đọc + Trực quan». SAI: số ấy
