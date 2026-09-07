@@ -286,7 +286,7 @@ METRICS = [
         source_artefact=PACK_ARTEFACT,
         rederivation_command="python3 tool/metrics/cli.py verify --only ACTIVITY_LEAF_COUNT",
         derive=_activity_leaves,
-        recorded_value=223,
+        recorded_value=227,
         note=('This is the metric the published lineage 248 -> 207 belongs to; 248 was its value '
               'before the §3 fail-closed change removed the 41 INFERRED expressions. '
               'Independently reproduced by tool/corpus/legacy/packs.py pack_metrics() '
@@ -306,7 +306,7 @@ METRICS = [
         source_artefact=PACK_ARTEFACT,
         rederivation_command="python3 tool/metrics/cli.py verify --only LEARNER_ACTIVITY_LEAF_COUNT",
         derive=_learner_activity_leaves,
-        recorded_value=187,
+        recorded_value=191,
         note=('The repository already held TWO family sets for the word «activity» — seven in '
               'packs.py, six in readiness_matrix.py — differing by 36 rows. Both are recorded '
               'here rather than one being chosen silently.'),
@@ -522,8 +522,8 @@ DEPRECATED = [
         reason=('Three different totals — 248, 217, 161 — were all published under this one '
                 'phrase. A phrase that admits three answers is not a metric. It must not enter '
                 'round-7 reporting in any form.'),
-        replacement=('ACTIVITY_LEAF_COUNT (7 families, 223) or LEARNER_ACTIVITY_LEAF_COUNT '
-                     '(6 families, 187) — chosen explicitly and written with its family set.'),
+        replacement=('ACTIVITY_LEAF_COUNT (7 families, 227) or LEARNER_ACTIVITY_LEAF_COUNT '
+                     '(6 families, 191) — chosen explicitly and written with its family set.'),
     ),
     Deprecated(
         id='ACTIVITY_TOTAL_248',
