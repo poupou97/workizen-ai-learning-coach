@@ -406,9 +406,12 @@ METRICS = [
         source_artefact=PACK_ARTEFACT,
         rederivation_command="python3 tool/metrics/cli.py verify --only CANONICAL_LESSON_IDENTITY_COUNT",
         derive=_canonical_lesson_identities,
-        recorded_value=3650,
-        note=('A MEASUREMENT, not a Founder-approved denominator. 3,679 and 3,650 are the SAME '
-              'leaf rows under two grouping keys — not two artefacts disagreeing.'),
+        recorded_value=3663,
+        note=('A MEASUREMENT, not a Founder-approved denominator. 3,679 and 3,663 are the SAME '
+              'leaf rows under two grouping keys — not two artefacts disagreeing. '
+              'Was 3,650: the chapter-identity build fills titles that the TOC left null '
+              '(read from the page), so rows that used to collapse under a shared null title '
+              'are now distinguishable. The leaf population did not change.'),
     ),
     Metric(
         id='RANGED_LESSON_ROW_COUNT',
@@ -453,8 +456,10 @@ METRICS = [
         source_artefact=PACK_ARTEFACT,
         rederivation_command="python3 tool/metrics/cli.py verify --only TRUE_DUPLICATE_EXCESS_ROWS",
         derive=_true_duplicate_excess_rows,
-        recorded_value=29,
-        note='3,679 - 29 = 3,650, exactly. The two denominators are reconciled by arithmetic.',
+        recorded_value=16,
+        note=('3,679 - 16 = 3,663, exactly. The two denominators are reconciled by arithmetic. '
+              'Was 29 against 3,650 — the same arithmetic, before page-read titles '
+              'separated rows the TOC had left indistinguishable.'),
     ),
     Metric(
         id='PACK_BOOK_ROW_COUNT',
