@@ -654,7 +654,18 @@ _flags = pack_provenance.read_flags()
 out = pack_provenance.stamp(out, GRADE, _flags, __file__)
 os.makedirs('assets/pack', exist_ok=True)
 path = f'assets/pack/lesson-index-g{GRADE}.json'
+# ⚠ PACK CHƯA XONG: bước này sinh lại `lessonReadings.content` KHÔNG có mục
+# hình — hình do `build_lesson_figures.py` nạp vào SAU. Chạy lẻ bước này là
+# làm mất hình mà không có lỗi nào (đã xảy ra: lớp 10–12 mất sạch hình, L1-M
+# tụt, không một cảnh báo). Đánh dấu để `build_pack.py --verify` bắt được, và
+# nói thẳng ra màn hình cho người đang chạy tay.
+out['figuresPending'] = True
 json.dump(out, open(path, 'w'), ensure_ascii=False)
+if os.environ.get('WAL_PACK_ORCHESTRATED') != '1':
+    print('  ⚠️  PACK CHƯA XONG — mới có chữ, chưa có hình.\n'
+          f'      Chạy:  python3 tool/ui/build_pack.py {GRADE}\n'
+          '      (đường dựng duy nhất: index → figures → kiểm bất biến)',
+          file=sys.stderr)
 _att = ATT.summary()
 try:
     os.makedirs(ATTACH_LOG_DIR, exist_ok=True)
