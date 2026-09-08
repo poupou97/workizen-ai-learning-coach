@@ -29,6 +29,7 @@ import '../shell/compose_lite_screen.dart';
 import '../shell/reader_screen.dart';
 import '../shell/session_recorder.dart';
 import 'lesson_index.dart';
+import 'subject_display.dart';
 import 'lesson_pages_screen.dart';
 import 'source_gallery_screen.dart';
 
@@ -110,7 +111,7 @@ class SubjectHomeScreen extends StatelessWidget {
               if (b.sourceDocumentId == book!.sourceDocumentId) b
           ];
     final title = book == null
-        ? '$subject · Lớp ${profile.grade}'
+        ? '${subjectLabel(subject)} · Lớp ${profile.grade}'
         : (book!.volumeLabel == null
             ? book!.title
             : '${book!.title} · ${book!.volumeLabel}');

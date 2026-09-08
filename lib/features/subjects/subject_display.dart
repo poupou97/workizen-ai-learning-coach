@@ -37,6 +37,32 @@ const _subjectNames = <String, String>{
   'hoat-dong-trai-nghiem': 'Hoạt động trải nghiệm',
 };
 
+/// ⭐ TÊN MÔN VIẾT TẮT TRÊN GIÁ SÁCH — chữ registry, không phải mã môn.
+///
+/// Máy thật lớp 11: Home ghi «HĐTN-HN», giá sách ghi «GDKT&PL». Đó là tên
+/// `subject` của registry, KHÔNG đi qua [subjectDisplayName] (bảng kia tra
+/// theo *mã* `khtn`, `dia-li`). Trẻ lớp 6 không giải mã được «TN&XH».
+///
+/// Tám chữ tắt có trong corpus, mỗi chữ được XÁC MINH CHÉO bằng định danh
+/// sách của chính môn ấy — 52/52 cuốn xác nhận (vd «GDKT&PL» ⇔ mọi cuốn đều
+/// mang `giao-duc-kinh-te-va-phap-luat`). Hai nguồn độc lập đồng ý thì mới
+/// dịch; chữ tắt lạ ⇒ giữ nguyên, không đoán.
+const _subjectAbbreviations = <String, String>{
+  'GDCD': 'Giáo dục công dân',
+  'GDKT&PL': 'Giáo dục kinh tế và pháp luật',
+  'GDTC': 'Giáo dục thể chất',
+  'HĐTN': 'Hoạt động trải nghiệm',
+  'HĐTN-HN': 'Hoạt động trải nghiệm, hướng nghiệp',
+  'KHTN': 'Khoa học tự nhiên',
+  'LS&ĐL': 'Lịch sử và Địa lí',
+  'TN&XH': 'Tự nhiên và Xã hội',
+};
+
+/// Tên môn trẻ đọc, từ TÊN môn của mục lục (không phải mã). Không nằm trong
+/// bảng ⇒ trả lại nguyên văn: tên đầy đủ đã đọc được thì không cần đụng vào.
+String subjectLabel(String subject) =>
+    _subjectAbbreviations[subject.trim()] ?? subject;
+
 /// Tên môn trẻ đọc từ mã môn; mã lạ ⇒ trả lại mã (không bịa).
 String subjectDisplayName(String subjectId) =>
     _subjectNames[subjectId] ?? subjectId;

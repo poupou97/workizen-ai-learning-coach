@@ -402,10 +402,19 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   HomeRecommendation? _bookRecommendation() {
     final idx = _lessonIndex;
     if (idx == null) return null;
-    return nextBookRecommendation(
+    final byTimetable = nextBookRecommendation(
       index: idx,
       now: DateTime.now(),
-      timetable: _timetable,
+      timetable: _timetableInGrade,
+    );
+    if (byTimetable != null) return byTimetable;
+    // ⭐ Home KHÔNG được im lặng chỉ vì SAM chưa soạn bài. Máy thật lớp 11:
+    // 441 bài mở đọc được mà Home chỉ đưa nút «Mở giá sách». Xếp hạng dùng
+    // đúng ngữ cảnh thời khoá biểu mà giá sách đang dùng — không luật thứ hai.
+    final ctx = _timetableContext();
+    return firstReadableRecommendation(
+      index: idx,
+      subjectRank: (s) => ctx.rankOfSubject(s),
     );
   }
 
@@ -431,7 +440,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
             index: idx,
             subject: rec.subject,
             book: book,
-            timetable: _timetable,
+            timetable: _timetableInGrade,
             reviewDueSubjects: _reviewDueSubjects(data),
           );
           // ⭐ Book Home vào ĐÚNG stack (back trả về đây, không rơi thẳng về
@@ -734,7 +743,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
             index: idx,
             subject: b.subject,
             book: b,
-            timetable: _timetable,
+            timetable: _timetableInGrade,
             reviewDueSubjects: _reviewDueSubjects(data),
           ),
         ),
@@ -780,7 +789,7 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     final idx = _lessonIndex;
     if (idx != null) {
       for (final s in gradeSubjectNames(idx)) {
-        if (subjectIdOf(s) == subjectId) return s;
+        if (subjectIdOf(s) == subjectId) return subjectLabel(s);
       }
     }
     // ⭐ Môn KHÔNG thuộc lớp đang học vẫn phải có tên trẻ đọc được.
@@ -808,8 +817,20 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   /// ⭐ Lệnh 56 §P1 + §P5.1 — ngữ cảnh lịch của người học đang mở.
   ///
   /// `widget.clock` cho test tiêm ngày; production dùng đồng hồ máy.
+  /// Mã môn CÓ THẬT ở lớp đang học — dùng để lọc TKB của lớp cũ ra khỏi
+  /// những chỗ trẻ đọc và chỗ SAM gợi ý.
+  Set<String> _gradeSubjectIds() {
+    final idx = _lessonIndex;
+    if (idx == null) return const {};
+    return {for (final s in gradeSubjectNames(idx)) subjectIdOf(s)};
+  }
+
+  /// TKB đã lọc theo lớp đang học. Kho vẫn giữ nguyên tiết của lớp cũ.
+  List<TimetableEntry> get _timetableInGrade =>
+      entriesForSubjectIds(_timetable, _gradeSubjectIds());
+
   TimetableContext _timetableContext() =>
-      timetableContext(_timetable, now: widget.clock());
+      timetableContext(_timetableInGrade, now: widget.clock());
 
   /// §P0.1 / §P1.3 — tạo nhanh MỘT tuần mẫu từ MÔN CỦA ĐÚNG LỚP.
   ///

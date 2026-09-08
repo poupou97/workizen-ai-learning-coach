@@ -90,3 +90,69 @@ HomeRecommendation? nextBookRecommendation({
   }
   return null;
 }
+
+
+/// ⭐ GỢI Ý KHÔNG PHỤ THUỘC SAM — Home phải có việc thật để đề nghị kể cả khi
+/// SAM chưa soạn bài nào cho lớp này.
+///
+/// Máy thật, lớp 11: 441 bài mở đọc được, mà Home chỉ nói «Chưa có bài học
+/// SAM chuẩn bị sẵn cho lớp 11» rồi đưa mỗi nút «Mở giá sách». Trẻ không có
+/// đường vào, dù nội dung đã có sẵn trên máy.
+///
+/// Thứ tự lấy KHÔNG tuỳ tiện — dùng đúng thứ hạng sản phẩm đã dùng cho giá
+/// sách: môn có tiết HÔM NAY trước, rồi số bài mở được nhiều hơn, rồi tên môn
+/// (để hai lần dựng không ra hai kết quả). Trong môn thì lấy bài ĐẦU TIÊN mở
+/// được theo mục lục.
+///
+/// Không có bài nào mở được ⇒ `null`. Home nói thật là chưa có, không bịa.
+HomeRecommendation? firstReadableRecommendation({
+  required LessonIndex index,
+  int Function(String subject)? subjectRank,
+}) {
+  final bySubject = <String, List<BookLessons>>{};
+  index.subjects.forEach((subject, books) {
+    bySubject[subject] = books;
+  });
+  final names = bySubject.keys.toList()
+    ..sort((a, b) {
+      final ra = subjectRank?.call(a) ?? 0;
+      final rb = subjectRank?.call(b) ?? 0;
+      if (ra != rb) return ra.compareTo(rb);
+      final na = _openableIn(index, bySubject[a]!);
+      final nb = _openableIn(index, bySubject[b]!);
+      if (na != nb) return nb.compareTo(na);
+      return a.compareTo(b);
+    });
+  for (final subject in names) {
+    for (final book in bySubject[subject]!) {
+      for (final lesson in book.lessons) {
+        final acts =
+            index.activitiesFor(book: book.sourceDocumentId, lessonNo: lesson.no);
+        if (acts.isEmpty) continue;
+        return HomeRecommendation(
+          sourceDocumentId: book.sourceDocumentId,
+          subject: subject,
+          lessonNo: lesson.no,
+          // «Xem trong sách» — đúng ngữ nghĩa: mở trang sách để đọc,
+          // sinh TRACE chứ không sinh EVIDENCE. Không đội lốt bài dạy.
+          intent: LearningIntent.lookup,
+          reason: 'SAM chưa soạn bài cho lớp này, nhưng sách của con có sẵn '
+              'trang để đọc.',
+        );
+      }
+    }
+  }
+  return null;
+}
+
+int _openableIn(LessonIndex index, List<BookLessons> books) {
+  var n = 0;
+  for (final b in books) {
+    for (final l in b.lessons) {
+      if (index.activitiesFor(book: b.sourceDocumentId, lessonNo: l.no).isNotEmpty) {
+        n++;
+      }
+    }
+  }
+  return n;
+}

@@ -40,6 +40,7 @@ import '../../core/store/learner_profile.dart';
 import '../lesson_workspace/book_screen.dart';
 import '../lesson_workspace/workspace_trace.dart';
 import 'lesson_index.dart';
+import 'subject_display.dart';
 
 class BookShelfScreen extends StatefulWidget {
   const BookShelfScreen({
@@ -334,7 +335,7 @@ class _BookShelfScreenState extends State<BookShelfScreen> {
         _filterChip(null, 'Tất cả', 'all'),
         if (_catalog.isLoaded && _catalog.booksWithWorkspace.isNotEmpty)
           _filterChip(BookShelfScreen.samFilter, '✨ Có bài học SAM', 'sam'),
-        for (final s in subjects) _filterChip(s, s, s),
+        for (final s in subjects) _filterChip(s, subjectLabel(s), s),
       ],
     ),
   );
