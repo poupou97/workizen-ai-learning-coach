@@ -331,6 +331,7 @@ class BookRef {
     required this.cover,
     required this.lessonCount,
     this.volumeLabel,
+    this.variantLabel,
     this.volume,
     this.bookSeries,
     this.pageCount,
@@ -346,6 +347,21 @@ class BookRef {
 
   /// «Tập 1» — `null` khi sách không chia tập.
   final String? volumeLabel;
+
+  /// Tên PHÂN MÔN in trên bìa («ĐỒ HOẠ (TRANH IN)»), chỉ có khi cuốn này trùng
+  /// nhãn với cuốn khác cùng lớp. Máy thật lớp 11 hiện TÁM cuốn y hệt
+  /// «Mĩ thuật 11 · 2 bài» — trẻ không biết mở cuốn nào.
+  ///
+  /// Đọc từ TRANG BÌA và xác minh chéo với định danh của sách, nên nó là chữ
+  /// của sách. `null` = không xác minh được ⇒ thà để trùng còn hơn dán một cái
+  /// tên không kiểm được.
+  final String? variantLabel;
+
+  /// Nhãn hiện trên giá — gộp đủ thứ phân biệt cuốn này với cuốn bên cạnh.
+  String get shelfLabel {
+    final parts = [title, ?variantLabel, ?volumeLabel];
+    return parts.join(' · ');
+  }
 
   /// Số tập để XẾP THỨ TỰ. Không có thì `null` — không đoán từ tên file:
   /// `tap-hai` xếp trước `tap-mot` theo bảng chữ cái là đúng chuỗi, sai sách.
@@ -937,6 +953,9 @@ class LessonIndex {
             cover: b['cover'] as String,
             lessonCount: (b['lessonCount'] as num?)?.toInt() ?? 0,
             volumeLabel: b['volumeLabel'] as String?,
+            variantLabel: (b['variantLabel'] as String?)?.trim().isEmpty ?? true
+                ? null
+                : (b['variantLabel'] as String).trim(),
             volume: switch (b['volume']) {
               final num v => v.toInt(),
               final String s => int.tryParse(s),

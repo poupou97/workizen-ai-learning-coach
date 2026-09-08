@@ -32,6 +32,7 @@ from tc2_attach import printed_offset  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lesson_attach import AttachRegistry  # noqa: E402
 import pack_provenance  # noqa: E402
+from book_variant import label_variants  # noqa: E402
 
 GRADE = int(sys.argv[1]) if len(sys.argv) > 1 else 5
 ATTACH_LOG_DIR = os.environ.get('ATTACH_LOG_DIR', 'poc-out/b-lane/attach-log')
@@ -446,6 +447,49 @@ for sid, (subj, n) in sorted(_lessons_by_book.items()):
                       bookSeries=c.get('bookSeries'), lessonCount=n,
                       pageCount=c.get('pageCount')))
 
+# ---- MÔN phải khớp LÕI định danh, không phải phần phân môn ------------------
+# Máy thật lớp 11: «TIN HỌC 11 · ĐỊNH HƯỚNG KHOA HỌC MÁY TÍNH» hiện trên giá
+# dưới môn «Khoa học» — một môn KHÔNG TỒN TẠI ở lớp 11. Chuỗi `khoa-hoc` nằm
+# trong phần PHÂN MÔN `dinh-huong-khoa-hoc-may-tinh`, và môn bị suy từ đó.
+# Hậu quả: hai cuốn Tin học 11 trông như hai môn khác nhau, và một cuốn nằm một
+# mình dưới một môn không có thật.
+#
+# Luật generic: sách CÙNG LÕI ĐỊNH DANH phải CÙNG MÔN. Tên môn đúng lấy từ cuốn
+# anh em khớp lõi — chữ đã có trong dữ liệu, không phải chữ suy ra từ slug (suy
+# từ slug là bịa dấu tiếng Việt).
+def _core_of(sid):
+    m = re.match(r'^\d{2}-sgk-(.+?)-(\d{1,2})(?:-.+)?$', sid)
+    return m.group(1) if m else None
+
+
+def _fold_subject(s):
+    import unicodedata
+    s = unicodedata.normalize('NFD', (s or '').lower())
+    return re.sub(r'[\u0300-\u036f]', '', s).replace('đ', 'd').replace(' ', '-')
+
+
+_by_core = collections.defaultdict(list)
+for _b in books:
+    _c = _core_of(_b['sourceDocumentId'])
+    if _c:
+        _by_core[_c].append(_b)
+_fixed = 0
+for _core, _group in _by_core.items():
+    _matching = [b for b in _group if _fold_subject(b['subject']) in _core
+                 or _core in _fold_subject(b['subject'])]
+    if not _matching or len(_matching) == len(_group):
+        continue
+    _right = _matching[0]['subject']
+    for _b in _group:
+        if _b is not _matching[0] and _b['subject'] != _right:
+            print(f"  ⚠️ {_b['sourceDocumentId']}: môn «{_b['subject']}» suy từ phần "
+                  f"phân môn ⇒ sửa thành «{_right}» (khớp lõi «{_core}»)")
+            _b['subject'] = _right
+            _b['title'] = _right + ' ' + str(GRADE)
+            _fixed += 1
+if _fixed:
+    print(f'  môn sửa theo lõi định danh: {_fixed}')
+
 # ---- sourceAssets (WAL-133): hình SGK đã crop, provenance đầy đủ ----------
 # Chỉ nhận asset CÓ MẶT trên máy này và ĐỦ provenance; thiếu ⇒ bỏ, không để UI
 # hứa một hình không dựng lại được.
@@ -578,6 +622,16 @@ for _subj, _books in subjects.items():
             # Tên đọc-từ-trang bù vào mục lục: chữ của SÁCH, không phải chữ máy đặt.
             if not (_L.get('title') or '').strip():
                 _L['title'] = _title
+
+# ---- nhãn phân biệt cho sách TRÙNG NHÃN ------------------------------------
+# Máy thật lớp 11: TÁM cuốn hiện y hệt «Mĩ thuật 11 · 2 bài». Phân môn chỉ in
+# trên BÌA. Đo được 65/238 sách (27%) trùng nhãn, 20 cuốn mỗi lớp 10–12.
+_variants = label_variants(books, os.path.join('poc-out', 'graph', 'ocr-body'))
+for _b in books:
+    _v = _variants.get(_b['sourceDocumentId'])
+    if _v:
+        _b['variantLabel'] = _v
+print(f'  variantLabel: {len(_variants)} cuốn được đặt nhãn phân biệt')
 
 for v in subjects.values():
     for _bk in v:
