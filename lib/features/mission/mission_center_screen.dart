@@ -1093,9 +1093,16 @@ class MissionCenterScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
+              // ⭐ HIỆN `body`, KHÔNG PHẢI `title`.
+              // Máy thật: thẻ hiện «châu Mỹ (1492 - 1502), cuộc thám hiểm của
+              // Ph.» — đó là TITLE, và title là chỗ hay cụt nhất: chỉ 4/38 title
+              // trọn nghĩa, so với 17/38 body. `body` mới là điều muốn nói với
+              // trẻ; title chỉ là nhãn cắt từ nguồn.
+              // Cắt bằng ellipsis KHÁC với một mẩu cụt lưu sẵn: dấu «…» nói cho
+              // trẻ biết còn nữa, và chạm vào là đọc tiếp.
               Text(
-                st.title,
-                maxLines: 2,
+                st.body.trim().isEmpty ? st.title : st.body,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: WalType.body,
