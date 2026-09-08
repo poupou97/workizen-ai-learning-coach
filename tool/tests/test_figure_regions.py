@@ -69,10 +69,17 @@ class AnchorsMoRong(unittest.TestCase):
         self.assertEqual(ff.caption_anchors(ls, extended=True,
                                             block_lines={id(ls[0]): 1}), [])
 
-    def test_chu_thich_co_DAU_NGUON_la_bang_chung_in(self):
-        ls = [L(0.1, 0.3, 0.5, 'Thực hành tạo dáng chụp ảnh(2)')]
-        got = ff.caption_anchors(ls, extended=True, block_lines={id(ls[0]): 1})
-        self.assertEqual([(a['family'], a['num']) for a in got], [('FOOTNOTE', None)])
+    def test_ho_DAU_NGUON_da_bi_RUT_LAI_vi_corpus_bac_bo(self):
+        """⛔ B2.1 từng nhận «Thực hành tạo dáng chụp ảnh⁽²⁾» làm bằng chứng.
+        Corpus bác bỏ: trên 1.900 trang thật, 7/7 ca là SAI — tên bài «PHÉP CỘNG
+        (qua 10)», dòng trích nguồn «…NXB Trẻ, 2004)», thân bài điền khuyết
+        «two bedrooms in my house. There (2)». Hình dạng «…số)» không phải bằng
+        chứng, chỉ là một cái khuôn trùng hợp."""
+        for t in ('Thực hành tạo dáng chụp ảnh(2)', 'PHÉP CỘNG (qua 10)',
+                  'Lương Hùng biên dịch, NXB Trẻ, 2004)', 'a book. I am (3)'):
+            ls = [L(0.1, 0.3, 0.5, t)]
+            self.assertEqual(ff.caption_anchors(ls, extended=True,
+                                                block_lines={id(ls[0]): 1}), [], t)
 
     def test_THAM_CHIEU_trong_doan_van_KHONG_phai_chu_thich(self):
         """⭐ «NEARBY TEXT != CAPTION». Một câu thân bài mở đầu bằng «Hình 2 là
@@ -92,21 +99,6 @@ class AnchorsMoRong(unittest.TestCase):
         ls = [L(0.1, 0.7, 0.5, 'Hình 16.2 là ví dụ giao diện của phần mềm')]
         got = ff.caption_anchors(ls, extended=True, block_lines={id(ls[0]): 6})
         self.assertEqual([a['num'] for a in got], ['16.2'])
-
-    def test_O_BANG_SO_LIEU_khong_phai_chu_thich_co_dau_nguon(self):
-        """⭐ TRUSTED SAI thật, cầu nối bóng tìm ra (Toán 11 trang 67): ô đầu cột
-        «[160; 165)» của bảng số liệu có ĐÚNG HÌNH DẠNG «…số)» nên được nhận làm
-        chú thích, và bảo lãnh cho một con mascot trang trí. Sách không hề nói
-        bức ấy tên là gì. Chú thích là một CÁI TÊN — phải mở đầu bằng chữ cái."""
-        for t in ('[160; 165)', '[0,5; 10,5)', '110)', ',maxsplit=2)'):
-            ls = [L(0.1, 0.2, 0.5, t)]
-            self.assertEqual(ff.caption_anchors(ls, extended=True,
-                                                block_lines={id(ls[0]): 1}), [], t)
-
-    def test_dau_nguon_trong_doan_van_cung_KHONG_tinh(self):
-        ls = [L(0.1, 0.7, 0.5, 'theo số liệu đã nêu ở trên (2)')]
-        self.assertEqual(ff.caption_anchors(ls, extended=True,
-                                            block_lines={id(ls[0]): 6}), [])
 
     def test_khong_co_block_lines_thi_coi_nhu_khoi_MOT_dong(self):
         ls = [L(0.1, 0.3, 0.5, 'Hình 2. Cột kinh Phật')]

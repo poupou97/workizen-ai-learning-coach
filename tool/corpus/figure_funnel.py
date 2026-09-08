@@ -31,20 +31,27 @@ CAPTION_NUM = re.compile(r'^\s*(hình|bảng|sơ\s*đồ|biểu\s*đồ)\s*(\d{1
 CAPTION_NUM_ANY = re.compile(
     r'^\s*(hình|bảng|sơ\s*đồ|biểu\s*đồ)\s*(\d{1,2})(?:\s*[.,]\s*(\d{1,2}))?(?![\d])',
     re.IGNORECASE)
-# ⭐ CHÚ THÍCH CÓ DẤU NGUỒN: dòng ngắn kết bằng chỉ số nguồn «⁽⁴⁾» — OCR ra
-# «Thêu(4)», «Nhuộm3)», «In lưới?)». Đây là CẤU TRÚC IN của sách (nối ảnh với
-# danh sách nguồn cuối trang), không phải chữ tình cờ nằm dưới ảnh.
-# Census: 13 ca ở Mĩ thuật 10 (hai cuốn khác nhau).
+# ⛔ HỌ «DẤU NGUỒN» ĐÃ BỊ RÚT LẠI — CORPUS BÁC BỎ CHÍNH GIẢ THUYẾT CỦA TÔI.
 #
-# ⚠ PHẢI MỞ ĐẦU BẰNG CHỮ CÁI — CHÚ THÍCH LÀ MỘT CÁI TÊN, KHÔNG PHẢI MỘT HÌNH DẠNG.
-# Bản đầu chỉ bắt hình dạng «…số)» nên nhận cả Ô ĐẦU CỘT của bảng số liệu:
-# «[160; 165)». Đã tạo ra một TRUSTED SAI thật ở Toán 11 trang 67 — vùng được
-# tin là con mascot trang trí trong hộp ghi chú, còn «bằng chứng» là một ô
-# khoảng giá trị của bảng bên dưới. Sách KHÔNG hề nói bức ấy tên là gì.
-# Riêng luật này loại 13 dòng không phải chú thích trên 63 trang đã đo (khoảng
-# giá trị, một trích dẫn nguồn trong ngoặc, một mẩu mã «,maxsplit=2)») mà vẫn
-# giữ đủ 15 chú thích thật.
-CAPTION_FOOTNOTE = re.compile(r'^(?![\d\W])\S.{1,59}[\(\?\"“”]?\s*\d\s*\)\s*$')
+# B2.1 nhận thêm họ này: dòng ngắn kết bằng chỉ số nguồn «Thêu⁽⁴⁾». Trên 63
+# trang mẫu nó cho 15 chú thích thật, 3 ca đã soi tận mắt là đúng (Mĩ thuật 10).
+# Chạy thật trên 1.900 trang đầu của corpus: 7/7 ca là SAI.
+#
+#     «PHÉP CỘNG (qua 10)»                 ⟵ TÊN BÀI, Toán 2
+#     «BẢNG CỘNG (qua 10)»                 ⟵ TÊN BÀI
+#     «BẢNG TRỪ (qua 10)»                  ⟵ TÊN BÀI
+#     «Lương Hùng biên dịch, NXB Trẻ, 2004)» ⟵ DÒNG TRÍCH NGUỒN SÁCH
+#     «two bedrooms in my house. There (2)»  ⟵ THÂN BÀI điền khuyết, Tiếng Anh 3
+#     «a book. I am (3)»                     ⟵ THÂN BÀI điền khuyết
+#     «Let's sing. 57)»                      ⟵ THÂN BÀI
+#
+# Hình dạng «…số)» có mặt khắp SGK tiếng Việt: tên bài có «(qua 10)», trích
+# nguồn có năm, bài tập tiếng Anh có ô điền «(2)». Đây KHÔNG phải bằng chứng —
+# đây là một cái khuôn trùng hợp. Nó đúng ở HAI CUỐN Mĩ thuật, và luật riêng
+# cho hai cuốn thì không phải luật.
+#
+# Giữ lại thì được thêm ít ảnh đúng và một loạt DANH TÍNH BỊA. «SAI TÊN >
+# THIẾU TÊN». Rút lại, chịu mất 3 ảnh Mĩ thuật đã soi đúng.
 BAND_UP = 0.35        # soi tối đa ngần này chiều cao trang phía trên chú thích
 BAND_PAD = 0.02
 
@@ -73,11 +80,6 @@ def caption_anchors(lines, *, extended=False, block_lines=None):
             short = (block_lines or {}).get(id(l), 1) <= 2
             if short:
                 m = CAPTION_NUM_ANY.match(t)
-                if not m and CAPTION_FOOTNOTE.match(t):
-                    out.append(dict(kind='hình', num=None, family='FOOTNOTE',
-                                    x=l['x'], y=l['y'], w=l.get('w') or 0,
-                                    h=l.get('h') or 0, text=t))
-                    continue
         if not m:
             continue
         num = f'{m.group(2)}.{m.group(3)}' if m.lastindex and m.group(3) else m.group(2)
