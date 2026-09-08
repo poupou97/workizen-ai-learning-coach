@@ -74,24 +74,58 @@ BAND_TOL = 0.01       # sai số khi gộp khối vào cùng một dải ngang
 
 
 def blocks(lines):
-    """Gom dòng thành KHỐI bố cục: cùng khối khi chồng nhau theo x VÀ liền nhau
-    theo y. Khung phụ, nhãn hình và thân bài trở thành những khối riêng.
+    """Gom dòng thành KHỐI bố cục: dòng mới phải chồng x với MỌI dòng đã có
+    trong khối, VÀ liền nhau theo y.
+
+    ⭐⭐ CHỒNG VỚI CẢ KHỐI, KHÔNG PHẢI VỚI DÒNG CUỐI.
+
+    Bản trước chỉ so dòng mới với DÒNG CUỐI, nên khối TRÔI NGANG bắc cầu:
+    A(x .09–.50) → B(x .46–.90) → C(x .86–.95) nối được hết dù A và C không hề
+    chồng nhau. Đo trên máy: Vật lí 11 trang 21 sinh MỘT khối 23 dòng trải
+    `x=0.092..0.900`, nuốt cả cột trái lẫn dải hình. Ranh giới khối là thứ dùng
+    để biết CHỖ NÀO LÀ HÌNH và MẢNH KÝ HIỆU THUỘC VỀ ĐÂU — khối trôi thì cả
+    hai đều sai.
+
+    Điều kiện ở đây là một BẤT BIẾN CỦA CỘT CHỮ, không phải một con số được
+    chỉnh: trong một cột, không tồn tại hai dòng rời hẳn nhau. Giữ giao của mọi
+    dòng (`core`) rồi đòi dòng mới chồng giao ấy là cách phát biểu đúng điều đó
+    — không có hằng số nào để vặn.
+
+    Chấm trên 12 họ bố cục (một cột · hai cột · công thức · đồ thị · bảng · bài
+    tập · âm nhạc · bản đồ · khung phụ · Tiếng Việt · Toán), nhãn đọc từ hình
+    học trang + chính tả:
+
+        luật            khối   CẶP DÒNG RỜI   ĐOẠN BỊ CẮT
+        dòng-cuối (cũ)   528        121             8
+        dải tích luỹ     511         49             1
+        thẳng mép        665         56            11
+        mép đầu          600         32            11
+        trung vị         635         34            10
+        GIAO (luật này)  677          0            20
+
+    Đổi 121 khối có dòng rời lấy thêm 12 chỗ đoạn bị cắt: chỗ ghép SAI làm hỏng
+    CÂU (đúng họ lỗi #141 — «…tác động KHOẢNG TÁM NGHÌN NĂM xấu của thiên
+    nhiên…»), còn chỗ cắt chỉ làm một đoạn hiện thành hai. Sai nội dung nặng
+    hơn xấu trình bày.
     """
     ls = sorted([l for l in lines if (l.get('text') or '').strip()],
                 key=lambda l: (l['y'], l['x']))
-    out = []
+    out, core = [], []
     for l in ls:
         h = l.get('h') or 0.02
-        for b in out:
+        x0, x1 = l['x'], l['x'] + l.get('w', 0)
+        for b, c in zip(out, core):
             last = b[-1]
-            overlap = (min(l['x'] + l.get('w', 0), last['x'] + last.get('w', 0))
-                       - max(l['x'], last['x']))
-            if overlap > -BLOCK_XGAP and \
-                    0 <= l['y'] - last['y'] <= BLOCK_YGAP * max(h, last.get('h') or h):
+            if not (0 <= l['y'] - last['y'] <= BLOCK_YGAP * max(h, last.get('h') or h)):
+                continue
+            # Chồng GIAO của khối ⇒ chồng TỪNG dòng của khối (giao nằm trong mọi dòng).
+            if min(x1, c[1]) - max(x0, c[0]) > 0:
                 b.append(l)
+                c[0], c[1] = max(c[0], x0), min(c[1], x1)
                 break
         else:
             out.append([l])
+            core.append([x0, x1])
     return out
 
 
@@ -194,8 +228,32 @@ def page_text(lines, drop=frozenset()):
                     if not is_furniture(l) and (l.get('text') or '').strip() not in drop).strip()
 
 
-HEAD_CHARS = 400      # phần đầu bài, nơi tên bài phải xuất hiện
-START_MATCH = 0.5     # tỉ lệ từ của tên bài phải có mặt ở phần đầu ấy
+# ⚠ CỬA SỔ ĐẦU BÀI — ĐO RỒI MỚI ĐỔI, VÀ CỔNG NÀY YẾU HƠN TÊN CỦA NÓ.
+#
+# Trước đây chỉ soi 400 ký tự đầu. Khi tầng phân khối được sửa (không còn trôi
+# ngang), thứ tự đọc mịn hơn nên chữ của tên bài rơi ra NGOÀI 400 ký tự ấy ở 4
+# bài — dù 100% từ của tên vẫn nằm TRÊN CHÍNH TRANG đó (Sinh học 11 Bài 11
+# 10/10 từ · Hoá học 10 Bài 9 8/8 · Địa lí 12 Bài 27 9/9 · Công nghệ 9 Bài 3
+# 11/11). Giữ 400 là bỏ 4 bài vì một chi tiết cài đặt, không phải vì thiếu
+# bằng chứng.
+#
+# Đo trên 1.446 bài lớp 9–12, cửa sổ ⇒ (khớp đúng tên mình · trang khớp tên
+# một bài KHÁC cùng sách):
+#
+#     400 ký tự  98,5%  ·  92,3%
+#     600        99,2%  ·  96,6%
+#     800        99,5%  ·  97,6%
+#     cả trang   99,9%  ·  98,7%
+#
+# ⭐ Con số thứ hai mới là điều đáng nói: ngay ở 400 ký tự, 92,3% trang đã khớp
+# tên của một bài khác. Cổng này GẦN NHƯ KHÔNG phân biệt được gì — nới nó ra
+# không đánh đổi mất sức phân biệt, vì sức phân biệt vốn không có. Việc thật
+# giữ cho «đúng bài» là `unit_locator` (khớp duy nhất) và luật chương.
+#
+# Nên soi CẢ TRANG mở đầu: câu hỏi là «trang này có mở bài ấy không», và đơn vị
+# của câu hỏi ấy là TRANG.
+HEAD_CHARS = None     # None = soi cả trang mở đầu
+START_MATCH = 0.5     # tỉ lệ từ của tên bài phải có mặt
 
 
 def _norm(s):
@@ -216,7 +274,7 @@ def starts_at_lesson(head, title):
     t = _norm(title)
     if not t:
         return None
-    h = _norm(head)[:HEAD_CHARS]
+    h = _norm(head) if HEAD_CHARS is None else _norm(head)[:HEAD_CHARS]
     toks = [w for w in t.split() if len(w) > 2]
     if not toks:                      # tên rất ngắn («Ôn tập») — khớp cả cụm
         return t in h

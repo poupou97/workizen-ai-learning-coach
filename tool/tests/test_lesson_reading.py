@@ -269,3 +269,31 @@ class UnitStartSearchTests(unittest.TestCase):
         d, why = lr.lesson_reading('x', 5, 6, title='Tách chất khỏi hỗn hợp')
         self.assertIsNone(d)
         self.assertEqual(why, 'LESSON_START_UNCONFIRMED')
+
+
+class HeadWindowTests(unittest.TestCase):
+    """Cửa sổ đầu bài — soi CẢ TRANG mở đầu, không phải 400 ký tự đầu.
+
+    Khi tầng phân khối hết trôi ngang, thứ tự đọc mịn hơn nên chữ của tên bài
+    rơi ra ngoài 400 ký tự ở 4 bài — dù 100% từ của tên vẫn nằm trên chính
+    trang ấy. Đo trên 1.446 bài lớp 9–12: ngay ở 400 ký tự đã có 92,3% trang
+    khớp tên của một bài KHÁC, nên cổng này vốn không phân biệt được gì.
+    """
+
+    def test_ten_bai_nam_SAU_400_ky_tu_van_duoc_nhan(self):
+        head = 'x' * 500 + ' THỰC HÀNH MỘT SỐ THÍ NGHIỆM VỀ HỆ TUẦN HOÀN'
+        self.assertTrue(lr.starts_at_lesson(
+            head, 'THỰC HÀNH: MỘT SỐ THÍ NGHIỆM VỀ HỆ TUẦN HOÀN'))
+
+    def test_ten_bai_KHONG_co_tren_trang_thi_van_truot(self):
+        self.assertFalse(lr.starts_at_lesson(
+            'một trang nói về chuyện hoàn toàn khác, không liên quan gì',
+            'THỰC HÀNH: MỘT SỐ THÍ NGHIỆM VỀ HỆ TUẦN HOÀN'))
+
+    def test_khong_co_ten_thi_tra_None_chu_khong_im_lang(self):
+        self.assertIsNone(lr.starts_at_lesson('bất kỳ chữ gì', ''))
+
+    def test_moi_nua_so_tu_la_du_theo_START_MATCH(self):
+        # Giữ nguyên ngưỡng cũ: 2/4 từ dài ⇒ đạt.
+        self.assertTrue(lr.starts_at_lesson('alpha beta gamma delta',
+                                            'alpha beta khac hoan'))
