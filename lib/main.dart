@@ -57,6 +57,7 @@ import 'app/theme/wal_tokens.dart'
 import 'core/pedagogy/presentation_policy.dart' show bandForGrade;
 import 'features/subjects/book_shelf_screen.dart';
 import 'features/subjects/subjects_screen.dart';
+import 'core/stories/snippet_integrity.dart';
 import 'features/subjects/subject_display.dart';
 import 'features/subjects/subject_home_screen.dart';
 import 'features/mission/mission_data.dart';
@@ -656,8 +657,11 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
       ..._stories.byType('INVENTION_DISCOVERY'),
       ..._stories.byType('PERSON'),
     ];
-    if (pool.isEmpty) return null;
-    return pool[Random(DateTime.now().day).nextInt(pool.length)];
+    // Chỉ mẩu TRỌN NGHĨA. Kho hiện có 55% mẩu cụt một đầu (body bị cắt ở ~300
+    // ký tự lúc trích), và một nửa câu về lịch sử là một câu SAI về lịch sử.
+    final whole = [for (final s in pool) if (isCompleteSnippet(s.body)) s];
+    if (whole.isEmpty) return null;   // không có mẩu nào trọn ⇒ BỎ THẺ
+    return whole[Random(DateTime.now().day).nextInt(whole.length)];
   }
 
   void _honest(BuildContext context, String msg) {
@@ -772,10 +776,19 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
   /// một cái tên không còn đúng.
   String _subjectLabelOf(String subjectId) {
     final idx = _lessonIndex;
-    if (idx == null) return subjectId;
-    for (final s in gradeSubjectNames(idx)) {
-      if (subjectIdOf(s) == subjectId) return s;
+    if (idx != null) {
+      for (final s in gradeSubjectNames(idx)) {
+        if (subjectIdOf(s) == subjectId) return s;
+      }
     }
+    // ⭐ Môn KHÔNG thuộc lớp đang học vẫn phải có tên trẻ đọc được.
+    // Máy thật: hồ sơ đổi từ lớp 6 sang 11, thời khoá biểu cũ còn tiết «khtn»
+    // (KHTN chỉ có ở lớp 6–9), nên dải «Sắp tới» hiện «khtn» thô lẫn giữa
+    // «Công nghệ · GDTC · Mĩ thuật». Bảng tên môn là từ điển CỐ ĐỊNH các tên
+    // tiếng Việt có thật — tra nó không phải là bịa.
+    final known = subjectDisplayName(subjectId);
+    if (known != subjectId) return known;
+    // Không khớp gì ⇒ trả lại MÃ: thà hiện mã còn hơn hiện một tên không đúng.
     return subjectId;
   }
 
