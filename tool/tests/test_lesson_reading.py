@@ -187,3 +187,85 @@ class ContentStreamTests(unittest.TestCase):
         d, _ = lr.lesson_reading('x', 5, 6)
         for p in d['pages']:
             self.assertEqual(' '.join(q['text'] for q in p['paragraphs']), p['text'])
+
+
+class UnitStartSearchTests(unittest.TestCase):
+    """Tìm trang mở THẬT của đơn vị — hai họ lớn nhất của census dải trang.
+
+    Census 270 ca: nguyên nhân chính KHÔNG phải offset (offset còn không ổn định
+    trong cùng một cuốn). Hai họ lớn nhất là «mục lục ghi PHẦN CON của bài» (51)
+    và «lệch đúng một trang» (40); cả hai giải bằng cùng một luật.
+    """
+
+    def setUp(self):
+        self.pages = {}
+        self._real = lr.page_lines
+        lr.page_lines = lambda book, pp: self.pages.get(pp)
+        self.addCleanup(lambda: setattr(lr, 'page_lines', self._real))
+
+    def _titled(self, title):
+        return [line(title, y=0.06, w=0.5)] + one_column()
+
+    def test_sub_section_starting_INSIDE_the_range_is_found(self):
+        # Ca thật TV5: dải bài mở ở trang khác, mục «Luyện từ và câu» ở trong.
+        self.pages = {5: one_column(), 6: one_column(),
+                      7: self._titled('LUYỆN TỪ VÀ CÂU LIÊN KẾT CÂU')}
+        d, why = lr.lesson_reading('x', 5, 7, title='Luyện từ và câu: Liên kết câu')
+        self.assertIsNone(why)
+        self.assertEqual(d['pagePdfStart'], 7)
+
+    def test_off_by_one_before_the_range_is_found(self):
+        self.pages = {4: self._titled('TÁCH CHẤT KHỎI HỖN HỢP'),
+                      5: one_column(), 6: one_column()}
+        d, why = lr.lesson_reading('x', 5, 6, title='Tách chất khỏi hỗn hợp')
+        self.assertIsNone(why)
+        self.assertEqual(d['pagePdfStart'], 4)
+
+    def test_TWO_matching_pages_means_WITHHOLD(self):
+        # Nhiều chỗ khớp ⇒ không biết chỗ nào là mở đầu. Chọn cái đầu là ĐOÁN,
+        # và đoán sai thì trẻ đọc nhầm chỗ.
+        self.pages = {5: one_column(),
+                      6: self._titled('ÔN TẬP CHƯƠNG MỘT'),
+                      7: self._titled('ÔN TẬP CHƯƠNG MỘT')}
+        d, why = lr.lesson_reading('x', 5, 7, title='Ôn tập chương một')
+        self.assertIsNone(d)
+        self.assertEqual(why, 'LESSON_START_UNCONFIRMED')
+
+    def test_no_matching_page_anywhere_means_WITHHOLD(self):
+        self.pages = {5: one_column(), 6: one_column()}
+        d, why = lr.lesson_reading('x', 5, 6, title='Một bài không có trên trang')
+        self.assertIsNone(d)
+        self.assertEqual(why, 'LESSON_START_UNCONFIRMED')
+
+    def test_search_never_runs_past_the_slack_window(self):
+        # Trang khớp nằm xa hơn ±2 ⇒ KHÔNG nhận: nó thuộc bài khác.
+        self.pages = {1: self._titled('TÁCH CHẤT KHỎI HỖN HỢP'),
+                      5: one_column(), 6: one_column()}
+        d, why = lr.lesson_reading('x', 5, 6, title='Tách chất khỏi hỗn hợp')
+        self.assertIsNone(d)
+        self.assertEqual(why, 'LESSON_START_UNCONFIRMED')
+
+    def test_the_shifted_start_never_passes_the_end_of_the_range(self):
+        # Dịch tới sau trang cuối nghĩa là đã sang bài khác.
+        self.pages = {5: one_column(), 6: one_column(),
+                      7: self._titled('TÁCH CHẤT KHỎI HỖN HỢP')}
+        d, why = lr.lesson_reading('x', 5, 6, title='Tách chất khỏi hỗn hợp')
+        self.assertIsNone(d, 'trang khớp nằm NGOÀI dải ⇒ không nhận')
+
+    def test_a_found_start_is_re_verified_on_the_full_reading(self):
+        # Phép dò chỉ nhìn 10 dòng đầu; dòng đọc đầy đủ mới là thứ trẻ thấy.
+        # Trang khớp ⇒ nhận, và nội dung trả về PHẢI mở đúng bằng tên ấy.
+        self.pages = {5: one_column(), 6: self._titled('TÁCH CHẤT KHỎI HỖN HỢP')}
+        d, why = lr.lesson_reading('x', 5, 6, title='Tách chất khỏi hỗn hợp')
+        self.assertIsNone(why)
+        self.assertTrue(d['pages'][0]['text'].startswith('TÁCH CHẤT'))
+
+    def test_TWO_matches_in_the_slack_window_also_WITHHOLD(self):
+        # Ngoài dải cũng vậy: hai chỗ khớp thì không chỗ nào chứng minh được nó
+        # là mở đầu. Luật «duy nhất» phải áp cho cả vùng nới, không chỉ trong dải.
+        self.pages = {3: self._titled('TÁCH CHẤT KHỎI HỖN HỢP'),
+                      4: self._titled('TÁCH CHẤT KHỎI HỖN HỢP'),
+                      5: one_column(), 6: one_column()}
+        d, why = lr.lesson_reading('x', 5, 6, title='Tách chất khỏi hỗn hợp')
+        self.assertIsNone(d)
+        self.assertEqual(why, 'LESSON_START_UNCONFIRMED')
