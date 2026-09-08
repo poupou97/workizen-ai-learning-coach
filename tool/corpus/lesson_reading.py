@@ -223,6 +223,52 @@ def starts_at_lesson(head, title):
     return sum(1 for w in toks if w in h) / len(toks) >= START_MATCH
 
 
+UNIT_START_SLACK = 2      # nới ra ngoài dải attach tối đa ngần này trang
+
+
+def find_unit_start(book, page_pdf_start, page_pdf_end, title,
+                    slack=UNIT_START_SLACK):
+    """Trang mà tên đơn vị xuất hiện DUY NHẤT — hoặc `None`.
+
+    Census 270 ca hỏng dải trang cho thấy nguyên nhân chính KHÔNG phải offset
+    trang in→PDF (offset thậm chí không ổn định trong cùng một cuốn: 20/44 sách
+    có nhiều giá trị khác nhau). Hai họ lớn nhất là:
+
+      · mục lục ghi PHẦN CON của bài, không phải bài (51 ca). Tiếng Việt: mục
+        «Luyện từ và câu: Liên kết câu…» là một mục BÊN TRONG «Bài 9», nên dải
+        của bài mở ở trang khác với chỗ mục ấy bắt đầu;
+      · dải lệch đúng một trang (40 ca).
+
+    Cả hai giải bằng CÙNG một luật: tìm trang mà tên ấy xuất hiện, trước hết
+    TRONG dải, rồi nới ±slack. Nhận khi và chỉ khi ĐÚNG MỘT trang khớp.
+
+    ⭐ DUY NHẤT LÀ ĐIỀU KIỆN, KHÔNG PHẢI SỞ THÍCH. Nhiều trang khớp nghĩa là ta
+    không biết trang nào là chỗ bắt đầu; chọn trang đầu tiên là đoán, và đoán
+    sai thì trẻ đọc nhầm chỗ. Không khớp trang nào cũng vậy. Cả hai ⇒ giữ lại.
+    """
+    if not title or page_pdf_start is None:
+        return None
+    inside = [p for p in range(page_pdf_start, (page_pdf_end or page_pdf_start) + 1)
+              if _page_opens_unit(book, p, title)]
+    if len(inside) == 1:
+        return inside[0]
+    if inside:
+        return None            # nhiều chỗ khớp trong dải ⇒ không quyết được
+    near = [p for p in range(page_pdf_start - slack, page_pdf_start + slack + 1)
+            if p >= 1 and _page_opens_unit(book, p, title)]
+    return near[0] if len(near) == 1 else None
+
+
+def _page_opens_unit(book, page_pdf, title):
+    lines = page_lines(book, page_pdf)
+    if lines is None:
+        return False
+    head = ' '.join((l.get('text') or '').strip()
+                    for l in sorted([x for x in lines if (x.get('text') or '').strip()],
+                                    key=lambda z: z['y'])[:10])
+    return starts_at_lesson(head, title) is True
+
+
 def lesson_reading(book, page_pdf_start, page_pdf_end, *, printed_start=None, title=None):
     """Nội dung đọc của bài, hoặc `None` kèm lý do nếu KHÔNG chứng minh được.
 
@@ -249,7 +295,15 @@ def lesson_reading(book, page_pdf_start, page_pdf_end, *, printed_start=None, ti
     if not pages:
         return None, 'CONTENT_THIN'
     if title is not None and starts_at_lesson(pages[0]['text'], title) is False:
-        return None, 'LESSON_START_UNCONFIRMED'
+        # Nội dung không mở đúng bài — thử tìm trang mở THẬT của đơn vị này.
+        start = find_unit_start(book, page_pdf_start, page_pdf_end, title)
+        if start is None or start == page_pdf_start:
+            # `start == page_pdf_start` nghĩa là đầu trang khớp nhưng dòng đọc
+            # đầy đủ thì không — đừng lặp lại chính phép vừa trượt.
+            return None, 'LESSON_START_UNCONFIRMED'
+        # Kiểm LẠI trên dòng đọc đầy đủ, không tin phép dò đầu trang là đủ.
+        return lesson_reading(book, start, page_pdf_end,
+                              printed_start=printed_start, title=title)
     return dict(book=book, pagePdfStart=page_pdf_start, pagePdfEnd=page_pdf_end,
                 pageStart=printed_start, pages=pages,
                 extraction='ocr-layout-blocks-v1'), None

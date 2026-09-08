@@ -92,9 +92,15 @@ def main():
     out_dir = a.out or os.path.join(ROOT, 'poc-out/packs/figures')
     os.makedirs(out_dir, exist_ok=True)
     db_path = os.path.join(out_dir, f'figures-g{a.grade}.db')
-    if os.path.exists(db_path):
-        os.remove(db_path)
-    db = sqlite3.connect(db_path)
+    # ⭐ DỰNG SANG TỆP TẠM RỒI MỚI ĐỔI TÊN.
+    # Bản trước XOÁ kho cũ ngay từ đầu, nên một lần dựng hỏng giữa chừng (đã xảy
+    # ra thật: `disk I/O error` ở lớp 7) làm mất luôn kho ĐANG CHẠY TỐT. Cùng bài
+    # học nguyên tử với `GradePackInstaller`: bản cũ phải sống sót qua một lần
+    # dựng thất bại.
+    tmp_path = db_path + '.building'
+    if os.path.exists(tmp_path):
+        os.remove(tmp_path)
+    db = sqlite3.connect(tmp_path)
     db.execute('CREATE TABLE fig (id TEXT PRIMARY KEY, book TEXT, lesson INT, '
                'page INT, w INT, h INT, jpeg BLOB)')
 
@@ -130,6 +136,7 @@ def main():
             n_les += 1
     db.commit()
     db.close()
+    os.replace(tmp_path, db_path)      # nguyên tử: không có nửa kho ở chỗ thật
     # Hình đã vào `content` ⇒ pack không còn dở dang.
     idx.pop('figuresPending', None)
     json.dump(idx, open(idx_path, 'w'), ensure_ascii=False)
