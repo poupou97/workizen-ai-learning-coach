@@ -284,6 +284,18 @@ class MissionCenterScreen extends StatelessWidget {
                 !row.cards.any((c) => c.isRealLesson)) ...[
               const SizedBox(height: WalSpacing.sm),
               _pad(_noSamLessonPanel()),
+              // ⭐ SAM CHƯA SOẠN BÀI ≠ KHÔNG CÓ GÌ ĐỂ HỌC.
+              //
+              // Máy thật lớp 11: 441 bài mở đọc được, mà nhánh này chỉ hiện
+              // panel «chưa có bài học SAM» rồi hết — thẻ «SAM GỢI Ý» không
+              // bao giờ được dựng, nên trẻ không có đường vào. Khả năng của
+              // SAM là MỘT NĂNG LỰC, không phải điều kiện để sản phẩm có việc
+              // tiếp theo.
+              if (_effectiveRecommendation != null) ...[
+                const SizedBox(height: WalSpacing.md),
+                _pad(_sectionLabel('SAM GỢI Ý')),
+                _pad(_nextActionCard()),
+              ],
             ] else if (row.cards.isNotEmpty) ...[
               // ── TẦNG 1: NHIỀU MÔN ───────────────────────────────────────
               const SizedBox(height: WalSpacing.sm),
@@ -580,7 +592,7 @@ class MissionCenterScreen extends StatelessWidget {
           // order 50 §7 cấm («Không cần lặp»). Tầng 2 nay chỉ ĐỊNH DANH bài —
           // đúng như ví dụ §5 của Founder: «Tiếp tục KHTN 6 · Bài 17 →».
           Text(
-            '${card.subjectLine} · Bài ${doc.lessonNo}',
+            '${subjectLabel(card.subjectLine)} · Bài ${doc.lessonNo}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -1899,7 +1911,7 @@ class _SmartCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              card.subjectLine.toUpperCase(),
+                              subjectLabel(card.subjectLine).toUpperCase(),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(

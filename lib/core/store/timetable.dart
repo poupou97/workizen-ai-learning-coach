@@ -80,3 +80,23 @@ List<T> prioritiseByTimetable<T>(
   }
   return [...inTimetable, ...rest];
 }
+
+/// ⭐ THỜI KHOÁ BIỂU THUỘC VỀ MỘT LỚP — của lớp cũ thì nói sai về lớp mới.
+///
+/// Máy thật: hồ sơ đổi lớp 6 → 11, dải «Sắp tới» của Home vẫn hiện «Khoa học
+/// tự nhiên» cho một học sinh lớp 11 — môn ấy chỉ có ở lớp 6–9. Tệ hơn: gợi ý
+/// bài theo TKB không khớp được cuốn nào của lớp 11, nên Home im lặng luôn.
+///
+/// Lọc theo MÃ MÔN CÓ THẬT trong mục lục lớp đang học. Đây là lọc ĐỂ HIỆN và
+/// ĐỂ GỢI Ý — KHÔNG xoá gì trong kho: gia đình đổi lại lớp thì tiết cũ vẫn
+/// còn nguyên.
+List<TimetableEntry> entriesForSubjectIds(
+  List<TimetableEntry> entries,
+  Set<String> subjectIds,
+) {
+  if (subjectIds.isEmpty) return const [];
+  return [
+    for (final e in entries)
+      if (subjectIds.contains(e.subjectId)) e,
+  ];
+}
