@@ -118,3 +118,66 @@ class MatrixTests(unittest.TestCase):
         r1 = [r for r in rows if r['no'] == 1][0]
         self.assertEqual(r1['title_from'], 'index')
         self.assertNotIn(cm.NO_TITLE, r2['blockers'])
+
+
+class MultimodalMetricTests(unittest.TestCase):
+    """L1-T và L1-M phải đứng RIÊNG.
+
+    Founder dogfood 2.589 bài «mở được» và thấy chúng chỉ có chữ. Gộp hai thứ ấy
+    vào một con số «readable» là báo cáo một sản phẩm không tồn tại.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+        self.addCleanup(self.tmp.cleanup)
+
+    def _rows(self, *, detected, packed, reading=True):
+        _index(self.d, lessons=[{'no': 1, 'title': 'Bài có tên', 'pageStart': 5}])
+        _attach(self.d, [{'number': 1, 'title': 'Bài có tên', 'page_pdf': 6,
+                          'source': 'both', 'confidence': 0.95}])
+        p = os.path.join(self.d, 'lesson-index-g6.json')
+        idx = json.load(open(p, encoding='utf-8'))
+        if reading:
+            idx['lessonReadings'] = [dict(
+                book=BOOK, lesson=1, pagePdfStart=6, pagePdfEnd=6, text='x',
+                content=[{'t': 'img', 'id': 'i$k'.replace('$k', str(k))}
+                         for k in range(packed)])]
+        with open(p, 'w', encoding='utf-8') as fh:
+            json.dump(idx, fh, ensure_ascii=False)
+        # Bài này KHÔNG có OCR thật; tiêm số ký tự để nó qua được L1-T, vì thứ
+        # đang kiểm ở đây là tầng HÌNH chứ không phải tầng chữ.
+        real = cm.page_chars
+        cm.page_chars = lambda book, pp: 5000
+        try:
+            return cm.build(self.d, [], index_dir=self.d, with_visuals=True,
+                            visual_counter=lambda *a: detected)
+        finally:
+            cm.page_chars = real
+
+    def test_a_lesson_whose_source_has_no_visual_reaches_L1M_on_text_alone(self):
+        # Thiếu thứ KHÔNG TỒN TẠI không phải là thiếu.
+        r = self._rows(detected=0, packed=0)[0]
+        self.assertTrue(r['L1'])
+        self.assertTrue(r['L1M'])
+
+    def test_text_only_lesson_whose_source_has_figures_is_NOT_L1M(self):
+        # Đây đúng ca Founder dogfood: bài mở được, đọc được chữ, MẤT HÌNH.
+        r = self._rows(detected=3, packed=0)[0]
+        self.assertTrue(r['L1'], 'chữ vẫn đọc được')
+        self.assertFalse(r['L1M'], 'mất hình thì không phải đọc được đầy đủ')
+
+    def test_all_figures_packed_reaches_L1M(self):
+        self.assertTrue(self._rows(detected=3, packed=3)[0]['L1M'])
+
+    def test_unmeasured_visuals_never_count_as_passing(self):
+        # Chưa đo được ⇒ KHÔNG kết luận đạt. Im lặng cho qua là tự chấm điểm mình.
+        self.assertFalse(self._rows(detected=None, packed=5)[0]['L1M'])
+
+    def test_openable_is_measured_from_the_pack_not_from_L1(self):
+        # DATA IN PIPELINE != PRODUCT VALUE: bài L1-T mà pack không mang nội dung
+        # đọc thì trẻ không mở được.
+        rows = self._rows(detected=0, packed=0, reading=False)
+        self.assertTrue(rows[0]['L1'])
+        self.assertFalse(rows[0]['openable'])
+        self.assertFalse(rows[0]['L1M'])
