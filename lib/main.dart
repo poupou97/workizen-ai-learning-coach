@@ -659,6 +659,8 @@ class _HocCungSamAppState extends State<HocCungSamApp> {
     ];
     // Chỉ mẩu TRỌN NGHĨA. Kho hiện có 55% mẩu cụt một đầu (body bị cắt ở ~300
     // ký tự lúc trích), và một nửa câu về lịch sử là một câu SAI về lịch sử.
+    // Lọc trên chính TRƯỜNG THẺ HIỆN (`body`) — bản đầu tôi lọc `body` trong
+    // khi thẻ hiện `title`, nên vẫn ra một mẩu cụt trên máy thật.
     final whole = [for (final s in pool) if (isCompleteSnippet(s.body)) s];
     if (whole.isEmpty) return null;   // không có mẩu nào trọn ⇒ BỎ THẺ
     return whole[Random(DateTime.now().day).nextInt(whole.length)];

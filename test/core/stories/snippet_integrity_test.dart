@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/stories/snippet_integrity.dart';
 
 void main() {
+  _fieldMismatchTests();
   group('cụt ĐUÔI', () {
     test('ca thật trên máy: dừng giữa một cái tên', () {
       // «Cô-lôm-bô tìm ra châu Mỹ (1492 - 1502), cuộc thám hiểm của Ph.»
@@ -64,5 +65,24 @@ void main() {
       expect(isCompleteSnippet(null), isFalse);
       expect(isCompleteSnippet('   '), isFalse);
     });
+  });
+}
+
+/// ⭐ THẺ PHẢI LỌC ĐÚNG TRƯỜNG NÓ HIỂN THỊ.
+///
+/// Bản sửa đầu lọc `body` trong khi thẻ hiện `title` — nên máy thật VẪN ra một
+/// mẩu cụt. Đo trên kho: chỉ 4/38 `title` trọn nghĩa, so với 17/38 `body`.
+void _fieldMismatchTests() {
+  test('title là chỗ hay cụt nhất — không được lọc nhầm trường', () {
+    // Chính hai ca thật lấy từ kho.
+    const titleCut = 'châu Mỹ (1492 - 1502), cuộc thám hiểm của Ph.';
+    const bodyWhole = 'Năm 1941, Tô Hoài xuất bản truyện Con Dế Mèn; sau đó '
+        'tác giả viết thêm Dế Mèn phiêu lưu kí.';
+    expect(isCompleteSnippet(titleCut), isFalse);
+    expect(isCompleteSnippet(bodyWhole), isTrue);
+  });
+
+  test('«Năm 1941» — một nhãn, không phải một sự thật', () {
+    expect(isCompleteSnippet('Năm 1941'), isFalse);
   });
 }
