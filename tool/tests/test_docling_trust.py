@@ -31,9 +31,29 @@ class Adjacency(unittest.TestCase):
         self.assertEqual([a['num'] for a in got], ['5.1'])
 
     def test_chu_thich_ngay_TREN_vung(self):
-        # Bảng SGK thường in «Bảng N.M» PHÍA TRÊN.
-        got = dt.adjacent_captions([0.1, 0.3, 0.4, 0.3], [cap('2.1', 0.15, 0.26, kind='bảng')])
+        # Bảng SGK thường in «Bảng N.M» PHÍA TRÊN — chỉ nhận khi xét như BẢNG.
+        got = dt.adjacent_captions([0.1, 0.3, 0.4, 0.3],
+                                   [cap('2.1', 0.15, 0.26, kind='bảng')], kind='table')
         self.assertEqual([a['num'] for a in got], ['2.1'])
+
+    def test_chu_thich_HINH_o_phia_TREN_thi_KHONG_tinh(self):
+        """⭐ QUY ƯỚC IN CỦA SGK, KHÔNG PHẢI THẨM MỸ.
+
+        Ca thật, nhìn tận mắt (Công nghệ 10 trang 95): câu thân bài «Hình 16.2.
+        là ví dụ giao diện của phần mềm AutoCAD.» đứng TRÊN ảnh; chú thích thật
+        «Hình 16.2. Giao diện của phần mềm AutoCAD 2021» nằm DƯỚI. Nhận cả phía
+        trên thì cổng trích dẫn CÂU THÂN BÀI làm bằng chứng — lần ấy kết luận
+        vẫn đúng nhờ có chú thích thật ở dưới, nhưng ở trang khác đó là một
+        TRUSTED SAI.
+        """
+        got = dt.adjacent_captions([0.1, 0.3, 0.4, 0.3], [cap('16.2', 0.15, 0.26)])
+        self.assertEqual(got, [])
+
+    def test_BANG_thi_van_nhan_chu_thich_phia_tren(self):
+        # Bảng in chú thích TRÊN; chặn cả hai phía là mất toàn bộ bảng.
+        got = dt.adjacent_captions([0.1, 0.3, 0.4, 0.3],
+                                   [cap('41.1', 0.15, 0.26, kind='bảng')], kind='table')
+        self.assertEqual([a['num'] for a in got], ['41.1'])
 
     def test_chu_thich_XA_thi_khong_tinh(self):
         self.assertEqual(dt.adjacent_captions([0.1, 0.2, 0.4, 0.3], [cap('5.1', 0.15, 0.80)]), [])
@@ -68,7 +88,8 @@ class Judge(unittest.TestCase):
         # bị chặn oan trước khi sửa.
         box = [0.1, 0.2, 0.4, 0.3]
         st, why, _ = dt.judge(box, anchors=[cap('2.1', 0.15, 0.16, kind='bảng')],
-                              items=[item((0.1, 0.2, 0.5, 0.5), 'table')])
+                              items=[item((0.1, 0.2, 0.5, 0.5), 'table')],
+                              kind='table')
         self.assertEqual(st, 'TRUSTED')
 
     def test_hop_rong_thi_GIU_LAI(self):

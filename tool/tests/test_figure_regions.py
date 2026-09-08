@@ -38,6 +38,91 @@ class Anchors(unittest.TestCase):
         self.assertEqual(got, [('hình', '5.1'), ('bảng', '2.3')])
 
 
+class AnchorsMoRong(unittest.TestCase):
+    """B2.1 — NỚI MẪU NHẬN BẰNG CHỨNG IN, KHÔNG HẠ CHUẨN BẰNG CHỨNG.
+
+    Census 72 đề xuất bị giữ (diện tích ≥0,02) trên 51 trang: 3 ca là chú thích
+    ĐÁNH SỐ MỘT CẤP thật («Hình 2», «Hình 10»), 13 ca là chú thích kết bằng
+    CHỈ SỐ NGUỒN («Thêu⁽⁴⁾»). Cả hai vẫn là chữ SÁCH TỰ IN.
+    """
+
+    def test_mac_dinh_KHONG_doi_nghia_so_cu(self):
+        # Mọi phép đo đã công bố chạy với `extended=False`. Nới mẫu KHÔNG được
+        # âm thầm làm số cũ mang nghĩa khác.
+        ls = [L(0.1, 0.3, 0.5, 'Hình 2. Cột kinh Phật thời Tiền Lê')]
+        self.assertEqual(ff.caption_anchors(ls), [])
+
+    def test_danh_so_MOT_CAP_la_bang_chung_in(self):
+        ls = [L(0.1, 0.3, 0.5, 'Hình 2. Cột kinh Phật thời Tiền Lê')]
+        got = ff.caption_anchors(ls, extended=True, block_lines={id(ls[0]): 1})
+        self.assertEqual([(a['kind'], a['num'], a['family']) for a in got],
+                         [('hình', '2', 'NUMBERED')])
+
+    def test_hai_cap_van_doc_ra_hai_cap(self):
+        ls = [L(0.1, 0.3, 0.5, 'Hình 5.1. Con lắc đơn')]
+        got = ff.caption_anchors(ls, extended=True, block_lines={id(ls[0]): 1})
+        self.assertEqual(got[0]['num'], '5.1')
+
+    def test_so_dai_hon_hai_chu_so_KHONG_phai_chu_thich(self):
+        # «Hình 123» không phải cách đánh số của SGK; chặn để không nhận bừa.
+        ls = [L(0.1, 0.3, 0.5, 'Hình 123 xyz')]
+        self.assertEqual(ff.caption_anchors(ls, extended=True,
+                                            block_lines={id(ls[0]): 1}), [])
+
+    def test_chu_thich_co_DAU_NGUON_la_bang_chung_in(self):
+        ls = [L(0.1, 0.3, 0.5, 'Thực hành tạo dáng chụp ảnh(2)')]
+        got = ff.caption_anchors(ls, extended=True, block_lines={id(ls[0]): 1})
+        self.assertEqual([(a['family'], a['num']) for a in got], [('FOOTNOTE', None)])
+
+    def test_THAM_CHIEU_trong_doan_van_KHONG_phai_chu_thich(self):
+        """⭐ «NEARBY TEXT != CAPTION». Một câu thân bài mở đầu bằng «Hình 2 là
+        ví dụ…» nằm trong khối NHIỀU DÒNG — đó là tham chiếu, không phải chú
+        thích. Khác biệt này do census tìm ra, không phải ngưỡng ước lệ.
+
+        ⚠ Chỉ ràng buộc HAI HỌ MỚI. Mẫu hai cấp «Hình 16.2» cũ KHÔNG bị chặn ở
+        đây — cố tình, để số đã công bố không đổi nghĩa. Câu thân bài mở đầu
+        bằng «Hình 16.2 là…» được chặn ở TẦNG KHÁC: quy ước in trong
+        `docling_trust.adjacent_captions` (chú thích hình nằm DƯỚI hình).
+        """
+        ls = [L(0.1, 0.7, 0.5, 'Hình 2 là ví dụ giao diện của phần mềm')]
+        self.assertEqual(ff.caption_anchors(ls, extended=True,
+                                            block_lines={id(ls[0]): 6}), [])
+
+    def test_mau_HAI_CAP_cu_KHONG_bi_cong_moi_rang_buoc(self):
+        ls = [L(0.1, 0.7, 0.5, 'Hình 16.2 là ví dụ giao diện của phần mềm')]
+        got = ff.caption_anchors(ls, extended=True, block_lines={id(ls[0]): 6})
+        self.assertEqual([a['num'] for a in got], ['16.2'])
+
+    def test_O_BANG_SO_LIEU_khong_phai_chu_thich_co_dau_nguon(self):
+        """⭐ TRUSTED SAI thật, cầu nối bóng tìm ra (Toán 11 trang 67): ô đầu cột
+        «[160; 165)» của bảng số liệu có ĐÚNG HÌNH DẠNG «…số)» nên được nhận làm
+        chú thích, và bảo lãnh cho một con mascot trang trí. Sách không hề nói
+        bức ấy tên là gì. Chú thích là một CÁI TÊN — phải mở đầu bằng chữ cái."""
+        for t in ('[160; 165)', '[0,5; 10,5)', '110)', ',maxsplit=2)'):
+            ls = [L(0.1, 0.2, 0.5, t)]
+            self.assertEqual(ff.caption_anchors(ls, extended=True,
+                                                block_lines={id(ls[0]): 1}), [], t)
+
+    def test_dau_nguon_trong_doan_van_cung_KHONG_tinh(self):
+        ls = [L(0.1, 0.7, 0.5, 'theo số liệu đã nêu ở trên (2)')]
+        self.assertEqual(ff.caption_anchors(ls, extended=True,
+                                            block_lines={id(ls[0]): 6}), [])
+
+    def test_khong_co_block_lines_thi_coi_nhu_khoi_MOT_dong(self):
+        ls = [L(0.1, 0.3, 0.5, 'Hình 2. Cột kinh Phật')]
+        self.assertEqual(len(ff.caption_anchors(ls, extended=True)), 1)
+
+
+class DemDongCuaKhoi(unittest.TestCase):
+    def test_dem_theo_KHOI_chu_khong_theo_trang(self):
+        ls = [L(0.10, 0.40, 0.30, 'một câu dài của thân bài'),
+              L(0.10, 0.40, 0.33, 'câu thứ hai cùng khối'),
+              L(0.10, 0.30, 0.70, 'Hình 2. Chú thích đứng riêng')]
+        got = ff.block_line_counts(ls)
+        self.assertEqual(got[id(ls[0])], 2)
+        self.assertEqual(got[id(ls[2])], 1)
+
+
 class Neighborhood(unittest.TestCase):
     def test_dung_o_chu_thich_khac_phia_tren(self):
         a1 = dict(x=0.6, y=0.60, w=0.3, h=0.02, num='5.1')
