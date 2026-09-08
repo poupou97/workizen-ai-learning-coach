@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../app/theme/wal_tokens.dart';
+import '../../core/pack/grade_pack.dart';
 import '../../core/pack/lesson_figure_store.dart';
 import '../lesson_workspace/learning_image_viewer.dart';
 import 'lesson_index.dart';
@@ -82,11 +83,25 @@ class _LessonPagesScreenState extends State<LessonPagesScreen> {
 
   /// Chữ hiện NGAY; hình tới khi pack mở xong. Chặn cả màn để chờ một tệp 30 MB
   /// là biến bài đọc thành màn chờ.
+  ///
+  /// Trước khi nạp, thử CÀI pack của lớp này từ nguồn trên máy — chỉ lớp đang
+  /// mở, không phải cả 12. Cài hỏng / chưa có nguồn ⇒ đi tiếp bình thường và
+  /// bài vẫn đọc được phần chữ.
   Future<void> _load() async {
     final dir = await getApplicationDocumentsDirectory();
     final d = Directory('${dir.path}/hoc-cung-sam');
     if (!d.existsSync()) d.createSync(recursive: true);
-    final s = await LessonFigureStore.loadForGrade(widget.grade!, d.path);
+    final packs = Directory('${d.path}/packs');
+    if (!packs.existsSync()) packs.createSync(recursive: true);
+    try {
+      await GradePackInstaller(
+              source: DirectoryPackSource(gradePackStagingDir(dir.path)),
+              dir: packs.path)
+          .install(widget.grade!);
+    } catch (_) {
+      // Cài lỗi không được làm hỏng bài đọc.
+    }
+    final s = await LessonFigureStore.loadForGrade(widget.grade!, packs.path);
     if (mounted) setState(() => _figures = s);
   }
 
