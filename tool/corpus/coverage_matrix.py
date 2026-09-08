@@ -153,6 +153,14 @@ def tutor_index(script_dir=TUTOR_SCRIPTS):
 def openable_index(index_dir=INDEX_DIR):
     """Bài có đường mở THẬT trong app: pack mang nội dung đọc của CHÍNH bài ấy.
 
+    ⚠ HAI NGUỒN DẢI TRANG, VÀ ĐÓ LÀ CHỦ Ý. `L1-T` ở đây đo theo dải của ATTACH;
+    bộ dựng pack còn tìm thêm dải cho bài mà mục lục không ghi trang
+    (`unit_locator`). Nên `OPENABLE` có thể VƯỢT con số suy ra từ `L1-T` — đo
+    được: đúng 30 bài. Chênh ấy có giải thích, không phải đếm nống.
+
+    Giữ định nghĩa `L1-T` nguyên như cũ thay vì nới nó theo bộ dựng: một metric
+    đổi định nghĩa giữa chừng thì mọi so sánh giữa các vòng thành vô nghĩa.
+
     ⚠ KHOÁ PHẢI GỒM TRANG MỞ BÀI. Tra bằng `(sách, số bài)` thì MỘT mục pack sẽ
     đánh dấu MỌI bản ghi trùng số là mở được — kể cả bản thuộc chương khác mà
     pack cố ý giữ lại. Đo được: sai lệch nống con số lên 2.961 trong khi pack
