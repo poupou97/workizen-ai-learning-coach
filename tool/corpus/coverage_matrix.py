@@ -151,7 +151,13 @@ def tutor_index(script_dir=TUTOR_SCRIPTS):
 
 
 def openable_index(index_dir=INDEX_DIR):
-    """Bài có đường mở THẬT trong app: pack mang nội dung đọc của chính bài ấy."""
+    """Bài có đường mở THẬT trong app: pack mang nội dung đọc của CHÍNH bài ấy.
+
+    ⚠ KHOÁ PHẢI GỒM TRANG MỞ BÀI. Tra bằng `(sách, số bài)` thì MỘT mục pack sẽ
+    đánh dấu MỌI bản ghi trùng số là mở được — kể cả bản thuộc chương khác mà
+    pack cố ý giữ lại. Đo được: sai lệch nống con số lên 2.961 trong khi pack
+    chỉ có 2.858 mục. Đếm nống chính là cách một census tự chấm điểm mình.
+    """
     out = {}
     for g in range(1, 13):
         p = os.path.join(index_dir, f'lesson-index-g{g}.json')
@@ -160,7 +166,8 @@ def openable_index(index_dir=INDEX_DIR):
         d = json.load(open(p, encoding='utf-8'))
         for r in d.get('lessonReadings') or []:
             imgs = [i for i in (r.get('content') or []) if i.get('t') == 'img']
-            out[(r.get('book'), r.get('lesson'))] = dict(packed=len(imgs))
+            out[(r.get('book'), r.get('lesson'), r.get('pageStart'))] = \
+                dict(packed=len(imgs))
     return out
 
 
@@ -243,7 +250,7 @@ def build(attach_root, fixture_dirs, index_dir=INDEX_DIR, with_visuals=False,
         key = (r['book'], r['no'])
         l2 = l1 and key in sem
         l3 = l2 and key in tut
-        op = opened.get(key)
+        op = opened.get((r['book'], r['no'], r['page_start']))
         packed = op['packed'] if op else 0
 
         # L1-M: hình CẦN THIẾT của sách có tới được trẻ không.
