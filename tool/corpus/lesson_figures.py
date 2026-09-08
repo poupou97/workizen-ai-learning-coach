@@ -85,6 +85,84 @@ def page_ink_regions(pdf_path, page_pdf, lines, dpi=60):
     return out
 
 
+def _line_crosses(l, bbox):
+    """Dòng CẮT QUA vùng: tâm dọc của dòng nằm trong hộp và có chồng ngang.
+
+    ⚠ Không hỏi «dòng có nằm gọn trong hộp không». Nhìn tận mắt một ca hỏng:
+    vùng gom HẸP HƠN dòng văn, nên dòng thò ra hai bên và phép «nằm gọn» cho
+    là không dính — trong khi ảnh cắt ra hiện đúng một lát cắt của câu chữ
+    («Gọi (P) là mặt phẳng qua E» cụt cả hai đầu). Cắt qua là đủ để hỏng.
+    """
+    x, y, w, h = bbox
+    lx0, lx1 = l['x'], l['x'] + (l.get('w') or 0)
+    if min(lx1, x + w) - max(lx0, x) <= 0:
+        return False
+    cy = l['y'] + (l.get('h') or 0) / 2
+    return y <= cy <= y + h
+
+
+def caption_regions(regions, lines):
+    """GOM VÙNG QUANH MỎ NEO CHÚ THÍCH — hình mà sách TỰ NÓI là có.
+
+    Đo phễu dò trên 223 mỏ neo có chú thích số, 5 họ nguồn:
+
+        họ                 n   ĐẠT  VỠ MẢNH  TRANG TRÍ  QUÁ NHỎ  KHÔNG THÀNH  KHÔNG THẤY
+        đồ thị nét mảnh   71     5      24        16       18          5          3
+        sơ đồ hoá học     36     1      14         3        8          5          5
+        sinh học          41    21      17         2        1          0          0
+        bản đồ/địa lí     34    11       9         1        1          3          9
+        ảnh/minh hoạ      41    21      15         1        2          1          1
+        TỔNG             223    59      79        23       30         14         18
+
+    ⭐ VỠ MẢNH là họ lỗi LỚN NHẤT (35,4%): mực có, thành phần liên thông có, HỢP
+    của chúng đủ lớn — chỉ thiếu bước GOM. Và lỗi phụ thuộc HỌ NGUỒN: ảnh và
+    hình sinh học đạt ~51%, còn đồ thị nét mảnh 7%, sơ đồ hoá học 3%.
+
+    ⇒ `classify()` KHÔNG sai: nó từ chối đúng những mảnh vụn. Hạ ngưỡng diện
+    tích sẽ nhận mảnh vụn vào bài đọc. Thứ thiếu là TẦNG GOM VÙNG.
+
+    Chú thích CHỨNG MINH hình tồn tại, KHÔNG cho biết biên của hình. Nên biên ở
+    đây là HỢP CỦA MỰC THẬT tìm được trong dải, không phải cái dải.
+
+    Chỉ gom khi CÓ chú thích — nơi nguồn đã khẳng định có hình. Không có chú
+    thích thì giữ nguyên luật cũ, để không tự ý dựng hình từ mực vụn.
+    """
+    from figure_funnel import caption_anchors, neighborhood, in_band, prose_boxes
+    from lesson_reading import LONG_LINE
+    anchors = caption_anchors(lines)
+    prose = prose_boxes(lines)
+    out = []
+    for a in anchors:
+        band = neighborhood(a, anchors, prose=prose)
+        xs = (max(0.0, a['x'] - 0.15), min(1.0, a['x'] + a['w'] + 0.15))
+        near = [r for r in regions if in_band(r['bbox'], band, xs)]
+        if not near:
+            continue
+        x0 = min(r['bbox'][0] for r in near)
+        y0 = min(r['bbox'][1] for r in near)
+        x1 = max(r['bbox'][0] + r['bbox'][2] for r in near)
+        y1 = max(r['bbox'][1] + r['bbox'][3] for r in near)
+        bbox = [round(x0, 4), round(y0, 4), round(x1 - x0, 4), round(y1 - y0, 4)]
+        # Hợp mà phủ đầy chữ thì đó là một khối văn bản, không phải hình —
+        # cùng luật đã dùng cho hộp chữ có nền.
+        if text_coverage(bbox, lines) > TEXT_BOX_COVERAGE:
+            continue
+        # ⭐ HỢP KHÔNG ĐƯỢC TRÙM DÒNG VĂN THẬT.
+        # Nhìn tận mắt một vùng bị đánh dấu: hợp trườn qua hình mascot, HAI DÒNG
+        # thân bài («Gọi (P) là mặt phẳng qua E…»), rồi mới tới hình tứ diện thật
+        # — đưa cho trẻ ảnh chụp đoạn chữ nó vừa đọc. Chặn bằng khối thân bài
+        # không bắt được vì hai dòng ấy chưa đủ thành «khối».
+        #
+        # Dấu hiệu phân biệt có sẵn và đã được dùng chỗ khác: NHÃN TRONG HÌNH thì
+        # ngắn, DÒNG VĂN thì dài. `LONG_LINE` là mốc ấy, không phải hằng số mới.
+        if any((l.get('w') or 0) >= LONG_LINE and (l.get('text') or '').strip()
+               and _line_crosses(l, bbox) for l in lines):
+            continue
+        out.append(dict(bbox=bbox, area=round(bbox[2] * bbox[3], 5),
+                        parts=len(near), anchor=a['num'], caption=a['text']))
+    return out
+
+
 def text_coverage(bbox, lines):
     """Phần diện tích vùng bị các dòng chữ OCR phủ."""
     x, y, w, h = bbox
@@ -173,15 +251,43 @@ def crop_jpeg(pdf_path, page_pdf, bbox, target_w=TARGET_W, quality=JPEG_Q):
     return buf.getvalue(), im.size
 
 
+def _iou(a, b):
+    ix = min(a[0] + a[2], b[0] + b[2]) - max(a[0], b[0])
+    iy = min(a[1] + a[3], b[1] + b[3]) - max(a[1], b[1])
+    if ix <= 0 or iy <= 0:
+        return 0.0
+    inter = ix * iy
+    return inter / (a[2] * a[3] + b[2] * b[3] - inter)
+
+
 def lesson_figures(pdf_path, book, page_range, lines_by_page):
-    """Hình NỘI DUNG của một bài, kèm chú thích và vị trí để chèn đúng chỗ."""
+    """Hình NỘI DUNG của một bài, kèm chú thích và vị trí để chèn đúng chỗ.
+
+    HAI ĐƯỜNG, CỘNG VÀO NHAU:
+
+    1. vùng mực đủ lớn tự nó (luật cũ) — dùng được cả khi sách không in chú thích;
+    2. vùng GOM QUANH CHÚ THÍCH (`caption_regions`) — chỗ sách tự nói là có hình.
+
+    Đường (2) không thay đường (1): đo trên 223 mỏ neo có chú thích, phủ đi từ
+    23,8% lên 65,0%, và 6 mỏ neo chỉ đường (1) bắt được. Bỏ đường cũ là mất số ấy.
+    """
     out = []
     for pp in page_range:
         lines = lines_by_page.get(pp) or []
-        for k, r in enumerate(page_ink_regions(pdf_path, pp, lines)):
+        regions = page_ink_regions(pdf_path, pp, lines)
+        taken = []
+        for k, r in enumerate(regions):
             if classify(r) != 'content':
                 continue
             out.append(dict(id=f'{book}:p{pp:03d}:img{k:02d}', book=book, page=pp,
                             bbox=r['bbox'], area=r['area'],
                             caption=caption_for(r['bbox'], lines)))
+            taken.append(r['bbox'])
+        for j, c in enumerate(caption_regions(regions, lines)):
+            # Đã có vùng gần trùng ⇒ không thêm bản thứ hai của cùng một hình.
+            if any(_iou(c['bbox'], t) > 0.5 for t in taken):
+                continue
+            out.append(dict(id=f'{book}:p{pp:03d}:cap{j:02d}', book=book, page=pp,
+                            bbox=c['bbox'], area=c['area'], caption=c['caption']))
+            taken.append(c['bbox'])
     return out
