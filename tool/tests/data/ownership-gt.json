@@ -1,0 +1,841 @@
+{
+ "note": "Nhãn GÁN BẰNG MẮT trên trang nguồn đã render kèm số khối. KHÔNG dùng bề rộng, số dòng, detector hay prose-bound để suy nhãn.",
+ "split": {
+  "dev": [
+   "vl21",
+   "sh11",
+   "dl13"
+  ],
+  "holdout": [
+   "cn9",
+   "t99"
+  ]
+ },
+ "pages": {
+  "vl21": {
+   "book": "11-sgk-vat-li-11",
+   "page": 21,
+   "family": "đồ thị nét mảnh + công thức",
+   "rationale": "nhãn trục Wđ/Wt/A/−A/x thuộc hai đồ thị bên cột phải; mảnh công thức (5.1),(5.2),Wđ=,và… nằm trong cột thân bài nên là chữ đọc"
+  },
+  "sh11": {
+   "book": "11-sgk-sinh-hoc-11",
+   "page": 11,
+   "family": "bảng + ảnh chú thích",
+   "rationale": "khối 3 là TOÀN BỘ ruột bảng gộp làm một (22 dòng) — chứng minh «≥3 dòng ⇒ prose» là nhãn sai; P/Mg/Zn/(a) là nhãn trên ảnh lá"
+  },
+  "dl13": {
+   "book": "11-sgk-dia-li-11",
+   "page": 13,
+   "family": "bảng trong khung hoạt động",
+   "rationale": "ô bảng «Hệ quả»/«Toàn cầu hoá kinh tế»/«?»; khối 8 rộng 0,67 một dòng vẫn là chữ đọc"
+  },
+  "cn9": {
+   "book": "06-sgk-cong-nghe-6",
+   "page": 9,
+   "family": "ảnh + khung phụ (họ lỗi #141)",
+   "rationale": "⭐ khối 6 «Quan sát Hình 1.1 và cho biết…» HẸP 0,19 và 3 DÒNG nhưng là CHỮ ĐỌC — đúng khung phụ đã gây lỗi #141"
+  },
+  "t99": {
+   "book": "11-sgk-toan-11-tap-mot",
+   "page": 99,
+   "family": "hình học + hình giữa hai đoạn",
+   "rationale": "nhãn đỉnh B/M′ thuộc hình; khối 9 GỘP chú thích «Hình 4.63» với đoạn văn dưới nên không gán được ở mức khối"
+  }
+ },
+ "labels": {
+  "vl21": {
+   "0": "PROSE",
+   "1": "PROSE",
+   "2": "PROSE",
+   "3": "PROSE",
+   "4": "VISUAL",
+   "5": "PROSE",
+   "6": "PROSE",
+   "7": "PROSE",
+   "8": "AMBIGUOUS",
+   "9": "VISUAL",
+   "10": "VISUAL",
+   "11": "PROSE",
+   "12": "PROSE",
+   "13": "AMBIGUOUS",
+   "14": "VISUAL",
+   "15": "PROSE",
+   "16": "PROSE",
+   "17": "PROSE",
+   "18": "PROSE",
+   "19": "VISUAL",
+   "20": "VISUAL",
+   "21": "VISUAL",
+   "22": "PROSE",
+   "23": "PROSE",
+   "24": "CAPTION",
+   "25": "PROSE",
+   "26": "FURNITURE"
+  },
+  "sh11": {
+   "0": "PROSE",
+   "1": "VISUAL",
+   "2": "VISUAL",
+   "3": "VISUAL",
+   "4": "VISUAL",
+   "5": "VISUAL",
+   "6": "VISUAL",
+   "7": "VISUAL",
+   "8": "VISUAL",
+   "9": "VISUAL",
+   "10": "VISUAL",
+   "11": "VISUAL",
+   "12": "VISUAL",
+   "13": "VISUAL",
+   "14": "VISUAL",
+   "15": "VISUAL",
+   "16": "VISUAL",
+   "17": "VISUAL",
+   "18": "VISUAL",
+   "19": "VISUAL",
+   "20": "VISUAL",
+   "21": "VISUAL",
+   "22": "VISUAL",
+   "23": "PROSE",
+   "24": "VISUAL",
+   "25": "VISUAL",
+   "26": "CAPTION",
+   "27": "PROSE",
+   "28": "FURNITURE"
+  },
+  "dl13": {
+   "0": "PROSE",
+   "1": "PROSE",
+   "2": "PROSE",
+   "3": "VISUAL",
+   "4": "VISUAL",
+   "5": "VISUAL",
+   "6": "VISUAL",
+   "7": "VISUAL",
+   "8": "PROSE"
+  },
+  "cn9": {
+   "0": "PROSE",
+   "1": "PROSE",
+   "2": "PROSE",
+   "3": "PROSE",
+   "4": "PROSE",
+   "5": "PROSE",
+   "6": "PROSE",
+   "7": "VISUAL",
+   "8": "VISUAL",
+   "9": "CAPTION"
+  },
+  "t99": {
+   "0": "PROSE",
+   "1": "PROSE",
+   "2": "VISUAL",
+   "3": "CAPTION",
+   "4": "PROSE",
+   "5": "PROSE",
+   "6": "VISUAL",
+   "7": "CAPTION",
+   "8": "PROSE",
+   "9": "AMBIGUOUS",
+   "10": "PROSE",
+   "11": "PROSE",
+   "12": "FURNITURE"
+  }
+ },
+ "blocks": [
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.508,
+   "nlines": 3,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.043,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.049,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.673,
+   "nlines": 6,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.043,
+   "nlines": 2,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.188,
+   "nlines": 2,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.784,
+   "nlines": 17,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.047,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.018,
+   "nlines": 1,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.022,
+   "nlines": 1,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.045,
+   "nlines": 1,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.09,
+   "nlines": 1,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.1,
+   "nlines": 2,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.043,
+   "nlines": 2,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.784,
+   "nlines": 8,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.069,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.014,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.031,
+   "nlines": 1,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.022,
+   "nlines": 1,
+   "inink": true,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.022,
+   "nlines": 1,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.051,
+   "nlines": 1,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.045,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "vl21",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.088,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.776,
+   "nlines": 9,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.116,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.059,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.476,
+   "nlines": 22,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.035,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.096,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.041,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.133,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.096,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.094,
+   "nlines": 4,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.116,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.104,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.073,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.094,
+   "nlines": 1,
+   "inink": true,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.073,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.067,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.055,
+   "nlines": 2,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.133,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.137,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.037,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.069,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.01,
+   "nlines": 1,
+   "inink": true,
+   "incap": true
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.022,
+   "nlines": 1,
+   "inink": true,
+   "incap": true
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.335,
+   "nlines": 5,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.02,
+   "nlines": 1,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.024,
+   "nlines": 1,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "sh11",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.382,
+   "nlines": 2,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "dl13",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.798,
+   "nlines": 19,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "dl13",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.761,
+   "nlines": 2,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "dl13",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.706,
+   "nlines": 2,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "dl13",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.072,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "dl13",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.196,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "dl13",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.01,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "dl13",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.19,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "dl13",
+   "split": "dev",
+   "lab": "VISUAL",
+   "wmax": 0.01,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "dl13",
+   "split": "dev",
+   "lab": "PROSE",
+   "wmax": 0.667,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "cn9",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.51,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "cn9",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.039,
+   "nlines": 2,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "cn9",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.38,
+   "nlines": 5,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "cn9",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.753,
+   "nlines": 2,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "cn9",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.243,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "cn9",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.102,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "cn9",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.19,
+   "nlines": 3,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "cn9",
+   "split": "holdout",
+   "lab": "VISUAL",
+   "wmax": 0.039,
+   "nlines": 1,
+   "inink": true,
+   "incap": false
+  },
+  {
+   "page": "cn9",
+   "split": "holdout",
+   "lab": "VISUAL",
+   "wmax": 0.014,
+   "nlines": 1,
+   "inink": true,
+   "incap": true
+  },
+  {
+   "page": "t99",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.561,
+   "nlines": 2,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "t99",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.557,
+   "nlines": 14,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "t99",
+   "split": "holdout",
+   "lab": "VISUAL",
+   "wmax": 0.016,
+   "nlines": 1,
+   "inink": true,
+   "incap": true
+  },
+  {
+   "page": "t99",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.418,
+   "nlines": 3,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "t99",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.027,
+   "nlines": 1,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "t99",
+   "split": "holdout",
+   "lab": "VISUAL",
+   "wmax": 0.022,
+   "nlines": 1,
+   "inink": true,
+   "incap": true
+  },
+  {
+   "page": "t99",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.745,
+   "nlines": 2,
+   "inink": false,
+   "incap": true
+  },
+  {
+   "page": "t99",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.79,
+   "nlines": 2,
+   "inink": false,
+   "incap": false
+  },
+  {
+   "page": "t99",
+   "split": "holdout",
+   "lab": "PROSE",
+   "wmax": 0.79,
+   "nlines": 2,
+   "inink": false,
+   "incap": false
+  }
+ ]
+}
