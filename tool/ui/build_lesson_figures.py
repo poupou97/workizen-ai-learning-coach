@@ -130,6 +130,8 @@ def main():
             n_les += 1
     db.commit()
     db.close()
+    # Hình đã vào `content` ⇒ pack không còn dở dang.
+    idx.pop('figuresPending', None)
     json.dump(idx, open(idx_path, 'w'), ensure_ascii=False)
     # MANIFEST — máy cài pack phải kiểm được TRƯỚC KHI kích hoạt: đúng tệp
     # không, đủ byte không, băm có khớp không. Nửa tệp mà vẫn nạp thì trẻ mở bài
