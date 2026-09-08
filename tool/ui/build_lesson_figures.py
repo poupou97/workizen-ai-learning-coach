@@ -33,6 +33,7 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(ROOT, 'tool', 'corpus'))
 from lesson_figures import lesson_figures, crop_jpeg  # noqa: E402
 from lesson_reading import lesson_reading  # noqa: E402
+from read_structure import block_kind  # noqa: E402
 
 OCR = os.path.join(ROOT, 'poc-out/graph/ocr-body')
 
@@ -59,18 +60,47 @@ def lines_for(book, pages):
 
 
 def interleave(pages, figs_by_page):
-    """Dòng nội dung: mỗi trang đọc theo khối, hình chèn vào đúng y của nó."""
+    """Dòng nội dung: KHỐI của nguồn giữ nguyên là khối, hình chèn đúng y của nó.
+
+    ⭐⭐ ĐÂY LÀ CHỖ CẤU TRÚC ĐỌC TỪNG BỊ LÀM PHẲNG.
+
+    Bản trước dính mọi khối chữ liền nhau thành một: `stream[-1]['v'] += ...`.
+    Đo được trên toàn corpus: nguồn có 215.714 khối, pack ghi ra 14.119 (6,5%),
+    và 2.944/2.944 bài đều có «số khối chữ ≤ số ảnh + 1» — nghĩa là dòng đọc
+    chưa bao giờ được ngắt theo đoạn, nó chỉ bị cắt ở chỗ chèn ảnh. Vật lí 11
+    Bài 5: nguồn 67 khối, pack 1 khối, 4.980 ký tự liền một mạch.
+
+    16.680 tiêu đề mục của sách («I.», «1.», «a)») cũng biến mất trong đống ấy.
+
+    Ở đây KHÔNG gộp nữa. Khối nào của nguồn ra khối ấy, đúng thứ tự đọc, và
+    khối mở đầu bằng đánh số mục được đánh dấu `heading` — biết tới đâu ghi
+    tới đó, KHÔNG suy ra cấp bậc h1/h2/h3 từ chỗ không có bằng chứng.
+    """
     stream = []
     for p in pages:
-        items = [(q['y'], dict(t='text', v=q['text'])) for q in p.get('paragraphs') or []]
+        # ⚠ THỨ TỰ CHỮ LÀ THỨ TỰ ĐỌC, KHÔNG PHẢI THỨ TỰ Y.
+        # `page_paragraphs` đã trả về theo dải đọc (`seq`) đúng vì lý do ở #141:
+        # xếp khối theo y thuần làm khung phụ chen vào giữa câu. Bản trước ở đây
+        # xếp theo `q['y']` — lỗi ấy bị che vì mọi khối chữ đều bị dính lại làm
+        # một. Bỏ gộp mà giữ nguyên cách xếp cũ là làm lỗi #141 sống lại.
+        paras = sorted(p.get('paragraphs') or [], key=lambda q: q['seq'])
+        items = [((float(i), 0.0), dict(t=block_kind(q['text']), v=q['text']))
+                 for i, q in enumerate(paras)]
         for f in figs_by_page.get(p['pagePdf'], []):
-            items.append((f['bbox'][1], dict(t='img', id=f['id'], w=f['w'], h=f['h'],
-                                             page=f['page'], caption=f['caption'])))
+            # Hình neo vào KHỐI CHỮ GẦN NHẤT PHÍA TRÊN nó theo y — vị trí hình
+            # là chuyện hình học, còn thứ tự chữ là chuyện dải đọc. Không có
+            # khối nào ở trên ⇒ hình mở đầu trang.
+            fy = f['bbox'][1]
+            above = [(q['y'], i) for i, q in enumerate(paras) if q['y'] <= fy]
+            pos = (max(above)[1] + 0.5) if above else -0.5
+            # Hai hình cùng neo vào một khối ⇒ tách bằng chính y của chúng.
+            # Không có khoá phụ này thì thứ tự rơi về thứ tự dò, tức là ngẫu
+            # nhiên với trẻ đang đọc.
+            items.append(((pos, fy), dict(t='img', id=f['id'], w=f['w'],
+                                          h=f['h'], page=f['page'],
+                                          caption=f['caption'])))
         for _, it in sorted(items, key=lambda z: z[0]):
-            if it['t'] == 'text' and stream and stream[-1]['t'] == 'text':
-                stream[-1]['v'] += ' ' + it['v']      # khối liền nhau, không có hình xen
-            else:
-                stream.append(it)
+            stream.append(it)
     return stream
 
 

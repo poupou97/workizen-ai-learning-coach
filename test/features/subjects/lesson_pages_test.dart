@@ -167,4 +167,59 @@ void main() {
       expect(find.textContaining('Hình 17.1'), findsNothing);
     });
   });
+
+  // ── CẤU TRÚC ĐỌC ────────────────────────────────────────────────────────
+  //
+  // Nguồn có 215.714 khối chữ và 16.680 tiêu đề mục; trước đây pack ghi ra
+  // 14.119 khối và 0 tiêu đề vì mọi khối liền nhau bị dính làm một.
+
+  test('⭐ mục `heading` của pack thành ReadHeading, không thành đoạn thường', () {
+    final lp = LessonPages.fromJson({
+      'book': 'b',
+      'lesson': 5,
+      'pagePdfStart': 1,
+      'pagePdfEnd': 1,
+      'text': 'x',
+      'content': [
+        {'t': 'heading', 'v': 'I. MỞ ĐẦU'},
+        {'t': 'text', 'v': 'Thân bài ở đây.'},
+      ],
+    });
+    expect(lp, isNotNull);
+    expect(lp!.content.length, 2);
+    expect(lp.content[0], isA<ReadHeading>());
+    expect((lp.content[0] as ReadHeading).text, 'I. MỞ ĐẦU');
+    expect(lp.content[1], isA<ReadText>());
+  });
+
+  test('hai đoạn liền nhau giữ nguyên là HAI mục, không bị gộp khi đọc', () {
+    final lp = LessonPages.fromJson({
+      'book': 'b',
+      'lesson': 5,
+      'pagePdfStart': 1,
+      'pagePdfEnd': 1,
+      'text': 'x',
+      'content': [
+        {'t': 'text', 'v': 'Đoạn một.'},
+        {'t': 'text', 'v': 'Đoạn hai.'},
+      ],
+    });
+    expect(lp!.content.whereType<ReadText>().length, 2);
+  });
+
+  test('tiêu đề rỗng bị BỎ, không dựng mục câm', () {
+    final lp = LessonPages.fromJson({
+      'book': 'b',
+      'lesson': 5,
+      'pagePdfStart': 1,
+      'pagePdfEnd': 1,
+      'text': 'x',
+      'content': [
+        {'t': 'heading', 'v': '   '},
+        {'t': 'text', 'v': 'Thân bài.'},
+      ],
+    });
+    expect(lp!.content.length, 1);
+    expect(lp.content.single, isA<ReadText>());
+  });
 }

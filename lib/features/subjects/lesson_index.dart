@@ -431,6 +431,16 @@ final class ReadText extends ReadItem {
   final String text;
 }
 
+/// ⭐ TIÊU ĐỀ MỤC CỦA CHÍNH SÁCH — «I.», «1.», «a)».
+///
+/// Corpus có 16.680 tiêu đề như thế; trước đây pack giữ 0 vì mọi khối chữ bị
+/// dính làm một. Ở đây chỉ mang MỘT sự thật: «khối này là một mục». KHÔNG có
+/// cấp bậc — parser không biết cấp, nên app không được bịa ra cấp.
+final class ReadHeading extends ReadItem {
+  const ReadHeading(this.text);
+  final String text;
+}
+
 final class ReadImage extends ReadItem {
   const ReadImage(
       {required this.id, required this.width, required this.height,
@@ -506,6 +516,11 @@ class LessonPages {
       if (it['t'] == 'text') {
         final v = it['v'];
         if (v is String && v.trim().isNotEmpty) content.add(ReadText(v.trim()));
+      } else if (it['t'] == 'heading') {
+        final v = it['v'];
+        if (v is String && v.trim().isNotEmpty) {
+          content.add(ReadHeading(v.trim()));
+        }
       } else if (it['t'] == 'img') {
         final img = ReadImage.fromJson(it);
         if (img != null) content.add(img);   // mục hỏng bị BỎ, không dựng nửa vời

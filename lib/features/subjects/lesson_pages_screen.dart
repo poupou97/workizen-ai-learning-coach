@@ -146,6 +146,19 @@ class _LessonPagesScreenState extends State<LessonPagesScreen> {
               );
             }
             return switch (items[i - 1]) {
+              // ⭐ Tiêu đề mục của SÁCH phải nhìn ra là tiêu đề: cách trên rộng
+              // hơn cách dưới, đậm hơn thân bài. Không thêm trang trí gì khác —
+              // cấu trúc của nguồn quyết định cách trình bày.
+              ReadHeading(:final text) => Padding(
+                  padding: const EdgeInsets.only(
+                      top: WalSpacing.lg, bottom: WalSpacing.sm),
+                  child: SelectableText(text,
+                      style: const TextStyle(
+                          fontSize: WalType.body,
+                          height: 1.4,
+                          fontWeight: FontWeight.w700,
+                          color: WalColors.ink)),
+                ),
               ReadText(:final text) => Padding(
                   padding: const EdgeInsets.only(bottom: WalSpacing.md),
                   child: SelectableText(text,

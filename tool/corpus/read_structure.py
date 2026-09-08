@@ -73,6 +73,66 @@ def heading_blocks(blocks):
 SHARED_PAGE_OK = 1
 
 
+def block_kind(text):
+    """`'heading'` khi khối MỞ ĐẦU bằng đánh số mục của sách; ngược lại `'text'`.
+
+    ⛔ KHÔNG suy ra CẤP. Parser chỉ biết «đây là một mục» — biết tới đâu giữ
+    tới đó. Đặt ra «h1/h2/h3» từ chỗ không có bằng chứng là bịa cấu trúc.
+    """
+    return 'heading' if HEADING.match((text or '')) else 'text'
+
+
+def align(source_blocks, pack_items):
+    """SO KHỚP NGUỒN → PACK. Đây là phép đo của `STRUCTURED_READ`.
+
+    ⛔ «pack có nhiều hơn một đoạn» KHÔNG phải là giữ được cấu trúc. Một bản
+    sửa có thể cắt bừa chuỗi phẳng ra làm mười và metric vẫn xanh. Nên phép đo
+    ở đây bám vào CHÍNH khối của nguồn:
+
+      preserved  khối nguồn xuất hiện thành MỘT mục chữ riêng trong pack
+      merged     khối nguồn bị dính vào cùng một mục với khối nguồn khác
+      dropped    khối nguồn không tìm thấy trong pack
+      order      số lần thứ tự pack đi ngược thứ tự nguồn
+
+    So khớp bằng chính chuỗi ký tự của khối, không bằng vị trí — pack chèn
+    thêm mục hình nên chỉ số không so trực tiếp được.
+    """
+    joined = [(it.get('v') or '').strip() for it in pack_items
+              if it.get('t') in ('text', 'heading')]
+    preserved = merged = dropped = 0
+    seq = []
+    # ⚠ KHỚP TIẾN DẦN, không «lần xuất hiện đầu tiên». Nguồn có khối TRÙNG NỘI
+    # DUNG thật (nhãn trục «-A» của hai hình khác nhau trong cùng bài); khớp cả
+    # hai vào cùng một chỗ sinh ra một «vi phạm thứ tự» KHÔNG CÓ THẬT — đã đo
+    # đúng một lần như thế ở Vật lí 11 Bài 5.
+    at = 0
+    for b in source_blocks:
+        bb = (b or '').strip()
+        if not bb:
+            continue
+        exact = next((i for i in range(at, len(joined)) if joined[i] == bb), None)
+        if exact is None:
+            exact = next((i for i, t in enumerate(joined) if t == bb), None)
+        if exact is not None:
+            preserved += 1
+            seq.append(exact)
+            at = exact + 1
+            continue
+        inside = next((i for i in range(at, len(joined)) if bb in joined[i]), None)
+        if inside is None:
+            inside = next((i for i, t in enumerate(joined) if bb in t), None)
+        if inside is not None:
+            merged += 1
+            seq.append(inside)
+            at = inside
+        else:
+            dropped += 1
+    order = sum(1 for i in range(len(seq) - 1) if seq[i] > seq[i + 1])
+    return dict(source=len([b for b in source_blocks if (b or '').strip()]),
+                preserved=preserved, merged=merged, dropped=dropped,
+                order_violations=order)
+
+
 def overlaps(ranges, *, deep_only=True):
     """`{(book, lesson)}` có dải trang chồng lấn SÂU với một bài khác cùng sách."""
     bad = set()
