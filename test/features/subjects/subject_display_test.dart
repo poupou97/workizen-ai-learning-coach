@@ -14,6 +14,7 @@ import 'package:learning_coach/core/store/learner_store.dart';
 import '../../support/pack_bundle.dart';
 
 void main() {
+  _subjectRoundTripTests();
   test('mã môn → tên môn; mã lạ giữ nguyên (không bịa)', () {
     expect(subjectDisplayName('khtn'), 'Khoa học tự nhiên');
     expect(subjectDisplayName('dia-li'), 'Địa lí');
@@ -145,5 +146,37 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text('SGK Toán 6 · Tập 1 · trang 22'), findsOneWidget);
     });
+  });
+}
+
+/// ⭐ KHỨ HỒI TÊN MÔN — máy thật hiện slug thô «khtn» lẫn giữa tên môn.
+///
+/// Hồ sơ đổi từ lớp 6 sang 11: thời khoá biểu cũ còn tiết «khtn» (KHTN chỉ có ở
+/// lớp 6–9), và bộ tra chỉ nhìn MÔN CỦA LỚP ĐANG HỌC nên trả lại mã.
+///
+/// Bảng tên môn phải phủ được mọi mã mà chính app sinh ra — nếu không, một môn
+/// của lớp khác sẽ hiện dưới dạng mã máy giữa những cái tên tiếng Việt.
+void _subjectRoundTripTests() {
+  const displayed = [
+    'Toán', 'Ngữ văn', 'Tiếng Việt', 'Tiếng Anh', 'Vật lí', 'Hoá học',
+    'Sinh học', 'Lịch sử', 'Địa lí', 'Tin học', 'Công nghệ', 'Âm nhạc',
+    'Mĩ thuật', 'Đạo đức',
+  ];
+
+  test('tên môn → mã → TÊN, không rơi về mã thô', () {
+    for (final name in displayed) {
+      final id = subjectIdOf(name);
+      expect(subjectDisplayName(id), isNot(id),
+          reason: '«$name» → «$id» → không tra ngược được');
+    }
+  });
+
+  test('mã KHTN của lớp 6–9 vẫn có tên khi trẻ đang học lớp 11', () {
+    // Đây đúng ca máy thật: mã tồn tại trong thời khoá biểu cũ.
+    expect(subjectDisplayName('khtn'), 'Khoa học tự nhiên');
+  });
+
+  test('mã lạ ⇒ trả lại mã, KHÔNG bịa một cái tên', () {
+    expect(subjectDisplayName('mon-khong-co-that'), 'mon-khong-co-that');
   });
 }
