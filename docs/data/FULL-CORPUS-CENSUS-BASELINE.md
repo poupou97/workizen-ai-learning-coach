@@ -20,6 +20,29 @@ python3 tool/corpus/coverage_matrix.py --attach <attach-root> --csv out.csv
 Kho OCR (531) rộng hơn mục lục canonical (238). Mẫu số của sản phẩm là **mục lục**,
 không phải số sách đã OCR — đo pipeline bằng mẫu số của chính pipeline là tự chấm điểm mình.
 
+## ⭐ Đo 2026-09-08 — tách L1-T / L1-M (lệnh Founder, A2)
+
+Một con số «readable» là gây hiểu nhầm: Founder dogfood 2.589 bài «mở được» và
+thấy chúng **chỉ có chữ**.
+
+| mức | đo được |
+|---|---|
+| **L1-T** text readable | **3.142 / 3.679 = 85,4 %** |
+| **L1-M** multimodal readable | **665 / 3.679 = 18,1 %** |
+| **PRODUCT OPENABLE** | 2.589 / 3.679 = 70,4 % |
+
+Tầng hình (đo trên 3.142 bài L1-T, `--visuals`, ~9 phút):
+
+| tầng | số |
+|---|---|
+| Bài mà **sách có hình** | **2.525** (80 % số bài L1-T) |
+| Hình **detected** | **14.381** |
+| Hình **packed** (vào sản phẩm) | **532** — mới dựng lớp 6 |
+
+Bài mà sách **vốn không có** hình cần thiết (617 bài) thì text-only đã đạt L1-M —
+thiếu thứ không tồn tại không phải là thiếu. Phần còn lại của khoảng cách là
+pack hình mới có một lớp.
+
 ## Ba mức (định nghĩa Founder)
 
 | mức | định nghĩa | đo được |

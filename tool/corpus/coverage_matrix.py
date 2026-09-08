@@ -17,10 +17,20 @@ Mỗi tầng dưới đây đọc nguồn của riêng nó:
     semantic    ← fixture do cầu TSL sinh
     kịch bản    ← tool/corpus/tutor_scripts/
 
-BA MỨC (lệnh Founder, phase FULL DATA 1–12):
-    L1 READABLE     định danh đúng + dải đúng + đủ chữ để đọc
-    L2 VISUAL READY L1 + semantic dùng được
-    L3 SAM READY    L2 + kịch bản dạy đã soạn
+CÁC MỨC (lệnh Founder, phase FULL DATA 1–12 + MULTIMODAL READ):
+    L1-T  TEXT READABLE       định danh đúng + dải đúng + đủ chữ để đọc
+    L1-M  MULTIMODAL READABLE L1-T + nội dung HÌNH cần thiết cũng tới được trẻ
+    OPENABLE                  bài có đường mở THẬT trong app (pack có nội dung đọc)
+    L2    VISUAL READY        L1-T + semantic dùng được
+    L3    SAM READY           L2 + kịch bản dạy đã soạn
+
+⚠ MỘT CON SỐ «READABLE» LÀ GÂY HIỂU NHẦM. Founder dogfood 2.589 bài «mở được»
+và thấy chúng CHỈ CÓ CHỮ — hình, sơ đồ, bảng của sách không tới được trẻ. Bài
+đọc được phần chữ mà mất hình thì với môn có hình là mất phần lớn nội dung, nên
+L1-T và L1-M phải đứng riêng, không gộp.
+
+Bài mà SÁCH VỐN KHÔNG CÓ hình cần thiết thì text-only vẫn đạt L1-M — thiếu thứ
+không tồn tại không phải là thiếu.
 
 READ-ONLY LÀ TRẠNG THÁI HỢP LỆ. Bài không lên được L2/L3 vẫn là bài trẻ mở được;
 nó KHÔNG phải lỗi và không bị trừ khỏi L1.
@@ -140,11 +150,63 @@ def tutor_index(script_dir=TUTOR_SCRIPTS):
     return have
 
 
-def build(attach_root, fixture_dirs, index_dir=INDEX_DIR):
+def openable_index(index_dir=INDEX_DIR):
+    """Bài có đường mở THẬT trong app: pack mang nội dung đọc của chính bài ấy."""
+    out = {}
+    for g in range(1, 13):
+        p = os.path.join(index_dir, f'lesson-index-g{g}.json')
+        if not os.path.exists(p):
+            continue
+        d = json.load(open(p, encoding='utf-8'))
+        for r in d.get('lessonReadings') or []:
+            imgs = [i for i in (r.get('content') or []) if i.get('t') == 'img']
+            out[(r.get('book'), r.get('lesson'))] = dict(packed=len(imgs))
+    return out
+
+
+def source_visuals(book, page_pdf, page_end, pdf_path):
+    """Số vùng HÌNH NỘI DUNG mà chính trang sách của bài có.
+
+    Đây là tầng «detected» — đo trên nguồn, KHÔNG suy từ việc pack có gì. Suy
+    ngược lại là tự chấm điểm mình: pack rỗng sẽ thành «sách vốn không có hình».
+    """
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from lesson_figures import page_ink_regions, classify
+    n = 0
+    for pp in range(page_pdf, page_end + 1):
+        try:
+            with open(f'{OCR}/{book}/p{pp:03d}.json', encoding='utf-8') as fh:
+                lines = json.load(fh)['lines']
+        except (OSError, ValueError, KeyError):
+            continue
+        try:
+            n += sum(1 for r in page_ink_regions(pdf_path, pp, lines)
+                     if classify(r) == 'content')
+        except Exception:
+            return None          # PDF không đọc được ⇒ KHÔNG kết luận «không có hình»
+    return n
+
+
+def pdf_map():
+    import glob
+    m = {}
+    for p in glob.glob(os.path.join(ROOT, 'poc-out/pdf/*/*.pdf')):
+        m[os.path.basename(p)[:-4]] = p
+    for p in glob.glob(os.path.join(ROOT, 'poc-out/pdf/*.pdf')):
+        m.setdefault(os.path.basename(p)[:-4], p)
+    return m
+
+
+def build(attach_root, fixture_dirs, index_dir=INDEX_DIR, with_visuals=False,
+          visual_counter=None):
+    """`visual_counter(book, start, end, pdf) -> int | None` tiêm được cho test:
+    đếm hình thật phải dựng ảnh từng trang, không chạy trong unit test."""
     rows = canonical_lessons(index_dir)
     att = attach_index(attach_root)
     sem = semantic_index(fixture_dirs)
     tut = tutor_index()
+    opened = openable_index(index_dir)
+    pdfs = pdf_map() if with_visuals else {}
 
     seen = collections.Counter((r['book'], r['no'], r['page_start']) for r in rows)
     dup_key = {k for k, n in seen.items() if n > 1}
@@ -181,25 +243,46 @@ def build(attach_root, fixture_dirs, index_dir=INDEX_DIR):
         key = (r['book'], r['no'])
         l2 = l1 and key in sem
         l3 = l2 and key in tut
+        op = opened.get(key)
+        packed = op['packed'] if op else 0
+
+        # L1-M: hình CẦN THIẾT của sách có tới được trẻ không.
+        detected = None
+        if with_visuals and l1 and a.get('page_pdf') and (visual_counter or r['book'] in pdfs):
+            detected = (visual_counter or source_visuals)(
+                r['book'], a['page_pdf'], a['page_end'], pdfs.get(r['book']))
+        # `None` = chưa đo được ⇒ KHÔNG kết luận đạt. Sách vốn không có hình
+        # (detected == 0) thì text-only đã là đủ nội dung.
+        l1m = bool(l1 and op is not None and detected is not None
+                   and packed >= detected)
         out.append(dict(**r, title_resolved=title, title_from=title_from,
                         page_pdf=a.get('page_pdf'), page_end=a.get('page_end'),
                         attach_source=a.get('source'), chars=chars,
-                        blockers=blockers, L1=l1, L1_confirmed=l1_confirmed, L2=l2, L3=l3))
+                        blockers=blockers, L1=l1, L1_confirmed=l1_confirmed,
+                        openable=op is not None, visuals_detected=detected,
+                        visuals_packed=packed, L1M=l1m, L2=l2, L3=l3))
     return out
 
 
 def summarise(rows):
     n = len(rows)
+    measured = [r for r in rows if r['visuals_detected'] is not None]
     s = dict(canonical=n,
-             L1=sum(r['L1'] for r in rows),
-             L1_confirmed=sum(r['L1_confirmed'] for r in rows),
+             L1T=sum(r['L1'] for r in rows),
+             L1T_confirmed=sum(r['L1_confirmed'] for r in rows),
+             L1M=sum(r['L1M'] for r in rows),
+             openable=sum(r['openable'] for r in rows),
              L2=sum(r['L2'] for r in rows),
-             L3=sum(r['L3'] for r in rows))
+             L3=sum(r['L3'] for r in rows),
+             visual_measured=len(measured),
+             lessons_with_source_visuals=sum(1 for r in measured if r['visuals_detected']),
+             visuals_detected=sum(r['visuals_detected'] for r in measured),
+             visuals_packed=sum(r['visuals_packed'] for r in rows))
     by_grade = collections.defaultdict(lambda: collections.Counter())
     for r in rows:
         c = by_grade[r['grade']]
         c['n'] += 1
-        for k in ('L1', 'L1_confirmed', 'L2', 'L3'):
+        for k in ('L1', 'L1_confirmed', 'L1M', 'openable', 'L2', 'L3'):
             c[k] += bool(r[k])
     blockers = collections.Counter()
     for r in rows:
@@ -217,22 +300,33 @@ def main():
     ap.add_argument('--fixtures', nargs='*', default=[os.path.join(ROOT, 'assets/fixtures/real'),
                                                      os.path.join(ROOT, 'assets/fixtures/synthetic')])
     ap.add_argument('--index-dir', default=INDEX_DIR)
+    ap.add_argument('--visuals', action='store_true',
+                    help='đo tầng hình (chậm: dựng ảnh từng trang ~0,03s)')
     ap.add_argument('--json', default=None)
     ap.add_argument('--csv', default=None)
     a = ap.parse_args()
 
-    rows = build(a.attach, a.fixtures, a.index_dir)
+    rows = build(a.attach, a.fixtures, a.index_dir, with_visuals=a.visuals)
     s, by_grade, blockers = summarise(rows)
 
     print(f"DATA — mẫu số canonical: {s['canonical']:,} bài\n")
-    for k, label in (('L1', 'Level 1 READABLE'), ('L1_confirmed', '  ├ trang sách xác nhận'),
-                     ('L2', 'Level 2 VISUAL READY'), ('L3', 'Level 3 SAM READY')):
-        print(f"  {label:<26} {s[k]:>6,} / {s['canonical']:,} = {s[k]/s['canonical']:6.1%}")
-    print(f"\n{'lớp':>4} {'bài':>5} {'L1':>6} {'%':>7} {'xácnhận':>8} {'L2':>5} {'L3':>4}")
+    for k, label in (('L1T', 'L1-T  TEXT READABLE'),
+                     ('L1T_confirmed', '  ├ trang sách xác nhận'),
+                     ('L1M', 'L1-M  MULTIMODAL READABLE'),
+                     ('openable', 'PRODUCT OPENABLE'),
+                     ('L2', 'L2    VISUAL READY'),
+                     ('L3', 'L3    SAM READY')):
+        print(f"  {label:<28} {s[k]:>6,} / {s['canonical']:,} = {s[k]/s['canonical']:6.1%}")
+    if s['visual_measured']:
+        print(f"\nMULTIMODAL (đo được trên {s['visual_measured']:,} bài L1-T):")
+        print(f"  bài SÁCH CÓ hình         {s['lessons_with_source_visuals']:>6,}")
+        print(f"  hình detected            {s['visuals_detected']:>6,}")
+        print(f"  hình packed (vào sản phẩm){s['visuals_packed']:>5,}")
+    print(f"\n{'lớp':>4} {'bài':>5} {'L1-T':>6} {'%':>7} {'L1-M':>6} {'mở':>6} {'L2':>4} {'L3':>4}")
     for g in sorted(by_grade):
         c = by_grade[g]
         print(f"{g:>4} {c['n']:>5} {c['L1']:>6} {c['L1']/c['n']:>6.1%} "
-              f"{c['L1_confirmed']:>8} {c['L2']:>5} {c['L3']:>4}")
+              f"{c['L1M']:>6} {c['openable']:>6} {c['L2']:>4} {c['L3']:>4}")
     print('\nTOP BLOCKERS (bài bị chặn khỏi Level 1):')
     for i, (b, cnt) in enumerate(blockers.most_common(), 1):
         print(f'  {i}. {b:<28} → {cnt:,} bài')
@@ -244,7 +338,8 @@ def main():
         print(f'\n→ {a.json}')
     if a.csv:
         cols = ['grade', 'subject', 'book', 'no', 'title_resolved', 'title_from', 'page_start',
-                'page_pdf', 'page_end', 'attach_source', 'chars', 'L1', 'L1_confirmed', 'L2', 'L3']
+                'page_pdf', 'page_end', 'attach_source', 'chars', 'L1', 'L1_confirmed',
+                'L1M', 'openable', 'visuals_detected', 'visuals_packed', 'L2', 'L3']
         with open(a.csv, 'w', encoding='utf-8', newline='') as fh:
             w = csv.writer(fh)
             w.writerow(cols + ['blockers'])
