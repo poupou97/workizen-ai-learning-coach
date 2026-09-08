@@ -26,6 +26,8 @@ import json, os, re, sys, collections
 from experiment_steps import step_body, is_real_step, continues_step
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'corpus'))
 from lesson_reading import lesson_reading  # noqa: E402
+from lesson_chapters import chapter_openers, chapter_at, resolve_group  # noqa: E402
+from tc2_attach import printed_offset  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lesson_attach import AttachRegistry  # noqa: E402
@@ -519,16 +521,42 @@ for _subj, _books in subjects.items():
             _s = _L['page_pdf']
             _e = (_Ls[_i + 1]['page_pdf'] - 1) if _i + 1 < len(_Ls) else _npages
             _range[_L['number']] = (_s, max(_s, min(_e, _npages)), _L.get('title'))
-        # Bài trùng số trong cùng cuốn: KHÔNG phát. `(book, lessonNo)` không phân
-        # biệt được chúng (đo được: 310 bài thật sự khác nhau dùng chung số), nên
-        # phát ra sẽ gắn nội dung của bài này vào tên của bài kia.
-        _dupes = {n for n, c in collections.Counter(
-            l['no'] for l in _b['lessons']).items() if c > 1}
+        # ⭐ BÀI TRÙNG SỐ: tách bằng CHƯƠNG đọc từ chính trang sách.
+        # `(book, lessonNo)` không phân biệt được chúng — đo được 593 bản ghi va
+        # chạm trên 154 khoá, 105 khoá có tiêu đề GIỐNG HỆT nhau. Trước đây loại
+        # sạch cả nhóm; nay chương tách được 77/154 khoá (240 bản ghi) và giúp
+        # một phần 30 khoá nữa.
+        # KHÔNG tách được ⇒ VẪN GIỮ LẠI. Sai bài nguy hiểm hơn thiếu bài.
+        _groups = collections.defaultdict(list)
+        for _L in _b['lessons']:
+            _groups[_L['no']].append(_L)
+        _openers = chapter_openers(_bid) if any(len(v) > 1 for v in _groups.values()) else []
+        try:
+            _off = printed_offset(_bid) if _openers else None
+        except Exception:
+            _off = None
+        _chapter_of = {}
+        _dupes = set()
+        for _no, _grp in _groups.items():
+            if len(_grp) == 1:
+                if _openers and _off is not None and _grp[0].get('pageStart') is not None:
+                    _chapter_of[id(_grp[0])] = chapter_at(_openers, _grp[0]['pageStart'] + _off)
+                continue
+            _res, _wh, _why = resolve_group(_grp, _openers, _off)
+            for _ch, _r in _res:
+                _chapter_of[id(_r)] = _ch
+            if _wh:
+                _dupes.add(_no)
+                _lr_reasons[f'AMBIGUOUS_{_why or "IDENTITY"}'] += len(_wh)
+            _resolved_ids = {id(_r) for _, _r in _res}
+            for _r in _grp:
+                if id(_r) not in _resolved_ids:
+                    _r['_withheld'] = True
         for _L in _b['lessons']:
             _no = _L['no']
-            if _no in _dupes:
-                _lr_reasons['AMBIGUOUS_IDENTITY'] += 1
-                continue
+            if _L.get('_withheld'):
+                continue          # đã đếm ở resolve_group
+            _chapter = _chapter_of.get(id(_L))
             if _no not in _range:
                 _lr_reasons['SOURCE_RANGE'] += 1
                 continue
@@ -543,7 +571,7 @@ for _subj, _books in subjects.items():
                 _lr_reasons[_why] += 1
                 continue
             lesson_readings.append(dict(
-                book=_bid, lesson=_no, title=_title,
+                book=_bid, lesson=_no, title=_title, chapter=_chapter,
                 pageStart=_L.get('pageStart'), pagePdfStart=_s, pagePdfEnd=_e,
                 text=' '.join(p['text'] for p in _d['pages']),
                 extraction=_d['extraction']))
@@ -552,6 +580,9 @@ for _subj, _books in subjects.items():
                 _L['title'] = _title
 
 for v in subjects.values():
+    for _bk in v:
+        for _L in _bk['lessons']:
+            _L.pop('_withheld', None)
     v.sort(key=lambda b: (b['volume'] or '9', b['sourceDocumentId']))
 out = dict(grade=GRADE, version='lesson-index-v2',
            subjects={k: v for k, v in sorted(subjects.items())},
