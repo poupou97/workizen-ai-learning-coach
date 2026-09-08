@@ -20,6 +20,7 @@ TOẠ ĐỘ Y THẬT của nó giữa các khối chữ cùng trang.
 dạng bài toán chứ không phải mẹo tiết kiệm.
 """
 import argparse
+import hashlib
 import json
 import os
 import sqlite3
@@ -77,6 +78,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('grade', type=int)
     ap.add_argument('--limit', type=int, default=0)
+    ap.add_argument('--out', default=None,
+                    help='thư mục pack (mặc định poc-out/packs/figures — KHÔNG phải assets/)')
     a = ap.parse_args()
 
     idx_path = os.path.join(ROOT, f'assets/pack/lesson-index-g{a.grade}.json')
@@ -86,7 +89,9 @@ def main():
         readings = readings[:a.limit]
     pdfs = pdf_map()
 
-    db_path = os.path.join(ROOT, f'assets/pack/figures-g{a.grade}.db')
+    out_dir = a.out or os.path.join(ROOT, 'poc-out/packs/figures')
+    os.makedirs(out_dir, exist_ok=True)
+    db_path = os.path.join(out_dir, f'figures-g{a.grade}.db')
     if os.path.exists(db_path):
         os.remove(db_path)
     db = sqlite3.connect(db_path)
@@ -126,9 +131,21 @@ def main():
     db.commit()
     db.close()
     json.dump(idx, open(idx_path, 'w'), ensure_ascii=False)
-    size = os.path.getsize(db_path) / 1048576
+    # MANIFEST — máy cài pack phải kiểm được TRƯỚC KHI kích hoạt: đúng tệp
+    # không, đủ byte không, băm có khớp không. Nửa tệp mà vẫn nạp thì trẻ mở bài
+    # ra thấy ảnh vỡ, và không ai biết vì sao.
+    raw = open(db_path, 'rb').read()
+    digest = hashlib.sha256(raw).hexdigest()
+    manifest = dict(grade=a.grade, file=os.path.basename(db_path),
+                    version=f'g{a.grade}-{digest[:12]}', size=len(raw),
+                    sha256=digest, figures=n_fig, lessons=n_les,
+                    captions=n_cap, builder='lesson-figures-v1')
+    mpath = os.path.join(out_dir, f'figures-g{a.grade}.manifest.json')
+    with open(mpath, 'w', encoding='utf-8') as fh:
+        json.dump(manifest, fh, ensure_ascii=False, indent=1)
     print(f'lớp {a.grade}: {n_fig} hình ({n_cap} có chú thích của sách) trong '
-          f'{n_les}/{len(readings)} bài · figures-g{a.grade}.db {size:.0f} MB')
+          f'{n_les}/{len(readings)} bài · {manifest["file"]} '
+          f'{len(raw)/1048576:.0f} MB · {manifest["version"]}')
 
 
 if __name__ == '__main__':
