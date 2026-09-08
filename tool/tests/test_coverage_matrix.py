@@ -140,7 +140,7 @@ class MultimodalMetricTests(unittest.TestCase):
         idx = json.load(open(p, encoding='utf-8'))
         if reading:
             idx['lessonReadings'] = [dict(
-                book=BOOK, lesson=1, pagePdfStart=6, pagePdfEnd=6, text='x',
+                book=BOOK, lesson=1, pageStart=5, pagePdfStart=6, pagePdfEnd=6, text='x',
                 content=[{'t': 'img', 'id': 'i$k'.replace('$k', str(k))}
                          for k in range(packed)])]
         with open(p, 'w', encoding='utf-8') as fh:
@@ -181,3 +181,20 @@ class MultimodalMetricTests(unittest.TestCase):
         self.assertTrue(rows[0]['L1'])
         self.assertFalse(rows[0]['openable'])
         self.assertFalse(rows[0]['L1M'])
+
+    def test_one_pack_entry_does_not_mark_a_DIFFERENT_lesson_openable(self):
+        # Hai bài trùng số ở hai chương; pack cố ý chỉ mang một. Tra bằng
+        # (sách, số bài) sẽ đánh dấu cả hai là mở được — đếm nống.
+        _index(self.d, lessons=[{'no': 1, 'title': 'A', 'pageStart': 5},
+                                {'no': 1, 'title': 'B', 'pageStart': 40}])
+        _attach(self.d, [{'number': 1, 'title': 'A', 'page_pdf': 6,
+                          'source': 'both', 'confidence': 0.95}])
+        p = os.path.join(self.d, 'lesson-index-g6.json')
+        idx = json.load(open(p, encoding='utf-8'))
+        idx['lessonReadings'] = [dict(book=BOOK, lesson=1, pageStart=5,
+                                      pagePdfStart=6, pagePdfEnd=6, text='x')]
+        with open(p, 'w', encoding='utf-8') as fh:
+            json.dump(idx, fh, ensure_ascii=False)
+        rows = cm.build(self.d, [], index_dir=self.d)
+        self.assertEqual([r['openable'] for r in rows], [True, False],
+                         'chỉ bài mà pack THỰC SỰ mang mới là mở được')
