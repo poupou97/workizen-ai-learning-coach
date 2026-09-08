@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 from lesson_reading import lesson_reading  # noqa: E402
 from lesson_chapters import chapter_openers, chapter_at, resolve_group  # noqa: E402
 from tc2_attach import printed_offset  # noqa: E402
+from unit_locator import locate_start, locate_end, norm as _unorm  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lesson_attach import AttachRegistry  # noqa: E402
@@ -581,6 +582,9 @@ for _subj, _books in subjects.items():
             _off = None
         _chapter_of = {}
         _dupes = set()
+        _book_titles = [_unorm(l.get('title') or '') for l in _b['lessons']
+                        if (l.get('title') or '').strip()]
+        _confirmed_starts = sorted(v[0] for v in _range.values())
         for _no, _grp in _groups.items():
             if len(_grp) == 1:
                 if _openers and _off is not None and _grp[0].get('pageStart') is not None:
@@ -602,8 +606,21 @@ for _subj, _books in subjects.items():
                 continue          # đã đếm ở resolve_group
             _chapter = _chapter_of.get(id(_L))
             if _no not in _range:
-                _lr_reasons['SOURCE_RANGE'] += 1
-                continue
+                # ⭐ MỤC LỤC KHÔNG GHI TRANG ≠ SÁCH KHÔNG CÓ BÀI ẤY.
+                # Tìm bằng HAI bằng chứng: tên mở đầu trang, và số bài trên
+                # chính trang ấy (chỉ dùng để tách khi tên cho nhiều trang).
+                # 0 hoặc >1 ứng viên ⇒ giữ lại. Đo được: 26/59 ca tìm được.
+                _t0 = (_L.get('title') or '').strip()
+                _found = locate_start(_bid, _t0, _no, _book_titles) if _t0 else None
+                if _found is None:
+                    _lr_reasons['SOURCE_RANGE'] += 1
+                    continue
+                # END lấy từ ĐƠN VỊ KẾ TIẾP ĐÃ XÁC NHẬN, không suy theo số trang.
+                _e2 = locate_end(_found, _confirmed_starts, _npages)
+                if _e2 is None:
+                    _lr_reasons['SOURCE_RANGE'] += 1
+                    continue
+                _range[_no] = (_found, _e2, None)
             _s, _e, _atitle = _range[_no]
             _title = (_L.get('title') or _atitle or '').strip()
             if not _title:
