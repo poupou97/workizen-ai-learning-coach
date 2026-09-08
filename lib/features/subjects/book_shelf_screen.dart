@@ -121,7 +121,7 @@ class BookShelfScreen extends StatefulWidget {
         if ((subject == null || b.subject == subject) &&
             (!samOnly || (hasWorkspace?.call(b) ?? false)) &&
             (q.isEmpty ||
-                fold(b.title).contains(q) ||
+                fold(b.shelfLabel).contains(q) ||
                 fold(b.subject).contains(q)))
           b,
     ];
@@ -398,7 +398,7 @@ class _BookShelfScreenState extends State<BookShelfScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            b.volumeLabel == null ? b.title : '${b.title} · ${b.volumeLabel}',
+            b.shelfLabel,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
