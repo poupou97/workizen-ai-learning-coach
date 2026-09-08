@@ -85,11 +85,52 @@ def pack_shape(grade, pack_dir=PACK_DIR):
                 lessons={(r.get('book'), r.get('lesson')) for r in rs})
 
 
+def unrouted_books(grade, pack_dir=PACK_DIR):
+    """Sách trên giá mà bấm vào KHÔNG ra mục lục nào.
+
+    Giá sách mở màn theo `books[].subject`; mục lục nằm trong `subjects[môn]`.
+    Hai chỗ lệch nhau thì cuốn ấy hiện đủ bìa, đủ «N bài», bấm vào ra màn rỗng.
+    Đã xảy ra thật: Tin học 11 và 12, 60 bài, không lỗi nào báo.
+    """
+    p = index_path(grade, pack_dir)
+    if not os.path.exists(p):
+        return []
+    with open(p, encoding='utf-8') as fh:
+        d = json.load(fh)
+    holders = {}
+    for subj, blist in (d.get('subjects') or {}).items():
+        for bl in blist:
+            holders.setdefault(bl.get('sourceDocumentId'), set()).add(subj)
+    return [b for b in (d.get('books') or [])
+            if b.get('subject') not in holders.get(b.get('sourceDocumentId'), set())]
+
+
+def ambiguous_books(grade, pack_dir=PACK_DIR):
+    """Nhóm ≥2 cuốn KHÁC NHAU mà tên hiện trên giá giống hệt nhau."""
+    p = index_path(grade, pack_dir)
+    if not os.path.exists(p):
+        return []
+    with open(p, encoding='utf-8') as fh:
+        d = json.load(fh)
+    seen = {}
+    for b in (d.get('books') or []):
+        key = (b.get('title'), b.get('volumeLabel'), b.get('variantLabel'))
+        seen.setdefault(key, []).append(b.get('sourceDocumentId'))
+    return [(k, v) for k, v in sorted(seen.items(), key=lambda kv: str(kv[0]))
+            if len(v) > 1]
+
+
 def verify(grade, pack_dir=PACK_DIR, fig_dir=FIG_DIR):
     """`[]` = đạt. Mỗi phần tử là một vi phạm bất biến, nói rõ vì sao."""
     problems = []
     shape = pack_shape(grade, pack_dir)
     store = figure_ids(grade, fig_dir)
+
+    for b in unrouted_books(grade, pack_dir):
+        problems.append(
+            f'lớp {grade}: «{b.get("title")}» ({b.get("sourceDocumentId")}) lên '
+            f'giá dưới môn «{b.get("subject")}» nhưng mục lục KHÔNG nằm ở môn '
+            f'ấy — bấm vào ra màn rỗng')
 
     if shape.get('pending'):
         problems.append(
@@ -159,6 +200,16 @@ def main():
             if before['with_images'] and not after['with_images']:
                 bad.append(f'lớp {g}: TRƯỚC có {before["with_images"]} bài mang hình, '
                            f'SAU còn 0 — bước dựng làm mất năng lực')
+            # ⭐ MẤT BÀI CŨNG LÀ MẤT NĂNG LỰC, KHÔNG CHỈ MẤT HÌNH.
+            # Đã xảy ra thật (2026-09-08): dựng lại lớp 3 và 6 mà QUÊN
+            # `--attach` ⇒ mọi sách rơi vào `NO_ATTACH`, lớp 3 tụt 232 → 44 bài.
+            # Ba bất biến cũ đều ĐẠT: không hình treo, không cờ pending, kho
+            # hình vẫn có bài dùng. Pack «hợp lệ» mà mất 80% số bài của trẻ.
+            if after['openable'] < before['openable']:
+                bad.append(
+                    f'lớp {g}: TRƯỚC {before["openable"]} bài mở được, SAU '
+                    f'{after["openable"]} — bước dựng làm TỤT. Kiểm `--attach` '
+                    f'trước khi tin con số mới.')
         bad += verify(g)
 
     for b in bad:
@@ -169,8 +220,12 @@ def main():
         return 1
     for g in grades:
         s = pack_shape(g)
+        # Tên trùng KHÔNG phải lỗi dựng: 9 cuốn cố ý không có nhãn phân biệt vì
+        # bìa không xác minh chéo được. Nhưng phải ĐẾM ĐƯỢC, không im lặng.
+        amb = ambiguous_books(g)
+        note = f' · ⚠ {sum(len(v) for _, v in amb)} cuốn trùng tên' if amb else ''
         print(f'  lớp {g:>2}: {s["openable"]:>4} bài mở được · '
-              f'{s["with_images"]:>4} bài có hình · {s["images"]:>5} hình')
+              f'{s["with_images"]:>4} bài có hình · {s["images"]:>5} hình{note}')
     print('BẤT BIẾN PACK: ĐẠT')
     return 0
 
