@@ -35,7 +35,16 @@ CAPTION_NUM_ANY = re.compile(
 # «Thêu(4)», «Nhuộm3)», «In lưới?)». Đây là CẤU TRÚC IN của sách (nối ảnh với
 # danh sách nguồn cuối trang), không phải chữ tình cờ nằm dưới ảnh.
 # Census: 13 ca ở Mĩ thuật 10 (hai cuốn khác nhau).
-CAPTION_FOOTNOTE = re.compile(r'^.{2,60}[\(\?\"“”]?\s*\d\s*\)\s*$')
+#
+# ⚠ PHẢI MỞ ĐẦU BẰNG CHỮ CÁI — CHÚ THÍCH LÀ MỘT CÁI TÊN, KHÔNG PHẢI MỘT HÌNH DẠNG.
+# Bản đầu chỉ bắt hình dạng «…số)» nên nhận cả Ô ĐẦU CỘT của bảng số liệu:
+# «[160; 165)». Đã tạo ra một TRUSTED SAI thật ở Toán 11 trang 67 — vùng được
+# tin là con mascot trang trí trong hộp ghi chú, còn «bằng chứng» là một ô
+# khoảng giá trị của bảng bên dưới. Sách KHÔNG hề nói bức ấy tên là gì.
+# Riêng luật này loại 13 dòng không phải chú thích trên 63 trang đã đo (khoảng
+# giá trị, một trích dẫn nguồn trong ngoặc, một mẩu mã «,maxsplit=2)») mà vẫn
+# giữ đủ 15 chú thích thật.
+CAPTION_FOOTNOTE = re.compile(r'^(?![\d\W])\S.{1,59}[\(\?\"“”]?\s*\d\s*\)\s*$')
 BAND_UP = 0.35        # soi tối đa ngần này chiều cao trang phía trên chú thích
 BAND_PAD = 0.02
 

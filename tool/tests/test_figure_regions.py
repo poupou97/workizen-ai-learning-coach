@@ -93,6 +93,16 @@ class AnchorsMoRong(unittest.TestCase):
         got = ff.caption_anchors(ls, extended=True, block_lines={id(ls[0]): 6})
         self.assertEqual([a['num'] for a in got], ['16.2'])
 
+    def test_O_BANG_SO_LIEU_khong_phai_chu_thich_co_dau_nguon(self):
+        """⭐ TRUSTED SAI thật, cầu nối bóng tìm ra (Toán 11 trang 67): ô đầu cột
+        «[160; 165)» của bảng số liệu có ĐÚNG HÌNH DẠNG «…số)» nên được nhận làm
+        chú thích, và bảo lãnh cho một con mascot trang trí. Sách không hề nói
+        bức ấy tên là gì. Chú thích là một CÁI TÊN — phải mở đầu bằng chữ cái."""
+        for t in ('[160; 165)', '[0,5; 10,5)', '110)', ',maxsplit=2)'):
+            ls = [L(0.1, 0.2, 0.5, t)]
+            self.assertEqual(ff.caption_anchors(ls, extended=True,
+                                                block_lines={id(ls[0]): 1}), [], t)
+
     def test_dau_nguon_trong_doan_van_cung_KHONG_tinh(self):
         ls = [L(0.1, 0.7, 0.5, 'theo số liệu đã nêu ở trên (2)')]
         self.assertEqual(ff.caption_anchors(ls, extended=True,
