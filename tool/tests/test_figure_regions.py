@@ -19,7 +19,7 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', 'corpus'))
 import figure_funnel as ff  # noqa: E402
-from lesson_figures import caption_regions, _line_crosses, _iou  # noqa: E402
+from lesson_figures import caption_regions, _line_crosses, _iou, _swallows  # noqa: E402
 
 
 def L(x, w, y, text, h=0.02):
@@ -104,6 +104,43 @@ class Regions(unittest.TestCase):
 
     def test_khong_chu_thich_thi_khong_gom_gi(self):
         self.assertEqual(caption_regions([R(0.1, 0.4, 0.2, 0.2)], [L(0.1, 0.3, 0.6, 'chữ thường')]), [])
+
+
+class WithholdD(unittest.TestCase):
+    """⭐ PHƯƠNG ÁN D — không chứng minh được quyền sở hữu thì GIỮ LẠI.
+
+    Bộ kiểm gán tay (#160): với hình học dòng OCR + thành phần mực, KHÔNG luật
+    nào vừa nhận đủ chữ-của-hình vừa không nuốt văn xuôi. Tín hiệu sạch duy
+    nhất phủ 11%. Nên hợp KHÔNG được nuốt một khối chữ chưa chứng minh được.
+
+    «Thiếu hình» sửa được vòng sau; «hình nuốt mất câu» thì trẻ đọc phải ngay.
+    """
+
+    def test_swallows_do_theo_dien_tich_khoi_chu(self):
+        self.assertTrue(_swallows([0.1, 0.1, 0.5, 0.5], (0.2, 0.2, 0.3, 0.3)))
+        self.assertFalse(_swallows([0.1, 0.1, 0.5, 0.5], (0.9, 0.9, 0.99, 0.99)))
+
+    def test_hop_NUOT_khoi_chu_chua_chung_minh_thi_BO(self):
+        # ⚠ Khối chữ ở CỘT KHÁC nên KHÔNG chặn được dải (chặn dải chỉ xét khối
+        # cùng cột với chú thích) — nhưng hợp trải ngang vẫn trùm lên nó.
+        # Đây đúng là 31/120 ca đo được mà chặn-dải bỏ lọt.
+        lines = [L(0.10, 0.22, 0.60, 'Hình 1.1. Sơ đồ mạch điện'),
+                 L(0.33, 0.07, 0.42, 'một dòng'), L(0.33, 0.07, 0.45, 'dòng hai')]
+        regs = [R(0.12, 0.40, 0.08, 0.10), R(0.41, 0.40, 0.05, 0.10)]
+        self.assertEqual(caption_regions(regs, lines), [])
+
+    def test_ca_do_duoc_31_tren_120_la_LOAI_NAY(self):
+        """Ghi lại: chặn dải bảo vệ phía TRÊN, cổng nuốt bảo vệ phía TRONG."""
+        lines = [L(0.10, 0.22, 0.60, 'Hình 1.1. Sơ đồ mạch điện'),
+                 L(0.33, 0.07, 0.42, 'một dòng'), L(0.33, 0.07, 0.45, 'dòng hai')]
+        regs = [R(0.12, 0.40, 0.08, 0.10)]        # chỉ một phía ⇒ không trùm
+        self.assertEqual(len(caption_regions(regs, lines)), 1)
+
+    def test_khong_co_khoi_chu_nao_bi_nuot_thi_GIU_vung(self):
+        lines = [L(0.10, 0.30, 0.60, 'Hình 1.1. Sơ đồ mạch điện'),
+                 L(0.70, 0.20, 0.36, 'chữ ở cột khác')]
+        regs = [R(0.12, 0.30, 0.10, 0.08), R(0.13, 0.45, 0.12, 0.10)]
+        self.assertEqual(len(caption_regions(regs, lines)), 1)
 
 
 class Dedup(unittest.TestCase):

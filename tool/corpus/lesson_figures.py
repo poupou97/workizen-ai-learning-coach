@@ -85,6 +85,16 @@ def page_ink_regions(pdf_path, page_pdf, lines, dpi=60):
     return out
 
 
+def _swallows(bbox, box, frac=0.5):
+    """Hộp `bbox` nuốt ít nhất `frac` diện tích khối chữ `box` = (x0,y0,x1,y1)."""
+    x, y, w, h = bbox
+    ix = min(x + w, box[2]) - max(x, box[0])
+    iy = min(y + h, box[3]) - max(y, box[1])
+    if ix <= 0 or iy <= 0:
+        return False
+    return ix * iy >= frac * max((box[2] - box[0]) * (box[3] - box[1]), 1e-9)
+
+
 def _line_crosses(l, bbox):
     """Dòng CẮT QUA vùng: tâm dọc của dòng nằm trong hộp và có chồng ngang.
 
@@ -127,10 +137,11 @@ def caption_regions(regions, lines):
     Chỉ gom khi CÓ chú thích — nơi nguồn đã khẳng định có hình. Không có chú
     thích thì giữ nguyên luật cũ, để không tự ý dựng hình từ mực vụn.
     """
-    from figure_funnel import caption_anchors, neighborhood, in_band, prose_boxes
+    from figure_funnel import caption_anchors, neighborhood, in_band, unproven_text_boxes
     from lesson_reading import LONG_LINE
     anchors = caption_anchors(lines)
-    prose = prose_boxes(lines)
+    unproven = unproven_text_boxes(lines, regions)
+    prose = unproven
     out = []
     for a in anchors:
         band = neighborhood(a, anchors, prose=prose)
@@ -157,6 +168,17 @@ def caption_regions(regions, lines):
         # ngắn, DÒNG VĂN thì dài. `LONG_LINE` là mốc ấy, không phải hằng số mới.
         if any((l.get('w') or 0) >= LONG_LINE and (l.get('text') or '').strip()
                and _line_crosses(l, bbox) for l in lines):
+            continue
+        # ⭐ PHƯƠNG ÁN D — HỢP KHÔNG ĐƯỢC NUỐT MỘT KHỐI CHỮ CHƯA CHỨNG MINH.
+        #
+        # Chặn dải chỉ giới hạn phía TRÊN; một khối chữ nằm GIỮA dải vẫn lọt vào
+        # hộp hợp. Đo được: 31/120 vùng nuốt ≥ nửa một khối chữ chưa chứng minh
+        # được là chữ của hình. Bộ kiểm gán tay (#160) nói rõ ta KHÔNG có cách
+        # nào đáng tin để biết khối ấy thuộc hình hay thuộc bài đọc.
+        #
+        # «Thiếu hình» sửa được ở vòng sau; «hình nuốt mất câu» thì trẻ đọc phải
+        # ngay. Không chứng minh được ⇒ GIỮ LẠI.
+        if any(_swallows(bbox, t) for t in unproven):
             continue
         out.append(dict(bbox=bbox, area=round(bbox[2] * bbox[3], 5),
                         parts=len(near), anchor=a['num'], caption=a['text']))

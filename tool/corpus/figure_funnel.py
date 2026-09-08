@@ -87,6 +87,53 @@ def prose_boxes(lines, min_lines=3):
     return out
 
 
+def unproven_text_boxes(lines, regions):
+    """Hộp của MỌI khối chữ CHƯA CHỨNG MINH ĐƯỢC là chữ của hình.
+
+    ⭐ ĐÂY LÀ PHƯƠNG ÁN D — GIỮ LẠI KHI KHÔNG CHỨNG MINH ĐƯỢC QUYỀN SỞ HỮU.
+
+    Bộ kiểm gán tay (#160, 77 khối) cho thấy: với hình học dòng OCR + thành phần
+    mực, KHÔNG luật nào vừa nhận đủ chữ-của-hình vừa không nuốt văn xuôi. Tín
+    hiệu SẠCH duy nhất là «khối nằm trong hộp của một thành phần mực đã dò» —
+    chính xác 100% nhưng chỉ phủ 11%.
+
+    Nên ranh giới nới hình dừng ở MỌI khối chữ, trừ:
+      · khối chứng minh được là chữ của hình (nằm trong mực đã dò);
+      · dòng chú thích (nó là mỏ neo, không phải rào).
+
+    Trước đây chỉ chặn ở khối ≥3 dòng, nên khung phụ 2 dòng lọt qua và hợp
+    trườn ngang qua câu chữ trẻ đang đọc — đúng ca đã nhìn tận mắt ở Toán 11
+    trang 87 (mascot + hai dòng thân bài + hình tứ diện trong một tấm).
+
+    «Thiếu hình» sửa được ở vòng sau; «hình nuốt mất câu» thì trẻ đọc phải ngay.
+    """
+    from lesson_reading import blocks, is_furniture
+    caps = {a['text'] for a in caption_anchors(lines)}
+    out = []
+    for b in blocks(lines):
+        k = [l for l in b if not is_furniture(l) and (l.get('text') or '').strip()]
+        if not k:
+            continue
+        if any((l.get('text') or '').strip() in caps for l in k):
+            continue
+        x0 = min(l['x'] for l in k)
+        y0 = min(l['y'] for l in k)
+        x1 = max(l['x'] + (l.get('w') or 0) for l in k)
+        y1 = max(l['y'] + (l.get('h') or 0) for l in k)
+        area = max((x1 - x0) * (y1 - y0), 1e-9)
+        proven = False
+        for r in regions:
+            rx, ry, rw, rh = r['bbox']
+            ix = min(x1, rx + rw) - max(x0, rx)
+            iy = min(y1, ry + rh) - max(y0, ry)
+            if ix > 0 and iy > 0 and ix * iy >= 0.6 * area:
+                proven = True
+                break
+        if not proven:
+            out.append((x0, y0, x1, y1))
+    return out
+
+
 def in_band(bbox, band, x_span=None):
     y0, y1 = band
     bx, by, bw, bh = bbox
