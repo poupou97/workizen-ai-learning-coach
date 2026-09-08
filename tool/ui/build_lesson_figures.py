@@ -74,6 +74,15 @@ def interleave(pages, figs_by_page):
     return stream
 
 
+def _cleanup(tmp_path):
+    """Tệp `.building` sót lại chiếm chỗ và làm người sau tưởng kho đang dựng."""
+    try:
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
+    except OSError:
+        pass
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('grade', type=int)
@@ -104,6 +113,11 @@ def main():
     db.execute('CREATE TABLE fig (id TEXT PRIMARY KEY, book TEXT, lesson INT, '
                'page INT, w INT, h INT, jpeg BLOB)')
 
+    # Gộp toàn bộ ~1.500 ảnh vào MỘT giao dịch làm nhật ký hoàn tác phình tới
+    # vài chục MB, và commit khi ấy đã ném `disk I/O error` thật (lớp 4, 5, 7).
+    # Chốt theo lô để nhật ký luôn nhỏ.
+    COMMIT_EVERY = 50
+
     n_fig = n_les = n_cap = 0
     for r in readings:
         pdf = pdfs.get(r['book'])
@@ -126,6 +140,8 @@ def main():
                      caption=f['caption']))
             n_fig += 1
             n_cap += bool(f['caption'])
+            if n_fig % COMMIT_EVERY == 0:
+                db.commit()
         # dựng lại dòng đọc để có khối + y (pack chỉ giữ chuỗi chữ phẳng)
         doc, _ = lesson_reading(r['book'], r['pagePdfStart'], r['pagePdfEnd'],
                                 printed_start=r.get('pageStart'), title=r.get('title'))
@@ -158,4 +174,12 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except BaseException:
+        # Hỏng giữa chừng ⇒ dọn tệp tạm. Kho ĐANG CHẠY TỐT không bị đụng tới:
+        # nó chỉ bị thay ở bước `os.replace` cuối cùng.
+        import glob as _g
+        for _t in _g.glob(os.path.join(ROOT, 'poc-out/packs/figures/*.building')):
+            _cleanup(_t)
+        raise
