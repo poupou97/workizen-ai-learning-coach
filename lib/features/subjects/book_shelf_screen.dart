@@ -414,7 +414,11 @@ class _BookShelfScreenState extends State<BookShelfScreen> {
           if (b.variantLabel != null)
             Text(
               b.variantLabel!,
-              maxLines: 2,
+              // Máy thật lớp 11: «ĐỊNH HƯỚNG KHOA HỌC MÁY TÍNH» và «ĐỊNH HƯỚNG
+              // TIN HỌC ỨNG DỤNG» cùng cụt ở dòng 2 («…KHOA HỌC M…»), nên phần
+              // PHÂN BIỆT nằm ngay chỗ bị cắt. Ô sách nằm trong Wrap ⇒ cao thêm
+              // một dòng là được, không đẩy lưới.
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: WalType.secondary,

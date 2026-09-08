@@ -129,3 +129,73 @@ class PendingFlagTests(unittest.TestCase):
         _index(self.pack, readings=[_reading(imgs=['f1'])])
         self.assertFalse(bp.pack_shape(6, self.pack)['pending'])
         self.assertEqual(bp.verify(6, self.pack, self.figs), [])
+
+
+class ShelfRoutingTests(unittest.TestCase):
+    """Cuốn lên giá mà bấm vào ra màn RỖNG — đã xảy ra thật, không lỗi nào báo.
+
+    Máy thật lớp 11: «Tin học 11 · ĐỊNH HƯỚNG KHOA HỌC MÁY TÍNH · 31 bài» trên
+    giá; bấm vào ⇒ «SAM chưa có mục lục môn này trên máy». `books[].subject` đã
+    được sửa theo lõi định danh, mục lục thì vẫn nằm dưới môn cũ «Khoa học».
+    60 bài (lớp 11 + 12) hứa với trẻ rồi dẫn vào ngõ cụt.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.pack = os.path.join(self.tmp.name, 'pack')
+        self.figs = os.path.join(self.tmp.name, 'figs')
+        os.makedirs(self.pack, exist_ok=True)
+
+    def _write(self, books, subjects):
+        with open(bp.index_path(11, self.pack), 'w', encoding='utf-8') as fh:
+            json.dump({'grade': 11, 'books': books, 'subjects': subjects,
+                       'lessonReadings': []}, fh, ensure_ascii=False)
+
+    def test_mon_tren_gia_lech_voi_mon_giu_muc_luc_thi_FAIL(self):
+        self._write(
+            books=[{'sourceDocumentId': 'b1', 'subject': 'Tin học',
+                    'title': 'Tin học 11'}],
+            subjects={'Khoa học': [{'sourceDocumentId': 'b1', 'lessons': []}]})
+        problems = bp.verify(11, self.pack, self.figs)
+        self.assertTrue(any('ra màn rỗng' in p for p in problems), problems)
+
+    def test_khop_mon_thi_dat(self):
+        self._write(
+            books=[{'sourceDocumentId': 'b1', 'subject': 'Tin học',
+                    'title': 'Tin học 11'}],
+            subjects={'Tin học': [{'sourceDocumentId': 'b1', 'lessons': []}]})
+        self.assertEqual(bp.verify(11, self.pack, self.figs), [])
+
+    def test_sach_khong_co_muc_luc_nao_cung_la_ngo_cut(self):
+        self._write(books=[{'sourceDocumentId': 'b1', 'subject': 'Tin học',
+                            'title': 'Tin học 11'}],
+                    subjects={})
+        self.assertTrue(bp.unrouted_books(11, self.pack))
+
+    def test_trung_ten_duoc_DEM_chu_khong_lam_hong_ban_dung(self):
+        # 9 cuốn cố ý không có nhãn phân biệt (bìa không xác minh chéo được).
+        # Thà để trùng còn hơn dán tên không kiểm được — nhưng phải đếm được.
+        self._write(
+            books=[{'sourceDocumentId': 'b1', 'subject': 'Công nghệ',
+                    'title': 'Công nghệ 9', 'volumeLabel': None,
+                    'variantLabel': None},
+                   {'sourceDocumentId': 'b2', 'subject': 'Công nghệ',
+                    'title': 'Công nghệ 9', 'volumeLabel': None,
+                    'variantLabel': None}],
+            subjects={'Công nghệ': [{'sourceDocumentId': 'b1', 'lessons': []},
+                                    {'sourceDocumentId': 'b2', 'lessons': []}]})
+        amb = bp.ambiguous_books(11, self.pack)
+        self.assertEqual(len(amb), 1)
+        self.assertEqual(sorted(amb[0][1]), ['b1', 'b2'])
+        self.assertEqual(bp.verify(11, self.pack, self.figs), [])
+
+    def test_nhan_phan_biet_khac_nhau_thi_khong_bi_tinh_la_trung(self):
+        self._write(
+            books=[{'sourceDocumentId': 'b1', 'subject': 'Công nghệ',
+                    'title': 'Công nghệ 11', 'variantLabel': 'CƠ KHÍ'},
+                   {'sourceDocumentId': 'b2', 'subject': 'Công nghệ',
+                    'title': 'Công nghệ 11', 'variantLabel': 'CHĂN NUÔI'}],
+            subjects={'Công nghệ': [{'sourceDocumentId': 'b1', 'lessons': []},
+                                    {'sourceDocumentId': 'b2', 'lessons': []}]})
+        self.assertEqual(bp.ambiguous_books(11, self.pack), [])

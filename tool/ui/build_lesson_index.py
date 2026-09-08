@@ -34,6 +34,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lesson_attach import AttachRegistry  # noqa: E402
 import pack_provenance  # noqa: E402
 from book_variant import label_variants  # noqa: E402
+import book_naming  # noqa: E402
 
 GRADE = int(sys.argv[1]) if len(sys.argv) > 1 else 5
 ATTACH_LOG_DIR = os.environ.get('ATTACH_LOG_DIR', 'poc-out/b-lane/attach-log')
@@ -487,9 +488,46 @@ for _core, _group in _by_core.items():
                   f"phân môn ⇒ sửa thành «{_right}» (khớp lõi «{_core}»)")
             _b['subject'] = _right
             _b['title'] = _right + ' ' + str(GRADE)
+            # ⭐ SỬA ĐÚNG TRƯỜNG NHƯNG SÓT MỘT NƠI = VẪN HỎNG. Máy thật lớp 11:
+            # giá sách ghi «Tin học 11 · 31 bài», bấm vào ra «SAM chưa có mục
+            # lục môn này trên máy» — vì `books[].subject` đã sửa mà mục lục
+            # vẫn nằm dưới môn cũ. 60 bài (lớp 11 + 12) mở ra ngõ cụt.
+            _sid = _b['sourceDocumentId']
+            for _k in list(subjects):
+                if _k == _right:
+                    continue
+                _moved = [e for e in subjects[_k] if e['sourceDocumentId'] == _sid]
+                for _e in _moved:
+                    subjects[_k].remove(_e)
+                    subjects[_right].append(_e)
+                if _moved and not subjects[_k]:
+                    del subjects[_k]
             _fixed += 1
 if _fixed:
     print(f'  môn sửa theo lõi định danh: {_fixed}')
+
+# ---- TÊN SÁCH phải đủ để phân biệt hai cuốn khác nhau ----------------------
+# Đo trên giá sách lớp 11: «Công nghệ 11 · CÔNG NGHỆ CHĂN NUÔI» hiện HAI Ô y
+# hệt nhau (một SGK, một Chuyên đề học tập). Luật ở `book_naming` chỉ dùng
+# trường có thật: dấu hiệu bộ trong định danh, và tên môn CÓ DẤU của cuốn anh
+# em cùng lõi. Không có bằng chứng ⇒ giữ nguyên tên cũ.
+_names_by_core = book_naming.subject_names_by_core(books)
+_renamed = _volumed = 0
+for _b in books:
+    _sid = _b['sourceDocumentId']
+    _t = book_naming.display_title(_sid, _b.get('title'), GRADE, _names_by_core)
+    if _t != _b.get('title'):
+        print(f"  ⚠️ {_sid}: «{_b.get('title')}» ⇒ «{_t}» (bộ sách nói trong định danh)")
+        _b['title'] = _t
+        _renamed += 1
+    if not _b.get('volumeLabel'):
+        _v = book_naming.volume_label(_sid)
+        if _v:
+            print(f"  ⚠️ {_sid}: thiếu nhãn tập ⇒ «{_v}» (định danh nói ra)")
+            _b['volumeLabel'] = _v
+            _volumed += 1
+if _renamed or _volumed:
+    print(f'  tên sách sửa: {_renamed} · nhãn tập bổ sung: {_volumed}')
 
 # ---- sourceAssets (WAL-133): hình SGK đã crop, provenance đầy đủ ----------
 # Chỉ nhận asset CÓ MẶT trên máy này và ĐỦ provenance; thiếu ⇒ bỏ, không để UI
