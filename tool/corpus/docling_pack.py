@@ -60,17 +60,25 @@ def caption_of(r):
     return ident.get('sub') or ident.get('text') or None
 
 
-def extra_figures(book, pages, existing, index):
+def extra_figures(book, pages, existing, index, stats=None):
     """Vùng Docling THÊM vào, đã loại những vùng D đã có.
 
     `existing` = bbox các hình D đã nhận, để không đưa hai bản của cùng một hình.
+
+    `stats` = `Counter` đếm CẦU NỐI DI TRÚ ngay trong lúc dựng: `MOI` (chỉ
+    Docling có) và `CA_HAI` (D đã có rồi). Đếm ở đây vì đây là chỗ DUY NHẤT biết
+    cả hai phía; đo lại sau bằng một lượt quét nữa vừa đắt vừa dễ lệch.
     """
     out = []
     for pp in pages:
         for k, r in enumerate(index.get((book, pp), [])):
             bbox = r['box']
             if any(_iou(bbox, e) > DEDUP_IOU for e in existing):
+                if stats is not None:
+                    stats['CA_HAI'] += 1
                 continue
+            if stats is not None:
+                stats['MOI'] += 1
             out.append(dict(id=f'{book}:p{pp:03d}:dl{k:02d}', book=book, page=pp,
                             bbox=bbox, area=round(bbox[2] * bbox[3], 5),
                             caption=caption_of(r), source='docling'))

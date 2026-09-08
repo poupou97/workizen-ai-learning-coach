@@ -81,6 +81,16 @@ class CongThem(unittest.TestCase):
     def test_trang_khong_co_vung_dang_tin_thi_khong_them_gi(self):
         self.assertEqual(dp.extra_figures('b', [9], existing=[], index=self.idx), [])
 
+    def test_dem_cau_noi_di_tru_ngay_luc_dung(self):
+        """MOI = chỉ Docling có · CA_HAI = D đã có rồi. Đếm ở đây vì đây là chỗ
+        duy nhất biết cả hai phía."""
+        import collections
+        st = collections.Counter()
+        idx = {('b', 3): [row(), row(box=(0.6, 0.6, 0.2, 0.2))]}
+        dp.extra_figures('b', [3], existing=[[0.1, 0.2, 0.4, 0.3]], index=idx,
+                         stats=st)
+        self.assertEqual((st['MOI'], st['CA_HAI']), (1, 1))
+
     def test_KHONG_dung_toi_hinh_cua_D(self):
         """⭐ Bất biến di trú: danh sách D vào thế nào ra thế ấy."""
         d = [[0.5, 0.5, 0.2, 0.2]]

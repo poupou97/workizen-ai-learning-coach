@@ -20,6 +20,7 @@ TOẠ ĐỘ Y THẬT của nó giữa các khối chữ cùng trang.
 dạng bài toán chứ không phải mẹo tiết kiệm.
 """
 import argparse
+import collections
 import hashlib
 import json
 import os
@@ -150,6 +151,7 @@ def main():
     COMMIT_EVERY = 50
 
     DL_TRUSTED = docling_pack.readable_by_page()
+    DL_STATS = collections.Counter()
     if DL_TRUSTED:
         print(f'  + {sum(len(v) for v in DL_TRUSTED.values())} vùng Docling đáng tin trên {len(DL_TRUSTED)} trang')
 
@@ -165,8 +167,11 @@ def main():
         # đã qua cổng tin cậy VÀ nối được danh tính thì thêm vào sau, bỏ những
         # vùng trùng hình D đã có. Không có tệp tin cậy ⇒ danh sách rỗng ⇒
         # đường dựng chạy y như trước.
+        n_d = len(figs)
         figs += docling_pack.extra_figures(r['book'], pages,
-                                           [f['bbox'] for f in figs], DL_TRUSTED)
+                                           [f['bbox'] for f in figs], DL_TRUSTED,
+                                           stats=DL_STATS)
+        DL_STATS['CHI_D'] += n_d
         by_page = {}
         for f in figs:
             try:
@@ -205,7 +210,8 @@ def main():
     manifest = dict(grade=a.grade, file=os.path.basename(db_path),
                     version=f'g{a.grade}-{digest[:12]}', size=len(raw),
                     sha256=digest, figures=n_fig, lessons=n_les,
-                    captions=n_cap, builder='lesson-figures-v1')
+                    captions=n_cap, builder='lesson-figures-v1',
+                    bridge=dict(sorted(DL_STATS.items())))
     mpath = os.path.join(out_dir, f'figures-g{a.grade}.manifest.json')
     with open(mpath, 'w', encoding='utf-8') as fh:
         json.dump(manifest, fh, ensure_ascii=False, indent=1)
