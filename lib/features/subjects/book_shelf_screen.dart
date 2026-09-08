@@ -398,7 +398,7 @@ class _BookShelfScreenState extends State<BookShelfScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            b.shelfLabel,
+            b.volumeLabel == null ? b.title : '${b.title} · ${b.volumeLabel}',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -407,6 +407,21 @@ class _BookShelfScreenState extends State<BookShelfScreen> {
               color: WalColors.ink,
             ),
           ),
+          // ⭐ PHÂN MÔN ĐỨNG RIÊNG MỘT DÒNG.
+          // Gộp vào cùng dòng tên thì ellipsis cắt ĐÚNG chỗ phân biệt: máy thật
+          // hiện hai cuốn «Tin học 11 · ĐỊNH HƯỚNG …» y hệt nhau — nhãn có chữ
+          // mà trẻ vẫn không đọc được nó.
+          if (b.variantLabel != null)
+            Text(
+              b.variantLabel!,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: WalType.secondary,
+                fontWeight: FontWeight.w600,
+                color: WalColors.primaryText,
+              ),
+            ),
           Text(
             '${b.lessonCount} bài',
             style: const TextStyle(
