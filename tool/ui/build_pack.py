@@ -70,7 +70,7 @@ def pack_shape(grade, pack_dir=PACK_DIR):
     p = index_path(grade, pack_dir)
     if not os.path.exists(p):
         return dict(openable=0, with_images=0, images=0, image_ids=set(),
-                    lessons=set(), pending=False)
+                    distinct=0, lessons=set(), pending=False)
     with open(p, encoding='utf-8') as fh:
         d = json.load(fh)
     rs = d.get('lessonReadings') or []
@@ -80,8 +80,15 @@ def pack_shape(grade, pack_dir=PACK_DIR):
         if imgs:
             with_img += 1
         ids.update(i.get('id') for i in imgs if i.get('id'))
+    # ⚠ NĂNG LỰC ĐO BẰNG BÀI PHÂN BIỆT ĐƯỢC, KHÔNG PHẢI SỐ BẢN GHI.
+    # Bản ghi trùng nhau y hệt (cùng sách, cùng số bài, cùng dải) không cho trẻ
+    # thêm gì. Đo được: một lần dựng bỏ đi bản ghi trùng của Tin học 5 Bài 8
+    # (38–49) làm số bản ghi tụt 252 → 251, trong khi số bài mở được KHÔNG đổi.
+    # Đếm theo bản ghi thì việc dọn trùng đọc ra thành mất năng lực.
     return dict(openable=len(rs), with_images=with_img, images=len(ids),
                 image_ids=ids, pending=bool(d.get('figuresPending')),
+                distinct=len({(r.get('book'), r.get('lesson'),
+                               r.get('pagePdfStart')) for r in rs}),
                 lessons={(r.get('book'), r.get('lesson')) for r in rs})
 
 
@@ -205,10 +212,10 @@ def main():
             # `--attach` ⇒ mọi sách rơi vào `NO_ATTACH`, lớp 3 tụt 232 → 44 bài.
             # Ba bất biến cũ đều ĐẠT: không hình treo, không cờ pending, kho
             # hình vẫn có bài dùng. Pack «hợp lệ» mà mất 80% số bài của trẻ.
-            if after['openable'] < before['openable']:
+            if after['distinct'] < before['distinct']:
                 bad.append(
-                    f'lớp {g}: TRƯỚC {before["openable"]} bài mở được, SAU '
-                    f'{after["openable"]} — bước dựng làm TỤT. Kiểm `--attach` '
+                    f'lớp {g}: TRƯỚC {before["distinct"]} bài mở được, SAU '
+                    f'{after["distinct"]} — bước dựng làm TỤT. Kiểm `--attach` '
                     f'trước khi tin con số mới.')
         bad += verify(g)
 

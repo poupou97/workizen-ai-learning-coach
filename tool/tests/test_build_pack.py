@@ -199,3 +199,39 @@ class ShelfRoutingTests(unittest.TestCase):
             subjects={'Công nghệ': [{'sourceDocumentId': 'b1', 'lessons': []},
                                     {'sourceDocumentId': 'b2', 'lessons': []}]})
         self.assertEqual(bp.ambiguous_books(11, self.pack), [])
+
+
+class DistinctCapabilityTests(unittest.TestCase):
+    """Năng lực đo bằng BÀI PHÂN BIỆT ĐƯỢC, không phải số bản ghi.
+
+    Đo thật: một lần dựng bỏ đi bản ghi TRÙNG của Tin học 5 Bài 8 (38–49) làm
+    số bản ghi tụt 252 → 251 trong khi số bài mở được không đổi. Đếm theo bản
+    ghi thì dọn trùng đọc ra thành mất năng lực — và cổng chặn sẽ chặn nhầm
+    một cải tiến.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.pack = os.path.join(self.tmp.name, 'pack')
+
+    def _write(self, readings):
+        os.makedirs(self.pack, exist_ok=True)
+        with open(bp.index_path(6, self.pack), 'w', encoding='utf-8') as fh:
+            json.dump({'grade': 6, 'subjects': {}, 'lessonReadings': readings},
+                      fh, ensure_ascii=False)
+
+    def test_ban_ghi_trung_KHONG_lam_tang_nang_luc(self):
+        r = dict(book='b', lesson=8, pagePdfStart=38, pagePdfEnd=49, content=[])
+        self._write([dict(r), dict(r)])
+        s = bp.pack_shape(6, self.pack)
+        self.assertEqual(s['openable'], 2)     # số bản ghi
+        self.assertEqual(s['distinct'], 1)     # năng lực thật
+
+    def test_hai_bai_khac_dai_la_hai_nang_luc(self):
+        self._write([dict(book='b', lesson=8, pagePdfStart=38, pagePdfEnd=49, content=[]),
+                     dict(book='b', lesson=8, pagePdfStart=50, pagePdfEnd=55, content=[])])
+        self.assertEqual(bp.pack_shape(6, self.pack)['distinct'], 2)
+
+    def test_pack_chua_co_thi_distinct_bang_0(self):
+        self.assertEqual(bp.pack_shape(9, self.pack)['distinct'], 0)
