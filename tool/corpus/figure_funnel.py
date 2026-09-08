@@ -23,21 +23,69 @@ import re
 
 CAPTION_NUM = re.compile(r'^\s*(hình|bảng|sơ\s*đồ|biểu\s*đồ)\s*(\d{1,2})\s*[.,]\s*(\d{1,2})',
                          re.IGNORECASE)
+# ⭐ SÁCH CÒN ĐÁNH SỐ MỘT CẤP: «Hình 2», «Hình 10», «Bảng 3» (đánh số theo bài,
+# không theo chương). Census trên 72 đề xuất bị giữ: 3 ca là chú thích ĐÁNH SỐ
+# thật mà mẫu hai-cấp bỏ lọt (LS&ĐL 7 «Hình 2. Cột kinh Phật…», Lịch sử 10
+# «Hình 10», «Hình 11»). Vẫn là BẰNG CHỨNG ĐÁNH SỐ IN TRONG SÁCH — nới mẫu
+# nhận, KHÔNG hạ chuẩn bằng chứng.
+CAPTION_NUM_ANY = re.compile(
+    r'^\s*(hình|bảng|sơ\s*đồ|biểu\s*đồ)\s*(\d{1,2})(?:\s*[.,]\s*(\d{1,2}))?(?![\d])',
+    re.IGNORECASE)
+# ⭐ CHÚ THÍCH CÓ DẤU NGUỒN: dòng ngắn kết bằng chỉ số nguồn «⁽⁴⁾» — OCR ra
+# «Thêu(4)», «Nhuộm3)», «In lưới?)». Đây là CẤU TRÚC IN của sách (nối ảnh với
+# danh sách nguồn cuối trang), không phải chữ tình cờ nằm dưới ảnh.
+# Census: 13 ca ở Mĩ thuật 10 (hai cuốn khác nhau).
+CAPTION_FOOTNOTE = re.compile(r'^.{2,60}[\(\?\"“”]?\s*\d\s*\)\s*$')
 BAND_UP = 0.35        # soi tối đa ngần này chiều cao trang phía trên chú thích
 BAND_PAD = 0.02
 
 
-def caption_anchors(lines):
-    """Dòng chú thích CÓ SỐ HIỆU của sách, kèm hình học của chính dòng ấy."""
+def caption_anchors(lines, *, extended=False, block_lines=None):
+    """Dòng chú thích IN TRONG SÁCH, kèm hình học của chính dòng ấy.
+
+    `extended=False` giữ đúng hành vi cũ (chỉ số hai cấp «Hình 5.1») — dùng cho
+    mọi phép đo đã công bố, để số cũ không đổi nghĩa.
+
+    `extended=True` nhận thêm HAI HỌ BẰNG CHỨNG IN, không hạ chuẩn:
+      · đánh số MỘT CẤP («Hình 2», «Bảng 3»);
+      · chú thích kết bằng CHỈ SỐ NGUỒN («Thêu⁽⁴⁾»).
+
+    ⚠ Cả hai chỉ nhận khi dòng nằm trong KHỐI NGẮN (≤2 dòng). Một câu thân bài
+    mở đầu bằng «Hình 5.1 là đồ thị…» là THAM CHIẾU, không phải chú thích —
+    census cho thấy khác biệt nằm ở chỗ nó nằm trong đoạn văn nhiều dòng.
+    `block_lines` = `{id(dòng): số dòng của khối}`.
+    """
     out = []
     for l in lines:
-        m = CAPTION_NUM.match((l.get('text') or '').strip())
+        t = (l.get('text') or '').strip()
+        m = CAPTION_NUM.match(t)
+        fam = 'NUMBERED'
+        if not m and extended:
+            short = (block_lines or {}).get(id(l), 1) <= 2
+            if short:
+                m = CAPTION_NUM_ANY.match(t)
+                if not m and CAPTION_FOOTNOTE.match(t):
+                    out.append(dict(kind='hình', num=None, family='FOOTNOTE',
+                                    x=l['x'], y=l['y'], w=l.get('w') or 0,
+                                    h=l.get('h') or 0, text=t))
+                    continue
         if not m:
             continue
-        out.append(dict(kind=m.group(1).lower().replace(' ', ''),
-                        num=f'{m.group(2)}.{m.group(3)}',
+        num = f'{m.group(2)}.{m.group(3)}' if m.lastindex and m.group(3) else m.group(2)
+        out.append(dict(kind=m.group(1).lower().replace(' ', ''), num=num, family=fam,
                         x=l['x'], y=l['y'], w=l.get('w') or 0, h=l.get('h') or 0,
-                        text=(l.get('text') or '').strip()))
+                        text=t))
+    return out
+
+
+def block_line_counts(lines):
+    """`{id(dòng): số dòng của khối chứa nó}` — để biết dòng có đứng riêng không."""
+    from lesson_reading import blocks, is_furniture
+    out = {}
+    for b in blocks(lines):
+        k = [l for l in b if not is_furniture(l) and (l.get('text') or '').strip()]
+        for l in k:
+            out[id(l)] = len(k)
     return out
 
 

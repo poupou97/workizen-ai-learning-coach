@@ -40,14 +40,29 @@ def _overlap(a0, a1, b0, b1):
     return min(a1, b1) - max(a0, b0)
 
 
-def adjacent_captions(bbox, anchors, gap=CAPTION_GAP):
-    """Chú thích in NGAY KỀ vùng (trên hoặc dưới) và chồng ngang với nó."""
+def adjacent_captions(bbox, anchors, gap=CAPTION_GAP, kind='picture'):
+    """Chú thích in NGAY KỀ vùng và chồng ngang với nó.
+
+    ⭐ THEO ĐÚNG QUY ƯỚC IN CỦA SGK: chú thích HÌNH nằm DƯỚI hình; chú thích
+    BẢNG nằm TRÊN bảng.
+
+    Không phải chuyện thẩm mỹ. Nhận cả phía trên cho hình thì một CÂU THÂN BÀI
+    mở đầu bằng tham chiếu bị nhận nhầm là chú thích — bắt được ca thật ở
+    Công nghệ 10 trang 95: «Hình 16.2. là ví dụ giao diện của phần mềm
+    AutoCAD.» đứng TRÊN ảnh, trong khi chú thích thật «Hình 16.2. Giao diện
+    của phần mềm AutoCAD 2021» nằm DƯỚI. Lần ấy kết luận vẫn đúng vì có chú
+    thích thật ở dưới — nhưng ở trang khác thì đó là một TRUSTED sai.
+    """
     x, y, w, h = bbox
     out = []
     for a in anchors:
         below = a['y'] - (y + h)
         above = y - (a['y'] + a['h'])
-        d = below if -0.01 <= below <= gap else (above if -0.01 <= above <= gap else None)
+        d = None
+        if -0.01 <= below <= gap:
+            d = below
+        elif kind == 'table' and -0.01 <= above <= gap:
+            d = above
         if d is None:
             continue
         if _overlap(x, x + w, a['x'], a['x'] + a['w']) <= 0:
@@ -113,7 +128,7 @@ def judge(bbox, *, anchors, items=(), kind='picture'):
         return 'CONFLICT', f'ôm {len(inside)} chú thích của nhiều hình', None
     if contains_item(bbox, items):
         return 'CONFLICT', 'chứa phần tử cấu trúc khác ⇒ mảng trang', None
-    adj = adjacent_captions(bbox, anchors)
+    adj = adjacent_captions(bbox, anchors, kind=kind)
     if adj:
         return 'TRUSTED', f'sách in chú thích kề bên: {adj[0]["kind"]} {adj[0]["num"]}', adj[0]
     if inside:
