@@ -168,8 +168,9 @@ def main():
     if DL_TRUSTED:
         print(f'  + {sum(len(v) for v in DL_TRUSTED.values())} vùng Docling đáng tin trên {len(DL_TRUSTED)} trang')
 
-    n_fig = n_les = n_cap = n_dec = 0
+    n_fig = n_les = n_cap = n_dec = n_sec = 0
     pending = []
+    book_pages = {}
     for r in readings:
         pdf = pdfs.get(r['book'])
         if not pdf:
@@ -196,7 +197,12 @@ def main():
             recs.append(dict(id=f['id'], book=f['book'], page=f['page'], w=w, h=h,
                              jpeg=jpeg, bbox=f['bbox'], caption=f['caption'],
                              source=f.get('source', 'D'), kind=f.get('kind'),
-                             hash=decoration.image_hash(jpeg)))
+                             hash=decoration.image_hash(jpeg),
+                             inside=[l for l in (lb.get(f['page']) or [])
+                                     if (l.get('text') or '').strip()
+                                     and decoration._inside(f['bbox'], l)]))
+        for pp2 in pages:
+            book_pages.setdefault(r['book'], {}).setdefault(pp2, lb.get(pp2) or [])
         pending.append((r, recs))
 
     # ⭐ LƯỢT HAI — ĐỒ TRANG TRÍ CHỈ NHẬN RA ĐƯỢC KHI NHÌN CẢ CUỐN.
@@ -204,11 +210,20 @@ def main():
     # của cả quyển, không phải của một bài. Nên phải cắt xong hết rồi mới lọc.
     # Đo được: 17/35 ca hỏng trong mẫu 120 là đồ trang trí, cả 17 đều từ D.
     reps = decoration.repeat_index([x for _, rs in pending for x in rs])
+    # ⭐ HỌ THỨ HAI — băng mục và dải trang. Nhận bằng VAI TRÒ TRONG SÁCH:
+    # vùng chứa NHÃN MỤC mà chính cuốn ấy in lại trên nhiều trang, hoặc chứa
+    # CHÍNH SỐ TRANG ở mép. Không nhận bằng dáng vẻ — «ít mực» và «dẹt» đều
+    # đã bị số liệu bác bỏ (xem `decoration.py`).
+    heads = {b: decoration.heading_reps(pg) for b, pg in book_pages.items()}
     for r, recs in pending:
         by_page = {}
         for f in recs:
             if decoration.is_page_furniture(f, reps):
                 n_dec += 1
+                continue
+            if (f.get('source') != 'docling' and decoration.is_section_furniture(
+                    f['bbox'], f.get('inside'), heads.get(f['book'], {}))):
+                n_sec += 1
                 continue
             db.execute('INSERT OR REPLACE INTO fig VALUES (?,?,?,?,?,?,?)',
                        (f['id'], f['book'], r['lesson'], f['page'], f['w'], f['h'],
@@ -245,7 +260,8 @@ def main():
                     sha256=digest, figures=n_fig, lessons=n_les,
                     captions=n_cap, builder='lesson-figures-v1',
                     bridge=dict(sorted(DL_STATS.items())),
-                    pageFurnitureRemoved=n_dec)
+                    pageFurnitureRemoved=n_dec,
+                    sectionFurnitureRemoved=n_sec)
     mpath = os.path.join(out_dir, f'figures-g{a.grade}.manifest.json')
     with open(mpath, 'w', encoding='utf-8') as fh:
         json.dump(manifest, fh, ensure_ascii=False, indent=1)
