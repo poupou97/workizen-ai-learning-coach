@@ -35,6 +35,7 @@ sys.path.insert(0, os.path.join(ROOT, 'tool', 'corpus'))
 from lesson_figures import lesson_figures, crop_jpeg  # noqa: E402
 import docling_pack  # noqa: E402
 import decoration  # noqa: E402
+import table_ownership  # noqa: E402
 from lesson_reading import lesson_reading  # noqa: E402
 from read_structure import block_kind  # noqa: E402
 
@@ -87,8 +88,19 @@ def interleave(pages, figs_by_page):
         # xếp theo `q['y']` — lỗi ấy bị che vì mọi khối chữ đều bị dính lại làm
         # một. Bỏ gộp mà giữ nguyên cách xếp cũ là làm lỗi #141 sống lại.
         paras = sorted(p.get('paragraphs') or [], key=lambda q: q['seq'])
+        # ⭐ BẢNG KHÔNG ĐƯỢC HIỆN HAI LẦN. Máy thật bắt được: trẻ đọc «STT 1 2 3
+        # 4 5 6», «1986 1998 1998 2010» — bảng bẹp thành văn xuôi — rồi mới thấy
+        # ảnh bảng đúng ngay bên dưới. Đo được 277/290 bài dính lỗi này.
+        #
+        # Chỉ bỏ khối chữ NẰM GỌN TRONG một vùng bảng đáng tin: chính ảnh ấy đã
+        # hiện nó ra rồi nên không mất gì. Văn xuôi quanh bảng GIỮ NGUYÊN —
+        # không có bằng chứng sở hữu thì không xoá chữ của sách.
+        tabs = table_ownership.table_regions(figs_by_page.get(p['pagePdf'], []))
+        keep = [q for q in paras
+                if not (tabs and table_ownership.owned_by_table(q, tabs))]
         items = [((float(i), 0.0), dict(t=block_kind(q['text']), v=q['text']))
-                 for i, q in enumerate(paras)]
+                 for i, q in enumerate(keep)]
+        paras = keep
         for f in figs_by_page.get(p['pagePdf'], []):
             # Hình neo vào KHỐI CHỮ GẦN NHẤT PHÍA TRÊN nó theo y — vị trí hình
             # là chuyện hình học, còn thứ tự chữ là chuyện dải đọc. Không có
@@ -183,7 +195,7 @@ def main():
                 continue
             recs.append(dict(id=f['id'], book=f['book'], page=f['page'], w=w, h=h,
                              jpeg=jpeg, bbox=f['bbox'], caption=f['caption'],
-                             source=f.get('source', 'D'),
+                             source=f.get('source', 'D'), kind=f.get('kind'),
                              hash=decoration.image_hash(jpeg)))
         pending.append((r, recs))
 
@@ -203,7 +215,8 @@ def main():
                         f['jpeg']))
             by_page.setdefault(f['page'], []).append(
                 dict(id=f['id'], bbox=f['bbox'], w=f['w'], h=f['h'], page=f['page'],
-                     caption=f['caption']))
+                     caption=f['caption'], kind=f.get('kind'),
+                     source=f.get('source')))
             n_fig += 1
             n_cap += bool(f['caption'])
             if n_fig % COMMIT_EVERY == 0:

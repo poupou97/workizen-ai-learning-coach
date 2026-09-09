@@ -81,6 +81,7 @@ def extra_figures(book, pages, existing, index, stats=None):
                 stats['MOI'] += 1
             out.append(dict(id=f'{book}:p{pp:03d}:dl{k:02d}', book=book, page=pp,
                             bbox=bbox, area=round(bbox[2] * bbox[3], 5),
-                            caption=caption_of(r), source='docling'))
+                            caption=caption_of(r), source='docling',
+                            kind=r.get('kind') or 'picture'))
             existing.append(bbox)
     return out
