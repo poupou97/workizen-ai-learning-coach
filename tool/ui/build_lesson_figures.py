@@ -35,7 +35,9 @@ sys.path.insert(0, os.path.join(ROOT, 'tool', 'corpus'))
 from lesson_figures import lesson_figures, crop_jpeg  # noqa: E402
 import docling_pack  # noqa: E402
 import decoration  # noqa: E402
+import figure_funnel  # noqa: E402
 import table_ownership  # noqa: E402
+import staging  # noqa: E402
 from lesson_reading import lesson_reading  # noqa: E402
 from read_structure import block_kind  # noqa: E402
 
@@ -136,16 +138,32 @@ def main():
                     help='thư mục pack (mặc định poc-out/packs/figures — KHÔNG phải assets/)')
     a = ap.parse_args()
 
-    idx_path = os.path.join(ROOT, f'assets/pack/lesson-index-g{a.grade}.json')
+    # ⭐ AN TOÀN DỰNG (WAL-230): dựng thử KHÔNG được chạm dữ liệu đang phục vụ.
+    # Bản trước đọc VÀ GHI thẳng `assets/pack/` bất kể `PACK_OUT_DIR`, nên một
+    # lượt «dựng sang chỗ khác để đối chiếu» vẫn ghi đè index canonical tại chỗ.
+    # Kho .db thì có `--out`, còn index thì không — hai nửa của một lần dựng đi
+    # về hai nơi khác nhau mà không có gì báo.
+    pack_dir = staging.pack_dir()
+    idx_path = staging.guard(
+        os.path.join(pack_dir, f'lesson-index-g{a.grade}.json'), 'index bài học')
+    if not os.path.exists(idx_path):
+        # ĐÓNG CHẶT: không lặng lẽ lùi về pack canonical. Thiếu index dàn dựng
+        # nghĩa là bước trước chưa chạy — dựng tiếp là dựng lên dữ liệu sai.
+        raise SystemExit(
+            f'{idx_path}: không có index bài học.\n'
+            f'Chạy build_lesson_index.py với CÙNG PACK_OUT_DIR={pack_dir} trước.')
     idx = json.load(open(idx_path, encoding='utf-8'))
     readings = idx.get('lessonReadings') or []
     if a.limit:
         readings = readings[:a.limit]
     pdfs = pdf_map()
 
-    out_dir = a.out or os.path.join(ROOT, 'poc-out/packs/figures')
+    # Kho ảnh phải đi CÙNG index. Mặc định cũ trỏ thẳng thư mục canonical,
+    # nên `PACK_OUT_DIR` chỉ dời được một nửa lượt dựng.
+    out_dir = staging.figures_dir(a.out)
     os.makedirs(out_dir, exist_ok=True)
-    db_path = os.path.join(out_dir, f'figures-g{a.grade}.db')
+    db_path = staging.guard(os.path.join(out_dir, f'figures-g{a.grade}.db'),
+                            'kho ảnh')
     # ⭐ DỰNG SANG TỆP TẠM RỒI MỚI ĐỔI TÊN.
     # Bản trước XOÁ kho cũ ngay từ đầu, nên một lần dựng hỏng giữa chừng (đã xảy
     # ra thật: `disk I/O error` ở lớp 7) làm mất luôn kho ĐANG CHẠY TỐT. Cùng bài
@@ -165,6 +183,10 @@ def main():
 
     DL_TRUSTED = docling_pack.readable_by_page()
     DL_STATS = collections.Counter()
+    SELECTOR_SHADOW = os.environ.get('SELECTOR_SHADOW') == '1'
+    SEL_LOG = [] if os.environ.get('SELECTOR_LOG') else None
+    if SELECTOR_SHADOW:
+        print('  ⚠ CHẾ ĐỘ BÓNG: chỉ đếm quyết định chọn hình, KHÔNG đổi pack')
     if DL_TRUSTED:
         print(f'  + {sum(len(v) for v in DL_TRUSTED.values())} vùng Docling đáng tin trên {len(DL_TRUSTED)} trang')
 
@@ -183,9 +205,19 @@ def main():
         # vùng trùng hình D đã có. Không có tệp tin cậy ⇒ danh sách rỗng ⇒
         # đường dựng chạy y như trước.
         n_d = len(figs)
-        figs += docling_pack.extra_figures(r['book'], pages,
-                                           [f['bbox'] for f in figs], DL_TRUSTED,
-                                           stats=DL_STATS)
+        # ⭐ BỘ CHỌN HÌNH (Founder Gate 2026-09-09): vùng Docling ĐÁNG TIN và
+        # NỐI ĐƯỢC DANH TÍNH được ưu tiên khi CHỨNG MINH ĐƯỢC cùng một hình
+        # nguồn — bằng chú thích in, không bằng chồng hộp. Không chứng minh
+        # được ⇒ D là dự phòng. `SELECTOR_SHADOW=1` chỉ đếm, không đổi đầu ra.
+        # Chú thích IN của từng trang: bằng chứng để biết một khung ứng cử có
+        # đang nuốt một vật thể mang TÊN KHÁC hay không.
+        anchors = {pp: figure_funnel.caption_anchors(
+                       ls, extended=True,
+                       block_lines=figure_funnel.block_line_counts(ls))
+                   for pp, ls in lb.items()}
+        figs = docling_pack.select(figs, r['book'], pages, DL_TRUSTED,
+                                   stats=DL_STATS, shadow=SELECTOR_SHADOW,
+                                   log=SEL_LOG, anchors=anchors)
         DL_STATS['CHI_D'] += n_d
         recs = []
         for f in figs:
@@ -253,6 +285,10 @@ def main():
     # MANIFEST — máy cài pack phải kiểm được TRƯỚC KHI kích hoạt: đúng tệp
     # không, đủ byte không, băm có khớp không. Nửa tệp mà vẫn nạp thì trẻ mở bài
     # ra thấy ảnh vỡ, và không ai biết vì sao.
+    if SEL_LOG is not None:
+        with open(os.environ['SELECTOR_LOG'], 'a', encoding='utf-8') as fh:
+            for x in SEL_LOG:
+                fh.write(json.dumps(x, ensure_ascii=False) + '\n')
     raw = open(db_path, 'rb').read()
     digest = hashlib.sha256(raw).hexdigest()
     manifest = dict(grade=a.grade, file=os.path.basename(db_path),
@@ -262,7 +298,8 @@ def main():
                     bridge=dict(sorted(DL_STATS.items())),
                     pageFurnitureRemoved=n_dec,
                     sectionFurnitureRemoved=n_sec)
-    mpath = os.path.join(out_dir, f'figures-g{a.grade}.manifest.json')
+    mpath = staging.guard(os.path.join(out_dir, f'figures-g{a.grade}.manifest.json'),
+                          'manifest')
     with open(mpath, 'w', encoding='utf-8') as fh:
         json.dump(manifest, fh, ensure_ascii=False, indent=1)
     print(f'lớp {a.grade}: {n_fig} hình ({n_cap} có chú thích của sách) trong '

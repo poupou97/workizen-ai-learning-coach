@@ -732,9 +732,11 @@ out = pack_provenance.stamp(out, GRADE, _flags, __file__)
 # validate. Then atomic promotion.» Mặc định vẫn ghi thẳng để mọi lệnh cũ không
 # đổi nghĩa; `PACK_OUT_DIR` cho phép dựng ra chỗ khác để ĐỐI CHIẾU trước khi
 # thay bản đang tốt — đúng thứ đã cứu lớp 11 khỏi tụt 449 → 437 hôm nay.
-PACK_OUT_DIR = os.environ.get('PACK_OUT_DIR', 'assets/pack')
+import staging  # noqa: E402
+PACK_OUT_DIR = staging.pack_dir()
 os.makedirs(PACK_OUT_DIR, exist_ok=True)
-path = os.path.join(PACK_OUT_DIR, f'lesson-index-g{GRADE}.json')
+path = staging.guard(os.path.join(PACK_OUT_DIR, f'lesson-index-g{GRADE}.json'),
+                     'index bài học')
 # ⚠ PACK CHƯA XONG: bước này sinh lại `lessonReadings.content` KHÔNG có mục
 # hình — hình do `build_lesson_figures.py` nạp vào SAU. Chạy lẻ bước này là
 # làm mất hình mà không có lỗi nào (đã xảy ra: lớp 10–12 mất sạch hình, L1-M

@@ -99,5 +99,285 @@ class CongThem(unittest.TestCase):
         self.assertEqual(before, [list(x) for x in d[:len(before)]])
 
 
+class CungMotHinhNguon(unittest.TestCase):
+    """⛔ «CÙNG MỘT HÌNH NGUỒN» KHÔNG được định nghĩa bằng CHỒNG HỘP.
+
+    Bằng chứng phải từ nguồn: cùng trang VÀ cùng một dòng chú thích SÁCH IN.
+    Hình học chỉ là bằng chứng phụ.
+    """
+
+    CAP = 'Hình 6.1. Một số loại động vật cảnh'   # khớp mặc định của `row()`
+
+    def dfig(self, cap=CAP, box=(0.1, 0.2, 0.4, 0.3), page=3):
+        return dict(id='d0', book='b', page=page, bbox=list(box), caption=cap,
+                    source='D')
+
+    def test_cung_trang_va_cung_CHU_THICH_IN_thi_la_mot(self):
+        self.assertTrue(dp.same_source_visual(self.dfig(), row()))
+
+    def test_CHONG_HOP_ma_KHAC_chu_thich_thi_KHONG_phai_mot(self):
+        d = self.dfig(cap='Hình 6.2. Một hình khác hẳn')
+        self.assertFalse(dp.same_source_visual(d, row()))
+
+    def test_KHAC_TRANG_thi_khong_phai_mot(self):
+        self.assertFalse(dp.same_source_visual(self.dfig(page=9), row()))
+
+    def test_D_KHONG_co_chu_thich_thi_KHONG_chung_minh_duoc(self):
+        """Thiếu bằng chứng in ⇒ không được thay chỗ."""
+        self.assertFalse(dp.same_source_visual(self.dfig(cap=None), row()))
+
+    def test_cung_chu_thich_ma_KHONG_chong_nhau_thi_khong_nhan(self):
+        d = self.dfig(box=(0.6, 0.7, 0.2, 0.2))
+        self.assertFalse(dp.same_source_visual(d, row()))
+
+    def test_chu_thich_khac_khoang_trang_hoa_thuong_van_la_mot(self):
+        d = self.dfig(cap='  hình 6.1.  MỘT SỐ LOẠI ĐỘNG VẬT CẢNH  ')
+        r = row(text='Hình 6.1. Một số loại động vật cảnh')
+        self.assertTrue(dp.same_source_visual(d, r))
+
+
+class BoChonHinh(unittest.TestCase):
+    def _d(self, cap='Hình 6.1. Một số loại động vật cảnh',
+           box=(0.1, 0.2, 0.4, 0.3)):
+        return dict(id='d0', book='b', page=3, bbox=list(box), caption=cap,
+                    source='D')
+
+    def test_chung_minh_duoc_cung_nguon_thi_DOCLING_THAY_CHO(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): [row()]}, stats=st)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+        self.assertEqual([f['source'] for f in out], ['docling'])
+
+    def test_KHONG_chung_minh_duoc_thi_GIU_D_va_BO_docling(self):
+        """Chồng hộp mà khác chú thích ⇒ D là dự phòng, không hiện hai bản."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d(cap='Hình 6.2. Khác')], 'b', [3],
+                        {('b', 3): [row()]}, stats=st)
+        self.assertEqual(st['D_FALLBACK'], 1)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_cho_D_KHONG_co_gi_thi_THEM_MOI(self):
+        st = __import__('collections').Counter()
+        out = dp.select([], 'b', [3], {('b', 3): [row()]}, stats=st)
+        self.assertEqual(st['DOCLING_NEW'], 1)
+        self.assertEqual(len(out), 1)
+
+    def test_CHE_DO_BONG_dem_luat_MOI_nhung_ra_dau_ra_luat_CU(self):
+        """⚠ Bóng KHÔNG phải «chỉ giữ D». Bản đầu tôi viết vậy và nó lặng lẽ bỏ
+        luôn phần Docling đang có — lớp 6 tụt 913 → 709 hình."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): [row()]},
+                        stats=st, shadow=True)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_CHE_DO_BONG_van_THEM_hinh_o_cho_D_khong_co(self):
+        st = __import__('collections').Counter()
+        out = dp.select([], 'b', [3], {('b', 3): [row()]}, stats=st, shadow=True)
+        self.assertEqual(st['DOCLING_NEW'], 1)
+        self.assertEqual(len(out), 1, 'bóng mà bỏ mất hình đang có thì không phải bóng')
+
+    def test_danh_tinh_GIU_LAI_thi_khong_bao_gio_toi_bo_chon(self):
+        """`readable_by_page` đã loại vùng chưa nối được danh tính, nên bộ chọn
+        không bao giờ thấy chúng — REGION_TRUST != IDENTITY_LINK giữ nguyên."""
+        import tempfile, os as _os
+        fh = tempfile.NamedTemporaryFile('w', suffix='.jsonl', delete=False,
+                                         encoding='utf-8')
+        fh.write(json.dumps(row(readable=False), ensure_ascii=False) + '\n')
+        fh.close()
+        self.addCleanup(_os.remove, fh.name)
+        self.assertEqual(dp.readable_by_page(fh.name), {})
+
+
 if __name__ == '__main__':
     unittest.main()
+
+
+class CamBayHinhCon(unittest.TestCase):
+    """⛔ SAI TÊN > THIẾU TÊN — không mảnh nào được mượn tên của hình gộp.
+
+    ⚠ Con số tôi báo lần đầu cho `naming_conflict` («161 nhóm, 148 đặt trùng
+    tên») SAI: nhật ký ghi một dòng mỗi LƯỢT XỬ LÝ, mà attach làm một trang đi
+    qua nhiều bài. Đếm trên ứng cử DUY NHẤT: 13 nhóm đa-vùng, cả 13 đều có nhãn
+    con in phân biệt ⇒ chốt ấy chặn 0 vùng. Nó vẫn được giữ như một bất biến
+    đóng chặt. Chốt thật sự bắt được là `partial_claim` + `covers`.
+    """
+    def _d(self, cap='Hình 8. Luyện tập tung và bắt bóng trên cao'):
+        return dict(id='d0', book='b', page=3, bbox=[0.1, 0.1, 0.8, 0.6],
+                    caption=cap, source='D')
+
+    def _parts(self, subs=(None, None), w=0.38, step=0.4):
+        """Mặc định: các ô GHÉP LẠI PHỦ GẦN ĐỦ hình D — đó mới là hình nhiều ô
+        thật. Truyền `w` nhỏ để dựng ca CHỈ MỘT PHẦN ô được đề xuất."""
+        cap = 'Hình 8. Luyện tập tung và bắt bóng trên cao'
+        return [row(box=(0.1 + step * i, 0.1, w, 0.6), text=cap, sub=s)
+                for i, s in enumerate(subs)]
+
+    def test_nhieu_manh_KHONG_co_nhan_con_thi_GIU_HINH_GOP(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts()}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 2)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 0)
+        self.assertEqual([f['source'] for f in out], ['D'],
+                         'sách in MỘT tên thì hiện MỘT ảnh')
+
+    def test_nhan_con_IN_phan_biet_thi_duoc_tach(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts(subs=('a)', 'b)'))}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 0)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+        self.assertEqual(sorted(f['caption'] for f in out), ['a)', 'b)'])
+
+    def test_DU_O_va_co_nhan_con_IN_thi_TACH_duoc(self):
+        """Ca phải CHO QUA: sách in ba ô a) b) c), cả ba đều tới bộ chọn và ghép
+        lại phủ gần đủ hình. Mỗi ô có tên riêng của sách ⇒ tách an toàn.
+
+        (Kiểm-đột-biến bắt chỗ này: nới `PART_COVER` lên 0,99 hay bỏ hẳn phép đo
+        phủ vẫn sống, vì mọi ca cũ đều có ô QUÁ TO nên không tính là mảnh.)
+        """
+        st = __import__('collections').Counter()
+        parts = self._parts(subs=('a)', 'b)', 'c)'), w=0.25, step=0.27)
+        out = dp.select([self._d()], 'b', [3], {('b', 3): parts}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 0)
+        self.assertEqual(sorted(f['caption'] for f in out), ['a)', 'b)', 'c)'])
+
+    def test_nhan_con_TRUNG_NHAU_van_bi_chan(self):
+        """Hai mảnh cùng nhãn «a)» thì nhãn không phân biệt được cái nào."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts(subs=('a)', 'a)'))}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 2)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_nhan_con_IN_ma_THIEU_O_thi_van_giu_hinh_gop(self):
+        """«Hình 1.3. Sự đa dạng của thiết bị vào - ra» có ba ô; chỉ ô c) đủ tin
+        cậy tới bộ chọn. Nhãn con in nên TÊN đúng — nhưng trẻ mất hai ô kia.
+        Nhãn con trả lời «mảnh này tên gì», không trả lời «đã đủ hình chưa»."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts(subs=('c)',), w=0.28)}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 1)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_MOT_manh_khong_nhan_cung_KHONG_duoc_muon_ten(self):
+        """`naming_conflict` chỉ bắt nhóm ≥2 — nhưng mẫu 55 ca cho thấy CA HẠI
+        NHẤT chỉ có MỘT mảnh đòi: «Hình 8.7. Các bước là quần áo» (5 ô) bị thay
+        bằng đúng ô «4». `partial_claim` bắt bằng quan hệ BAO HÀM."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts(subs=(None,), w=0.28)}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 1)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_manh_LON_gan_bang_ca_hinh_thi_van_thay_cho(self):
+        """Docling cắt lại gần trọn hình thì đó là CÙNG hình, không phải mảnh."""
+        st = __import__('collections').Counter()
+        big = [row(box=(0.12, 0.12, 0.74, 0.55),
+                   text='Hình 8. Luyện tập tung và bắt bóng trên cao')]
+        out = dp.select([self._d()], 'b', [3], {('b', 3): big}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 0)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+
+    def test_D_nam_gon_trong_DOCLING_thi_DOCLING_BU_phan_thieu(self):
+        """Chiều ngược lại là 990/3.403 cặp và là cái ta MUỐN: D cắt cụt, Docling
+        bù đủ. Luật mảnh không được chặn nhầm chiều này."""
+        st = __import__('collections').Counter()
+        d = dict(id='d0', book='b', page=3, bbox=[0.3, 0.3, 0.2, 0.15],
+                 caption='Hình 8. Luyện tập tung và bắt bóng trên cao',
+                 source='D')
+        out = dp.select([d], 'b', [3],
+                        {('b', 3): [row(box=(0.1, 0.1, 0.8, 0.6),
+                                        text='Hình 8. Luyện tập tung và bắt bóng trên cao')]},
+                        stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 0)
+        self.assertEqual([f['source'] for f in out], ['docling'])
+
+    def test_CHE_DO_BONG_dem_chan_nhung_KHONG_doi_dau_ra(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts()}, stats=st, shadow=True)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 2)
+        self.assertEqual([f['source'] for f in out], ['D', 'docling', 'docling'],
+                         'bóng phải ra ĐÚNG đầu ra đang chạy, kể cả cái sai')
+
+    def test_nhan_con_NUA_VOI_van_bi_chan(self):
+        """Sách in «a)» cho một mảnh, mảnh kia không có nhãn ⇒ CHƯA đủ để tách.
+
+        (Kiểm-đột-biến bắt được chỗ này: `all(subs)` đổi thành `any(subs)` vẫn
+        sống, vì không test nào chạm nhóm nửa có nhãn nửa không. Thả thì mảnh
+        không nhãn mượn nguyên tên hình gộp — đúng kiểu bịa danh tính.)
+        """
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts(subs=('a)', None))}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 2)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+
+class KhungNuotVatKhac(unittest.TestCase):
+    """Chốt thứ ba trong bộ chọn: khung ứng cử nuốt vật thể có TÊN KHÁC.
+
+    Ca thật: Tin học 6 tr.20 — khung mang tên «Hình 2.3» nuốt trọn «Hình 2.2».
+    """
+    CAP = 'Hình 2.3. Ví dụ cách kết nối 5 máy tính thành một mạng'
+    KHAC = 'Hình 2.2. Các thiết bị được nối vào mạng'
+
+    def _d(self):
+        return dict(id='d0', book='b', page=3, bbox=[0.15, 0.55, 0.60, 0.20],
+                    caption=self.CAP, source='D')
+
+    def _dl(self):
+        return [row(box=(0.10, 0.10, 0.80, 0.70), text=self.CAP)]
+
+    def _anchors(self, text):
+        return {3: [dict(text=text, x=0.20, y=0.15, w=0.40, h=0.03)]}
+
+    def test_nuot_chu_thich_KHAC_thi_GIU_D(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): self._dl()},
+                        stats=st, anchors=self._anchors(self.KHAC))
+        self.assertEqual(st['CONTAINS_SEPARATE_CAPTION'], 1)
+        self.assertEqual(st['CONTAINMENT_BLOCKED'], 1)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_chu_thich_CUA_CHINH_NO_thi_van_thay_cho(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): self._dl()},
+                        stats=st, anchors=self._anchors(self.CAP))
+        self.assertEqual(st['CONTAINMENT_BLOCKED'], 0)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+        self.assertEqual([f['source'] for f in out], ['docling'])
+
+    def test_CHE_DO_BONG_dem_chan_nhung_KHONG_doi_dau_ra(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): self._dl()},
+                        stats=st, shadow=True, anchors=self._anchors(self.KHAC))
+        self.assertEqual(st['CONTAINMENT_BLOCKED'], 1)
+        self.assertEqual([f['source'] for f in out], ['D', 'docling'],
+                         'bóng phải ra ĐÚNG đầu ra đang chạy')
+
+    def test_KHONG_truyen_chu_thich_thi_khong_kem_MO_HO(self):
+        """Người gọi cũ không truyền `anchors` — không được biến thành mơ hồ
+        rồi chặn sạch. Thiếu bằng chứng ở đây nghĩa là KHÔNG có bằng chứng
+        buộc tội, chứ không phải có bằng chứng buộc tội."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): self._dl()}, stats=st)
+        self.assertEqual(st['CONTAINMENT_BLOCKED'], 0)
+        self.assertEqual([f['source'] for f in out], ['docling'])
+
+    def test_hinh_D_o_TRANG_KHAC_khong_duoc_tinh_la_bi_nuot(self):
+        """⚠ Hộp là toạ độ CHUẨN HOÁ THEO TRANG. Không lọc trang thì một hình D
+        ở trang bên cạnh gần như bao giờ cũng «nằm trong» khung này.
+
+        Đo ngoài luồng ra 6 ca; lượt dựng THẬT đầu tiên ra 822 — sai 137 lần, và
+        toàn bộ là chặn oan. Chỉ có chạy thật mới lộ ra."""
+        st = __import__('collections').Counter()
+        khac = dict(id='d1', book='b', page=4, bbox=[0.20, 0.20, 0.30, 0.20],
+                    caption=self.KHAC, source='D')
+        out = dp.select([self._d(), khac], 'b', [3, 4],
+                        {('b', 3): self._dl()}, stats=st, anchors={3: [], 4: []})
+        self.assertEqual(st['CONTAINMENT_BLOCKED'], 0,
+                         'hình D ở trang khác không phải vật bị nuốt')
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
