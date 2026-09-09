@@ -132,7 +132,28 @@ def same_source_visual(d_fig, dl_row):
     return _iou([x, y, w, h], dl_row['box']) > 0
 
 
-def select(figs, book, pages, index, stats=None, shadow=False):
+def _sub_of(r):
+    return ((r.get('ident') or {}).get('sub') or '').strip().lower() or None
+
+
+def naming_conflict(claims):
+    """Nhóm vùng Docling cùng đòi thay MỘT hình D — có tách được không.
+
+    ⛔ CẠM BẪY HÌNH CON, đo được trên corpus: 161 hình D bị nhiều vùng Docling
+    cùng viện dẫn một chú thích. Thả cho thay chỗ thì «Hình 8. Luyện tập tung và
+    bắt bóng trên cao» biến thành SÁU ảnh khác nhau CÙNG MANG MỘT TÊN. Đó là
+    SAI TÊN, tệ hơn THIẾU TÊN.
+
+    Chỉ tách khi sách IN nhãn con phân biệt cho từng vùng. 13/161 nhóm đạt;
+    148 nhóm còn lại giữ hình D gộp — sách in một tên thì hiện một ảnh.
+    """
+    if len(claims) < 2:
+        return False
+    subs = [_sub_of(r) for _, r in claims]
+    return not (all(subs) and len(set(subs)) == len(subs))
+
+
+def select(figs, book, pages, index, stats=None, shadow=False, log=None):
     """Danh sách hình HIỆN CHO TRẺ, sau khi chọn giữa hai đường.
 
     `shadow=True`: ĐẾM quyết định của chính sách MỚI nhưng vẫn ra ĐÚNG ĐẦU RA
@@ -159,12 +180,38 @@ def select(figs, book, pages, index, stats=None, shadow=False):
         taken.append(box)
 
     for pp in pages:
-        for k, r in enumerate(index.get((book, pp), [])):
+        rows = list(enumerate(index.get((book, pp), [])))
+        # PHA 1 — ai đòi thay hình D nào. Phải biết TOÀN nhóm trước khi quyết,
+        # vì nguy hiểm nằm ở SỐ LƯỢNG vùng cùng đòi, không ở từng vùng một.
+        claims = {}
+        for k, r in rows:
+            for f in out:
+                if f.get('source') != 'docling' and same_source_visual(f, r):
+                    claims.setdefault(id(f), []).append((k, r))
+                    break
+        blocked = set()
+        for grp in claims.values():
+            if naming_conflict(grp):
+                blocked.update(k for k, _ in grp)
+
+        for k, r in rows:
             box = r['box']
             same = [f for f in out if f.get('source') != 'docling'
                     and same_source_visual(f, r)]
-            if same:
+            if k in blocked:
+                bump('SUBFIGURE_WITHHELD')
+                if not shadow:
+                    continue          # giữ hình D gộp, BỎ các mảnh trùng tên
+                # BÓNG: rơi xuống đúng luật cũ, không được rẽ hướng.
+            elif same:
                 bump('DOCLING_SUPERSEDES_D')
+                if log is not None:
+                    # Ghi CẶP để dựng mẫu đối chiếu ba bên: NGUỒN · D · DOCLING.
+                    log.append(dict(book=book, page=pp,
+                                    d_bbox=[round(v, 4) for v in same[0]['bbox']],
+                                    dl_bbox=[round(v, 4) for v in box],
+                                    caption=(r.get('ident') or {}).get('text'),
+                                    kind=r.get('kind') or 'picture'))
                 if not shadow:
                     for f in same:
                         out.remove(f)

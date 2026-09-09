@@ -191,3 +191,75 @@ class BoChonHinh(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class CamBayHinhCon(unittest.TestCase):
+    """⛔ SAI TÊN > THIẾU TÊN — không mảnh nào được mượn tên của hình gộp.
+
+    Bóng toàn corpus đo được 161 hình D bị NHIỀU vùng Docling cùng viện dẫn một
+    chú thích in. Nếu thả, «Hình 8. Luyện tập tung và bắt bóng trên cao» thành
+    SÁU ảnh khác nhau cùng một tên. 13/161 nhóm có nhãn con in phân biệt.
+    """
+    def _d(self, cap='Hình 8. Luyện tập tung và bắt bóng trên cao'):
+        return dict(id='d0', book='b', page=3, bbox=[0.1, 0.1, 0.8, 0.6],
+                    caption=cap, source='D')
+
+    def _parts(self, subs=(None, None)):
+        cap = 'Hình 8. Luyện tập tung và bắt bóng trên cao'
+        return [row(box=(0.1 + 0.25 * i, 0.1, 0.2, 0.6), text=cap, sub=s)
+                for i, s in enumerate(subs)]
+
+    def test_nhieu_manh_KHONG_co_nhan_con_thi_GIU_HINH_GOP(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts()}, stats=st)
+        self.assertEqual(st['SUBFIGURE_WITHHELD'], 2)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 0)
+        self.assertEqual([f['source'] for f in out], ['D'],
+                         'sách in MỘT tên thì hiện MỘT ảnh')
+
+    def test_nhan_con_IN_phan_biet_thi_duoc_tach(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts(subs=('a)', 'b)'))}, stats=st)
+        self.assertEqual(st['SUBFIGURE_WITHHELD'], 0)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+        self.assertEqual(sorted(f['caption'] for f in out), ['a)', 'b)'])
+
+    def test_nhan_con_TRUNG_NHAU_van_bi_chan(self):
+        """Hai mảnh cùng nhãn «a)» thì nhãn không phân biệt được cái nào."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts(subs=('a)', 'a)'))}, stats=st)
+        self.assertEqual(st['SUBFIGURE_WITHHELD'], 2)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_MOT_manh_duy_nhat_KHONG_phai_xung_dot(self):
+        """Chốt này chỉ bắt nhóm ≥2. Một-đổi-một vẫn phải thay chỗ như thường."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts(subs=(None,))}, stats=st)
+        self.assertEqual(st['SUBFIGURE_WITHHELD'], 0)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+        self.assertEqual([f['source'] for f in out], ['docling'])
+
+    def test_CHE_DO_BONG_dem_chan_nhung_KHONG_doi_dau_ra(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts()}, stats=st, shadow=True)
+        self.assertEqual(st['SUBFIGURE_WITHHELD'], 2)
+        self.assertEqual([f['source'] for f in out], ['D', 'docling', 'docling'],
+                         'bóng phải ra ĐÚNG đầu ra đang chạy, kể cả cái sai')
+
+    def test_nhan_con_NUA_VOI_van_bi_chan(self):
+        """Sách in «a)» cho một mảnh, mảnh kia không có nhãn ⇒ CHƯA đủ để tách.
+
+        (Kiểm-đột-biến bắt được chỗ này: `all(subs)` đổi thành `any(subs)` vẫn
+        sống, vì không test nào chạm nhóm nửa có nhãn nửa không. Thả thì mảnh
+        không nhãn mượn nguyên tên hình gộp — đúng kiểu bịa danh tính.)
+        """
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts(subs=('a)', None))}, stats=st)
+        self.assertEqual(st['SUBFIGURE_WITHHELD'], 2)
+        self.assertEqual([f['source'] for f in out], ['D'])

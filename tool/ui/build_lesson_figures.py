@@ -166,6 +166,7 @@ def main():
     DL_TRUSTED = docling_pack.readable_by_page()
     DL_STATS = collections.Counter()
     SELECTOR_SHADOW = os.environ.get('SELECTOR_SHADOW') == '1'
+    SEL_LOG = [] if os.environ.get('SELECTOR_LOG') else None
     if SELECTOR_SHADOW:
         print('  ⚠ CHẾ ĐỘ BÓNG: chỉ đếm quyết định chọn hình, KHÔNG đổi pack')
     if DL_TRUSTED:
@@ -191,7 +192,8 @@ def main():
         # nguồn — bằng chú thích in, không bằng chồng hộp. Không chứng minh
         # được ⇒ D là dự phòng. `SELECTOR_SHADOW=1` chỉ đếm, không đổi đầu ra.
         figs = docling_pack.select(figs, r['book'], pages, DL_TRUSTED,
-                                   stats=DL_STATS, shadow=SELECTOR_SHADOW)
+                                   stats=DL_STATS, shadow=SELECTOR_SHADOW,
+                                   log=SEL_LOG)
         DL_STATS['CHI_D'] += n_d
         recs = []
         for f in figs:
@@ -259,6 +261,10 @@ def main():
     # MANIFEST — máy cài pack phải kiểm được TRƯỚC KHI kích hoạt: đúng tệp
     # không, đủ byte không, băm có khớp không. Nửa tệp mà vẫn nạp thì trẻ mở bài
     # ra thấy ảnh vỡ, và không ai biết vì sao.
+    if SEL_LOG is not None:
+        with open(os.environ['SELECTOR_LOG'], 'a', encoding='utf-8') as fh:
+            for x in SEL_LOG:
+                fh.write(json.dumps(x, ensure_ascii=False) + '\n')
     raw = open(db_path, 'rb').read()
     digest = hashlib.sha256(raw).hexdigest()
     manifest = dict(grade=a.grade, file=os.path.basename(db_path),
