@@ -36,6 +36,7 @@ from lesson_figures import lesson_figures, crop_jpeg  # noqa: E402
 import docling_pack  # noqa: E402
 import decoration  # noqa: E402
 import table_ownership  # noqa: E402
+import staging  # noqa: E402
 from lesson_reading import lesson_reading  # noqa: E402
 from read_structure import block_kind  # noqa: E402
 
@@ -141,10 +142,9 @@ def main():
     # lượt «dựng sang chỗ khác để đối chiếu» vẫn ghi đè index canonical tại chỗ.
     # Kho .db thì có `--out`, còn index thì không — hai nửa của một lần dựng đi
     # về hai nơi khác nhau mà không có gì báo.
-    pack_dir = os.environ.get('PACK_OUT_DIR', 'assets/pack')
-    if not os.path.isabs(pack_dir):
-        pack_dir = os.path.join(ROOT, pack_dir)
-    idx_path = os.path.join(pack_dir, f'lesson-index-g{a.grade}.json')
+    pack_dir = staging.pack_dir()
+    idx_path = staging.guard(
+        os.path.join(pack_dir, f'lesson-index-g{a.grade}.json'), 'index bài học')
     if not os.path.exists(idx_path):
         # ĐÓNG CHẶT: không lặng lẽ lùi về pack canonical. Thiếu index dàn dựng
         # nghĩa là bước trước chưa chạy — dựng tiếp là dựng lên dữ liệu sai.
@@ -157,9 +157,12 @@ def main():
         readings = readings[:a.limit]
     pdfs = pdf_map()
 
-    out_dir = a.out or os.path.join(ROOT, 'poc-out/packs/figures')
+    # Kho ảnh phải đi CÙNG index. Mặc định cũ trỏ thẳng thư mục canonical,
+    # nên `PACK_OUT_DIR` chỉ dời được một nửa lượt dựng.
+    out_dir = staging.figures_dir(a.out)
     os.makedirs(out_dir, exist_ok=True)
-    db_path = os.path.join(out_dir, f'figures-g{a.grade}.db')
+    db_path = staging.guard(os.path.join(out_dir, f'figures-g{a.grade}.db'),
+                            'kho ảnh')
     # ⭐ DỰNG SANG TỆP TẠM RỒI MỚI ĐỔI TÊN.
     # Bản trước XOÁ kho cũ ngay từ đầu, nên một lần dựng hỏng giữa chừng (đã xảy
     # ra thật: `disk I/O error` ở lớp 7) làm mất luôn kho ĐANG CHẠY TỐT. Cùng bài
@@ -288,7 +291,8 @@ def main():
                     bridge=dict(sorted(DL_STATS.items())),
                     pageFurnitureRemoved=n_dec,
                     sectionFurnitureRemoved=n_sec)
-    mpath = os.path.join(out_dir, f'figures-g{a.grade}.manifest.json')
+    mpath = staging.guard(os.path.join(out_dir, f'figures-g{a.grade}.manifest.json'),
+                          'manifest')
     with open(mpath, 'w', encoding='utf-8') as fh:
         json.dump(manifest, fh, ensure_ascii=False, indent=1)
     print(f'lớp {a.grade}: {n_fig} hình ({n_cap} có chú thích của sách) trong '
