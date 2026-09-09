@@ -227,6 +227,21 @@ def select(figs, book, pages, index, stats=None, shadow=False, log=None,
         if stats is not None:
             stats[k] += 1
 
+    def note(decision, pp, d_fig, r):
+        """Ghi CẶP cho MỌI quyết định, không chỉ ca thay chỗ.
+
+        Mẫu đối chiếu phải lấy được cả ca BỊ CHẶN — Founder Gate: «deliberately
+        include candidates near the new containment boundary». Chỉ ghi ca thắng
+        thì mẫu chỉ soi được nửa chính sách.
+        """
+        if log is None:
+            return
+        log.append(dict(book=book, page=pp, decision=decision,
+                        d_bbox=[round(v, 4) for v in d_fig['bbox']],
+                        dl_bbox=[round(v, 4) for v in r['box']],
+                        caption=(r.get('ident') or {}).get('text'),
+                        kind=r.get('kind') or 'picture'))
+
     out = list(figs)
     taken = [f['bbox'] for f in out]
 
@@ -253,10 +268,15 @@ def select(figs, book, pages, index, stats=None, shadow=False, log=None,
         for fid, grp in claims.items():
             if naming_conflict(grp):
                 blocked.update(k for k, _ in grp)
+                for k, r in grp:
+                    note('SUBFIGURE_NAME_CLASH', pp, by_id[fid], r)
                 continue
             parts = [k for k, r in grp if partial_claim(by_id[fid], r)]
             if parts and not covers(by_id[fid], grp):
                 blocked.update(parts)   # mảnh rời, không dựng lại được cả hình
+                for k, r in grp:
+                    if k in parts:
+                        note('PART_OF_NAMED_FIGURE', pp, by_id[fid], r)
                 continue
             # ⭐ CHỐT THỨ BA: khung ứng cử có NUỐT một vật thể nguồn có tên
             # khác không. Hỏng về phía GIỮ D — không cắt gọt khung cho vừa.
@@ -270,6 +290,7 @@ def select(figs, book, pages, index, stats=None, shadow=False, log=None,
                     have_lines=anchors is None or pp in anchors)
                 if lab:
                     swallow[k] = lab
+                    note(lab, pp, d_fig, r)
 
         for k, r in rows:
             box = r['box']
@@ -288,13 +309,7 @@ def select(figs, book, pages, index, stats=None, shadow=False, log=None,
                 # BÓNG: rơi xuống đúng luật cũ, không được rẽ hướng.
             elif same:
                 bump('DOCLING_SUPERSEDES_D')
-                if log is not None:
-                    # Ghi CẶP để dựng mẫu đối chiếu ba bên: NGUỒN · D · DOCLING.
-                    log.append(dict(book=book, page=pp,
-                                    d_bbox=[round(v, 4) for v in same[0]['bbox']],
-                                    dl_bbox=[round(v, 4) for v in box],
-                                    caption=(r.get('ident') or {}).get('text'),
-                                    kind=r.get('kind') or 'picture'))
+                note('DOCLING_SUPERSEDES_D', pp, same[0], r)
                 if not shadow:
                     for f in same:
                         out.remove(f)
