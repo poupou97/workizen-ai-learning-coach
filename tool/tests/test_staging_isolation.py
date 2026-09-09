@@ -103,6 +103,24 @@ class RanhGioi(unittest.TestCase):
 class DungThuThat(unittest.TestCase):
     """Chạy một lượt dựng thật rồi băm lại chỗ canonical."""
 
+    def test_thieu_index_dan_dung_thi_DUNG_HAN(self):
+        """Lùi âm thầm về pack canonical là cách hỏng tệ nhất: chạy xong, xanh,
+        và dữ liệu thử nghiệm nằm trong chỗ thật.
+
+        (Bài kiểm cũ đọc MÃ NGUỒN bằng chuỗi. Nó mục ngay khi mã dời sang
+        `staging.py` — và một bài kiểm mục thì tệ hơn không có, vì nó vẫn xanh
+        cho tới lúc ai đó nhìn kỹ. Đo HÀNH VI thì không mục theo cách ấy.)
+        """
+        d = tempfile.mkdtemp(prefix='wal-stage-trong-')
+        pr = subprocess.run(
+            [sys.executable, os.path.join(ROOT, 'tool/ui/build_lesson_figures.py'), '6'],
+            cwd=ROOT, env=dict(os.environ, PACK_OUT_DIR=d),
+            capture_output=True, text=True, timeout=120)
+        self.assertNotEqual(pr.returncode, 0, 'thiếu index mà vẫn chạy tiếp')
+        self.assertIn('không có index bài học', pr.stdout + pr.stderr)
+        self.assertFalse(os.path.exists(os.path.join(d, 'figures')),
+                         'đã dựng gì đó dù thiếu đầu vào')
+
     def test_dung_thu_BI_NGAT_van_de_canonical_nguyen_ven(self):
         before = fingerprint(PACK, FIGS)
         d = tempfile.mkdtemp(prefix='wal-stage-')
