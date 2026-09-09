@@ -43,14 +43,19 @@ def band(g):
 def required_visuals(book, pages):
     """Chú thích ĐÁNH SỐ sách in trên các trang của bài — hình BẮT BUỘC phải có.
 
-    Dùng mẫu hai cấp đã công bố («Hình 5.1»), không dùng họ mở rộng: ở đây cần
-    bằng chứng chắc nhất, không cần độ phủ.
+    Dùng CẢ họ đánh số một cấp («Hình 2»), vì ở đây câu hỏi là «SÁCH ĐÒI HỎI
+    hình nào», cần ĐỘ PHỦ của bằng chứng in. Mẫu hai cấp một mình bỏ lọt gần
+    hết: trên 21 bài lấy thử, nó chỉ tìm thấy chú thích ở 2 bài.
+
+    Vẫn KHÔNG dùng họ «dấu nguồn» — corpus đã bác bỏ nó (7/7 sai).
     """
     from lesson_reading import page_lines
     import figure_funnel as ff
     out = []
     for p in pages:
-        for a in ff.caption_anchors(page_lines(book, p) or []):
+        ls = page_lines(book, p) or []
+        bl = ff.block_line_counts(ls)
+        for a in ff.caption_anchors(ls, extended=True, block_lines=bl):
             out.append(dict(page=p, kind=a['kind'], num=a['num'], text=a['text']))
     return out
 
