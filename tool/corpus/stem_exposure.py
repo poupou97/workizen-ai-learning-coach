@@ -35,8 +35,11 @@ sys.path.insert(0, HERE)
 from lesson_reading import page_paragraphs  # noqa: E402
 
 OCR = os.path.join(ROOT, 'poc-out/graph/ocr-body')
-SUBJ = [('toan', 'Toán'), ('vat-li', 'Vật lí'), ('hoa-hoc', 'Hoá học'),
-        ('tin-hoc', 'Tin học'), ('khoa-hoc-tu-nhien', 'KHTN'),
+# ⚠ THỨ TỰ QUAN TRỌNG: chuỗi 'khoa-hoc' CHỨA 'hoa-hoc'. Xét 'hoa-hoc' trước
+# thì «Tin học 11 định hướng KHOA HỌC máy tính» bị gán nhãn «Hoá học» — bảng
+# đối chiếu bốn bên đã hiện ra đúng lỗi ấy.
+SUBJ = [('toan', 'Toán'), ('vat-li', 'Vật lí'), ('khoa-hoc-tu-nhien', 'KHTN'),
+        ('tin-hoc', 'Tin học'), ('hoa-hoc', 'Hoá học'),
         ('sinh-hoc', 'Sinh học'), ('cong-nghe', 'Công nghệ')]
 INSIDE = 0.60      # đoạn văn nằm trong vùng chừng này thì coi là CỦA vùng ấy
 

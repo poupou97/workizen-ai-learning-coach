@@ -115,6 +115,17 @@ class DungKhoi(unittest.TestCase):
         self.assertEqual(blk, [], 'không được dựng khối khi không bỏ được chữ')
         self.assertEqual(owned, set())
 
+    def test_doan_DAI_phu_vung_van_lam_no_chot_chong_C(self):
+        """⚠ HAI MẪU SỐ KHÁC NHAU. Đoạn dài «T(n) = n2 + 3n - 3 Xác định độ
+        phức tạp…» chỉ có 1,5% diện tích CỦA NÓ nằm trong vùng công thức bé,
+        nhưng phủ ~80% DIỆN TÍCH VÙNG. Dùng nhầm mẫu số thì chốt không nổ và
+        trẻ thấy ảnh đúng cạnh chữ hỏng — đúng C bị cấm. Ca thật ở Tin học 11
+        tr.119, lọt qua tới tận vòng soi mẫu bốn bên."""
+        nho = [0.30, 0.28, 0.08, 0.03]          # vùng công thức bé
+        dai = [para([0.10, 0.20, 0.90, 0.55], 'công thức + cả đoạn văn dài', seq=4)]
+        blk, _ = fs.blocks('b', 21, [nho], dai)
+        self.assertEqual(blk, [], 'đoạn dài phủ vùng phải chặn được khối')
+
     def test_vung_SACH_khong_co_chu_nao_thi_VAN_dung_khoi(self):
         """Không có chữ nào để mâu thuẫn ⇒ hiện ảnh là lãi ròng, không phải C."""
         xa = [para([0.10, 0.80, 0.60, 0.90], 'đoạn ở xa', seq=3)]

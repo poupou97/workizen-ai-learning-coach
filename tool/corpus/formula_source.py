@@ -132,12 +132,32 @@ def identity(texts):
     return found.pop() if len(found) == 1 else None
 
 
-TOUCH = 0.05              # đoạn CHẠM vào vùng chừng này thì coi là có dính
+TOUCH = 0.20              # chữ phủ chừng này DIỆN TÍCH VÙNG thì trong vùng có chữ
+
+
+def _covers_region(inner, region):
+    """Phần diện tích VÙNG bị `inner` phủ — mẫu số là VÙNG, không phải `inner`.
+
+    ⚠ ĐÂY LÀ MỘT MẪU SỐ KHÁC VỚI `_inside_frac`, VÀ CHỌN NHẦM THÌ CHỐT THỦNG.
+    `_inside_frac` hỏi «đoạn này có thuộc về vùng không» ⇒ mẫu số là ĐOẠN.
+    Ở đây hỏi «trong vùng có chữ không» ⇒ mẫu số là VÙNG.
+
+    Bản đầu tôi dùng nhầm `_inside_frac`: Tin học 11 tr.119, đoạn «T(n) = n2 +
+    3n - 3 Xác định độ phức tạp O-lớn của thuật toán…» dài nên chỉ 1,5% diện
+    tích CỦA NÓ nằm trong vùng công thức bé — dưới ngưỡng, chốt không nổ, khối
+    được dựng và trẻ thấy ẢNH ĐÚNG CẠNH CHỮ HỎNG. Đúng phương án C bị cấm.
+    Cùng đoạn ấy phủ ~80% DIỆN TÍCH VÙNG.
+    """
+    ix = min(inner[0] + inner[2], region[0] + region[2]) - max(inner[0], region[0])
+    iy = min(inner[1] + inner[3], region[1] + region[3]) - max(inner[1], region[1])
+    if ix <= 0 or iy <= 0:
+        return 0.0
+    return (ix * iy) / max(region[2] * region[3], 1e-9)
 
 
 def _touched(region, paragraphs):
-    """Có đoạn văn nào CHẠM vào vùng mà không nằm gọn trong đó không."""
-    return any(_inside_frac(_wh(p['box']), region) > TOUCH
+    """Trong vùng có chữ OCR mà ta KHÔNG bỏ được không."""
+    return any(_covers_region(_wh(p['box']), region) > TOUCH
                for p in paragraphs if p.get('box'))
 
 

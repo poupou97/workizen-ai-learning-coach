@@ -115,10 +115,16 @@ def main():
     n = c['FORMULA_TOTAL']
     print('═══ CENSUS TOÀN CORPUS (không phải ước lượng từ mẫu) ═══\n')
     print(f'  FORMULA_TOTAL                      {n:6d}')
-    for k in ('FORMULA_SOURCE_REGION_AVAILABLE', 'FORMULA_BLOCK_IN_READ',
-              'UNSAFE_OCR_SUPPRESSED', 'FORMULA_WITHHELD_AVOID_C',
+    # ⚠ ĐƠN VỊ. Chỉ số đếm VÙNG mới lấy `FORMULA_TOTAL` làm mẫu số. Số đoạn
+    # văn bị bỏ là ĐƠN VỊ KHÁC (đoạn, không phải vùng) — in tỉ lệ chung cho nó
+    # ra 129,5%, một con số vô nghĩa. Đây đúng cái bẫy hôm nay đã dính.
+    for k in ('FORMULA_SOURCE_REGION_AVAILABLE', 'FORMULA_WITHHELD_AVOID_C',
               'FORMULA_WITHHELD_UNSAFE_REGION', 'REGION_KHONG_CO_CHU'):
-        print(f'  {k:34s} {c[k]:6d}  {c[k] / n:6.1%}')
+        print(f'  {k:34s} {c[k]:6d}  {c[k] / n:6.1%}  (vùng)')
+    print(f'  {"FORMULA_BLOCK_IN_READ":34s} {c["FORMULA_BLOCK_IN_READ"]:6d}'
+          f'          (LƯỢT vào bài — một trang dùng chung nhiều bài)')
+    print(f'  {"UNSAFE_OCR_SUPPRESSED":34s} {c["UNSAFE_OCR_SUPPRESSED"]:6d}'
+          f'          (ĐOẠN văn, đơn vị khác — không chia cho số vùng)')
     tp = c['SURROUNDING_PROSE_TOTAL']
     print(f'\n  SURROUNDING_PROSE_PRESERVED        {c["SURROUNDING_PROSE_PRESERVED"]:6d}'
           f'/{tp}  {c["SURROUNDING_PROSE_PRESERVED"] / max(tp, 1):.2%}')
