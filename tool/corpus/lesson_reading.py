@@ -216,8 +216,16 @@ def page_paragraphs(lines, drop=frozenset()):
                 and (l.get('text') or '').strip() not in drop]
         if not keep:
             continue
+        # ⭐ MANG THEO HỘP BAO, không chỉ `y`. Có hộp thì bước sau mới trả lời
+        # được câu «dòng chữ này có nằm TRONG một vùng bảng đáng tin không» —
+        # tức là ai SỞ HỮU nó. Không có bằng chứng sở hữu thì không được xoá
+        # chữ của sách.
         out.append(dict(y=round(min(l['y'] for l in b), 4),
                         seq=min(order.get(id(l), 1 << 30) for l in keep),
+                        box=[round(min(l['x'] for l in keep), 4),
+                             round(min(l['y'] for l in keep), 4),
+                             round(max(l['x'] + (l.get('w') or 0) for l in keep), 4),
+                             round(max(l['y'] + (l.get('h') or 0) for l in keep), 4)],
                         text=' '.join((l.get('text') or '').strip() for l in keep).strip()))
     return sorted(out, key=lambda p: p['seq'])
 
