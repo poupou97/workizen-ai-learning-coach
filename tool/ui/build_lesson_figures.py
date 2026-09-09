@@ -136,7 +136,21 @@ def main():
                     help='thư mục pack (mặc định poc-out/packs/figures — KHÔNG phải assets/)')
     a = ap.parse_args()
 
-    idx_path = os.path.join(ROOT, f'assets/pack/lesson-index-g{a.grade}.json')
+    # ⭐ AN TOÀN DỰNG (WAL-230): dựng thử KHÔNG được chạm dữ liệu đang phục vụ.
+    # Bản trước đọc VÀ GHI thẳng `assets/pack/` bất kể `PACK_OUT_DIR`, nên một
+    # lượt «dựng sang chỗ khác để đối chiếu» vẫn ghi đè index canonical tại chỗ.
+    # Kho .db thì có `--out`, còn index thì không — hai nửa của một lần dựng đi
+    # về hai nơi khác nhau mà không có gì báo.
+    pack_dir = os.environ.get('PACK_OUT_DIR', 'assets/pack')
+    if not os.path.isabs(pack_dir):
+        pack_dir = os.path.join(ROOT, pack_dir)
+    idx_path = os.path.join(pack_dir, f'lesson-index-g{a.grade}.json')
+    if not os.path.exists(idx_path):
+        # ĐÓNG CHẶT: không lặng lẽ lùi về pack canonical. Thiếu index dàn dựng
+        # nghĩa là bước trước chưa chạy — dựng tiếp là dựng lên dữ liệu sai.
+        raise SystemExit(
+            f'{idx_path}: không có index bài học.\n'
+            f'Chạy build_lesson_index.py với CÙNG PACK_OUT_DIR={pack_dir} trước.')
     idx = json.load(open(idx_path, encoding='utf-8'))
     readings = idx.get('lessonReadings') or []
     if a.limit:
