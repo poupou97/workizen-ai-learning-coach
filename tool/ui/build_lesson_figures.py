@@ -324,6 +324,12 @@ def main():
                         FML_STATS['BO_CAT_KHONG_TRON'] += 1
                         continue          # ĐÓNG CHẶT: không hiện công thức cụt
                     b['bbox'] = fit
+                    # ⭐ XUẤT XỨ PHẢI NÓI ĐÚNG VÙNG ĐÃ CẮT. Giữ hộp gốc ở đây
+                    # là ghi sai lý lịch: ai dựng lại ảnh từ `src.region` sẽ ra
+                    # một ảnh CỤT khác với ảnh trẻ đang xem. Chính chỗ này đã
+                    # làm bảng đối chiếu của tôi báo nhầm 4 ca «cắt cụt».
+                    b['src'] = dict(b['src'], region=[round(v, 4) for v in fit],
+                                    fitted=True)
                     jpeg, (w, h) = crop_jpeg(pdf, pp2, fit, pad=0.0)
                 except Exception as e:        # cắt hỏng ⇒ ĐÓNG CHẶT, không khối
                     print(f"  ! {b['id']}: {e}", file=sys.stderr)

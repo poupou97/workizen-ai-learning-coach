@@ -263,6 +263,23 @@ class DemCat(unittest.TestCase):
         self.assertIn('pad', inspect.signature(crop_jpeg).parameters,
                       'khối công thức phải cắt được với đệm 0')
 
+    def test_xuat_xu_ghi_dung_vung_DA_CAT(self):
+        """⚠ Xuất xứ phải nói đúng vùng ĐÃ CẮT, không phải hộp gốc.
+
+        Ghi hộp gốc thì ai dựng lại ảnh từ `src.region` sẽ ra ảnh CỤT khác với
+        ảnh trẻ đang xem — và chính chỗ ấy đã làm bảng đối chiếu của tôi báo
+        nhầm 4 ca «cắt cụt» trong khi ảnh lưu hoàn toàn đúng.
+        """
+        p = os.path.join(HERE, '..', 'ui', 'build_lesson_figures.py')
+        with open(p, encoding='utf-8') as fh:
+            src = fh.read()
+        # ⚠ Neo vào CHỖ GỌI, không phải lần xuất hiện đầu tiên của tên hàm —
+        # lần đầu nằm trong docstring của `_grey_render` và test bắt nhầm.
+        i = src.index('FML_STATS')
+        blk = src[i:src.index('pending.append', i)]
+        self.assertIn("region=", blk, 'phải ghi lại vùng đã nới vào src')
+        self.assertIn('fitted', blk, 'phải đánh dấu là đã nới')
+
     def test_builder_cat_cong_thuc_KHONG_dung_dem_cua_hinh(self):
         """⚠ Bài kiểm bám vào CHUỖI GỌI thì mục ngay khi chữ ký đổi — đã dính
         một lần hôm nay. Bám vào TÍNH CHẤT: đường công thức phải đi qua
