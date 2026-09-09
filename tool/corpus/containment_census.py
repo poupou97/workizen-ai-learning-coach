@@ -24,7 +24,7 @@ import figure_funnel as ff        # noqa: E402
 from lesson_figures import lesson_figures  # noqa: E402
 
 OCR = os.path.join(ROOT, 'poc-out/graph/ocr-body')
-PAIRS = os.path.join(ROOT, 'poc-out/docling/selector-pairs-final.json')
+PAIRS = os.path.join(ROOT, 'poc-out/docling/selector-pairs-uniq.json')
 TRUSTED = os.path.join(ROOT, 'poc-out/docling/trusted.jsonl')
 
 

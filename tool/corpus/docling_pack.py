@@ -197,13 +197,21 @@ def covers(d_fig, claims):
 def naming_conflict(claims):
     """Nhóm vùng Docling cùng đòi thay MỘT hình D — có tách được không.
 
-    ⛔ CẠM BẪY HÌNH CON, đo được trên corpus: 161 hình D bị nhiều vùng Docling
-    cùng viện dẫn một chú thích. Thả cho thay chỗ thì «Hình 8. Luyện tập tung và
-    bắt bóng trên cao» biến thành SÁU ảnh khác nhau CÙNG MANG MỘT TÊN. Đó là
+    Bất biến: chỉ tách khi sách IN nhãn con phân biệt cho từng vùng. Không có
+    nhãn phân biệt mà vẫn tách thì nhiều ảnh khác nhau cùng mang một tên —
     SAI TÊN, tệ hơn THIẾU TÊN.
 
-    Chỉ tách khi sách IN nhãn con phân biệt cho từng vùng. 13/161 nhóm đạt;
-    148 nhóm còn lại giữ hình D gộp — sách in một tên thì hiện một ảnh.
+    ⚠ TÔI ĐÃ BÁO SAI CON SỐ CHO CHỐT NÀY, và ghi lại đây để không lặp lại.
+    Lần đầu tôi đếm «161 hình D bị nhiều vùng cùng đòi, 148 nhóm sẽ đặt trùng
+    tên» rồi lấy «Hình 8. Luyện tập tung và bắt bóng trên cao thành SÁU ảnh
+    cùng tên» làm ví dụ. Sai. Nhật ký ghi MỘT DÒNG MỖI LẦN XỬ LÝ, mà một trang
+    được nhiều bài dùng chung qua attach — trang 97 ấy đi qua 6 bài, nên MỘT
+    vùng duy nhất hiện ra thành sáu dòng. Khử trùng lặp theo (sách, trang, hộp)
+    rồi đếm lại: 3.551 ứng cử duy nhất, 13 nhóm đa-vùng, và CẢ 13 đều có nhãn
+    con in phân biệt ⇒ chốt này chặn ĐÚNG 0 vùng trên corpus hiện tại.
+
+    Giữ lại vì đây là bất biến đúng, đóng chặt, và rẻ — không giữ vì nó bắt
+    được gì. Bài học: nhật ký theo LƯỢT XỬ LÝ không phải mẫu số để đếm VẬT THỂ.
     """
     if len(claims) < 2:
         return False
@@ -285,7 +293,12 @@ def select(figs, book, pages, index, stats=None, shadow=False, log=None,
                 lab, _ = containment.swallowed(
                     r['box'], caption_of(r), d_fig['bbox'],
                     anchors=(anchors or {}).get(pp) or (),
-                    d_figs=[f for f in out if f.get('source') != 'docling'],
+                    # ⛔ CÙNG TRANG. Hộp là toạ độ CHUẨN HOÁ THEO TRANG, nên
+                    # một hình D ở trang khác gần như bao giờ cũng «nằm trong»
+                    # khung này. Bản đầu quên lọc trang: đo ngoài luồng ra 6 ca,
+                    # dựng thật ra 822 — sai 137 lần, và toàn là chặn OAN.
+                    d_figs=[f for f in out if f.get('source') != 'docling'
+                            and f.get('page') == pp],
                     trusted=index.get((book, pp)) or (),
                     have_lines=anchors is None or pp in anchors)
                 if lab:

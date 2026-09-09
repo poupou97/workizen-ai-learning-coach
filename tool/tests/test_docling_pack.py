@@ -196,9 +196,11 @@ if __name__ == '__main__':
 class CamBayHinhCon(unittest.TestCase):
     """⛔ SAI TÊN > THIẾU TÊN — không mảnh nào được mượn tên của hình gộp.
 
-    Bóng toàn corpus đo được 161 hình D bị NHIỀU vùng Docling cùng viện dẫn một
-    chú thích in. Nếu thả, «Hình 8. Luyện tập tung và bắt bóng trên cao» thành
-    SÁU ảnh khác nhau cùng một tên. 13/161 nhóm có nhãn con in phân biệt.
+    ⚠ Con số tôi báo lần đầu cho `naming_conflict` («161 nhóm, 148 đặt trùng
+    tên») SAI: nhật ký ghi một dòng mỗi LƯỢT XỬ LÝ, mà attach làm một trang đi
+    qua nhiều bài. Đếm trên ứng cử DUY NHẤT: 13 nhóm đa-vùng, cả 13 đều có nhãn
+    con in phân biệt ⇒ chốt ấy chặn 0 vùng. Nó vẫn được giữ như một bất biến
+    đóng chặt. Chốt thật sự bắt được là `partial_claim` + `covers`.
     """
     def _d(self, cap='Hình 8. Luyện tập tung và bắt bóng trên cao'):
         return dict(id='d0', book='b', page=3, bbox=[0.1, 0.1, 0.8, 0.6],
@@ -364,3 +366,18 @@ class KhungNuotVatKhac(unittest.TestCase):
         out = dp.select([self._d()], 'b', [3], {('b', 3): self._dl()}, stats=st)
         self.assertEqual(st['CONTAINMENT_BLOCKED'], 0)
         self.assertEqual([f['source'] for f in out], ['docling'])
+
+    def test_hinh_D_o_TRANG_KHAC_khong_duoc_tinh_la_bi_nuot(self):
+        """⚠ Hộp là toạ độ CHUẨN HOÁ THEO TRANG. Không lọc trang thì một hình D
+        ở trang bên cạnh gần như bao giờ cũng «nằm trong» khung này.
+
+        Đo ngoài luồng ra 6 ca; lượt dựng THẬT đầu tiên ra 822 — sai 137 lần, và
+        toàn bộ là chặn oan. Chỉ có chạy thật mới lộ ra."""
+        st = __import__('collections').Counter()
+        khac = dict(id='d1', book='b', page=4, bbox=[0.20, 0.20, 0.30, 0.20],
+                    caption=self.KHAC, source='D')
+        out = dp.select([self._d(), khac], 'b', [3, 4],
+                        {('b', 3): self._dl()}, stats=st, anchors={3: [], 4: []})
+        self.assertEqual(st['CONTAINMENT_BLOCKED'], 0,
+                         'hình D ở trang khác không phải vật bị nuốt')
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
