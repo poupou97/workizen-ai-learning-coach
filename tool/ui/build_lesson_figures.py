@@ -34,6 +34,7 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(ROOT, 'tool', 'corpus'))
 from lesson_figures import lesson_figures, crop_jpeg  # noqa: E402
 import docling_pack  # noqa: E402
+import decoration  # noqa: E402
 from lesson_reading import lesson_reading  # noqa: E402
 from read_structure import block_kind  # noqa: E402
 
@@ -155,7 +156,8 @@ def main():
     if DL_TRUSTED:
         print(f'  + {sum(len(v) for v in DL_TRUSTED.values())} vùng Docling đáng tin trên {len(DL_TRUSTED)} trang')
 
-    n_fig = n_les = n_cap = 0
+    n_fig = n_les = n_cap = n_dec = 0
+    pending = []
     for r in readings:
         pdf = pdfs.get(r['book'])
         if not pdf:
@@ -172,17 +174,35 @@ def main():
                                            [f['bbox'] for f in figs], DL_TRUSTED,
                                            stats=DL_STATS)
         DL_STATS['CHI_D'] += n_d
-        by_page = {}
+        recs = []
         for f in figs:
             try:
                 jpeg, (w, h) = crop_jpeg(pdf, f['page'], f['bbox'])
             except Exception as e:            # trang hỏng / PDF lỗi ⇒ bỏ hình, giữ chữ
                 print(f"  ! {f['id']}: {e}", file=sys.stderr)
                 continue
+            recs.append(dict(id=f['id'], book=f['book'], page=f['page'], w=w, h=h,
+                             jpeg=jpeg, bbox=f['bbox'], caption=f['caption'],
+                             source=f.get('source', 'D'),
+                             hash=decoration.image_hash(jpeg)))
+        pending.append((r, recs))
+
+    # ⭐ LƯỢT HAI — ĐỒ TRANG TRÍ CHỈ NHẬN RA ĐƯỢC KHI NHÌN CẢ CUỐN.
+    # «Dải này in lại trên bao nhiêu trang của chính cuốn này» là bằng chứng
+    # của cả quyển, không phải của một bài. Nên phải cắt xong hết rồi mới lọc.
+    # Đo được: 17/35 ca hỏng trong mẫu 120 là đồ trang trí, cả 17 đều từ D.
+    reps = decoration.repeat_index([x for _, rs in pending for x in rs])
+    for r, recs in pending:
+        by_page = {}
+        for f in recs:
+            if decoration.is_page_furniture(f, reps):
+                n_dec += 1
+                continue
             db.execute('INSERT OR REPLACE INTO fig VALUES (?,?,?,?,?,?,?)',
-                       (f['id'], f['book'], r['lesson'], f['page'], w, h, jpeg))
+                       (f['id'], f['book'], r['lesson'], f['page'], f['w'], f['h'],
+                        f['jpeg']))
             by_page.setdefault(f['page'], []).append(
-                dict(id=f['id'], bbox=f['bbox'], w=w, h=h, page=f['page'],
+                dict(id=f['id'], bbox=f['bbox'], w=f['w'], h=f['h'], page=f['page'],
                      caption=f['caption']))
             n_fig += 1
             n_cap += bool(f['caption'])
@@ -211,7 +231,8 @@ def main():
                     version=f'g{a.grade}-{digest[:12]}', size=len(raw),
                     sha256=digest, figures=n_fig, lessons=n_les,
                     captions=n_cap, builder='lesson-figures-v1',
-                    bridge=dict(sorted(DL_STATS.items())))
+                    bridge=dict(sorted(DL_STATS.items())),
+                    pageFurnitureRemoved=n_dec)
     mpath = os.path.join(out_dir, f'figures-g{a.grade}.manifest.json')
     with open(mpath, 'w', encoding='utf-8') as fh:
         json.dump(manifest, fh, ensure_ascii=False, indent=1)
