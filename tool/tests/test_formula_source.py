@@ -163,6 +163,87 @@ class QuyUocHop(unittest.TestCase):
         self.assertAlmostEqual(b[2] * b[3], 0.3 * 0.04, places=6)
 
 
+class CatVuaVan(unittest.TestCase):
+    """Nới tới khi MỰC KHÔNG CÒN CHẠM MÉP — không dùng đệm cố định.
+
+    Soi mắt cho thấy một hằng số không đủ: «13/2» cần 0,004 mới đủ mẫu số,
+    «mv₁²/2» cần tới 0,008 mới đủ tử số, mà 0,008 ở ca khác đã kéo nửa dòng
+    văn xuôi vào. Nên hỏi chính trang in, và nới ĐÚNG cạnh đang bị chạm.
+    """
+    def _render(self, ink_box):
+        """Giả lập trang: chỉ vùng `ink_box` có mực, ngoài ra trắng."""
+        def render(box):
+            n = 40
+            x, y, w, h = box
+            out = []
+            for j in range(n):
+                for i in range(n):
+                    px = x + w * (i + 0.5) / n
+                    py = y + h * (j + 0.5) / n
+                    inside = (ink_box[0] <= px <= ink_box[0] + ink_box[2]
+                              and ink_box[1] <= py <= ink_box[1] + ink_box[3])
+                    out.append(0 if inside else 255)
+            return out, n, n
+        return render
+
+    def test_muc_khong_cham_mep_thi_giu_nguyen_khung(self):
+        box = [0.20, 0.20, 0.20, 0.10]
+        ink = [0.24, 0.23, 0.12, 0.04]        # nằm gọn bên trong
+        got, ok = fs.fit_region(None, box, self._render(ink))
+        self.assertTrue(ok)
+        self.assertEqual(got, box, 'khung đã đủ thì không được nới')
+
+    def test_muc_cham_MEP_TREN_thi_noi_LEN_va_dat(self):
+        box = [0.20, 0.20, 0.20, 0.10]
+        ink = [0.24, 0.185, 0.12, 0.10]       # tràn lên trên
+        got, ok = fs.fit_region(None, box, self._render(ink))
+        self.assertTrue(ok)
+        self.assertLess(got[1], box[1], 'phải nới lên trên')
+        self.assertAlmostEqual(got[0], box[0], places=6,
+                               msg='cạnh trái sạch thì KHÔNG được nới')
+
+    def _render_grey(self, ink_box, level):
+        """Mực XÁM, không đen tuyệt đối — chữ in quét ra thường là xám."""
+        def render(box):
+            n = 40
+            x, y, w, h = box
+            out = []
+            for j in range(n):
+                for i in range(n):
+                    px = x + w * (i + 0.5) / n
+                    py = y + h * (j + 0.5) / n
+                    inside = (ink_box[0] <= px <= ink_box[0] + ink_box[2]
+                              and ink_box[1] <= py <= ink_box[1] + ink_box[3])
+                    out.append(level if inside else 255)
+            return out, n, n
+        return render
+
+    def test_muc_XAM_van_phai_nhan_ra(self):
+        """⚠ Mực giả đen tuyệt đối làm mọi ngưỡng đều đúng. Chữ quét thật là
+        XÁM — ngưỡng quá chặt thì không thấy mực và khung không bao giờ nới."""
+        box = [0.20, 0.20, 0.20, 0.10]
+        ink = [0.24, 0.185, 0.12, 0.10]
+        got, ok = fs.fit_region(None, box, self._render_grey(ink, 150))
+        self.assertTrue(ok)
+        self.assertLess(got[1], box[1], 'mực xám chạm mép vẫn phải nới')
+
+    def test_KHONG_noi_qua_han_muc(self):
+        """Hạn mức là LUẬT NGHIỆP VỤ: nới quá thì không còn là một công thức.
+        Chặn vòng lặp chỉ là lưới an toàn, không thay được luật ấy."""
+        box = [0.40, 0.40, 0.05, 0.05]
+        got, ok = fs.fit_region(None, box, self._render([0.0, 0.0, 1.0, 1.0]))
+        self.assertFalse(ok)
+        self.assertLessEqual(got[2] - box[2], fs.GROW_MAX * 2 + 1e-9,
+                             'không được nới vượt hạn mức')
+
+    def test_muc_tran_qua_XA_thi_DONG_CHAT(self):
+        """Hết hạn mức mà mực vẫn chạm ⇒ không được hiện công thức cắt cụt."""
+        box = [0.40, 0.40, 0.05, 0.05]
+        ink = [0.0, 0.0, 1.0, 1.0]            # mực khắp trang
+        _, ok = fs.fit_region(None, box, self._render(ink))
+        self.assertFalse(ok)
+
+
 if __name__ == '__main__':
     unittest.main()
 
@@ -182,10 +263,17 @@ class DemCat(unittest.TestCase):
         self.assertIn('pad', inspect.signature(crop_jpeg).parameters,
                       'khối công thức phải cắt được với đệm 0')
 
-    def test_builder_cat_cong_thuc_voi_dem_0(self):
+    def test_builder_cat_cong_thuc_KHONG_dung_dem_cua_hinh(self):
+        """⚠ Bài kiểm bám vào CHUỖI GỌI thì mục ngay khi chữ ký đổi — đã dính
+        một lần hôm nay. Bám vào TÍNH CHẤT: đường công thức phải đi qua
+        `fit_region` (cắt vừa vặn) và không được dùng đệm mặc định của hình.
+        """
         p = os.path.join(HERE, '..', 'ui', 'build_lesson_figures.py')
         with open(p, encoding='utf-8') as fh:
             src = fh.read()
-        i = src.index("crop_jpeg(pdf, pp2, b['bbox']")
-        self.assertIn('pad=0.0', src[i:i + 80],
-                      'cắt khối công thức phải truyền pad=0.0')
+        i = src.index('FML_STATS')
+        blk = src[i:src.index('pending.append', i)]
+        self.assertIn('fit_region', blk, 'khối công thức phải cắt vừa vặn')
+        self.assertIn('pad=0.0', blk, 'không được dùng CROP_PAD của hình')
+        self.assertIn('BO_CAT_KHONG_TRON', blk,
+                      'cắt không trọn thì phải đóng chặt, có bộ đếm riêng')

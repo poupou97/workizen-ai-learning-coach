@@ -216,3 +216,81 @@ def regions_index(path=None):
                 if box:
                     out.setdefault((r['book'], r['page']), []).extend(box)
     return out
+
+# ────────────────────────────────────────────────────────────────────────
+# CẮT VỪA VẶN — nới tới khi MỰC KHÔNG CÒN CHẠM MÉP
+# ────────────────────────────────────────────────────────────────────────
+#
+# Founder: «A formula crop that cuts off numerator / denominator / radical /
+# exponent / subscript / charge / operator / label is NOT safe.»
+#
+# Một ĐỆM CỐ ĐỊNH không làm được việc ấy, đã soi mắt thấy rõ:
+#   · đệm 0     → «mv₁²/2» chỉ còn «/2»; «13/2» mất mẫu số
+#   · đệm 0,004 → cứu được «13/2», vẫn cụt «mv₁²/2»
+#   · đệm 0,008 → cứu được cả hai, nhưng ở ca khác đã kéo nửa dòng văn xuôi vào
+#   · đệm 0,012 (của HÌNH) → ca nào cũng dính chữ hàng xóm
+#
+# Nên không chọn hằng số. Hỏi CHÍNH TRANG IN: mực có chạm mép khung không.
+# Chạm cạnh nào thì nới ĐÚNG cạnh ấy — cạnh đã sạch thì để yên, nếu không lại
+# kéo văn xuôi vào từ phía không cần.
+
+INK_DARK = 205            # dưới ngưỡng xám này thì tính là MỰC
+GROW_STEP = 0.004         # mỗi lần nới
+GROW_MAX = 0.030          # nới quá đây thì không còn là một công thức
+
+
+def _sides_with_ink(samples, w, h, dark=INK_DARK):
+    """Cạnh nào của ảnh có mực chạm vào. `samples` = ảnh xám dạng phẳng."""
+    out = set()
+    row = lambda y: samples[y * w:(y + 1) * w]
+    col = lambda x: samples[x::w]
+    if any(v < dark for v in row(0)):
+        out.add('top')
+    if any(v < dark for v in row(h - 1)):
+        out.add('bottom')
+    if any(v < dark for v in col(0)):
+        out.add('left')
+    if any(v < dark for v in col(w - 1)):
+        out.add('right')
+    return out
+
+
+def fit_region(page, box, render, step=GROW_STEP, cap=GROW_MAX):
+    """Nới khung tới khi mực không còn chạm mép. `(khung, đủ chưa)`.
+
+    `render(box) -> (samples, w, h)` — ảnh xám của khung ấy. Tách ra để kiểm
+    được bằng ảnh dựng tay, không cần PDF.
+
+    Hết hạn mức mà mực vẫn chạm ⇒ `(khung, False)`: ĐÓNG CHẶT, người gọi phải
+    bỏ khối chứ không được hiện một công thức cắt cụt.
+    """
+    x, y, w, h = box
+    grown = 0.0
+    # ⭐ CHẶN VÒNG LẶP CỨNG. Hạn mức `cap` là luật nghiệp vụ; cái này là lưới an
+    # toàn cho chính vòng lặp. Kiểm-đột-biến cho thấy bỏ `cap` thì hàm TREO chứ
+    # không fail — một kiểu hỏng tệ hơn hẳn, vì nó làm cả lượt dựng đứng im.
+    for _ in range(int(cap / max(step, 1e-6)) + 4):
+        samples, iw, ih = render([x, y, w, h])
+        if iw < 3 or ih < 3:
+            return [x, y, w, h], False
+        sides = _sides_with_ink(samples, iw, ih)
+        if not sides:
+            return [x, y, w, h], True
+        # Kiểm TRƯỚC khi nới: kiểm sau thì bước cuối đã vượt hạn mức rồi mới
+        # phát hiện, và khung trả về rộng hơn luật cho phép đúng một bước.
+        if grown + step > cap:
+            return [x, y, w, h], False
+        if 'left' in sides:
+            d = min(step, x)
+            x -= d
+            w += d
+        if 'right' in sides:
+            w += min(step, 1.0 - (x + w))
+        if 'top' in sides:
+            d = min(step, y)
+            y -= d
+            h += d
+        if 'bottom' in sides:
+            h += min(step, 1.0 - (y + h))
+        grown += step
+    return [x, y, w, h], False

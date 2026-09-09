@@ -66,6 +66,29 @@ def lines_for(book, pages):
     return out
 
 
+
+def _grey_render(pdf, page_pdf):
+    """`render(box) -> (ảnh xám phẳng, w, h)` cho `formula_source.fit_region`.
+
+    Dựng ở dpi thấp: câu hỏi chỉ là «mực có chạm mép không», không cần nét.
+    """
+    import fitz
+
+    def render(box):
+        doc = fitz.open(pdf)
+        try:
+            pg = doc[page_pdf - 1]
+            r = pg.rect
+            clip = fitz.Rect(box[0] * r.width, box[1] * r.height,
+                             (box[0] + box[2]) * r.width,
+                             (box[1] + box[3]) * r.height)
+            px = pg.get_pixmap(dpi=60, clip=clip, colorspace=fitz.csGRAY)
+            return list(px.samples), px.width, px.height
+        finally:
+            doc.close()
+    return render
+
+
 def interleave(pages, figs_by_page, fml_by_page=None):
     """Dòng nội dung: KHỐI của nguồn giữ nguyên là khối, hình chèn đúng y của nó.
 
@@ -287,9 +310,17 @@ def main():
             ok = []
             for b in blks:
                 try:
-                    # đệm 0: vùng công thức đã chặt, nới thêm là nuốt
-                    # nửa dòng văn xuôi bên cạnh (soi mắt xác nhận).
-                    jpeg, (w, h) = crop_jpeg(pdf, pp2, b['bbox'], pad=0.0)
+                    # ⭐ CẮT VỪA VẶN, KHÔNG DÙNG ĐỆM CỐ ĐỊNH. Vùng Docling cắt
+                    # hụt phía trên của phân số cao («mv₁²/2» còn mỗi «/2»),
+                    # mà nới đều thì kéo văn xuôi hàng xóm vào. Hỏi chính
+                    # trang in: mực chạm mép nào thì nới đúng mép ấy.
+                    fit, ok = formula_source.fit_region(
+                        None, b['bbox'], _grey_render(pdf, pp2))
+                    if not ok:
+                        FML_STATS['BO_CAT_KHONG_TRON'] += 1
+                        continue          # ĐÓNG CHẶT: không hiện công thức cụt
+                    b['bbox'] = fit
+                    jpeg, (w, h) = crop_jpeg(pdf, pp2, fit, pad=0.0)
                 except Exception as e:        # cắt hỏng ⇒ ĐÓNG CHẶT, không khối
                     print(f"  ! {b['id']}: {e}", file=sys.stderr)
                     FML_STATS['CAT_HONG'] += 1
