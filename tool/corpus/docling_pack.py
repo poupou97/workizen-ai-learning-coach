@@ -157,9 +157,6 @@ def partial_claim(d_fig, dl_row):
 
     Ngưỡng 0,4 chọn trên chính mẫu 55 ca ⇒ tỉ lệ sót phải đo lại bằng MẪU MỚI.
     """
-    if _sub_of(dl_row):
-        # Có nhãn con IN thì mảnh ấy có TÊN RIÊNG của sách — không mượn của ai.
-        return False
     d = d_fig['bbox']
     dl = dl_row['box']
     ix = min(d[0] + d[2], dl[0] + dl[2]) - max(d[0], dl[0])
@@ -169,6 +166,30 @@ def partial_claim(d_fig, dl_row):
     a_dl = max(dl[2] * dl[3], 1e-9)
     a_d = max(d[2] * d[3], 1e-9)
     return (ix * iy) / a_dl >= PART_INSIDE and a_dl / a_d < PART_AREA
+
+
+PART_COVER = 0.7          # cả nhóm mảnh phải phủ chừng này hình D mới tách
+
+
+def covers(d_fig, claims):
+    """Các mảnh gộp lại có dựng lại được gần đủ hình D không.
+
+    ⛔ Ca bắt được ở mẫu thứ hai: «Hình 1.3. Sự đa dạng của thiết bị vào - ra»
+    có ba ô a) b) c), nhưng CHỈ ô c) đủ tin cậy để tới bộ chọn. Ô ấy CÓ nhãn con
+    in nên không mượn tên của ai — tên đúng, nhưng trẻ mất hai ô kia. Nhãn con
+    trả lời «mảnh này tên gì», KHÔNG trả lời «đã đủ hình chưa».
+
+    Đề xuất Docling trên một trang không chồng nhau, nên cộng phần giao là đủ.
+    """
+    d = d_fig['bbox']
+    s = 0.0
+    for _, r in claims:
+        dl = r['box']
+        ix = min(d[0] + d[2], dl[0] + dl[2]) - max(d[0], dl[0])
+        iy = min(d[1] + d[3], dl[1] + dl[3]) - max(d[1], dl[1])
+        if ix > 0 and iy > 0:
+            s += ix * iy
+    return s / max(d[2] * d[3], 1e-9) >= PART_COVER
 
 
 def naming_conflict(claims):
@@ -230,9 +251,9 @@ def select(figs, book, pages, index, stats=None, shadow=False, log=None):
             if naming_conflict(grp):
                 blocked.update(k for k, _ in grp)
                 continue
-            for k, r in grp:                 # một mảnh cũng không được mượn tên
-                if partial_claim(by_id[fid], r):
-                    blocked.add(k)
+            parts = [k for k, r in grp if partial_claim(by_id[fid], r)]
+            if parts and not covers(by_id[fid], grp):
+                blocked.update(parts)   # mảnh rời, không dựng lại được cả hình
 
         for k, r in rows:
             box = r['box']

@@ -204,9 +204,11 @@ class CamBayHinhCon(unittest.TestCase):
         return dict(id='d0', book='b', page=3, bbox=[0.1, 0.1, 0.8, 0.6],
                     caption=cap, source='D')
 
-    def _parts(self, subs=(None, None)):
+    def _parts(self, subs=(None, None), w=0.38, step=0.4):
+        """Mặc định: các ô GHÉP LẠI PHỦ GẦN ĐỦ hình D — đó mới là hình nhiều ô
+        thật. Truyền `w` nhỏ để dựng ca CHỈ MỘT PHẦN ô được đề xuất."""
         cap = 'Hình 8. Luyện tập tung và bắt bóng trên cao'
-        return [row(box=(0.1 + 0.25 * i, 0.1, 0.2, 0.6), text=cap, sub=s)
+        return [row(box=(0.1 + step * i, 0.1, w, 0.6), text=cap, sub=s)
                 for i, s in enumerate(subs)]
 
     def test_nhieu_manh_KHONG_co_nhan_con_thi_GIU_HINH_GOP(self):
@@ -226,6 +228,19 @@ class CamBayHinhCon(unittest.TestCase):
         self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
         self.assertEqual(sorted(f['caption'] for f in out), ['a)', 'b)'])
 
+    def test_DU_O_va_co_nhan_con_IN_thi_TACH_duoc(self):
+        """Ca phải CHO QUA: sách in ba ô a) b) c), cả ba đều tới bộ chọn và ghép
+        lại phủ gần đủ hình. Mỗi ô có tên riêng của sách ⇒ tách an toàn.
+
+        (Kiểm-đột-biến bắt chỗ này: nới `PART_COVER` lên 0,99 hay bỏ hẳn phép đo
+        phủ vẫn sống, vì mọi ca cũ đều có ô QUÁ TO nên không tính là mảnh.)
+        """
+        st = __import__('collections').Counter()
+        parts = self._parts(subs=('a)', 'b)', 'c)'), w=0.25, step=0.27)
+        out = dp.select([self._d()], 'b', [3], {('b', 3): parts}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 0)
+        self.assertEqual(sorted(f['caption'] for f in out), ['a)', 'b)', 'c)'])
+
     def test_nhan_con_TRUNG_NHAU_van_bi_chan(self):
         """Hai mảnh cùng nhãn «a)» thì nhãn không phân biệt được cái nào."""
         st = __import__('collections').Counter()
@@ -234,13 +249,23 @@ class CamBayHinhCon(unittest.TestCase):
         self.assertEqual(st['PART_OF_NAMED_FIGURE'], 2)
         self.assertEqual([f['source'] for f in out], ['D'])
 
+    def test_nhan_con_IN_ma_THIEU_O_thi_van_giu_hinh_gop(self):
+        """«Hình 1.3. Sự đa dạng của thiết bị vào - ra» có ba ô; chỉ ô c) đủ tin
+        cậy tới bộ chọn. Nhãn con in nên TÊN đúng — nhưng trẻ mất hai ô kia.
+        Nhãn con trả lời «mảnh này tên gì», không trả lời «đã đủ hình chưa»."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3],
+                        {('b', 3): self._parts(subs=('c)',), w=0.28)}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 1)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
     def test_MOT_manh_khong_nhan_cung_KHONG_duoc_muon_ten(self):
         """`naming_conflict` chỉ bắt nhóm ≥2 — nhưng mẫu 55 ca cho thấy CA HẠI
         NHẤT chỉ có MỘT mảnh đòi: «Hình 8.7. Các bước là quần áo» (5 ô) bị thay
         bằng đúng ô «4». `partial_claim` bắt bằng quan hệ BAO HÀM."""
         st = __import__('collections').Counter()
         out = dp.select([self._d()], 'b', [3],
-                        {('b', 3): self._parts(subs=(None,))}, stats=st)
+                        {('b', 3): self._parts(subs=(None,), w=0.28)}, stats=st)
         self.assertEqual(st['PART_OF_NAMED_FIGURE'], 1)
         self.assertEqual([f['source'] for f in out], ['D'])
 
