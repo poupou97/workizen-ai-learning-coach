@@ -28,8 +28,11 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 PACK = os.path.join(ROOT, 'assets', 'pack')
 FIG = os.path.join(ROOT, 'poc-out', 'packs', 'figures')
 
+# `NOT_A_LEARNING_VISUAL` tách ra từ `AMBIGUOUS` sau vòng đo đầu: 17/17 ca
+# AMBIGUOUS là ĐỒ TRANG TRÍ CỦA TRANG, và cả 17 đều từ đường D. Gộp chung vào
+# «không rõ» thì giấu mất một họ hỏng có nguyên nhân riêng và cách sửa riêng.
 VERDICTS = ('VALID', 'TRUNCATED', 'PROSE_CONTAMINATED', 'NEIGHBOR_VISUAL_INCLUDED',
-            'IDENTITY_MISMATCH', 'AMBIGUOUS')
+            'NOT_A_LEARNING_VISUAL', 'IDENTITY_MISMATCH', 'AMBIGUOUS')
 
 
 def band(g):
