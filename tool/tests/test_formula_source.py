@@ -165,3 +165,27 @@ class QuyUocHop(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class DemCat(unittest.TestCase):
+    """⚠ ĐỆM LÀ CỦA HÌNH, KHÔNG PHẢI CỦA MỌI THỨ.
+
+    `CROP_PAD = 0,012` sinh ra cho vùng dò bằng MẶT NẠ MỰC, nơi nhãn sơ đồ là
+    CHỮ nên nằm NGOÀI khung. Vùng bố cục (công thức) đã ôm sẵn chữ của nó, nên
+    nới thêm chỉ kéo vào nửa dòng văn xuôi bên trên/dưới. Soi mắt 5 ca: đệm
+    0,012 lần nào cũng dính chữ hàng xóm; đệm 0 sạch và không cắt cụt cái nào.
+    """
+    def test_crop_jpeg_cho_nguoi_goi_chon_dem(self):
+        import inspect
+        sys.path.insert(0, os.path.join(HERE, '..', 'corpus'))
+        from lesson_figures import crop_jpeg
+        self.assertIn('pad', inspect.signature(crop_jpeg).parameters,
+                      'khối công thức phải cắt được với đệm 0')
+
+    def test_builder_cat_cong_thuc_voi_dem_0(self):
+        p = os.path.join(HERE, '..', 'ui', 'build_lesson_figures.py')
+        with open(p, encoding='utf-8') as fh:
+            src = fh.read()
+        i = src.index("crop_jpeg(pdf, pp2, b['bbox']")
+        self.assertIn('pad=0.0', src[i:i + 80],
+                      'cắt khối công thức phải truyền pad=0.0')

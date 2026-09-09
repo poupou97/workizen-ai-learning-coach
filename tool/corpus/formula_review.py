@@ -157,7 +157,11 @@ def draw(rows, n, seed, per_book=4):
     return picked
 
 
-def sheets(picked, out_dir, cell=560, pad=0.006):
+def sheets(picked, out_dir, cell=560, pad=None):
+    # ⚠ VẼ ĐÚNG NHƯ ẢNH ĐÃ LƯU. Tự đặt đệm khác `crop_jpeg` thì bảng đối
+    # chiếu soi một thứ mà trẻ không nhìn thấy — mẩu chữ ở mép có thể là
+    # do MÌNH vẽ thừa chứ không phải do ảnh lưu.
+    pad = 0.0 if pad is None else pad   # ĐÚNG như ảnh lưu của khối công thức
     import fitz
     from PIL import Image, ImageDraw
     os.makedirs(out_dir, exist_ok=True)

@@ -238,7 +238,8 @@ def caption_for(bbox, lines, max_gap=0.06):
     return best[1] if best else None
 
 
-def crop_jpeg(pdf_path, page_pdf, bbox, target_w=TARGET_W, quality=JPEG_Q):
+def crop_jpeg(pdf_path, page_pdf, bbox, target_w=TARGET_W, quality=JPEG_Q,
+              pad=None):
     """Cắt đúng vùng ấy từ trang, co về bề rộng hiển thị thật của điện thoại.
 
     Cắt theo dpi cố định thì hình lớn bị lấy mẫu thừa (đo được: 550 MB cho 12
@@ -253,10 +254,17 @@ def crop_jpeg(pdf_path, page_pdf, bbox, target_w=TARGET_W, quality=JPEG_Q):
         # Nới đều bốn phía: nhãn của sơ đồ («Mái nhà», «Tường nhà») là CHỮ nên đã
         # bị xoá khỏi mặt nạ mực, nằm ngoài khung dò. Cắt sát khung là cắt cụt
         # đúng phần nói cho trẻ biết đang nhìn cái gì — máy thật cho thấy điều đó.
-        x = max(0.0, bbox[0] - CROP_PAD)
-        y = max(0.0, bbox[1] - CROP_PAD)
-        w = min(1.0 - x, bbox[2] + 2 * CROP_PAD)
-        h = min(1.0 - y, bbox[3] + 2 * CROP_PAD)
+        # ⚠ ĐỆM LÀ CỦA HÌNH, KHÔNG PHẢI CỦA MỌI THỨ. `CROP_PAD` sinh ra cho
+        # vùng dò bằng MẶT NẠ MỰC, nơi nhãn sơ đồ là CHỮ nên nằm NGOÀI khung.
+        # Vùng bố cục (công thức, bảng) đã ôm sẵn cả chữ của nó, nên nới thêm
+        # chỉ kéo vào nửa dòng văn xuôi bên trên/dưới — đo bằng mắt trên 5 ca:
+        # đệm 0,012 lần nào cũng dính chữ hàng xóm, đệm 0 thì sạch và không
+        # cắt cụt công thức nào. Người gọi nói rõ `pad` thì theo người gọi.
+        p = CROP_PAD if pad is None else pad
+        x = max(0.0, bbox[0] - p)
+        y = max(0.0, bbox[1] - p)
+        w = min(1.0 - x, bbox[2] + 2 * p)
+        h = min(1.0 - y, bbox[3] + 2 * p)
         clip = fitz.Rect(r.x0 + x * r.width, r.y0 + y * r.height,
                          r.x0 + (x + w) * r.width, r.y0 + (y + h) * r.height)
         zoom = max(target_w / max(clip.width, 1), 1.0)

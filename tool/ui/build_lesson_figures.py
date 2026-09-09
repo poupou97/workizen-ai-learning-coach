@@ -287,7 +287,9 @@ def main():
             ok = []
             for b in blks:
                 try:
-                    jpeg, (w, h) = crop_jpeg(pdf, pp2, b['bbox'])
+                    # đệm 0: vùng công thức đã chặt, nới thêm là nuốt
+                    # nửa dòng văn xuôi bên cạnh (soi mắt xác nhận).
+                    jpeg, (w, h) = crop_jpeg(pdf, pp2, b['bbox'], pad=0.0)
                 except Exception as e:        # cắt hỏng ⇒ ĐÓNG CHẶT, không khối
                     print(f"  ! {b['id']}: {e}", file=sys.stderr)
                     FML_STATS['CAT_HONG'] += 1
