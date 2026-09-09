@@ -165,6 +165,9 @@ def main():
 
     DL_TRUSTED = docling_pack.readable_by_page()
     DL_STATS = collections.Counter()
+    SELECTOR_SHADOW = os.environ.get('SELECTOR_SHADOW') == '1'
+    if SELECTOR_SHADOW:
+        print('  ⚠ CHẾ ĐỘ BÓNG: chỉ đếm quyết định chọn hình, KHÔNG đổi pack')
     if DL_TRUSTED:
         print(f'  + {sum(len(v) for v in DL_TRUSTED.values())} vùng Docling đáng tin trên {len(DL_TRUSTED)} trang')
 
@@ -183,9 +186,12 @@ def main():
         # vùng trùng hình D đã có. Không có tệp tin cậy ⇒ danh sách rỗng ⇒
         # đường dựng chạy y như trước.
         n_d = len(figs)
-        figs += docling_pack.extra_figures(r['book'], pages,
-                                           [f['bbox'] for f in figs], DL_TRUSTED,
-                                           stats=DL_STATS)
+        # ⭐ BỘ CHỌN HÌNH (Founder Gate 2026-09-09): vùng Docling ĐÁNG TIN và
+        # NỐI ĐƯỢC DANH TÍNH được ưu tiên khi CHỨNG MINH ĐƯỢC cùng một hình
+        # nguồn — bằng chú thích in, không bằng chồng hộp. Không chứng minh
+        # được ⇒ D là dự phòng. `SELECTOR_SHADOW=1` chỉ đếm, không đổi đầu ra.
+        figs = docling_pack.select(figs, r['book'], pages, DL_TRUSTED,
+                                   stats=DL_STATS, shadow=SELECTOR_SHADOW)
         DL_STATS['CHI_D'] += n_d
         recs = []
         for f in figs:

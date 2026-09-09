@@ -99,5 +99,95 @@ class CongThem(unittest.TestCase):
         self.assertEqual(before, [list(x) for x in d[:len(before)]])
 
 
+class CungMotHinhNguon(unittest.TestCase):
+    """⛔ «CÙNG MỘT HÌNH NGUỒN» KHÔNG được định nghĩa bằng CHỒNG HỘP.
+
+    Bằng chứng phải từ nguồn: cùng trang VÀ cùng một dòng chú thích SÁCH IN.
+    Hình học chỉ là bằng chứng phụ.
+    """
+
+    CAP = 'Hình 6.1. Một số loại động vật cảnh'   # khớp mặc định của `row()`
+
+    def dfig(self, cap=CAP, box=(0.1, 0.2, 0.4, 0.3), page=3):
+        return dict(id='d0', book='b', page=page, bbox=list(box), caption=cap,
+                    source='D')
+
+    def test_cung_trang_va_cung_CHU_THICH_IN_thi_la_mot(self):
+        self.assertTrue(dp.same_source_visual(self.dfig(), row()))
+
+    def test_CHONG_HOP_ma_KHAC_chu_thich_thi_KHONG_phai_mot(self):
+        d = self.dfig(cap='Hình 6.2. Một hình khác hẳn')
+        self.assertFalse(dp.same_source_visual(d, row()))
+
+    def test_KHAC_TRANG_thi_khong_phai_mot(self):
+        self.assertFalse(dp.same_source_visual(self.dfig(page=9), row()))
+
+    def test_D_KHONG_co_chu_thich_thi_KHONG_chung_minh_duoc(self):
+        """Thiếu bằng chứng in ⇒ không được thay chỗ."""
+        self.assertFalse(dp.same_source_visual(self.dfig(cap=None), row()))
+
+    def test_cung_chu_thich_ma_KHONG_chong_nhau_thi_khong_nhan(self):
+        d = self.dfig(box=(0.6, 0.7, 0.2, 0.2))
+        self.assertFalse(dp.same_source_visual(d, row()))
+
+    def test_chu_thich_khac_khoang_trang_hoa_thuong_van_la_mot(self):
+        d = self.dfig(cap='  hình 6.1.  MỘT SỐ LOẠI ĐỘNG VẬT CẢNH  ')
+        r = row(text='Hình 6.1. Một số loại động vật cảnh')
+        self.assertTrue(dp.same_source_visual(d, r))
+
+
+class BoChonHinh(unittest.TestCase):
+    def _d(self, cap='Hình 6.1. Một số loại động vật cảnh',
+           box=(0.1, 0.2, 0.4, 0.3)):
+        return dict(id='d0', book='b', page=3, bbox=list(box), caption=cap,
+                    source='D')
+
+    def test_chung_minh_duoc_cung_nguon_thi_DOCLING_THAY_CHO(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): [row()]}, stats=st)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+        self.assertEqual([f['source'] for f in out], ['docling'])
+
+    def test_KHONG_chung_minh_duoc_thi_GIU_D_va_BO_docling(self):
+        """Chồng hộp mà khác chú thích ⇒ D là dự phòng, không hiện hai bản."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d(cap='Hình 6.2. Khác')], 'b', [3],
+                        {('b', 3): [row()]}, stats=st)
+        self.assertEqual(st['D_FALLBACK'], 1)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_cho_D_KHONG_co_gi_thi_THEM_MOI(self):
+        st = __import__('collections').Counter()
+        out = dp.select([], 'b', [3], {('b', 3): [row()]}, stats=st)
+        self.assertEqual(st['DOCLING_NEW'], 1)
+        self.assertEqual(len(out), 1)
+
+    def test_CHE_DO_BONG_dem_luat_MOI_nhung_ra_dau_ra_luat_CU(self):
+        """⚠ Bóng KHÔNG phải «chỉ giữ D». Bản đầu tôi viết vậy và nó lặng lẽ bỏ
+        luôn phần Docling đang có — lớp 6 tụt 913 → 709 hình."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): [row()]},
+                        stats=st, shadow=True)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_CHE_DO_BONG_van_THEM_hinh_o_cho_D_khong_co(self):
+        st = __import__('collections').Counter()
+        out = dp.select([], 'b', [3], {('b', 3): [row()]}, stats=st, shadow=True)
+        self.assertEqual(st['DOCLING_NEW'], 1)
+        self.assertEqual(len(out), 1, 'bóng mà bỏ mất hình đang có thì không phải bóng')
+
+    def test_danh_tinh_GIU_LAI_thi_khong_bao_gio_toi_bo_chon(self):
+        """`readable_by_page` đã loại vùng chưa nối được danh tính, nên bộ chọn
+        không bao giờ thấy chúng — REGION_TRUST != IDENTITY_LINK giữ nguyên."""
+        import tempfile, os as _os
+        fh = tempfile.NamedTemporaryFile('w', suffix='.jsonl', delete=False,
+                                         encoding='utf-8')
+        fh.write(json.dumps(row(readable=False), ensure_ascii=False) + '\n')
+        fh.close()
+        self.addCleanup(_os.remove, fh.name)
+        self.assertEqual(dp.readable_by_page(fh.name), {})
+
+
 if __name__ == '__main__':
     unittest.main()
