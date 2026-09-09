@@ -314,9 +314,13 @@ def main():
                     # hụt phía trên của phân số cao («mv₁²/2» còn mỗi «/2»),
                     # mà nới đều thì kéo văn xuôi hàng xóm vào. Hỏi chính
                     # trang in: mực chạm mép nào thì nới đúng mép ấy.
-                    fit, ok = formula_source.fit_region(
+                    # ⚠ KHÔNG đặt tên `ok`: biến ấy đang là danh sách gom khối
+                    # ở ngay vòng ngoài. Trùng tên làm nó thành `bool` và cả
+                    # lượt dựng chết ở `ok.append` — bắt được vì tôi kiểm dòng
+                    # lỗi trong log thay vì chỉ đếm số lớp đã xong.
+                    fit, fit_ok = formula_source.fit_region(
                         None, b['bbox'], _grey_render(pdf, pp2))
-                    if not ok:
+                    if not fit_ok:
                         FML_STATS['BO_CAT_KHONG_TRON'] += 1
                         continue          # ĐÓNG CHẶT: không hiện công thức cụt
                     b['bbox'] = fit
