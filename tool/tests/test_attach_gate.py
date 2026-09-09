@@ -127,8 +127,19 @@ class SachDungDuoc(unittest.TestCase):
             self.assertEqual(ag.actual_books(t, ag.lesson_counts(c)), set())
 
 
+CORPUS = os.path.join(ROOT, 'poc-out', 'graph', 'curriculum-structure.json')
+
+
+@unittest.skipUnless(os.path.exists(CORPUS),
+                     'cần sổ sách chuẩn — corpus KHÔNG vào git (bất biến repo), '
+                     'nên phép kiểm này chỉ chạy ở máy có dữ liệu')
 class HoiQuySuCoReboot(unittest.TestCase):
-    """Tái hiện đúng sự cố: đầu vào bền còn, thư mục attach tạm KHÔNG còn."""
+    """Tái hiện đúng sự cố: đầu vào bền còn, thư mục attach tạm KHÔNG còn.
+
+    ⚠ Bỏ qua trên CI là ĐÚNG, không phải né tránh: CI cố ý không có corpus, nên
+    ở đó bước dựng chết sớm hơn vì thiếu sổ sách — vẫn KHÔNG ghi pack, tính an
+    toàn vẫn giữ, chỉ là chết vì lý do khác nên không kiểm được ĐÚNG cổng này.
+    """
 
     def test_dung_pack_voi_attach_RONG_phai_DUNG_LAI_va_KHONG_ghi_pack(self):
         with tempfile.TemporaryDirectory() as empty, \
