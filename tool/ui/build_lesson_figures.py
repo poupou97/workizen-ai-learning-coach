@@ -37,8 +37,9 @@ import docling_pack  # noqa: E402
 import decoration  # noqa: E402
 import figure_funnel  # noqa: E402
 import table_ownership  # noqa: E402
+import formula_source  # noqa: E402
 import staging  # noqa: E402
-from lesson_reading import lesson_reading  # noqa: E402
+from lesson_reading import lesson_reading, page_paragraphs  # noqa: E402
 from read_structure import block_kind  # noqa: E402
 
 OCR = os.path.join(ROOT, 'poc-out/graph/ocr-body')
@@ -65,7 +66,7 @@ def lines_for(book, pages):
     return out
 
 
-def interleave(pages, figs_by_page):
+def interleave(pages, figs_by_page, fml_by_page=None):
     """Dòng nội dung: KHỐI của nguồn giữ nguyên là khối, hình chèn đúng y của nó.
 
     ⭐⭐ ĐÂY LÀ CHỖ CẤU TRÚC ĐỌC TỪNG BỊ LÀM PHẲNG.
@@ -98,8 +99,20 @@ def interleave(pages, figs_by_page):
         # hiện nó ra rồi nên không mất gì. Văn xuôi quanh bảng GIỮ NGUYÊN —
         # không có bằng chứng sở hữu thì không xoá chữ của sách.
         tabs = table_ownership.table_regions(figs_by_page.get(p['pagePdf'], []))
+        # ⭐ CÔNG THỨC CŨNG KHÔNG ĐƯỢC HIỆN HAI LẦN — và ở đây lý do nặng hơn
+        # bảng: chuỗi OCR của công thức KHÔNG CHỈ thừa, nó SAI. Đo 53 ca soi
+        # mắt so với bản in: 88,7% hại, Toán 23/23. «x²/9 + y²/5 = 1» tới tay
+        # trẻ thành «5 = 1.». Nên chữ mà một vùng công thức sở hữu bị GIỮ LẠI,
+        # dù có dựng được ảnh hay không (Founder Gate: B mặc định, D dự phòng).
+        # Quyền sở hữu tính NGAY Ở ĐÂY, chỗ có đoạn văn thật — không mang
+        # `id()` qua hai lượt dựng, vì đó là hai bộ đối tượng khác nhau.
+        # Dùng TOÀN BỘ vùng (kể cả vùng không dựng được ảnh): vùng không an
+        # toàn vẫn phải giữ lại chữ sai của nó (D).
+        fml = (fml_by_page or {}).get(p['pagePdf']) or {}
+        fregs = fml.get('regions') or []
         keep = [q for q in paras
-                if not (tabs and table_ownership.owned_by_table(q, tabs))]
+                if not (fregs and formula_source.owned_by_formula(q, fregs))
+                and not (tabs and table_ownership.owned_by_table(q, tabs))]
         items = [((float(i), 0.0), dict(t=block_kind(q['text']), v=q['text']))
                  for i, q in enumerate(keep)]
         paras = keep
@@ -116,6 +129,15 @@ def interleave(pages, figs_by_page):
             items.append(((pos, fy), dict(t='img', id=f['id'], w=f['w'],
                                           h=f['h'], page=f['page'],
                                           caption=f['caption'])))
+        for b in (fml.get('blocks') or []):
+            # Neo như hình: theo khối chữ gần nhất PHÍA TRÊN. Thứ tự đọc của
+            # nguồn phải giữ — TEXT TRƯỚC → CÔNG THỨC → TEXT SAU.
+            above = [(q['y'], i) for i, q in enumerate(paras) if q['y'] <= b['y']]
+            pos = (max(above)[1] + 0.5) if above else -0.5
+            items.append(((pos, b['y']),
+                          dict(t='formula', id=b['id'], w=b['w'], h=b['h'],
+                               page=b['page'], src=b['src'], trust=b['trust'],
+                               ident=b['ident'])))
         for _, it in sorted(items, key=lambda z: z[0]):
             stream.append(it)
     return stream
@@ -184,6 +206,16 @@ def main():
     DL_TRUSTED = docling_pack.readable_by_page()
     DL_STATS = collections.Counter()
     SELECTOR_SHADOW = os.environ.get('SELECTOR_SHADOW') == '1'
+    # ⭐ WAL-239 — CÔNG THỨC TỚI VỚI TRẺ BẰNG ẢNH TRANG IN (Founder Gate: B).
+    # `FORMULA_SHADOW=1` chỉ ĐẾM, không đổi dòng đọc. Thiếu tệp đề xuất ⇒ rỗng
+    # ⇒ đường dựng chạy y như cũ.
+    FORMULA_OFF = os.environ.get('FORMULA_SOURCE') != '1'
+    FORMULA_SHADOW = os.environ.get('FORMULA_SHADOW') == '1'
+    FML_REGIONS = {} if FORMULA_OFF else formula_source.regions_index()
+    FML_STATS = collections.Counter()
+    if FML_REGIONS:
+        print(f'  + {sum(len(v) for v in FML_REGIONS.values())} vùng công thức '
+              f'trên {len(FML_REGIONS)} trang', file=sys.stderr)
     SEL_LOG = [] if os.environ.get('SELECTOR_LOG') else None
     if SELECTOR_SHADOW:
         print('  ⚠ CHẾ ĐỘ BÓNG: chỉ đếm quyết định chọn hình, KHÔNG đổi pack')
@@ -233,21 +265,51 @@ def main():
                              inside=[l for l in (lb.get(f['page']) or [])
                                      if (l.get('text') or '').strip()
                                      and decoration._inside(f['bbox'], l)]))
+        # ⭐ KHỐI CÔNG THỨC — cắt từ chính trang in. KHÔNG dựng lại nội dung.
+        fml = {}
+        for pp2 in pages:
+            regs = FML_REGIONS.get((r['book'], pp2)) or []
+            if not regs:
+                continue
+            paras = page_paragraphs(lb.get(pp2) or [])
+            blks, _ = formula_source.blocks(r['book'], pp2, regs, paras)
+            FML_STATS['VUNG'] += len(regs)
+            FML_STATS['KHOI_DUNG_DUOC'] += len(blks)
+            # Bỏ vì HAI lý do khác nhau — không gộp: vùng không cắt an toàn
+            # được, và vùng không chứng minh được sở hữu (dựng khối lúc ấy là
+            # rơi vào C). Gộp hai cái làm một là giấu mất một họ.
+            FML_STATS['BO_VUNG_KHONG_AN_TOAN'] += sum(
+                1 for r2 in regs if not formula_source.safe_region(r2))
+            FML_STATS['BO_TRANH_C'] += (len(regs) - len(blks)) - sum(
+                1 for r2 in regs if not formula_source.safe_region(r2))
+            FML_STATS['CHU_BI_GIU_LAI'] += sum(
+                1 for q in paras if formula_source.owned_by_formula(q, regs))
+            ok = []
+            for b in blks:
+                try:
+                    jpeg, (w, h) = crop_jpeg(pdf, pp2, b['bbox'])
+                except Exception as e:        # cắt hỏng ⇒ ĐÓNG CHẶT, không khối
+                    print(f"  ! {b['id']}: {e}", file=sys.stderr)
+                    FML_STATS['CAT_HONG'] += 1
+                    continue
+                b.update(w=w, h=h, jpeg=jpeg)
+                ok.append(b)
+            fml[pp2] = dict(regions=regs, blocks=ok)
         for pp2 in pages:
             book_pages.setdefault(r['book'], {}).setdefault(pp2, lb.get(pp2) or [])
-        pending.append((r, recs))
+        pending.append((r, recs, fml))
 
     # ⭐ LƯỢT HAI — ĐỒ TRANG TRÍ CHỈ NHẬN RA ĐƯỢC KHI NHÌN CẢ CUỐN.
     # «Dải này in lại trên bao nhiêu trang của chính cuốn này» là bằng chứng
     # của cả quyển, không phải của một bài. Nên phải cắt xong hết rồi mới lọc.
     # Đo được: 17/35 ca hỏng trong mẫu 120 là đồ trang trí, cả 17 đều từ D.
-    reps = decoration.repeat_index([x for _, rs in pending for x in rs])
+    reps = decoration.repeat_index([x for _, rs, _ in pending for x in rs])
     # ⭐ HỌ THỨ HAI — băng mục và dải trang. Nhận bằng VAI TRÒ TRONG SÁCH:
     # vùng chứa NHÃN MỤC mà chính cuốn ấy in lại trên nhiều trang, hoặc chứa
     # CHÍNH SỐ TRANG ở mép. Không nhận bằng dáng vẻ — «ít mực» và «dẹt» đều
     # đã bị số liệu bác bỏ (xem `decoration.py`).
     heads = {b: decoration.heading_reps(pg) for b, pg in book_pages.items()}
-    for r, recs in pending:
+    for r, recs, fml in pending:
         by_page = {}
         for f in recs:
             if decoration.is_page_furniture(f, reps):
@@ -273,7 +335,18 @@ def main():
                                 printed_start=r.get('pageStart'), title=r.get('title'))
         if not doc:
             continue
-        r['content'] = interleave(doc['pages'], by_page)
+        # Ghi ảnh công thức vào cùng kho ảnh của lớp — một đường lưu trữ đã
+        # chứng minh, không dựng đường mới.
+        for pp2, fm in ({} if FORMULA_SHADOW else (fml or {})).items():
+            for b in fm['blocks']:
+                db.execute('INSERT OR REPLACE INTO fig VALUES (?,?,?,?,?,?,?)',
+                           (b['id'], r['book'], r.get('lesson'), b['page'],
+                            b['w'], b['h'], b['jpeg']))
+                FML_STATS['KHOI_VAO_PACK'] += 1
+        r['content'] = interleave(doc['pages'], by_page,
+                                  None if FORMULA_SHADOW else fml)
+        if FORMULA_SHADOW and fml:
+            FML_STATS['BONG_KHONG_DOI_DAU_RA'] += 1
         if by_page:
             n_les += 1
     db.commit()
@@ -296,6 +369,7 @@ def main():
                     sha256=digest, figures=n_fig, lessons=n_les,
                     captions=n_cap, builder='lesson-figures-v1',
                     bridge=dict(sorted(DL_STATS.items())),
+                    formula=dict(sorted(FML_STATS.items())),
                     pageFurnitureRemoved=n_dec,
                     sectionFurnitureRemoved=n_sec)
     mpath = staging.guard(os.path.join(out_dir, f'figures-g{a.grade}.manifest.json'),
