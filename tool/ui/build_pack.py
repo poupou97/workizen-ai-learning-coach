@@ -177,6 +177,23 @@ def _run(script, *args):
 def build(grade, attach_root=None):
     if attach_root:
         os.environ['ATTACH_ROOT'] = attach_root
+    # ⭐ SINH ĐẦU VÀO TRƯỚC, KIỂM, RỒI MỚI DỰNG — không dựa vào ai nhớ cờ.
+    #
+    #   NGUỒN CHUẨN → SINH ATTACH → KIỂM ATTACH → DỰNG → KIỂM ĐẦU RA → ĐỔI CHỖ
+    #
+    # Sự cố 2026-09-09: bộ attach đầy đủ sống ở `/private/tmp`; reboot xoá sạch;
+    # chỗ mặc định chỉ còn 39/238 cuốn — và lệnh dựng chuẩn vẫn chạy trót lọt,
+    # ra pack nhỏ hơn, không một lỗi nào. Nay bước sinh nằm TRONG đường dựng.
+    sys.path.insert(0, os.path.join(ROOT, 'tool', 'corpus'))
+    import attach_gate
+    root = os.environ.get('ATTACH_ROOT') or attach_gate.DEFAULT_ROOT
+    if not os.path.isabs(root):
+        root = os.path.join(ROOT, root)
+    problems = attach_gate.ensure(grade, root)
+    if problems:
+        for p in problems:
+            print(f'  ✗ {p}', file=sys.stderr)
+        raise SystemExit(f'lớp {grade}: CỔNG ATTACH KHÔNG ĐẠT — dừng trước khi dựng.')
     # Nói cho bước index biết nó đang chạy TRONG đường dựng, để nó không phải
     # cảnh báo người dùng về một thứ orchestrator đã lo.
     os.environ['WAL_PACK_ORCHESTRATED'] = '1'
