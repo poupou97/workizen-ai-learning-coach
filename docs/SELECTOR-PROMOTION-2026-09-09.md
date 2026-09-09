@@ -77,3 +77,47 @@ Ca bị chặn (n=18): chặn đúng 10 · chặn oan 5 · vô hại 1 · không
 Bản canonical trước promote: `/private/tmp/wal-canon-pre-selector`
 (12 index + 12 kho ảnh + manifest). ⚠ `/private/tmp` bị xoá khi khởi động lại
 máy — xem [[learning-coach-build-input-durability]].
+
+---
+
+# Đo lại chất lượng SAU promote (mẫu tươi, đóng băng trước khi soi)
+
+## FIGURE_CROP_VALID — mức HÌNH (n=120, seed 20260913, khung 15.344)
+
+| | toàn bộ | chỉ hình học tập thật |
+|---|---|---|
+| **VALID** | 90/120 = **75,0%** | 90/105 = **85,7%** |
+| D (n=71) | 66,2% | 82,5% |
+| Docling (n=49) | **87,8%** | **89,6%** |
+
+Họ hỏng còn lại, xếp theo độ lớn:
+
+| họ | số | tỉ lệ | nguồn |
+|---|---|---|---|
+| `NOT_A_LEARNING_VISUAL` | 15 | 12,5% | **14/15 từ D** |
+| `PROSE_CONTAMINATED` | 9 | 7,5% | 5 D · 4 Docling |
+| `TRUNCATED` | 4 | 3,3% | **4/4 từ D**, Docling 0 |
+| `NEIGHBOR_VISUAL_INCLUDED` | 1 | 0,8% | Docling |
+| `AMBIGUOUS` | 1 | 0,8% | D |
+
+⭐ **Họ hỏng số 1 nay là ĐỒ TRANG TRÍ, không phải cắt hỏng** — và 14/15 đến từ
+đường D. Đây là thay đổi thứ hạng so với vòng trước.
+
+## Mức BÀI (n=40, seed 20260913, khung 2.974) — mẫu số RIÊNG
+
+- `NO_REQUIRED_VISUAL` **20/40** — trạng thái HỢP LỆ, không gộp vào mẫu số.
+- Trong 20 bài có «Hình N» in trong thân bài: **đủ 6 (30,0%)** · thiếu một
+  phần 14 (70,0%) · không có ảnh nào **0**.
+- Mức hình: **119/144 = 82,6%** hình mà sách nhắc tên đã có mặt.
+
+⚠ Đây là **CÓ MẶT ĐÚNG TÊN**, KHÔNG phải `MULTIMODAL_FAITHFUL_VALIDATED`.
+Đúng tên không chứng minh đúng ảnh. `UNKNOWN != VALID`.
+
+## Lỗ hổng phạm vi đã phát hiện (KHÔNG sửa trong vòng này)
+
+Chốt nuốt chỉ chạy trên **ứng cử thay chỗ**, không chạy trên vùng
+`DOCLING_NEW`. Ca #053 (Toán 7, một khung chứa cả «Hình 4.6» lẫn «Hình 4.7»)
+là vùng THÊM MỚI nên không đi qua chốt. Cùng một họ, khác đường mã.
+
+Founder Gate: «If another material repeated structural failure appears after
+this round: STOP. Report it.» → báo cáo, KHÔNG dựng chốt thứ tư.
