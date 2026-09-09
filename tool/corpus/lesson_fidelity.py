@@ -35,9 +35,33 @@ PACK = os.path.join(ROOT, 'assets', 'pack')
 GRADES = ('MULTIMODAL_FAITHFUL', 'PARTIAL', 'UNFAITHFUL', 'NO_REQUIRED_VISUAL',
           'AMBIGUOUS')
 
+# Nguyên nhân gốc, ghi cho MỌI bài PARTIAL/UNFAITHFUL. Một bài có thể mang
+# nhiều họ. `TABLE_DUPLICATION` chỉ đo được sau #167.
+CAUSES = ('NOT_A_LEARNING_VISUAL', 'PROSE_CONTAMINATED', 'TRUNCATED',
+          'NEIGHBOR_VISUAL_INCLUDED', 'MISSING_REQUIRED_VISUAL',
+          'FRAGMENTED_VISUAL', 'IDENTITY_ERROR', 'ORDER_ERROR',
+          'TABLE_DUPLICATION', 'OTHER')
+
 
 def band(g):
-    return '1-3' if g <= 3 else ('4-8' if g <= 8 else '9-12')
+    """Bốn dải lớp theo cấp học, không phải ba — Founder chốt ở vòng này."""
+    return ('1-3' if g <= 3 else '4-6' if g <= 6 else '7-9' if g <= 9 else '10-12')
+
+
+def density(n):
+    return 'nhiều ảnh' if n >= 6 else ('ít ảnh' if n >= 1 else 'không ảnh')
+
+
+def src_mix(imgs):
+    """Bài này do đường nào cấp hình — để đo lỗi đến từ đâu."""
+    s = {i['src'] for i in imgs}
+    if not s:
+        return 'không ảnh'
+    if s == {'docling'}:
+        return 'chỉ Docling'
+    if s == {'D'}:
+        return 'chỉ D'
+    return 'cả hai'
 
 
 def required_visuals(book, pages):
@@ -88,14 +112,29 @@ def main():
     ap.add_argument('--out', default=os.path.join(ROOT, 'poc-out', 'lesson-fidelity'))
     a = ap.parse_args()
     rows = lessons()
+    for r in rows:
+        r['density'] = density(len(r['images']))
+        r['mix'] = src_mix(r['images'])
+    # ⭐ NGẪU NHIÊN TRONG TỪNG TẦNG, KHÔNG CHỌN BÀI VÌ NÓ TRÔNG CÓ VẤN ĐỀ.
+    # Tầng = (dải lớp × nguồn cấp hình). Mật độ ảnh và môn được báo cáo lại như
+    # thuộc tính của mẫu, không dùng làm tầng nữa — chia quá nhỏ thì mỗi tầng
+    # chỉ còn một hai bài và mẫu hết ngẫu nhiên.
     rng = random.Random(a.seed)
     by = collections.defaultdict(list)
     for r in rows:
-        by[r['band']].append(r)
-    per = max(1, a.n // len(by))
-    picked = []
-    for b in sorted(by):
-        picked += rng.sample(by[b], min(per, len(by[b])))
+        by[(r['band'], r['mix'])].append(r)
+    keys = sorted(by)
+    picked, quota = [], {}
+    tot = sum(len(by[k]) for k in keys)
+    for k in keys:
+        quota[k] = max(1, round(a.n * len(by[k]) / tot))
+    while sum(quota.values()) > a.n:
+        k = max(keys, key=lambda k: quota[k])
+        if quota[k] <= 1:
+            break
+        quota[k] -= 1
+    for k in keys:
+        picked += rng.sample(by[k], min(quota[k], len(by[k])))
     for r in picked:
         r['required'] = required_visuals(r['book'], range(r['p0'], r['p1'] + 1))
     os.makedirs(a.out, exist_ok=True)
