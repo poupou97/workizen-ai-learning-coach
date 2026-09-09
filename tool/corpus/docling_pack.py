@@ -18,6 +18,8 @@ Thiếu tệp `trusted.jsonl` thì hàm này trả về rỗng và đường d�
 import json
 import os
 
+import containment
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 TRUSTED = os.path.join(ROOT, 'poc-out', 'docling', 'trusted.jsonl')
@@ -209,7 +211,8 @@ def naming_conflict(claims):
     return not (all(subs) and len(set(subs)) == len(subs))
 
 
-def select(figs, book, pages, index, stats=None, shadow=False, log=None):
+def select(figs, book, pages, index, stats=None, shadow=False, log=None,
+           anchors=None):
     """Danh sách hình HIỆN CHO TRẺ, sau khi chọn giữa hai đường.
 
     `shadow=True`: ĐẾM quyết định của chính sách MỚI nhưng vẫn ra ĐÚNG ĐẦU RA
@@ -246,7 +249,7 @@ def select(figs, book, pages, index, stats=None, shadow=False, log=None):
                     claims.setdefault(id(f), []).append((k, r))
                     by_id[id(f)] = f
                     break
-        blocked = set()
+        blocked, swallow = set(), {}
         for fid, grp in claims.items():
             if naming_conflict(grp):
                 blocked.update(k for k, _ in grp)
@@ -254,12 +257,31 @@ def select(figs, book, pages, index, stats=None, shadow=False, log=None):
             parts = [k for k, r in grp if partial_claim(by_id[fid], r)]
             if parts and not covers(by_id[fid], grp):
                 blocked.update(parts)   # mảnh rời, không dựng lại được cả hình
+                continue
+            # ⭐ CHỐT THỨ BA: khung ứng cử có NUỐT một vật thể nguồn có tên
+            # khác không. Hỏng về phía GIỮ D — không cắt gọt khung cho vừa.
+            d_fig = by_id[fid]
+            for k, r in grp:
+                lab, _ = containment.swallowed(
+                    r['box'], caption_of(r), d_fig['bbox'],
+                    anchors=(anchors or {}).get(pp) or (),
+                    d_figs=[f for f in out if f.get('source') != 'docling'],
+                    trusted=index.get((book, pp)) or (),
+                    have_lines=anchors is None or pp in anchors)
+                if lab:
+                    swallow[k] = lab
 
         for k, r in rows:
             box = r['box']
             same = [f for f in out if f.get('source') != 'docling'
                     and same_source_visual(f, r)]
-            if k in blocked:
+            if k in swallow:
+                bump(swallow[k])
+                bump('CONTAINMENT_BLOCKED')
+                if not shadow:
+                    continue          # giữ hình D, không đưa khung nuốt vật khác
+                # BÓNG: rơi xuống đúng luật cũ.
+            elif k in blocked:
                 bump('PART_OF_NAMED_FIGURE')
                 if not shadow:
                     continue          # giữ hình D gộp, BỎ mảnh mượn tên

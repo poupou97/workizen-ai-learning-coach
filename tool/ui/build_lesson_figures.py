@@ -35,6 +35,7 @@ sys.path.insert(0, os.path.join(ROOT, 'tool', 'corpus'))
 from lesson_figures import lesson_figures, crop_jpeg  # noqa: E402
 import docling_pack  # noqa: E402
 import decoration  # noqa: E402
+import figure_funnel  # noqa: E402
 import table_ownership  # noqa: E402
 import staging  # noqa: E402
 from lesson_reading import lesson_reading  # noqa: E402
@@ -208,9 +209,15 @@ def main():
         # NỐI ĐƯỢC DANH TÍNH được ưu tiên khi CHỨNG MINH ĐƯỢC cùng một hình
         # nguồn — bằng chú thích in, không bằng chồng hộp. Không chứng minh
         # được ⇒ D là dự phòng. `SELECTOR_SHADOW=1` chỉ đếm, không đổi đầu ra.
+        # Chú thích IN của từng trang: bằng chứng để biết một khung ứng cử có
+        # đang nuốt một vật thể mang TÊN KHÁC hay không.
+        anchors = {pp: figure_funnel.caption_anchors(
+                       ls, extended=True,
+                       block_lines=figure_funnel.block_line_counts(ls))
+                   for pp, ls in lb.items()}
         figs = docling_pack.select(figs, r['book'], pages, DL_TRUSTED,
                                    stats=DL_STATS, shadow=SELECTOR_SHADOW,
-                                   log=SEL_LOG)
+                                   log=SEL_LOG, anchors=anchors)
         DL_STATS['CHI_D'] += n_d
         recs = []
         for f in figs:

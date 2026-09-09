@@ -312,3 +312,55 @@ class CamBayHinhCon(unittest.TestCase):
                         {('b', 3): self._parts(subs=('a)', None))}, stats=st)
         self.assertEqual(st['PART_OF_NAMED_FIGURE'], 2)
         self.assertEqual([f['source'] for f in out], ['D'])
+
+
+class KhungNuotVatKhac(unittest.TestCase):
+    """Chốt thứ ba trong bộ chọn: khung ứng cử nuốt vật thể có TÊN KHÁC.
+
+    Ca thật: Tin học 6 tr.20 — khung mang tên «Hình 2.3» nuốt trọn «Hình 2.2».
+    """
+    CAP = 'Hình 2.3. Ví dụ cách kết nối 5 máy tính thành một mạng'
+    KHAC = 'Hình 2.2. Các thiết bị được nối vào mạng'
+
+    def _d(self):
+        return dict(id='d0', book='b', page=3, bbox=[0.15, 0.55, 0.60, 0.20],
+                    caption=self.CAP, source='D')
+
+    def _dl(self):
+        return [row(box=(0.10, 0.10, 0.80, 0.70), text=self.CAP)]
+
+    def _anchors(self, text):
+        return {3: [dict(text=text, x=0.20, y=0.15, w=0.40, h=0.03)]}
+
+    def test_nuot_chu_thich_KHAC_thi_GIU_D(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): self._dl()},
+                        stats=st, anchors=self._anchors(self.KHAC))
+        self.assertEqual(st['CONTAINS_SEPARATE_CAPTION'], 1)
+        self.assertEqual(st['CONTAINMENT_BLOCKED'], 1)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_chu_thich_CUA_CHINH_NO_thi_van_thay_cho(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): self._dl()},
+                        stats=st, anchors=self._anchors(self.CAP))
+        self.assertEqual(st['CONTAINMENT_BLOCKED'], 0)
+        self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+        self.assertEqual([f['source'] for f in out], ['docling'])
+
+    def test_CHE_DO_BONG_dem_chan_nhung_KHONG_doi_dau_ra(self):
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): self._dl()},
+                        stats=st, shadow=True, anchors=self._anchors(self.KHAC))
+        self.assertEqual(st['CONTAINMENT_BLOCKED'], 1)
+        self.assertEqual([f['source'] for f in out], ['D', 'docling'],
+                         'bóng phải ra ĐÚNG đầu ra đang chạy')
+
+    def test_KHONG_truyen_chu_thich_thi_khong_kem_MO_HO(self):
+        """Người gọi cũ không truyền `anchors` — không được biến thành mơ hồ
+        rồi chặn sạch. Thiếu bằng chứng ở đây nghĩa là KHÔNG có bằng chứng
+        buộc tội, chứ không phải có bằng chứng buộc tội."""
+        st = __import__('collections').Counter()
+        out = dp.select([self._d()], 'b', [3], {('b', 3): self._dl()}, stats=st)
+        self.assertEqual(st['CONTAINMENT_BLOCKED'], 0)
+        self.assertEqual([f['source'] for f in out], ['docling'])
