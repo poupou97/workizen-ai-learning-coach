@@ -213,7 +213,7 @@ class CamBayHinhCon(unittest.TestCase):
         st = __import__('collections').Counter()
         out = dp.select([self._d()], 'b', [3],
                         {('b', 3): self._parts()}, stats=st)
-        self.assertEqual(st['SUBFIGURE_WITHHELD'], 2)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 2)
         self.assertEqual(st['DOCLING_SUPERSEDES_D'], 0)
         self.assertEqual([f['source'] for f in out], ['D'],
                          'sách in MỘT tên thì hiện MỘT ảnh')
@@ -222,7 +222,7 @@ class CamBayHinhCon(unittest.TestCase):
         st = __import__('collections').Counter()
         out = dp.select([self._d()], 'b', [3],
                         {('b', 3): self._parts(subs=('a)', 'b)'))}, stats=st)
-        self.assertEqual(st['SUBFIGURE_WITHHELD'], 0)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 0)
         self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
         self.assertEqual(sorted(f['caption'] for f in out), ['a)', 'b)'])
 
@@ -231,23 +231,47 @@ class CamBayHinhCon(unittest.TestCase):
         st = __import__('collections').Counter()
         out = dp.select([self._d()], 'b', [3],
                         {('b', 3): self._parts(subs=('a)', 'a)'))}, stats=st)
-        self.assertEqual(st['SUBFIGURE_WITHHELD'], 2)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 2)
         self.assertEqual([f['source'] for f in out], ['D'])
 
-    def test_MOT_manh_duy_nhat_KHONG_phai_xung_dot(self):
-        """Chốt này chỉ bắt nhóm ≥2. Một-đổi-một vẫn phải thay chỗ như thường."""
+    def test_MOT_manh_khong_nhan_cung_KHONG_duoc_muon_ten(self):
+        """`naming_conflict` chỉ bắt nhóm ≥2 — nhưng mẫu 55 ca cho thấy CA HẠI
+        NHẤT chỉ có MỘT mảnh đòi: «Hình 8.7. Các bước là quần áo» (5 ô) bị thay
+        bằng đúng ô «4». `partial_claim` bắt bằng quan hệ BAO HÀM."""
         st = __import__('collections').Counter()
         out = dp.select([self._d()], 'b', [3],
                         {('b', 3): self._parts(subs=(None,))}, stats=st)
-        self.assertEqual(st['SUBFIGURE_WITHHELD'], 0)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 1)
+        self.assertEqual([f['source'] for f in out], ['D'])
+
+    def test_manh_LON_gan_bang_ca_hinh_thi_van_thay_cho(self):
+        """Docling cắt lại gần trọn hình thì đó là CÙNG hình, không phải mảnh."""
+        st = __import__('collections').Counter()
+        big = [row(box=(0.12, 0.12, 0.74, 0.55),
+                   text='Hình 8. Luyện tập tung và bắt bóng trên cao')]
+        out = dp.select([self._d()], 'b', [3], {('b', 3): big}, stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 0)
         self.assertEqual(st['DOCLING_SUPERSEDES_D'], 1)
+
+    def test_D_nam_gon_trong_DOCLING_thi_DOCLING_BU_phan_thieu(self):
+        """Chiều ngược lại là 990/3.403 cặp và là cái ta MUỐN: D cắt cụt, Docling
+        bù đủ. Luật mảnh không được chặn nhầm chiều này."""
+        st = __import__('collections').Counter()
+        d = dict(id='d0', book='b', page=3, bbox=[0.3, 0.3, 0.2, 0.15],
+                 caption='Hình 8. Luyện tập tung và bắt bóng trên cao',
+                 source='D')
+        out = dp.select([d], 'b', [3],
+                        {('b', 3): [row(box=(0.1, 0.1, 0.8, 0.6),
+                                        text='Hình 8. Luyện tập tung và bắt bóng trên cao')]},
+                        stats=st)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 0)
         self.assertEqual([f['source'] for f in out], ['docling'])
 
     def test_CHE_DO_BONG_dem_chan_nhung_KHONG_doi_dau_ra(self):
         st = __import__('collections').Counter()
         out = dp.select([self._d()], 'b', [3],
                         {('b', 3): self._parts()}, stats=st, shadow=True)
-        self.assertEqual(st['SUBFIGURE_WITHHELD'], 2)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 2)
         self.assertEqual([f['source'] for f in out], ['D', 'docling', 'docling'],
                          'bóng phải ra ĐÚNG đầu ra đang chạy, kể cả cái sai')
 
@@ -261,5 +285,5 @@ class CamBayHinhCon(unittest.TestCase):
         st = __import__('collections').Counter()
         out = dp.select([self._d()], 'b', [3],
                         {('b', 3): self._parts(subs=('a)', None))}, stats=st)
-        self.assertEqual(st['SUBFIGURE_WITHHELD'], 2)
+        self.assertEqual(st['PART_OF_NAMED_FIGURE'], 2)
         self.assertEqual([f['source'] for f in out], ['D'])

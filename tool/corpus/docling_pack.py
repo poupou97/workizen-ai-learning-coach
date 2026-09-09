@@ -136,6 +136,41 @@ def _sub_of(r):
     return ((r.get('ident') or {}).get('sub') or '').strip().lower() or None
 
 
+PART_INSIDE = 0.9         # vùng Docling nằm gọn trong hình D chừng này
+PART_AREA = 0.4           # ...mà chỉ chiếm chừng này diện tích ⇒ là MỘT MẢNH
+
+
+def partial_claim(d_fig, dl_row):
+    """Vùng Docling có đang đòi tên của cả hình trong khi chỉ là MỘT MẢNH không.
+
+    ⛔ Họ hỏng đo được trên mẫu 55 ca đối chiếu ba bên (3 ca, 5,5%): sách in một
+    hình gồm nhiều ô — «Hình 12.6. Quây úm cho gà con» (3 ô), «Hình 8.7. Các
+    bước là quần áo» (5 ô) — Docling đề xuất ĐÚNG MỘT ô, rồi thừa hưởng tên của
+    cả hình. Trẻ mất các ô còn lại VÀ nhận một cái tên sai phạm vi.
+
+    `naming_conflict` không bắt được vì ở đây chỉ có MỘT vùng Docling đòi.
+
+    Bằng chứng là quan hệ BAO HÀM, không phải chồng lấn: chú thích in nằm dưới
+    CẢ hình, nên tên thuộc về cả hình. Nằm gọn bên trong mà nhỏ hơn hẳn ⇒ mảnh.
+    Chiều ngược lại (D nằm trong Docling) là Docling BÙ phần D cắt thiếu —
+    990/3.403 cặp, và đó chính là cái ta muốn.
+
+    Ngưỡng 0,4 chọn trên chính mẫu 55 ca ⇒ tỉ lệ sót phải đo lại bằng MẪU MỚI.
+    """
+    if _sub_of(dl_row):
+        # Có nhãn con IN thì mảnh ấy có TÊN RIÊNG của sách — không mượn của ai.
+        return False
+    d = d_fig['bbox']
+    dl = dl_row['box']
+    ix = min(d[0] + d[2], dl[0] + dl[2]) - max(d[0], dl[0])
+    iy = min(d[1] + d[3], dl[1] + dl[3]) - max(d[1], dl[1])
+    if ix <= 0 or iy <= 0:
+        return False
+    a_dl = max(dl[2] * dl[3], 1e-9)
+    a_d = max(d[2] * d[3], 1e-9)
+    return (ix * iy) / a_dl >= PART_INSIDE and a_dl / a_d < PART_AREA
+
+
 def naming_conflict(claims):
     """Nhóm vùng Docling cùng đòi thay MỘT hình D — có tách được không.
 
@@ -183,25 +218,30 @@ def select(figs, book, pages, index, stats=None, shadow=False, log=None):
         rows = list(enumerate(index.get((book, pp), [])))
         # PHA 1 — ai đòi thay hình D nào. Phải biết TOÀN nhóm trước khi quyết,
         # vì nguy hiểm nằm ở SỐ LƯỢNG vùng cùng đòi, không ở từng vùng một.
-        claims = {}
+        claims, by_id = {}, {}
         for k, r in rows:
             for f in out:
                 if f.get('source') != 'docling' and same_source_visual(f, r):
                     claims.setdefault(id(f), []).append((k, r))
+                    by_id[id(f)] = f
                     break
         blocked = set()
-        for grp in claims.values():
+        for fid, grp in claims.items():
             if naming_conflict(grp):
                 blocked.update(k for k, _ in grp)
+                continue
+            for k, r in grp:                 # một mảnh cũng không được mượn tên
+                if partial_claim(by_id[fid], r):
+                    blocked.add(k)
 
         for k, r in rows:
             box = r['box']
             same = [f for f in out if f.get('source') != 'docling'
                     and same_source_visual(f, r)]
             if k in blocked:
-                bump('SUBFIGURE_WITHHELD')
+                bump('PART_OF_NAMED_FIGURE')
                 if not shadow:
-                    continue          # giữ hình D gộp, BỎ các mảnh trùng tên
+                    continue          # giữ hình D gộp, BỎ mảnh mượn tên
                 # BÓNG: rơi xuống đúng luật cũ, không được rẽ hướng.
             elif same:
                 bump('DOCLING_SUPERSEDES_D')
