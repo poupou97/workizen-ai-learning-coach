@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 from lesson_reading import lesson_reading  # noqa: E402
 from lesson_chapters import chapter_openers, chapter_at, resolve_group  # noqa: E402
 from tc2_attach import printed_offset  # noqa: E402
+import attach_gate  # noqa: E402
 from unit_locator import locate_start, locate_end, norm as _unorm  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -586,6 +587,26 @@ if PATTERN_BOOKS.get(GRADE) and os.environ.get('PATTERN_ROUTER') == '1':
 # Không có nó ⇒ KHÔNG phát mục nào (pack vẫn dựng được, chỉ là không có họ này) —
 # đoán dải trang để bài «mở được» là cho trẻ mở nhầm chỗ.
 ATTACH_ROOT = os.environ.get('ATTACH_ROOT', 'poc-out/trusted-corpus/tc-v2/tc2-p1')
+# ⭐ FAIL CLOSED — THIẾU ATTACH THÌ DỪNG, KHÔNG DỰNG PACK NHỎ HƠN TRONG IM LẶNG.
+#
+# Sự cố thật 2026-09-09: bộ attach đầy đủ nằm ở `/private/tmp/wal-census/attach`;
+# máy khởi động lại, macOS xoá `/private/tmp`, bộ ấy bốc hơi. Chỗ mặc định chỉ
+# còn 39/238 cuốn. Trước bản sửa này, chạy lệnh dựng chuẩn lúc ấy vẫn chạy trót
+# lọt và sinh ra một pack NHỎ HƠN mà không một lỗi nào — bài không có attach chỉ
+# bị cộng vào `NO_ATTACH` rồi bỏ qua.
+#
+# Nay so TẬP HỢP sách mong đợi (suy từ chính sổ sách chuẩn) với tập đang có.
+# Thiếu, hỏng, hay CŨ so với sổ ⇒ dừng ngay tại đây.
+_att_root = (ATTACH_ROOT if os.path.isabs(ATTACH_ROOT)
+             else os.path.join(attach_gate.ROOT, ATTACH_ROOT))
+_att_problems = attach_gate.verify(GRADE, _att_root)
+if _att_problems:
+    for _p in _att_problems:
+        print(f'  ✗ {_p}', file=sys.stderr)
+    raise SystemExit(
+        f'lớp {GRADE}: CỔNG ATTACH KHÔNG ĐẠT — dừng trước khi ghi pack.\n'
+        f'Sinh lại: python3 tool/corpus/attach_gate.py --generate')
+
 lesson_readings = []
 _lr_reasons = collections.Counter()
 for _subj, _books in subjects.items():
@@ -707,8 +728,13 @@ out = dict(grade=GRADE, version='lesson-index-v2',
 # ---- WAL-210: provenance (audit G5) + reason-coded attachment log (G2/G3) --------
 _flags = pack_provenance.read_flags()
 out = pack_provenance.stamp(out, GRADE, _flags, __file__)
-os.makedirs('assets/pack', exist_ok=True)
-path = f'assets/pack/lesson-index-g{GRADE}.json'
+# ⭐ DỰNG VÀO KHU TẠM TRƯỚC, ĐỔI CHỖ SAU. Founder: «Build staging first. Then
+# validate. Then atomic promotion.» Mặc định vẫn ghi thẳng để mọi lệnh cũ không
+# đổi nghĩa; `PACK_OUT_DIR` cho phép dựng ra chỗ khác để ĐỐI CHIẾU trước khi
+# thay bản đang tốt — đúng thứ đã cứu lớp 11 khỏi tụt 449 → 437 hôm nay.
+PACK_OUT_DIR = os.environ.get('PACK_OUT_DIR', 'assets/pack')
+os.makedirs(PACK_OUT_DIR, exist_ok=True)
+path = os.path.join(PACK_OUT_DIR, f'lesson-index-g{GRADE}.json')
 # ⚠ PACK CHƯA XONG: bước này sinh lại `lessonReadings.content` KHÔNG có mục
 # hình — hình do `build_lesson_figures.py` nạp vào SAU. Chạy lẻ bước này là
 # làm mất hình mà không có lỗi nào (đã xảy ra: lớp 10–12 mất sạch hình, L1-M
