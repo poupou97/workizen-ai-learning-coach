@@ -35,21 +35,7 @@ sys.path.insert(0, HERE)
 from lesson_reading import page_paragraphs  # noqa: E402
 
 OCR = os.path.join(ROOT, 'poc-out/graph/ocr-body')
-# ⚠ THỨ TỰ QUAN TRỌNG: chuỗi 'khoa-hoc' CHỨA 'hoa-hoc'. Xét 'hoa-hoc' trước
-# thì «Tin học 11 định hướng KHOA HỌC máy tính» bị gán nhãn «Hoá học» — bảng
-# đối chiếu bốn bên đã hiện ra đúng lỗi ấy.
-SUBJ = [('toan', 'Toán'), ('vat-li', 'Vật lí'), ('khoa-hoc-tu-nhien', 'KHTN'),
-        ('tin-hoc', 'Tin học'), ('hoa-hoc', 'Hoá học'),
-        ('sinh-hoc', 'Sinh học'), ('cong-nghe', 'Công nghệ')]
-INSIDE = 0.60      # đoạn văn nằm trong vùng chừng này thì coi là CỦA vùng ấy
-
-
-def subject(book):
-    s = book.split('-', 2)[-1]
-    for k, n in SUBJ:
-        if k in s:
-            return n
-    return 'môn khác'
+from subject import subject  # noqa: E402  (khớp theo ĐOẠN, xem module)
 
 
 def regions(kind):
