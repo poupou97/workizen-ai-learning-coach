@@ -168,9 +168,54 @@ class _LessonPagesScreenState extends State<LessonPagesScreen> {
                           color: WalColors.ink)),
                 ),
               ReadImage img => _figure(context, img),
+              ReadFormula f => _formula(context, f),
             };
           },
         ),
+      ),
+    );
+  }
+
+  /// Công thức hiện bằng ẢNH CẮT TỪ TRANG SÁCH — bản in là sự thật.
+  ///
+  /// KHÔNG dùng lại `_figure`: hình có chú thích của sách in dưới ảnh, công
+  /// thức thì không có chú thích nào cả. Chỗ duy nhất được viết thêm là SỐ
+  /// HIỆU IN, và chỉ khi sách có in nó.
+  Widget _formula(BuildContext context, ReadFormula f) {
+    final bytes = figures?.jpeg(f.id);
+    // Không có ảnh thì không hiện gì — không chừa ô câm, không bịa chữ thay.
+    if (bytes == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: WalSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => showLearningImage(context,
+                  bytes: bytes,
+                  aspect: f.aspect,
+                  caption: f.ident == null ? null : '(${f.ident})',
+                  sourceLine: sourceLine),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(WalSpacing.radiusChip),
+                child: AspectRatio(
+                  aspectRatio: f.aspect,
+                  child: Image.memory(bytes,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => const SizedBox.shrink()),
+                ),
+              ),
+            ),
+          ),
+          if (f.ident != null)
+            Padding(
+              padding: const EdgeInsets.only(left: WalSpacing.sm),
+              child: Text('(${f.ident})',
+                  style: const TextStyle(
+                      fontSize: WalType.secondary, color: WalColors.inkSoft)),
+            ),
+        ],
       ),
     );
   }
