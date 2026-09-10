@@ -72,6 +72,17 @@ Thiếu một ⇒ **FAIL CLOSED**. Không cho một hình khác «đỡ» cho vi
 **ĐẠT 10/17 · TRƯỢT 6 · MỘT PHẦN 1.**
 Theo môn: **KHTN 5/5** · **Ngữ văn 3/6** · **Lịch sử 2/6**.
 
+> ⚠ **ĐÍNH CHÍNH 2026-09-10.** Ô T13 ở trên chấm SAI. Tôi cho ĐẠT vì bài có
+> «ảnh có chú thích», mà **không kiểm đúng danh tính sách gọi**. Sự thật:
+> «Hình 9.1» là hình NHIỀU PHẦN — chỉ 2 phần tới tay trẻ («d) Bánh mì»,
+> «e) Cầu Long Biên»), **danh tính cha không được giao**, bộ phần thì thiếu.
+> Việc «Quan sát Hình 9.1…» **không làm được**. Vậy con số ĐÚNG trước vòng
+> danh tính chú thích là **9/17**, không phải 10/17.
+>
+> Đây đúng điều Founder chốt: **danh tính là bắt buộc**, «có một hình nào đó»
+> không thoả được «Quan sát Hình 9.1». Xem
+> [CAPTION-IDENTITY-ROUND.md](CAPTION-IDENTITY-ROUND.md).
+
 ---
 
 ## 4 · CÁC KIỂU HỎNG

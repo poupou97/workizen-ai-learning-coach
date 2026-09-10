@@ -135,3 +135,37 @@ DUY NHẤT trong lớp 5 mất khối chữ, và mất đúng thứ đáng mất
   Docling**, không phải đường D.
 * 4 ca chú thích **đánh số trơ** trong khối 3–4 dòng vẫn bỏ sót.
 * Họ hỏng **#2 · #4 · #5** còn nguyên, đúng như phạm vi đã chốt.
+
+
+---
+
+## 8 · MA TRẬN 17 VIỆC — TRƯỚC → SAU
+
+Chấm lại **áp đúng luật danh tính**: một việc «Quan sát Hình N» chỉ ĐẠT khi
+hình mang **đúng danh tính N** tới tay trẻ, không phải khi bài có «một ảnh nào
+đó có chú thích».
+
+| | TRƯỚC (đã đính chính) | SAU |
+|---|---|---|
+| **tổng** | **9/17** | **11/17** |
+| Lịch sử | 2/6 | **4/6** |
+| Ngữ văn | 3/6 | 3/6 |
+| KHTN | 4/5 | 4/5 |
+
+Đổi chiều:
+
+* **T3** «Đọc thông tin và quan sát **hình 2**, xác định khu vực đông dân,
+  thưa dân» — TRƯỢT → **ĐẠT**
+* **T5** LUYỆN TẬP «**Dựa vào bản đồ** phân bố dân cư… kể tên 3 tỉnh mật độ
+  cao nhất» — TRƯỢT → **ĐẠT**
+
+⚠ **ĐÍNH CHÍNH ma trận cũ.** T13 «Quan sát **Hình 9.1**…» từng bị tôi chấm ĐẠT
+vì bài có ảnh có chú thích — **sai**. «Hình 9.1» là hình NHIỀU PHẦN: chỉ 2
+phần tới tay trẻ («d) Bánh mì», «e) Cầu Long Biên»), **danh tính cha không
+được giao**, bộ phần thì thiếu. Nên TRƯỚC đúng là **9/17**, không phải 10/17.
+Vòng này **không** sửa được ca ấy.
+
+Còn TRƯỢT: **T1** bảng số dân · **T2** «hình 1» giao rồi mà **mất danh tính**
+(ảnh biểu đồ không chú thích) · **T11** bảng trống · **T12** dây chuyền ·
+**T13** hình nhiều phần. Tức họ **#2 · #3(phần hình nhiều phần) · #4 · #5**
+còn nguyên — đúng phạm vi đã chốt.
