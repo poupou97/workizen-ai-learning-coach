@@ -48,6 +48,22 @@ phân biệt `hoa-hoc` · `khoa-hoc` · `khoa-hoc-tu-nhien` · `dinh-huong-khoa-
 
 ---
 
+## ⚠ ĐÍNH CHÍNH 2026-09-10 — MỤC C VÀ D DƯỚI ĐÂY DỰA TRÊN MỘT PHÉP ĐO SAI
+
+Xếp loại «mất gần hết (chỉ còn SỐ DÒNG)» — 8/16 ca — **là artefact của phép
+đo, không phải sự thật sản phẩm.** Truy bốn ca ấy xuyên suốt tới `assets/pack`:
+**21/21 dòng mã đều tới tay trẻ.** `stem_exposure` chỉ đếm đoạn phủ ≥60% vào
+vùng; cột số dòng hẹp nên phủ 100% và được đếm, còn dòng mã thật đã bị hàn vào
+văn xuôi rộng cả trang nên phủ 0,9%–39,7% và rớt ngưỡng.
+
+Hư hại có thật, nhưng là **BĂM NHỎ VÀ ĐẶT SAI CHỖ**, không phải mất nội dung:
+`blocks()` xé 60,2% chương trình thành nhiều khối và hàn 88,0% vào văn xuôi.
+
+Giữ nguyên mục C và D làm bằng chứng về một phép đo đã bị bác bỏ.
+Căn nguyên, bản vá và số đo đúng: [WAL-239-CODE-ROOT-CAUSE.md](WAL-239-CODE-ROOT-CAUSE.md).
+
+---
+
 ## C · CODE — AN TOÀN HIỆN TẠI (mẫu, KHÔNG suy rộng)
 
 n=16 `TRUE_PROGRAM_CODE`, đóng băng: **HẠI 15/16 = 93,8%**.
