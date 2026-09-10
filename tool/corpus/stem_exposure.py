@@ -37,6 +37,14 @@ from lesson_reading import page_paragraphs  # noqa: E402
 OCR = os.path.join(ROOT, 'poc-out/graph/ocr-body')
 from subject import subject  # noqa: E402  (khớp theo ĐOẠN, xem module)
 
+#: Đoạn văn phủ chừng này DIỆN TÍCH CỦA CHÍNH NÓ vào vùng thì coi là CỦA vùng.
+#: ⚠ Giá trị này KHÔI PHỤC NGUYÊN VĂN từ 3e1c367/eca4d50, không phải chọn lại:
+#: nó là ngưỡng đã sinh ra mọi số phơi nhiễm đã báo cáo. Bản d099f5f xoá nhầm
+#: hằng số này khi gỡ bộ phân loại môn cục bộ ở ngay bên cạnh, làm module ném
+#: `NameError` ngay vùng đầu tiên. Đổi số ở đây là lặng lẽ định nghĩa lại một
+#: phép đo đã công bố — đừng đổi.
+INSIDE = 0.60
+
 
 def regions(kind):
     out = collections.defaultdict(list)
