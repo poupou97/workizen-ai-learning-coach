@@ -18,7 +18,6 @@ library;
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:learning_coach/core/lesson_model/lesson_document.dart';
 import 'package:learning_coach/core/lesson_model/next_action.dart';
 import 'package:learning_coach/core/lesson_model/semantic_data.dart';
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
