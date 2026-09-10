@@ -1,7 +1,34 @@
-# LEARNABLE — HỢP ĐỒNG NHỎ NHẤT (ĐỀ XUẤT, 2026-09-10)
+# LEARNABLE_V1 — HỢP ĐỒNG NHỎ NHẤT (Founder DUYỆT 2026-09-10)
 
-Trạng thái: **PROPOSED** — chờ Founder chốt. Chưa có luật nào ở đây đang chạy
-trong sản phẩm.
+Trạng thái: **APPROVED — LEARNABLE_V1**. Chưa thi công: còn chờ kiểm máy thật
+cho `FormulaSourceBlock` và mã nhiều dòng.
+
+---
+
+## ⛔ RANH GIỚI NGỮ NGHĨA — ĐỌC TRƯỚC KHI DÙNG SỐ Ở ĐÂY
+
+**`LEARNABLE_V1` là hợp đồng CÓ BẰNG CHỨNG cho LÁT CẮT TSL ĐẦU TIÊN.
+Nó CHƯA phải định nghĩa LEARNABLE của toàn K-12.**
+
+`VISUAL_GROUNDED` là cổng bắt buộc **ở V1** vì quần thể ứng viên đo được đầu
+tiên chính là lát cắt Khoa học/KHTN của TSL. Điều đó **KHÔNG** được suy rộng
+thành «mọi bài K-12 muốn LEARNABLE đều phải có SemanticData / Trực quan».
+
+Mô hình năng lực giữ nguyên ba bậc:
+
+    READ  →  READ + VISUAL  →  READ + VISUAL + SAM
+
+Các môn sau này — Ngữ văn · Lịch sử · Toán — và các dạng bài khác **có thể cần
+bằng chứng học chủ động KIỂU KHÁC**. Khi tới lúc ấy, việc phải làm là tìm bằng
+chứng đúng cho môn ấy, **KHÔNG phải chế ra `process`/`comparison`** cho đủ chỉ
+số.
+
+### Thiên lệch của quần thể V1 — nói thẳng
+
+    100% Khoa học / KHTN   ·   lớp 4–9   ·   6 cuốn
+
+**Không được trình bày như phủ K-12.** `SAM_READY` vẫn là **1**, không đổi
+theo hợp đồng này.
 
 Câu hỏi Founder đặt: *«What minimum evidence makes a real lesson safe and
 useful enough to become LEARNABLE?»*
@@ -98,7 +125,12 @@ giới hạn thật, không phải con số cần nống lên.
 
 ---
 
-## 4 · LÁT CẮT ĐẦU TIÊN ĐỀ XUẤT
+## 4 · LÁT CẮT ĐẦU TIÊN — Founder ĐÃ DUYỆT
+
+Seed `20260910`, một bài mỗi lớp. Founder chốt: **không thay bằng ví dụ đẹp hơn.**
+
+⛔ **Chưa thi công.** Điều kiện tiên quyết: kiểm MÁY THẬT cho công thức và mã
+nhiều dòng. Bằng chứng phải là HÀNH VI TRẺ NHÌN THẤY, không phải chỉ test.
 
 Một bài mỗi lớp, rút từ **44** bài trên bằng seed đóng băng `20260910` — lát
 cắt THẬT, không phải bài trưng bày chọn tay:
