@@ -236,3 +236,51 @@ class BridgeTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class BoTrungProcess(unittest.TestCase):
+    """Một process trùng hệt là BA SƠ ĐỒ Y NHAU trên màn của trẻ.
+
+    Đo được trên 44 bài ứng viên LEARNABLE_V1: **20 bài (45,5%)** phát ra
+    process trùng. KHTN 9 Bài 14 ra CHÍN process mà chỉ có BỐN nội dung khác
+    nhau — «Lắp mạch điện như Hình 14.3 · Quan sát kim điện kế» hiện ba lần
+    liền nhau.
+
+    Nguyên nhân: vòng ngoài chạy theo TỪNG khối `instruction`, mà một trang có
+    thể có nhiều khối `instruction` cùng đứng trước MỘT dãy bước.
+    """
+
+    def _p(self, title, *texts):
+        return {'type': 'process', 'id': 'x', 'title': title, 'trust': 'x',
+                'derivation': 'x',
+                'steps': [{'order': i + 1, 'text': t} for i, t in enumerate(texts)]}
+
+    def test_trung_hoan_toan_thi_giu_MOT(self):
+        got = br._dedupe([self._p('Quy trình', 'a', 'b'),
+                           self._p('Quy trình', 'a', 'b'),
+                           self._p('Quy trình', 'a', 'b')])
+        self.assertEqual(len(got), 1)
+
+    def test_KHAC_noi_dung_thi_GIU_CA_HAI(self):
+        """Cùng tên mà khác bước là hai quy trình khác — không được gộp."""
+        got = br._dedupe([self._p('Quy trình', 'a', 'b'),
+                           self._p('Quy trình', 'c', 'd')])
+        self.assertEqual(len(got), 2)
+
+    def test_KHAC_ten_thi_GIU_CA_HAI(self):
+        got = br._dedupe([self._p('Thí nghiệm 1', 'a'),
+                           self._p('Thí nghiệm 2', 'a')])
+        self.assertEqual(len(got), 2)
+
+    def test_giu_THU_TU_va_danh_lai_id_lien_tuc(self):
+        got = br._dedupe([self._p('A', 'x'), self._p('B', 'y'),
+                           self._p('A', 'x'), self._p('C', 'z')])
+        self.assertEqual([p['title'] for p in got], ['A', 'B', 'C'])
+        self.assertEqual([p['id'] for p in got],
+                         ['process-1', 'process-2', 'process-3'])
+
+    def test_buoc_BI_GIU_LAI_cung_tinh_la_noi_dung_khi_so_trung(self):
+        """Hai process cùng tên, một bên có chữ một bên bị giữ lại ⇒ KHÁC nhau."""
+        a = self._p('Q', 'thật')
+        b = {**self._p('Q'), 'steps': [{'order': 1, 'withheldReason': 'agree_text'}]}
+        self.assertEqual(len(br._dedupe([a, b])), 2)
