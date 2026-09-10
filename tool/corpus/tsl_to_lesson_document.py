@@ -578,7 +578,36 @@ def derive_process(tsl):
                 'derivation': 'tsl-enumerated-steps-v1',
                 'steps': steps,
             })
-    return out
+    return _dedupe(out)
+
+
+def _dedupe(procs):
+    """Cùng tên VÀ cùng dãy bước thì chỉ giữ MỘT.
+
+    ⚠ ĐO ĐƯỢC, KHÔNG PHẢI DỌN DẸP CHO ĐẸP: 20/44 bài ứng viên (45,5%) phát ra
+    process trùng. KHTN 9 Bài 14 ra **chín** process mà chỉ có **bốn** nội dung
+    khác nhau — «Lắp mạch điện như Hình 14.3 · Quan sát kim điện kế» hiện ba
+    lần liền. Với trẻ đó là ba sơ đồ y hệt nhau xếp chồng, không phải ba bước
+    học.
+
+    Nguyên nhân: vòng ngoài chạy theo TỪNG khối `instruction`, mà một trang có
+    thể có nhiều khối `instruction` cùng đứng trước MỘT dãy bước — mỗi khối lại
+    thu về đúng dãy ấy.
+
+    Bỏ trùng theo (tên + dãy bước), giữ cái ĐẦU TIÊN để thứ tự đọc không đổi.
+    KHÔNG gộp hai process khác nội dung, KHÔNG sửa chữ.
+    """
+    seen, keep = set(), []
+    for p in procs:
+        sig = (p.get('title'),
+               tuple((s.get('text') or s.get('withheldReason') or '')
+                     for s in p.get('steps') or ()))
+        if sig in seen:
+            continue
+        seen.add(sig)
+        p = dict(p, id=f'process-{len(keep) + 1}')
+        keep.append(p)
+    return keep
 
 
 def derive_comparison(tsl):

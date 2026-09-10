@@ -76,6 +76,19 @@ class WorkspaceCatalog {
     FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 10),
     FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 9),
     FixtureSlot(book: '05-sgk-lich-su-va-dia-li-5', lessonNo: 8),
+    // ⭐ LEARNABLE_V1 — lát cắt đầu tiên, Founder duyệt 2026-09-10, rút từ 44
+    // bài qua đủ bốn cổng bằng seed ĐÓNG BĂNG 20260910, một bài mỗi lớp.
+    // Không chọn tay, không thay bằng ví dụ đẹp hơn.
+    //
+    // ⚠ THIẾU LỚP 6: bài rút được (KHTN 6 Bài 8) TRƯỢT cổng ③ — `SemanticData`
+    // duy nhất của nó gồm toàn bước BỊ GIỮ LẠI, nên ✨ Trực quan sẽ là một tab
+    // rỗng có tiêu đề. Fixture vẫn sinh ra và giữ trên đĩa làm bằng chứng;
+    // KHÔNG nối vào sản phẩm, và KHÔNG tự ý rút bài khác thay.
+    FixtureSlot(book: '04-sgk-khoa-hoc-4', lessonNo: 4),
+    FixtureSlot(book: '05-sgk-khoa-hoc-5', lessonNo: 4),
+    FixtureSlot(book: '07-sgk-khoa-hoc-tu-nhien-7', lessonNo: 4),
+    FixtureSlot(book: '08-sgk-khoa-hoc-tu-nhien-8', lessonNo: 19),
+    FixtureSlot(book: '09-sgk-khoa-hoc-tu-nhien-9', lessonNo: 14),
   ];
 
   /// Lát cắt NGHIÊN CỨU: hiện trên Home cho mọi lớp (kèm nhãn «sách lớp N»)
