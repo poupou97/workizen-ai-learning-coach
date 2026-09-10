@@ -31,6 +31,22 @@ CAPTION_NUM = re.compile(r'^\s*(hình|bảng|sơ\s*đồ|biểu\s*đồ)\s*(\d{1
 CAPTION_NUM_ANY = re.compile(
     r'^\s*(hình|bảng|sơ\s*đồ|biểu\s*đồ)\s*(\d{1,2})(?:\s*[.,]\s*(\d{1,2}))?(?![\d])',
     re.IGNORECASE)
+
+#: MỘT danh tính hình/bảng bất kỳ, ở BẤT KỲ chỗ nào trong dòng — đếm để biết
+#: dòng có nói tới nhiều hình cùng lúc không.
+IDENTITY = re.compile(
+    r'(?:hình|bảng|sơ\s*đồ|biểu\s*đồ)\s*\d{1,2}[a-z]?(?:\s*[.,]\s*\d{1,2}[a-z]?)?',
+    re.IGNORECASE)
+
+#: CHÚ THÍCH CÓ TÊN: số hiệu · DẤU NGĂN · rồi còn chữ thật. Đây là bằng chứng
+#: của chính dòng ấy, thay cho proxy «khối ngắn».
+CAPTION_TITLED = re.compile(
+    r'^\s*(hình|bảng|sơ\s*đồ|biểu\s*đồ)\s*\d{1,2}[a-z]?(?:\s*[.,]\s*\d{1,2}[a-z]?)*'
+    # ⚠ `\S{3,}` là SAI: nó đòi ba ký tự LIỀN NHAU không dấu cách, nên
+    # «Hình 6. Du lịch trên sông Hồng» trượt vì «Du» chỉ có hai. Đúng phải là
+    # «bắt đầu bằng chữ, rồi còn ít nhất hai ký tự nữa».
+    r'\s*[.:]\s*\S.{2,}',
+    re.IGNORECASE)
 # ⛔ HỌ «DẤU NGUỒN» ĐÃ BỊ RÚT LẠI — CORPUS BÁC BỎ CHÍNH GIẢ THUYẾT CỦA TÔI.
 #
 # B2.1 nhận thêm họ này: dòng ngắn kết bằng chỉ số nguồn «Thêu⁽⁴⁾». Trên 63
@@ -66,20 +82,68 @@ def caption_anchors(lines, *, extended=False, block_lines=None):
       · đánh số MỘT CẤP («Hình 2», «Bảng 3»);
       · chú thích kết bằng CHỈ SỐ NGUỒN («Thêu⁽⁴⁾»).
 
-    ⚠ Cả hai chỉ nhận khi dòng nằm trong KHỐI NGẮN (≤2 dòng). Một câu thân bài
-    mở đầu bằng «Hình 5.1 là đồ thị…» là THAM CHIẾU, không phải chú thích —
-    census cho thấy khác biệt nằm ở chỗ nó nằm trong đoạn văn nhiều dòng.
+    ⭐⭐ KÍCH THƯỚC KHỐI LÀ PROXY, KHÔNG PHẢI BẰNG CHỨNG.
+
+    Luật cũ đòi dòng nằm trong KHỐI ≤2 DÒNG. Census toàn corpus: trong 14.768
+    chú thích đánh số in, **1.900 (12,9%)** bị loại CHỈ vì khối dài hơn — và
+    lệch rất mạnh theo môn, vì «khối» là thứ `blocks()` tình cờ dựng ra chứ
+    không phải thứ sách in:
+
+        Khoa học 4/5  42,6%   ·   GDTC 33,8%   ·   Lịch sử 31,1%
+        KHTN · Toán · Hoá học  ~1%
+
+    Nhân chứng: Lịch sử 5 Bài 4 tr.24 — dòng «Hình 2. Bản đồ phân bố dân cư
+    Việt Nam năm 2024» SẠCH và ĐỨNG ĐẦU DÒNG, nhưng `blocks()` gom nó với hai
+    nhãn toạ độ bản đồ («100», «108°») thành khối 3 dòng ⇒ bị loại ⇒ tấm bản
+    đồ 67,4% trang không tới tay trẻ ⇒ bài tập in «Dựa vào bản đồ…» KHÔNG LÀM
+    ĐƯỢC.
+
+    ⛔ NHƯNG BỎ NGƯỠNG KHÔNG PHẢI LỜI GIẢI. Mẫu đóng băng 80 ca (seed
+    20260911) cho thấy nới thẳng sẽ nhận cả «Hình 1 gắn liền với hoạt động
+    của…» (một CÂU), «Hình 4: Sơ đồ…; Hình 5: Sơ đồ…» (một DANH SÁCH), và
+    «bảng 10 x 10, cột 10 x 1…» (một PHÉP NHÂN). `SAI TÊN > THIẾU TÊN`.
+
+    Nên thay proxy bằng BẰNG CHỨNG CỦA CHÍNH DÒNG ẤY — ba điều kiện:
+
+        ① DẤU NGĂN  «.» hoặc «:» ngay sau số hiệu
+           (câu tham chiếu không có: «Hình 1 gắn liền», «Hình 8 và cho biết»)
+        ② CÓ TÊN    sau dấu ngăn còn chữ thật
+           («Hình 9a.9.» kết một câu thì không có tên)
+        ③ ĐÚNG MỘT DANH TÍNH trong dòng
+           (hai danh tính thì KHÔNG gán an toàn cho MỘT hình được — đó chính
+            là điều mơ hồ, nên loại là fail-closed ĐÚNG)
+
+    Đủ ba ⇒ nhận BẤT KỂ khối dài bao nhiêu. Thiếu tên (đánh số trơ «Hình 11»)
+    ⇒ vẫn giữ nguyên luật khối ≤2 dòng như cũ, KHÔNG nới.
+
+    Điều kiện ③ áp cho CẢ nhánh hai cấp — nó sửa một họ dương tính giả đã có
+    sẵn (0,57% số đang nhận), ví dụ «Hình 2.13b trình bày các hình chiếu vuông
+    góc của hình trụ được mô tả ở Hình 2.13a.»
+
+    Chấm trên mẫu đóng băng 80 ca đã dán nhãn tay:
+
+        luật cũ    precision 95,0%   recall 28,8%
+        luật này   precision 98,4%   recall 93,9%
+
+    Không nhạy với ngưỡng độ dài tên (1→8 ký tự cho cùng kết quả) — nó không
+    phải một núm vặn.
+
     `block_lines` = `{id(dòng): số dòng của khối}`.
     """
     out = []
     for l in lines:
         t = (l.get('text') or '').strip()
+        if extended and len(IDENTITY.findall(t)) > 1:
+            continue                      # ③ hai danh tính ⇒ không gán được
         m = CAPTION_NUM.match(t)
         fam = 'NUMBERED'
         if not m and extended:
+            titled = bool(CAPTION_TITLED.match(t))
             short = (block_lines or {}).get(id(l), 1) <= 2
-            if short:
+            if titled or short:
                 m = CAPTION_NUM_ANY.match(t)
+                if titled and not short:
+                    fam = 'TITLED_LONG_BLOCK'
         if not m:
             continue
         num = f'{m.group(2)}.{m.group(3)}' if m.lastindex and m.group(3) else m.group(2)
