@@ -441,6 +441,44 @@ final class ReadHeading extends ReadItem {
   final String text;
 }
 
+/// ⭐ KHỐI CÔNG THỨC NGUỒN — `FormulaSourceBlock`, KHÔNG phải một cái hình.
+///
+/// Docling khoanh được CHỖ công thức đứng nhưng phiên âm đúng 0%. Nên chỗ ấy
+/// trẻ đọc ẢNH CẮT TỪ CHÍNH TRANG SÁCH, còn chuỗi OCR không an toàn thì bỏ.
+/// «KHÔNG BỊA SỰ THẬT CHO TRẺ» — thà thấy đúng bản in còn hơn đọc một bản
+/// phiên âm sai.
+///
+/// ⚠ ĐÂY LÀ LOẠI KHỐI RIÊNG, không gộp vào [ReadImage]: hình có chú thích của
+/// sách, công thức thì không — nó chỉ có SỐ HIỆU IN («3.2») khi sách in đúng
+/// một số hiệu. Gộp hai loại lại là mời máy đặt tên «Hình…» cho một công thức.
+final class ReadFormula extends ReadItem {
+  const ReadFormula(
+      {required this.id, required this.width, required this.height,
+      required this.page, this.ident});
+
+  final String id;
+  final int width;
+  final int height;
+
+  /// Trang PDF vùng công thức được cắt ra — để truy nguyên, không hiện cho trẻ.
+  final int page;
+
+  /// SỐ HIỆU CÔNG THỨC IN TRONG SÁCH («3.2»). `null` = sách không in số hiệu,
+  /// hoặc in nhiều hơn một nên không quy được về đúng một cái. `UNKNOWN != VALID`.
+  final String? ident;
+
+  double get aspect => height <= 0 ? 1 : width / height;
+
+  static ReadFormula? fromJson(Map j) {
+    final id = j['id'], w = j['w'], h = j['h'], p = j['page'];
+    if (id is! String || w is! int || h is! int || w <= 0 || h <= 0) return null;
+    final ident = j['ident'];
+    return ReadFormula(
+        id: id, width: w, height: h, page: p is int ? p : 0,
+        ident: ident is String && ident.trim().isNotEmpty ? ident.trim() : null);
+  }
+}
+
 final class ReadImage extends ReadItem {
   const ReadImage(
       {required this.id, required this.width, required this.height,
@@ -524,6 +562,14 @@ class LessonPages {
       } else if (it['t'] == 'img') {
         final img = ReadImage.fromJson(it);
         if (img != null) content.add(img);   // mục hỏng bị BỎ, không dựng nửa vời
+      } else if (it['t'] == 'formula') {
+        // ⚠ THIẾU NHÁNH NÀY LÀ MẤT CHỮ CỦA SÁCH, KHÔNG PHẢI MẤT TRANG TRÍ.
+        // Bộ dựng pack GỠ chuỗi OCR mà vùng công thức sở hữu rồi đặt khối này
+        // vào chỗ ấy. Client không đọc `formula` thì khối rơi im lặng và trẻ
+        // không nhận lại gì — đo được ở Toán 1 tr.61: mất «60 - 20 = ?» cùng
+        // bốn phép tính, đổi lấy con số không.
+        final f = ReadFormula.fromJson(it);
+        if (f != null) content.add(f);
       }
     }
     return LessonPages(

@@ -109,9 +109,21 @@ def reconstruct(lines, box, tol=0.004):
         return max(xs) - min(xs) <= tol * 2
 
     gut = _gutter(rows)
+    nums = {}
     if gut:
-        rows = [sorted(r, key=lambda l: l['x'])[1:] or r for r in rows]
-        rows = [r for r in rows if r]
+        # ⚠ SỐ DÒNG BỊ BÓC RA CHỈ ĐỂ ĐO THỤT LỀ — nó vẫn là CHỮ IN CỦA SÁCH.
+        # Bản trước bóc xong là mất luôn, trái với chính chú thích ở trên; đo
+        # được trên 32 trang: hụt đúng các chữ số ấy. Giữ lại ở `num` để bên
+        # gọi in ra được. «Không xoá chữ của sách» là luật, không phải lời hứa.
+        keep = []
+        for r in rows:
+            r = sorted(r, key=lambda l: l['x'])
+            if len(r) > 1:
+                nums[id(r[1])] = (r[0].get('text') or '').strip()
+                keep.append(r[1:])
+            else:
+                keep.append(r)
+        rows = [r for r in keep if r]
 
     # Mốc thụt lề = các giá trị x đầu dòng, gom cụm theo `tol`.
     starts = sorted(min(l['x'] for l in r) for r in rows)
@@ -123,9 +135,9 @@ def reconstruct(lines, box, tol=0.004):
     for r in rows:
         x0 = min(l['x'] for l in r)
         lvl = max(i for i, s in enumerate(stops) if x0 >= s - tol)
-        txt = ' '.join((l.get('text') or '').strip()
-                       for l in sorted(r, key=lambda l: l['x'])).strip()
-        out.append(dict(indent=lvl, text=txt))
+        rr = sorted(r, key=lambda l: l['x'])
+        txt = ' '.join((l.get('text') or '').strip() for l in rr).strip()
+        out.append(dict(indent=lvl, text=txt, num=nums.get(id(rr[0]))))
     return out, ('OK_BO_COT_SO_DONG' if gut else 'OK')
 
 

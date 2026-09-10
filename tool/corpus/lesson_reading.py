@@ -21,7 +21,11 @@ ghép lại; không tóm tắt, không sửa, không diễn giải.
 import json
 import os
 import re
+import sys
 import unicodedata
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import code_source  # noqa: E402  (chỉ dùng khi có `code_regions`; chỉ mục nạp lười)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OCR = os.path.join(ROOT, 'poc-out/graph/ocr-body')
@@ -30,6 +34,10 @@ OCR = os.path.join(ROOT, 'poc-out/graph/ocr-body')
 FURNITURE_TOP = 0.055
 FURNITURE_BOTTOM = 0.945
 LONG_LINE = 0.25      # dòng «dài» = dòng văn thật, không phải ô bảng
+
+#: Tắt hẳn phần giữ dòng cho mã nguồn — để lượt dựng quay về đúng đường cũ mà
+#: không phải revert mã. Đặt `WAL_CODE_OFF=1`.
+CODE_OFF = os.environ.get('WAL_CODE_OFF') == '1'
 COL_SPLIT = 0.45      # mốc trái/phải khi xét hai luồng
 MIN_SPAN = 0.25       # mỗi luồng phải trải ≥ ngần này chiều cao mới coi là cột
 
@@ -198,7 +206,7 @@ def running_headers(pages_lines):
     return {t for t, n in seen.items() if n >= 2}
 
 
-def page_paragraphs(lines, drop=frozenset()):
+def page_paragraphs(lines, drop=frozenset(), code_regions=()):
     """Từng KHỐI chữ của trang, kèm y — để hình chèn ĐÚNG CHỖ nó thuộc về.
 
     Gom tất cả xuống cuối bài thì trẻ đọc xong mới thấy hình, và không biết hình
@@ -210,7 +218,30 @@ def page_paragraphs(lines, drop=frozenset()):
     """
     order = {id(l): i for i, l in enumerate(read_order(lines))}
     out = []
-    for b in blocks(lines):
+    rest = lines
+    if code_regions:
+        # ⭐ MÃ NGUỒN TÁCH RA TRƯỚC KHI GOM KHỐI, và tách theo DÒNG.
+        #
+        # `blocks()` gom theo cột; thụt lề của mã tạo bước nhảy x nên một
+        # chương trình bị XÉ ra nhiều khối (60,2% số vùng, tới 14 khối) rồi
+        # mỗi mảnh bị HÀN vào văn xuôi quanh nó (88,0%). Lọc theo ĐOẠN không
+        # cứu được: đoạn nào cũng chỉ phủ 0,9%–39,7% vào vùng mã.
+        #
+        # Đây KHÔNG phải giữ xuống dòng của OCR nói chung — chỉ đúng những
+        # dòng nằm trong một vùng `code` CÓ dấu vết chương trình in. Văn xuôi
+        # không đổi một chữ.
+        rest, groups = code_source.owned_lines(lines, code_regions)
+        for box, got in groups:
+            if not got:
+                continue
+            seq = min(order.get(id(l), 1 << 30) for l in got)
+            q = code_source.code_paragraph(got, box, seq, drop)
+            if q is None:
+                # Không dựng được thì TRẢ CHỮ VỀ đường cũ, không nuốt mất.
+                rest = rest + got
+            else:
+                out.append(q)
+    for b in blocks(rest):
         keep = [l for l in b
                 if not is_furniture(l) and (l.get('text') or '').strip()
                 and (l.get('text') or '').strip() not in drop]
@@ -353,11 +384,13 @@ def lesson_reading(book, page_pdf_start, page_pdf_end, *, printed_start=None, ti
         return None, 'OCR_MISSING'
     drop = running_headers([l for _, l in raw])
     pages = []
+    cregs = {} if CODE_OFF else code_source.regions_index()
     for pp, lines in raw:
         txt = page_text(lines, drop)
         if txt:
             pages.append(dict(pagePdf=pp, text=txt,
-                              paragraphs=page_paragraphs(lines, drop)))
+                              paragraphs=page_paragraphs(
+                                  lines, drop, cregs.get((book, pp)) or ())))
     if not pages:
         return None, 'CONTENT_THIN'
     if title is not None and starts_at_lesson(pages[0]['text'], title) is False:
