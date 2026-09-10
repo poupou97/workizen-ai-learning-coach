@@ -82,6 +82,22 @@ Theo môn: **KHTN 5/5** · **Ngữ văn 3/6** · **Lịch sử 2/6**.
 > Đây đúng điều Founder chốt: **danh tính là bắt buộc**, «có một hình nào đó»
 > không thoả được «Quan sát Hình 9.1». Xem
 > [CAPTION-IDENTITY-ROUND.md](CAPTION-IDENTITY-ROUND.md).
+>
+> **PHÂN LOẠI CHÍNH XÁC NGUYÊN NHÂN — `SỬA TRẠNG THÁI VIỆC LÀM`.**
+>
+> Không phải sửa hợp đồng: hợp đồng **đã** đòi danh tính từ đầu (§1: «với
+> **đúng danh tính**»). Không phải đếm lại: không con số nào bị cộng sai.
+> Không phải lỗi phép đo trong mã: ô này do **tôi chấm tay**, không có mã nào
+> tính nó.
+>
+> Nguyên nhân: khi chấm, tôi **thay tiêu chí của hợp đồng bằng một tiêu chí
+> yếu hơn** — «bài có ảnh nào có chú thích không» thay vì «hình sách GỌI TÊN
+> có tới tay trẻ không». Mâu thuẫn hiện ngay trong chính bảng: dòng T13 ghi
+> bằng chứng đòi là **Hình 9.1**, còn ô lý do lại viết «có chú thích **Hình
+> 9.2**» — một hình KHÁC.
+>
+> Con số **10/17 đã báo cáo giữ nguyên trong bản ghi**, có dán nhãn. Mẫu số
+> 17 không đổi. Chỉ trạng thái của T13 đổi từ ĐẠT sang TRƯỢT.
 
 ---
 
