@@ -133,10 +133,22 @@ def interleave(pages, figs_by_page, fml_by_page=None):
         # toàn vẫn phải giữ lại chữ sai của nó (D).
         fml = (fml_by_page or {}).get(p['pagePdf']) or {}
         fregs = fml.get('regions') or []
+        # ⚠ KHỐI MÃ MIỄN NHIỄM VỚI HAI LUẬT SỞ HỮU TRÊN, và đây là rủi ro do
+        # CHÍNH thay đổi này sinh ra: trước kia dòng mã nằm lẫn trong một đoạn
+        # văn rộng cả trang nên không vùng nào sở hữu nổi; giờ nó khớp GỌN vào
+        # vùng mã, nên một vùng bảng chồng lên là nuốt trọn cả chương trình.
+        # Vùng mã là bằng chứng nguồn riêng, không phải chữ thừa của bảng.
         keep = [q for q in paras
-                if not (fregs and formula_source.owned_by_formula(q, fregs))
-                and not (tabs and table_ownership.owned_by_table(q, tabs))]
-        items = [((float(i), 0.0), dict(t=block_kind(q['text']), v=q['text']))
+                if q.get('kind') == 'code'
+                or (not (fregs and formula_source.owned_by_formula(q, fregs))
+                    and not (tabs and table_ownership.owned_by_table(q, tabs)))]
+        # ⚠ KHỐI MÃ KHÔNG BAO GIỜ LÀ TIÊU ĐỀ. `block_kind` nhận tiêu đề mục
+        # bằng cách nhìn đánh số đầu khối («1.», «a)») — mà mã nguồn in kèm
+        # cột số dòng thì mở đầu đúng như thế. Bằng chứng loại khối đã có sẵn
+        # từ hình học, đừng đoán lại bằng chính tả.
+        items = [((float(i), 0.0),
+                  dict(t='text' if q.get('kind') == 'code' else block_kind(q['text']),
+                       v=q['text']))
                  for i, q in enumerate(keep)]
         paras = keep
         for f in figs_by_page.get(p['pagePdf'], []):
