@@ -71,12 +71,33 @@ thành nguồn, hoặc đã bị giữ lại:
 ⭐ Đây là cổng cắn thật, không phải cổng trang trí: nó loại **18/62 = 29,0%**
 ứng viên.
 
-### ③ VISUAL_GROUNDED
+### ③ VISUAL_GROUNDED  *(SỬA 2026-09-10 — bản cũ đã bị BÁC BỎ)*
+
 Có ít nhất một `SemanticData` **có kiểu**, dựng bởi một luật CÓ TÊN với trust
 `trustedStructuredLesson`:
 
     tsl-enumerated-steps-v1      (process)
     tsl-summary-parenthesis-v1   (comparison)
+
+**VÀ** ít nhất **MỘT phần tử trẻ nhìn thấy** bên trong `SemanticData` ấy mang
+**chữ nguồn đọc được, đã tin cậy**.
+
+⛔ **BỊ GIỮ LẠI / chỗ trống / «xem trong sách» KHÔNG tính** là phần tử ấy.
+
+Với `process` hôm nay: **≥ 1 bước đọc được**.
+
+⚠ KHÔNG đóng đinh «bước» thành định nghĩa chung cho mọi kiểu về sau. Kiểu
+semantic mới phải thoả **cùng nguyên tắc** bằng phần tử có nghĩa của CHÍNH NÓ.
+
+#### Vì sao phải sửa — bằng chứng từ ĐƯỜNG HỌC THẬT
+
+Câu cũ — «có ít nhất một `SemanticData` có kiểu» — **nhận cả sơ đồ rỗng ruột**.
+
+Phản ví dụ cụ thể, **KHTN 6 Bài 8**: nó CÓ một `process`, nên đạt cổng cũ về
+mặt chữ. Nhưng `process` ấy có đúng **một bước, và bước ấy BỊ GIỮ LẠI**. Trẻ
+bấm ✨ Trực quan và nhận được **một tiêu đề với một ô xám, không chữ nào**.
+
+Đo trên 44 ứng viên của cổng cũ: **7 bài (15,9%)** đúng dạng ấy.
 
 Không viết tay, không LLM. Đây là thứ làm ✨ **Trực quan** thành một lối học
 thật thay vì một tab rỗng.
@@ -110,13 +131,22 @@ Mẫu số: **238** bài có Trusted Structured Lesson (6 cuốn, lớp 4–9).
 | có `SemanticData` dựng được tất định | **73** | 30,7% |
 | ├ trong đó có câu hỏi in | **73** | 100% |
 | ├ **và** mở được trong pack canonical | **62** | |
-| └ **và** qua cổng READ_SAFE | **44** | 71,0% của 62 |
+| ├ **và** qua cổng READ_SAFE | **44** | 71,0% của 62 |
+| └ **và** qua cổng ③ ĐÃ SỬA (≥1 phần tử đọc được) | **37** | 84,1% của 44 |
 
-**44 bài** qua đủ bốn điều, trải lớp **4 · 5 · 6 · 7 · 8 · 9**:
+**37 bài** qua đủ bốn điều, trải lớp **4 · 5 · 6 · 7 · 8 · 9**:
 
 | lớp | 4 | 5 | 6 | 7 | 8 | 9 |
 |---|---|---|---|---|---|---|
-| bài | 5 | 5 | 18 | 2 | 5 | 9 |
+| bài | 5 | 5 | **11** | 2 | 5 | 9 |
+
+Môn: **100% Khoa học / KHTN** — không phải phủ K-12.
+
+### ⚠ GIỮ LẠI LỊCH SỬ — 44 KHÔNG BỊ XOÁ
+
+**44** là kết quả dưới cổng ③ **đã bị bác bỏ**. Nó có thật, đã được báo cáo, và
+ở lại đây có dán nhãn. Bảy bài chênh lệch là bảy bài cho trẻ một tab ✨ Trực
+quan RỖNG — phát hiện từ ĐƯỜNG HỌC THẬT, không phải từ suy luận.
 
 ⚠ **MẪU SỐ NÀY KHÔNG PHẢI 2.778.** TSL chỉ tồn tại cho lát cắt khoa học 6
 cuốn. Trên toàn corpus, `VISUAL_GROUNDED` hiện **không đo được** vì luật dựng
@@ -129,20 +159,30 @@ giới hạn thật, không phải con số cần nống lên.
 
 Seed `20260910`, một bài mỗi lớp. Founder chốt: **không thay bằng ví dụ đẹp hơn.**
 
-⛔ **Chưa thi công.** Điều kiện tiên quyết: kiểm MÁY THẬT cho công thức và mã
-nhiều dòng. Bằng chứng phải là HÀNH VI TRẺ NHÌN THẤY, không phải chỉ test.
+Kiểm MÁY THẬT cho công thức và mã nhiều dòng: **ĐÃ XONG**
+(xem [WAL-239-DEVICE-CHECK.md](WAL-239-DEVICE-CHECK.md)).
 
-Một bài mỗi lớp, rút từ **44** bài trên bằng seed đóng băng `20260910` — lát
-cắt THẬT, không phải bài trưng bày chọn tay:
+### RÚT LẠI SAU KHI SỬA CỔNG ③
 
-| lớp | sách | bài | khối phục vụ | câu hỏi in | giữ lại | semantic |
-|---|---|---|---|---|---|---|
-| 4 | `04-sgk-khoa-hoc-4` | 4 | 49 | 10 | 7 | process ×1 |
-| 5 | `05-sgk-khoa-hoc-5` | 4 | 46 | 8 | 6 | process ×1 |
-| 6 | `06-sgk-khoa-hoc-tu-nhien-6` | 8 | 71 | 2 | 13 | process ×4 |
-| 7 | `07-sgk-khoa-hoc-tu-nhien-7` | 4 | 90 | 18 | 24 | process ×2 |
-| 8 | `08-sgk-khoa-hoc-tu-nhien-8` | 19 | 51 | 5 | 8 | process ×1 |
-| 9 | `09-sgk-khoa-hoc-tu-nhien-9` | 14 | 65 | 9 | 20 | process ×9 |
+Quần thể đổi **44 → 37**, nên mẫu tất định phải rút **LẠI TỪ ĐẦU**, cả sáu lớp.
+Không giữ năm bài cũ rồi chỉ rút lại lớp 6.
+
+CÙNG thuật toán · CÙNG seed `20260910` · một bài mỗi lớp, rổ **37**:
+
+| lớp | sách | bài | khối | câu hỏi in | giữ lại | process | bước đọc được |
+|---|---|---|---|---|---|---|---|
+| 4 | `04-sgk-khoa-hoc-4` | 4 | 69 | 10 | 7 | ×1 | ✅ |
+| 5 | `05-sgk-khoa-hoc-5` | 4 | 63 | 8 | 6 | ×1 | ✅ |
+| **6** | `06-sgk-khoa-hoc-tu-nhien-6` | **9** | 56 | 6 | 3 | ×1 | ✅ |
+| 7 | `07-sgk-khoa-hoc-tu-nhien-7` | 4 | 122 | 18 | 24 | ×2 | ✅ |
+| 8 | `08-sgk-khoa-hoc-tu-nhien-8` | 19 | 68 | 5 | 8 | ×1 | ✅ |
+| 9 | `09-sgk-khoa-hoc-tu-nhien-9` | 14 | 96 | 9 | 20 | ×4 | ✅ |
+
+Thuật toán cho ra **đúng năm bài cũ**; chỉ ô lớp 6 đổi **Bài 8 → Bài 9**, vì
+Bài 8 đã bị chính cổng ③ đã sửa loại ra. Không thay tay, không chọn bài đẹp.
+
+⚠ `09-sgk-khoa-hoc-tu-nhien-9` b14 ghi **process ×4** chứ không phải ×9 như
+bảng cũ: bản cũ đếm cả process TRÙNG LẶP, lỗi ấy đã sửa.
 
 ### Thi công — dùng nguyên đường đã có, không dựng tầng mới
 

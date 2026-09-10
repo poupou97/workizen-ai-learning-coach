@@ -22,17 +22,20 @@ import 'package:learning_coach/core/lesson_model/next_action.dart';
 import 'package:learning_coach/core/lesson_model/semantic_data.dart';
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
 
-/// Lát cắt Founder chốt (seed 20260910) — KHÔNG thay bằng ví dụ đẹp hơn.
+/// Lát cắt Founder chốt — seed `20260910`, rút LẠI CẢ SÁU LỚP trên quần thể
+/// đã sửa (37 bài). KHÔNG thay bằng ví dụ đẹp hơn.
 const _slice = [
   ('04-sgk-khoa-hoc-4', 4),
   ('05-sgk-khoa-hoc-5', 4),
+  ('06-sgk-khoa-hoc-tu-nhien-6', 9),
   ('07-sgk-khoa-hoc-tu-nhien-7', 4),
   ('08-sgk-khoa-hoc-tu-nhien-8', 19),
   ('09-sgk-khoa-hoc-tu-nhien-9', 14),
 ];
 
-/// Bài rút được cho lớp 6 nhưng TRƯỢT cổng ③ — giữ tên ở đây để nếu có ai
-/// lặng lẽ nối nó vào thì test đỏ.
+/// Bài lớp 6 rút được dưới cổng ③ CŨ, nhưng cổng ấy đã bị BÁC BỎ: `process`
+/// duy nhất của nó có đúng một bước và bước ấy BỊ GIỮ LẠI. Giữ tên ở đây để
+/// nếu có ai lặng lẽ nối nó vào thì test đỏ.
 const _failed = ('06-sgk-khoa-hoc-tu-nhien-6', 8);
 
 bool _hasRealStep(SemanticData s) => switch (s) {
