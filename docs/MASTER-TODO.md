@@ -3,7 +3,7 @@
 **Đây là bản nhìn cấp Founder.** Repo là source of record · Jira là theo dõi thi
 hành · tài liệu này là trạng thái dự án.
 
-Cập nhật: **2026-09-11** · main `91fce97` · cây sạch · 1.493 test Python ·
+Cập nhật: **2026-09-11** · main `246dd80` · cây sạch · 1.493 test Python ·
 1.477 test Flutter.
 
 > Quy ước: `DONE · DOING · NEXT · WAIT · BLOCKED · FROZEN · DEFER`.
@@ -24,7 +24,7 @@ Cập nhật: **2026-09-11** · main `91fce97` · cây sạch · 1.493 test Pyth
                     │
    GATE 3 ── ⏳ WAIT   Bằng chứng ấy → hợp đồng Pedagogy Runtime
                     │
-              SAM 1 → 10            POC
+              SAM 1 → 10            POC ← ĐANG LÀM (Founder duyệt 2026-09-11)
                     │
               kiểm chéo lớp · chéo môn · máy thật · ghép SAI · sư phạm SAI
                     │
@@ -113,8 +113,8 @@ SGK + SGV + bằng chứng học liệu đáng tin
 
 | ID | WORKSTREAM | STATUS | EVIDENCE | BLOCKER | NEXT | JIRA |
 |---|---|---|---|---|---|---|
-| 15 | Pedagogy Runtime | **WAIT** | 1.595 dòng ở `lib/core/pedagogy/` (`realization_contract` · `presentation_policy` · `source_misconception` · `source_quote_index`); TutorScope đã có | chưa nối vào nguồn SGV | hợp đồng bằng-chứng→runtime (Gate 3) | NONE |
-| 16 | SAM scale POC 1 → 10 | **NEXT · chờ Founder** | `SAM_READY` = **1**. Kịch bản duy nhất: `samMode=prototypeScripted` · `trust=prototype` · `evidencePolicy=none` · `keySource` tự khai «KHÔNG phải SGV» | Gate 14 | — | NONE |
+| 15 | Pedagogy Runtime | **DOING** | 1.595 dòng ở `lib/core/pedagogy/` (`realization_contract` · `presentation_policy` · `source_misconception` · `source_quote_index`); TutorScope đã có | chưa nối vào nguồn SGV | hợp đồng bằng-chứng→runtime (Gate 3) | NONE |
+| 16 | SAM scale POC 1 → 10 | **DOING** | `SAM_READY` = **1**. Kịch bản duy nhất: `samMode=prototypeScripted` · `trust=prototype` · `evidencePolicy=none` · `keySource` tự khai «KHÔNG phải SGV» | Gate 14 | — | NONE |
 | 17 | SAM scale 10 → 50 | **WAIT** | — | 16 | — | NONE |
 | 18 | SAM scale 50 → N | **WAIT** | — | 17 | — | NONE |
 | 19 | Cross-grade / cross-subject SAM | **WAIT** | 11 fixture hiện chỉ KHTN/Khoa học + 1 LS&ĐL | 16 | — | NONE |

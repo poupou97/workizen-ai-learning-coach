@@ -1,0 +1,96 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_coach/core/lesson_model/lesson_document.dart';
+import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
+
+/// ⭐ SAM SCALE POC 1 → 10 — MỘT bộ dựng, MỘT runtime, nhiều bằng chứng.
+///
+/// Điều phải giữ: thêm một bài KHÔNG được đòi thêm một nhánh mã. Nếu POC chỉ
+/// chạy nhờ logic riêng từng bài thì nó không chứng minh được gì về 50 hay N.
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  const poc = [
+    ['06-sgk-khoa-hoc-tu-nhien-6', 9],
+    ['06-sgk-cong-nghe-6', 3],
+    ['11-sgk-sinh-hoc-11', 2],
+    ['11-sgk-hoa-hoc-11', 13],
+    ['10-sgk-dia-li-10', 5],
+    ['07-sgk-tin-hoc-7', 3],
+    ['12-sgk-chuyen-de-hoc-tap-cong-nghe-12-lam-nghiep-thuy-san', 5],
+    ['10-sgk-lich-su-10', 9],
+    ['06-sgk-khoa-hoc-tu-nhien-6', 10],
+    ['09-sgk-cong-nghe-9-trai-nghiem-nghe-nghiep-mo-dun-trong-cay-an-qua', 1],
+  ];
+
+  Future<Map<String, Object?>> raw(String book, int no) async {
+    final s = await rootBundle
+        .loadString('assets/fixtures/real/lesson-$book-b$no.json');
+    return (jsonDecode(s) as Map).cast<String, Object?>();
+  }
+
+  test('⭐ cả 10 bài POC dựng được LessonDocument qua CÙNG một đường', () async {
+    for (final p in poc) {
+      final j = await raw(p[0] as String, p[1] as int);
+      final d = LessonDocument.fromJson(j);
+      expect(d, isNotNull, reason: '${p[0]} B${p[1]} không dựng được');
+      expect(d!.blocks, isNotEmpty, reason: '${p[0]} B${p[1]} rỗng');
+      expect(d.book, p[0]);
+      expect(d.lessonNo, p[1]);
+    }
+  });
+
+  test('⭐ KHÔNG bài nào mang khoá chấm — chốt fail-closed của vòng', () async {
+    for (final p in poc) {
+      final j = await raw(p[0] as String, p[1] as int);
+      final prov = (j['provenance'] as Map).cast<String, Object?>();
+      expect(prov['answerKeysIncluded'], isNot(true),
+          reason: '${p[0]} B${p[1]} mang khoá chấm — trẻ có thể bị chấm sai');
+      expect(j['evidencePolicy'], 'none');
+    }
+  });
+
+  test('⭐ bài do bộ dựng POC sinh phải KHAI RÕ đã khoá đáp án', () async {
+    var checked = 0;
+    for (final p in poc) {
+      final j = await raw(p[0] as String, p[1] as int);
+      final prov = (j['provenance'] as Map).cast<String, Object?>();
+      if (prov['generator'] != 'tool/pedagogy/build_sam_workspace.py@v1') {
+        continue; // bài cũ dựng từ TSL — đường khác, vẫn không có khoá chấm
+      }
+      final ped = (prov['pedagogySource'] as Map).cast<String, Object?>();
+      expect(ped['answerWithheld'], true, reason: '${p[0]} B${p[1]}');
+      expect(ped['withholdReason'], 'TASK_ANSWER_OWNERSHIP_UNPROVEN');
+      expect(ped['sgvBook'], isA<String>());
+      expect(ped['pairing'], contains('L1+L2+L3'));
+      checked++;
+    }
+    expect(checked, 8, reason: '8 bài mới phải đi qua bộ dựng chung');
+  });
+
+  test('⭐ catalog KHÔNG có nhánh riêng cho bài nào', () {
+    // Mọi slot đi qua cùng một hàm; không có danh sách ngoại lệ.
+    final keys = WorkspaceCatalog.defaultSlots
+        .map((s) => '${s.book}#${s.lessonNo}')
+        .toSet();
+    for (final p in poc) {
+      expect(keys, contains('${p[0]}#${p[1]}'),
+          reason: '${p[0]} B${p[1]} chưa vào catalog');
+    }
+    expect(WorkspaceCatalog.defaultSlots.length, keys.length,
+        reason: 'slot trùng ⇒ một bài được nạp hai lần');
+  });
+
+  test('⭐ mỗi bài POC có VIỆC của trẻ là chữ NGUYÊN VĂN của sách', () async {
+    for (final p in poc) {
+      final j = await raw(p[0] as String, p[1] as int);
+      final d = LessonDocument.fromJson(j)!;
+      final hasQuestion = d.blocks.any((b) => b.sourceRole == 'question');
+      final hasText = d.blocks.any((b) => b.sourceRole == 'body');
+      expect(hasText, isTrue, reason: '${p[0]} B${p[1]} không có chữ bài');
+      expect(hasQuestion || hasText, isTrue);
+    }
+  });
+}
