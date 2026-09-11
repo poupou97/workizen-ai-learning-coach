@@ -19,6 +19,7 @@ false`, và `check_answer` nằm trong `forbiddenTutorActions` của MỌI bài.
 import argparse
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -29,6 +30,13 @@ from lesson_reading import lesson_reading  # noqa: E402
 from subject import subject as subject_of  # noqa: E402
 
 SCHEMA = 'wal-lesson-fixture-v1'
+#: Mục tiêu do CHÍNH SGK in cho trẻ đọc — KHÔNG lấy mục tiêu của SGV, vì SGV
+#: viết cho giáo viên («Trình bày các yêu cầu HS cần đạt…»). Đọc lời người lớn
+#: cho trẻ nghe rồi gọi là có-nguồn là nhầm tầng.
+#: «MỤC TIÊU» in trong SGK thì HỢP LỆ — SGK là sách của trẻ. «MỤC TIÊU» in
+#: trong SGV thì không, vì đó là mục của phần hướng dẫn giáo viên.
+SGK_OBJECTIVE = re.compile(
+    r'(sau bài học này|học xong bài này|yêu cầu cần đạt|\bMỤC TIÊU\b)')
 GEN = 'tool/pedagogy/build_sam_workspace.py@v1'
 
 
@@ -51,6 +59,78 @@ def _role(text):
     if t.isupper() and len(t) < 90:
         return 'heading', 'heading'
     return 'body', 'paragraph'
+
+
+def _best_block(blocks, text):
+    """Khối SGK khớp nhất với một chuỗi — để bước dạy TRỎ VỀ chữ có thật."""
+    import sys as _s
+    _s.path.insert(0, os.path.join(ROOT, 'tool', 'pedagogy'))
+    from sgk_sgv_pairing import toks
+    T = toks(text)
+    if not T:
+        return None
+    best, score = None, 0.0
+    for b in blocks:
+        B = toks(b.get('text') or '')
+        if not B:
+            continue
+        # ⚠ ĐỘ PHỦ, KHÔNG PHẢI JACCARD. Khối SGK thường dài hơn câu hỏi nhiều
+        # (cả đoạn dẫn + câu hỏi), nên Jaccard phạt oan đúng khối chứa nó:
+        # đo lần đầu chỉ trỏ được 2/10 bài. Cái cần hỏi là «khối này có CHỨA
+        # câu hỏi không», tức bao nhiêu phần của CÂU HỎI nằm trong khối.
+        j = len(T & B) / len(T)
+        if j > score:
+            best, score = b, j
+    return best if score >= 0.6 else None
+
+
+def _loop(blocks, contract):
+    """VÒNG DẠY KHÔNG CHẤM — chỉ `explain` + `next`, KHÔNG có `ask`.
+
+    Founder 2026-09-11: một vòng học không chấm vẫn là SAM_READY nếu nó thật
+    và chạy hết đường. Nên ở đây CỐ Ý không sinh `AskStep`: `AskStep` đòi
+    `acceptable`/`hints`/`feedbackMatched`/`scaffold`/`keySource` — toàn bộ
+    máy móc chấm điểm mà nguồn KHÔNG chống đỡ nổi. Không có bước hỏi thì
+    không có chỗ nào để lỡ tay phán đúng/sai.
+
+    Mọi chữ SAM nói là chữ của SGK, trỏ về block có thật.
+    """
+    # Khối TSL không chắc có khoá `text` (khối bị giữ lại thì không có chữ).
+    obj = next((b for b in blocks if SGK_OBJECTIVE.search(b.get('text') or '')), None)
+    task = None
+    for t in contract['tasks']:
+        task = _best_block(blocks, t['prompt'])
+        if task:
+            break
+    # ⚠ VIỆC là bắt buộc; MỤC TIÊU thì không. Vòng dạy cần: bài có danh tính
+    # → việc trẻ nhìn thấy → hành vi được phép → hành động kế tiếp. Nhiều bài
+    # SGK không in mục tiêu cho trẻ (Lịch sử 10 Bài 9) — thiếu nó không làm
+    # vòng học mất thật.
+    #
+    # ⭐ SỞ HỮU VIỆC XÉT Ở MỨC KHỐI, KHÔNG PHẢI MỨC BÀI. Đo được: «Phương án
+    # nào chỉ gồm các thiết bị ra?» qua được phép so với TOÀN BÀI Tin học 7
+    # Bài 3 nhờ từ chung, nhưng không khối nào của bài ấy chứa nó (phủ 0,33).
+    # Đó là sở hữu SAI, và giao cho trẻ một việc không có trong bài của em.
+    if not task:
+        return None, dict(samReady=False, answerCheckReady=False,
+                          misconceptionReady=False,
+                          reason='VIỆC KHÔNG TRỎ ĐƯỢC VỀ MỘT KHỐI CỦA BÀI SGK')
+    steps = []
+    if obj:
+        steps.append({'type': 'explain', 'id': 'e1', 'text': obj['text'],
+                      'sourceBlockId': obj['id'], 'mascot': 'sam-explain'})
+    steps += [
+        {'type': 'explain', 'id': 'e2', 'text': task['text'],
+         'sourceBlockId': task['id'], 'mascot': 'sam-explain'},
+        {'type': 'next', 'id': 'n1', 'label': 'Đọc lại phần này trong sách',
+         'target': 'read', 'anchorBlockId': task['id']},
+    ]
+    return (dict(samMode='runtimeGuided', trust='trustedStructuredLesson',
+                 evidencePolicy='none', steps=steps),
+            dict(samReady=True, answerCheckReady=False,
+                 misconceptionReady=False,
+                 reason='ANSWER_CHECK: TASK_ANSWER_OWNERSHIP_UNPROVEN · '
+                        'MISCONCEPTION: KHÔNG CÓ NGUỒN GỌI TÊN LỖI'))
 
 
 def build(book, lesson, contract, out_dir):
@@ -83,6 +163,7 @@ def build(book, lesson, contract, out_dir):
             })
     if not blocks:
         return None, 'KHÔNG CÓ KHỐI CHỮ'
+    script, cap = _loop(blocks, contract)
     d = {
         'schema': SCHEMA, 'book': book,
         'bookTitle': (rec.get('bookTitle') or book), 'subject': subject_of(book),
@@ -98,6 +179,9 @@ def build(book, lesson, contract, out_dir):
             'answerKeysIncluded': False,
             'auditStatus': 'notAudited', 'auditRef': None,
             'distribution': 'internal-research-only',
+            # ⭐ CAPABILITY NẰM TRONG DỮ LIỆU, không chỉ trong tài liệu.
+            # Client phải đọc được rằng SAM ở bài này KHÔNG được phán đúng/sai.
+            'capability': cap,
             'pedagogySource': {
                 'sgvBook': contract['sgvBook'], 'sgvPages': contract['sgvPages'],
                 'pairing': contract['provenance']['pairing'],
@@ -107,6 +191,8 @@ def build(book, lesson, contract, out_dir):
         },
         'blocks': blocks,
     }
+    if script:
+        d['tutorScript'] = script
     os.makedirs(out_dir, exist_ok=True)
     p = os.path.join(out_dir, f'lesson-{book}-b{lesson}.json')
     with open(p, 'w', encoding='utf-8') as f:
@@ -133,7 +219,26 @@ def main():
         # dựng từ TSL (KHTN 6 Bài 9 và 10) — chúng mang `semantic` cho tab
         # Trực quan mà bộ dựng này không sinh ra. Đè = mất năng lực đang chạy.
         if os.path.exists(dest):
-            print(f'  = {book[:38]:38s} B{lesson:<3d} GIỮ tài liệu đã có')
+            # HỢP NHẤT, KHÔNG GHI ĐÈ: tài liệu dựng từ TSL mang `semantic` cho
+            # tab Trực quan mà bộ dựng này không sinh ra. Chỉ THÊM vòng dạy và
+            # cờ năng lực nếu chưa có; mọi thứ khác giữ nguyên từng byte.
+            d = json.load(open(dest, encoding='utf-8'))
+            if d.get('tutorScript') is None:
+                script, cap = _loop(d['blocks'], contract)
+                d['provenance']['capability'] = cap
+                if script:
+                    d['tutorScript'] = script
+                    d['provenance'].setdefault('pedagogySource', {}).update(
+                        sgvBook=contract['sgvBook'], sgvPages=contract['sgvPages'],
+                        pairing=contract['provenance']['pairing'],
+                        tasksOwned=len(contract['tasks']),
+                        answerWithheld=True,
+                        withholdReason='TASK_ANSWER_OWNERSHIP_UNPROVEN')
+                with open(dest, 'w', encoding='utf-8') as f:
+                    json.dump(d, f, ensure_ascii=False, indent=1)
+                print(f"  + {book[:36]:36s} B{lesson:<3d} THÊM vòng dạy vào tài liệu TSL")
+            else:
+                print(f'  = {book[:36]:36s} B{lesson:<3d} GIỮ nguyên')
             ok += 1
             continue
         p, err = build(book, lesson, contract, os.path.join(ROOT, a.out))

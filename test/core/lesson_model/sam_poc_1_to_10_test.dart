@@ -21,16 +21,16 @@ void main() {
       'chạy tool/pedagogy/build_sam_workspace.py rồi thử lại';
 
   const poc = [
-    ['06-sgk-khoa-hoc-tu-nhien-6', 9],
-    ['06-sgk-cong-nghe-6', 3],
     ['11-sgk-sinh-hoc-11', 2],
+    ['06-sgk-khoa-hoc-tu-nhien-6', 9],
     ['11-sgk-hoa-hoc-11', 13],
+    ['09-sgk-cong-nghe-9-trai-nghiem-nghe-nghiep-mo-dun-trong-cay-an-qua', 1],
     ['10-sgk-dia-li-10', 5],
-    ['07-sgk-tin-hoc-7', 3],
     ['12-sgk-chuyen-de-hoc-tap-cong-nghe-12-lam-nghiep-thuy-san', 5],
     ['10-sgk-lich-su-10', 9],
+    ['07-sgk-tin-hoc-7', 13],
+    ['11-sgk-sinh-hoc-11', 6],
     ['06-sgk-khoa-hoc-tu-nhien-6', 10],
-    ['09-sgk-cong-nghe-9-trai-nghiem-nghe-nghiep-mo-dun-trong-cay-an-qua', 1],
   ];
 
   Future<Map<String, Object?>> raw(String book, int no) async {
@@ -68,9 +68,6 @@ void main() {
     for (final p in poc) {
       final j = await raw(p[0] as String, p[1] as int);
       final prov = (j['provenance'] as Map).cast<String, Object?>();
-      if (prov['generator'] != 'tool/pedagogy/build_sam_workspace.py@v1') {
-        continue; // bài cũ dựng từ TSL — đường khác, vẫn không có khoá chấm
-      }
       final ped = (prov['pedagogySource'] as Map).cast<String, Object?>();
       expect(ped['answerWithheld'], true, reason: '${p[0]} B${p[1]}');
       expect(ped['withholdReason'], 'TASK_ANSWER_OWNERSHIP_UNPROVEN');
@@ -78,7 +75,7 @@ void main() {
       expect(ped['pairing'], contains('L1+L2+L3'));
       checked++;
     }
-    expect(checked, 8, reason: '8 bài mới phải đi qua bộ dựng chung');
+    expect(checked, 10, reason: '8 bài mới phải đi qua bộ dựng chung');
   });
 
   test('⭐ catalog KHÔNG có nhánh riêng cho bài nào', () {
@@ -92,6 +89,35 @@ void main() {
     }
     expect(WorkspaceCatalog.defaultSlots.length, keys.length,
         reason: 'slot trùng ⇒ một bài được nạp hai lần');
+  });
+
+  test('⭐ vòng dạy KHÔNG CHẤM — không bài nào có bước hỏi', () async {
+    if (!have) return markTestSkipped(why);
+    for (final p in poc) {
+      final j = await raw(p[0] as String, p[1] as int);
+      final sc = (j['tutorScript'] as Map?)?.cast<String, Object?>();
+      expect(sc, isNotNull, reason: '${p[0]} B${p[1]} không có vòng dạy');
+      final kinds = (sc!['steps'] as List)
+          .map((s) => (s as Map)['type'])
+          .toSet();
+      // `ask` kéo theo acceptable/hints/feedbackMatched/scaffold/keySource —
+      // toàn bộ máy móc chấm điểm mà nguồn KHÔNG chống đỡ nổi.
+      expect(kinds, isNot(contains('ask')),
+          reason: '${p[0]} B${p[1]} có bước hỏi ⇒ có chỗ phán đúng/sai');
+      expect(kinds, contains('next'), reason: '${p[0]} B${p[1]} thiếu hành động kế');
+    }
+  });
+
+  test('⭐ cờ NĂNG LỰC nằm trong dữ liệu, không chỉ trong tài liệu', () async {
+    if (!have) return markTestSkipped(why);
+    for (final p in poc) {
+      final j = await raw(p[0] as String, p[1] as int);
+      final cap = ((j['provenance'] as Map)['capability'] as Map)
+          .cast<String, Object?>();
+      expect(cap['samReady'], true, reason: '${p[0]} B${p[1]}');
+      expect(cap['answerCheckReady'], false, reason: '${p[0]} B${p[1]}');
+      expect(cap['misconceptionReady'], false, reason: '${p[0]} B${p[1]}');
+    }
   });
 
   test('⭐ mỗi bài POC có VIỆC của trẻ là chữ NGUYÊN VĂN của sách', () async {

@@ -19,6 +19,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learning_coach/core/lesson_model/next_action.dart';
+import 'package:learning_coach/core/lesson_model/tutor_script.dart';
 import 'package:learning_coach/core/lesson_model/semantic_data.dart';
 import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
 
@@ -115,14 +116,28 @@ void main() {
     }
   });
 
-  test('KHÔNG bài nào trong lát cắt có kịch bản SAM — đúng như dự kiến', () async {
+  /// ⭐ CHỐT NÀY ĐÃ BẮN ĐÚNG (2026-09-11). Bản trước đòi MỌI bài trong lát cắt
+  /// có `tutorScript == null`, kèm lý do: «bỗng có kịch bản ⇒ con số
+  /// SAM_READY=1 phải được đo lại». Vòng POC 1→10 thêm vòng dạy cho KHTN 6
+  /// Bài 9, chốt đỏ, và **SAM_READY=1 đã được đo lại** — nay là 10.
+  ///
+  /// Chốt không bị gỡ, nó được ĐỔI SANG ĐIỀU CÒN ĐÚNG: `SAM_READY != LEARNABLE`
+  /// (hai phép đo khác nhau), và kịch bản nào có mặt trong lát cắt phải là
+  /// loại KHÔNG CHẤM — không bước hỏi, không khoá đáp án.
+  test('SAM_READY != LEARNABLE; kịch bản trong lát cắt phải là loại KHÔNG CHẤM',
+      () async {
     if (!have) return markTestSkipped(why);
     final cat = WorkspaceCatalog();
     await cat.load();
     for (final (book, no) in _slice) {
-      expect(cat.docFor(book, no)!.tutorScript, isNull,
-          reason: '$book bài $no bỗng có kịch bản — `SAM_READY != LEARNABLE` '
-              'vẫn đúng, nhưng con số SAM_READY=1 phải được đo lại');
+      final d = cat.docFor(book, no)!;
+      final sc = d.tutorScript;
+      if (sc == null) continue; // LEARNABLE không đòi có kịch bản
+      expect(sc.steps.whereType<AskStep>(), isEmpty,
+          reason: '$book bài $no có bước HỎI ⇒ có chỗ phán đúng/sai, '
+              'mà nguồn chưa chứng minh được sở hữu đáp án');
+      expect(d.provenance.answerKeysIncluded, isNot(true),
+          reason: '$book bài $no mang khoá chấm');
     }
   });
 }
