@@ -138,9 +138,12 @@ void main() {
       final cap = ((j['provenance'] as Map)['capability'] as Map)
           .cast<String, Object?>();
       expect(cap['samReady'], true, reason: '${p[0]} B${p[1]}');
-      // ⭐ SAM_READY != RUNTIME_GUIDED_READY. Không bài nào có
-      // SemanticBinding, nên runtime KHÔNG được nhận nhãn runtimeGuided.
-      expect(cap['runtimeGuidedReady'], false, reason: '${p[0]} B${p[1]}');
+      // ⭐ SAM_READY != RUNTIME_GUIDED_READY — và cờ phải KHỚP dữ liệu, không
+      // được khai suông. Bài có `curriculum` (suy từ khối quy tắc in) thì
+      // true; không có thì false. Chốt cũ đòi false ở MỌI bài; nó đã bắn
+      // đúng khi 18 bài có ngữ nghĩa thật, nên đổi sang điều còn đúng.
+      expect(cap['runtimeGuidedReady'], j['curriculum'] != null,
+          reason: '${p[0]} B${p[1]}: cờ không khớp dữ liệu');
       expect(cap['answerCheckReady'], false, reason: '${p[0]} B${p[1]}');
       expect(cap['misconceptionReady'], false, reason: '${p[0]} B${p[1]}');
     }

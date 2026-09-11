@@ -958,6 +958,7 @@ class CensusRow {
 
 class LessonDocument {
   const LessonDocument({
+    this.curriculum,
     required this.schema,
     required this.book,
     required this.bookTitle,
@@ -1221,6 +1222,11 @@ class LessonDocument {
   /// `strictBlockTypes: true` khôi phục hành vi cũ hoàn toàn: một `type` lạ
   /// cũng từ chối cả tài liệu. Dùng cho cổng đóng gói — nơi «pack mới hơn app»
   /// phải là LỖI, không phải một thẻ giữ lại.
+  /// ⭐ Ngữ nghĩa chương trình SUY TỪ NGUỒN (khối quy tắc in trong bài).
+  /// Giữ nguyên JSON: tầng curriculum tự đọc và tự fail-closed, model tài
+  /// liệu không cần biết hình dạng của nó.
+  final Map<String, Object?>? curriculum;
+
   static LessonDocument? fromJson(
     Map<String, Object?> j, {
     String assetBase = '',
@@ -1276,6 +1282,9 @@ class LessonDocument {
       if (script == null) return null;
     }
     return LessonDocument(
+      curriculum: j['curriculum'] is Map
+          ? (j['curriculum'] as Map).cast<String, Object?>()
+          : null,
       schema: schemaV1,
       book: book,
       bookTitle: bt,

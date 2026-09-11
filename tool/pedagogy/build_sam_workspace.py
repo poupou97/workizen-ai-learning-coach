@@ -35,6 +35,15 @@ SCHEMA = 'wal-lesson-fixture-v1'
 #: cho trẻ nghe rồi gọi là có-nguồn là nhầm tầng.
 #: «MỤC TIÊU» in trong SGK thì HỢP LỆ — SGK là sách của trẻ. «MỤC TIÊU» in
 #: trong SGV thì không, vì đó là mục của phần hướng dẫn giáo viên.
+#: Khối QUY TẮC do chính SGK in cho trẻ. Đây là chỗ DUY NHẤT trong bài mà
+#: sách NÓI THẲNG một quy tắc — cơ sở duy nhất để dựng `TeachingMethod` với
+#: `origin: sourceStated`. Không có khối này ⇒ không có method ⇒ fail closed.
+RULE_HEADER = re.compile(r'(em đã học|ghi nhớ|kết luận|kiến thức cốt lõi)',
+                         re.IGNORECASE)
+#: Câu TRẦN THUẬT trong khối quy tắc — không lấy câu hỏi, không lấy mệnh lệnh.
+RULE_SENT = re.compile(
+    r'([A-ZĐÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯẠ-ỹ][^.?!]{40,220}\.)')
+
 SGK_OBJECTIVE = re.compile(
     r'(sau bài học này|học xong bài này|yêu cầu cần đạt|\bMỤC TIÊU\b)')
 GEN = 'tool/pedagogy/build_sam_workspace.py@v1'
@@ -143,6 +152,48 @@ def _loop(blocks, contract):
                         'MISCONCEPTION: KHÔNG CÓ NGUỒN GỌI TÊN LỖI'))
 
 
+def curriculum(blocks, book, lesson, title):
+    """Ngữ nghĩa chương trình SUY TỪ NGUỒN — hoặc `None`, không bịa.
+
+    ⛔ KHÔNG DỰNG MÔ HÌNH CHƯƠNG TRÌNH XUYÊN BÀI. Mọi trường ở đây là CỤC BỘ
+    TRONG BÀI, đúng hình dạng mà nguyên mẫu KHTN 6 Bài 17 đã dùng:
+
+      · `condition` của ca   = CÂU QUY TẮC NGUYÊN VĂN sách in
+      · `requiresConcepts`   = {chính khái niệm của bài} ⇒ cổng tiên quyết
+                               đúng một cách TỰ THAM CHIẾU, không cần biết
+                               bài trước đã dạy gì
+      · `requiresTerminology`= {} — RỖNG CỐ Ý. Sách không in ra «phương pháp
+                               này đòi những thuật ngữ nào»; khai bừa là bịa
+                               tiên quyết.
+      · `terminologyIntroduced` = từ CÓ TRONG chính câu quy tắc, không thêm
+
+    Không có khối quy tắc in ⇒ trả `None`. `runtimeGuidedReady` = false.
+    """
+    for i, b in enumerate(blocks):
+        t = b.get('text') or ''
+        if not RULE_HEADER.search(t):
+            continue
+        m = RULE_SENT.search(t)
+        if not m:
+            continue
+        rule = m.group(1).strip()
+        ref = b['sourceRef']
+        terms = sorted({w for w in re.findall(r'[a-zà-ỹ]{3,}', rule.lower())})[:24]
+        cid = f'{book}:b{lesson}:concept'
+        return dict(
+            conceptId=cid, canonicalName=title,
+            textbookTerms=terms,
+            skillCaseId=f'{book}:b{lesson}:case',
+            condition=rule,
+            methodId=f'{book}:b{lesson}:method',
+            methodName=rule[:120],
+            ruleBlockId=b['id'],
+            pagePdf=ref['pagePdf'], pagePrinted=ref.get('pagePrinted'),
+            extractionMethod='source-rule-block-v1',
+            origin='sourceStated')
+    return None
+
+
 def build(book, lesson, contract, out_dir):
     rec, grade = _pack_lesson(book, lesson)
     if rec is None:
@@ -174,6 +225,13 @@ def build(book, lesson, contract, out_dir):
     if not blocks:
         return None, 'KHÔNG CÓ KHỐI CHỮ'
     script, cap = _loop(blocks, contract)
+    cur = curriculum(blocks, book, lesson, rec.get('title') or '')
+    cap['runtimeGuidedReady'] = bool(script and cur)
+    if cur:
+        cap['reason'] = cap['reason'].replace(
+            'RUNTIME_GUIDED: KHÔNG CÓ Concept/SkillCase/Method SOURCE_STATED '
+            '⇒ không tạo SemanticBinding · ',
+            'RUNTIME_GUIDED: có quy tắc in ⇒ binding suy từ nguồn · ')
     d = {
         'schema': SCHEMA, 'book': book,
         'bookTitle': (rec.get('bookTitle') or book), 'subject': subject_of(book),
@@ -201,6 +259,8 @@ def build(book, lesson, contract, out_dir):
         },
         'blocks': blocks,
     }
+    if cur:
+        d['curriculum'] = cur
     if script:
         d['tutorScript'] = script
     os.makedirs(out_dir, exist_ok=True)

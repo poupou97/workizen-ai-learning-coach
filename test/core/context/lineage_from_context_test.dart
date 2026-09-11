@@ -106,7 +106,13 @@ void main() {
             .join('\n');
         // semantic_binding.dart chỉ ĐỌC lessonNo từ context (LessonRef.fromContext)
         // và khai LessonRef; không suy từ ảnh.
+        // source_grounded_binding.dart NHẬN `lessonNo` như tham số bắt buộc
+        // từ `LessonDocument` (đường gọi: planForDoc → doc.lessonNo). Nó
+        // không đọc ảnh, không suy từ biểu thức — cùng loại miễn trừ với
+        // `semantic_binding.dart`.
         if (f.path.endsWith('semantic_binding.dart') ||
+            f.path.endsWith('source_grounded_binding.dart') ||
+            f.path.endsWith('semantic_binding_registry.dart') ||
             f.path.endsWith('khtn6_bai17.dart') ||
             f.path.endsWith('concept.dart') ||
             f.path.endsWith('skill_case.dart')) {
