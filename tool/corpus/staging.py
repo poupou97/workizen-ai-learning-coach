@@ -77,3 +77,28 @@ def guard(path, what='đầu ra'):
                 f'  khu dựng thử: {pack_dir()}\n'
                 f'Dựng thử phải để trạng thái canonical giống từng byte.')
     return path
+
+
+def require_promoted(disabled):
+    """Pack CANONICAL không được thiếu một năng lực ĐÃ PROMOTE nào.
+
+    2026-09-11: `FORMULA_SOURCE` từng là cờ BẬT thủ công. Một lượt dựng quên
+    cờ ấy làm **28 bài Toán 5 TĂNG khối chữ** — mảnh OCR công thức («+»,
+    «a)», «:(x7)») chảy ngược vào dòng đọc, trong khi số hình, số bài và mọi
+    bất biến pack đều y hệt. Không lỗi, không cảnh báo.
+
+    ⛔ Đây là họ lỗi «cấu hình vắng mặt», khác với «dữ liệu thiếu»: đường dựng
+    chạy trót lọt và ra một pack TRÔNG hợp lệ. Không cổng nào sẵn có bắt được,
+    vì mọi cổng đều đo pack chứ không đo CẤU HÌNH sinh ra pack.
+
+    Khu dựng thử vẫn được phép tắt — tắt để đối chiếu chính là việc của nó.
+    """
+    if not disabled or is_staging():
+        return
+    raise SystemExit(
+        'DỰNG CANONICAL THIẾU NĂNG LỰC ĐÃ PROMOTE — dừng.\n'
+        f'  đang tắt: {", ".join(sorted(disabled))}\n'
+        f'  đích: {pack_dir()}\n'
+        'Năng lực đã promote nghĩa là pack đang phục vụ CÓ nó và client ĐANG\n'
+        'dựng nó. Dựng thiếu là lặng lẽ trả chữ sai về cho trẻ.\n'
+        'Muốn đối chiếu thì dựng vào khu tạm: PACK_OUT_DIR=<thư mục khác>.')
