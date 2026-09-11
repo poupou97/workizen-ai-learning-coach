@@ -7,6 +7,10 @@ Cập nhật: **2026-09-11** · main `4322ef7` · cây sạch · 1.493 test Pyth
 1.477 test Flutter.
 
 > Quy ước: `DONE · DOING · NEXT · WAIT · BLOCKED · FROZEN · DEFER`.
+> **NĂNG LỰC TÁCH RIÊNG** (Founder 2026-09-11): `SAM_READY` ≠ `ANSWER_CHECK_READY`
+> ≠ `MISCONCEPTION_READY`. Một vòng học KHÔNG CHẤM vẫn là `SAM_READY` nếu nó
+> thật và chạy hết đường sản phẩm. Cờ nằm trong DỮ LIỆU, không chỉ trong tài liệu.
+>
 > **DOING = đang thực sự được thi hành.** Tài sản/mã cũ tồn tại KHÔNG phải DOING.
 > Không có % nếu không có mẫu số tái hiện được. Không chắc ⇒ **UNKNOWN**.
 > Số cũ đã bị thay ⇒ **SUPERSEDED**. Giả thuyết đã bác ⇒ **FALSIFIED**.
@@ -114,8 +118,8 @@ SGK + SGV + bằng chứng học liệu đáng tin
 
 | ID | WORKSTREAM | STATUS | EVIDENCE | BLOCKER | NEXT | JIRA |
 |---|---|---|---|---|---|---|
-| 15 | Pedagogy Runtime | **DOING · DÙNG LẠI, KHÔNG VIẾT LẠI** | `planForScript` đã tổng quát; `SourceQuoteIndex` đòi mọi trích dẫn nguyên văn nguồn. Chưa nối SGV vì POC KHOÁ chấm điểm. 1.595 dòng ở `lib/core/pedagogy/` (`realization_contract` · `presentation_policy` · `source_misconception` · `source_quote_index`); TutorScope đã có | chưa nối vào nguồn SGV | hợp đồng bằng-chứng→runtime (Gate 3) | NONE |
-| 16 | SAM scale POC 1 → 10 | **DOING · 10/10 dựng được, DEVICE PENDING** | `SAM_READY` = **1**. Kịch bản duy nhất: `samMode=prototypeScripted` · `trust=prototype` · `evidencePolicy=none` · `keySource` tự khai «KHÔNG phải SGV» | Gate 14 | — | NONE |
+| 15 | Pedagogy Runtime | **DONE · DÙNG LẠI, KHÔNG VIẾT LẠI** | `planForScript` đã tổng quát; `SourceQuoteIndex` đòi mọi trích dẫn nguyên văn nguồn. Chưa nối SGV vì POC KHOÁ chấm điểm. 1.595 dòng ở `lib/core/pedagogy/` (`realization_contract` · `presentation_policy` · `source_misconception` · `source_quote_index`); TutorScope đã có | chưa nối vào nguồn SGV | hợp đồng bằng-chứng→runtime (Gate 3) | NONE |
+| 16 | SAM scale POC 1 → 10 | **DOING · 10/10 có vòng dạy, DEVICE PENDING** | `SAM_READY` = **1**. Kịch bản duy nhất: `samMode=prototypeScripted` · `trust=prototype` · `evidencePolicy=none` · `keySource` tự khai «KHÔNG phải SGV» | Gate 14 | — | NONE |
 | 17 | SAM scale 10 → 50 | **WAIT** | — | 16 | — | NONE |
 | 18 | SAM scale 50 → N | **WAIT** | — | 17 | — | NONE |
 | 19 | Cross-grade / cross-subject SAM | **WAIT** | 11 fixture hiện chỉ KHTN/Khoa học + 1 LS&ĐL | 16 | — | NONE |
