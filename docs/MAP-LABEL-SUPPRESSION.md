@@ -136,6 +136,51 @@ Hồi quy: `tool/tests/test_build_safety.py` (7 test). Kiểm-đột-biến: ①
 cờ bật thủ công (đúng lỗi gốc) · ②chế độ đếm không tính là thiếu ·
 ③`require_promoted` vô hiệu · ④chặn cả khu dựng thử ⇒ **cả bốn bị bắt**.
 
+## DỰNG CANONICAL — 2026-09-11, sau khi vá hiểm hoạ cấu hình
+
+8 lớp bị chạm dựng lại qua đúng đường canonical (`build_lesson_index` →
+`build_lesson_figures`, không `PACK_OUT_DIR`): **4, 5, 7, 8, 9, 10, 11, 12**.
+Pack cũ sao lưu ra `~/Desktop/wal-pack-backup-20260911` trước khi chạm —
+`assets/pack` bị gitignore nên không có lưới an toàn của git.
+
+So **TỪNG BẢN GHI THEO VỊ TRÍ MẢNG** với bản sao lưu:
+
+| | trước | sau | Δ |
+|---|---|---|---|
+| `text` | 235 955 | 233 557 | **−2 398** |
+| `heading` | 17 434 | 17 427 | −7 |
+| `img` | 17 536 | 17 536 | **±0** |
+| `formula` | 2 699 | 2 699 | **±0** |
+| ảnh CÓ chú thích | 8 731 | 8 731 | **±0** |
+
+- `OPENABLE_RECORDS` **2 974** ĐẠT · `DISTINCT_OPENABLE` **2 778** ĐẠT
+- bất biến «không bài nào TĂNG khối chữ»: **ĐẠT**
+- không lỗi cấu trúc; danh tính từng bản ghi khớp theo vị trí
+- 2 405 khối chữ bị gỡ, **toàn bộ từ 10 cuốn có bản đồ**: Địa lí 12 (630),
+  LS&ĐL 4 (374), LS&ĐL 5 (340), Địa lí 10 (318), LS&ĐL 8 (256), Lịch sử 11
+  (196), Địa lí 11 (148), LS&ĐL 7 (132), LS&ĐL 9 (9), chuyên đề Vật lí 10 (2).
+
+⚠ Dự đoán trước khi dựng là 3 470 khối; thực tế **2 405**. Dự đoán khớp đoạn
+OCR với khối pack bằng 40 ký tự đầu, mà khối pack đã qua ba luật sở hữu khác
+nên không tương ứng một-một. **Con số thật là con số dựng, không phải dự đoán.**
+
+Soi mắt bài đại diện ở ba cuốn khác nhau (Địa lí 12 b3 229→155, LS&ĐL 4 b1
+169→105, Lịch sử 11 b2 89→49): thứ bị gỡ là địa danh, toạ độ, chú giải phân
+tầng độ cao, tên đại dương, rác OCR; mục tiêu bài, phần khởi động và trích dẫn
+in đều còn.
+
+`flutter analyze` sạch · **1 477 test Flutter** xanh trên pack mới.
+
+## ĐÍNH CHÍNH MẪU SỐ
+
+Bình luận Jira đầu tiên của tôi ghi «lớp 5: khối chữ 18 399 → 18 059». **Mẫu số
+ấy sai.** Phép so lúc ấy khoá theo `(book, lesson)` nên **gộp mất 12 bản ghi**
+(GDTC 5 có nhiều dải đọc cùng một số bài). Tổng thật của lớp 5 là **19 723**.
+Số *gỡ 340* vẫn đúng vì cuốn bị chạm không có khoá trùng, và bản dựng canonical
+cho đúng 340 khối ở lớp 5. Ngay cả khoá `(book, lesson, pagePdfStart,
+pagePdfEnd)` cũng không duy nhất — có bản ghi trùng hệt — nên phép so đúng là
+**theo vị trí trong mảng**.
+
 ## Còn nợ
 
 - **`PRODUCED != DELIVERED`: chưa có bằng chứng máy thật.**
