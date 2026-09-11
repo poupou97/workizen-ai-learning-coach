@@ -2,6 +2,8 @@
 
 Gia sư thích ứng **có ý thức sư phạm** cho học sinh phổ thông Việt Nam.
 
+📋 **Trạng thái dự án cấp Founder: [`docs/MASTER-TODO.md`](docs/MASTER-TODO.md)** — DONE/DOING/NEXT/BLOCKED + lộ trình SAM scale.
+
 **Tên sản phẩm tiếng Việt (Founder chốt 2026-09-01): «Học cùng SAM»** — SAM là định danh
 tutor/mascot (cú tím-vàng). Tên tiếng Anh/quốc tế **chưa chốt** — không tự đổi.
 
