@@ -181,8 +181,64 @@ cho đúng 340 khối ở lớp 5. Ngay cả khoá `(book, lesson, pagePdfStart,
 pagePdfEnd)` cũng không duy nhất — có bản ghi trùng hệt — nên phép so đúng là
 **theo vị trí trong mảng**.
 
+## CỔNG MÁY THẬT — ĐẠT (Nokia 6.1, 2026-09-11 10:01)
+
+Chuỗi chứng minh đầy đủ: **NGUỒN → CHẶN → PACK CANONICAL → CLIENT → TRẺ.**
+
+**Bằng chứng TRƯỚC lấy từ chính máy**, không từ máy dev: kéo APK đang cài
+(`app-profile.apk` 09-09, 173 015 218 byte) và đọc pack bên trong —
+LS&ĐL 5 Bài 4 có **111 khối chữ, chỉ 1 ảnh** (chưa có bản đồ «Hình 2»), và rác
+bản đồ CÓ MẶT: «LAI CHÂU», «TRUNG QUỐC», «CHÚ GIÁI MẶT ĐỌ DÂN SỐ…», «NGHỆ AN»,
+«GIALAI».
+
+Dựng `flutter build apk --profile` (184 155 584 byte), cài `-r` (giữ dữ liệu),
+rồi **KÉO APK TỪ MÁY VỀ** kiểm lại — «Success» không phải bằng chứng: pack trên
+máy có **66 khối chữ, 2 ảnh**, ảnh thứ hai mang chú thích «Hình 2. Bản đồ phân
+bố dân cư Việt Nam năm 2024», **0 rác bản đồ**. Đẩy `figures-g5.db` (36,7 MB)
+vào khu cài của app; app tự cài (`figures-g5.installed.json` 10:01).
+
+Kết quả trên màn hình trẻ (ảnh ở `~/Desktop/wal-evidence/map-*.png`):
+
+| yêu cầu | kết quả |
+|---|---|
+| bản đồ còn hiện | **ĐẠT** — bản đồ màu đầy đủ |
+| danh tính «Hình 2» còn hiện | **ĐẠT** — in nghiêng ngay dưới ảnh |
+| bản đồ DÙNG ĐƯỢC | **ĐẠT** — đọc rõ chú giải mật độ, tên tỉnh, Hoàng Sa/Trường Sa, thước tỉ lệ |
+| rác nhãn bản đồ đã hết | **ĐẠT** — 0/66 khối là nhãn bản đồ |
+| văn xuôi & đề bài in còn | **ĐẠT** — mục tiêu, KHỞI ĐỘNG, «4. Dân tộc», «(Theo Bác Hồ ở Việt Bắc, NXB Chính trị quốc gia, 2011)» |
+| không lệch thứ tự / hỏng dựng | **ĐẠT** |
+
+⭐ `TASK EXISTS != TASK IS DOABLE` — nay **làm được**: «LUYỆN TẬP Dựa vào bản đồ
+phân bố dân cư Việt Nam năm 2024, hãy kể tên 3 tỉnh, thành phố có mật độ dân số
+cao nhất và 3 tỉnh, thành phố có mật độ dân số thấp nhất.»
+
+### ⚠ Khuyết tật CÒN LẠI, nhìn thấy trên máy
+
+Ngay dưới chú thích có một khối chữ:
+
+> **100 108° Hình 2. Bản đồ phân bố dân cư Việt Nam năm 2024**
+
+Chốt fail-closed GIỮ nó vì nó mang chuỗi danh tính — đúng luật. Nhưng «100»
+(thước tỉ lệ) và «108°» (toạ độ) đã bị **OCR gộp vào cùng một đoạn** với chú
+thích in, nên chúng đi theo. Đây **không phải luật sai**, mà là giới hạn của
+đơn vị đo: luật làm việc trên ĐOẠN, còn lỗi nằm BÊN TRONG đoạn. Tách nó cần
+phẫu thuật dưới mức đoạn và sẽ đe doạ chính chú thích — ngoài phạm vi vòng này.
+
+Đúng 4/66 khối được chốt danh tính giữ lại, và cả bốn đều đáng giữ: 2 đề bài
+in gọi tên hình, 1 chú thích biểu đồ kèm nguồn, 1 chú thích bản đồ (ca trên).
+
+### Dữ liệu của Founder
+
+Hồ sơ «Na» đổi tạm Lớp 11 → 5 để duyệt, rồi **trả về Lớp 11**. Sổ học
+`learner-store.jsonl` nối thêm đúng 3 dòng hồ sơ (`grade 5`, `grade 5`,
+`grade 11`); sổ ghi nối-thêm và bản ghi cuối thắng, nên **trạng thái hiệu lực
+bằng đúng ban đầu**. Không xoá, không sửa, không có sự kiện học nào bị bịa.
+
 ## Còn nợ
 
-- **`PRODUCED != DELIVERED`: chưa có bằng chứng máy thật.**
+- **Chữ trong BIỂU ĐỒ vẫn rơi hai lần** — thấy ngay trên máy ở chính bài này:
+  ảnh «Hình 1. Biểu đồ số dân…» hiện đúng, nhưng trục số vẫn đọc thành văn xuôi
+  «100 · 96,5 · 101,3 · 86,0 · 80 · 76,5 · 60 · 40 · 20 · 0». Đóng băng theo
+  lệnh — không mở rộng khi chưa có bằng chứng điểm ảnh.
 - Chữ trong **sơ đồ/đồ thị/ảnh chụp màn hình** vẫn rơi hai lần (Sinh học, Tin
   học, Công nghệ). Không mở rộng sang đó khi chưa có bằng chứng điểm ảnh.
