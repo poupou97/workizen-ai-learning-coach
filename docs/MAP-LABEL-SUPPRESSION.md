@@ -101,11 +101,43 @@ Kiểm điều Founder cấm động, trên cả 3 375 đoạn: **0 đề bài**
 | ⑤ không bóc phần đánh số | **bị bắt** (2 lỗi) |
 | khôi phục | ĐẠT |
 
+## ĐÍNH CHÍNH — bộ attach KHÔNG mất
+
+Bản đầu của tài liệu này (và ghi nhớ của tôi) nói bộ attach 238 cuốn chỉ nằm ở
+`/private/tmp/wal-census` và đã bị reboot xoá, nên «không dựng lại được pack».
+**Sai.** `poc-out/trusted-corpus/tc-v2/tc2-p1/attach/` trong repo có **đủ 238
+tệp**, và `lesson_attach.TC2_ATTACH_DEFAULT` trỏ thẳng vào đó — bản vá độ bền
+đầu vào đã dời chúng khỏi `/tmp` từ trước. Đường `/tmp` đã chết và không cần
+nữa. Tin bản ghi cũ suýt làm tôi báo một vật cản không có thật.
+
+## HIỂM HOẠ DỰNG phát hiện trong vòng này — và bản sửa
+
+`FORMULA_SOURCE=1` là cờ **BẬT thủ công**. Lượt dựng thử lớp 5 đầu tiên quên
+cờ ấy: **28 bài Toán 5 TĂNG khối chữ** (+324), nội dung là mảnh OCR công thức
+«+», «a)», «:(x7)», «- (2+ →)» chảy ngược vào dòng đọc. Số hình y hệt, số bài
+y hệt, mọi bất biến pack ĐẠT, không một lỗi nào.
+
+Phát hiện được chỉ vì so **TỪNG BÀI** với pack canonical và thấy có bài *tăng*
+khối chữ. Bộ dựng không bao giờ được tự thêm chữ, nên «số bài tăng khối chữ»
+phải bằng 0 là một bất biến rẻ và bắt đúng loại lỗi này.
+
+**Sửa** (theo đúng quy ước sẵn có của `WAL_CODE_OFF`):
+
+- năng lực đã promote thì cờ là cờ **TẮT**, không phải cờ bật:
+  `FORMULA_OFF = os.environ.get('FORMULA_SOURCE') == '0'`;
+- `staging.require_promoted(...)` **DỪNG HẲN** lượt dựng canonical nào tắt một
+  năng lực đã promote (`FormulaSource` qua `FORMULA_SOURCE=0` hoặc
+  `FORMULA_SHADOW=1`; `CodeSource` qua `WAL_CODE_OFF=1`). Khu dựng thử vẫn
+  được phép tắt — tắt để đối chiếu chính là việc của nó;
+- `CodeSource` đọc từ chính module sở hữu hành vi (`lesson_reading.CODE_OFF`),
+  không đọc lại tên biến môi trường ở hai nơi.
+
+Hồi quy: `tool/tests/test_build_safety.py` (7 test). Kiểm-đột-biến: ①trả lại
+cờ bật thủ công (đúng lỗi gốc) · ②chế độ đếm không tính là thiếu ·
+③`require_promoted` vô hiệu · ④chặn cả khu dựng thử ⇒ **cả bốn bị bắt**.
+
 ## Còn nợ
 
-- **Chưa dựng lại pack.** Bộ attach 238 cuốn ở `/private/tmp/wal-census` đã bị
-  reboot xoá; dựng lại index khi thiếu nó làm **tụt số bài mà mọi bất biến vẫn
-  ĐẠT**. Luật đã đúng ở tầng bộ dựng và đã đo trước/sau trên ca chuẩn, nhưng
-  **`PRODUCED != DELIVERED`: chưa có bằng chứng máy thật.**
+- **`PRODUCED != DELIVERED`: chưa có bằng chứng máy thật.**
 - Chữ trong **sơ đồ/đồ thị/ảnh chụp màn hình** vẫn rơi hai lần (Sinh học, Tin
   học, Công nghệ). Không mở rộng sang đó khi chưa có bằng chứng điểm ảnh.

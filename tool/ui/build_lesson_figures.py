@@ -40,7 +40,7 @@ import map_ownership  # noqa: E402
 import table_ownership  # noqa: E402
 import formula_source  # noqa: E402
 import staging  # noqa: E402
-from lesson_reading import lesson_reading, page_paragraphs  # noqa: E402
+from lesson_reading import CODE_OFF, lesson_reading, page_paragraphs  # noqa: E402
 from read_structure import block_kind  # noqa: E402
 
 OCR = os.path.join(ROOT, 'poc-out/graph/ocr-body')
@@ -88,6 +88,29 @@ def _grey_render(pdf, page_pdf):
         finally:
             doc.close()
     return render
+
+
+
+def promoted_off(env=None):
+    """Tên các năng lực ĐÃ PROMOTE đang bị tắt ở lượt dựng này.
+
+    ⭐ MẶC ĐỊNH PHẢI LÀ RỖNG. Đó chính là bất biến mà vụ 2026-09-11 phá: khi
+    `FORMULA_SOURCE` còn là cờ BẬT thủ công, một lượt dựng quên cờ ra pack
+    thiếu khối công thức mà không có gì báo. Nay quên cờ = đầy đủ; muốn thiếu
+    phải nói rõ, và nói rõ khi dựng canonical thì `staging.require_promoted`
+    dừng hẳn.
+
+    `CodeSource` đọc từ chính module sở hữu hành vi (`lesson_reading.CODE_OFF`)
+    chứ không đọc lại tên biến môi trường — hai chỗ giữ một tên là cách chúng
+    trôi khỏi nhau.
+    """
+    env = os.environ if env is None else env
+    off = []
+    if env.get('FORMULA_SOURCE') == '0' or env.get('FORMULA_SHADOW') == '1':
+        off.append('FormulaSource')
+    if CODE_OFF:
+        off.append('CodeSource')
+    return off
 
 
 def interleave(pages, figs_by_page, fml_by_page=None):
@@ -253,8 +276,14 @@ def main():
     # ⭐ WAL-239 — CÔNG THỨC TỚI VỚI TRẺ BẰNG ẢNH TRANG IN (Founder Gate: B).
     # `FORMULA_SHADOW=1` chỉ ĐẾM, không đổi dòng đọc. Thiếu tệp đề xuất ⇒ rỗng
     # ⇒ đường dựng chạy y như cũ.
-    FORMULA_OFF = os.environ.get('FORMULA_SOURCE') != '1'
+    # ⭐ ĐÃ PROMOTE ⇒ BẬT MẶC ĐỊNH. Trước 2026-09-11 đây là cờ BẬT thủ công
+    # (`!= '1'`), nên một lượt dựng quên cờ ra pack thiếu khối công thức mà
+    # KHÔNG lỗi nào báo — 28 bài Toán 5 nhận lại mảnh OCR «+», «a)», «:(x7)».
+    # Nay theo đúng quy ước của `WAL_CODE_OFF`: năng lực đã promote thì cờ là
+    # cờ TẮT, và tắt nó khi dựng canonical thì `require_promoted` dừng hẳn.
+    FORMULA_OFF = os.environ.get('FORMULA_SOURCE') == '0'
     FORMULA_SHADOW = os.environ.get('FORMULA_SHADOW') == '1'
+    staging.require_promoted(promoted_off())
     FML_REGIONS = {} if FORMULA_OFF else formula_source.regions_index()
     FML_STATS = collections.Counter()
     if FML_REGIONS:
