@@ -182,3 +182,47 @@ hoạt động + hình **có danh tính** đã tới tay trẻ.
 
 Đây là **hướng kiến trúc**, chưa thi công: bài ít bằng chứng thì SAM **giảm
 năng lực**, không bịa bù.
+
+---
+
+## TODO 16 · SAM SCALE POC 1 → 10 — **PASS** (2026-09-11)
+
+**10/10 bài** qua cùng một bộ dựng và cùng một runtime · **0 logic riêng từng bài**.
+
+### Cổng máy thật — 2 máy · 3 nhóm môn
+
+| máy | bài | môn | kết quả |
+|---|---|---|---|
+| Nokia 6.1 (cáp) | Hoá học 11 · Bài 13 | Hoá học | ĐẠT |
+| S24 (WiFi) | Sinh học 11 · Bài 2 | Sinh học | ĐẠT |
+| S24 (WiFi) | Lịch sử 10 · Bài 9 | Lịch sử | ĐẠT |
+
+Mỗi bài: đúng hồ sơ/lớp · đúng sách/bài · **việc là chữ nguyên văn SGK** · thẻ
+«SÁCH VIẾT» trích nguyên văn kèm xuất xứ («trang PDF 16 · chạm để tra cứu») ·
+ba tab mở được · **không có bước hỏi** ⇒ không có chỗ phán đúng/sai · nút
+«Tiếp ›».
+
+APK **kéo từ cả hai máy về**: 10/10 bài đủ vòng dạy + cờ
+`samReady=true · answerCheckReady=false · misconceptionReady=false`.
+Không tin «install Success».
+
+### BACK / RESUME — **PASS**
+
+Lịch sử 10 Bài 9 → tab SAM → BACK → Thành tích → Giá sách → Trang chủ → mở
+lại → tab SAM. Sau resume: **cùng sách · cùng bài · cùng việc · cùng nguồn ·
+cùng cờ năng lực**. Không lệch danh tính, không leo thang năng lực. Thẻ ở màn
+chính đổi đúng «CHƯA BẮT ĐẦU» → «TIẾP TỤC · Đã mở: Đọc · Học với SAM».
+
+### Ghi nhận nợ CHỮ SẢN PHẨM — *chưa sửa*
+
+| dòng chữ | phán định | căn cứ |
+|---|---|---|
+| «Máy chưa ràng buộc được bài này với sách» | **TRUTHFUL** | `lib/core/curriculum/` chỉ có **một** binding (`khtn6_bai17.dart`); không bài POC nào có `SemanticBinding`, nên runtime không chứng minh được `TutorScope` và từ chối nhãn `runtimeGuided`. Cảnh báo ĐÚNG, **phải giữ**. |
+| «SAM đi theo kịch bản viết sẵn — chưa phải SAM thật» | **TRUTHFUL, thiếu chính xác** | Các bước **là** viết sẵn theo nghĩa không suy luận lúc chạy — nhưng chúng được **SUY TẤT ĐỊNH TỪ NGUỒN**, không phải người gõ tay. Chữ hiện tại không phân biệt hai điều đó. Sửa ở vòng sau, **không xoá cảnh báo để UI đẹp**. |
+
+### Kết luận
+
+`SAM_READY = 10/10` · `ANSWER_CHECK_READY = 0/10` · `MISCONCEPTION_READY = 0/10`.
+
+**Đã chứng minh scale SAM_READY 1 → 10 bằng một runtime ăn bằng chứng dùng
+chung.** KHÔNG phải «10 bài có full AI Tutor».
