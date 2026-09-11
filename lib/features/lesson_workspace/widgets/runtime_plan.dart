@@ -43,10 +43,20 @@ RuntimePlan? planForDoc(LessonDocument doc, {String? learnerId}) {
   final ref = lessonRefOf(doc);
   return PedagogyRuntime.planForScript(
     script: script,
+    // ⭐ Ưu tiên binding VIẾT TAY nếu bài có (Bài 17); nếu không, thử đường
+    // SUY TỪ NGUỒN bằng chính `curriculum` của tài liệu. Cả hai đi qua cùng
+    // `resolveBinding` — không có luật tin cậy thứ hai.
     binding: SemanticBindingRegistry.resolveFor(
-      ref,
-      SemanticBinding.tutorScriptActivity,
-    ),
+          ref,
+          SemanticBinding.tutorScriptActivity,
+        ) ??
+        SemanticBindingRegistry.resolveFromDocument(
+          doc.curriculum,
+          book: doc.book,
+          lessonNo: doc.lessonNo,
+          grade: doc.grade,
+          activityId: SemanticBinding.tutorScriptActivity,
+        ),
     studentState: StudentLessonState.unseen(ref),
     context: learningContextFor(doc, learnerId: learnerId),
     blockText: (id) {
