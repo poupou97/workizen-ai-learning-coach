@@ -1,0 +1,111 @@
+# VÒNG CHẶN NHÃN BẢN ĐỒ — đo trước, và bác bỏ bản rộng
+
+Ngày 2026-09-11. Hạt giống mọi mẫu đóng băng: `20260911`.
+
+## Khuyết tật được báo
+
+Vòng danh tính chú thích đã giao được «Hình 2. Bản đồ phân bố dân cư Việt Nam
+năm 2024» cho bài Lịch sử & Địa lí 5 Bài 4. Nhưng ngay dưới tấm bản đồ, trẻ đọc
+tiếp: «PINÓM PÊNII», «NHT TYHI HNH 8°», «LAI CHÂU», «CHÚ GIÁI MẶT ĐỌ DÂN SỐ…».
+Đó là chữ **vẽ trong chính tấm ảnh đang hiện**, rơi thêm một lần nữa thành văn
+xuôi.
+
+## Giả thuyết ĐẦU TIÊN — và nó SAI
+
+> Áp luật sở hữu của `table_ownership` cho **mọi vùng hình có danh tính**.
+
+Đo trên toàn kho: **39 797 đoạn** bị chặn (47,7% số đoạn trên các trang có vùng
+hình đáng tin). Ba bằng chứng bác bỏ:
+
+1. **1 166 đoạn mang chuỗi danh tính, trên 925 trang** — luật rộng xoá đúng
+   chú thích và câu hỏi in trỏ vào hình mà vòng trước vừa giành lại. Hộp hình
+   của Docling thường nuốt dòng chú thích in ngay dưới nó: Toán 8 tr.97,
+   «Hình 9.40» in ở `y0,728` lọt vào hộp `y0,623–0,740`.
+2. **Hoá học 12 chuyên đề tr.25** — hộp «Hình 5.4» phình ra **74% trang** trong
+   khi hình thật chỉ là dải đáy. Bên trong nó là TOÀN BỘ quy trình in của bài:
+   «Chuẩn bị nguyên liệu», «Nung chảy», «Định hình», «Hoàn thiện», hộp «EM CÓ
+   BIẾT», cả phương trình «→ Na₂SiO₃ + CO₂». Hỏng **không phải ở phân loại
+   chữ — mà ở hình học vùng**. Hộp `table` của Docling bó sát; hộp `picture`
+   thì không. Đúng cảnh báo tác giả cũ đã viết sẵn trong `table_ownership`.
+3. **Hai đặc trưng hình học không tách được** trường hợp đúng khỏi sai:
+
+   | trang | tỉ lệ chữ phủ vùng | khối rộng | nhãn tay |
+   |---|---|---|---|
+   | Sinh học 11 tr.168 (nuốt «Bước 1–4») | 15,1% | 0% | **HỎNG** |
+   | LS&ĐL 5 tr.24 (bản đồ dân cư) | 21,0% | 0% | ĐÚNG |
+   | Khoa học 4 tr.91 (tháp dinh dưỡng) | 27,7% | 9% | ĐÚNG |
+   | Hoá học 12 tr.25 (nuốt quy trình) | 37,0% | 50% | **HỎNG** |
+
+   Dữ kiện phân biệt thật — «chữ nằm trên tranh hay trên giấy trắng» — là dữ
+   kiện **điểm ảnh**. Kho không có ảnh trang toàn bộ, nên dữ kiện ấy không lấy
+   được ở quy mô này.
+
+**Giữ lại kết luận bị bác này.** Bản rộng KHÔNG được hồi sinh nếu không có bằng
+chứng mới về độ tin của hộp `picture`.
+
+## Luật ĐƯỢC GIỮ — hẹp theo tên gọi của chính sách
+
+Phạm vi thu về đúng vật mà **chính sách in ra là bản đồ/lược đồ**:
+
+- **3 375 đoạn / 118 trang**, chỉ Lịch sử (1 825) và Địa lí (1 555).
+- 79 bài bị chạm; **không bài nào còn dưới 15 khối chữ** — không có bài nào bị
+  làm rỗng.
+
+### ⚠ NHẮC TỚI KHÔNG PHẢI LÀ DANH TÍNH
+
+Bản đầu của luật hẹp vẫn sai: nó bắt chữ «bản đồ» ở bất kỳ đâu trong chú thích,
+nên nhận nhầm vùng «**Hình 3. Sơ đồ** các bước sử dụng bản đồ, lược đồ»
+(LS&ĐL 4 tr.10) — bên trong vùng ấy là ba bước **in ra chữ**:
+
+> Bước 1 — Đọc tên bản đồ, lược đồ để biết phương tiện thể hiện nội dung gì.
+> Bước 2 — Xem chú giải để biết kí hiệu của các đối tượng lịch sử hoặc địa lí.
+> Bước 3 — Tìm đối tượng lịch sử hoặc địa lí dựa vào kí hiệu.
+
+Sửa: từ chỉ loại đọc **ngay sau phần đánh số**, không phải bất kỳ đâu. Ba dòng
+ấy sống; phạm vi đi từ 3 411 → 3 375 đoạn; ca chuẩn LS5 tr.24 không đổi.
+
+### Hai chốt fail-closed
+
+- Không có hộp bao ⇒ **GIỮ** (không bằng chứng thì không xoá chữ của sách).
+- Đoạn mang **chuỗi danh tính** ⇒ **GIỮ**, kể cả khi nằm gọn trong vùng. Chốt
+  này cứu cả chú thích in lẫn đề bài gọi tên hình («Quan sát Hình 8.4 và cho
+  biết…»).
+- Vùng `table` không bao giờ là bản đồ — nợ cấu trúc bảng vẫn đóng băng.
+
+## Nghiệm thu trên ca chuẩn (LS&ĐL 5 Bài 4)
+
+| | trước | sau |
+|---|---|---|
+| khối chữ | 111 | **66** |
+| ảnh | 1 | 1 |
+| chú thích «Hình 2. Bản đồ phân bố dân cư…» | có | **có** |
+
+45 khối bị gỡ, soi tay **45/45 đều là chữ trong bản đồ**: tên tỉnh (LAI CHÂU,
+NGHỆ AN, GIA LAI), tên đảo (đảo Bạch Long Vĩ, Qđ. Trường Sa), toạ độ (20°, 16°,
+104°, 112°), thước tỉ lệ (100 200 km), chú giải mật độ dân số, nước láng giềng
+(TRUNG QUỐC, CAM-PU-CHIA, PINÓM PÊNII), và rác OCR («NHT TYHI HNH 8°», «IOA»).
+
+Kiểm điều Founder cấm động, trên cả 3 375 đoạn: **0 đề bài**, **0 chữ nguồn**
+(một ca «© Thị Cầu» là nhãn địa danh, `©` là nhiễu OCR).
+
+## Kiểm-đột-biến
+
+| đột biến | kết quả |
+|---|---|
+| ① bỏ chốt danh tính | **bị bắt** (3 lỗi) |
+| ② `.match` → `.search` | sống — **chứng minh tương đương**: mẫu có neo `^` |
+| ②′ gỡ neo `^` | sống — **tương đương**: `re.match` vốn neo đầu chuỗi |
+| ②″ gỡ `^` **và** dùng `.search` (nhận nhắc-tới) | **bị bắt** |
+| ③ hạ ngưỡng sở hữu về 0 | **bị bắt** (2 lỗi) |
+| ④ bỏ chốt vùng bảng | **bị bắt** |
+| ⑤ không bóc phần đánh số | **bị bắt** (2 lỗi) |
+| khôi phục | ĐẠT |
+
+## Còn nợ
+
+- **Chưa dựng lại pack.** Bộ attach 238 cuốn ở `/private/tmp/wal-census` đã bị
+  reboot xoá; dựng lại index khi thiếu nó làm **tụt số bài mà mọi bất biến vẫn
+  ĐẠT**. Luật đã đúng ở tầng bộ dựng và đã đo trước/sau trên ca chuẩn, nhưng
+  **`PRODUCED != DELIVERED`: chưa có bằng chứng máy thật.**
+- Chữ trong **sơ đồ/đồ thị/ảnh chụp màn hình** vẫn rơi hai lần (Sinh học, Tin
+  học, Công nghệ). Không mở rộng sang đó khi chưa có bằng chứng điểm ảnh.
