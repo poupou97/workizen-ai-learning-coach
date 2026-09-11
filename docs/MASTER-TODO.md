@@ -3,10 +3,11 @@
 **Đây là bản nhìn cấp Founder.** Repo là source of record · Jira là theo dõi thi
 hành · tài liệu này là trạng thái dự án.
 
-Cập nhật: **2026-09-11** · main `c96d24c` · cây sạch · 1.493 test Python ·
+Cập nhật: **2026-09-11** · main `3e13768` · cây sạch · 1.493 test Python ·
 1.477 test Flutter.
 
 > Quy ước: `DONE · DOING · NEXT · WAIT · BLOCKED · FROZEN · DEFER`.
+> **DOING = đang thực sự được thi hành.** Tài sản/mã cũ tồn tại KHÔNG phải DOING.
 > Không có % nếu không có mẫu số tái hiện được. Không chắc ⇒ **UNKNOWN**.
 > Số cũ đã bị thay ⇒ **SUPERSEDED**. Giả thuyết đã bác ⇒ **FALSIFIED**.
 
@@ -72,9 +73,9 @@ SGK + SGV + bằng chứng học liệu đáng tin
 
 | ID | WORKSTREAM | STATUS | EVIDENCE | BLOCKER | NEXT | JIRA |
 |---|---|---|---|---|---|---|
-| 11 | **SGK ↔ SGV lesson pairing** | **NEXT · GATE 1** | Ghép theo quy ước tên **HỎNG 8/18** cuốn đã khai thác (`01-sgv-toan-1` không có `01-sgk-toan-1`); nơi có đôi, trùng số bài dao động **3/76 → 31/31** | — | định nghĩa ĐƠN VỊ ghép rồi đo confident/ambiguous/UNKNOWN | WAL-198 (nửa SGV) |
-| 12 | SGV pedagogy evidence extraction | **DOING** | `sgv-pedagogy-v1` (WAL-127) đã chạy **18/220 cuốn** → **13.634 finding**: `objective` 708 · `expectedResponse` 457 · `teacherNote` 924 · `perExerciseGuide` 2.227 · `intent` 1.931 | chưa mở rộng quy mô | mở rộng sau khi Gate 1 rõ | WAL-198 |
-| 13 | Pedagogy evidence trust classification | **DOING** | ⚠ **13.634/13.634 finding đều gắn `SOURCE_EXPLICIT`** — một rổ duy nhất ⇒ tin cậy đang được **KHẲNG ĐỊNH, chưa được PHÂN XỬ**. `SOURCE_DEMONSTRATED` và `UNKNOWN` chưa dùng lần nào | — | tách ba mức có tiêu chí đọc được từ nguồn | WAL-198 |
+| 11 | **SGK ↔ SGV lesson pairing** | **DOING · GATE 1** | Ghép theo quy ước tên **HỎNG 8/18** cuốn đã khai thác (`01-sgv-toan-1` không có `01-sgk-toan-1`); nơi có đôi, trùng số bài dao động **3/76 → 31/31** | — | định nghĩa ĐƠN VỊ ghép rồi đo confident/ambiguous/UNKNOWN | WAL-198 (nửa SGV) |
+| 12 | SGV pedagogy evidence extraction | **WAIT** | `sgv-pedagogy-v1` (WAL-127) đã chạy **18/220 cuốn** → **13.634 finding**: `objective` 708 · `expectedResponse` 457 · `teacherNote` 924 · `perExerciseGuide` 2.227 · `intent` 1.931 | chưa mở rộng quy mô | mở rộng sau khi Gate 1 rõ | WAL-198 |
+| 13 | Pedagogy evidence trust classification | **WAIT** | ⚠ **13.634/13.634 finding đều gắn `SOURCE_EXPLICIT`** — một rổ duy nhất ⇒ tin cậy đang được **KHẲNG ĐỊNH, chưa được PHÂN XỬ**. `SOURCE_DEMONSTRATED` và `UNKNOWN` chưa dùng lần nào | — | tách ba mức có tiêu chí đọc được từ nguồn | WAL-198 |
 | 14 | **SGV → SAM feasibility gate** | **WAIT** | chưa có | 11 + 12 + 13 | trả lời **YES / PARTIAL / NO** | WAL-198 |
 
 ### Checklist P0 — đã chứng minh vs còn lại
@@ -112,7 +113,7 @@ SGK + SGV + bằng chứng học liệu đáng tin
 
 | ID | WORKSTREAM | STATUS | EVIDENCE | BLOCKER | NEXT | JIRA |
 |---|---|---|---|---|---|---|
-| 15 | Pedagogy Runtime | **DOING** | 1.595 dòng ở `lib/core/pedagogy/` (`realization_contract` · `presentation_policy` · `source_misconception` · `source_quote_index`); TutorScope đã có | chưa nối vào nguồn SGV | hợp đồng bằng-chứng→runtime (Gate 3) | NONE |
+| 15 | Pedagogy Runtime | **WAIT** | 1.595 dòng ở `lib/core/pedagogy/` (`realization_contract` · `presentation_policy` · `source_misconception` · `source_quote_index`); TutorScope đã có | chưa nối vào nguồn SGV | hợp đồng bằng-chứng→runtime (Gate 3) | NONE |
 | 16 | SAM scale POC 1 → 10 | **BLOCKED** | `SAM_READY` = **1**. Kịch bản duy nhất: `samMode=prototypeScripted` · `trust=prototype` · `evidencePolicy=none` · `keySource` tự khai «KHÔNG phải SGV» | Gate 14 | — | NONE |
 | 17 | SAM scale 10 → 50 | **WAIT** | — | 16 | — | NONE |
 | 18 | SAM scale 50 → N | **WAIT** | — | 17 | — | NONE |
