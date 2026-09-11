@@ -31,6 +31,29 @@ void main() {
     ['07-sgk-tin-hoc-7', 13],
     ['11-sgk-sinh-hoc-11', 6],
     ['06-sgk-khoa-hoc-tu-nhien-6', 10],
+    ['06-sgk-khoa-hoc-tu-nhien-6', 18],
+    ['06-sgk-khoa-hoc-tu-nhien-6', 25],
+    ['09-sgk-khoa-hoc-tu-nhien-9', 18],
+    ['09-sgk-khoa-hoc-tu-nhien-9', 3],
+    ['09-sgk-khoa-hoc-tu-nhien-9', 44],
+    ['10-sgk-dia-li-10', 19],
+    ['11-sgk-sinh-hoc-11', 10],
+    ['11-sgk-sinh-hoc-11', 12],
+    ['11-sgk-sinh-hoc-11', 13],
+    ['11-sgk-sinh-hoc-11', 15],
+    ['11-sgk-sinh-hoc-11', 19],
+    ['11-sgk-sinh-hoc-11', 20],
+    ['11-sgk-sinh-hoc-11', 27],
+    ['11-sgk-sinh-hoc-11', 9],
+    ['12-sgk-cong-nghe-12-lam-nghiep-thuy-san', 1],
+    ['12-sgk-cong-nghe-12-lam-nghiep-thuy-san', 27],
+    ['12-sgk-cong-nghe-12-lam-nghiep-thuy-san', 3],
+    ['12-sgk-cong-nghe-12-lam-nghiep-thuy-san', 7],
+    ['12-sgk-hoa-hoc-12', 15],
+    ['12-sgk-hoa-hoc-12', 18],
+    ['12-sgk-hoa-hoc-12', 21],
+    ['12-sgk-hoa-hoc-12', 24],
+    ['12-sgk-hoa-hoc-12', 9],
   ];
 
   Future<Map<String, Object?>> raw(String book, int no) async {
@@ -75,7 +98,7 @@ void main() {
       expect(ped['pairing'], contains('L1+L2+L3'));
       checked++;
     }
-    expect(checked, 10, reason: '8 bài mới phải đi qua bộ dựng chung');
+    expect(checked, 33, reason: '8 bài mới phải đi qua bộ dựng chung');
   });
 
   test('⭐ catalog KHÔNG có nhánh riêng cho bài nào', () {
@@ -115,6 +138,9 @@ void main() {
       final cap = ((j['provenance'] as Map)['capability'] as Map)
           .cast<String, Object?>();
       expect(cap['samReady'], true, reason: '${p[0]} B${p[1]}');
+      // ⭐ SAM_READY != RUNTIME_GUIDED_READY. Không bài nào có
+      // SemanticBinding, nên runtime KHÔNG được nhận nhãn runtimeGuided.
+      expect(cap['runtimeGuidedReady'], false, reason: '${p[0]} B${p[1]}');
       expect(cap['answerCheckReady'], false, reason: '${p[0]} B${p[1]}');
       expect(cap['misconceptionReady'], false, reason: '${p[0]} B${p[1]}');
     }
@@ -130,5 +156,24 @@ void main() {
       expect(hasText, isTrue, reason: '${p[0]} B${p[1]} không có chữ bài');
       expect(hasQuestion || hasText, isTrue);
     }
+  });
+
+  test('⭐ KHÔNG bài nào được tạo SemanticBinding giả', () {
+    // `resolveBinding` đòi Concept + SkillCase + TeachingMethod có
+    // `origin: sourceStated` và trích được trang. Nguồn hiện tại không cấp
+    // ba thứ đó. Sổ đăng ký binding phải vẫn là ĐÚNG MỘT (KHTN 6 Bài 17) —
+    // thêm binding cho bài khác mà không có bằng chứng là bịa chương trình.
+    final dir = Directory('lib/core/curriculum');
+    // ⚠ Chỉ đếm tệp KHAI một binding cụ thể (`= SemanticBinding(`), không
+    // đếm tệp ĐỊNH NGHĨA lớp — bản đầu đếm cả `semantic_binding.dart` nên ra 2.
+    final bindings = dir
+        .listSync()
+        .whereType<File>()
+        .where((f) =>
+            File(f.path).readAsStringSync().contains('= SemanticBinding('))
+        .toList();
+    expect(bindings.length, 1,
+        reason: 'có ${bindings.length} tệp khai SemanticBinding — '
+            'chỉ được đúng một cho tới khi Concept/SkillCase có nguồn');
   });
 }
