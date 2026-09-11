@@ -92,6 +92,22 @@ class WorkspaceCatalog {
     FixtureSlot(book: '07-sgk-khoa-hoc-tu-nhien-7', lessonNo: 4),
     FixtureSlot(book: '08-sgk-khoa-hoc-tu-nhien-8', lessonNo: 19),
     FixtureSlot(book: '09-sgk-khoa-hoc-tu-nhien-9', lessonNo: 14),
+    // ⭐ SAM SCALE POC 1 → 10 (Founder duyệt 2026-09-11). Chọn TẤT ĐỊNH từ 46
+    // bài có VIỆC của trẻ chứng minh được: luân phiên theo môn rồi theo lớp.
+    // Đây là DỮ LIỆU riêng từng bài — KHÔNG có logic riêng từng bài ở đâu cả;
+    // mọi bài đi qua cùng một bộ dựng và cùng một runtime.
+    //
+    // ⚠ CHẤM ĐIỂM BỊ KHOÁ Ở CẢ MƯỜI BÀI. Trong 589 bài ghép CONFIDENT chỉ
+    // 6 việc / 3 bài có đáp án gắn theo danh sách đánh số, và soi tay thì quá
+    // nửa số ấy VẪN là đáp án của câu khác. Không đủ để nói với trẻ em sai.
+    FixtureSlot(book: '06-sgk-cong-nghe-6', lessonNo: 3),  // POC 1→10
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 2),  // POC 1→10
+    FixtureSlot(book: '11-sgk-hoa-hoc-11', lessonNo: 13),  // POC 1→10
+    FixtureSlot(book: '10-sgk-dia-li-10', lessonNo: 5),  // POC 1→10
+    FixtureSlot(book: '07-sgk-tin-hoc-7', lessonNo: 3),  // POC 1→10
+    FixtureSlot(book: '12-sgk-chuyen-de-hoc-tap-cong-nghe-12-lam-nghiep-thuy-san', lessonNo: 5),  // POC 1→10
+    FixtureSlot(book: '10-sgk-lich-su-10', lessonNo: 9),  // POC 1→10
+    FixtureSlot(book: '09-sgk-cong-nghe-9-trai-nghiem-nghe-nghiep-mo-dun-trong-cay-an-qua', lessonNo: 1),  // POC 1→10
   ];
 
   /// Lát cắt NGHIÊN CỨU: hiện trên Home cho mọi lớp (kèm nhãn «sách lớp N»)
