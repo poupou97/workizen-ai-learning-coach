@@ -36,6 +36,7 @@ from lesson_figures import lesson_figures, crop_jpeg  # noqa: E402
 import docling_pack  # noqa: E402
 import decoration  # noqa: E402
 import figure_funnel  # noqa: E402
+import map_ownership  # noqa: E402
 import table_ownership  # noqa: E402
 import formula_source  # noqa: E402
 import staging  # noqa: E402
@@ -122,6 +123,13 @@ def interleave(pages, figs_by_page, fml_by_page=None):
         # hiện nó ra rồi nên không mất gì. Văn xuôi quanh bảng GIỮ NGUYÊN —
         # không có bằng chứng sở hữu thì không xoá chữ của sách.
         tabs = table_ownership.table_regions(figs_by_page.get(p['pagePdf'], []))
+        # ⭐ BẢN ĐỒ CŨNG KHÔNG ĐƯỢC HIỆN HAI LẦN. Sau khi vòng danh tính giao
+        # được tấm bản đồ, trẻ vẫn đọc tiếp «PINÓM PÊNII», «LAI CHÂU», «CHÚ
+        # GIÁI MẶT ĐỌ DÂN SỐ…» — địa danh, toạ độ, chú giải VẼ TRONG chính tấm
+        # ảnh ấy. Phạm vi CỐ Ý HẸP: chỉ vật mà sách GỌI TÊN là bản đồ/lược đồ
+        # (3 375 đoạn / 118 trang). Bản rộng «mọi vùng hình» đã bị đo bác bỏ —
+        # lý do đầy đủ trong `map_ownership`.
+        maps = map_ownership.map_regions(figs_by_page.get(p['pagePdf'], []))
         # ⭐ CÔNG THỨC CŨNG KHÔNG ĐƯỢC HIỆN HAI LẦN — và ở đây lý do nặng hơn
         # bảng: chuỗi OCR của công thức KHÔNG CHỈ thừa, nó SAI. Đo 53 ca soi
         # mắt so với bản in: 88,7% hại, Toán 23/23. «x²/9 + y²/5 = 1» tới tay
@@ -133,7 +141,7 @@ def interleave(pages, figs_by_page, fml_by_page=None):
         # toàn vẫn phải giữ lại chữ sai của nó (D).
         fml = (fml_by_page or {}).get(p['pagePdf']) or {}
         fregs = fml.get('regions') or []
-        # ⚠ KHỐI MÃ MIỄN NHIỄM VỚI HAI LUẬT SỞ HỮU TRÊN, và đây là rủi ro do
+        # ⚠ KHỐI MÃ MIỄN NHIỄM VỚI CẢ BA LUẬT SỞ HỮU TRÊN, và đây là rủi ro do
         # CHÍNH thay đổi này sinh ra: trước kia dòng mã nằm lẫn trong một đoạn
         # văn rộng cả trang nên không vùng nào sở hữu nổi; giờ nó khớp GỌN vào
         # vùng mã, nên một vùng bảng chồng lên là nuốt trọn cả chương trình.
@@ -141,7 +149,8 @@ def interleave(pages, figs_by_page, fml_by_page=None):
         keep = [q for q in paras
                 if q.get('kind') == 'code'
                 or (not (fregs and formula_source.owned_by_formula(q, fregs))
-                    and not (tabs and table_ownership.owned_by_table(q, tabs)))]
+                    and not (tabs and table_ownership.owned_by_table(q, tabs))
+                    and not (maps and map_ownership.owned_by_map(q, maps)))]
         # ⚠ KHỐI MÃ KHÔNG BAO GIỜ LÀ TIÊU ĐỀ. `block_kind` nhận tiêu đề mục
         # bằng cách nhìn đánh số đầu khối («1.», «a)») — mà mã nguồn in kèm
         # cột số dòng thì mở đầu đúng như thế. Bằng chứng loại khối đã có sẵn
