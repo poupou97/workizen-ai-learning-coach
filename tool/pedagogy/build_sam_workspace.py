@@ -112,8 +112,8 @@ def _loop(blocks, contract):
     # Bài 3 nhờ từ chung, nhưng không khối nào của bài ấy chứa nó (phủ 0,33).
     # Đó là sở hữu SAI, và giao cho trẻ một việc không có trong bài của em.
     if not task:
-        return None, dict(samReady=False, answerCheckReady=False,
-                          misconceptionReady=False,
+        return None, dict(samReady=False, runtimeGuidedReady=False,
+                          answerCheckReady=False, misconceptionReady=False,
                           reason='VIỆC KHÔNG TRỎ ĐƯỢC VỀ MỘT KHỐI CỦA BÀI SGK')
     steps = []
     if obj:
@@ -127,9 +127,19 @@ def _loop(blocks, contract):
     ]
     return (dict(samMode='runtimeGuided', trust='trustedStructuredLesson',
                  evidencePolicy='none', steps=steps),
-            dict(samReady=True, answerCheckReady=False,
+            dict(samReady=True,
+                 # ⭐ SAM_READY ≠ RUNTIME_GUIDED_READY. `resolveBinding` đòi
+                 # Concept + SkillCase + TeachingMethod có `origin:
+                 # sourceStated` và trích được trang. Hợp đồng sư phạm hiện
+                 # tại KHÔNG cấp ba thứ đó — sinh chúng bằng máy là bịa CHÂN
+                 # LÍ CHƯƠNG TRÌNH. Nên không tạo binding giả; runtime giữ
+                 # nhãn prototype và nói thẳng với trẻ là chưa ràng buộc được.
+                 runtimeGuidedReady=False,
+                 answerCheckReady=False,
                  misconceptionReady=False,
-                 reason='ANSWER_CHECK: TASK_ANSWER_OWNERSHIP_UNPROVEN · '
+                 reason='RUNTIME_GUIDED: KHÔNG CÓ Concept/SkillCase/Method '
+                        'SOURCE_STATED ⇒ không tạo SemanticBinding · '
+                        'ANSWER_CHECK: TASK_ANSWER_OWNERSHIP_UNPROVEN · '
                         'MISCONCEPTION: KHÔNG CÓ NGUỒN GỌI TÊN LỖI'))
 
 

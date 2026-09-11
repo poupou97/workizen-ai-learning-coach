@@ -102,14 +102,42 @@ class WorkspaceCatalog {
     // nửa số ấy VẪN là đáp án của câu khác. Không đủ để nói với trẻ em sai.
     // Vòng dạy là KHÔNG CHẤM: chỉ `explain` + `next`, KHÔNG có `ask` — không
     // có bước hỏi thì không có chỗ nào để lỡ tay phán đúng/sai.
-    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 2),  // POC 1→10
-    FixtureSlot(book: '11-sgk-hoa-hoc-11', lessonNo: 13),  // POC 1→10
-    FixtureSlot(book: '09-sgk-cong-nghe-9-trai-nghiem-nghe-nghiep-mo-dun-trong-cay-an-qua', lessonNo: 1),  // POC 1→10
-    FixtureSlot(book: '10-sgk-dia-li-10', lessonNo: 5),  // POC 1→10
-    FixtureSlot(book: '12-sgk-chuyen-de-hoc-tap-cong-nghe-12-lam-nghiep-thuy-san', lessonNo: 5),  // POC 1→10
-    FixtureSlot(book: '10-sgk-lich-su-10', lessonNo: 9),  // POC 1→10
-    FixtureSlot(book: '07-sgk-tin-hoc-7', lessonNo: 13),  // POC 1→10
-    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 6),  // POC 1→10
+    //
+    // ⭐ VÒNG SCALE (2026-09-11): toàn bộ quần thể đáng tin hiện có — 33 bài.
+    // `SAM_READY` != `RUNTIME_GUIDED_READY`: không bài nào có SemanticBinding
+    // vì hợp đồng sư phạm KHÔNG cấp Concept/SkillCase/Method `sourceStated`,
+    // mà sinh chúng bằng máy là bịa CHÂN LÍ CHƯƠNG TRÌNH.
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 2),  // SAM scale
+    FixtureSlot(book: '11-sgk-hoa-hoc-11', lessonNo: 13),  // SAM scale
+    FixtureSlot(book: '09-sgk-cong-nghe-9-trai-nghiem-nghe-nghiep-mo-dun-trong-cay-an-qua', lessonNo: 1),  // SAM scale
+    FixtureSlot(book: '10-sgk-dia-li-10', lessonNo: 5),  // SAM scale
+    FixtureSlot(book: '12-sgk-chuyen-de-hoc-tap-cong-nghe-12-lam-nghiep-thuy-san', lessonNo: 5),  // SAM scale
+    FixtureSlot(book: '10-sgk-lich-su-10', lessonNo: 9),  // SAM scale
+    FixtureSlot(book: '07-sgk-tin-hoc-7', lessonNo: 13),  // SAM scale
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 6),  // SAM scale
+    FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 18),  // SAM scale
+    FixtureSlot(book: '06-sgk-khoa-hoc-tu-nhien-6', lessonNo: 25),  // SAM scale
+    FixtureSlot(book: '09-sgk-khoa-hoc-tu-nhien-9', lessonNo: 18),  // SAM scale
+    FixtureSlot(book: '09-sgk-khoa-hoc-tu-nhien-9', lessonNo: 3),  // SAM scale
+    FixtureSlot(book: '09-sgk-khoa-hoc-tu-nhien-9', lessonNo: 44),  // SAM scale
+    FixtureSlot(book: '10-sgk-dia-li-10', lessonNo: 19),  // SAM scale
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 10),  // SAM scale
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 12),  // SAM scale
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 13),  // SAM scale
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 15),  // SAM scale
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 19),  // SAM scale
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 20),  // SAM scale
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 27),  // SAM scale
+    FixtureSlot(book: '11-sgk-sinh-hoc-11', lessonNo: 9),  // SAM scale
+    FixtureSlot(book: '12-sgk-cong-nghe-12-lam-nghiep-thuy-san', lessonNo: 1),  // SAM scale
+    FixtureSlot(book: '12-sgk-cong-nghe-12-lam-nghiep-thuy-san', lessonNo: 27),  // SAM scale
+    FixtureSlot(book: '12-sgk-cong-nghe-12-lam-nghiep-thuy-san', lessonNo: 3),  // SAM scale
+    FixtureSlot(book: '12-sgk-cong-nghe-12-lam-nghiep-thuy-san', lessonNo: 7),  // SAM scale
+    FixtureSlot(book: '12-sgk-hoa-hoc-12', lessonNo: 15),  // SAM scale
+    FixtureSlot(book: '12-sgk-hoa-hoc-12', lessonNo: 18),  // SAM scale
+    FixtureSlot(book: '12-sgk-hoa-hoc-12', lessonNo: 21),  // SAM scale
+    FixtureSlot(book: '12-sgk-hoa-hoc-12', lessonNo: 24),  // SAM scale
+    FixtureSlot(book: '12-sgk-hoa-hoc-12', lessonNo: 9),  // SAM scale
   ];
 
   /// Lát cắt NGHIÊN CỨU: hiện trên Home cho mọi lớp (kèm nhãn «sách lớp N»)

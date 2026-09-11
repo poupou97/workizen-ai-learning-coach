@@ -3,7 +3,7 @@
 **Đây là bản nhìn cấp Founder.** Repo là source of record · Jira là theo dõi thi
 hành · tài liệu này là trạng thái dự án.
 
-Cập nhật: **2026-09-11** · main `ee8d7b8` · cây sạch · 1.493 test Python ·
+Cập nhật: **2026-09-11** · main `b7e1bc5` · cây sạch · 1.493 test Python ·
 1.477 test Flutter.
 
 > Quy ước: `DONE · DOING · NEXT · WAIT · BLOCKED · FROZEN · DEFER`.
@@ -30,6 +30,7 @@ Cập nhật: **2026-09-11** · main `ee8d7b8` · cây sạch · 1.493 test Pyth
    GATE 3 ── ⏳ WAIT   Bằng chứng ấy → hợp đồng Pedagogy Runtime
                     │
               SAM 1 → 10            ✅ PASS — 2 máy · 3 môn · back/resume ĐẠT
+              SAM → 33              quần thể đáng tin hiện có (trần hôm nay)
                     │
               kiểm chéo lớp · chéo môn · máy thật · ghép SAI · sư phạm SAI
                     │
@@ -120,7 +121,7 @@ SGK + SGV + bằng chứng học liệu đáng tin
 |---|---|---|---|---|---|---|
 | 15 | Pedagogy Runtime | **DONE** | `planForScript` đã tổng quát; `SourceQuoteIndex` đòi mọi trích dẫn nguyên văn nguồn. Chưa nối SGV vì POC KHOÁ chấm điểm. 1.595 dòng ở `lib/core/pedagogy/` (`realization_contract` · `presentation_policy` · `source_misconception` · `source_quote_index`); TutorScope đã có | chưa nối vào nguồn SGV | hợp đồng bằng-chứng→runtime (Gate 3) | NONE |
 | 16 | SAM scale POC 1 → 10 | **DONE · PASS** | `SAM_READY` = **1**. Kịch bản duy nhất: `samMode=prototypeScripted` · `trust=prototype` · `evidencePolicy=none` · `keySource` tự khai «KHÔNG phải SGV» | Gate 14 | — | NONE |
-| 17 | SAM scale 10 → 50 | **NEXT · chờ Founder** | quần thể còn **23 bài** đã qua chuẩn sở hữu mức khối (33 − 10) | quyết định Founder | — | NONE |
+| 17 | **SAM SCALE — TRUSTED POPULATION** | **DOING** | quần thể đáng tin hiện có **33 bài**; 33/33 `SAM_READY`. ⚠ `RUNTIME_GUIDED_READY` **0/33** — không tạo `SemanticBinding` vì nguồn không cấp Concept/SkillCase/Method `sourceStated` | Concept/SkillCase chưa có nguồn | device mẫu | NONE |
 | 18 | SAM scale 50 → N | **WAIT** | — | 17 | — | NONE |
 | 19 | Cross-grade / cross-subject SAM | **WAIT** | 11 fixture hiện chỉ KHTN/Khoa học + 1 LS&ĐL | 16 | — | NONE |
 | 20 | Real-device SAM validation | **WAIT** | đường máy thật ĐÃ chứng minh cho Read/Figure (Nokia 6.1, 2026-09-11) | 16 | — | NONE |
