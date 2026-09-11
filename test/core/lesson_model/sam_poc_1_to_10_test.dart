@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,13 @@ import 'package:learning_coach/core/lesson_model/workspace_catalog.dart';
 /// chạy nhờ logic riêng từng bài thì nó không chứng minh được gì về 50 hay N.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  // ⚠ `assets/fixtures/real/` là GITIGNORE (Founder D4 — không phân phối).
+  // Clone sạch không có tệp ⇒ SKIP có lý do, không đỏ giả. Cổng «catalog» ở
+  // dưới KHÔNG skip: nó đọc mã, và mã thì clone nào cũng có.
+  final have =
+      File('assets/fixtures/real/lesson-07-sgk-tin-hoc-7-b3.json').existsSync();
+  const why = 'assets/fixtures/real/ chưa sinh trên máy này (gitignore) — '
+      'chạy tool/pedagogy/build_sam_workspace.py rồi thử lại';
 
   const poc = [
     ['06-sgk-khoa-hoc-tu-nhien-6', 9],
@@ -32,6 +40,7 @@ void main() {
   }
 
   test('⭐ cả 10 bài POC dựng được LessonDocument qua CÙNG một đường', () async {
+    if (!have) return markTestSkipped(why);
     for (final p in poc) {
       final j = await raw(p[0] as String, p[1] as int);
       final d = LessonDocument.fromJson(j);
@@ -43,6 +52,7 @@ void main() {
   });
 
   test('⭐ KHÔNG bài nào mang khoá chấm — chốt fail-closed của vòng', () async {
+    if (!have) return markTestSkipped(why);
     for (final p in poc) {
       final j = await raw(p[0] as String, p[1] as int);
       final prov = (j['provenance'] as Map).cast<String, Object?>();
@@ -53,6 +63,7 @@ void main() {
   });
 
   test('⭐ bài do bộ dựng POC sinh phải KHAI RÕ đã khoá đáp án', () async {
+    if (!have) return markTestSkipped(why);
     var checked = 0;
     for (final p in poc) {
       final j = await raw(p[0] as String, p[1] as int);
@@ -84,6 +95,7 @@ void main() {
   });
 
   test('⭐ mỗi bài POC có VIỆC của trẻ là chữ NGUYÊN VĂN của sách', () async {
+    if (!have) return markTestSkipped(why);
     for (final p in poc) {
       final j = await raw(p[0] as String, p[1] as int);
       final d = LessonDocument.fromJson(j)!;
