@@ -91,6 +91,7 @@ so hai phía ở NFC nên không báo động giả.
 
 | thứ tự tải | tệp | | |
 |---|---|---|---|
+| **0** | `T0-local-config.zip` | 0,08 GB | ⭐ **chặn đường lên máy thật** — `debug.keystore` + 249 ảnh bằng chứng; nằm NGOÀI repo và ngoài `repo-heavy/` |
 | **1** | `T1-critical.zip` | 0,48 GB | ⭐ **không tạo lại được trên Windows** — OCR · TSL+attach · assets · **38 tệp bộ nhớ Claude** (37 bài học + MEMORY.md) · manifest |
 | 2 | `T3-derived.zip` | 1,88 GB | dựng lại được, nhưng mất nhiều giờ |
 | 3 | `T3b-pack-backup.zip` | 0,50 GB | bản lùi pack 11-09 |
@@ -116,7 +117,13 @@ giá sẽ bị dẫm lại.
 **Công cụ — dùng đúng các phiên bản này**
 
 - [ ] Git
-- [ ] **Flutter 3.48.0** · **Dart 3.13.0** (`pubspec.yaml` ràng `sdk: ^3.13.0-201.0.dev`)
+- [ ] **Flutter `3.48.0-0.3.pre` · kênh `main`** — KHÔNG phải stable, KHÔNG
+      phải 3.48.0 chung chung. Đây là bản CI pin (`.github/workflows/ci.yml`
+      `FLUTTER_VERSION`), và mốc test 1.495/11 đo trên bản này.
+      `pubspec.yaml` ràng `sdk: ^3.13.0-201.0.dev` ⇒ stable mang Dart cũ hơn
+      thì `flutter pub get` gãy. Cài bản khác ⇒ số test lệch vì TOOLCHAIN,
+      không phải vì thiếu dữ liệu — và ta sẽ chẩn đoán sai.
+      (Bản đầu tài liệu này chỉ ghi "3.48.0"; máy mới vì thế cài 3.47.0.)
 - [ ] Android SDK + **platform-tools (adb 1.0.41+)**
 - [ ] JDK cho build Android (Mac này không có Java riêng — Android Studio cấp)
 - [ ] **Python 3.11.x** (Mac đang 3.11.12)
@@ -124,6 +131,24 @@ giá sẽ bị dẫm lại.
       — **KHÔNG cài `ocrmac`**, nó không chạy trên Windows và không cần cho
       đường dựng pack/fixture
 - [ ] `docling==2.126.0` chỉ cần nếu chạy lại TSL — **mà việc đó thuộc máy Mac**
+
+**Thứ nằm ngoài cả repo lẫn `repo-heavy/`** ⚠ bổ sung 15-09
+
+Quét một lượt thay vì phát hiện lẻ tẻ. Cần chép sang (gói `T0-local-config.zip`):
+
+- `~/.android/debug.keystore` → `%USERPROFILE%\.android\` — **khoá duy nhất**:
+  `android/app/build.gradle.kts` dùng `signingConfigs.getByName("debug")` cho
+  cả bản release. Ký khoá khác ⇒ cài đè trượt
+  `INSTALL_FAILED_UPDATE_INCOMPATIBLE` ⇒ phải gỡ app ⇒ **mất hồ sơ con của
+  Founder**, đúng thứ device-protocol cấm. SHA-256 `2da490dd…18bb`, 2.618 byte.
+- `~/Desktop/wal-evidence/` — 249 ảnh máy thật, không tái tạo được.
+
+KHÔNG chép, có chủ ý: `.claude/` (14 GB lịch sử phiên) · `research/oss`
+(1,1 GB, clone lại được) · `android/local.properties` (đường dẫn riêng máy) ·
+`~/.android/adbkey` (máy mới đã tự uỷ quyền).
+
+Không có khoá phát hành nào trong dự án — đã kiểm, không `key.properties`,
+không `.jks`.
 
 **Ba repo, không phải một** ⚠ THIẾU trong bản đầu, bổ sung 15-09
 
