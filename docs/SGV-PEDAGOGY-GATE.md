@@ -226,3 +226,25 @@ chính đổi đúng «CHƯA BẮT ĐẦU» → «TIẾP TỤC · Đã mở: Đ�
 
 **Đã chứng minh scale SAM_READY 1 → 10 bằng một runtime ăn bằng chứng dùng
 chung.** KHÔNG phải «10 bài có full AI Tutor».
+
+---
+
+## 17b · BINDING SUY TỪ NGUỒN — **DEVICE PASS** (S24, 2026-09-15)
+
+`RUNTIME_GUIDED_READY` **0 → 18/33**, nghiệm thu trên máy thật qua **đối chứng
+hai bài cùng một sách, cùng một màn**:
+
+| bài | dòng runtime trẻ đọc | nhãn bước |
+|---|---|---|
+| Hoá học 11 · Bài 13 *(có khối quy tắc)* | «Máy **đã kiểm 3/3 bước** là lời lấy đúng trong sách» | «SAM (**runtime có kiểm**)» |
+| Sinh học 11 · Bài 27 *(không có khối quy tắc)* | «Máy **chưa ràng buộc** được bài này với sách» | «SAM (kịch bản thử nghiệm)» |
+
+Chữ đi theo **sự thật runtime** (`plan.isBound`), không hard-code theo bài —
+đúng bất biến Founder đặt: `runtimeGuidedReady=false` ⇒ cảnh báo phải hiện;
+`=true` ⇒ không được hiện nữa.
+
+APK **kéo từ máy về kiểm**: 33 `samReady` · **18 `runtimeGuidedReady`** · 18 có
+`curriculum`. Giá sách hiện đúng «Sinh học 11 · ✨ 10 bài học SAM: Bài 2, 6, 10,
+12, 13, 15, 19, 20, 27, 9» — khớp từng bài với quần thể đã dựng.
+
+Hồ sơ máy Founder trả nguyên trạng (Lớp 5, tự xoay bật lại).
