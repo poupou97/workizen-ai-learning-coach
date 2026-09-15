@@ -84,6 +84,31 @@ python3 tool/ops/migration_manifest.py \
 byte. Bản kê ghi tên đã chuẩn hoá **NFC** và giữ tên thô ở `rawName`; bộ verify
 so hai phía ở NFC nên không báo động giả.
 
+### Gói tải lên cloud (2026-09-15)
+
+`~/Desktop/wal-migration-20260915/zips/` — **25,35 GB**, cả 5 đã kiểm
+`unzip -t` toàn vẹn, có `SHA256SUMS.txt` và `README-UPLOAD.txt`.
+
+| thứ tự tải | tệp | | |
+|---|---|---|---|
+| **1** | `T1-critical.zip` | 0,48 GB | ⭐ **không tạo lại được trên Windows** — OCR · TSL+attach · assets · **38 bài học bộ nhớ của Claude** · manifest |
+| 2 | `T3-derived.zip` | 1,88 GB | dựng lại được, nhưng mất nhiều giờ |
+| 3 | `T3b-pack-backup.zip` | 0,50 GB | bản lùi pack 11-09 |
+| 4 | `T2a-nguon-chi-thuc.zip` | 10,56 GB | văn bản quy định + tài liệu gốc |
+| 5 | `T2b-poc-out-pdf.zip` | 11,93 GB | PDF 531 cuốn |
+
+Chia tầng để nếu phải dừng giữa chừng thì phần **sống còn đã lên trước**. T2
+tách đôi để mỗi tệp dưới 12 GB — tải hỏng chỉ phải làm lại một nửa.
+
+⚠ **`claude-memory/` không thuộc repo.** Nó nằm ở
+`~/.claude/projects/<slug>/memory/` — 38 bài học đã trả giá. Máy mới phải
+khôi phục vào đúng thư mục memory của Claude, nếu không thì mọi cái bẫy đã trả
+giá sẽ bị dẫm lại.
+
+⚠ **`zip -x` không loại được thư mục** ở lần dựng đầu — tệp tạm phình tới
+23 GB vì nuốt cả 11 GB PDF. Bản hiện tại dựng bằng **danh sách tệp tường minh**
+(`zip -@`), có kiểm lại bằng tổng byte trước khi nén.
+
 ---
 
 ## Checklist bootstrap Windows
