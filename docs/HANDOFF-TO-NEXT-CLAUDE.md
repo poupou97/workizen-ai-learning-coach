@@ -173,6 +173,9 @@ Ba giả thuyết **đã bị bác, giữ nguyên, không hồi sinh**: sở h�
 
 ## 10 · Tài liệu nên đọc, theo thứ tự
 
+0. `docs/FIRST-PROMPT-WINDOWS.md` — lệnh mở đầu Founder dán cho bạn; nếu bạn
+   đọc tài liệu này mà chưa thấy lệnh đó, hãy đọc nó trước
+
 1. `docs/MASTER-TODO.md` — trạng thái cấp Founder
 2. `docs/MACHINE-MIGRATION.md` — máy, dữ liệu, bootstrap
 3. `docs/SGV-PEDAGOGY-GATE.md` — bốn cổng SGV, đầy đủ số liệu
