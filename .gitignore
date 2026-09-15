@@ -42,3 +42,8 @@ __pycache__/
 # Trusted-corpus study: isolated bake-off venvs (never project dependencies)
 .venv-bakeoff/
 .venv-bakeoff-*/
+
+# Gói di trú 25,3 GB có thể được tải THẲNG vào gốc repo trên máy mới.
+# Không tệp .zip nào từng được track. Không có dòng này thì `git status`
+# ngập 25 GB và một `git add -A` là hỏng.
+*.zip
