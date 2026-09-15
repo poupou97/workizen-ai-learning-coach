@@ -59,7 +59,7 @@ làm gì tiếp. Báo tôi con số sai lệch.
 3. KHÔI PHỤC BỘ NHỚ LÀM VIỆC
 ==================================================
 
-Trong T1-critical.zip có thư mục `claude-memory/` — 38 bài học đã trả giá
+Trong T1-critical.zip có thư mục `claude-memory/` — 38 tệp: 37 bài học đã trả giá
 thật. Nó KHÔNG thuộc repo.
 
 Chép cả 38 tệp vào thư mục memory của bạn trên máy này — trên Windows là
@@ -92,8 +92,8 @@ KHÔNG hồi sinh ba giả thuyết đã bị bác bỏ.
 ==================================================
 
     flutter analyze                                   → sạch
-    flutter test                                      → 1.495 test
-    cd tool && python -m unittest discover -s tests    → 1.505 test
+    flutter test                                      → 1.495 đạt, 11 bỏ qua
+    cd tool && python -m unittest discover -s tests    → 1.516 test, 23 bỏ qua
     flutter build apk --profile
 
 Số test khác con số trên ⇒ báo tôi, đừng tự sửa test cho khớp.

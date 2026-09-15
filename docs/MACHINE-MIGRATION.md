@@ -91,7 +91,7 @@ so hai phía ở NFC nên không báo động giả.
 
 | thứ tự tải | tệp | | |
 |---|---|---|---|
-| **1** | `T1-critical.zip` | 0,48 GB | ⭐ **không tạo lại được trên Windows** — OCR · TSL+attach · assets · **38 bài học bộ nhớ của Claude** · manifest |
+| **1** | `T1-critical.zip` | 0,48 GB | ⭐ **không tạo lại được trên Windows** — OCR · TSL+attach · assets · **38 tệp bộ nhớ Claude** (37 bài học + MEMORY.md) · manifest |
 | 2 | `T3-derived.zip` | 1,88 GB | dựng lại được, nhưng mất nhiều giờ |
 | 3 | `T3b-pack-backup.zip` | 0,50 GB | bản lùi pack 11-09 |
 | 4 | `T2a-nguon-chi-thuc.zip` | 10,56 GB | văn bản quy định + tài liệu gốc |
@@ -101,7 +101,7 @@ Chia tầng để nếu phải dừng giữa chừng thì phần **sống còn �
 tách đôi để mỗi tệp dưới 12 GB — tải hỏng chỉ phải làm lại một nửa.
 
 ⚠ **`claude-memory/` không thuộc repo.** Nó nằm ở
-`~/.claude/projects/<slug>/memory/` — 38 bài học đã trả giá. Máy mới phải
+`~/.claude/projects/<slug>/memory/` — **38 tệp**: 37 bài học đã trả giá + MEMORY.md. Máy mới phải
 khôi phục vào đúng thư mục memory của Claude, nếu không thì mọi cái bẫy đã trả
 giá sẽ bị dẫm lại.
 
@@ -150,8 +150,9 @@ giá sẽ bị dẫm lại.
 **Nghiệm thu**
 
 - [ ] `flutter analyze` — sạch
-- [ ] `flutter test` — 1.495 test
-- [ ] `cd tool && python3 -m unittest discover -s tests` — 1.505 test
+- [ ] `flutter test` — **1.495 đạt + 11 bỏ qua** (bỏ qua = fixture gitignore)
+- [ ] `cd tool && python -m unittest discover -s tests` — **1.516 test, 23 bỏ qua**
+      (tài liệu trước ghi 1.505 — SAI, ghi mà không đo lại; đã sửa 15-09)
 - [ ] `flutter build apk --profile`
 - [ ] `adb devices` → cài → **kéo APK từ máy về kiểm** (install Success không
       phải bằng chứng)

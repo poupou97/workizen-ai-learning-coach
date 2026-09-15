@@ -93,7 +93,7 @@ TC-v1) cho ra **một kho khác**, không phải một bản sao.
 
 ## 6 · Bộ nhớ làm việc — ĐỌC TRƯỚC KHI LÀM
 
-38 bài học đã trả giá, nằm ở `claude-memory/` trong bản sao lưu di trú. **Khôi
+38 tệp — 37 bài học đã trả giá + MEMORY.md — nằm ở `claude-memory/` trong bản sao lưu di trú. **Khôi
 phục vào thư mục memory của bạn trên máy mới.** Vài cái đắt nhất:
 
 - **`copy-verify-or-nothing`** — `rsync` báo exit 0 mà chép 0 byte; `| tail`
