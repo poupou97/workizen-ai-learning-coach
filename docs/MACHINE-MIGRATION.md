@@ -125,6 +125,11 @@ giá sẽ bị dẫm lại.
       đường dựng pack/fixture
 - [ ] `docling==2.126.0` chỉ cần nếu chạy lại TSL — **mà việc đó thuộc máy Mac**
 
+**Lệnh mở đầu cho Claude máy mới**
+
+- [ ] Dán nguyên khối trong `docs/FIRST-PROMPT-WINDOWS.md` làm tin nhắn đầu
+      tiên — nó chốt thứ tự đọc, cổng verify, và những việc **cấm** làm
+
 **Hệ điều hành**
 
 - [ ] Bật **long paths** (`HKLM\SYSTEM\CurrentControlSet\Control\FileSystem
