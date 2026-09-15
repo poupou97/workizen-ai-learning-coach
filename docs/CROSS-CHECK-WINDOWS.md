@@ -58,7 +58,10 @@ C. GIẢI NÉN
 
 Thứ tự: T1 → T3 → T3b → T2a → T2b.
 
-Bật long paths trước (đường dài nhất 169 ký tự, cộng thư mục gốc là vượt 260):
+Bật long paths trước cho chắc. ĐO ĐƯỢC trên 93.179 đường (kể cả biến thể
+NFD): dài nhất **169 ký tự**. Cộng gốc kiểu `C:\Projects\...` (~48) là 217 —
+vẫn dưới 260, nên long paths là bảo hiểm chứ không phải chốt chặn. Chỉ vượt
+260 nếu thư mục gốc từ 91 ký tự trở lên.
 
     HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled = 1
 
@@ -97,8 +100,8 @@ bạn trên máy này rồi đọc hết.
 
 Báo: đếm được bao nhiêu tệp `.md`, và MEMORY.md liệt kê bao nhiêu dòng.
 
-Hai số này phải bằng nhau. Lệch nghĩa là có bài học nằm ngoài mục lục — báo
-tôi tên tệp lệch.
+Hai số này lệch nhau ĐÚNG 1 là bình thường — mục lục không tự kể tên nó.
+Lệch khác 1 nghĩa là có bài học nằm ngoài mục lục — báo tôi tên tệp lệch.
 
 ==================================================
 F. NGHIỆM THU MÔI TRƯỜNG — dán nguyên văn dòng tổng kết
@@ -114,6 +117,9 @@ tests»). Đừng viết lại thành «đạt».
 
 Số test lệch so với bảng của tôi ⇒ BÁO, tuyệt đối đừng sửa test cho khớp.
 Test lệch sau di trú thường là dữ liệu thiếu, không phải test sai.
+
+Báo cả SỐ TEST BỎ QUA. Bỏ qua nhiều hơn bình thường nghĩa là có dữ liệu chưa
+khôi phục — và nó KHÔNG làm test đỏ. Đây đúng là chỗ CI xanh mà dữ liệu thiếu.
 
 ==================================================
 G. ĐỌC DỰ ÁN

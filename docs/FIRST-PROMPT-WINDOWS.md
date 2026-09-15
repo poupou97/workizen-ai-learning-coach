@@ -43,8 +43,8 @@ Bên trong zip mọi đường bắt đầu bằng `repo-heavy/`. Sau khi giải
 `nguon-chi-thuc`, `poc-out`, `assets` lên thẳng gốc repo (bỏ tầng
 `repo-heavy`).
 
-Bật long paths trước khi giải nén — đường dài nhất 169 ký tự, cộng
-thư mục gốc là vượt 260.
+Bật long paths cho chắc. Đo được: đường dài nhất 169 ký tự; cộng gốc kiểu
+`C:\Projects\...` là 217, vẫn dưới 260. Chỉ vượt nếu gốc từ 91 ký tự trở lên.
 
 ==================================================
 2. CỔNG BẮT BUỘC — VERIFY

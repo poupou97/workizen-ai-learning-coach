@@ -3,8 +3,9 @@
 **Đây là bản nhìn cấp Founder.** Repo là source of record · Jira là theo dõi thi
 hành · tài liệu này là trạng thái dự án.
 
-Cập nhật: **2026-09-15** · main `e1fa7f3` · cây sạch · 1.493 test Python ·
-1.477 test Flutter.
+Cập nhật: **2026-09-15** · main `6179f62` · cây sạch · **1.516 test Python**
+(23 bỏ qua) · **1.495 test Flutter** (11 bỏ qua) — đo lại 15-09; ba tài liệu
+trước đó ghi ba con số khác nhau, nay thống nhất về số ĐO ĐƯỢC.
 
 > Quy ước: `DONE · DOING · NEXT · WAIT · BLOCKED · FROZEN · DEFER`.
 > **NĂNG LỰC TÁCH RIÊNG** (Founder 2026-09-11): `SAM_READY` ≠ `ANSWER_CHECK_READY`
