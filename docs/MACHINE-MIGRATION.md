@@ -125,6 +125,29 @@ giá sẽ bị dẫm lại.
       đường dựng pack/fixture
 - [ ] `docling==2.126.0` chỉ cần nếu chạy lại TSL — **mà việc đó thuộc máy Mac**
 
+**Ba repo, không phải một** ⚠ THIẾU trong bản đầu, bổ sung 15-09
+
+`CLAUDE.md` gốc workspace và Canonical Knowledge **không nằm trong gói zip
+nào** — `repo-heavy/` chỉ gói `nguon-chi-thuc` · `poc-out` · `assets`. Chúng
+sống ở hai repo khác, đều có remote GitHub nên clone là đủ:
+
+- [ ] `git clone https://github.com/poupou97/workforceos-project.git` → đặt
+      làm thư mục CHA chứa các repo; `CLAUDE.md` gốc workspace nằm ở đây
+- [ ] `git clone https://github.com/poupou97/workizen-knowledge-base.git` →
+      `canonical/` là boot context bắt buộc theo CLAUDE.md gốc
+- [ ] `git clone https://github.com/poupou97/workizen-ai-learning-coach.git`
+
+Bỏ hai repo đầu thì Claude máy mới thiếu chính lớp doctrine mà `CLAUDE.md`
+gốc bắt đọc trước mọi việc lớn.
+
+**Tải zip: từng tệp một, KHÔNG tải cả thư mục** ⚠ bài học 15-09
+
+Tải cả thư mục `zips/` từ OneDrive thì nó bọc 5 tệp thành **một** tệp
+`zips.zip` — và bộ băm `SHA256SUMS.txt` lập cho 5 tệp bên trong trở nên vô
+dụng, vì tệp bọc ngoài không có băm để đối chiếu. Lần đầu đã dính: nhận
+3,96/25,35 GB, **cụt 85%**, không một tín hiệu nào cho tới khi mở ra xem.
+Tải riêng từng tệp thì đứt tệp nào chỉ mất tệp đó, và băm bắt được ngay.
+
 **Lệnh mở đầu cho Claude máy mới**
 
 - [ ] Dán nguyên khối trong `docs/FIRST-PROMPT-WINDOWS.md` làm tin nhắn đầu
