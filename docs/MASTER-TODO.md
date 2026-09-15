@@ -3,7 +3,7 @@
 **Đây là bản nhìn cấp Founder.** Repo là source of record · Jira là theo dõi thi
 hành · tài liệu này là trạng thái dự án.
 
-Cập nhật: **2026-09-11** · main `0f36f6a` · cây sạch · 1.493 test Python ·
+Cập nhật: **2026-09-15** · main `e1fa7f3` · cây sạch · 1.493 test Python ·
 1.477 test Flutter.
 
 > Quy ước: `DONE · DOING · NEXT · WAIT · BLOCKED · FROZEN · DEFER`.
@@ -122,7 +122,8 @@ SGK + SGV + bằng chứng học liệu đáng tin
 | 15 | Pedagogy Runtime | **DONE** | `planForScript` đã tổng quát; `SourceQuoteIndex` đòi mọi trích dẫn nguyên văn nguồn. Chưa nối SGV vì POC KHOÁ chấm điểm. 1.595 dòng ở `lib/core/pedagogy/` (`realization_contract` · `presentation_policy` · `source_misconception` · `source_quote_index`); TutorScope đã có | chưa nối vào nguồn SGV | hợp đồng bằng-chứng→runtime (Gate 3) | NONE |
 | 16 | SAM scale POC 1 → 10 | **DONE · PASS** | `SAM_READY` = **1**. Kịch bản duy nhất: `samMode=prototypeScripted` · `trust=prototype` · `evidencePolicy=none` · `keySource` tự khai «KHÔNG phải SGV» | Gate 14 | — | NONE |
 | 17 | SAM SCALE — TRUSTED POPULATION | **DONE** | 33/33 `SAM_READY`, 6 lớp · 8 nhóm môn | — | — | NONE |
-| 17b | **SOURCE-GROUNDED SEMANTIC BINDING** | **DOING** | `RUNTIME_GUIDED_READY` **0 → 18/33**, giải qua chính `resolveBinding`; `planForDoc().isBound = true` trên đường sản phẩm. 15 bài fail-closed vì **không in khối quy tắc** | — | device mẫu | NONE |
+| 17b | **SOURCE-GROUNDED SEMANTIC BINDING** | **DONE · DEVICE PASS** | `RUNTIME_GUIDED_READY` **0 → 18/33**. Máy thật (S24, 2026-09-15): Hoá 11 B13 hiện «Máy **đã kiểm 3/3 bước** là lời lấy đúng trong sách», Sinh 11 B27 vẫn «**chưa ràng buộc**» — chữ đi theo runtime, không hard-code | — | — | NONE |
+| 18 | Di trú máy Mac → Windows | **DOING** | backup **VERIFIED** 93.165 tệp · 26,2 GB · 0 sai lệch; `docs/MACHINE-MIGRATION.md` | chờ Founder dựng máy Windows | bootstrap theo checklist | NONE |
 | 18 | SAM scale 50 → N | **WAIT** | — | 17 | — | NONE |
 | 19 | Cross-grade / cross-subject SAM | **WAIT** | 11 fixture hiện chỉ KHTN/Khoa học + 1 LS&ĐL | 16 | — | NONE |
 | 20 | Real-device SAM validation | **WAIT** | đường máy thật ĐÃ chứng minh cho Read/Figure (Nokia 6.1, 2026-09-11) | 16 | — | NONE |
