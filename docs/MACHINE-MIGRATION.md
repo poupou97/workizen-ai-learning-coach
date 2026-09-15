@@ -91,7 +91,7 @@ so hai phía ở NFC nên không báo động giả.
 
 | thứ tự tải | tệp | | |
 |---|---|---|---|
-| **0** | `T0-local-config.zip` | 0,08 GB | ⭐ **chặn đường lên máy thật** — `debug.keystore` + 249 ảnh bằng chứng; nằm NGOÀI repo và ngoài `repo-heavy/` |
+| **0** | `WAL-ESSENTIALS.zip` | 0,08 GB | ⭐ **chặn đường lên máy thật** — chứa `KEYS.zip.gpg` (khoá SSH+Android, **đã mã hoá AES-256**), `T0-evidence.zip` (249 ảnh, không khoá), bản kê, và các khối lệnh. Nằm NGOÀI repo và ngoài `repo-heavy/` |
 | **1** | `T1-critical.zip` | 0,48 GB | ⭐ **không tạo lại được trên Windows** — OCR · TSL+attach · assets · **38 tệp bộ nhớ Claude** (37 bài học + MEMORY.md) · manifest |
 | 2 | `T3-derived.zip` | 1,88 GB | dựng lại được, nhưng mất nhiều giờ |
 | 3 | `T3b-pack-backup.zip` | 0,50 GB | bản lùi pack 11-09 |
@@ -132,11 +132,25 @@ giá sẽ bị dẫm lại.
       đường dựng pack/fixture
 - [ ] `docling==2.126.0` chỉ cần nếu chạy lại TSL — **mà việc đó thuộc máy Mac**
 
+**Gộp thì được, nhưng gói ngoài phải có băm của chính nó**
+
+Gói nhỏ (~85 MB) gộp thành MỘT tệp `WAL-ESSENTIALS.zip` được — vì nó mang
+`SHA256SUMS-BEN-TRONG.txt` cho từng tệp bên trong, VÀ băm của chính nó được
+công bố khi tạo. Đó đúng là thứ lần trước thiếu: OneDrive tự bọc 5 tệp thành
+một `zips.zip` **không ai lập băm**, nên cụt 85% mà không tín hiệu nào.
+
+Bốn gói nặng (25 GB) **vẫn tải riêng từng tệp** — gộp lại là lặp đúng lỗi ấy
+ở quy mô mà tải lại tốn cả ngày.
+
+Khoá riêng đi trong `KEYS.zip.gpg` (AES-256, mật khẩu đưa qua kênh khác).
+`T0-evidence.zip` cố ý **không chứa khoá nào**.
+
 **Thứ nằm ngoài cả repo lẫn `repo-heavy/`** ⚠ bổ sung 15-09
 
 Quét một lượt thay vì phát hiện lẻ tẻ. Cần chép sang (gói `T0-local-config.zip`):
 
-- `~/.android/debug.keystore` → `%USERPROFILE%\.android\` — **khoá duy nhất**:
+- `~/.android/debug.keystore` → `%USERPROFILE%\.android\` — đi trong
+  `KEYS.zip.gpg` **đã mã hoá**, không bao giờ để trần trên đám mây. **Khoá duy nhất**:
   `android/app/build.gradle.kts` dùng `signingConfigs.getByName("debug")` cho
   cả bản release. Ký khoá khác ⇒ cài đè trượt
   `INSTALL_FAILED_UPDATE_INCOMPATIBLE` ⇒ phải gỡ app ⇒ **mất hồ sơ con của
