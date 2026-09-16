@@ -47,3 +47,6 @@ __pycache__/
 # Không tệp .zip nào từng được track. Không có dòng này thì `git status`
 # ngập 25 GB và một `git add -A` là hỏng.
 *.zip
+# Bản kê di trú: 16 MB, sinh lại trong ~1 phút bằng tool/ops/migration_manifest.py.
+# Nó đi kèm gói T1 và WAL-ESSENTIALS, không cần nằm trong git.
+MIGRATION-MANIFEST.json
