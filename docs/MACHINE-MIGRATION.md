@@ -132,6 +132,51 @@ giá sẽ bị dẫm lại.
       đường dựng pack/fixture
 - [ ] `docling==2.126.0` chỉ cần nếu chạy lại TSL — **mà việc đó thuộc máy Mac**
 
+## Đối chiếu dữ liệu giữa hai máy — CÙNG một lệnh
+
+    python3 tool/ops/data_sanity.py
+
+Mốc đo trên **Mac 2026-09-16**, `SANITY-DIGEST 248f1157cb46082b`:
+
+```
+fixture-real-files      44
+fixture-with-capability 35
+samReady                33
+runtimeGuidedReady      18
+answerCheckReady        0
+misconceptionReady      0
+pack-records-by-position 3679
+pack-records-distinct    3240
+pack-books               238
+assets/pack              321 tệp 85916585 byte
+assets/fixtures          244 tệp 44253726 byte
+poc-out/graph            69635 tệp 625284439 byte
+poc-out/trusted-corpus   6029 tệp 318128182 byte
+poc-out/pedagogy         77 tệp 4444059 byte
+poc-out/units-k12        525 tệp 149607926 byte
+nguon-chi-thuc           21 tệp 10559228225 byte
+```
+
+Windows phải in ra **cùng digest**. Lệch ⇒ **dừng**, so từng dòng, tìm nguyên
+nhân — **không sửa dữ liệu cho khớp số**.
+
+Cờ năng lực đọc từ `provenance.capability` trong `assets/fixtures/real/*.json`,
+tức **từ dữ liệu**, không từ tài liệu. Bản ghi pack đếm **theo vị trí mảng**;
+khoá `(book, lesson)` từng gộp mất 12 bài lớp 5.
+
+Kiểm-đột-biến (16-09): lật một `samReady` → số và digest đều đổi; xoá một bài
+khỏi pack → số và digest đều đổi.
+
+### Một mẫu số trong docs KHÔNG tái hiện được
+
+`OPENABLE_RECORDS 2.974` / `DISTINCT_OPENABLE 2.778` chỉ tồn tại trong `docs/`;
+**không lệnh nào tính ra chúng**. Con số pack đo được là **3.679 / 3.240** —
+và 3.679 đúng là mẫu số canonical «coverage sản phẩm» đã chốt từ trước. Hai
+đại lượng khác nhau, **không được gộp**. Chừng nào 2.974 chưa có đường sinh
+thì nó là *tài liệu*, không phải *phép đo*.
+
+---
+
 ## ⛔ MẤT 2026-09-15 — đọc trước khi tin bất cứ đường dẫn nào ở đây
 
 Cả thư mục `~/Desktop/wal-migration-20260915/` biến mất. Desktop đổi lúc
