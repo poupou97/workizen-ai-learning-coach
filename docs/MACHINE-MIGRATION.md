@@ -132,6 +132,46 @@ giá sẽ bị dẫm lại.
       đường dựng pack/fixture
 - [ ] `docling==2.126.0` chỉ cần nếu chạy lại TSL — **mà việc đó thuộc máy Mac**
 
+## ⛔ MẤT 2026-09-15 — đọc trước khi tin bất cứ đường dẫn nào ở đây
+
+Cả thư mục `~/Desktop/wal-migration-20260915/` biến mất. Desktop đổi lúc
+**15-09 16:22**; Thùng rác trống; không có ở iCloud; `find` khắp `~` không ra.
+
+**Mất hẳn, không tái tạo được:**
+
+| | |
+|---|---|
+| **RAW DEVICE EVIDENCE ARCHIVE** | 249 ảnh máy thật (`wal-evidence`). Chỉ OneDrive **cá nhân** đồng bộ trên Mac; tài khoản `galaxydigitalvn` thì không — nên **không chứng minh được đã upload** ⇒ fail-closed, ghi LOST. |
+| **T3b-pack-backup** | nguồn `~/Desktop/wal-pack-backup-20260911`, cũng trên Desktop. Bản lùi pack trước vòng map-label. |
+
+Không tái tạo screenshot rồi gọi là bằng chứng lịch sử. **Không rollback các
+device gate đã đóng** chỉ vì mất kho ảnh thô — kết luận cũ giữ nguyên với
+xuất xứ thật của chúng.
+
+**Dựng lại được** (nguồn còn trong repo): T1 · T2a · T2b · T3.
+
+### Bài học cấu trúc — công thức phải nằm trong git
+
+Lần đầu tôi đóng gói **thủ công**, nên mất Desktop là mất luôn cách làm. Nay
+công thức ở `tool/ops/build_migration_zips.py`:
+
+    python3 tool/ops/build_migration_zips.py --repo . --out ~/wal-migration
+
+Định nghĩa tầng là khai báo, dựng **danh sách tệp tường minh** rồi nạp qua
+`zip -@` (không dùng `zip -x` — nó không loại được thư mục), cộng tổng byte
+trước khi nén và chạy `unzip -t` sau.
+
+Bằng chứng tái dựng trung thực: **T3-derived ra đúng 1.879.335.349 byte,
+trùng từng byte bản gốc**; T2b nguồn 11.925.516.511 byte, khớp bản gốc.
+
+### Nơi để gói
+
+`~/wal-migration/` — **không** Desktop, **không** scratchpad. Và không bao
+giờ để bản đó là bản duy nhất: phải có bản thứ hai ngoài máy, đã xác nhận tới
+nơi. «Đã upload» mà không có bằng chứng thì bằng chưa upload.
+
+---
+
 **Gộp thì được, nhưng gói ngoài phải có băm của chính nó**
 
 Gói nhỏ (~85 MB) gộp thành MỘT tệp `WAL-ESSENTIALS.zip` được — vì nó mang
